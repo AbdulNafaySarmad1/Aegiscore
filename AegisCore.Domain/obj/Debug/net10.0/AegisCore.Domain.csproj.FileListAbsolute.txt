@@ -1,4 +1,0 @@
-/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Domain/obj/Debug/net10.0/AegisCore.Domain.GeneratedMSBuildEditorConfig.editorconfig
-/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Domain/obj/Debug/net10.0/AegisCore.Domain.AssemblyInfoInputs.cache
-/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Domain/obj/Debug/net10.0/AegisCore.Domain.AssemblyInfo.cs
-/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Domain/obj/Debug/net10.0/AegisCore.Domain.csproj.CoreCompileInputs.cache
