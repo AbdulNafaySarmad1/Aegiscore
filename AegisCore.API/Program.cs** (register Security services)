@@ -1,0 +1,15 @@
+// Add these registrations in the DI container setup
+
+builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
+builder.Services.AddScoped<IVehiclePassRepository, VehiclePassRepository>();
+builder.Services.AddScoped<ISecurityIncidentRepository, SecurityIncidentRepository>();
+builder.Services.AddScoped<IGateEntryRepository, GateEntryRepository>();
+builder.Services.AddScoped<ISecurityGuardRepository, SecurityGuardRepository>();
+builder.Services.AddScoped<IGuardShiftRepository, GuardShiftRepository>();
+builder.Services.AddScoped<IGuardRoundRepository, GuardRoundRepository>();
+builder.Services.AddScoped<ILostFoundItemRepository, LostFoundItemRepository>();
+builder.Services.AddScoped<VisitorManagementService>();
+builder.Services.AddScoped<VehiclePassService>();
+builder.Services.AddScoped<IncidentReportingService>();
+builder.Services.AddScoped<GuardManagementService>();
+builder.Services.AddScoped<LostFoundService>();

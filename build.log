@@ -1,0 +1,222 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.45kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/dotnet/aspnet:10.0
+#2 ...
+
+#3 [internal] load metadata for mcr.microsoft.com/dotnet/sdk:10.0
+#3 DONE 1.4s
+
+#2 [internal] load metadata for mcr.microsoft.com/dotnet/aspnet:10.0
+#2 DONE 1.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 163B done
+#4 DONE 0.0s
+
+#5 [build  1/14] FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:ed034a8bf0b24ded0cbbac07e17825d8e9ebfe21e308191d0f7421eaf5ad4664
+#5 resolve mcr.microsoft.com/dotnet/sdk:10.0@sha256:ed034a8bf0b24ded0cbbac07e17825d8e9ebfe21e308191d0f7421eaf5ad4664 0.0s done
+#5 DONE 0.1s
+
+#6 [final 1/5] FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:1fa23fc4872d95fd71c2833ebe65d7e84a43b2d51a31d119516852f13d9505a7
+#6 resolve mcr.microsoft.com/dotnet/aspnet:10.0@sha256:1fa23fc4872d95fd71c2833ebe65d7e84a43b2d51a31d119516852f13d9505a7 0.0s done
+#6 DONE 0.1s
+
+#7 [internal] load build context
+#7 transferring context: 101.32kB 0.1s done
+#7 DONE 0.1s
+
+#8 [build  4/14] COPY AegisCore.Contracts/AegisCore.Contracts.csproj AegisCore.Contracts/
+#8 CACHED
+
+#9 [build  2/14] WORKDIR /src
+#9 CACHED
+
+#10 [build  3/14] COPY AegisCore.Domain/AegisCore.Domain.csproj AegisCore.Domain/
+#10 CACHED
+
+#11 [build  5/14] COPY AegisCore.Application/AegisCore.Application.csproj AegisCore.Application/
+#11 CACHED
+
+#12 [build  6/14] COPY AegisCore.Infrastructure/AegisCore.Infrastructure.csproj AegisCore.Infrastructure/
+#12 DONE 0.1s
+
+#13 [build  7/14] COPY AegisCore.API/AegisCore.API.csproj AegisCore.API/
+#13 DONE 0.1s
+
+#14 [build  8/14] RUN dotnet restore AegisCore.API/AegisCore.API.csproj
+#14 1.887   Determining projects to restore...
+#14 3.255 /src/AegisCore.API/AegisCore.API.csproj : warning NU1510: PackageReference Microsoft.Extensions.Diagnostics.HealthChecks will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+#14 3.395   Restored /src/AegisCore.Domain/AegisCore.Domain.csproj (in 128 ms).
+#14 92.93   Restored /src/AegisCore.Contracts/AegisCore.Contracts.csproj (in 1.49 min).
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'Newtonsoft.Json' 11.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.8 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc [/src/AegisCore.API/AegisCore.API.csproj]
+#14 312.9   Restored /src/AegisCore.Application/AegisCore.Application.csproj (in 5.16 min).
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1603: AegisCore.Infrastructure depends on AWSSDK.SecretsManager (>= 3.7.305.28) but AWSSDK.SecretsManager 3.7.305.28 was not found. AWSSDK.SecretsManager 3.7.400 was resolved instead.
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'Microsoft.Kiota.Abstractions' 1.9.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7j59-v9qr-6fq9
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'Microsoft.Rest.ClientRuntime' 2.3.8 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-whph-446h-6m9v
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'Newtonsoft.Json' 12.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23
+#14 374.7 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc
+#14 374.8   Restored /src/AegisCore.API/AegisCore.API.csproj (in 6.19 min).
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1603: AegisCore.Infrastructure depends on AWSSDK.SecretsManager (>= 3.7.305.28) but AWSSDK.SecretsManager 3.7.305.28 was not found. AWSSDK.SecretsManager 3.7.400 was resolved instead. [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'Microsoft.Kiota.Abstractions' 1.9.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7j59-v9qr-6fq9 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23 [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.4 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf [/src/AegisCore.API/AegisCore.API.csproj]
+#14 375.5   Restored /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj (in 6.2 min).
+#14 DONE 375.7s
+
+#15 [build  9/14] COPY AegisCore.Domain/ AegisCore.Domain/
+#15 DONE 0.3s
+
+#16 [build 10/14] COPY AegisCore.Contracts/ AegisCore.Contracts/
+#16 DONE 0.1s
+
+#17 [build 11/14] COPY AegisCore.Application/ AegisCore.Application/
+#17 DONE 0.2s
+
+#18 [build 12/14] COPY AegisCore.Infrastructure/ AegisCore.Infrastructure/
+#18 DONE 0.3s
+
+#19 [build 13/14] COPY AegisCore.API/ AegisCore.API/
+#19 DONE 1.1s
+
+#20 [build 14/14] RUN dotnet publish AegisCore.API/AegisCore.API.csproj     -c Release     -o /app     -p:UseAppHost=false
+#20 0.936   Determining projects to restore...
+#20 2.271 /src/AegisCore.API/AegisCore.API.csproj : warning NU1510: PackageReference Microsoft.Extensions.Diagnostics.HealthChecks will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'Newtonsoft.Json' 11.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.701 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.702 /src/AegisCore.API/AegisCore.API.csproj : warning NU1603: AegisCore.Infrastructure depends on AWSSDK.SecretsManager (>= 3.7.305.28) but AWSSDK.SecretsManager 3.7.305.28 was not found. AWSSDK.SecretsManager 3.7.400 was resolved instead.
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1603: AegisCore.Infrastructure depends on AWSSDK.SecretsManager (>= 3.7.305.28) but AWSSDK.SecretsManager 3.7.305.28 was not found. AWSSDK.SecretsManager 3.7.400 was resolved instead. [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'Microsoft.Kiota.Abstractions' 1.9.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7j59-v9qr-6fq9
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'Microsoft.Rest.ClientRuntime' 2.3.8 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-whph-446h-6m9v
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'Newtonsoft.Json' 12.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'Microsoft.Kiota.Abstractions' 1.9.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7j59-v9qr-6fq9 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23 [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.704 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx [/src/AegisCore.API/AegisCore.API.csproj]
+#20 2.705 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf [/src/AegisCore.API/AegisCore.API.csproj]
+#20 3.179   Restored /src/AegisCore.Domain/AegisCore.Domain.csproj (in 173 ms).
+#20 3.582   Restored /src/AegisCore.Contracts/AegisCore.Contracts.csproj (in 588 ms).
+#20 3.645   Restored /src/AegisCore.Application/AegisCore.Application.csproj (in 598 ms).
+#20 3.646   Restored /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj (in 673 ms).
+#20 3.647   Restored /src/AegisCore.API/AegisCore.API.csproj (in 629 ms).
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1510: PackageReference Microsoft.Extensions.Diagnostics.HealthChecks will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1603: AegisCore.Infrastructure depends on AWSSDK.SecretsManager (>= 3.7.305.28) but AWSSDK.SecretsManager 3.7.305.28 was not found. AWSSDK.SecretsManager 3.7.400 was resolved instead.
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'Microsoft.Kiota.Abstractions' 1.9.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7j59-v9qr-6fq9
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'Microsoft.Rest.ClientRuntime' 2.3.8 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-whph-446h-6m9v
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'Newtonsoft.Json' 12.0.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23
+#20 4.137 /src/AegisCore.API/AegisCore.API.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1603: AegisCore.Infrastructure depends on AWSSDK.SecretsManager (>= 3.7.305.28) but AWSSDK.SecretsManager 3.7.305.28 was not found. AWSSDK.SecretsManager 3.7.400 was resolved instead.
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'Microsoft.Kiota.Abstractions' 1.9.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7j59-v9qr-6fq9
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx
+#20 5.080 /src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'Newtonsoft.Json' 11.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1903: Package 'SixLabors.ImageSharp' 1.0.4 has a known high severity vulnerability, https://github.com/advisories/GHSA-65x7-c272-7g7r
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23
+#20 5.581 /src/AegisCore.Application/AegisCore.Application.csproj : warning NU1902: Package 'SixLabors.ImageSharp' 1.0.4 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc
+#20 10.01   AegisCore.Domain -> /src/AegisCore.Domain/bin/Release/net10.0/AegisCore.Domain.dll
+#20 10.69   AegisCore.Contracts -> /src/AegisCore.Contracts/bin/Release/net10.0/AegisCore.Contracts.dll
+#20 12.54   AegisCore.Application -> /src/AegisCore.Application/bin/Release/net10.0/AegisCore.Application.dll
+#20 16.47 /src/AegisCore.Infrastructure/AI/OllamaLlmProvider.cs(66,43): warning CS8425: Async-iterator 'OllamaLlmProvider.StreamAsync(string, string, LlmOptions?, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/AI/OpenAiLlmProvider.cs(74,43): warning CS8425: Async-iterator 'OpenAiLlmProvider.StreamAsync(string, string, LlmOptions?, CancellationToken)' has one or more parameters of type 'CancellationToken' but none of them is decorated with the 'EnumeratorCancellation' attribute, so the cancellation token parameter from the generated 'IAsyncEnumerable<>.GetAsyncEnumerator' will be unconsumed [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/ConfigCenter/ConfigurationCenterService.cs(92,20): warning CS8603: Possible null reference return. [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Cloud/VaultConfigurationExtensions.cs(25,47): warning CS8620: Argument of type 'Dictionary<string, string>' cannot be used for parameter 'initialData' of type 'IEnumerable<KeyValuePair<string, string?>>' in 'IConfigurationBuilder MemoryConfigurationBuilderExtensions.AddInMemoryCollection(IConfigurationBuilder configurationBuilder, IEnumerable<KeyValuePair<string, string?>>? initialData)' due to differences in the nullability of reference types. [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Backup/BackupService.cs(141,26): warning CS0168: The variable 'ex' is declared but never used [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Identity/SamlService.cs(149,31): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Identity/SamlService.cs(149,31): warning CS8604: Possible null reference argument for parameter 'value' in 'void SignedXml.LoadXml(XmlElement value)'. [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Onboarding/OnboardingService.cs(110,27): warning CS8604: Possible null reference argument for parameter 'source' in 'KeyValuePair<string, string> Enumerable.FirstOrDefault<KeyValuePair<string, string>>(IEnumerable<KeyValuePair<string, string>> source)'. [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Platform/PlatformServices.cs(160,26): warning CS0168: The variable 'ex' is declared but never used [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Workflow/EmailNotificationService.cs(101,26): warning CS0168: The variable 'ex' is declared but never used [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/Platform/PlatformServices.cs(41,26): warning CS0168: The variable 'ex' is declared but never used [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/AI/OllamaLlmProvider.cs(94,17): warning CA2024: Do not use 'reader.EndOfStream' in an async method (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2024) [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.47 /src/AegisCore.Infrastructure/AI/OpenAiLlmProvider.cs(101,17): warning CA2024: Do not use 'reader.EndOfStream' in an async method (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2024) [/src/AegisCore.Infrastructure/AegisCore.Infrastructure.csproj]
+#20 16.68   AegisCore.Infrastructure -> /src/AegisCore.Infrastructure/bin/Release/net10.0/AegisCore.Infrastructure.dll
+#20 19.73   AegisCore.API -> /src/AegisCore.API/bin/Release/net10.0/AegisCore.API.dll
+#20 20.17   AegisCore.API -> /app/
+#20 DONE 20.6s
+
+#21 [final 2/5] WORKDIR /app
+#21 CACHED
+
+#22 [final 3/5] RUN groupadd -r aegiscore && useradd -r -g aegiscore -d /app -s /sbin/nologin aegiscore
+#22 CACHED
+
+#23 [final 4/5] COPY --from=build /app .
+#23 DONE 0.5s
+
+#24 [final 5/5] RUN mkdir -p /app/backups /app/logs && chown -R aegiscore:aegiscore /app
+#24 DONE 2.2s
+
+#25 exporting to image
+#25 exporting layers
+#25 exporting layers 7.3s done
+#25 exporting manifest sha256:ed6658e7331caa288087bcb6e268fbe80fb82771c3a7cb5a4836c707f1559dd6
+#25 exporting manifest sha256:ed6658e7331caa288087bcb6e268fbe80fb82771c3a7cb5a4836c707f1559dd6 0.3s done
+#25 exporting config sha256:1ca459c13e4010758fc567aa9c6b347f2b4b4019d76e94c5ac95db5aa1a48b15
+#25 exporting config sha256:1ca459c13e4010758fc567aa9c6b347f2b4b4019d76e94c5ac95db5aa1a48b15 0.3s done
+#25 exporting attestation manifest sha256:5312324fff0d41368af741b554482b257abb31963c86af4574e42ed37b06702b
+#25 exporting attestation manifest sha256:5312324fff0d41368af741b554482b257abb31963c86af4574e42ed37b06702b 0.6s done
+#25 exporting manifest list sha256:98b8eb85676fac3c1481ce7d90de515cb9cd37d8f02578b0dce4cb3075c25765
+#25 exporting manifest list sha256:98b8eb85676fac3c1481ce7d90de515cb9cd37d8f02578b0dce4cb3075c25765 0.3s done
+#25 naming to docker.io/aegiscore/api:latest
+#25 naming to docker.io/aegiscore/api:latest 0.0s done
+#25 unpacking to docker.io/aegiscore/api:latest
+#25 unpacking to docker.io/aegiscore/api:latest 2.4s done
+#25 DONE 11.8s

@@ -1,0 +1,164 @@
+// Add these configurations inside the OnModelCreating method
+
+// Visitor
+modelBuilder.Entity<Visitor>(entity =>
+{
+    entity.HasIndex(e => e.CNIC);
+    entity.HasOne(e => e.HostEmployee)
+        .WithMany()
+        .HasForeignKey(e => e.HostEmployeeId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.HostStudent)
+        .WithMany()
+        .HasForeignKey(e => e.HostStudentId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+// VehiclePass
+modelBuilder.Entity<VehiclePass>(entity =>
+{
+    entity.HasIndex(e => e.VehicleNumber);
+    entity.HasOne(e => e.OwnerEmployee)
+        .WithMany()
+        .HasForeignKey(e => e.OwnerEmployeeId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.OwnerStudent)
+        .WithMany()
+        .HasForeignKey(e => e.OwnerStudentId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.Visitor)
+        .WithMany()
+        .HasForeignKey(e => e.VisitorId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+// GateEntry
+modelBuilder.Entity<GateEntry>(entity =>
+{
+    entity.HasOne(e => e.VehiclePass)
+        .WithMany(e => e.GateEntries)
+        .HasForeignKey(e => e.VehiclePassId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.Visitor)
+        .WithMany()
+        .HasForeignKey(e => e.VisitorId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.Guard)
+        .WithMany()
+        .HasForeignKey(e => e.GuardEmployeeId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+// SecurityGuard
+modelBuilder.Entity<SecurityGuard>(entity =>
+{
+    entity.HasOne(e => e.Employee)
+        .WithMany()
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasIndex(e => e.BadgeNumber).IsUnique();
+});
+
+// GuardShift
+modelBuilder.Entity<GuardShift>(entity =>
+{
+    entity.HasOne(e => e.SecurityGuard)
+        .WithMany(e => e.Shifts)
+        .HasForeignKey(e => e.SecurityGuardId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+// GuardRound
+modelBuilder.Entity<GuardRound>(entity =>
+{
+    entity.HasOne(e => e.SecurityGuard)
+        .WithMany(e => e.Rounds)
+        .HasForeignKey(e => e.SecurityGuardId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+// CheckpointScan
+modelBuilder.Entity<CheckpointScan>(entity =>
+{
+    entity.HasOne(e => e.GuardRound)
+        .WithMany(e => e.CheckpointScans)
+        .HasForeignKey(e => e.GuardRoundId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+// SecurityIncident
+modelBuilder.Entity<SecurityIncident>(entity =>
+{
+    entity.HasIndex(e => e.IncidentNumber).IsUnique();
+    entity.HasOne(e => e.LocationBuilding)
+        .WithMany()
+        .HasForeignKey(e => e.LocationBuildingId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.LocationRoom)
+        .WithMany()
+        .HasForeignKey(e => e.LocationRoomId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.AssignedTo)
+        .WithMany()
+        .HasForeignKey(e => e.AssignedToEmployeeId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+// IncidentWitness
+modelBuilder.Entity<IncidentWitness>(entity =>
+{
+    entity.HasOne(e => e.SecurityIncident)
+        .WithMany(e => e.Witnesses)
+        .HasForeignKey(e => e.SecurityIncidentId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+// IncidentEvidence
+modelBuilder.Entity<IncidentEvidence>(entity =>
+{
+    entity.HasOne(e => e.SecurityIncident)
+        .WithMany(e => e.Evidences)
+        .HasForeignKey(e => e.SecurityIncidentId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+// EmergencyContact
+modelBuilder.Entity<EmergencyContact>(entity =>
+{
+    entity.HasIndex(e => e.Phone);
+});
+
+// EmergencyAlert
+modelBuilder.Entity<EmergencyAlert>(entity =>
+{
+    entity.HasIndex(e => e.SentAt);
+});
+
+// FireEquipment
+modelBuilder.Entity<FireEquipment>(entity =>
+{
+    entity.HasIndex(e => e.EquipmentCode).IsUnique();
+    entity.HasOne(e => e.Building)
+        .WithMany()
+        .HasForeignKey(e => e.BuildingId)
+        .OnDelete(DeleteBehavior.Restrict);
+    entity.HasOne(e => e.Room)
+        .WithMany()
+        .HasForeignKey(e => e.RoomId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+// FireDrill
+modelBuilder.Entity<FireDrill>(entity =>
+{
+    entity.HasOne(e => e.FireEquipment)
+        .WithMany(e => e.Drills)
+        .HasForeignKey(e => e.FireEquipmentId)
+        .OnDelete(DeleteBehavior.Restrict);
+});
+
+// LostFoundItem
+modelBuilder.Entity<LostFoundItem>(entity =>
+{
+    entity.HasIndex(e => e.Status);
+});

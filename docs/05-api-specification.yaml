@@ -1,0 +1,825 @@
+openapi: "3.1.0"
+info:
+  title: AegisCore API
+  version: "1.0.0"
+  description: |
+    Complete API specification for AegisCore, the multi-tenant university ERP platform.
+    This API provides endpoints for student lifecycle management, financial operations,
+    faculty workflows, ML analytics, and system administration.
+    
+    **Tenant Isolation:** All endpoints require a valid JWT with a `tenant_id` claim.
+    The tenant context is resolved from the JWT and applied to all database queries.
+    
+    **Rate Limiting:** All endpoints are rate-limited. Headers `X-RateLimit-Limit`,
+    `X-RateLimit-Remaining`, and `X-RateLimit-Reset` are included in responses.
+  contact:
+    name: Apex Systems (Pvt.) Ltd.
+    email: support@apexsystems.pk
+    url: https://apexsystems.pk
+  license:
+    name: Proprietary
+    url: https://apexsystems.pk/license
+
+servers:
+  - url: https://api.aegiscore.pk/v1
+    description: Production server (Azure)
+  - url: https://staging.aegiscore.pk/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication and authorisation endpoints
+  - name: Students
+    description: Student lifecycle management
+  - name: Faculty
+    description: Faculty portal endpoints
+  - name: Courses
+    description: Course management
+  - name: Finance
+    description: Financial operations
+  - name: Analytics
+    description: ML analytics and reporting
+  - name: Admin
+    description: System administration
+  - name: Health
+    description: Health check endpoints
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns the health status of the API server.
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: User login
+      description: Authenticates a user and returns JWT access and refresh tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: Exchanges a valid refresh token for a new access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: User logout
+      description: Invalidates the current refresh token.
+      responses:
+        "200":
+          description: Logout successful
+        "401":
+          description: Not authenticated
+
+  /students:
+    get:
+      tags: [Students]
+      summary: List students
+      description: Returns a paginated list of students for the current tenant.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: programme
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Active, Graduated, Suspended, Withdrawn]
+      responses:
+        "200":
+          description: Paginated student list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedStudentsResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Students]
+      summary: Create student
+      description: Creates a new student record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStudentRequest"
+      responses:
+        "201":
+          description: Student created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /students/{studentId}:
+    get:
+      tags: [Students]
+      summary: Get student by ID
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Student details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /students/{studentId}/enrolments:
+    get:
+      tags: [Students]
+      summary: Get student enrolments
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Student enrolment history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrolment"
+
+  /students/{studentId}/attendance:
+    get:
+      tags: [Students]
+      summary: Get student attendance
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Student attendance records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attendance"
+
+  /courses:
+    get:
+      tags: [Courses]
+      summary: List courses
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Course list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+  /courses/{courseId}/enrolments:
+    post:
+      tags: [Courses]
+      summary: Enrol student in course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [studentId, semester, academicYear]
+              properties:
+                studentId:
+                  type: string
+                  format: uuid
+                semester:
+                  type: string
+                academicYear:
+                  type: string
+      responses:
+        "201":
+          description: Enrolment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enrolment"
+
+  /attendance:
+    post:
+      tags: [Faculty]
+      summary: Mark attendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enrolmentId, lectureDate, status]
+              properties:
+                enrolmentId:
+                  type: string
+                  format: uuid
+                lectureDate:
+                  type: string
+                  format: date
+                status:
+                  type: string
+                  enum: [Present, Absent, Late, Excused]
+      responses:
+        "201":
+          description: Attendance marked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+
+  /grades:
+    post:
+      tags: [Faculty]
+      summary: Enter grade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enrolmentId, examScheduleId, marksObtained, totalMarks]
+              properties:
+                enrolmentId:
+                  type: string
+                  format: uuid
+                examScheduleId:
+                  type: string
+                  format: uuid
+                marksObtained:
+                  type: number
+                totalMarks:
+                  type: number
+      responses:
+        "201":
+          description: Grade entered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResult"
+
+  /finance/fee-accounts/{studentId}:
+    get:
+      tags: [Finance]
+      summary: Get fee account
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Fee account details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeAccount"
+
+  /finance/transactions:
+    post:
+      tags: [Finance]
+      summary: Record fee transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionRequest"
+      responses:
+        "201":
+          description: Transaction recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeTransaction"
+
+  /analytics/retention-risk:
+    get:
+      tags: [Analytics]
+      summary: Get student retention risk scores
+      responses:
+        "200":
+          description: Retention risk data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RetentionRisk"
+
+  /analytics/dashboard:
+    get:
+      tags: [Analytics]
+      summary: Get executive dashboard data
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardData"
+
+  /admin/tenants:
+    post:
+      tags: [Admin]
+      summary: Provision new tenant
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTenantRequest"
+      responses:
+        "201":
+          description: Tenant created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List users
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Query audit logs
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT obtained from /auth/login
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for internal service-to-service communication
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        user:
+          $ref: "#/components/schemas/User"
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        expiresIn:
+          type: integer
+
+    PaginationEnvelope:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        hasNext:
+          type: boolean
+
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        motto:
+          type: string
+        headcount:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+        programme:
+          type: string
+        status:
+          type: string
+
+    CreateStudentRequest:
+      type: object
+      required: [email, fullName, studentId, programme]
+      properties:
+        email:
+          type: string
+        fullName:
+          type: string
+        studentId:
+          type: string
+        programme:
+          type: string
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        title:
+          type: string
+        creditHours:
+          type: integer
+
+    Enrolment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        semester:
+          type: string
+        grade:
+          type: string
+
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        enrolmentId:
+          type: string
+          format: uuid
+        lectureDate:
+          type: string
+          format: date
+        status:
+          type: string
+
+    ExamResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        marksObtained:
+          type: number
+        totalMarks:
+          type: number
+        grade:
+          type: string
+
+    FeeAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        totalDue:
+          type: number
+        totalPaid:
+          type: number
+        outstanding:
+          type: number
+
+    FeeTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        transactionType:
+          type: string
+        transactionDate:
+          type: string
+          format: date-time
+
+    CreateTransactionRequest:
+      type: object
+      required: [feeAccountId, amount, transactionType]
+      properties:
+        feeAccountId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        transactionType:
+          type: string
+          enum: [Payment, Refund, Adjustment, Penalty]
+        paymentMethod:
+          type: string
+
+    RetentionRisk:
+      type: object
+      properties:
+        studentId:
+          type: string
+          format: uuid
+        riskScore:
+          type: number
+        factors:
+          type: array
+          items:
+            type: string
+
+    DashboardData:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        totalFaculty:
+          type: integer
+        graduationRate:
+          type: number
+        revenueCollected:
+          type: number
+
+    CreateTenantRequest:
+      type: object
+      required: [name, adminEmail, adminPassword]
+      properties:
+        name:
+          type: string
+        adminEmail:
+          type: string
+        adminPassword:
+          type: string
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        entityType:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PaginatedStudentsResponse:
+      allOf:
+        - $ref: "#/components/schemas/PaginationEnvelope"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/Student"
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

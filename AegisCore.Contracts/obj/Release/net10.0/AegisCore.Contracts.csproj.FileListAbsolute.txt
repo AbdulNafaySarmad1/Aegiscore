@@ -1,0 +1,16 @@
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/bin/Release/net10.0/AegisCore.Contracts.deps.json
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/bin/Release/net10.0/AegisCore.Contracts.dll
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/bin/Release/net10.0/AegisCore.Contracts.pdb
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/bin/Release/net10.0/AegisCore.Domain.dll
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/bin/Release/net10.0/AegisCore.Domain.pdb
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.csproj.AssemblyReference.cache
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.AssemblyInfoInputs.cache
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.AssemblyInfo.cs
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.csproj.CoreCompileInputs.cache
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.sourcelink.json
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCor.09FC016B.Up2Date
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.dll
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/refint/AegisCore.Contracts.dll
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/AegisCore.Contracts.pdb
+/home/abdul-nafay-sarmad/AegisCore/Source Code/Aegiscore code/AegisCore.Contracts/obj/Release/net10.0/ref/AegisCore.Contracts.dll
