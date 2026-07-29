@@ -64,15 +64,31 @@ jobs:
 
       - name: Full-stack Docker Compose smoke test
         run: |
-          docker compose --env-file .env.ci up -d --build --wait
-          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8080/portal-health
-          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8080/health/ready
-          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8080/
+          docker compose --env-file .env.ci up -d --build
+          ready=0
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:8080/health/ready >/tmp/aegiscore-ready.json; then
+              ready=1
+              break
+            fi
+            if ! docker compose --env-file .env.ci ps --status running api | grep -q aegiscore-api; then
+              docker compose --env-file .env.ci logs --no-color --tail=300 api
+              exit 1
+            fi
+            sleep 5
+          done
+          test "$ready" -eq 1
+          cat /tmp/aegiscore-ready.json
+          curl --fail http://127.0.0.1:8080/portal-health
+          curl --fail http://127.0.0.1:8080/
           docker compose --env-file .env.ci ps
 
       - name: Compose diagnostics
         if: failure()
-        run: docker compose --env-file .env.ci logs --no-color --tail=300
+        run: |
+          docker compose --env-file .env.ci ps --all
+          docker compose --env-file .env.ci logs --no-color --tail=500
+          docker inspect aegiscore-api-1 --format '{{json .State}}' || true
 
       - name: Tear down smoke stack
         if: always()

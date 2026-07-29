@@ -53,6 +53,7 @@ if (demoMode && builder.Environment.IsProduction())
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console()
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -189,6 +190,7 @@ else
     catch (Exception ex)
     {
         Log.Fatal(ex, "Application terminated unexpectedly");
+        throw;
     }
     finally
     {
