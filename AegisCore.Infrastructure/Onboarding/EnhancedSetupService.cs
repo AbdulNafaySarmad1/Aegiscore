@@ -130,7 +130,7 @@ public sealed class EnhancedSetupService
             .Select(x => x.Last() with { Role = NormalizeRole(x.Last().Role), Feature = x.Last().Feature.Trim() })
             .OrderBy(x => x.Feature)
             .ThenBy(x => x.Role)
-            .ToArray();
+            .ToList();
 
         lock (_gate)
         {
@@ -234,7 +234,7 @@ public sealed class EnhancedSetupService
             new("Required master data valid",
                 new[] { "departments", "students", "faculty", "courses" }.All(x => uploads.TryGetValue(x, out var value) && value.IsValid),
                 $"{uploads.Count(x => x.Value.IsValid)}/{Templates.Count} files valid"),
-            new("RBAC configured", permissions.Count > 0, $"{permissions.Count(x => x.Allowed)} permissions enabled")
+            new("RBAC configured", permissions.Length > 0, $"{permissions.Count(x => x.Allowed)} permissions enabled")
         };
         return new SetupReview(checks.All(x => x.Passed), checks, hierarchy, uploads, permissions);
     }
@@ -484,4 +484,3 @@ public sealed class EnhancedSetupService
             System.Security.SecurityElement.Escape(value) ?? "";
     }
 }
-
