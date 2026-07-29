@@ -35,7 +35,7 @@ type Review = {
 
 const stepLabels = ["Institution", "Infrastructure", "Templates", "Hierarchy", "Import", "Access", "Review"];
 const requiredFiles = ["departments", "students", "faculty", "courses"];
-const allFiles = ["departments", "students", "faculty", "courses", "attendance", "marks", "financial"];
+const allFiles = ["departments", "students", "faculty", "employees", "programs", "courses", "enrollments", "attendance", "examinations", "marks", "financial"];
 
 const emptyInstitution = {
   name: "", shortName: "", domain: "", licenseKey: "",

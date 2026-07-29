@@ -68,6 +68,7 @@ public class WizardStateService
 
     public string AdminFullName { get; set; } = string.Empty;
     public string AdminAccountEmail { get; set; } = string.Empty;
+    public string AdminPassword { get; set; } = string.Empty;
 
     public string DbConnectionString =>
         $"Host={DbHost};Port={DbPort};Database={DbName};Username={DbUsername};Password={DbPassword};SslMode={(DbSslEnabled ? "Require" : "Disable")}";

@@ -32,10 +32,7 @@ public class InstallationStateService : IInstallationStateService
 
     public bool IsInstalled()
     {
-        if (HasPersistentMarker(_configuration, _environment.ContentRootPath))
-            return true;
-
-        return HasDatabaseMarker();
+        return HasPersistentMarker(_configuration, _environment.ContentRootPath);
     }
 
     public static bool HasPersistentMarker(IConfiguration configuration, string contentRootPath)
@@ -95,22 +92,6 @@ public class InstallationStateService : IInstallationStateService
         Environment.SetEnvironmentVariable(INSTALLATION_MARKER_KEY, "true");
     }
 
-    private bool HasDatabaseMarker()
-    {
-        try
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetService<AegisDbContext>();
-            if (dbContext == null)
-                return false;
-
-            return dbContext.Database.CanConnect();
-        }
-        catch
-        {
-            return false;
-        }
-    }
 }
 
 public record InstallationMarker

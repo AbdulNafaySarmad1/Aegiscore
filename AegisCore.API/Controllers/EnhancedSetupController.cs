@@ -57,6 +57,23 @@ public sealed class EnhancedSetupController : ControllerBase
         return result.IsValid ? Ok(result) : UnprocessableEntity(result);
     }
 
+    [HttpGet("uploads/{fileType}/preview")]
+    public IActionResult Preview(string fileType) => BeforeInstall(() =>
+    {
+        var rows = _service.GetValidatedRows();
+        if (!rows.TryGetValue(fileType, out var source) || source.Count == 0) return NotFound();
+        return Ok(new { fileType, headers = source[0], rows = source.Skip(1).Take(25), totalRows = source.Count - 1 });
+    });
+
+    [HttpGet("uploads/{fileType}/rejections")]
+    public IActionResult Rejections(string fileType) => BeforeInstall(() =>
+    {
+        var review = _service.Review(_wizard);
+        return review.Uploads.TryGetValue(fileType, out var upload)
+            ? Ok(new { fileType, errors = upload.Errors, warnings = upload.Warnings })
+            : NotFound();
+    });
+
     [HttpGet("permissions")]
     public IActionResult Permissions() => BeforeInstall(() => Ok(_service.GetPermissions()));
 

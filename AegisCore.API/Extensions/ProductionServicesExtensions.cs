@@ -1,12 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
+using AegisCore.Application.Common.Interfaces;
 using AegisCore.API.Authorization;
 using AegisCore.API.Background;
 using AegisCore.API.Hubs;
 using AegisCore.Application.Onboarding;
 using AegisCore.Application.Platform;
 using AegisCore.Infrastructure.Installation;
+using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Onboarding;
+using AegisCore.Infrastructure.Security;
 using AegisCore.Infrastructure.Payments.Raast;
 using AegisCore.Infrastructure.Cloud.R2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -62,9 +65,12 @@ public static class SetupServicesExtensions
 {
     public static IServiceCollection AddSetupServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddAegisDbContext(configuration);
+        services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<WizardStateService>();
         services.AddSingleton<OnboardingService>();
         services.AddSingleton<EnhancedSetupService>();
+        services.AddScoped<SetupImportService>();
         services.AddControllers();
         return services;
     }
@@ -74,6 +80,7 @@ public static class ProductionServicesExtensions
 {
     public static IServiceCollection AddProductionServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<EnhancedSetupService>();
         return services;
     }
