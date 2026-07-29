@@ -95,7 +95,7 @@ jobs:
         run: docker compose --env-file .env.ci down --volumes --remove-orphans
 
   publish-and-deploy:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'push' }}
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -103,7 +103,7 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
       API_IMAGE: ghcr.io/abdulnafaysarmad1/aegiscore-api
       PORTAL_IMAGE: ghcr.io/abdulnafaysarmad1/aegiscore-portal
-      DEPLOY_ENABLED: ${{ secrets.KUBE_CONFIG != '' }}
+      DEPLOY_ENABLED: ${{ github.ref == 'refs/heads/main' && secrets.KUBE_CONFIG != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -116,12 +116,16 @@ jobs:
 
       - name: Build and push API and portal
         run: |
-          docker build -t "${API_IMAGE}:${IMAGE_TAG}" -t "${API_IMAGE}:latest" .
-          docker build -t "${PORTAL_IMAGE}:${IMAGE_TAG}" -t "${PORTAL_IMAGE}:latest" Nocturne.Portal
+          CHANNEL_TAG=recovery-latest
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            CHANNEL_TAG=latest
+          fi
+          docker build -t "${API_IMAGE}:${IMAGE_TAG}" -t "${API_IMAGE}:${CHANNEL_TAG}" .
+          docker build -t "${PORTAL_IMAGE}:${IMAGE_TAG}" -t "${PORTAL_IMAGE}:${CHANNEL_TAG}" Nocturne.Portal
           docker push "${API_IMAGE}:${IMAGE_TAG}"
-          docker push "${API_IMAGE}:latest"
+          docker push "${API_IMAGE}:${CHANNEL_TAG}"
           docker push "${PORTAL_IMAGE}:${IMAGE_TAG}"
-          docker push "${PORTAL_IMAGE}:latest"
+          docker push "${PORTAL_IMAGE}:${CHANNEL_TAG}"
 
       - name: Deploy to Kubernetes
         if: ${{ env.DEPLOY_ENABLED == 'true' }}

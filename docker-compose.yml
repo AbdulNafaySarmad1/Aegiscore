@@ -2,7 +2,7 @@ name: aegiscore
 
 services:
   portal:
-    image: aegiscore-portal:local
+    image: ${AEGISCORE_PORTAL_IMAGE:-aegiscore-portal:local}
     build:
       context: ./Nocturne.Portal
       args:
@@ -27,7 +27,7 @@ services:
       - /var/run
 
   api:
-    image: aegiscore-api:local
+    image: ${AEGISCORE_API_IMAGE:-aegiscore-api:local}
     build: .
     environment:
       ASPNETCORE_URLS: http://+:8080

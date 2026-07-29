@@ -26,6 +26,22 @@ Demo mode is rejected when `ASPNETCORE_ENVIRONMENT=Production`; production
 requires institutional SSO, a signed license, TLS/DNS, SMTP, backups, and
 credentials for each selected external integration.
 
+To run the verified prebuilt release-candidate images instead of compiling
+locally:
+
+```bash
+./scripts/bootstrap-env.sh
+printf '\nAEGISCORE_API_IMAGE=ghcr.io/abdulnafaysarmad1/aegiscore-api:recovery-latest\n' >> .env
+printf 'AEGISCORE_PORTAL_IMAGE=ghcr.io/abdulnafaysarmad1/aegiscore-portal:recovery-latest\n' >> .env
+docker compose --env-file .env pull api portal
+docker compose --env-file .env up -d --no-build --wait
+curl --fail http://localhost:8080/health/ready
+```
+
+The repository/package visibility must allow the host to pull from GHCR. Use
+the immutable commit-SHA image tag for controlled releases; `recovery-latest`
+is the moving integration tag for this recovery branch.
+
 **22 prompts total:**
 - 9 Utility Prompts (infrastructure, architecture, governance)
 - 13 Sprint Prompts (feature development)
