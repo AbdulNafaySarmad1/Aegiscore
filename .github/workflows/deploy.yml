@@ -1,8 +1,13 @@
-name: Deploy Nocturne
+name: Verify and Deploy Nocturne
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - codex/full-aegiscore-recovery
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -10,11 +15,8 @@ permissions:
   packages: write
 
 jobs:
-  test-build-deploy:
+  verify:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_TAG: ${{ github.sha }}
-      DEPLOY_ENABLED: ${{ secrets.KUBE_CONFIG != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,17 +27,52 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            Nocturne.Portal/package-lock.json
+            Nocturne.Mobile/package-lock.json
+
+      - name: Restore backend
+        run: dotnet restore Nocturne.slnx
+
+      - name: Build backend
+        run: dotnet build Nocturne.slnx --no-restore -m:1 -p:BuildInParallel=false --configuration Release
 
       - name: Backend tests
-        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj -m:1 -p:BuildInParallel=false
+        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release -m:1 -p:BuildInParallel=false --collect:"XPlat Code Coverage"
+
+      - name: Portal install
+        working-directory: Nocturne.Portal
+        run: npm ci
 
       - name: Portal build
         working-directory: Nocturne.Portal
-        run: npm ci && npm run build
+        run: npm run build
+
+      - name: Mobile install
+        working-directory: Nocturne.Mobile
+        run: npm ci
 
       - name: Mobile typecheck
         working-directory: Nocturne.Mobile
-        run: npm ci && npm run typecheck
+        run: npm run typecheck
+
+      - name: Mobile tests
+        working-directory: Nocturne.Mobile
+        run: npm test -- --runInBand
+
+      - name: Build API container
+        run: docker build -t aegiscore-api:ci .
+
+  publish-and-deploy:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+      DEPLOY_ENABLED: ${{ secrets.KUBE_CONFIG != '' }}
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Docker login
         uses: docker/login-action@v3
