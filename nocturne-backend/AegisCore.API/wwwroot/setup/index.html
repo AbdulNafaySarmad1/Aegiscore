@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AegisCore Setup Wizard</title>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --accent:#3b82f6; --ok:#10b981; --err:#ef4444; --muted:#94a3b8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:#e2e8f0; }
+  .wrap { max-width:680px; margin:40px auto; padding:0 16px; }
+  .brand { font-weight:700; font-size:20px; letter-spacing:-.02em; }
+  .brand small { color:var(--muted); font-weight:400; display:block; font-size:12px; }
+  .card { background:var(--panel); border:1px solid #334155; border-radius:14px; padding:22px; margin-top:18px; }
+  .steps { display:flex; gap:6px; margin:18px 0; flex-wrap:wrap; }
+  .step { font-size:11px; padding:4px 9px; border-radius:999px; background:#0b1220; color:var(--muted); border:1px solid #334155; }
+  .step.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .step.done { background:var(--ok); color:#04221a; border-color:var(--ok); }
+  label { display:block; font-size:13px; margin:12px 0 4px; color:var(--muted); }
+  input { width:100%; padding:10px 12px; border-radius:9px; border:1px solid #334155; background:#0b1220; color:#e2e8f0; font-size:14px; }
+  input:focus { outline:2px solid var(--accent); }
+  .row { display:flex; gap:10px; }
+  .row > div { flex:1; }
+  button { margin-top:16px; padding:11px 18px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; font-size:14px; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  button.ghost { background:transparent; border:1px solid #334155; color:var(--muted); }
+  .msg { margin-top:14px; padding:10px 12px; border-radius:9px; font-size:13px; }
+  .msg.ok { background:rgba(16,185,129,.12); color:var(--ok); border:1px solid rgba(16,185,129,.3); }
+  .msg.err { background:rgba(239,68,68,.12); color:var(--err); border:1px solid rgba(239,68,68,.3); }
+  .msg.info { background:rgba(59,130,246,.12); color:#93c5fd; border:1px solid rgba(59,130,246,.3); }
+  pre { background:#0b1220; padding:12px; border-radius:9px; overflow:auto; font-size:12px; }
+  h2 { margin:0 0 4px; font-size:17px; } p.sub { color:var(--muted); font-size:13px; margin:0 0 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">◆ AegisCore <small>Setup Wizard</small></div>
+  <div class="steps" id="steps"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const STEPS = ["License","PostgreSQL","Redis","Email","Domain","Go Live"];
+let step = 0;
+
+function renderSteps() {
+  document.getElementById("steps").innerHTML = STEPS.map((s,i)=>{
+    const cls = i < step ? "done" : (i === step ? "active" : "");
+    return `<span class="step ${cls}">${i+1}. ${s}</span>`;
+  }).join("");
+}
+
+function show(html) { document.getElementById("card").innerHTML = html; }
+function msg(type, text) { return `<div class="msg ${type}">${text}</div>`; }
+
+async function api(path, body) {
+  const res = await fetch("/api/setup"+path, {
+    method: body ? "POST" : "GET",
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = await res.json().catch(()=>({}));
+  return { ok: res.ok, data };
+}
+
+function licenseStep() {
+  show(`
+    <h2>1. License</h2><p class="sub">Enter your AegisCore license key to begin.</p>
+    <label>License key</label><input id="lic" placeholder="AE-XXXX-XXXX-XXXX" />
+    <button id="go">Validate &amp; Continue</button><div id="r"></div>`);
+  document.getElementById("go").onclick = async () => {
+    const r = await api("/step1/validate-license", { licenseKey: document.getElementById("lic").value });
+    const el = document.getElementById("r");
+    if (r.data && r.data.isValid) { el.innerHTML = msg("ok","License valid — "+(r.data.license?.issuedTo||"")); step=1; renderSteps(); pgStep(); }
+    else el.innerHTML = msg("err", r.data?.error?.userMessage || "Invalid license.");
+  };
+}
+
+function pgStep() {
+  show(`
+    <h2>2. PostgreSQL</h2><p class="sub">Connection used by the API at runtime.</p>
+    <div class="row"><div><label>Host</label><input id="h" value="postgres" /></div>
+    <div><label>Port</label><input id="p" value="5432" /></div></div>
+    <label>Database</label><input id="db" value="aegiscore" />
+    <div class="row"><div><label>Username</label><input id="u" value="aegiscore" /></div>
+    <div><label>Password</label><input id="pw" type="password" /></div></div>
+    <button id="go">Test Connection</button><div id="r"></div>`);
+  document.getElementById("go").onclick = async () => {
+    const r = await api("/step3/test-postgres", { host:val("h"), port:+val("p"), databaseName:val("db"), username:val("u"), password:val("pw") });
+    const el = document.getElementById("r");
+    if (r.data && r.data.success) { el.innerHTML = msg("ok", r.data.message); step=2; renderSteps(); redisStep(); }
+    else el.innerHTML = msg("err", r.data?.error?.userMessage || "Connection failed.");
+  };
+}
+
+function redisStep() {
+  show(`
+    <h2>3. Redis</h2><p class="sub">Cache &amp; distributed locks / state machine.</p>
+    <div class="row"><div><label>Host</label><input id="h" value="redis" /></div>
+    <div><label>Port</label><input id="p" value="6379" /></div></div>
+    <label>Password (optional)</label><input id="pw" type="password" />
+    <button id="go">Test Connection</button><div id="r"></div>`);
+  document.getElementById("go").onclick = async () => {
+    const r = await api("/step4/test-redis", { host:val("h"), port:+val("p"), password:val("pw")||null });
+    const el = document.getElementById("r");
+    if (r.data && r.data.success) { el.innerHTML = msg("ok", r.data.message); step=3; renderSteps(); emailStep(); }
+    else el.innerHTML = msg("err", r.data?.error?.userMessage || "Connection failed.");
+  };
+}
+
+function emailStep() {
+  show(`
+    <h2>4. Email (SMTP)</h2><p class="sub">Used for welcome &amp; notification emails.</p>
+    <div class="row"><div><label>Host</label><input id="h" value="smtp" /></div>
+    <div><label>Port</label><input id="p" value="587" /></div></div>
+    <div class="row"><div><label>Username</label><input id="u" /></div>
+    <div><label>Password</label><input id="pw" type="password" /></div></div>
+    <label>From address</label><input id="fa" value="noreply@university.edu" />
+    <label>From name</label><input id="fn" value="AegisCore" />
+    <button id="go">Send Test Email</button><div id="r"></div>`);
+  document.getElementById("go").onclick = async () => {
+    const r = await api("/step7/test-smtp", { host:val("h"), port:+val("p"), username:val("u"), password:val("pw"), fromAddress:val("fa"), fromName:val("fn") });
+    const el = document.getElementById("r");
+    if (r.data && r.data.success) { el.innerHTML = msg("ok", r.data.message); step=4; renderSteps(); domainStep(); }
+    else el.innerHTML = msg("err", r.data?.error?.userMessage || "Email test failed.");
+  };
+}
+
+function domainStep() {
+  show(`
+    <h2>5. Domain</h2><p class="sub">Your university's public domain.</p>
+    <label>Domain (e.g. your-uni.edu)</label><input id="d" placeholder="your-uni.edu" />
+    <button id="go">Provision &amp; Check DNS</button><div id="r"></div>`);
+  document.getElementById("go").onclick = async () => {
+    const prov = await api("/step9/provision-domain", { domain: val("d") });
+    const dns = await api("/step9/check-dns");
+    const el = document.getElementById("r");
+    if (prov.data) {
+      el.innerHTML = msg("info", `ERP URL: ${prov.data.erpUrl}<br/>Add DNS CNAME: ${prov.data.instructions?.replace(/\n/g,'<br/>')||''}`) + msg("ok", dns.data?.message || "DNS check done.");
+      step=5; renderSteps(); goLiveStep();
+    } else el.innerHTML = msg("err","Provisioning failed.");
+  };
+}
+
+function goLiveStep() {
+  show(`
+    <h2>6. Go Live</h2><p class="sub">Writes config and finalizes the deployment.</p>
+    <button id="go">Finish &amp; Go Live</button><div id="r"></div>`);
+  document.getElementById("go").onclick = async () => {
+    const r = await api("/step11/go-live");
+    const el = document.getElementById("r");
+    if (r.data && r.data.success) {
+      el.innerHTML = msg("ok", `Go live complete at ${r.data.erpUrl}.<br/>Restart the container to apply the generated config.`);
+    } else {
+      const failed = (r.data?.checks||[]).filter(c=>!c.passed).map(c=>c.name).join(", ");
+      el.innerHTML = msg("err", "Go live failed: "+(failed||r.data?.error?.userMessage||"unknown"));
+    }
+  };
+}
+
+const val = id => document.getElementById(id).value;
+renderSteps();
+licenseStep();
+</script>
+</body>
+</html>

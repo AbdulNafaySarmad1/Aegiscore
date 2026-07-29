@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="AegisCore.API/AegisCore.API.csproj" />
+  <Project Path="AegisCore.Application/AegisCore.Application.csproj" />
+  <Project Path="AegisCore.Contracts/AegisCore.Contracts.csproj" />
+  <Project Path="AegisCore.Domain/AegisCore.Domain.csproj" />
+  <Project Path="AegisCore.Infrastructure/AegisCore.Infrastructure.csproj" />
+  <Project Path="AegisCore.Tests/AegisCore.Tests.csproj" />
+  <Project Path="Nocturne.PluginCli/Nocturne.PluginCli.csproj" />
+  <Project Path="Nocturne.PluginSdk/Nocturne.PluginSdk.csproj" />
+</Solution>

@@ -1,0 +1,79 @@
+name: Deploy Nocturne
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+      DEPLOY_ENABLED: ${{ secrets.KUBE_CONFIG != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Backend tests
+        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj -m:1 -p:BuildInParallel=false
+
+      - name: Portal build
+        working-directory: Nocturne.Portal
+        run: npm ci && npm run build
+
+      - name: Mobile typecheck
+        working-directory: Nocturne.Mobile
+        run: npm ci && npm run typecheck
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/nocturne-api:${IMAGE_TAG} .
+          docker push ghcr.io/${{ github.repository }}/nocturne-api:${IMAGE_TAG}
+
+      - name: Deploy to Kubernetes
+        if: ${{ env.DEPLOY_ENABLED == 'true' }}
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          NOCTURNE_DB_CONNECTION: ${{ secrets.NOCTURNE_DB_CONNECTION }}
+          NOCTURNE_JWT_SECRET: ${{ secrets.NOCTURNE_JWT_SECRET }}
+          LICENSE_HMAC_SECRET: ${{ secrets.LICENSE_HMAC_SECRET }}
+          NOCTURNE_PQC_KEY_BASE64: ${{ secrets.NOCTURNE_PQC_KEY_BASE64 }}
+          Governance__FeedbackEncryptionKeyBase64: ${{ secrets.GOVERNANCE_FEEDBACK_KEY_BASE64 }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
+          kubectl apply -f k8s/namespace.yaml
+          kubectl -n nocturne create secret generic nocturne-runtime-secrets \
+            --from-literal=NOCTURNE_DB_CONNECTION="$NOCTURNE_DB_CONNECTION" \
+            --from-literal=NOCTURNE_JWT_SECRET="$NOCTURNE_JWT_SECRET" \
+            --from-literal=License__HmacSecret="$LICENSE_HMAC_SECRET" \
+            --from-literal=NOCTURNE_PQC_KEY_BASE64="$NOCTURNE_PQC_KEY_BASE64" \
+            --from-literal=Governance__FeedbackEncryptionKeyBase64="$Governance__FeedbackEncryptionKeyBase64" \
+            --from-literal=POSTGRES_USER="$POSTGRES_USER" \
+            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -f k8s/configmap.yaml -f k8s/postgres-statefulset.yaml -f k8s/postgres-service.yaml -f k8s/redis-deployment.yaml -f k8s/redis-service.yaml -f k8s/network-policy.yaml
+          sed "s|\${GITHUB_REPOSITORY}|${{ github.repository }}|g; s|\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/api-deployment.yaml | kubectl apply -f -
+          kubectl apply -f k8s/api-service.yaml -f k8s/api-hpa.yaml -f k8s/api-pdb.yaml -f k8s/ingress.yaml
+          kubectl -n nocturne rollout status deploy/nocturne-api --timeout=180s

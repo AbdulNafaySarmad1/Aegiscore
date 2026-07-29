@@ -1,4 +1,4 @@
-using AegisCore.Contracts.Common.Interfaces;
+using AegisCore.Application.Common.Interfaces;
 using AegisCore.Infrastructure.Repositories;
 using AegisCore.Infrastructure.Security;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,10 +11,8 @@ public static class LoginAuditServiceExtensions
     public static IServiceCollection AddLoginAudit(this IServiceCollection services)
     {
         services.TryAddScoped<ILoginAuditRecordRepository, LoginAuditRecordRepository>();
-        services.TryAddSingleton<IGeoIpService, GeoIpService>();
-        services.TryAddSingleton<LoginAuditService>();
-        services.TryAddSingleton<ILoginAuditService>(sp => sp.GetRequiredService<LoginAuditService>());
-        services.AddHostedService<LoginAuditArchiveWorker>();
+        services.TryAddScoped<IGeoIpService, GeoIpService>();
+        services.TryAddScoped<ILoginAuditService, LoginAuditService>();
         return services;
     }
 }

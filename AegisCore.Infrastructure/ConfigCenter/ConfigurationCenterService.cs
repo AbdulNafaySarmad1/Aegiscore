@@ -88,7 +88,7 @@ public class ConfigurationCenterService : IConfigurationCenterService
 
     public async Task<ConfigDto> GetConfigAsync(string key, CancellationToken cancellationToken = default)
     {
-        if (_cache.TryGetValue<ConfigDto>($"config:{key}", out var cached))
+        if (_cache.TryGetValue<ConfigDto>($"config:{key}", out var cached) && cached is not null)
             return cached;
 
         var entry = await _entryRepo.GetByKeyAsync(key, cancellationToken: cancellationToken);

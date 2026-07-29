@@ -78,7 +78,7 @@ public class InstallationStateService : IInstallationStateService
         try
         {
             using var scope = _serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetService<Domain.AegisDbContext>();
+            var dbContext = scope.ServiceProvider.GetService<AegisDbContext>();
             if (dbContext == null)
                 return false;
 

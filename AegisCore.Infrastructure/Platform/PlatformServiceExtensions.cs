@@ -26,6 +26,14 @@ public static class PlatformServiceExtensions
         services.TryAddScoped<IImportService, ImportService>();
         services.TryAddScoped<IExportService, ExportService>();
         services.TryAddScoped<ICommandCenterService, CommandCenterService>();
+        services.TryAddScoped<IGrievanceService, GrievanceService>();
+        services.TryAddSingleton<INotificationRealtimePublisher, NoopNotificationRealtimePublisher>();
+        services.AddHttpClient("whatsapp", client =>
+        {
+            client.BaseAddress = new Uri(configuration["WhatsApp:GraphBaseUrl"] ?? "https://graph.facebook.com/");
+            client.Timeout = TimeSpan.FromSeconds(20);
+        });
+        services.AddHttpClient("sms");
 
         return services;
     }

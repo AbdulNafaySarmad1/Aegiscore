@@ -26,6 +26,7 @@ public class PqcCryptographyOptions
 {
     public PqcAlgorithm Algorithm { get; set; } = PqcAlgorithm.Aes256Gcm;
     public int KeyRotationDays { get; set; } = 30;
+    public string? MasterKeyBase64 { get; set; }
 }
 
 public class PqcCryptographyService : IPqcCryptographyService
@@ -39,11 +40,18 @@ public class PqcCryptographyService : IPqcCryptographyService
     {
         _algorithm = options.Value.Algorithm;
         _logger = logger;
-        // Derive a deterministic 32-byte key from a machine secret; in production this
-        // would be sourced from the configured secret provider (Key Vault / KMS).
-        var seed = System.Text.Encoding.UTF8.GetBytes("aegiscore-pqc-master-seed-v1");
-        using var sha = System.Security.Cryptography.SHA256.Create();
-        _key = sha.ComputeHash(seed);
+        var configuredKey = Environment.GetEnvironmentVariable("NOCTURNE_PQC_KEY_BASE64")
+            ?? options.Value.MasterKeyBase64;
+        if (string.IsNullOrWhiteSpace(configuredKey))
+        {
+            throw new InvalidOperationException("PQC master key is required. Configure NOCTURNE_PQC_KEY_BASE64 with a 32-byte base64 value.");
+        }
+
+        _key = Convert.FromBase64String(configuredKey);
+        if (_key.Length != 32)
+        {
+            throw new InvalidOperationException("PQC master key must decode to exactly 32 bytes.");
+        }
         _nonce = new byte[12];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(_nonce);

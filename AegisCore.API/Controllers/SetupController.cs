@@ -1,4 +1,5 @@
 using AegisCore.Application.Onboarding;
+using AegisCore.Infrastructure.Installation;
 using AegisCore.Infrastructure.Onboarding;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +11,12 @@ public class SetupController : ControllerBase
 {
     private readonly WizardStateService _state;
     private readonly OnboardingService _svc;
-    private readonly InstallationStateService _installationState;
+    private readonly IInstallationStateService _installationState;
 
     public SetupController(
         WizardStateService state,
         OnboardingService svc,
-        InstallationStateService installationState)
+        IInstallationStateService installationState)
     {
         _state = state;
         _svc = svc;
@@ -61,6 +62,7 @@ public class SetupController : ControllerBase
     }
 
     [HttpPost("step3/database")]
+    [HttpPost("step3/test-postgres")]
     public async Task<IActionResult> ConfigureDatabase([FromBody] DatabaseConfigRequest r, CancellationToken ct)
     {
         _state.DbHost = r.Host;
@@ -75,6 +77,7 @@ public class SetupController : ControllerBase
     }
 
     [HttpPost("step4/redis")]
+    [HttpPost("step4/test-redis")]
     public async Task<IActionResult> ConfigureRedis([FromBody] RedisConfigRequest r, CancellationToken ct)
     {
         _state.RedisHost = r.Host;
@@ -82,13 +85,8 @@ public class SetupController : ControllerBase
         _state.RedisPassword = r.Password;
         _state.RedisTlsEnabled = r.TlsEnabled;
 
-        if (r.TestConnection)
-        {
-            var result = await _svc.TestRedisAsync(_state, r.Host, r.Port, r.Password, ct);
-            return Ok(result);
-        }
-
-        return Ok(new { success = true, message = "Redis configuration saved (connection test skipped)" });
+        var result = await _svc.TestRedisAsync(_state, r.Host, r.Port, r.Password, ct);
+        return Ok(result);
     }
 
     [HttpPost("step5/license-info")]
@@ -114,6 +112,7 @@ public class SetupController : ControllerBase
     }
 
     [HttpPost("step7/smtp")]
+    [HttpPost("step7/test-smtp")]
     public async Task<IActionResult> ConfigureSmtp([FromBody] SmtpConfigRequest r, CancellationToken ct)
     {
         _state.SmtpHost = r.Host;
@@ -123,13 +122,8 @@ public class SetupController : ControllerBase
         _state.SmtpFromAddress = r.FromAddress;
         _state.SmtpFromName = r.FromName;
 
-        if (r.TestConnection)
-        {
-            var result = await _svc.TestSmtpAsync(_state, r.Host, r.Port, r.Username, r.Password, r.FromAddress, r.FromName, ct);
-            return Ok(result);
-        }
-
-        return Ok(new { success = true, message = "SMTP configuration saved (connection test skipped)" });
+        var result = await _svc.TestSmtpAsync(_state, r.Host, r.Port, r.Username, r.Password, r.FromAddress, r.FromName, ct);
+        return Ok(result);
     }
 
     [HttpPost("step8/storage")]

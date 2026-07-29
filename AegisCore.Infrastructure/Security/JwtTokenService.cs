@@ -40,16 +40,18 @@ public class JwtTokenService : IJwtTokenService
             SecurityAlgorithms.RsaSha256
         );
 
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Email, user.Email),
+            new("tenant_id", user.TenantId.ToString())
+        };
+        claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
+
         var token = new JwtSecurityToken(
             issuer: "https://aegiscore.pk",
             audience: "aegiscore-api",
-            claims: new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim("tenant_id", user.TenantId.ToString()),
-                new Claim(ClaimTypes.Role, user.Role)
-            },
+            claims: claims,
             expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: credentials
         );

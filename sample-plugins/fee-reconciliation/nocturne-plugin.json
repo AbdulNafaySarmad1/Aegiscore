@@ -1,0 +1,14 @@
+{
+  "name": "fee-reconciliation",
+  "version": "1.0.0",
+  "description": "Reconciles imported bank payments against Nocturne fee invoices.",
+  "category": "Finance",
+  "pricingModel": "RevenueShare",
+  "price": 0,
+  "developerName": "Nocturne Systems",
+  "developerEmail": "plugins@nocturne.systems",
+  "requiredPermissions": [
+    "finance.fees.read",
+    "finance.payments.write"
+  ]
+}

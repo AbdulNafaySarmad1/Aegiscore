@@ -1125,6 +1125,8 @@ public class AegisDbContext : DbContext
     /// </summary>
     public DbSet<ExtensionReview> ExtensionReviews => Set<ExtensionReview>();
 
+    public DbSet<PluginRevenueShare> PluginRevenueShares => Set<PluginRevenueShare>();
+
     // Identity Governance
     /// <summary>
     /// Users.
@@ -1330,6 +1332,22 @@ public class AegisDbContext : DbContext
     /// Notification deliveries.
     /// </summary>
     public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
+
+    public DbSet<NoticeBoardItem> NoticeBoardItems => Set<NoticeBoardItem>();
+    public DbSet<GrievanceTicket> GrievanceTickets => Set<GrievanceTicket>();
+    public DbSet<GrievanceResponse> GrievanceResponses => Set<GrievanceResponse>();
+    public DbSet<TeamsSyncLog> TeamsSyncLogs => Set<TeamsSyncLog>();
+    public DbSet<LmsSyncLog> LmsSyncLogs => Set<LmsSyncLog>();
+    public DbSet<PowerBiReport> PowerBiReports => Set<PowerBiReport>();
+    public DbSet<AlumniProfile> AlumniProfiles => Set<AlumniProfile>();
+    public DbSet<AlumniDonation> AlumniDonations => Set<AlumniDonation>();
+    public DbSet<StudentSociety> StudentSocieties => Set<StudentSociety>();
+    public DbSet<SocietyMembership> SocietyMemberships => Set<SocietyMembership>();
+    public DbSet<StudentActivity> StudentActivities => Set<StudentActivity>();
+    public DbSet<ActivityParticipation> ActivityParticipations => Set<ActivityParticipation>();
+    public DbSet<StudentHealthRecord> StudentHealthRecords => Set<StudentHealthRecord>();
+    public DbSet<MedicalVisit> MedicalVisits => Set<MedicalVisit>();
+    public DbSet<SickLeaveApplication> SickLeaveApplications => Set<SickLeaveApplication>();
 
     /// <summary>
     /// Feature flags.
@@ -1568,6 +1586,57 @@ public class AegisDbContext : DbContext
     /// </summary>
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    public DbSet<PolicyConfig> PolicyConfigs => Set<PolicyConfig>();
+    public DbSet<AcademicYear> AcademicYears => Set<AcademicYear>();
+    public DbSet<Semester> Semesters => Set<Semester>();
+    public DbSet<AcademicHoliday> AcademicHolidays => Set<AcademicHoliday>();
+    public DbSet<CrossDeptPermissionRequest> CrossDeptPermissionRequests => Set<CrossDeptPermissionRequest>();
+    public DbSet<LicenseState> LicenseStates => Set<LicenseState>();
+    public DbSet<AdmissionApplication> AdmissionApplications => Set<AdmissionApplication>();
+    public DbSet<ApplicationDocument> ApplicationDocuments => Set<ApplicationDocument>();
+    public DbSet<MeritList> MeritLists => Set<MeritList>();
+    public DbSet<MeritListEntry> MeritListEntries => Set<MeritListEntry>();
+    public DbSet<SeatAllocation> SeatAllocations => Set<SeatAllocation>();
+    public DbSet<AssessmentScheme> AssessmentSchemes => Set<AssessmentScheme>();
+    public DbSet<AssessmentComponent> AssessmentComponents => Set<AssessmentComponent>();
+    public DbSet<CourseMark> CourseMarks => Set<CourseMark>();
+    public DbSet<MarkModeration> MarkModerations => Set<MarkModeration>();
+    public DbSet<GradeScale> GradeScales => Set<GradeScale>();
+    public DbSet<GradeBand> GradeBands => Set<GradeBand>();
+    public DbSet<CourseGrade> CourseGrades => Set<CourseGrade>();
+    public DbSet<ExamRegistration> ExamRegistrations => Set<ExamRegistration>();
+    public DbSet<Transcript> Transcripts => Set<Transcript>();
+    public DbSet<CisUpload> CisUploads => Set<CisUpload>();
+    public DbSet<PayrollRun> PayrollRuns => Set<PayrollRun>();
+    public DbSet<Payslip> Payslips => Set<Payslip>();
+    public DbSet<FeeStructure> FeeStructures => Set<FeeStructure>();
+    public DbSet<FeeComponent> FeeComponents => Set<FeeComponent>();
+    public DbSet<StudentFeeDue> StudentFeeDues => Set<StudentFeeDue>();
+    public DbSet<StudentFeePayment> StudentFeePayments => Set<StudentFeePayment>();
+    public DbSet<CostCenter> CostCenters => Set<CostCenter>();
+    public DbSet<ProcurementRequisition> ProcurementRequisitions => Set<ProcurementRequisition>();
+    public DbSet<RequisitionLineItem> RequisitionLineItems => Set<RequisitionLineItem>();
+    public DbSet<Vendor> Vendors => Set<Vendor>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
+    public DbSet<GradeOverrideRequest> GradeOverrideRequests => Set<GradeOverrideRequest>();
+    public DbSet<SectionOverrideRequest> SectionOverrideRequests => Set<SectionOverrideRequest>();
+    public DbSet<AnonymousFeedbackSubmission> AnonymousFeedbackSubmissions => Set<AnonymousFeedbackSubmission>();
+    public DbSet<CourseReEnrollment> CourseReEnrollments => Set<CourseReEnrollment>();
+    public DbSet<CurriculumVersionRecord> CurriculumVersions => Set<CurriculumVersionRecord>();
+    public DbSet<CurriculumCourse> CurriculumCourses => Set<CurriculumCourse>();
+    public DbSet<CurriculumPrerequisite> CurriculumPrerequisites => Set<CurriculumPrerequisite>();
+    public DbSet<CurriculumChangeHistory> CurriculumChangeHistory => Set<CurriculumChangeHistory>();
+    public DbSet<OfflineAttendanceEvent> OfflineAttendanceEvents => Set<OfflineAttendanceEvent>();
+    public DbSet<UniversitySsoProfile> UniversitySsoProfiles => Set<UniversitySsoProfile>();
+    public DbSet<UserSecondFactor> UserSecondFactors => Set<UserSecondFactor>();
+    public DbSet<SsoSession> SsoSessions => Set<SsoSession>();
+    public DbSet<ExamPaperBatch> ExamPaperBatches => Set<ExamPaperBatch>();
+    public DbSet<ExamPaperScan> ExamPaperScans => Set<ExamPaperScan>();
+    public DbSet<AgenticGradeRun> AgenticGradeRuns => Set<AgenticGradeRun>();
+    public DbSet<HumanGradeReview> HumanGradeReviews => Set<HumanGradeReview>();
+    public DbSet<PaperDestructionManifest> PaperDestructionManifests => Set<PaperDestructionManifest>();
+
     /// <summary>
     /// Configures the model that was discovered by convention from the entity types
     /// exposed in <see cref="DbSet{TEntity}"/> properties on your derived context.
@@ -1728,6 +1797,332 @@ public class AegisDbContext : DbContext
         modelBuilder.HasPostgresEnum<CallDisposition>();
         modelBuilder.HasPostgresEnum<MessageSender>();
         modelBuilder.HasPostgresEnum<RefreshFrequency>();
+
+        modelBuilder.Entity<PolicyConfig>(entity =>
+        {
+            entity.HasIndex(e => new { e.Module, e.Key, e.EffectiveFrom }).IsUnique();
+            entity.Property(e => e.Module).HasMaxLength(100);
+            entity.Property(e => e.Key).HasMaxLength(200);
+            entity.Property(e => e.ValueType).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<AcademicYear>(entity =>
+        {
+            entity.HasIndex(e => e.IsCurrent);
+            entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Semester>(entity =>
+        {
+            entity.HasIndex(e => e.IsCurrent);
+            entity.HasOne(e => e.AcademicYear).WithMany(e => e.Semesters).HasForeignKey(e => e.AcademicYearId);
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.Type).HasMaxLength(20);
+            entity.Property(e => e.Status).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<AcademicHoliday>(entity =>
+        {
+            entity.HasIndex(e => new { e.AcademicYearId, e.StartDate });
+            entity.HasOne(e => e.AcademicYear).WithMany().HasForeignKey(e => e.AcademicYearId);
+            entity.HasOne(e => e.Semester).WithMany(e => e.Holidays).HasForeignKey(e => e.SemesterId);
+        });
+
+        modelBuilder.Entity<CrossDeptPermissionRequest>(entity =>
+        {
+            entity.HasIndex(e => e.Status);
+            entity.HasOne(e => e.Permission).WithMany().HasForeignKey(e => e.PermissionId);
+        });
+
+        modelBuilder.Entity<LicenseState>(entity =>
+        {
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.LockedAt);
+            entity.Property(e => e.UniversityName).HasMaxLength(200);
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.LastHeartbeatStatus).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<AdmissionApplication>(entity =>
+        {
+            entity.HasIndex(e => e.Cnic).IsUnique();
+            entity.HasIndex(e => new { e.ProgramId, e.QuotaType, e.ApplicationStatus });
+            entity.HasMany(e => e.Documents).WithOne(e => e.Application).HasForeignKey(e => e.ApplicationId);
+        });
+
+        modelBuilder.Entity<ApplicationDocument>(entity =>
+        {
+            entity.HasIndex(e => new { e.ApplicationId, e.DocumentType });
+        });
+
+        modelBuilder.Entity<MeritList>(entity =>
+        {
+            entity.HasIndex(e => new { e.ProgramId, e.SemesterId, e.QuotaType, e.RoundNumber }).IsUnique();
+            entity.HasMany(e => e.Entries).WithOne(e => e.MeritList).HasForeignKey(e => e.MeritListId);
+        });
+
+        modelBuilder.Entity<MeritListEntry>(entity =>
+        {
+            entity.HasIndex(e => new { e.MeritListId, e.MeritRank }).IsUnique();
+            entity.HasOne(e => e.Application).WithMany().HasForeignKey(e => e.ApplicationId);
+        });
+
+        modelBuilder.Entity<SeatAllocation>(entity =>
+        {
+            entity.HasIndex(e => e.MeritListEntryId).IsUnique();
+            entity.HasIndex(e => e.ApplicationId);
+        });
+
+        modelBuilder.Entity<AssessmentScheme>(entity =>
+        {
+            entity.HasIndex(e => new { e.CourseId, e.SemesterId }).IsUnique();
+            entity.HasMany(e => e.Components).WithOne(e => e.Scheme).HasForeignKey(e => e.SchemeId);
+        });
+
+        modelBuilder.Entity<AssessmentComponent>(entity =>
+        {
+            entity.HasIndex(e => new { e.SchemeId, e.OrderIndex }).IsUnique();
+        });
+
+        modelBuilder.Entity<CourseMark>(entity =>
+        {
+            entity.HasIndex(e => new { e.CourseId, e.StudentId, e.AssessmentComponentId }).IsUnique();
+            entity.HasOne(e => e.AssessmentComponent).WithMany().HasForeignKey(e => e.AssessmentComponentId);
+        });
+
+        modelBuilder.Entity<MarkModeration>(entity =>
+        {
+            entity.HasIndex(e => new { e.CourseId, e.SemesterId }).IsUnique();
+            entity.HasIndex(e => e.Status);
+        });
+
+        modelBuilder.Entity<GradeScale>(entity =>
+        {
+            entity.HasMany(e => e.Grades).WithOne(e => e.GradeScale).HasForeignKey(e => e.GradeScaleId);
+        });
+
+        modelBuilder.Entity<GradeBand>(entity =>
+        {
+            entity.HasIndex(e => new { e.GradeScaleId, e.LetterGrade }).IsUnique();
+        });
+
+        modelBuilder.Entity<CourseGrade>(entity =>
+        {
+            entity.HasIndex(e => new { e.CourseId, e.StudentId }).IsUnique();
+            entity.HasIndex(e => new { e.StudentId, e.SemesterId });
+            entity.HasIndex(e => e.ResultStatus);
+        });
+
+        modelBuilder.Entity<ExamRegistration>(entity =>
+        {
+            entity.HasIndex(e => new { e.StudentId, e.CourseId }).IsUnique();
+        });
+
+        modelBuilder.Entity<Transcript>(entity =>
+        {
+            entity.HasIndex(e => e.VerificationHash).IsUnique();
+        });
+
+        modelBuilder.Entity<CisUpload>(entity =>
+        {
+            entity.HasIndex(e => new { e.CourseId, e.ProcessingStatus });
+            entity.HasIndex(e => e.HumanReviewStatus);
+        });
+
+        modelBuilder.Entity<PayrollRun>(entity =>
+        {
+            entity.HasIndex(e => e.Month).IsUnique();
+            entity.HasMany(e => e.Payslips).WithOne(e => e.PayrollRun).HasForeignKey(e => e.PayrollRunId);
+        });
+
+        modelBuilder.Entity<Payslip>(entity =>
+        {
+            entity.HasIndex(e => new { e.PayrollRunId, e.EmployeeId }).IsUnique();
+            entity.HasIndex(e => e.EmployeeId);
+        });
+
+        modelBuilder.Entity<FeeStructure>(entity =>
+        {
+            entity.HasIndex(e => new { e.AcademicYearId, e.ProgramId, e.Semester, e.FeeType }).IsUnique();
+            entity.HasMany(e => e.Components).WithOne(e => e.FeeStructure).HasForeignKey(e => e.FeeStructureId);
+        });
+
+        modelBuilder.Entity<FeeComponent>(entity =>
+        {
+            entity.HasIndex(e => new { e.FeeStructureId, e.OrderIndex }).IsUnique();
+        });
+
+        modelBuilder.Entity<StudentFeeDue>(entity =>
+        {
+            entity.HasIndex(e => new { e.StudentId, e.SemesterId }).IsUnique();
+            entity.HasIndex(e => e.Status);
+        });
+
+        modelBuilder.Entity<StudentFeePayment>(entity =>
+        {
+            entity.HasIndex(e => e.FeeDueId);
+            entity.HasIndex(e => e.ReferenceNumber);
+        });
+
+        modelBuilder.Entity<CostCenter>(entity =>
+        {
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<ProcurementRequisition>(entity =>
+        {
+            entity.HasIndex(e => e.RequisitionNumber).IsUnique();
+            entity.HasMany(e => e.LineItems).WithOne(e => e.Requisition).HasForeignKey(e => e.RequisitionId);
+        });
+
+        modelBuilder.Entity<Vendor>(entity =>
+        {
+            entity.HasIndex(e => e.VendorName);
+        });
+
+        modelBuilder.Entity<SystemConfiguration>(entity =>
+        {
+            entity.HasIndex(e => new { e.UniversityId, e.SubdomainName }).IsUnique();
+            entity.HasIndex(e => e.ReplicationLagHours);
+        });
+
+        modelBuilder.Entity<GradeOverrideRequest>(entity =>
+        {
+            entity.HasIndex(e => new { e.StudentId, e.CourseId, e.SemesterId });
+            entity.HasIndex(e => new { e.ApprovalStatus, e.ApprovalThreshold });
+        });
+
+        modelBuilder.Entity<SectionOverrideRequest>(entity =>
+        {
+            entity.HasIndex(e => new { e.StudentId, e.CourseId, e.Status });
+        });
+
+        modelBuilder.Entity<AnonymousFeedbackSubmission>(entity =>
+        {
+            entity.HasIndex(e => new { e.CourseId, e.FacultyId });
+            entity.HasIndex(e => e.SubmittedAt);
+        });
+
+        modelBuilder.Entity<CourseReEnrollment>(entity =>
+        {
+            entity.HasIndex(e => new { e.StudentId, e.CourseId, e.TargetSemesterId }).IsUnique();
+            entity.HasIndex(e => e.Status);
+        });
+
+        modelBuilder.Entity<CurriculumVersionRecord>(entity =>
+        {
+            entity.HasIndex(e => new { e.ProgramId, e.VersionNumber }).IsUnique();
+            entity.HasIndex(e => new { e.ProgramId, e.YearEffective }).IsUnique();
+            entity.HasMany(e => e.Courses).WithOne(e => e.CurriculumVersion).HasForeignKey(e => e.CurriculumVersionId);
+            entity.HasMany(e => e.Prerequisites).WithOne(e => e.CurriculumVersion).HasForeignKey(e => e.CurriculumVersionId);
+        });
+
+        modelBuilder.Entity<CurriculumCourse>(entity =>
+        {
+            entity.HasIndex(e => new { e.CurriculumVersionId, e.CourseId, e.Semester }).IsUnique();
+            entity.Property(e => e.TotalCreditHours).HasComputedColumnSql("\"TheoryCreditHours\" + \"LabCreditHours\"", stored: true);
+        });
+
+        modelBuilder.Entity<CurriculumPrerequisite>(entity =>
+        {
+            entity.HasIndex(e => new { e.CurriculumVersionId, e.CourseId, e.PrerequisiteCourseId }).IsUnique();
+            entity.ToTable(t => t.HasCheckConstraint("CK_CurriculumPrerequisites_NoSelf", "\"CourseId\" <> \"PrerequisiteCourseId\""));
+        });
+
+        modelBuilder.Entity<CurriculumChangeHistory>(entity =>
+        {
+            entity.HasIndex(e => new { e.CurriculumVersionId, e.ChangedAt });
+        });
+
+        modelBuilder.Entity<OfflineAttendanceEvent>(entity =>
+        {
+            entity.HasIndex(e => e.ClientEventId).IsUnique();
+            entity.HasIndex(e => new { e.CourseId, e.StudentId });
+            entity.HasIndex(e => e.WasOfflineAt);
+        });
+
+        modelBuilder.Entity<UniversitySsoProfile>(entity =>
+        {
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => e.Domain).IsUnique();
+            entity.HasIndex(e => e.SsoProvider);
+        });
+
+        modelBuilder.Entity<UserSecondFactor>(entity =>
+        {
+            entity.HasIndex(e => e.UserId).IsUnique();
+        });
+
+        modelBuilder.Entity<SsoSession>(entity =>
+        {
+            entity.HasIndex(e => new { e.UserId, e.IsActive });
+            entity.HasIndex(e => e.ExpiresAt);
+        });
+
+        modelBuilder.Entity<ExamPaperBatch>(entity =>
+        {
+            entity.HasIndex(e => new { e.ExamId, e.Status });
+        });
+
+        modelBuilder.Entity<ExamPaperScan>(entity =>
+        {
+            entity.HasIndex(e => new { e.BatchId, e.StudentId }).IsUnique();
+            entity.HasIndex(e => e.QrPayload).IsUnique();
+        });
+
+        modelBuilder.Entity<AgenticGradeRun>(entity =>
+        {
+            entity.HasIndex(e => new { e.ScanId, e.Status });
+            entity.HasIndex(e => e.Confidence);
+        });
+
+        modelBuilder.Entity<HumanGradeReview>(entity =>
+        {
+            entity.HasIndex(e => new { e.GradeRunId, e.Status });
+        });
+
+        modelBuilder.Entity<PaperDestructionManifest>(entity =>
+        {
+            entity.HasIndex(e => e.BatchId).IsUnique();
+            entity.HasIndex(e => e.ManifestHash).IsUnique();
+        });
+
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.HasIndex(e => e.PoNumber).IsUnique();
+            entity.HasIndex(e => e.Status);
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasIndex(e => e.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasIndex(e => new { e.Module, e.Action, e.Resource }).IsUnique();
+        });
+
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            entity.HasIndex(e => new { e.RoleId, e.PermissionId }).IsUnique();
+        });
+
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
+        });
+
+        modelBuilder.Entity<PolicyConfig>().HasData(
+            SeedPolicy("11111111-1111-1111-1111-111111111101", "admissions", "merit_change_max_percent", "5", "int", "maximum % a dept head can change merit unilaterally"),
+            SeedPolicy("11111111-1111-1111-1111-111111111102", "admissions", "merit_override_requires_vc", "true", "bool", "VC approval required for merit overrides"),
+            SeedPolicy("11111111-1111-1111-1111-111111111103", "admissions", "merit_override_requires_chancellor", "true", "bool", "Chancellor approval required for major merit overrides"),
+            SeedPolicy("11111111-1111-1111-1111-111111111104", "examination", "grace_marks_max", "2", "int", "maximum grace marks"),
+            SeedPolicy("11111111-1111-1111-1111-111111111105", "examination", "attendance_hold_threshold_percent", "75", "int", "attendance threshold for exam eligibility"),
+            SeedPolicy("11111111-1111-1111-1111-111111111106", "academic", "add_drop_window_days", "7", "int", "course add/drop window"),
+            SeedPolicy("11111111-1111-1111-1111-111111111107", "finance", "late_fee_grace_days", "3", "int", "late fee grace period"),
+            SeedPolicy("11111111-1111-1111-1111-111111111108", "license", "heartbeat_time", "08:00", "string", "daily license heartbeat time"),
+            SeedPolicy("11111111-1111-1111-1111-111111111109", "license", "lockout_on_first_failure", "true", "bool", "lock system on first failed heartbeat"));
         modelBuilder.HasPostgresEnum<ETLJobStatus>();
         modelBuilder.HasPostgresEnum<DashboardType>();
         modelBuilder.HasPostgresEnum<VisualizationType>();
@@ -1897,6 +2292,63 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => e.Email).IsUnique();
         });
 
+        modelBuilder.Entity<GrievanceTicket>(entity =>
+        {
+            entity.HasIndex(e => e.TicketNumber).IsUnique();
+            entity.HasIndex(e => e.SubmitterId);
+            entity.HasIndex(e => e.Status);
+        });
+
+        modelBuilder.Entity<GrievanceResponse>(entity =>
+        {
+            entity.HasIndex(e => e.TicketId);
+            entity.HasOne(e => e.Ticket).WithMany(e => e.Responses).HasForeignKey(e => e.TicketId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<NoticeBoardItem>(entity =>
+        {
+            entity.HasIndex(e => e.Visibility);
+            entity.HasIndex(e => e.ExpiryDate);
+        });
+
+        modelBuilder.Entity<TeamsSyncLog>(entity =>
+        {
+            entity.HasIndex(e => e.TimetableEntryId);
+            entity.HasIndex(e => e.SyncStatus);
+        });
+
+        modelBuilder.Entity<LmsSyncLog>(entity =>
+        {
+            entity.HasIndex(e => e.CourseId);
+            entity.HasIndex(e => new { e.CourseId, e.SyncType });
+        });
+
+        modelBuilder.Entity<PowerBiReport>(entity =>
+        {
+            entity.HasIndex(e => e.TargetRole);
+            entity.HasIndex(e => e.PowerBiReportId).IsUnique();
+        });
+
+        modelBuilder.Entity<AlumniProfile>(entity =>
+        {
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.HasIndex(e => e.AlumniId).IsUnique();
+        });
+
+        modelBuilder.Entity<AlumniDonation>(entity =>
+        {
+            entity.HasIndex(e => e.ReceiptNumber).IsUnique();
+            entity.HasIndex(e => e.AlumniProfileId);
+        });
+
+        modelBuilder.Entity<StudentSociety>(entity => entity.HasIndex(e => e.SocietyName));
+        modelBuilder.Entity<SocietyMembership>(entity => entity.HasIndex(e => new { e.SocietyId, e.StudentId }).IsUnique());
+        modelBuilder.Entity<StudentActivity>(entity => entity.HasIndex(e => e.ScheduledDate));
+        modelBuilder.Entity<ActivityParticipation>(entity => entity.HasIndex(e => new { e.ActivityId, e.StudentId }).IsUnique());
+        modelBuilder.Entity<StudentHealthRecord>(entity => entity.HasIndex(e => e.StudentId).IsUnique());
+        modelBuilder.Entity<MedicalVisit>(entity => entity.HasIndex(e => e.StudentId));
+        modelBuilder.Entity<SickLeaveApplication>(entity => entity.HasIndex(e => new { e.StudentId, e.Status }));
+
         // ResearchGrant
         modelBuilder.Entity<ResearchGrant>(entity =>
         {
@@ -1910,7 +2362,7 @@ public class AegisDbContext : DbContext
         // ResearchPatent
         modelBuilder.Entity<ResearchPatent>(entity =>
         {
-            entity.HasIndex(e => e.PatentNumber).IsUnique().HasFilter("[PatentNumber] IS NOT NULL");
+            entity.HasIndex(e => e.PatentNumber).IsUnique().HasFilter("\"PatentNumber\" IS NOT NULL");
         });
 
         // UniversityMission
@@ -2187,6 +2639,19 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => e.TenantId);
         });
     }
+
+    private static PolicyConfig SeedPolicy(string id, string module, string key, string value, string valueType, string description) => new()
+    {
+        Id = Guid.Parse(id),
+        Module = module,
+        Key = key,
+        Value = value,
+        ValueType = valueType,
+        Description = description,
+        CreatedBy = Guid.Empty,
+        EffectiveFrom = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+        CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero)
+    };
 }
 
 /// <summary>

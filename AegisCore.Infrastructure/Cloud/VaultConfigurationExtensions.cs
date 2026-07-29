@@ -22,7 +22,7 @@ public static class VaultConfigurationExtensions
             };
 
             if (secrets is { Count: > 0 })
-                builder.AddInMemoryCollection(secrets);
+                builder.AddInMemoryCollection(secrets.Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value)));
         }
         catch (Exception ex)
         {

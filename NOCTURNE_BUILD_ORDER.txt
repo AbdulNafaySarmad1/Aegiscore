@@ -1,0 +1,313 @@
+================================================================================
+                    NOCTURNE BUILD ORDER - STEP BY STEP
+                        Ready to Code & Deploy
+================================================================================
+
+PHASE 1: FOUNDATION (Weeks 1-3)
+================================================================================
+
+1. U1-codebase-understanding.md
+   └─ Audit existing codebase
+   └─ Paste output to next prompt
+
+2. S1-foundation.md
+   └─ Build: Cloud-agnostic infrastructure
+   └─ Build: RBAC matrix
+   └─ Build: Immutable audit logs
+   └─ Build: Academic calendar
+   └─ Integrate: U6 (License engine)
+   └─ Deploy to Docker
+
+3. U6-license-engine.md
+   └─ Build: Daily heartbeat service
+   └─ Build: License override endpoints
+   └─ Build: Module gating via attributes
+   └─ Integrate into S1
+
+================================================================================
+PHASE 2: CORE ACADEMIC (Weeks 4-12)
+================================================================================
+
+4. S2-admissions.md
+   └─ Build: Enquiry CRM
+   └─ Build: Application portal
+   └─ Build: SHAP merit calculation
+   └─ Build: Quota management
+   └─ Build: JazzCash/EasyPaisa payment
+   └─ Deploy to Docker
+
+5. S3-examination.md
+   └─ Build: Assessment scheme builder
+   └─ Build: Marks entry portal
+   └─ Build: Grading engine (SGPA/CGPA)
+   └─ Build: Hall ticket generation
+   └─ Build: Result publication
+   └─ Build: Transcript generation
+   └─ Deploy to Docker
+
+6. S5-obe-cis.md
+   └─ Build: OBE framework (PO/CLO/PSO)
+   └─ Build: CIS scanner (PDF → auto-extract CLOs)
+   └─ Build: Attainment calculation
+   └─ Build: HEC HEMIS export
+   └─ Deploy to Docker
+
+================================================================================
+PHASE 3: OPERATIONS (Weeks 13-18)
+================================================================================
+
+7. S4-hr.md
+   └─ Build: Recruitment pipeline
+   └─ Build: HR payroll (Pakistan-specific: EOBI, tax, PF)
+   └─ Build: Leave management + approval chain
+   └─ Build: Performance appraisal
+   └─ Deploy to Docker
+
+8. S7-finance.md
+   └─ Build: Fee structure + components
+   └─ Build: Chart of accounts + GL
+   └─ Build: Procurement workflow (requisition → PO → GRN)
+   └─ Build: Vendor management
+   └─ Build: PIFRA compliance export
+   └─ Deploy to Docker
+
+9. S9-communications.md
+   └─ Build: WhatsApp Business API (5 templates)
+   └─ Build: Email + SMS fallback
+   └─ Build: In-app notifications (SignalR)
+   └─ Build: Grievance ticketing
+   └─ Deploy to Docker
+
+================================================================================
+PHASE 4: INTERFACES (Weeks 19-23)
+================================================================================
+
+10. S8-portals.md
+    └─ Build: Student portal (10 screens)
+    └─ Build: Faculty portal (11 screens)
+    └─ Build: Attendance marking UI
+    └─ Build: Grade viewing
+    └─ Deploy to Docker
+
+11. S6-microsoft-ecosystem.md
+    └─ Build: Teams auto-provisioning (Graph API)
+    └─ Build: Moodle LTI 1.3 + grade passback
+    └─ Build: Power BI embedded dashboards (5 role-specific)
+    └─ Deploy to Docker
+
+================================================================================
+PHASE 5: EXTENDED MODULES (Weeks 24-28)
+================================================================================
+
+12. S10-campus-ops.md
+    └─ Build: Library OPAC + issue/return
+    └─ Build: Transport routes + GPS
+    └─ Build: Visitor pre-registration + QR passes
+    └─ Deploy to Docker
+
+13. S11-student-lifecycle.md
+    └─ Build: Placement drives + stats
+    └─ Build: Alumni profile + job board
+    └─ Build: Student societies + activity tracking
+    └─ Build: Student health records
+    └─ Deploy to Docker
+
+14. S12-asset-inventory-hec.md
+    └─ Build: Asset register + depreciation
+    └─ Build: Inventory management
+    └─ Build: HEMIS one-click export
+    └─ Deploy to Docker
+
+================================================================================
+PHASE 6: MOBILE APPS (Weeks 29-34)
+================================================================================
+
+15. S13-mobile-apps.md
+    └─ Build: React Native + Expo project
+    └─ Build: Student app (9 screens)
+    └─ Build: Faculty app (9 screens)
+    └─ Build: Offline-first sync (WatermelonDB)
+    └─ Build: Biometric auth (Face ID / Fingerprint)
+    └─ Build: FCM + APN push notifications
+    └─ Deploy to Expo
+
+================================================================================
+PHASE 7: GOVERNANCE & ADVANCED FEATURES
+================================================================================
+
+16. U10-governance-overrides-feedback.md
+    └─ Build: Replication lag configuration (12-hour default)
+    └─ Build: Grade override workflow + approval matrix
+    └─ Build: Anonymous student feedback system (zero traceability)
+    └─ Build: Section override capability (with capacity checks)
+    └─ Build: Automatic fee adjustment on section change
+    └─ Build: Course re-enrollment for incomplete courses
+    └─ Build: Dynamic fee recalculation (real-time billing)
+    └─ Integrate into S3 (Examination), S2 (Admissions), S7 (Finance)
+
+17. U11-course-trees-workload-offline.md
+    └─ Build: Visual curriculum editor (vis-network graph)
+    └─ Build: Curriculum versioning (v1, v2, v3)
+    └─ Build: CIS mapping (CLOs per course)
+    └─ Build: Teacher workload management (max hours per semester)
+    └─ Build: Workload enforcement (prevent over-assignment)
+    └─ Build: Offline attendance marking (30-min storage)
+    └─ Build: Service worker + IndexedDB sync
+    └─ Integrate into S1 (Foundation), S3 (Examination), S8 (Portals)
+
+18. U14-multitenant-sso-hitl-exams.md
+    └─ Build: Multi-tenant SSO (Microsoft, Google, Okta, LDAP)
+    └─ Build: Per-university login branding
+    └─ Build: Mandatory 2FA on first login (16-char password)
+    └─ Build: TOTP setup + backup codes
+    └─ Build: Agentic grading pipeline (specialized AI agents)
+    └─ Build: Human review queue + dashboard
+    └─ Build: Paper scanning pipeline (QR codes, OCR, AI)
+    └─ Build: Destruction manifest + incineration audit trail
+    └─ Integrate into S1 (Auth), S3 (Exam Grading), S8 (Portal)
+
+================================================================================
+PHASE 8: NATIVE MOBILE (AFTER S13, OPTIONAL BUT RECOMMENDED)
+================================================================================
+
+19. U13-native-mobile-docker-integration.md
+    └─ Build: Kotlin Android app (native)
+    │  └─ MVVM architecture
+    │  └─ Retrofit HTTP client
+    │  └─ Room offline database
+    │  └─ Biometric auth
+    │  └─ FCM push notifications
+    │
+    └─ Build: Swift iOS app (native)
+       └─ SwiftUI views
+       └─ URLSession HTTP client
+       └─ Core Data offline cache
+       └─ Keychain secure storage
+       └─ BiometricKit (Face ID / Touch ID)
+
+================================================================================
+PHASE 9: MAINTENANCE & UTILITIES (USE BETWEEN SPRINTS)
+================================================================================
+
+20. U2-patch.md
+    └─ Use after each sprint for bug fixes
+    └─ Follow: issue → minimal fix → regression test
+
+21. U3-cleanup.md
+    └─ Use after every 2 sprints for code quality
+    └─ Remove: dead code, TODOs, hardcoded values
+    └─ Improve: logging, error handling
+
+22. U4-docker-build-validator.md
+    └─ Use before EVERY deployment
+    └─ Test: build, startup, health check
+    └─ Verify: cloud-agnosticism, no secrets in image
+
+================================================================================
+PHASE 10: INFRASTRUCTURE & DEPLOYMENT
+================================================================================
+
+23. U7-cloud-agnosticism.md
+    └─ Run AFTER S1, verify cloud-agnosticism
+    └─ Audit: IStorageProvider, ISecretProvider, IEncryptionService
+    └─ Test: Local disk, S3, Azure Blob, SFTP backends
+    └─ University pitch + deployment sign-off checklist
+
+24. U12-deployment-distribution.md
+    └─ iOS App Store submission (when S13 mobile done)
+    │  └─ Developer account ($99/year)
+    │  └─ Code signing certificates
+    │  └─ Screenshots + privacy policy
+    │  └─ Submit for review (24-48 hours)
+    │
+    └─ Google Play Store submission
+    │  └─ Developer account ($25 one-time)
+    │  └─ Build AAB (Android App Bundle)
+    │  └─ Content rating questionnaire
+    │  └─ Submit for review (2-4 hours)
+    │
+    └─ Web deployment
+    │  └─ Vercel or Cloudflare Pages (frontend)
+    │  └─ Cloudflare DNS + SSL
+    │  └─ Custom domain: nocturne.university.edu.pk
+    │
+    └─ Kubernetes deployment (choose one)
+       ├─ OPTION A: Azure Singapore (cloud)
+       │  └─ az aks create --location southeastasia
+       │  └─ Azure Container Registry
+       │  └─ kubectl apply -f manifests/
+       │
+       └─ OPTION B: Bare-metal on-premises
+          └─ kubeadm init on 3 servers
+          └─ Install Flannel networking
+          └─ kubectl apply -f manifests/
+          └─ Backup strategy + monitoring
+
+================================================================================
+PHASE 11: ECOSYSTEM & GO-TO-MARKET
+================================================================================
+
+25. U8-competitive-analysis.md
+    └─ Review competitive positioning
+    └─ Pitch deck materials
+    └─ Go-to-market strategy
+
+26. U9-community-plugins.md
+    └─ Build: Plugin marketplace
+    └─ Build: Plugin SDK + CLI
+    └─ Build: Developer dashboard + earnings
+    └─ Build: Review queue system
+    └─ Build: Revenue sharing model (30% Nocturne, 70% developer)
+    └─ Launch plugin ecosystem
+
+================================================================================
+SUMMARY - DEPENDENCY GRAPH
+================================================================================
+
+U1 (audit)
+  ↓
+S1 (foundation) + U6 (license)
+  ↓
+S2, S3, S5 (academic) — can run parallel
+  ↓
+S4, S7, S9 (operations) — can run parallel
+  ↓
+S8, S6 (interfaces)
+  ↓
+S10, S11, S12 (extended) — can run parallel
+  ↓
+S13 (mobile)
+  ↓
+U10, U11, U14 (advanced features) — integrate into existing sprints
+  ↓
+U13 (native mobile) — OPTIONAL, build if not using React Native
+  ↓
+U2, U3, U4 (use between sprints as needed)
+  ↓
+U7 (verify cloud-agnosticism)
+  ↓
+U12 (deploy: App Store + Play Store + K8s)
+  ↓
+U8, U9 (launch + ecosystem)
+
+================================================================================
+TOTAL BUILD TIME
+================================================================================
+
+Solo (1 engineer):        8 months (sequential sprints)
+Team (4 engineers):       2 months (parallel sprints)
+With AI assistance:       4-6 months solo (use Claude for all sprints)
+
+================================================================================
+START NOW
+================================================================================
+
+Open: nocturne-prompts/utility/U1-codebase-understanding.md
+Copy entire file into Claude
+Paste your current codebase structure
+Get a baseline audit
+Then move to S1
+
+LET'S GO. 🚀
+
+================================================================================

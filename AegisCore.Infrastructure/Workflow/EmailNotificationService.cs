@@ -102,6 +102,7 @@ public class EmailNotificationService : INotificationService
         {
             record.Status = NotificationStatus.Failed;
             record.ErrorMessage = "Delivery failed.";
+            _logger.LogWarning(ex, "Notification delivery failed for {Recipient}", record.Recipient);
             await _notificationRepo.UpdateAsync(record, cancellationToken);
         }
 

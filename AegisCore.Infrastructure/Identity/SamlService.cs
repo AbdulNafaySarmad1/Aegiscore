@@ -8,6 +8,7 @@ using AegisCore.Application.Identity;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Config;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace AegisCore.Infrastructure.Identity;
@@ -18,17 +19,20 @@ public class SamlService : ISamlService
     private readonly IConfiguration _configuration;
     private readonly TenantConfigService _tenantConfig;
     private readonly ILogger<SamlService> _logger;
+    private readonly IMemoryCache _replayCache;
 
     public SamlService(
         ISamlConfigurationRepository samlRepo,
         IConfiguration configuration,
         TenantConfigService tenantConfig,
-        ILogger<SamlService> logger)
+        ILogger<SamlService> logger,
+        IMemoryCache replayCache)
     {
         _samlRepo = samlRepo;
         _configuration = configuration;
         _tenantConfig = tenantConfig;
         _logger = logger;
+        _replayCache = replayCache;
     }
 
     public string GenerateMetadataXml(Guid tenantId)
@@ -119,10 +123,10 @@ public class SamlService : ISamlService
             if (!string.IsNullOrEmpty(assertionId))
             {
                 var nonceKey = $"saml:nonce:{assertionId}";
-                var nonceExists = await _samlRepo.GetByEntityIdAsync(nonceKey, cancellationToken);
-                if (nonceExists != null) // FIXME: Replace with actual Redis nonce check in production
+                // ponytail: process-local replay cache; replace with shared Redis when multiple API replicas handle SAML callbacks.
+                if (_replayCache.TryGetValue(nonceKey, out _))
                     return new SamlAssertionResult { IsValid = false, Error = "SAML assertion already consumed." };
-                // Store nonce in Redis with 24h TTL (production: IDistributedCache)
+                _replayCache.Set(nonceKey, true, TimeSpan.FromHours(24));
             }
 
             // HIGH #5: Validate NotOnOrAfter condition
@@ -145,8 +149,11 @@ public class SamlService : ISamlService
             if (signatureNodes.Count == 0)
                 return new SamlAssertionResult { IsValid = false, Error = "Unsigned SAML response." };
 
+            if (signatureNodes[0] is not System.Xml.XmlElement signatureElement)
+                return new SamlAssertionResult { IsValid = false, Error = "Invalid SAML signature element." };
+
             var signedXml = new System.Security.Cryptography.Xml.SignedXml(doc);
-            signedXml.LoadXml((System.Xml.XmlElement)signatureNodes[0]);
+            signedXml.LoadXml(signatureElement);
 
             if (signedXml.SignatureMethod == null)
                 return new SamlAssertionResult { IsValid = false, Error = "Invalid SAML signature." };

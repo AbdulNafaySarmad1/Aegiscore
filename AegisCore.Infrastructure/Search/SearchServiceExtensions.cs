@@ -12,7 +12,7 @@ public static class SearchServiceExtensions
     public static IServiceCollection AddEnterpriseSearch(this IServiceCollection services, IConfiguration configuration)
     {
         var esUrl = configuration["Search:ElasticsearchUrl"];
-        if (string.IsNullOrWhiteSpace(esUrl))
+        if (string.IsNullOrWhiteSpace(esUrl) || esUrl.StartsWith("${", StringComparison.Ordinal))
             esUrl = DefaultTenantConfigTemplate.DefaultElasticsearchUrl;
         var settings = new ConnectionSettings(new Uri(esUrl))
             .DefaultIndex(configuration["Search:IndexPrefix"] ?? DefaultTenantConfigTemplate.DefaultSearchIndexPrefix)
