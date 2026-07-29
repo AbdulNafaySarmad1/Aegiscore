@@ -32,18 +32,40 @@ public class InstallationStateService : IInstallationStateService
 
     public bool IsInstalled()
     {
+        if (HasPersistentMarker(_configuration, _environment.ContentRootPath))
+            return true;
+
+        return HasDatabaseMarker();
+    }
+
+    public static bool HasPersistentMarker(IConfiguration configuration, string contentRootPath)
+    {
         var envValue = Environment.GetEnvironmentVariable(INSTALLATION_MARKER_KEY);
         if (!string.IsNullOrWhiteSpace(envValue) && envValue.Equals("true", StringComparison.OrdinalIgnoreCase))
             return true;
 
-        var configValue = _configuration[INSTALLATION_MARKER_KEY];
+        var configValue = configuration[INSTALLATION_MARKER_KEY];
         if (!string.IsNullOrWhiteSpace(configValue) && configValue.Equals("true", StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (HasDatabaseMarker())
-            return true;
+        var markerPath = Path.Combine(contentRootPath, "config", INSTALLATION_FILE_NAME);
+        if (!File.Exists(markerPath))
+            return false;
 
-        return false;
+        try
+        {
+            var markerJson = File.ReadAllText(markerPath);
+            var marker = System.Text.Json.JsonSerializer.Deserialize<InstallationMarker>(markerJson);
+            return marker is not null && marker.InstalledAt != default;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return false;
+        }
     }
 
     public async Task<bool> IsInstalledAsync(CancellationToken ct = default)
