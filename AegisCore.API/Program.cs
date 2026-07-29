@@ -52,7 +52,7 @@ builder.Host.UseSerilog();
 
 builder.Services.AddInstallationState();
 
-var isInstalled = IsInstalled(builder.Configuration);
+var isInstalled = InstallationStateService.HasPersistentMarker(builder.Configuration, builder.Environment.ContentRootPath);
 
 if (!isInstalled)
 {
@@ -174,15 +174,6 @@ else
     }
 }
 
-static bool IsInstalled(IConfiguration configuration)
-{
-    var envValue = Environment.GetEnvironmentVariable("AEGISCORE_INSTALLATION_COMPLETED");
-    if (!string.IsNullOrWhiteSpace(envValue) && envValue.Equals("true", StringComparison.OrdinalIgnoreCase))
-        return true;
-
-    var configValue = configuration["AEGISCORE_INSTALLATION_COMPLETED"];
-    return !string.IsNullOrWhiteSpace(configValue) && configValue.Equals("true", StringComparison.OrdinalIgnoreCase);
-}
 
 static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
 {
