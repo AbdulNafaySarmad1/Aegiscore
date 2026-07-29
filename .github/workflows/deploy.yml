@@ -20,6 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Capture source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ github.sha }}
+          path: .
+          include-hidden-files: true
+          retention-days: 1
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
@@ -111,6 +119,6 @@ jobs:
             --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
           kubectl apply -f k8s/configmap.yaml -f k8s/postgres-statefulset.yaml -f k8s/postgres-service.yaml -f k8s/redis-deployment.yaml -f k8s/redis-service.yaml -f k8s/network-policy.yaml
-          sed "s|\${GITHUB_REPOSITORY}|${{ github.repository }}|g; s|\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/api-deployment.yaml | kubectl apply -f -
+          sed "s|\\${GITHUB_REPOSITORY}|${{ github.repository }}|g; s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/api-deployment.yaml | kubectl apply -f -
           kubectl apply -f k8s/api-service.yaml -f k8s/api-hpa.yaml -f k8s/api-pdb.yaml -f k8s/ingress.yaml
           kubectl -n nocturne rollout status deploy/nocturne-api --timeout=180s
