@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using AegisCore.Application.Backup;
 using AegisCore.Contracts.Common.Interfaces;
@@ -6,6 +7,7 @@ using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace AegisCore.Infrastructure.Backup;
 
@@ -141,6 +143,7 @@ public class BackupService : IBackupService
         catch (Exception ex)
         {
             record.ErrorMessage = "Verification failed. Check system logs.";
+            _logger.LogWarning(ex, "Backup verification failed for {RecordId}", recordId);
         }
 
         await _recordRepo.UpdateAsync(record, cancellationToken);
@@ -200,35 +203,67 @@ public class BackupService : IBackupService
         return record;
     }
 
-    private Task ExecutePgDumpAsync(string connectionString, string dbName, string filePath, BackupType type, CancellationToken ct)
+    private async Task ExecutePgDumpAsync(string connectionString, string dbName, string filePath, BackupType type, CancellationToken ct)
     {
-        // Production: shell out to pg_dump via Process.Start
-        // For now: log the command that would be executed
-        var cmd = type switch
-        {
-            BackupType.Full => $"pg_dump -d \"{connectionString}\" -Fc -f \"{filePath}\"",
-            BackupType.Incremental => $"pg_dump -d \"{connectionString}\" -Fc --incremental -f \"{filePath}\"",
-            BackupType.WalArchive => $"pg_receivewal -D \"{filePath}\" -d \"{connectionString}\"",
-            _ => $"pg_dump -d \"{connectionString}\" -Fc -f \"{filePath}\""
-        };
+        var tool = type == BackupType.WalArchive ? Tool("pg_receivewal") : Tool("pg_dump");
+        var args = type == BackupType.WalArchive
+            ? BuildCommonArgs(connectionString, dbName).Concat(["-D", filePath]).ToArray()
+            : BuildCommonArgs(connectionString, dbName).Concat(["-Fc", "-f", filePath]).ToArray();
 
-        _logger.LogInformation("Backup command: {Command}", cmd);
-        return Task.CompletedTask;
+        _logger.LogInformation("Running PostgreSQL backup tool {Tool} for {File}", tool, filePath);
+        await ExecutePostgresToolAsync(tool, args, connectionString, ct);
     }
 
-    private Task ExecutePgRestoreAsync(string connectionString, string filePath, CancellationToken ct)
+    private async Task ExecutePgRestoreAsync(string connectionString, string filePath, CancellationToken ct)
     {
-        var cmd = $"pg_restore -d \"{connectionString}\" -c -v \"{filePath}\"";
-        _logger.LogInformation("Restore command: {Command}", cmd);
-        return Task.CompletedTask;
+        var builder = new NpgsqlConnectionStringBuilder(connectionString);
+        var dbName = builder.Database ?? throw new InvalidOperationException("Database name is required for restore.");
+        var tool = Tool("pg_restore");
+        var args = BuildCommonArgs(connectionString, dbName).Concat(["-c", "-v", filePath]).ToArray();
+
+        _logger.LogInformation("Running PostgreSQL restore for {File}", filePath);
+        await ExecutePostgresToolAsync(tool, args, connectionString, ct);
     }
 
     private Task ExecutePitrRestoreAsync(string connectionString, string filePath, DateTime pointInTime, CancellationToken ct)
     {
-        var pitrStr = pointInTime.ToString("yyyy-MM-dd HH:mm:ss");
-        var cmd = $"pg_restore -d \"{connectionString}\" --pitr=\"{pitrStr}\" \"{filePath}\"";
-        _logger.LogInformation("PITR restore command: {Command}", cmd);
-        return Task.CompletedTask;
+        throw new NotSupportedException("Point-in-time restore requires WAL archive orchestration outside pg_restore. Use the disaster recovery runbook for PITR.");
+    }
+
+    private string Tool(string name) => _configuration[$"PostgresTools:{name}"] ?? name;
+
+    private static string[] BuildCommonArgs(string connectionString, string dbName)
+    {
+        var builder = new NpgsqlConnectionStringBuilder(connectionString);
+        var args = new List<string>();
+        if (!string.IsNullOrWhiteSpace(builder.Host)) args.AddRange(["-h", builder.Host]);
+        if (builder.Port > 0) args.AddRange(["-p", builder.Port.ToString()]);
+        if (!string.IsNullOrWhiteSpace(builder.Username)) args.AddRange(["-U", builder.Username]);
+        args.AddRange(["-d", dbName]);
+        return args.ToArray();
+    }
+
+    private static async Task ExecutePostgresToolAsync(string tool, IEnumerable<string> args, string connectionString, CancellationToken ct)
+    {
+        var builder = new NpgsqlConnectionStringBuilder(connectionString);
+        var start = new ProcessStartInfo(tool)
+        {
+            RedirectStandardError = true,
+            RedirectStandardOutput = true
+        };
+
+        foreach (var arg in args)
+            start.ArgumentList.Add(arg);
+
+        if (!string.IsNullOrEmpty(builder.Password))
+            start.Environment["PGPASSWORD"] = builder.Password;
+
+        using var process = Process.Start(start) ?? throw new InvalidOperationException($"Failed to start {tool}.");
+        var stderrTask = process.StandardError.ReadToEndAsync(ct);
+        await process.WaitForExitAsync(ct);
+        var stderr = await stderrTask;
+        if (process.ExitCode != 0)
+            throw new InvalidOperationException($"{tool} failed with exit code {process.ExitCode}: {stderr}");
     }
 
     private static string ComputeChecksum(string filePath)

@@ -107,7 +107,10 @@ public class OnboardingService
 
             var server = connection.GetServer(host, port);
             var info = await server.InfoAsync("server");
-            var version = info.FirstOrDefault(g => g.Key == "redis_version").FirstOrDefault().Value ?? "unknown";
+            var version = info
+                .SelectMany(group => group)
+                .FirstOrDefault(item => item.Key == "redis_version")
+                .Value ?? "unknown";
 
             return new ConnectionTestResult(true, $"Redis {version} — read/write verified");
         }
@@ -132,16 +135,17 @@ public class OnboardingService
             client.Credentials = new System.Net.NetworkCredential(username, password);
             client.Timeout = 10000;
 
+            var recipient = string.IsNullOrWhiteSpace(state.AdminEmail) ? fromAddr : state.AdminEmail;
             var msg = new System.Net.Mail.MailMessage
             {
                 From = new System.Net.Mail.MailAddress(fromAddr, fromName),
                 Subject = "AegisCore Setup — Email Test",
                 Body = $"Test email from AegisCore setup wizard.\nUniversity: {state.UniversityFullName}"
             };
-            msg.To.Add(state.AdminEmail);
+            msg.To.Add(recipient);
 
             await client.SendMailAsync(msg, ct);
-            return new ConnectionTestResult(true, $"Test email sent to {state.AdminEmail}");
+            return new ConnectionTestResult(true, $"Test email sent to {recipient}");
         }
         catch (System.Net.Mail.SmtpException ex) when (ex.StatusCode == System.Net.Mail.SmtpStatusCode.GeneralFailure)
         {

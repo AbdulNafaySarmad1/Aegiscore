@@ -1,2 +1,16 @@
 **/bin/
 **/obj/
+**/node_modules/
+**/TestResults/
+**/dist/
+**/.next/
+**/out/
+**/*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+coverage/
+.vite/
+.DS_Store

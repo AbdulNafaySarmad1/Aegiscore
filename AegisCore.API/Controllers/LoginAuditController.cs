@@ -52,13 +52,47 @@ public class LoginAuditController : ControllerBase
     }
 
     [HttpGet("login-stats")]
-    public IActionResult GetStats([FromQuery] string range = "7d")
+    public async Task<IActionResult> GetStats([FromQuery] string range = "7d", CancellationToken ct = default)
     {
-        return Ok(new { range, totalLogins = 0, uniqueUsers = 0, failedAttempts = 0, byRole = new { }, byProvider = new { } });
+        var from = DateTime.UtcNow - ParseRange(range);
+        var records = (await _repo.GetAllAsync(ct)).Where(r => r.OccurredAt >= from).ToList();
+
+        return Ok(new
+        {
+            range,
+            totalLogins = records.Count(r => r.EventType == LoginEvent.Login && r.IsSuccessful),
+            uniqueUsers = records.Where(r => r.UserId.HasValue).Select(r => r.UserId).Distinct().Count(),
+            failedAttempts = records.Count(r => r.EventType == LoginEvent.LoginFailed || !r.IsSuccessful),
+            byRole = records
+                .Where(r => !string.IsNullOrWhiteSpace(r.UserRole))
+                .GroupBy(r => r.UserRole)
+                .ToDictionary(g => g.Key, g => g.Count()),
+            byProvider = records
+                .GroupBy(r => r.Provider.ToString())
+                .ToDictionary(g => g.Key, g => g.Count())
+        });
     }
 
     [HttpGet("anomalies")]
-    public IActionResult GetAnomalies() => Ok(new { total = 0, alerts = Array.Empty<AnomalyAlert>() });
+    public async Task<IActionResult> GetAnomalies(CancellationToken ct)
+    {
+        var alerts = new List<AnomalyAlert>();
+        var failed = await _repo.GetFailedAsync(limit: 100, cancellationToken: ct);
+        foreach (var record in failed)
+        {
+            alerts.AddRange(await _auditService.DetectAnomaliesAsync(record, ct));
+        }
+
+        return Ok(new { total = alerts.Count, alerts });
+    }
+
+    private static TimeSpan ParseRange(string range) => range.Trim().ToLowerInvariant() switch
+    {
+        "24h" or "1d" => TimeSpan.FromDays(1),
+        "30d" => TimeSpan.FromDays(30),
+        "90d" => TimeSpan.FromDays(90),
+        _ => TimeSpan.FromDays(7)
+    };
 
     private string GetClientIp()
     {

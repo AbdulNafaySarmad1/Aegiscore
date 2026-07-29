@@ -2,6 +2,7 @@ using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Workflow;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AegisCore.Infrastructure.Workflow;
@@ -10,18 +11,18 @@ public class ApprovalService : IApprovalService
 {
     private readonly IApprovalRecordRepository _approvalRepo;
     private readonly IWorkflowStepRepository _stepRepo;
-    private readonly WorkflowEngine _workflowEngine;
+    private readonly IServiceProvider _services;
     private readonly ILogger<ApprovalService> _logger;
 
     public ApprovalService(
         IApprovalRecordRepository approvalRepo,
         IWorkflowStepRepository stepRepo,
-        WorkflowEngine workflowEngine,
+        IServiceProvider services,
         ILogger<ApprovalService> logger)
     {
         _approvalRepo = approvalRepo;
         _stepRepo = stepRepo;
-        _workflowEngine = workflowEngine;
+        _services = services;
         _logger = logger;
     }
 
@@ -70,7 +71,8 @@ public class ApprovalService : IApprovalService
         var allRecords = await _approvalRepo.GetByStepAsync(record.StepId, cancellationToken);
         var allApproved = allRecords.All(a => a.Status == ApprovalStatus.Approved);
 
-        await _workflowEngine.OnApprovalDecidedAsync(record.StepId, allApproved, cancellationToken);
+        await _services.GetRequiredService<WorkflowEngine>()
+            .OnApprovalDecidedAsync(record.StepId, allApproved, cancellationToken);
 
         return record;
     }
@@ -91,7 +93,8 @@ public class ApprovalService : IApprovalService
         record.DecidedAt = DateTime.UtcNow;
         await _approvalRepo.UpdateAsync(record, cancellationToken);
 
-        await _workflowEngine.OnApprovalDecidedAsync(record.StepId, false, cancellationToken);
+        await _services.GetRequiredService<WorkflowEngine>()
+            .OnApprovalDecidedAsync(record.StepId, false, cancellationToken);
 
         return record;
     }

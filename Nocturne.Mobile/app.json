@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Nocturne",
+    "slug": "nocturne-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "nocturne",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "pk.edu.nocturne.mobile",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Nocturne uses Face ID to unlock your saved session."
+      }
+    },
+    "android": {
+      "package": "pk.edu.nocturne.mobile",
+      "permissions": ["USE_BIOMETRIC", "POST_NOTIFICATIONS"]
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-local-authentication",
+      "expo-notifications"
+    ],
+    "extra": {
+      "apiBaseUrl": "https://nocturne.ssuet.edu.pk/api",
+      "eas": {
+        "projectId": "nocturne-mobile-local"
+      }
+    }
+  }
+}

@@ -37,6 +37,8 @@ public static class ApiServicesExtensions
 
         services.AddSwaggerGen(options =>
         {
+            options.CustomSchemaIds(type => (type.FullName ?? type.Name).Replace('+', '.'));
+            options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "AegisCore API",
@@ -92,13 +94,6 @@ public static class ApiServicesExtensions
         services.AddHealthChecks();
 
         services.AddControllers();
-        services.AddApiVersioning(options =>
-        {
-            options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
-            options.AssumeDefaultVersionWhenUnspecified = true;
-            options.ReportApiVersions = true;
-        });
-
         return services;
     }
 

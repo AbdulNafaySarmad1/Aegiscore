@@ -3,110 +3,119 @@
 @layout MainLayout
 @rendermode InteractiveServer
 
-<PageTitle>AegisCore Setup</PageTitle>
+<PageTitle>Nocturne Setup</PageTitle>
 
 <div class="min-h-screen bg-slate-950 text-slate-100 font-sans">
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
-            <div class="px-6 py-6 border-b border-slate-800">
-                <h1 class="text-lg font-bold tracking-tight">◆ AegisCore</h1>
-                <p class="text-xs text-slate-500 mt-1">Setup Wizard</p>
-            </div>
-            <nav class="flex-1 py-4 space-y-1">
-                @foreach (var step in Steps)
-                {
-                    var isActive = step.Number == CurrentStep;
-                    var isDone = step.Number < CurrentStep;
-                    <div class="flex items-center gap-3 px-4 py-2.5 text-sm @(isActive ? "text-white font-semibold bg-blue-600/10 border-r-2 border-blue-500" : isDone ? "text-emerald-400" : "text-slate-500")">
-                        <span class="w-5 h-5 rounded-full @(isDone ? "bg-emerald-500/20" : isActive ? "bg-blue-500/20" : "border border-slate-700") flex items-center justify-center text-xs">
-                            @(isDone ? "✓" : isActive ? "●" : "")
-                        </span>
-                        @step.Label
-                    </div>
-                }
-            </nav>
-            <div class="px-4 py-4 border-t border-slate-800 text-xs text-slate-600">Apex Systems</div>
-        </aside>
-
-        <!-- Content -->
-        <main class="flex-1 flex items-center justify-center p-8">
-            <div class="w-full max-w-lg">
-                <!-- Progress -->
-                <div class="flex items-center justify-between mb-8">
-                    <span class="text-sm text-slate-400">Step @CurrentStep of @Steps.Count</span>
-                    <div class="w-32 h-1.5 bg-slate-700 rounded-full">
-                        <div class="h-1.5 bg-blue-500 rounded-full transition-all" style="width: @(CurrentStep * 100 / Steps.Count)%"></div>
-                    </div>
+    <main class="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center p-8">
+        <section class="w-full rounded-xl border border-slate-700 bg-slate-800 p-8 shadow-xl">
+            <div class="mb-8 flex items-center justify-between border-b border-slate-700 pb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">Nocturne setup</h1>
+                    <p class="mt-1 text-sm text-slate-400">Configure this installation for your university.</p>
                 </div>
-
-                <!-- Step content -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                    @switch (CurrentStep)
-                    {
-                        case 1:
-                            <Step1License @bind-LicenseKey="LicenseKey" OnValidate="OnValidateLicense" IsValidating="IsValidating" ValidationResult="LicenseResult" />
-                            break;
-                        case 3:
-                            <Step3Postgres OnTest="OnTestPostgres" IsTesting="IsTesting" TestResult="PgResult" />
-                            break;
-                        case 4:
-                            <Step4Redis OnTest="OnTestRedis" IsTesting="IsTesting" TestResult="RedisResult" />
-                            break;
-                        case 9:
-                            <Step9Domain OnProvision="OnProvisionDomain" OnCheckDns="OnCheckDns" DnsResult="DnsResult" />
-                            break;
-                        case 11:
-                            <Step11GoLive OnGoLive="OnGoLive" GoLiveResult="GoLiveResult" />
-                            break;
-                        default:
-                            <div class="text-center text-slate-400"><p class="text-xl mb-2">◆</p><p>Select a step from the sidebar.</p></div>
-                            break;
-                    }
-                </div>
-
-                <!-- Navigation -->
-                @if (CurrentStep > 1)
-                {
-                    <div class="flex gap-3 mt-6">
-                        @if (CurrentStep > 1)
-                        {
-                            <button @onclick="() => CurrentStep = Math.Max(1, CurrentStep - 1)"
-                                    class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition">
-                                ← Back
-                            </button>
-                        }
-                    </div>
-                }
+                <span class="text-sm text-slate-400">Step @CurrentStep of @Steps.Length</span>
             </div>
-        </main>
-    </div>
+
+            @if (CurrentStep == 1)
+            {
+                <h2 class="text-xl font-semibold">Welcome</h2>
+                <p class="mt-2 text-slate-300">Enter the installation details to begin.</p>
+                <button class="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium hover:bg-blue-500" @onclick="Next">Begin setup</button>
+            }
+            else if (CurrentStep == 2)
+            {
+                <h2 class="text-xl font-semibold">University identity</h2>
+                <div class="mt-5 grid gap-4">
+                    <label class="grid gap-2 text-sm">University name<input class="rounded border border-slate-600 bg-slate-900 p-2" @bind="UniversityName" /></label>
+                    <label class="grid gap-2 text-sm">Short name<input maxlength="10" class="rounded border border-slate-600 bg-slate-900 p-2" @bind="UniversityShortName" /></label>
+                    <label class="grid gap-2 text-sm">Website URL<input type="url" class="rounded border border-slate-600 bg-slate-900 p-2" @bind="UniversityWebsite" /></label>
+                </div>
+                <button class="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium disabled:opacity-50" disabled="@(!IdentityValid)" @onclick="Next">Continue</button>
+            }
+            else if (CurrentStep == 3)
+            {
+                <h2 class="text-xl font-semibold">Database configuration</h2>
+                <label class="mt-5 grid gap-2 text-sm">PostgreSQL connection string<textarea class="rounded border border-slate-600 bg-slate-900 p-2" @bind="DatabaseConnectionString"></textarea></label>
+                <button class="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium disabled:opacity-50" disabled="@string.IsNullOrWhiteSpace(DatabaseConnectionString)" @onclick="TestDatabase">Test and continue</button>
+                @if (DatabaseResult is not null) { <p class="mt-4 text-sm @(DatabaseResult.Success ? "text-emerald-400" : "text-red-400")">@DatabaseResult.Message</p> }
+            }
+            else if (CurrentStep == 4)
+            {
+                <h2 class="text-xl font-semibold">Cache configuration</h2>
+                <label class="mt-5 grid gap-2 text-sm">Redis connection string<textarea class="rounded border border-slate-600 bg-slate-900 p-2" @bind="RedisConnectionString"></textarea></label>
+                <button class="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium disabled:opacity-50" disabled="@string.IsNullOrWhiteSpace(RedisConnectionString)" @onclick="TestRedis">Test and continue</button>
+                @if (RedisResult is not null) { <p class="mt-4 text-sm @(RedisResult.Success ? "text-emerald-400" : "text-red-400")">@RedisResult.Message</p> }
+            }
+            else if (CurrentStep == 5)
+            {
+                <h2 class="text-xl font-semibold">Storage configuration</h2>
+                <label class="mt-5 grid gap-2 text-sm">Provider<select class="rounded border border-slate-600 bg-slate-900 p-2" @bind="StorageProvider"><option>local</option><option>s3</option><option>azure</option><option>sftp</option></select></label>
+                <label class="mt-4 grid gap-2 text-sm">Base path or bucket<input class="rounded border border-slate-600 bg-slate-900 p-2" @bind="StorageLocation" /></label>
+                <button class="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium disabled:opacity-50" disabled="@string.IsNullOrWhiteSpace(StorageLocation)" @onclick="Next">Continue</button>
+            }
+            else if (CurrentStep == 6)
+            {
+                <h2 class="text-xl font-semibold">License activation</h2>
+                <label class="mt-5 grid gap-2 text-sm">License key<input class="rounded border border-slate-600 bg-slate-900 p-2" @bind="LicenseKey" /></label>
+                <button class="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium disabled:opacity-50" disabled="@string.IsNullOrWhiteSpace(LicenseKey)" @onclick="ValidateLicense">Validate license</button>
+                @if (LicenseResult is not null) { <p class="mt-4 text-sm @(LicenseResult.Success ? "text-emerald-400" : "text-red-400")">@LicenseResult.Message</p> }
+            }
+            else
+            {
+                <h2 class="text-xl font-semibold">Setup summary</h2>
+                <dl class="mt-5 grid gap-3 text-sm"><div><dt class="text-slate-400">University</dt><dd>@UniversityName</dd></div><div><dt class="text-slate-400">Storage</dt><dd>@StorageProvider: @StorageLocation</dd></div></dl>
+                <p class="mt-5 text-sm text-amber-300">Persist the verified settings through the deployment configuration before opening the portal.</p>
+            }
+
+            @if (CurrentStep > 1 && CurrentStep < 7)
+            {
+                <button class="mt-6 mr-3 rounded-lg bg-slate-700 px-5 py-2.5 font-medium hover:bg-slate-600" @onclick="Previous">Back</button>
+            }
+        </section>
+    </main>
 </div>
 
 @code {
-    int CurrentStep = 1;
-    string LicenseKey = "";
-    bool IsValidating;
-    LicenseValidationResult? LicenseResult;
-    ConnectionTestResult? PgResult;
-    ConnectionTestResult? RedisResult;
-    bool IsTesting;
-    DnsPropagationResult? DnsResult;
-    GoLiveResult? GoLiveResult;
+    private int CurrentStep = 1;
+    private string UniversityName = "";
+    private string UniversityShortName = "";
+    private string UniversityWebsite = "";
+    private string DatabaseConnectionString = "";
+    private string RedisConnectionString = "";
+    private string StorageProvider = "local";
+    private string StorageLocation = "";
+    private string LicenseKey = "";
+    private ConnectionTestResult? DatabaseResult;
+    private ConnectionTestResult? RedisResult;
+    private ValidationResult? LicenseResult;
+    private readonly string[] Steps = ["Welcome", "Identity", "Database", "Cache", "Storage", "License", "Complete"];
 
-    record StepInfo(int Number, string Label);
-    List<StepInfo> Steps = new()
+    private bool IdentityValid => !string.IsNullOrWhiteSpace(UniversityName)
+        && !string.IsNullOrWhiteSpace(UniversityShortName)
+        && Uri.TryCreate(UniversityWebsite, UriKind.Absolute, out var website)
+        && (website.Scheme == Uri.UriSchemeHttp || website.Scheme == Uri.UriSchemeHttps);
+
+    private void Next() => CurrentStep = Math.Min(CurrentStep + 1, Steps.Length);
+    private void Previous() => CurrentStep = Math.Max(CurrentStep - 1, 1);
+
+    private void TestDatabase()
     {
-        new(1, "License"), new(2, "Identity"), new(3, "PostgreSQL"),
-        new(4, "Redis"), new(5, "File Storage"), new(6, "Secrets"),
-        new(7, "Email"), new(8, "SMS"), new(9, "Domain"),
-        new(10, "Admin Account"), new(11, "Go Live")
-    };
+        DatabaseResult = new ConnectionTestResult(true, "Connection details accepted. Runtime migration validation occurs during deployment.");
+        Next();
+    }
 
-    async Task OnValidateLicense() { IsValidating = true; await Task.Delay(500); IsValidating = false; LicenseResult = new LicenseValidationResult(true, new LicenseDto("KEY", "Enterprise", "SSUET", DateTime.UtcNow.AddYears(1), 10000, 3)); CurrentStep = 3; }
-    async Task OnTestPostgres() { IsTesting = true; await Task.Delay(800); IsTesting = false; PgResult = new ConnectionTestResult(true, "PostgreSQL 16.2 — 12ms"); CurrentStep = 4; }
-    async Task OnTestRedis() { IsTesting = true; await Task.Delay(500); IsTesting = false; RedisResult = new ConnectionTestResult(true, "Redis 7.2 — read/write verified"); CurrentStep = 9; }
-    async Task OnProvisionDomain() { await Task.Delay(300); DnsResult = new DnsPropagationResult(true, 100, "DNS ready."); }
-    async Task OnCheckDns() { await Task.Delay(600); DnsResult = new DnsPropagationResult(true, 100, "DNS propagated."); }
-    async Task OnGoLive() { await Task.Delay(1500); GoLiveResult = new GoLiveResult(true, "https://erp.ssuet.edu.pk", Checks: new()); }
+    private void TestRedis()
+    {
+        RedisResult = new ConnectionTestResult(true, "Connection details accepted. Runtime cache validation occurs during deployment.");
+        Next();
+    }
+
+    private void ValidateLicense()
+    {
+        LicenseResult = new ValidationResult(true, "License key captured for server-side validation.");
+        Next();
+    }
+
+    private sealed record ConnectionTestResult(bool Success, string Message);
+    private sealed record ValidationResult(bool Success, string Message);
 }

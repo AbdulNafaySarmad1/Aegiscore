@@ -3,6 +3,8 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.Marketplace;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
@@ -15,6 +17,7 @@ public class MarketplaceController : ControllerBase
     private readonly IExtensionInstallationRepository _installationRepo;
     private readonly IExtensionReviewRepository _reviewRepo;
     private readonly IExtensionService _extensionService;
+    private readonly AegisDbContext _db;
     private readonly ILogger<MarketplaceController> _logger;
 
     public MarketplaceController(
@@ -22,12 +25,14 @@ public class MarketplaceController : ControllerBase
         IExtensionInstallationRepository installationRepo,
         IExtensionReviewRepository reviewRepo,
         IExtensionService extensionService,
+        AegisDbContext db,
         ILogger<MarketplaceController> logger)
     {
         _extensionRepo = extensionRepo;
         _installationRepo = installationRepo;
         _reviewRepo = reviewRepo;
         _extensionService = extensionService;
+        _db = db;
         _logger = logger;
     }
 
@@ -213,6 +218,48 @@ public class MarketplaceController : ControllerBase
             .ToList();
 
         return Ok(new { categories });
+    }
+
+    [HttpPost("revenue")]
+    public async Task<IActionResult> RecordRevenue([FromBody] RecordPluginRevenueRequest request, CancellationToken cancellationToken)
+    {
+        var extension = await _extensionRepo.GetByIdAsync(request.ExtensionId, cancellationToken);
+        if (extension == null)
+            return NotFound(new { error = "not_found", message = "Extension not found." });
+
+        var split = MarketplaceRevenueCalculator.Split(request.GrossAmount);
+        var row = new PluginRevenueShare
+        {
+            Id = Guid.NewGuid(),
+            ExtensionId = request.ExtensionId,
+            TenantId = request.TenantId,
+            DeveloperEmail = extension.DeveloperEmail ?? "",
+            GrossAmount = split.GrossAmount,
+            NocturneAmount = split.NocturneAmount,
+            DeveloperAmount = split.DeveloperAmount
+        };
+
+        _db.PluginRevenueShares.Add(row);
+        await _db.SaveChangesAsync(cancellationToken);
+        return Ok(row);
+    }
+
+    [HttpGet("developers/{email}/earnings")]
+    public async Task<IActionResult> GetDeveloperEarnings(string email, CancellationToken cancellationToken)
+    {
+        var rows = await _db.PluginRevenueShares
+            .Where(r => r.DeveloperEmail == email)
+            .OrderByDescending(r => r.RecordedAt)
+            .ToListAsync(cancellationToken);
+
+        return Ok(new
+        {
+            developerEmail = email,
+            gross = rows.Sum(r => r.GrossAmount),
+            nocturne = rows.Sum(r => r.NocturneAmount),
+            developer = rows.Sum(r => r.DeveloperAmount),
+            rows
+        });
     }
 
     private static ExtensionListItem MapToListItem(Extension e)

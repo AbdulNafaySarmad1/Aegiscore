@@ -1,216 +1,280 @@
-<div align="center">
+# Nocturne — Complete University ERP Platform Prompts
 
-# ◆ AegisCore
+## Overview
+This is the **complete specification and implementation guide** for Nocturne, a Pakistani university ERP platform built in C# 14 / .NET 10.
 
-**Enterprise University ERP Platform**
+## Operational local/demo stack
 
-Built by [Apex Systems (Pvt. Ltd.)] · Licensed per institution · Deployed on university-owned infrastructure
-
-![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)
-![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
-![Security](https://img.shields.io/badge/Security-25%2F25%20Fixed-22c55e?style=flat-square)
-![Hardcode Audit](https://img.shields.io/badge/Hardcode%20Audit-EXIT%200-22c55e?style=flat-square)
-
-</div>
-
----
-
-## What is AegisCore?
-
-AegisCore is a multi-tenant university ERP system that covers the entire university operation stack — academics, finance, HR, student lifecycle, research, hostel, transport, library, exams, accreditation, and more — deployed per institution on infrastructure the university owns and controls.
-
-No shared cloud. No vendor lock-in. One license key, one onboarding wizard, one running system.
-
----
-
-## Scale
-
-| Metric | Count |
-|--------|-------|
-| Domain Entities | 113 |
-| Database Tables (DbSets) | 303 |
-| API Endpoints | ~350 |
-| DI Registrations | 206 |
-| Typed Repositories | 43 |
-| Background Services | 5 |
-| Cloud Provider Implementations | 4 (Azure / AWS / GCP / On-Premise) |
-| Security Findings Fixed | 25 / 25 |
-| Hardcode Audit Checks | 7 / 7 PASS |
-
----
-
-## Modules
-
-| # | Module | Entities | Status |
-|---|--------|----------|--------|
-| 1 | Core Academic (Departments, Courses, Enrollment, Attendance, Results) | 14 | ✅ |
-| 2 | Finance / General Ledger (CoA, Journal Entries, Fiscal Periods) | 5 | ✅ |
-| 3 | HR ERP (Employees, Payroll, Leave, Recruitment, Performance) | 13 | ✅ |
-| 4 | Student Information System (Fees, Discipline, Counseling, Clearance) | 12 | ✅ |
-| 5 | Research Management (Projects, Grants, Publications, Patents, Ethics) | 12 | ✅ |
-| 6 | Outcome Based Education / OBE (CLOs, POs, Rubrics, Attainment) | 14 | ✅ |
-| 7 | Accreditation Suite (HEC / ABET / PEC / WashingtonAccord) | 17 | ✅ |
-| 8 | Library Management (Catalog, Circulation, Digital Resources) | — | ✅ |
-| 9 | Hostel Management (Rooms, Allocations, Gate Logs) | — | ✅ |
-| 10 | Transport Management (Routes, Buses, Student Assignments) | — | ✅ |
-| 11 | Exam & Timetable Management | — | ✅ |
-| 12 | Asset & Inventory Management | — | ✅ |
-| 13 | Procurement & Vendor Management | — | ✅ |
-| 14 | Budgeting & Financial Planning | — | ✅ |
-| 15 | Multi-Campus Management | — | ✅ |
-| 16 | Enterprise Config Center | — | ✅ |
-| 17 | Role-Based & ABAC Authorization (Casbin) | — | ✅ |
-| 18 | SAML / Microsoft Entra SSO | — | ✅ |
-| 19 | Zero Trust / Cloudflare Tunnel | — | ✅ |
-| 20 | Workflow Engine (4 pre-built templates) | — | ✅ |
-| 21 | Notification Platform (Email / SMS / Push / In-App) | — | ✅ |
-| 22 | AI Agent Suite (Student, Faculty, Finance, HR advisors) | — | ✅ |
-| 23 | Post-Quantum Cryptography (ML-DSA / SPHINCS+ via Bouncy Castle) | — | ✅ |
-| 24 | Login Audit + Anomaly Detection | — | ✅ |
-| 25 | Backup Service (AES-256-GCM encrypted, provider-agnostic) | — | ✅ |
-| 26 | Degree Verification (token-based, employer-facing) | — | ✅ |
-| 27 | Semester Registration with Waitlisting | — | ✅ |
-| 28 | Curriculum Governance (proposal → approval workflow) | — | ✅ |
-| + | 18 more modules (P77–P112) | — | ✅ |
-
----
-
-## Architecture
-
-```
-AegisCore.Domain          → 113 entities, 190+ enums, zero dependencies
-AegisCore.Contracts       → 45 shared interfaces, references Domain only
-AegisCore.Application     → Services, DTOs — references Domain + Contracts
-AegisCore.Infrastructure  → Repositories, DbContext, providers — references Domain + Contracts
-AegisCore.API             → Controllers, Middleware, Program.cs — references all above
-AegisCore.Setup           → Blazor Server onboarding wizard (port 9000, self-destructs after go-live)
-AegisCore.Web             → Blazor WASM frontend
-AegisCore.Tests           → xUnit test project
-```
-
-Clean Architecture. No circular dependencies. Dependency chain: `Domain → Contracts → Application / Infrastructure → API`
-
----
-
-## Cloud Provider Abstraction
-
-Single environment variable switches the entire cloud provider stack:
-
-```
-AEGISCORE_CLOUD_PROVIDER=AZURE|AWS|GCP|ONPREMISE
-```
-
-| Service | Azure | AWS | GCP | On-Premise |
-|---------|-------|-----|-----|------------|
-| Secrets | Key Vault | Secrets Manager | Secret Manager | Env Vars |
-| Storage | Blob / R2 | S3 | GCS | MinIO |
-| Email | MS Graph | SES | Gmail API | SMTP |
-| Calendar | MS Graph | — | Google Calendar | — |
-| Identity | Entra ID | Cognito | Workspace | Local JWT |
-| Push | FCM | FCM | FCM | FCM |
-
----
-
-## Security
-
-| Finding | Severity | Status |
-|---------|----------|--------|
-| XXE in SamlService | Critical | ✅ Fixed |
-| Exception message leakage (7 locations) | Critical | ✅ Fixed |
-| Missing CSRF protection | Critical | ✅ Fixed |
-| Missing tenant query filters (16 tables) | High | ✅ Fixed |
-| SAML signature wrapping | High | ✅ Fixed |
-| SAML assertion replay | High | ✅ Fixed |
-| JWT issuer/audience not enforced | High | ✅ Fixed |
-| HS256 / alg:none algorithm allowed | Medium | ✅ Fixed |
-| Request body size unlimited | Medium | ✅ Fixed |
-| Missing HSTS | Low | ✅ Fixed |
-| Swagger in production | Info | ✅ Fixed |
-| Hardcoded secrets | Info | ✅ Fixed |
-| + 13 more findings | Various | ✅ Fixed |
-
-**25 / 25 findings fixed. `hardcode-audit.sh` exits 0.**
-
-Middleware pipeline (in order): HSTS → HTTPS Redirect → Serilog → Rate Limiting → Auth Pulls → Session Binding → CORS → Authentication → Authorization → Turnstile → ABAC → GlobalException → Health Checks → SignalR → Controllers
-
----
-
-## Deployment
-
-AegisCore ships with a zero-touch onboarding wizard (`AegisCore.Setup`) that runs on port 9000 and closes itself permanently after go-live.
-
-**11-step wizard:**
-```
-License Key → Institution Identity → PostgreSQL → Redis → File Storage →
-Secrets Provider → Email/SMTP → SMS → Domain & DNS → First Admin → Go Live
-```
-
-Every university brings their own infrastructure. AegisCore provisions nothing on your behalf — it connects to what you own.
-
-**Go-live requires 20 checks to pass. No partial deployments.**
+The supported local stack includes the React portal, ASP.NET Core API,
+PostgreSQL 17, Redis 7, automatic migrations, persistent volumes, and an
+explicitly non-production demo identity.
 
 ```bash
-# Staging deployment
-git clone git@github.com:AbdulNafaySarmad1/Aegiscore.git
-cd Aegiscore
-docker build -t aegiscore/api:latest .
-docker-compose -f docker-compose.uni.yml up -d
+./scripts/bootstrap-env.sh
+docker compose --env-file .env up -d --build --wait
+```
 
-# Open onboarding wizard
-open http://SERVER_IP:9000
+Open <http://localhost:8080>. Verify the runtime contract with:
+
+```bash
+curl --fail http://localhost:8080/health/ready
+docker compose --env-file .env ps
+```
+
+Stop without deleting data using `docker compose --env-file .env down`.
+Demo mode is rejected when `ASPNETCORE_ENVIRONMENT=Production`; production
+requires institutional SSO, a signed license, TLS/DNS, SMTP, backups, and
+credentials for each selected external integration.
+
+To run the verified prebuilt release-candidate images instead of compiling
+locally:
+
+```bash
+./scripts/bootstrap-env.sh
+printf '\nAEGISCORE_API_IMAGE=ghcr.io/abdulnafaysarmad1/aegiscore-api:recovery-latest\n' >> .env
+printf 'AEGISCORE_PORTAL_IMAGE=ghcr.io/abdulnafaysarmad1/aegiscore-portal:recovery-latest\n' >> .env
+docker compose --env-file .env pull api portal
+docker compose --env-file .env up -d --no-build --wait
+curl --fail http://localhost:8080/health/ready
+```
+
+The repository/package visibility must allow the host to pull from GHCR. Use
+the immutable commit-SHA image tag for controlled releases; `recovery-latest`
+is the moving integration tag for this recovery branch.
+
+**22 prompts total:**
+- 9 Utility Prompts (infrastructure, architecture, governance)
+- 13 Sprint Prompts (feature development)
+
+---
+
+## Quick Start
+
+1. **Start here:** Read `INDEX.md` first
+2. **Understand codebase:** Run `U1-codebase-understanding.md`
+3. **Build Sprint 1:** Copy `S1-foundation.md` into Claude, paste your codebase summary, ask Claude to build it
+4. **Repeat for each sprint:** S2 → S3 → ... → S13
+
+---
+
+## 📋 File Structure
+
+```
+nocturne-prompts/
+├── INDEX.md                          # Start here - roadmap & navigation
+├── README.md                         # This file
+├── utility/
+│   ├── U1-codebase-understanding.md    # Audit existing code
+│   ├── U2-patch.md                     # Bug fix workflow
+│   ├── U3-cleanup.md                   # Code quality improvement
+│   ├── U4-docker-build-validator.md    # Docker validation
+│   ├── U5-onboarding-wizard.md         # First-run setup
+│   ├── U6-license-engine.md            # License heartbeat + governance
+│   ├── U7-cloud-agnosticism.md         # Data sovereignty guarantee
+│   ├── U8-competitive-analysis.md      # Beat every competitor
+│   └── U9-community-plugins.md         # Plugin ecosystem
+└── sprints/
+    ├── S1-foundation.md                # Cloud-agnostic + RBAC + audit + calendar
+    ├── S2-admissions.md                # Merit (SHAP) + allocation + payment
+    ├── S3-examination.md               # Grading + transcripts + results
+    ├── S4-hr.md                        # Recruitment + payroll (Pakistan-compliant) + leave
+    ├── S5-obe-cis.md                   # OBE + CIS scanner (HEC accreditation)
+    ├── S6-microsoft-ecosystem.md       # Teams + Moodle + Power BI
+    ├── S7-finance.md                   # Fees + GL + procurement + PIFRA
+    ├── S8-portals.md                   # Student + faculty self-service
+    ├── S9-communications.md            # WhatsApp + email + SMS + tickets
+    ├── S10-campus-ops.md               # Library + transport + visitor mgmt
+    ├── S11-student-lifecycle.md        # Placement + alumni + activities + health
+    ├── S12-asset-inventory-hec.md      # Assets + inventory + HEMIS export
+    └── S13-mobile-apps.md              # React Native offline-first apps
 ```
 
 ---
 
-## Infrastructure
+## 🚀 How to Use These Prompts
 
-```yaml
-Services (docker-compose.uni.yml):
-  aegiscore-api          → .NET 10 API (port 8080)
-  aegiscore-setup        → Blazor onboarding wizard (port 9000, setup only)
-  aegiscore-postgres     → PostgreSQL 16
-  aegiscore-redis        → Redis 7
-  aegiscore-elasticsearch→ Elasticsearch 8
-  aegiscore-minio        → MinIO (on-premise storage)
-  aegiscore-cloudflared  → Cloudflare tunnel (no open ports)
+### Option 1: Claude (Recommended)
+```
+1. Open Claude chat
+2. Copy entire contents of a prompt file (e.g., S1-foundation.md)
+3. Paste into chat
+4. Add: "I'm Abdul, building Nocturne in C# 14/.NET 10. Here's my codebase structure [paste U1 output]. Build this sprint."
+5. Claude generates all code for that sprint
+6. Repeat for each sprint
 ```
 
-CI/CD: GitHub Actions → audit → Docker build → staging deploy → production deploy (manual approval gate)
+### Option 2: Manual Development
+- Use each prompt as a specification document
+- Follow the deliverables checklist
+- Reference database schemas, service interfaces, API endpoints
+- Cross-check against dependent sprints
 
 ---
 
-## Requirements
+## 🎯 Key Features (What Nocturne Includes)
 
-| Component | Minimum Version |
-|-----------|----------------|
-| .NET SDK | 10.0 |
-| PostgreSQL | 14+ |
-| Redis | 7+ |
-| Docker | 24+ |
-| Docker Compose | 2.20+ |
+### Academic
+- ✅ SHAP-explainable merit lists (statistical rigor)
+- ✅ OBE framework with CLO-PO mapping (HEC accreditation)
+- ✅ CIS scanner (auto-extract CLOs from PDFs)
+- ✅ Examination system (grading, transcripts, hall tickets)
+- ✅ Online admissions (payments via JazzCash/EasyPaisa)
+
+### Operations
+- ✅ Federated RBAC (dept autonomy, no bottlenecks)
+- ✅ HR system (Pakistan-compliant payroll with EOBI/income tax/PF)
+- ✅ Finance system (GL accounting, procurement, PIFRA export)
+- ✅ Campus operations (library, transport, visitor management)
+
+### Integration
+- ✅ Microsoft Teams (auto-provision classes, sync enrollments)
+- ✅ Moodle LMS (grade passback, roster sync, SSO)
+- ✅ Power BI (embedded role-specific dashboards)
+
+### Communications
+- ✅ WhatsApp Business API (95% open rates)
+- ✅ Email + SMS (fallback)
+- ✅ In-app notifications (real-time SignalR)
+- ✅ Grievance ticketing system
+
+### Ecosystem
+- ✅ Community plugin system (developers earn ₱35K-140K per plugin)
+- ✅ Plugin marketplace (discovery, installation, ratings)
+- ✅ Revenue sharing (30% Nocturne Systems, 70% developer)
+
+### Mobile
+- ✅ React Native iOS + Android apps
+- ✅ Offline-first (SQLite sync when connected)
+- ✅ Biometric auth (Face ID / Fingerprint)
+
+### Data Sovereignty
+- ✅ 100% cloud-agnostic (local disk, S3, Azure, SFTP, on-prem)
+- ✅ Zero vendor lock-in
+- ✅ Data never leaves university's infrastructure
+- ✅ License heartbeat (daily validation, no piracy workarounds)
 
 ---
 
-## License
+## 🏆 Competitive Advantages
 
-AegisCore is proprietary software. License keys are issued exclusively by Apex Systems (Pvt. Ltd.) on a per-institution basis.
+### vs EduSuite
+- ✅ SHAP-explainable merit (they just score)
+- ✅ OBE framework (HEC accreditation)
+- ✅ Cloud-agnostic (they're cloud-only)
+- ✅ Offline mobile
 
-**No license key = no deployment.** Contact [licensing@abdulnafaysarmad@gmail.com](mailto:abdulnafaysarmad@gmail.com)
+### vs SyberEdge
+- ✅ Software sophistication (academic + finance + lifecycle)
+- ✅ Data sovereignty
+- ✅ Research tracking
+
+### vs Futuresol
+- ✅ SHAP merit + OBE
+- ✅ Modern stack (C# 14/.NET 10)
+- ✅ Extended lifecycle (placement, alumni)
+
+### vs OpenEduCat
+- ✅ Modern architecture
+- ✅ OBE framework
+- ✅ CIS scanner (unique)
+- ✅ Governance + license model
+- ✅ Offline mobile
+
+### vs Global ERPs (Oracle/SAP/Dynamics)
+- ✅ Pakistan-native (not 50-language bloat)
+- ✅ Data sovereignty (data in Pakistan)
+- ✅ Cost (₱8M vs ₱50M+)
+- ✅ Deployment speed (1 month vs 12)
+- ✅ No US/Europe servers
 
 ---
 
-## Built By
+## 📊 Build Timeline
 
-**Apex Systems (Pvt. Ltd.)**  
-Pakistan · Singapore · UAE  
+**Recommended:** 8 months solo, 2 months with 4 engineers working in parallel
 
+### Phase 1: Foundation (Weeks 1-3)
+- S1 (Cloud-agnostic + RBAC + audit)
 
-*Currently deployed *
+### Phase 2: Core Academic (Weeks 4-12)
+- S2 (Admissions + SHAP merit)
+- S3 (Examination + grading)
+- S5 (OBE + CIS scanner)
+
+### Phase 3: Operations (Weeks 13-18)
+- S4 (HR + payroll)
+- S7 (Finance + GL)
+- S9 (Communications)
+
+### Phase 4: Interfaces (Weeks 19-23)
+- S8 (Portals)
+- S6 (Microsoft ecosystem)
+
+### Phase 5: Extended Modules (Weeks 24-28)
+- S10 (Campus ops)
+- S11 (Student lifecycle)
+- S12 (Assets/inventory)
+
+### Phase 6: Mobile (Weeks 29-34)
+- S13 (React Native apps)
 
 ---
 
-<div align="center">
-<sub>◆ AegisCore — Because universities deserve better than Oracle</sub>
-</div>
+## 🔒 Security & Compliance
+
+- ✅ AES-256 encryption at rest
+- ✅ Immutable audit logs (all actions tracked)
+- ✅ RBAC with permission matrix
+- ✅ Row-level security (HOD sees only their dept)
+- ✅ GDPR-compatible (data deletion, export)
+- ✅ Pakistan data residency (no US/EU servers)
+- ✅ PIFRA compliance (financial audit trail)
+- ✅ HEC accreditation ready (OBE + HEMIS export)
+
+---
+
+## 💻 Tech Stack
+
+- **Language:** C# 14
+- **Framework:** .NET 10
+- **Database:** PostgreSQL (cloud-agnostic)
+- **Cache:** Redis
+- **Frontend:** Blazor Server / Razor Pages (or Next.js if preferred)
+- **Mobile:** React Native (iOS + Android)
+- **Deployment:** Docker + Kubernetes (any cloud or on-prem)
+- **Storage:** Abstracted (local/S3/Azure/SFTP)
+
+---
+
+## 🚢 Launch Roadmap
+
+### Month 1-8: Build
+- Complete all 13 sprints
+- Internal testing
+- Security audit
+- Documentation
+
+### Month 9: Soft Launch
+- Deploy to SSUET (pilot customer)
+- Gather feedback
+- Fix critical bugs
+
+### Month 10: Public Launch
+- Market to 500 Pakistani universities
+- Launch plugin marketplace
+- Begin developer onboarding
+
+### Year 2+: Scale
+- 50+ universities deployed
+- 100+ plugins in marketplace
+- ₱4B annual revenue (licensing + plugins)
+
+---
+
+## 📞 Questions?
+
+Refer to `INDEX.md` for detailed navigation, sprint dependencies, and competitive positioning.
+
+---
+
+**Built for Pakistan. By Pakistanis. With no apologies. 🇵🇰🚀**

@@ -2,7 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using AegisCore.Contracts.Abstractions.Cloud;
-using AegisCore.Contracts.Common.Interfaces;
+using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

@@ -1,10 +1,15 @@
 using System.Text.Json;
+using System.Net;
+using System.Net.Http.Json;
+using System.Net.Mail;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.Infrastructure.Platform;
 
@@ -12,21 +17,40 @@ public class NotificationPlatformService : INotificationPlatformService
 {
     private readonly INotificationTemplateRepository _templateRepo;
     private readonly INotificationDeliveryRepository _deliveryRepo;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IConfiguration _configuration;
+    private readonly INotificationRealtimePublisher _realtimePublisher;
     private readonly ILogger<NotificationPlatformService> _logger;
 
-    public NotificationPlatformService(INotificationTemplateRepository t, INotificationDeliveryRepository d, ILogger<NotificationPlatformService> l) { _templateRepo = t; _deliveryRepo = d; _logger = l; }
+    public NotificationPlatformService(
+        INotificationTemplateRepository t,
+        INotificationDeliveryRepository d,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration,
+        INotificationRealtimePublisher realtimePublisher,
+        ILogger<NotificationPlatformService> l)
+    {
+        _templateRepo = t;
+        _deliveryRepo = d;
+        _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
+        _realtimePublisher = realtimePublisher;
+        _logger = l;
+    }
 
     public async Task SendAsync(SendNotificationRequest request, CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(request.TemplateName) || string.IsNullOrWhiteSpace(request.Recipient)) throw new ArgumentException("Template and recipient are required.");
         var template = await _templateRepo.GetByNameAsync(request.TemplateName, ct)
             ?? throw new InvalidOperationException($"Template '{request.TemplateName}' not found.");
 
         var subject = ApplyVariables(template.Subject, request.Variables);
         var body = ApplyVariables(template.Body, request.Variables);
+        if (!Enum.TryParse<NotificationTemplateChannel>(request.Channel, true, out var channel)) throw new ArgumentException("Notification channel is invalid.");
 
         var delivery = new NotificationDelivery
         {
-            Id = Guid.NewGuid(), Channel = Enum.Parse<NotificationTemplateChannel>(request.Channel, true),
+            Id = Guid.NewGuid(), Channel = channel,
             Recipient = request.Recipient, Subject = subject, Module = request.Module, Status = DeliveryStatus.Queued
         };
 
@@ -34,23 +58,28 @@ public class NotificationPlatformService : INotificationPlatformService
 
         try
         {
+            await DeliverAsync(channel, request.Recipient, subject, body, template.Name, request.Variables, ct);
             delivery.Status = DeliveryStatus.Sent;
             delivery.SentAt = DateTime.UtcNow;
             await _deliveryRepo.UpdateAsync(delivery, ct);
+            await _realtimePublisher.PublishAsync(request.Recipient, ToDto(delivery), ct);
         }
         catch (Exception ex)
         {
             delivery.Status = DeliveryStatus.Failed;
-            delivery.ErrorMessage = "Notification delivery failed.";
+            delivery.ErrorMessage = ex.Message;
             await _deliveryRepo.UpdateAsync(delivery, ct);
+            _logger.LogWarning(ex, "Notification delivery failed for {Channel} recipient {Recipient}", channel, request.Recipient);
         }
     }
 
     public async Task<NotificationTemplateDto> CreateTemplateAsync(NotificationTemplateDto dto, CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Body)) throw new ArgumentException("Template name and body are required.");
+        if (!Enum.TryParse<NotificationTemplateChannel>(dto.Channel, true, out var channel)) throw new ArgumentException("Notification channel is invalid.");
         var t = new NotificationTemplate
         {
-            Id = Guid.NewGuid(), Name = dto.Name, Channel = Enum.Parse<NotificationTemplateChannel>(dto.Channel, true),
+            Id = Guid.NewGuid(), Name = dto.Name.Trim(), Channel = channel,
             Subject = dto.Subject, Body = dto.Body
         };
         await _templateRepo.AddAsync(t, ct);
@@ -60,15 +89,142 @@ public class NotificationPlatformService : INotificationPlatformService
     public async Task<List<NotificationDeliveryDto>> GetDeliveryStatusAsync(Guid? userId = null, CancellationToken ct = default)
     {
         var deliveries = await _deliveryRepo.GetAllAsync(ct);
-        return deliveries.Select(d => new NotificationDeliveryDto { Id = d.Id, Channel = d.Channel.ToString(), Recipient = d.Recipient, Status = d.Status.ToString(), SentAt = d.SentAt }).ToList();
+        return deliveries.Select(ToDto).ToList();
     }
 
-    private static string ApplyVariables(string text, Dictionary<string, string>? vars)
+    public static string ApplyVariables(string text, Dictionary<string, string>? vars)
     {
         if (vars == null) return text;
         foreach (var kv in vars) text = text.Replace($"{{{{{kv.Key}}}}}", kv.Value);
         return text;
     }
+
+    private async Task DeliverAsync(NotificationTemplateChannel channel, string recipient, string subject, string body, string templateName, Dictionary<string, string>? variables, CancellationToken ct)
+    {
+        switch (channel)
+        {
+            case NotificationTemplateChannel.Email:
+                await SendEmailAsync(recipient, subject, body, ct);
+                break;
+            case NotificationTemplateChannel.SMS:
+                await SendSmsAsync(recipient, body, ct);
+                break;
+            case NotificationTemplateChannel.WhatsApp:
+                await SendWhatsAppAsync(recipient, templateName, variables ?? new(), ct);
+                break;
+            case NotificationTemplateChannel.InApp:
+                break;
+            default:
+                throw new NotSupportedException($"{channel} delivery is not configured.");
+        }
+    }
+
+    private async Task SendEmailAsync(string to, string subject, string body, CancellationToken ct)
+    {
+        var host = _configuration["Email:SmtpHost"];
+        if (string.IsNullOrWhiteSpace(host)) throw new InvalidOperationException("SMTP host is not configured.");
+
+        using var client = new SmtpClient(host, int.TryParse(_configuration["Email:SmtpPort"], out var port) ? port : 587)
+        {
+            EnableSsl = bool.TryParse(_configuration["Email:EnableSsl"], out var ssl) ? ssl : true
+        };
+
+        var user = _configuration["Email:Username"];
+        var pass = _configuration["Email:Password"];
+        if (!string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(pass)) client.Credentials = new NetworkCredential(user, pass);
+
+        using var message = new MailMessage(_configuration["Email:FromAddress"] ?? "no-reply@nocturne.local", to, subject, body) { IsBodyHtml = true };
+        await client.SendMailAsync(message, ct);
+    }
+
+    private async Task SendSmsAsync(string to, string body, CancellationToken ct)
+    {
+        var endpoint = _configuration["Sms:Endpoint"];
+        if (string.IsNullOrWhiteSpace(endpoint)) throw new InvalidOperationException("SMS endpoint is not configured.");
+
+        var response = await _httpClientFactory.CreateClient("sms").PostAsJsonAsync(endpoint, new { to, message = body }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    private async Task SendWhatsAppAsync(string to, string templateName, Dictionary<string, string> variables, CancellationToken ct)
+    {
+        var phoneNumberId = _configuration["WhatsApp:PhoneNumberId"];
+        var token = _configuration["WhatsApp:AccessToken"];
+        if (string.IsNullOrWhiteSpace(phoneNumberId) || string.IsNullOrWhiteSpace(token)) throw new InvalidOperationException("WhatsApp credentials are not configured.");
+
+        var client = _httpClientFactory.CreateClient("whatsapp");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var payload = new
+        {
+            messaging_product = "whatsapp",
+            to,
+            type = "template",
+            template = new
+            {
+                name = templateName,
+                language = new { code = _configuration["WhatsApp:Language"] ?? "en" },
+                components = new[] { new { type = "body", parameters = variables.Values.Select(v => new { type = "text", text = v }).ToArray() } }
+            }
+        };
+
+        var graphVersion = _configuration["WhatsApp:GraphVersion"] ?? "v21.0";
+        var response = await client.PostAsJsonAsync($"{graphVersion}/{phoneNumberId}/messages", payload, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static NotificationDeliveryDto ToDto(NotificationDelivery d) => new() { Id = d.Id, Channel = d.Channel.ToString(), Recipient = d.Recipient, Status = d.Status.ToString(), SentAt = d.SentAt };
+}
+
+public class NoopNotificationRealtimePublisher : INotificationRealtimePublisher
+{
+    public Task PublishAsync(string recipient, NotificationDeliveryDto delivery, CancellationToken cancellationToken = default) => Task.CompletedTask;
+}
+
+public class GrievanceService : IGrievanceService
+{
+    private readonly AegisDbContext _db;
+    public GrievanceService(AegisDbContext db) => _db = db;
+
+    public async Task<GrievanceTicketDto> CreateAsync(CreateGrievanceTicketRequest request, Guid submitterId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Subject)) throw new ArgumentException("Subject is required.", nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Description)) throw new ArgumentException("Description is required.", nameof(request));
+
+        var ticket = new GrievanceTicket
+        {
+            Id = Guid.NewGuid(),
+            TicketNumber = $"GRV-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}",
+            SubmitterId = submitterId,
+            Category = request.Category,
+            Subject = request.Subject,
+            Description = request.Description,
+            Priority = request.Priority
+        };
+        _db.GrievanceTickets.Add(ticket);
+        await _db.SaveChangesAsync(ct);
+        return ToDto(ticket);
+    }
+
+    public async Task<GrievanceTicketDto> RespondAsync(Guid ticketId, GrievanceResponseRequest request, Guid responderId, CancellationToken ct = default)
+    {
+        var ticket = await _db.GrievanceTickets.FirstOrDefaultAsync(t => t.Id == ticketId, ct)
+            ?? throw new InvalidOperationException("Grievance ticket not found.");
+        var response = new GrievanceResponse { Id = Guid.NewGuid(), TicketId = ticketId, ResponderId = responderId, ResponseText = request.ResponseText, StatusUpdate = request.StatusUpdate };
+        _db.GrievanceResponses.Add(response);
+        if (!string.IsNullOrWhiteSpace(request.StatusUpdate)) ticket.Status = request.StatusUpdate;
+        if (string.Equals(ticket.Status, "resolved", StringComparison.OrdinalIgnoreCase) || string.Equals(ticket.Status, "closed", StringComparison.OrdinalIgnoreCase)) ticket.ResolvedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+        return ToDto(ticket);
+    }
+
+    public async Task<List<GrievanceTicketDto>> ListAsync(Guid? submitterId = null, CancellationToken ct = default)
+    {
+        var query = _db.GrievanceTickets.AsNoTracking();
+        if (submitterId.HasValue) query = query.Where(t => t.SubmitterId == submitterId.Value);
+        return await query.OrderByDescending(t => t.SubmittedAt).Select(t => ToDto(t)).ToListAsync(ct);
+    }
+
+    private static GrievanceTicketDto ToDto(GrievanceTicket t) => new() { Id = t.Id, TicketNumber = t.TicketNumber, Category = t.Category, Subject = t.Subject, Status = t.Status, Priority = t.Priority, SubmittedAt = t.SubmittedAt, ResolvedAt = t.ResolvedAt };
 }
 
 public class FeatureFlagService : IFeatureFlagService
@@ -157,7 +313,7 @@ public class SchedulerService : ISchedulerService
             sw.Stop();
             exec.Status = JobExecutionStatus.Completed; exec.CompletedAt = DateTime.UtcNow; exec.DurationMs = sw.ElapsedMilliseconds;
         }
-        catch (Exception ex) { exec.Status = JobExecutionStatus.Failed; exec.ErrorMessage = "Job execution failed."; exec.CompletedAt = DateTime.UtcNow; }
+        catch (Exception ex) { exec.Status = JobExecutionStatus.Failed; exec.ErrorMessage = ex.Message; exec.CompletedAt = DateTime.UtcNow; }
         await _execRepo.UpdateAsync(exec, ct);
         return exec;
     }

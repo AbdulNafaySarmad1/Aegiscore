@@ -1,0 +1,125 @@
+name: aegiscore
+
+services:
+  portal:
+    image: ${AEGISCORE_PORTAL_IMAGE:-aegiscore-portal:local}
+    build:
+      context: ./Nocturne.Portal
+    ports:
+      - "${AEGISCORE_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - edge
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+
+  api:
+    image: ${AEGISCORE_API_IMAGE:-aegiscore-api:local}
+    build: .
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Development
+      Runtime__DemoMode: ${AEGISCORE_DEMO_MODE:-true}
+      AEGISCORE_INSTALLATION_COMPLETED: ${AEGISCORE_INSTALLATION_COMPLETED:-false}
+      Database__AutoMigrate: "true"
+      Deployment__FailOnReadinessError: "true"
+      AEGISCORE_CLOUD_PROVIDER: ONPREMISE
+      TENANT_ID: ${TENANT_ID:?Run ./scripts/bootstrap-env.sh first}
+      NOCTURNE_DB_CONNECTION: Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first};SslMode=Disable
+      NOCTURNE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+      NOCTURNE_STORAGE_PROVIDER: local
+      NOCTURNE_STORAGE_LOCAL_PATH: /app/storage
+      License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.nocturne.systems}
+      License__HmacSecret: ${LICENSE_HMAC_SECRET:?Run ./scripts/bootstrap-env.sh first}
+      NOCTURNE_ENCRYPTION_KEY: ${NOCTURNE_ENCRYPTION_KEY:?Run ./scripts/bootstrap-env.sh first}
+      NOCTURNE_PQC_KEY_BASE64: ${NOCTURNE_PQC_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
+      NOCTURNE_JWT_SECRET: ${NOCTURNE_JWT_SECRET:?Run ./scripts/bootstrap-env.sh first}
+      Governance__FeedbackEncryptionKeyBase64: ${GOVERNANCE_FEEDBACK_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
+      AI__Provider: ${AI_PROVIDER:-ollama}
+      AI__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/}
+      AI__Ollama__Model: ${OLLAMA_MODEL:-qwen2.5:7b}
+      AI__OpenAI__ApiKey: ${OPENAI_API_KEY:-}
+      AI__OpenAI__Model: ${OPENAI_MODEL:-gpt-5-mini}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8080/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - edge
+      - backend
+    volumes:
+      - api_storage:/app/storage
+      - api_config:/app/config
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aegiscore}
+      POSTGRES_USER: ${POSTGRES_USER:-aegiscore}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aegiscore} -d ${POSTGRES_DB:-aegiscore}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks:
+      - backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}"]
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$${REDIS_PASSWORD} redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+    restart: unless-stopped
+    networks:
+      - backend
+    volumes:
+      - redis_data:/data
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  edge:
+  backend:
+    internal: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  api_storage:
+  api_config:

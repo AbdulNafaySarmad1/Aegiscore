@@ -20,10 +20,20 @@ public class CourseRepository : Repository<Course>, ICourseRepository
 
     public async Task<IReadOnlyList<Course>> GetBySemesterAsync(int semester, CancellationToken cancellationToken = default)
     {
-        // Assuming semester is derived from credit hours or other logic
-        // For now, return all courses as placeholder
+        if (semester < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(semester), "Semester must be greater than zero.");
+        }
+
+        var courseIds = await _context.CurriculumCourses
+            .Where(c => c.Semester == semester)
+            .Select(c => c.CourseId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         return await _dbSet
             .Include(c => c.Department)
+            .Where(c => courseIds.Contains(c.Id))
             .ToListAsync(cancellationToken);
     }
 }

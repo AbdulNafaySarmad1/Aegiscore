@@ -1,42 +1,38 @@
-FROM python:3.12-slim
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
-# Accept Google Maps API key as build arg (optional)
-ARG GOOGLE_MAPS_API_KEY=""
-ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+COPY Nocturne.slnx ./
+COPY Directory.Build.props ./
+COPY AegisCore.Domain/AegisCore.Domain.csproj AegisCore.Domain/
+COPY AegisCore.Contracts/AegisCore.Contracts.csproj AegisCore.Contracts/
+COPY AegisCore.Application/AegisCore.Application.csproj AegisCore.Application/
+COPY AegisCore.Infrastructure/AegisCore.Infrastructure.csproj AegisCore.Infrastructure/
+COPY AegisCore.API/AegisCore.API.csproj AegisCore.API/
 
-# Set working directory
+RUN dotnet restore AegisCore.API/AegisCore.API.csproj
+
+COPY . .
+RUN dotnet publish AegisCore.API/AegisCore.API.csproj -c Release -o /app/publish \
+    -p:UseAppHost=false \
+    -p:UseSharedCompilation=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
-# Install system dependencies and create non-root user in a single layer
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && adduser --disabled-password --gecos "" appuser \
-    && mkdir -p /app/config \
+RUN apk add --no-cache krb5-libs \
+    && addgroup -S appgroup \
+    && adduser -S -D -H -s /sbin/nologin -G appgroup appuser \
+    && mkdir -p /app/storage /app/config \
     && chown -R appuser /app
 
-# Copy application files
-COPY --chown=appuser server.py .
-COPY --chown=appuser wizard.html .
+ENV ASPNETCORE_URLS=http://+:8080 \
+    ASPNETCORE_ENVIRONMENT=Production
 
-# Install Python dependencies
-RUN pip install --no-cache-dir fastapi uvicorn psycopg2-binary redis
+COPY --from=build --chown=appuser /app/publish .
 
-# Set environment variables
-ENV DOTNET_RUNNING_IN_CONTAINER=true \
-    DOTNET_USE_POLLING_FILE_WATCHER=false \
-    ASPNETCORE_URLS=http://+:8080
-
-# Expose port
 EXPOSE 8080
-
-# Health check
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD wget -q -O - http://localhost:8080/health >/dev/null || exit 1
 
-# Switch to non-root user
 USER appuser
-
-# Print startup message and run server
-CMD echo "AegisCore Setup Wizard running at http://localhost:8080" && \
-    uvicorn server:app --host 0.0.0.0 --port ${PORT:-8080}
+ENTRYPOINT ["dotnet", "AegisCore.API.dll"]

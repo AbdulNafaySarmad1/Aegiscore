@@ -1,0 +1,81 @@
+:root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f7f9; color: #172026; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+button { min-height: 40px; border: 1px solid #d5dbe1; background: #fff; color: #172026; border-radius: 6px; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid #1976d2; outline-offset: 2px; }
+.shell { min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; background: #f6f7f9; color: #172026; }
+.dark { color-scheme: dark; background: #101418; color: #f3f6f8; }
+aside { border-right: 1px solid #dce2e7; background: #fff; padding: 18px 12px; }
+.dark aside, .dark header, .dark .panel, .dark .metrics article { background: #161b20; border-color: #2a333c; }
+.brand { display: flex; gap: 10px; align-items: center; font-weight: 800; font-size: 20px; margin: 8px 8px 20px; }
+nav { display: grid; gap: 6px; }
+nav button { display: flex; align-items: center; justify-content: flex-start; gap: 10px; border-color: transparent; background: transparent; padding: 0 10px; }
+nav button.active, .segments button.active { border-color: #1976d2; background: #e8f2fd; color: #0b4f90; }
+.dark nav button.active, .dark .segments button.active { background: #11395a; color: #e8f2fd; }
+main { min-width: 0; }
+header { height: 68px; display: flex; gap: 12px; align-items: center; padding: 12px 20px; background: #fff; border-bottom: 1px solid #dce2e7; position: sticky; top: 0; z-index: 2; }
+.icon { width: 44px; padding: 0; display: grid; place-items: center; position: relative; }
+.icon span { position: absolute; top: -6px; right: -5px; min-width: 20px; min-height: 20px; border-radius: 999px; display: grid; place-items: center; font-size: 12px; color: #fff; background: #c62828; }
+.search { flex: 1; min-width: 160px; max-width: 520px; height: 42px; display: flex; align-items: center; gap: 8px; border: 1px solid #d5dbe1; border-radius: 6px; padding: 0 10px; background: #fff; }
+.dark .search, .dark button { background: #161b20; color: #f3f6f8; border-color: #2a333c; }
+.search input { width: 100%; border: 0; outline: 0; background: transparent; color: inherit; }
+.segments { display: flex; gap: 4px; }
+.segments button { padding: 0 14px; }
+.hero { padding: 24px 24px 16px; }
+.hero p { margin: 0 0 6px; color: #50616f; font-weight: 700; }
+.dark .hero p, .dark .hero span, .dark .metrics span { color: #aab8c4; }
+h1 { margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: 0; }
+h2 { margin: 0 0 14px; font-size: 18px; letter-spacing: 0; }
+.hero span { display: block; margin-top: 8px; max-width: 780px; color: #50616f; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0 24px 20px; }
+.metrics article, .panel { border: 1px solid #dce2e7; background: #fff; border-radius: 8px; }
+.metrics article { padding: 18px; min-height: 90px; }
+.metrics strong { display: block; font-size: 26px; line-height: 1.1; }
+.metrics span { color: #50616f; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 0 24px 24px; align-items: start; }
+.panel { padding: 18px; min-width: 0; }
+.compact { display: grid; gap: 10px; }
+.compact button { width: 100%; text-align: left; padding: 0 12px; }
+.table { display: grid; grid-template-columns: minmax(150px, 1.5fr) minmax(90px, .7fr) minmax(100px, .8fr); border: 1px solid #dce2e7; border-radius: 8px; overflow: hidden; }
+.table > * { min-height: 44px; display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid #dce2e7; }
+.table b { background: #eef2f5; }
+.dark .table, .dark .table > * { border-color: #2a333c; }
+.dark .table b { background: #202832; }
+.ok { color: #167c3b; font-weight: 700; }
+.warn { color: #b26a00; font-weight: 700; }
+.curriculum-builder { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 12px; }
+.network { min-height: 460px; border: 1px solid #dce2e7; border-radius: 8px; background: #fff; }
+.course-editor { position: static; border: 1px solid #dce2e7; border-radius: 8px; padding: 14px; background: #fff; }
+.course-editor h3 { margin: 0 0 8px; }
+.course-editor label { display: grid; gap: 4px; margin-top: 10px; font-weight: 700; }
+.course-editor input { min-height: 38px; border: 1px solid #d5dbe1; border-radius: 6px; padding: 0 8px; color: inherit; background: transparent; }
+.dark .network, .dark .course-editor { background: #161b20; border-color: #2a333c; }
+.plugin-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; }
+.plugin-grid h3 { margin: 0 0 10px; }
+.plugin-list { display: grid; gap: 10px; }
+.plugin-list article { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(120px, .8fr) minmax(130px, .8fr) 96px; gap: 10px; align-items: center; min-height: 58px; border: 1px solid #dce2e7; border-radius: 8px; padding: 10px; }
+.plugin-list span, .review-queue span:last-child { color: #50616f; }
+.dark .plugin-list article { border-color: #2a333c; }
+.earnings { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; border: 1px solid #dce2e7; border-radius: 8px; padding: 12px; }
+.dark .earnings { border-color: #2a333c; }
+.review-queue { display: grid; gap: 6px; margin-top: 12px; }
+svg { width: 20px; height: 20px; flex: 0 0 auto; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  aside { position: static; border-right: 0; border-bottom: 1px solid #dce2e7; }
+  nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  header { flex-wrap: wrap; height: auto; }
+  .search { order: 2; flex-basis: 100%; max-width: none; }
+  .metrics, .workspace { grid-template-columns: 1fr; }
+  .curriculum-builder, .plugin-grid { grid-template-columns: 1fr; }
+  .plugin-list article { grid-template-columns: 1fr; }
+}
+@media (max-width: 540px) {
+  nav { grid-template-columns: 1fr; }
+  .hero, .metrics, .workspace { padding-left: 14px; padding-right: 14px; }
+  h1 { font-size: 28px; }
+  .metrics { gap: 8px; }
+  .table { grid-template-columns: 1fr; }
+  .table b { display: none; }
+}

@@ -2,6 +2,7 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.Identity;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
@@ -14,6 +15,7 @@ public class IdentityController : ControllerBase
     private readonly IRoleRepository _roleRepo;
     private readonly IPermissionRepository _permissionRepo;
     private readonly IIdentityService _identityService;
+    private readonly AegisDbContext _db;
     private readonly ILogger<IdentityController> _logger;
 
     public IdentityController(
@@ -21,12 +23,14 @@ public class IdentityController : ControllerBase
         IRoleRepository roleRepo,
         IPermissionRepository permissionRepo,
         IIdentityService identityService,
+        AegisDbContext db,
         ILogger<IdentityController> logger)
     {
         _userRepo = userRepo;
         _roleRepo = roleRepo;
         _permissionRepo = permissionRepo;
         _identityService = identityService;
+        _db = db;
         _logger = logger;
     }
 
@@ -130,8 +134,9 @@ public class IdentityController : ControllerBase
         foreach (var permId in request.PermissionIds)
         {
             var rp = new RolePermission { Id = Guid.NewGuid(), RoleId = role.Id, PermissionId = permId };
-            await _permissionRepo.AddAsync(null!, cancellationToken); // placeholder; actual add via context
+            _db.RolePermissions.Add(rp);
         }
+        await _db.SaveChangesAsync(cancellationToken);
 
         return Ok(new RoleDto { Id = role.Id, Name = role.Name, Description = role.Description });
     }

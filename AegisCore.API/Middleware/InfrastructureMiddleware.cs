@@ -68,6 +68,7 @@ public class GlobalExceptionMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception at {Path}", context.Request.Path);
+            Console.Error.WriteLine(ex);
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
             var isDev = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>().IsDevelopment();

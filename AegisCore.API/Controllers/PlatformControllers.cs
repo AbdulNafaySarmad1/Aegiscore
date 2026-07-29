@@ -2,21 +2,22 @@ using AegisCore.Application.Platform;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AegisCore.API.Controllers;
 
-[ApiController] [Route("api/notifications")]
+[ApiController] [Route("api/notifications")] [Authorize]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationPlatformService _svc;
     public NotificationController(INotificationPlatformService s) => _svc = s;
 
     [HttpPost("send")] public async Task<IActionResult> Send([FromBody] SendNotificationRequest r, CancellationToken ct) { await _svc.SendAsync(r, ct); return Ok(new { message = "Notification queued." }); }
-    [HttpPost("templates")] public async Task<IActionResult> CreateTemplate([FromBody] NotificationTemplateDto r, CancellationToken ct) { var t = await _svc.CreateTemplateAsync(r, ct); return Ok(t); }
+    [HttpPost("templates")] [Authorize(Roles = "Admin,SuperAdmin")] public async Task<IActionResult> CreateTemplate([FromBody] NotificationTemplateDto r, CancellationToken ct) { var t = await _svc.CreateTemplateAsync(r, ct); return Ok(t); }
     [HttpGet("deliveries")] public async Task<IActionResult> GetDeliveries(CancellationToken ct) { var d = await _svc.GetDeliveryStatusAsync(null, ct); return Ok(new { total = d.Count, deliveries = d }); }
 }
 
-[ApiController] [Route("api/feature-flags")]
+[ApiController] [Route("api/feature-flags")] [Authorize(Roles = "Admin,SuperAdmin")]
 public class FeatureFlagController : ControllerBase
 {
     private readonly IFeatureFlagService _svc;

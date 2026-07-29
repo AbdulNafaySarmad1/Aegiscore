@@ -8,7 +8,7 @@ public static class TenantConfigServiceExtensions
 {
     public static IServiceCollection AddTenantConfig(this IServiceCollection services)
     {
-        services.TryAddSingleton<TenantConfigService>();
+        services.TryAddScoped<TenantConfigService>();
         return services;
     }
 }

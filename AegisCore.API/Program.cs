@@ -15,7 +15,6 @@ using AegisCore.Infrastructure.ApiGateway;
 using AegisCore.Infrastructure.Backup;
 using AegisCore.Infrastructure.Campus;
 using AegisCore.Infrastructure.Cloud;
-using AegisCore.Infrastructure.Commission;
 using AegisCore.Infrastructure.Config;
 using AegisCore.Infrastructure.ConfigCenter;
 using AegisCore.Infrastructure.CoreERP;
@@ -38,28 +37,30 @@ using AegisCore.Infrastructure.Payments.Raast;
 using AegisCore.Infrastructure.Cloud.R2;
 using AegisCore.Infrastructure.Workflow;
 using AegisCore.Infrastructure.Workflow.StateMachine;
-using AegisCore.Infrastructure.Deployment;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Polly;
-using Polly.Extensions.Http;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var demoMode = builder.Configuration.GetValue<bool>("Runtime:DemoMode");
+if (demoMode && builder.Environment.IsProduction())
+{
+    throw new InvalidOperationException(
+        "Runtime:DemoMode is forbidden in Production. Configure a real identity provider and license.");
+}
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console()
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
-var isInstalled = false;
-
 builder.Services.AddInstallationState();
 
-var installationState = builder.Services.BuildServiceProvider().GetRequiredService<Installation.IInstallationStateService>();
-isInstalled = installationState.IsInstalled();
+var isInstalled = InstallationStateService.HasPersistentMarker(builder.Configuration, builder.Environment.ContentRootPath);
 
 if (!isInstalled)
 {
@@ -68,12 +69,13 @@ if (!isInstalled)
     builder.Services.AddCoreServices(builder.Configuration);
     builder.Services.AddSetupServices(builder.Configuration);
 }
+
 else
 {
     Log.Information("AegisCore starting in production mode");
 
     builder.Services.AddCoreServices(builder.Configuration);
-    builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddProductionServices(builder.Configuration);
     builder.Services.AddAuthenticationServices(builder.Configuration);
     builder.Services.AddBackgroundWorkers(builder.Configuration);
@@ -81,21 +83,54 @@ else
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    if (string.Equals(context.Request.Path.Value, "/health", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync("Healthy");
+        return;
+    }
+
+    await next();
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex) when (context.Request.Path.StartsWithSegments("/swagger"))
+    {
+        app.Logger.LogError(ex, "Swagger generation failed for {Path}", context.Request.Path);
+        throw;
+    }
+});
+app.UseSwaggerPortal();
+
+app.MapGet("/health/installation", (IInstallationStateService installation) =>
+    Results.Ok(new { isInstalled = installation.IsInstalled() }))
+    .AllowAnonymous();
 
 if (!isInstalled)
 {
     app.UseSetupRequired();
-
-    app.UseSwaggerPortal();
 
     app.UseRouting();
     app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
-    app.MapHealthChecks("/health");
+    app.MapGet("/health", () => Results.Text("Healthy"));
+    app.MapGet("/health/live", () => Results.Text("Healthy"));
+    app.MapGet("/health/ready", () => Results.Ok(new
+    {
+        status = "setup_required",
+        message = "AegisCore is healthy and waiting for the guided installation to finish."
+    }));
 
     app.MapGet("/", async context =>
     {
@@ -106,6 +141,8 @@ if (!isInstalled)
     {
         context.Response.Redirect("/setup/");
     });
+
+    app.Run();
 }
 else
 {
@@ -115,6 +152,7 @@ else
         app.UseHttpsRedirection();
     }
 
+    app.UseMiddleware<GlobalExceptionMiddleware>();
     app.UseSerilogRequestLogging();
     app.UseMiddleware<RequestLoggingMiddleware>();
     app.UseMiddleware<RateLimitingMiddleware>();
@@ -123,21 +161,37 @@ else
 
     app.UseCors("CloudflarePages");
     app.UseAuthentication();
+    app.UseMiddleware<DemoIdentityMiddleware>();
     app.UseAuthorization();
+    app.UseMiddleware<LicenseLockoutMiddleware>();
 
     app.UseMiddleware<TurnstileMiddleware>();
     app.UseMiddleware<AbacMiddleware>();
-    app.UseMiddleware<GlobalExceptionMiddleware>();
 
-    app.MapHealthChecks("/health");
+    app.MapGet("/health", () => Results.Text("Healthy"));
+    app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
+    app.MapGet("/health/ready", async (DeploymentReadinessChecker checker, CancellationToken ct) =>
+    {
+        var checks = await checker.RunAllAsync(ct);
+        if (checker.AllPassed)
+        {
+            return Results.Ok(new { status = "ready", checks });
+        }
+
+        return Results.Json(
+            new { status = "not_ready", checks },
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+    }).AllowAnonymous();
     app.MapHealthChecks("/health/detail").RequireAuthorization();
 
     app.MapHub<StateMachineHub>("/hubs/statemachine");
+    app.MapHub<NotificationHub>("/hubs/notifications");
     app.MapControllers();
 
     try
     {
         Log.Information("Starting AegisCore API...");
+        await ApplyDatabaseMigrationsAsync(app);
         await app.RunDeploymentReadinessCheckAsync();
         Log.Information("AegisCore API started successfully.");
         app.Run();
@@ -145,6 +199,7 @@ else
     catch (Exception ex)
     {
         Log.Fatal(ex, "Application terminated unexpectedly");
+        throw;
     }
     finally
     {
@@ -152,37 +207,13 @@ else
     }
 }
 
-static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
-{
-    return HttpPolicyExtensions
-        .HandleTransientHttpError()
-        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        .WaitAndRetryAsync(
-            3,
-            retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-            onRetry: (outcome, timespan, retryAttempt, context) =>
-            {
-                Log.Warning(
-                    "Retry {RetryAttempt} after {Delay}ms due to {StatusCode}",
-                    retryAttempt,
-                    timespan.TotalMilliseconds,
-                    outcome.Result?.StatusCode);
-            });
-}
 
-static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
 {
-    return HttpPolicyExtensions
-        .HandleTransientHttpError()
-        .CircuitBreakerAsync(
-            5,
-            TimeSpan.FromSeconds(30),
-            onBreak: (outcome, timespan) =>
-            {
-                Log.Warning("Circuit breaker opened for {Duration}ms", timespan.TotalMilliseconds);
-            },
-            onReset: () =>
-            {
-                Log.Information("Circuit breaker reset");
-            });
+    if (!app.Configuration.GetValue("Database:AutoMigrate", false))
+        return;
+
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+    await db.Database.MigrateAsync();
 }

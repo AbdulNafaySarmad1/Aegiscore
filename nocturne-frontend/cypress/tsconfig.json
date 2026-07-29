@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "types": ["cypress"],
+    "target": "ES2022",
+    "moduleResolution": "Node",
+    "strict": true
+  },
+  "include": ["e2e/**/*.ts"]
+}

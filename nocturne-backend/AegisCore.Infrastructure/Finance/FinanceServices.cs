@@ -1,0 +1,144 @@
+using System.Xml.Linq;
+using AegisCore.Application.Finance;
+using AegisCore.Application.Foundation;
+using AegisCore.Domain;
+using AegisCore.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace AegisCore.Infrastructure.Finance;
+
+public sealed class FeeService(AegisDbContext db, IPolicyService policies, IAccountingService accounting) : IFeeService
+{
+    public async Task<StudentFeeDue> CalculateFeeAsync(Guid studentId, Guid semesterId, Guid feeStructureId, CancellationToken ct = default)
+    {
+        if (studentId == Guid.Empty || semesterId == Guid.Empty || feeStructureId == Guid.Empty) throw new ArgumentException("Student, semester, and fee structure are required.");
+        var structure = await db.FeeStructures.Include(f => f.Components).FirstOrDefaultAsync(f => f.Id == feeStructureId, ct)
+            ?? throw new InvalidOperationException("Fee structure was not found.");
+        var total = structure.Components.Count == 0 ? structure.TotalFee : structure.Components.Where(c => c.IsMandatory).Sum(c => c.Amount);
+        if (total < 0) throw new InvalidOperationException("Fee structure total cannot be negative.");
+        if (await db.StudentFeeDues.AnyAsync(d => d.StudentId == studentId && d.SemesterId == semesterId && d.FeeStructureId == feeStructureId, ct)) throw new InvalidOperationException("Fee due already exists for this student and semester.");
+        var due = new StudentFeeDue
+        {
+            Id = Guid.NewGuid(),
+            StudentId = studentId,
+            SemesterId = semesterId,
+            FeeStructureId = feeStructureId,
+            TotalDue = total,
+            OutstandingAmount = total
+        };
+
+        db.StudentFeeDues.Add(due);
+        await db.SaveChangesAsync(ct);
+        return due;
+    }
+
+    public async Task RecordPaymentAsync(Guid feeDueId, PaymentRequest payment, CancellationToken ct = default)
+    {
+        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new InvalidOperationException("Fee due was not found.");
+        if (payment.Amount <= 0 || payment.Amount > due.OutstandingAmount || string.IsNullOrWhiteSpace(payment.Method) || !new[] { "bank_transfer", "jazzcash", "easypaisa", "cheque" }.Contains(payment.Method.Trim().ToLowerInvariant()))
+        {
+            throw new InvalidOperationException("Payment amount is outside outstanding balance.");
+        }
+
+        var row = new StudentFeePayment
+        {
+            Id = Guid.NewGuid(),
+            FeeDueId = feeDueId,
+            PaymentMethod = payment.Method,
+            Amount = payment.Amount,
+            ReferenceNumber = payment.ReferenceNumber
+        };
+        due.PaidAmount += payment.Amount;
+        due.OutstandingAmount = Math.Max(0m, due.TotalDue - due.PaidAmount - due.ScholarshipDeduction);
+        due.Status = due.OutstandingAmount == 0m ? "paid" : "partial";
+        db.StudentFeePayments.Add(row);
+        await db.SaveChangesAsync(ct);
+        await accounting.PostFeePaymentAsync(row, Guid.Empty, ct);
+    }
+
+    public async Task<decimal> CalculateLateFeeAsync(Guid feeDueId, CancellationToken ct = default)
+    {
+        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new InvalidOperationException("Fee due was not found.");
+        var graceDays = await policies.GetAsync("finance", "late_fee_grace_days", 3, ct);
+        return due.Status == "paid" ? 0m : Math.Round(due.OutstandingAmount * 0.01m * graceDays, 2);
+    }
+
+    public async Task ApplyScholarshipAsync(Guid feeDueId, decimal amount, Guid scholarshipId, CancellationToken ct = default)
+    {
+        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new InvalidOperationException("Fee due was not found.");
+        if (scholarshipId == Guid.Empty || amount <= 0 || amount > due.OutstandingAmount) throw new InvalidOperationException("Scholarship amount is outside the outstanding balance.");
+        due.ScholarshipDeduction += amount;
+        due.OutstandingAmount = Math.Max(0m, due.TotalDue - due.PaidAmount - due.ScholarshipDeduction);
+        due.Status = due.OutstandingAmount == 0m ? "paid" : due.Status;
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+public sealed class AccountingService(AegisDbContext db) : IAccountingService
+{
+    public async Task PostFeePaymentAsync(StudentFeePayment payment, Guid postedBy, CancellationToken ct = default)
+    {
+        if (payment.Amount <= 0) throw new InvalidOperationException("Journal amount must be positive.");
+        if (await db.JournalEntries.AnyAsync(j => j.Description == $"Fee payment {payment.Id:N}", ct)) return;
+        var bank = await AccountAsync("1010", "Bank", AccountType.Asset, ct);
+        var revenue = await AccountAsync("4010", "Student Fee Revenue", AccountType.Revenue, ct);
+        var journal = new JournalEntry
+        {
+            Id = Guid.NewGuid(),
+            EntryNumber = $"FEE-{payment.Id:N}"[..20],
+            EntryDate = payment.PaymentDate.UtcDateTime,
+            EntryType = JournalEntryType.AutoGenerated,
+            Description = $"Fee payment {payment.Id:N}",
+            TotalDebit = payment.Amount,
+            TotalCredit = payment.Amount,
+            IsPosted = true,
+            PostedByUserId = postedBy,
+            PostedAt = DateTime.UtcNow,
+            Lines =
+            [
+                new JournalEntryLine { Id = Guid.NewGuid(), ChartOfAccountId = bank.Id, Debit = payment.Amount, Credit = 0m },
+                new JournalEntryLine { Id = Guid.NewGuid(), ChartOfAccountId = revenue.Id, Debit = 0m, Credit = payment.Amount }
+            ]
+        };
+
+        db.JournalEntries.Add(journal);
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task<string> ExportPifraAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        var fromDate = from.ToDateTime(TimeOnly.MinValue);
+        var toDate = to.ToDateTime(TimeOnly.MaxValue);
+        var entries = await db.JournalEntries.Where(j => j.EntryDate >= fromDate && j.EntryDate <= toDate).ToListAsync(ct);
+        return new XDocument(new XElement("pifra",
+            new XAttribute("from", from),
+            new XAttribute("to", to),
+            entries.Select(e => new XElement("journal",
+                new XAttribute("entryNumber", e.EntryNumber),
+                new XAttribute("date", e.EntryDate.ToString("yyyy-MM-dd")),
+                new XAttribute("debit", e.TotalDebit),
+                new XAttribute("credit", e.TotalCredit))))).ToString(SaveOptions.DisableFormatting);
+    }
+
+    private async Task<ChartOfAccount> AccountAsync(string code, string name, AccountType type, CancellationToken ct)
+    {
+        var account = await db.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountCode == code, ct);
+        if (account is not null) return account;
+
+        account = new ChartOfAccount { Id = Guid.NewGuid(), AccountCode = code, AccountName = name, AccountType = type };
+        db.ChartOfAccounts.Add(account);
+        return account;
+    }
+}
+
+public sealed class BudgetService(AegisDbContext db) : IBudgetService
+{
+    public async Task<BudgetVarianceReport> GetVarianceAsync(Guid costCenterId, CancellationToken ct = default)
+    {
+        var costCenter = await db.CostCenters.FindAsync([costCenterId], ct) ?? throw new InvalidOperationException("Cost center was not found.");
+        var actual = await db.JournalEntryLines.Where(l => l.Debit > 0).SumAsync(l => l.Debit, ct);
+        var variance = costCenter.BudgetAllocation - actual;
+        var percentage = costCenter.BudgetAllocation == 0 ? 0m : Math.Round(variance / costCenter.BudgetAllocation * 100m, 2);
+        return new BudgetVarianceReport(costCenterId, costCenter.BudgetAllocation, actual, variance, percentage, variance < 0 ? "over_budget" : "on_budget");
+    }
+}
