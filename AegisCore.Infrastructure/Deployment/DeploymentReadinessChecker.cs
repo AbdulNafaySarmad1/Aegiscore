@@ -48,12 +48,12 @@ public class DeploymentReadinessChecker
         var name = "PostgreSQL Connectivity";
         try
         {
-            var cs = _configuration.GetConnectionString("Postgres")
+            var cs = _configuration["NOCTURNE_DB_CONNECTION"]
+                ?? _configuration["POSTGRES_CONNECTION_STRING"]
+                ?? _configuration.GetConnectionString("Postgres")
                 ?? _configuration.GetConnectionString("SupabasePostgres")
                 ?? _configuration["Postgres:ConnectionString"]
-                ?? _configuration["Database:ConnectionString"]
-                ?? _configuration["NOCTURNE_DB_CONNECTION"]
-                ?? _configuration["POSTGRES_CONNECTION_STRING"];
+                ?? _configuration["Database:ConnectionString"];
 
             if (string.IsNullOrEmpty(cs))
             {
@@ -79,10 +79,7 @@ public class DeploymentReadinessChecker
         var name = "Redis Connectivity";
         try
         {
-            var cs = _configuration.GetConnectionString("Redis")
-                ?? _configuration["Redis:ConnectionString"]
-                ?? _configuration["NOCTURNE_REDIS_CONNECTION"]
-                ?? "localhost:6379";
+            var cs = ResolveRedisConnectionString(_configuration);
 
             var options = ConfigurationOptions.Parse(cs);
             options.AbortOnConnectFail = false;
@@ -96,6 +93,15 @@ public class DeploymentReadinessChecker
         {
             _checks.Add(new ReadinessCheck(name, false, $"Connection failed: {ex.Message}"));
         }
+    }
+
+    public static string ResolveRedisConnectionString(IConfiguration configuration)
+    {
+        return configuration["NOCTURNE_REDIS_CONNECTION"]
+            ?? configuration["REDIS_CONNECTION_STRING"]
+            ?? configuration.GetConnectionString("Redis")
+            ?? configuration["Redis:ConnectionString"]
+            ?? "localhost:6379";
     }
 
     private void CheckJwtConfig()

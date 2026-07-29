@@ -1,5 +1,6 @@
 using AegisCore.API.Controllers;
 using AegisCore.API.Middleware;
+using AegisCore.Infrastructure.Deployment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -56,5 +57,21 @@ public sealed class OperationalRuntimeTests
     public void SetupControllers_AreReachableBeforeAuthenticationIsConfigured(Type controllerType)
     {
         Assert.NotNull(Attribute.GetCustomAttribute(controllerType, typeof(AllowAnonymousAttribute)));
+    }
+
+    [Fact]
+    public void Readiness_UsesContainerRedisConfigurationBeforeLocalDefault()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["NOCTURNE_REDIS_CONNECTION"] = "redis:6379,password=runtime-secret",
+                ["ConnectionStrings:Redis"] = "localhost:6379"
+            })
+            .Build();
+
+        Assert.Equal(
+            "redis:6379,password=runtime-secret",
+            DeploymentReadinessChecker.ResolveRedisConnectionString(configuration));
     }
 }
