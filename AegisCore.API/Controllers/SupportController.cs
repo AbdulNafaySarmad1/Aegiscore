@@ -96,7 +96,9 @@ public sealed class SupportController : ControllerBase
     {
         var tenant = User.FindFirstValue("tenant_id") ?? User.FindFirstValue("tid");
         var user = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        return Guid.TryParse(tenant, out tenantId) && Guid.TryParse(user, out userId);
+        var hasTenant = Guid.TryParse(tenant, out tenantId);
+        var hasUser = Guid.TryParse(user, out userId);
+        return hasTenant && hasUser;
     }
 
     private bool IsSupportStaff() =>
@@ -106,4 +108,3 @@ public sealed class SupportController : ControllerBase
                 || x.Value.Equals("VC", StringComparison.OrdinalIgnoreCase)
                 || x.Value.Equals("Support", StringComparison.OrdinalIgnoreCase));
 }
-
