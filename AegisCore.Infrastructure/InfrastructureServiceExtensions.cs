@@ -50,7 +50,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Foundation.IAuditService, AuditService>();
         services.AddScoped<AegisCore.Application.Foundation.IAcademicCalendarService, AcademicCalendarService>();
         services.AddHttpClient("license");
-        services.AddScoped<AegisCore.Application.Licensing.ILicenseService, LicenseService>();
+        services.AddScoped<AegisCore.Application.Licensing.ILicenseService, AegisCore.Infrastructure.Licensing.LicenseService>();
         services.AddScoped<AegisCore.Application.Admissions.IMeritCalculationService, MeritCalculationService>();
         services.AddScoped<AegisCore.Application.Admissions.IIBCCEquivalenceService, IBCCEquivalenceService>();
         services.AddScoped<AegisCore.Application.Admissions.ISeatAllocationService, SeatAllocationService>();
@@ -98,4 +98,3 @@ public static class InfrastructureServiceExtensions
         return services;
     }
 }
-
