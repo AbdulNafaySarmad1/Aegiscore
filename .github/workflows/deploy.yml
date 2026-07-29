@@ -1,4 +1,4 @@
-name: Verify and Deploy Nocturne
+name: Verify and Deploy AegisCore
 
 on:
   push:
@@ -14,19 +14,16 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: aegiscore-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
-      - name: Capture source snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: source-${{ github.sha }}
-          path: .
-          include-hidden-files: true
-          retention-days: 1
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -49,35 +46,47 @@ jobs:
       - name: Backend tests
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release -m:1 -p:BuildInParallel=false --collect:"XPlat Code Coverage"
 
-      - name: Portal install
+      - name: Portal install and build
         working-directory: Nocturne.Portal
-        run: npm ci
+        run: |
+          npm ci
+          npm run build
 
-      - name: Portal build
-        working-directory: Nocturne.Portal
-        run: npm run build
-
-      - name: Mobile install
+      - name: Mobile install, typecheck, and tests
         working-directory: Nocturne.Mobile
-        run: npm ci
+        run: |
+          npm ci
+          npm run typecheck
+          npm test -- --runInBand
 
-      - name: Mobile typecheck
-        working-directory: Nocturne.Mobile
-        run: npm run typecheck
+      - name: Generate isolated runtime configuration
+        run: ./scripts/bootstrap-env.sh .env.ci
 
-      - name: Mobile tests
-        working-directory: Nocturne.Mobile
-        run: npm test -- --runInBand
+      - name: Full-stack Docker Compose smoke test
+        run: |
+          docker compose --env-file .env.ci up -d --build --wait
+          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8080/portal-health
+          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8080/health/ready
+          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8080/
+          docker compose --env-file .env.ci ps
 
-      - name: Build API container
-        run: docker build -t aegiscore-api:ci .
+      - name: Compose diagnostics
+        if: failure()
+        run: docker compose --env-file .env.ci logs --no-color --tail=300
+
+      - name: Tear down smoke stack
+        if: always()
+        run: docker compose --env-file .env.ci down --volumes --remove-orphans
 
   publish-and-deploy:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: verify
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       IMAGE_TAG: ${{ github.sha }}
+      API_IMAGE: ghcr.io/abdulnafaysarmad1/aegiscore-api
+      PORTAL_IMAGE: ghcr.io/abdulnafaysarmad1/aegiscore-portal
       DEPLOY_ENABLED: ${{ secrets.KUBE_CONFIG != '' }}
     steps:
       - uses: actions/checkout@v4
@@ -89,36 +98,48 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push API
+      - name: Build and push API and portal
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/nocturne-api:${IMAGE_TAG} .
-          docker push ghcr.io/${{ github.repository }}/nocturne-api:${IMAGE_TAG}
+          docker build -t "${API_IMAGE}:${IMAGE_TAG}" -t "${API_IMAGE}:latest" .
+          docker build -t "${PORTAL_IMAGE}:${IMAGE_TAG}" -t "${PORTAL_IMAGE}:latest" Nocturne.Portal
+          docker push "${API_IMAGE}:${IMAGE_TAG}"
+          docker push "${API_IMAGE}:latest"
+          docker push "${PORTAL_IMAGE}:${IMAGE_TAG}"
+          docker push "${PORTAL_IMAGE}:latest"
 
       - name: Deploy to Kubernetes
         if: ${{ env.DEPLOY_ENABLED == 'true' }}
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
           NOCTURNE_DB_CONNECTION: ${{ secrets.NOCTURNE_DB_CONNECTION }}
+          NOCTURNE_REDIS_CONNECTION: ${{ secrets.NOCTURNE_REDIS_CONNECTION }}
           NOCTURNE_JWT_SECRET: ${{ secrets.NOCTURNE_JWT_SECRET }}
           LICENSE_HMAC_SECRET: ${{ secrets.LICENSE_HMAC_SECRET }}
           NOCTURNE_PQC_KEY_BASE64: ${{ secrets.NOCTURNE_PQC_KEY_BASE64 }}
-          Governance__FeedbackEncryptionKeyBase64: ${{ secrets.GOVERNANCE_FEEDBACK_KEY_BASE64 }}
+          GOVERNANCE_FEEDBACK_KEY_BASE64: ${{ secrets.GOVERNANCE_FEEDBACK_KEY_BASE64 }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          TENANT_ID: ${{ secrets.TENANT_ID }}
         run: |
           mkdir -p "$HOME/.kube"
           printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
           kubectl apply -f k8s/namespace.yaml
           kubectl -n nocturne create secret generic nocturne-runtime-secrets \
             --from-literal=NOCTURNE_DB_CONNECTION="$NOCTURNE_DB_CONNECTION" \
+            --from-literal=NOCTURNE_REDIS_CONNECTION="$NOCTURNE_REDIS_CONNECTION" \
             --from-literal=NOCTURNE_JWT_SECRET="$NOCTURNE_JWT_SECRET" \
             --from-literal=License__HmacSecret="$LICENSE_HMAC_SECRET" \
             --from-literal=NOCTURNE_PQC_KEY_BASE64="$NOCTURNE_PQC_KEY_BASE64" \
-            --from-literal=Governance__FeedbackEncryptionKeyBase64="$Governance__FeedbackEncryptionKeyBase64" \
+            --from-literal=Governance__FeedbackEncryptionKeyBase64="$GOVERNANCE_FEEDBACK_KEY_BASE64" \
             --from-literal=POSTGRES_USER="$POSTGRES_USER" \
             --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
+            --from-literal=TENANT_ID="$TENANT_ID" \
             --dry-run=client -o yaml | kubectl apply -f -
           kubectl apply -f k8s/configmap.yaml -f k8s/postgres-statefulset.yaml -f k8s/postgres-service.yaml -f k8s/redis-deployment.yaml -f k8s/redis-service.yaml -f k8s/network-policy.yaml
-          sed "s|\\${GITHUB_REPOSITORY}|${{ github.repository }}|g; s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/api-deployment.yaml | kubectl apply -f -
-          kubectl apply -f k8s/api-service.yaml -f k8s/api-hpa.yaml -f k8s/api-pdb.yaml -f k8s/ingress.yaml
-          kubectl -n nocturne rollout status deploy/nocturne-api --timeout=180s
+          sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/api-deployment.yaml | kubectl apply -f -
+          sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/portal-deployment.yaml | kubectl apply -f -
+          kubectl apply -f k8s/api-service.yaml -f k8s/portal-service.yaml -f k8s/api-hpa.yaml -f k8s/api-pdb.yaml -f k8s/ingress.yaml
+          kubectl -n nocturne rollout status deploy/nocturne-api --timeout=300s
+          kubectl -n nocturne rollout status deploy/aegiscore-portal --timeout=300s

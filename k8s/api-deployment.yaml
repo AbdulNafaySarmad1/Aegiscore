@@ -19,7 +19,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/${GITHUB_REPOSITORY}/nocturne-api:${IMAGE_TAG}
+          image: ghcr.io/abdulnafaysarmad1/aegiscore-api:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -30,13 +30,14 @@ spec:
                 name: nocturne-runtime-secrets
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/ready
               port: 8080
-            initialDelaySeconds: 10
+            initialDelaySeconds: 20
             periodSeconds: 10
+            failureThreshold: 12
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/live
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 30

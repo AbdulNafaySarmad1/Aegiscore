@@ -5,9 +5,13 @@ metadata:
   namespace: nocturne
 data:
   ASPNETCORE_URLS: http://+:8080
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
   AEGISCORE_INSTALLATION_COMPLETED: "true"
+  Runtime__DemoMode: "false"
+  Deployment__FailOnReadinessError: "true"
+  AEGISCORE_CLOUD_PROVIDER: ONPREMISE
   NOCTURNE_STORAGE_PROVIDER: local
   NOCTURNE_STORAGE_LOCAL_PATH: /app/storage
-  NOCTURNE_REDIS_CONNECTION: nocturne-redis:6379
   License__ServerUrl: https://license.nocturne.systems
   Database__AutoMigrate: "true"

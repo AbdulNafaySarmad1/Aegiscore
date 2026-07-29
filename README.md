@@ -3,6 +3,29 @@
 ## Overview
 This is the **complete specification and implementation guide** for Nocturne, a Pakistani university ERP platform built in C# 14 / .NET 10.
 
+## Operational local/demo stack
+
+The supported local stack includes the React portal, ASP.NET Core API,
+PostgreSQL 17, Redis 7, automatic migrations, persistent volumes, and an
+explicitly non-production demo identity.
+
+```bash
+./scripts/bootstrap-env.sh
+docker compose --env-file .env up -d --build --wait
+```
+
+Open <http://localhost:8080>. Verify the runtime contract with:
+
+```bash
+curl --fail http://localhost:8080/health/ready
+docker compose --env-file .env ps
+```
+
+Stop without deleting data using `docker compose --env-file .env down`.
+Demo mode is rejected when `ASPNETCORE_ENVIRONMENT=Production`; production
+requires institutional SSO, a signed license, TLS/DNS, SMTP, backups, and
+credentials for each selected external integration.
+
 **22 prompts total:**
 - 9 Utility Prompts (infrastructure, architecture, governance)
 - 13 Sprint Prompts (feature development)

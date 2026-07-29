@@ -50,7 +50,10 @@ public class DeploymentReadinessChecker
         {
             var cs = _configuration.GetConnectionString("Postgres")
                 ?? _configuration.GetConnectionString("SupabasePostgres")
-                ?? _configuration["Postgres:ConnectionString"];
+                ?? _configuration["Postgres:ConnectionString"]
+                ?? _configuration["Database:ConnectionString"]
+                ?? _configuration["NOCTURNE_DB_CONNECTION"]
+                ?? _configuration["POSTGRES_CONNECTION_STRING"];
 
             if (string.IsNullOrEmpty(cs))
             {
@@ -78,15 +81,14 @@ public class DeploymentReadinessChecker
         {
             var cs = _configuration.GetConnectionString("Redis")
                 ?? _configuration["Redis:ConnectionString"]
+                ?? _configuration["NOCTURNE_REDIS_CONNECTION"]
                 ?? "localhost:6379";
 
-            var redis = await ConnectionMultiplexer.ConnectAsync(new ConfigurationOptions
-            {
-                EndPoints = { cs },
-                AbortOnConnectFail = false,
-                ConnectTimeout = 5000
-            });
+            var options = ConfigurationOptions.Parse(cs);
+            options.AbortOnConnectFail = false;
+            options.ConnectTimeout = 5000;
 
+            await using var redis = await ConnectionMultiplexer.ConnectAsync(options);
             await redis.GetDatabase().PingAsync();
             _checks.Add(new ReadinessCheck(name, true, $"Connected to {cs}."));
         }
@@ -100,14 +102,13 @@ public class DeploymentReadinessChecker
     {
         var name = "JWT Configuration";
         var authority = _configuration["Auth:Authority"];
-        var audience = _configuration["Auth:Audience"];
+        var audience = _configuration["Auth:Audience"] ?? "aegiscore-api";
+        var symmetricSecret = _configuration["NOCTURNE_JWT_SECRET"] ?? _configuration["Jwt:Secret"];
 
-        if (string.IsNullOrEmpty(authority) && string.IsNullOrEmpty(audience))
-            _checks.Add(new ReadinessCheck(name, true, "JWT not configured — running without authentication."));
+        if (!string.IsNullOrWhiteSpace(symmetricSecret))
+            _checks.Add(new ReadinessCheck(name, true, $"Local signing key configured for audience {audience}."));
         else if (string.IsNullOrEmpty(authority))
-            _checks.Add(new ReadinessCheck(name, false, "Auth:Authority is not set."));
-        else if (string.IsNullOrEmpty(audience))
-            _checks.Add(new ReadinessCheck(name, false, "Auth:Audience is not set."));
+            _checks.Add(new ReadinessCheck(name, false, "Configure Auth:Authority or NOCTURNE_JWT_SECRET."));
         else
             _checks.Add(new ReadinessCheck(name, true, $"Authority={authority}, Audience={audience}"));
     }
@@ -127,8 +128,13 @@ public class DeploymentReadinessChecker
     private void CheckRequiredEnvVars()
     {
         var name = "Required Environment Variables";
-        var required = new[] { "ASPNETCORE_ENVIRONMENT", "AEGISCORE_CLOUD_PROVIDER", "TENANT_ID" };
+        var required = new[] { "ASPNETCORE_ENVIRONMENT", "AEGISCORE_CLOUD_PROVIDER" };
         var missing = required.Where(v => string.IsNullOrEmpty(Environment.GetEnvironmentVariable(v))).ToList();
+        if (string.IsNullOrWhiteSpace(_configuration["TENANT_ID"])
+            && string.IsNullOrWhiteSpace(_configuration["AEGISCORE_TENANT_ID"]))
+        {
+            missing.Add("TENANT_ID");
+        }
 
         if (missing.Count == 0)
             _checks.Add(new ReadinessCheck(name, true, "All required variables present."));
@@ -165,7 +171,14 @@ public static class DeploymentReadinessServiceExtensions
 
         if (!checker.AllPassed)
         {
-            logger.LogCritical("Deployment readiness check FAILED. Application will continue but may be degraded.");
+            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            if (configuration.GetValue<bool>("Deployment:FailOnReadinessError"))
+            {
+                logger.LogCritical("Deployment readiness check FAILED. Strict startup is enabled.");
+                throw new InvalidOperationException("Deployment readiness checks failed.");
+            }
+
+            logger.LogCritical("Deployment readiness check FAILED. Application will continue in degraded mode.");
         }
     }
 }

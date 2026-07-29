@@ -4,8 +4,18 @@ namespace AegisCore.API.Middleware;
 
 public sealed class LicenseLockoutMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, ILicenseService licenseService)
+    public async Task InvokeAsync(
+        HttpContext context,
+        ILicenseService licenseService,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
+        if (!environment.IsProduction() && configuration.GetValue<bool>("Runtime:DemoMode"))
+        {
+            await next(context);
+            return;
+        }
+
         var path = context.Request.Path;
         if (path.StartsWithSegments("/health")
             || path.StartsWithSegments("/api/license")

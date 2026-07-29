@@ -44,6 +44,13 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var demoMode = builder.Configuration.GetValue<bool>("Runtime:DemoMode");
+if (demoMode && builder.Environment.IsProduction())
+{
+    throw new InvalidOperationException(
+        "Runtime:DemoMode is forbidden in Production. Configure a real identity provider and license.");
+}
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -113,6 +120,7 @@ if (!isInstalled)
 
     app.MapControllers();
     app.MapGet("/health", () => Results.Text("Healthy"));
+    app.MapGet("/health/live", () => Results.Text("Healthy"));
 
     app.MapGet("/", async context =>
     {
@@ -143,6 +151,7 @@ else
 
     app.UseCors("CloudflarePages");
     app.UseAuthentication();
+    app.UseMiddleware<DemoIdentityMiddleware>();
     app.UseAuthorization();
     app.UseMiddleware<LicenseLockoutMiddleware>();
 
@@ -150,6 +159,19 @@ else
     app.UseMiddleware<AbacMiddleware>();
 
     app.MapGet("/health", () => Results.Text("Healthy"));
+    app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
+    app.MapGet("/health/ready", async (DeploymentReadinessChecker checker, CancellationToken ct) =>
+    {
+        var checks = await checker.RunAllAsync(ct);
+        if (checker.AllPassed)
+        {
+            return Results.Ok(new { status = "ready", checks });
+        }
+
+        return Results.Json(
+            new { status = "not_ready", checks },
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+    }).AllowAnonymous();
     app.MapHealthChecks("/health/detail").RequireAuthorization();
 
     app.MapHub<StateMachineHub>("/hubs/statemachine");

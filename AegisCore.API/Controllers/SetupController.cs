@@ -1,11 +1,13 @@
 using AegisCore.Application.Onboarding;
 using AegisCore.Infrastructure.Installation;
 using AegisCore.Infrastructure.Onboarding;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/setup")]
 public class SetupController : ControllerBase
 {
@@ -154,4 +156,3 @@ public record SmtpConfigRequest(string Host, int Port, string Username, string P
 public record StorageConfigRequest(string Provider, string? MinioEndpoint, string? MinioAccessKey, string? MinioSecretKey, string? MinioBucketName);
 public record DomainConfigRequest(string Domain);
 public record InstallRequest(bool SkipOptionalIntegrations = true);
-

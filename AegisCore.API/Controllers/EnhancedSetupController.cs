@@ -1,11 +1,13 @@
 using AegisCore.Application.Onboarding;
 using AegisCore.Infrastructure.Installation;
 using AegisCore.Infrastructure.Onboarding;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/setup/enhanced")]
 [RequestSizeLimit(25 * 1024 * 1024)]
 public sealed class EnhancedSetupController : ControllerBase
@@ -71,4 +73,3 @@ public sealed class EnhancedSetupController : ControllerBase
     private IActionResult BeforeInstall(Func<IActionResult> action) =>
         _installation.IsInstalled() ? NotFound() : action();
 }
-

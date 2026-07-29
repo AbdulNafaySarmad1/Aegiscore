@@ -21,6 +21,7 @@ WORKDIR /app
 
 RUN addgroup -S appgroup \
     && adduser -S -D -H -s /sbin/nologin -G appgroup appuser \
+    && mkdir -p /app/storage /app/config \
     && chown -R appuser /app
 
 ENV ASPNETCORE_URLS=http://+:8080 \
