@@ -39,6 +39,12 @@ public sealed class EnhancedSetupService
             ["faculty"] = new("faculty", "Faculty", ["Faculty ID", "Name", "Email", "Phone", "Department", "Designation"],
                 [["FAC-001", "Dr. Ayesha Ahmed", "ayesha@university.edu.pk", "03002222222", "Computer Science", "Associate Professor"]],
                 ["Faculty ID: FAC-XXX", "Email must be unique", "Use a supported academic designation"]),
+            ["employees"] = new("employees", "Employees", ["Employee ID", "Name", "Email", "Department", "Designation"],
+                [["EMP-001", "Sara Ahmed", "sara@university.edu.pk", "Administration", "Registrar"]],
+                ["Employee ID must be unique", "Email must be valid", "Department must exist"]),
+            ["programs"] = new("programs", "Programs", ["Program Code", "Program Name", "Department", "Degree Type", "Duration Years"],
+                [["BS-CS", "BS Computer Science", "Computer Science", "Bachelor", "4"]],
+                ["Program code must be unique", "Department must exist"]),
             ["courses"] = new("courses", "Courses", ["Course Code", "Course Name", "Department", "Credits", "Credit Hours", "Lab Hours"],
                 [["CS-101", "Introduction to Programming", "Computer Science", "3", "3", "0"]],
                 ["Course Code: DEPT-XXX", "Credits must be between 1 and 6", "Department must exist"]),
@@ -51,6 +57,12 @@ public sealed class EnhancedSetupService
             ["marks"] = new("marks", "Marks", ["Course Code", "Student ID", "Quiz 1", "Quiz 2", "Midterm", "Final", "Project"],
                 [["CS-101", "STU-001-2024", "8", "9", "75", "78", "90"]],
                 ["Quiz values: 0-10", "Midterm, Final, and Project values: 0-100", "Blank marks are allowed"]),
+            ["enrollments"] = new("enrollments", "Enrollments", ["Student ID", "Course Code", "Status", "Grade"],
+                [["STU-001-2024", "CS-101", "Active", ""]],
+                ["Student and course must exist", "Duplicate enrollment is rejected"]),
+            ["examinations"] = new("examinations", "Examinations", ["Exam Code", "Course Code", "Exam Date", "Type", "Total Marks"],
+                [["MID-CS101-2024", "CS-101", "2024-03-01", "Midterm", "100"]],
+                ["Course must exist", "Exam date: YYYY-MM-DD", "Total marks must be positive"]),
             ["financial"] = new("financial", "Financial", ["Student ID", "Date", "Type", "Amount", "Description"],
                 [["STU-001-2024", "2024-01-15", "Tuition", "150000", "Semester tuition fee"]],
                 ["Date: YYYY-MM-DD", "Amount is in PKR", "Negative amounts are discounts or refunds"])
@@ -207,10 +219,17 @@ public sealed class EnhancedSetupService
         lock (_gate)
         {
             _state.Uploads[fileType] = result;
+            _state.Rows[fileType] = rows.Select(x => x.ToArray()).ToList();
             Audit("upload.validated", $"{fileType}: {dataRows.Length} rows, {errors.Count} errors");
             Persist();
         }
         return result;
+    }
+
+    public IReadOnlyDictionary<string, IReadOnlyList<string[]>> GetValidatedRows()
+    {
+        lock (_gate)
+            return _state.Rows.ToDictionary(x => x.Key, x => (IReadOnlyList<string[]>)x.Value.ToArray(), StringComparer.OrdinalIgnoreCase);
     }
 
     public SetupReview Review(WizardStateService wizard)
@@ -285,6 +304,14 @@ public sealed class EnhancedSetupService
                 if (!PhonePattern.IsMatch(cell("Phone"))) errors.Add($"Row {row}: phone must be 11 digits starting with 03.");
                 Unique("Faculty ID", seenPrimary); Unique("Email", seenEmails);
                 break;
+            case "employees":
+                Required("Employee ID"); Required("Name"); Required("Email"); Required("Department"); Required("Designation");
+                Unique("Employee ID", seenPrimary); if (!EmailPattern.IsMatch(cell("Email"))) errors.Add($"Row {row}: invalid email '{cell("Email")}'.");
+                break;
+            case "programs":
+                Required("Program Code"); Required("Program Name"); Required("Department"); Unique("Program Code", seenPrimary);
+                Number("Duration Years", 1, 10);
+                break;
             case "courses":
                 Required("Course Code"); Required("Course Name"); Required("Department");
                 if (!CourseCodePattern.IsMatch(cell("Course Code"))) errors.Add($"Row {row}: invalid Course Code '{cell("Course Code")}'.");
@@ -302,6 +329,13 @@ public sealed class EnhancedSetupService
                 Required("Course Code"); Required("Student ID");
                 Number("Quiz 1", 0, 10, true); Number("Quiz 2", 0, 10, true);
                 Number("Midterm", 0, 100, true); Number("Final", 0, 100, true); Number("Project", 0, 100, true);
+                break;
+            case "enrollments":
+                Required("Student ID"); Required("Course Code");
+                break;
+            case "examinations":
+                Required("Exam Code"); Required("Course Code"); Date("Exam Date"); Required("Type"); Number("Total Marks", 1, 1000);
+                Unique("Exam Code", seenPrimary);
                 break;
             case "financial":
                 Required("Student ID"); Date("Date"); Required("Type");
@@ -391,6 +425,7 @@ public sealed class EnhancedSetupService
         public SetupHierarchy? Hierarchy { get; set; }
         public List<SetupPermission> Permissions { get; set; } = [];
         public Dictionary<string, SetupFileValidation> Uploads { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, List<string[]>> Rows { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public List<SetupAudit> Audit { get; set; } = [];
     }
 

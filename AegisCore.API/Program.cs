@@ -95,8 +95,6 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
     try
@@ -109,7 +107,7 @@ app.Use(async (context, next) =>
         throw;
     }
 });
-app.UseSwaggerPortal();
+app.UseSwagger();
 
 app.MapGet("/health/installation", (IInstallationStateService installation) =>
     Results.Ok(new { isInstalled = installation.IsInstalled() }))
@@ -124,23 +122,15 @@ if (!isInstalled)
     app.UseAuthorization();
 
     app.MapControllers();
-    app.MapGet("/health", () => Results.Text("Healthy"));
-    app.MapGet("/health/live", () => Results.Text("Healthy"));
+    if (app.Configuration.GetValue<bool>("Database:AutoMigrate"))
+        await ApplyDatabaseMigrationsAsync(app);
+    app.MapGet("/health", () => Results.Text("Healthy")).AllowAnonymous();
+    app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/ready", () => Results.Ok(new
     {
         status = "setup_required",
         message = "AegisCore is healthy and waiting for the guided installation to finish."
-    }));
-
-    app.MapGet("/", async context =>
-    {
-        context.Response.Redirect("/setup/");
-    });
-
-    app.MapGet("/setup", async context =>
-    {
-        context.Response.Redirect("/setup/");
-    });
+    })).AllowAnonymous();
 
     app.Run();
 }
@@ -168,7 +158,7 @@ else
     app.UseMiddleware<TurnstileMiddleware>();
     app.UseMiddleware<AbacMiddleware>();
 
-    app.MapGet("/health", () => Results.Text("Healthy"));
+    app.MapGet("/health", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/ready", async (DeploymentReadinessChecker checker, CancellationToken ct) =>
     {

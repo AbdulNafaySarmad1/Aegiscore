@@ -11,6 +11,7 @@ public static class OnboardingServiceExtensions
     {
         services.TryAddSingleton<WizardStateService>();
         services.TryAddSingleton<OnboardingService>();
+        services.TryAddScoped<SetupImportService>();
         return services;
     }
 }

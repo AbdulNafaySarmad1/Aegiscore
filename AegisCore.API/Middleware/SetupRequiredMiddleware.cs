@@ -28,7 +28,15 @@ public sealed class SetupRequiredMiddleware
 
         if (!_installationState.IsInstalled() && !isSetupPath)
         {
-            context.Response.Redirect("/setup/");
+            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            context.Response.ContentType = "application/problem+json";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                type = "https://aegiscore.local/problems/setup-required",
+                title = "Installation required",
+                status = StatusCodes.Status503ServiceUnavailable,
+                detail = "Complete installation in the Next.js portal before using the API."
+            });
             return;
         }
         await _next(context);
@@ -40,4 +48,3 @@ public static class SetupRequiredMiddlewareExtensions
     public static IApplicationBuilder UseSetupRequired(this IApplicationBuilder app) =>
         app.UseMiddleware<SetupRequiredMiddleware>();
 }
-

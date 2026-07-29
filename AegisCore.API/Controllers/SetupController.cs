@@ -15,17 +15,20 @@ public class SetupController : ControllerBase
     private readonly OnboardingService _service;
     private readonly EnhancedSetupService _enhanced;
     private readonly IInstallationStateService _installationState;
+    private readonly SetupImportService _imports;
 
     public SetupController(
         WizardStateService state,
         OnboardingService service,
         EnhancedSetupService enhanced,
-        IInstallationStateService installationState)
+        IInstallationStateService installationState,
+        SetupImportService imports)
     {
         _state = state;
         _service = service;
         _enhanced = enhanced;
         _installationState = installationState;
+        _imports = imports;
     }
 
     [HttpGet("status")]
@@ -96,6 +99,7 @@ public class SetupController : ControllerBase
             return BadRequest(new { error = "Administrator passwords do not match." });
         _state.AdminFullName = request.FullName.Trim();
         _state.AdminAccountEmail = request.Email.Trim();
+        _state.AdminPassword = request.Password;
         return Ok(new { success = true, message = "Administrator account is queued for creation during installation." });
     }
 
@@ -139,6 +143,10 @@ public class SetupController : ControllerBase
         var enhancedReview = _enhanced.Review(_state);
         if (!enhancedReview.Ready)
             return UnprocessableEntity(new { success = false, error = "Enhanced setup checks are incomplete.", review = enhancedReview });
+
+        var import = await _imports.CommitAsync(_state.TenantId, _state.AdminFullName, _state.AdminAccountEmail, _state.AdminPassword, _enhanced.GetValidatedRows(), ct);
+        if (!import.Success)
+            return UnprocessableEntity(new { success = false, error = new WizardError("Initial data import failed.", string.Join(" ", import.RejectedRows)) });
 
         var result = await _service.GoLiveAsync(_state, ct);
         if (result.Success) await _installationState.MarkAsInstalledAsync(ct);
