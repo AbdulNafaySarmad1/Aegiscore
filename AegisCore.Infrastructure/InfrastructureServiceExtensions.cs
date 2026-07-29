@@ -6,13 +6,12 @@ using AegisCore.Infrastructure.Backup;
 using AegisCore.Infrastructure.Campus;
 using AegisCore.Infrastructure.CampusOperations;
 using AegisCore.Infrastructure.Cloud;
-using AegisCore.Infrastructure.Cloud.R2;
-using AegisCore.Infrastructure.DegreeAudit;
 using AegisCore.Infrastructure.Compliance;
 using AegisCore.Infrastructure.Config;
 using AegisCore.Infrastructure.ConfigCenter;
 using AegisCore.Infrastructure.CoreERP;
 using AegisCore.Infrastructure.Curriculum;
+using AegisCore.Infrastructure.DegreeAudit;
 using AegisCore.Infrastructure.Deployment;
 using AegisCore.Infrastructure.DigitalTwin;
 using AegisCore.Infrastructure.Examination;
@@ -32,8 +31,9 @@ using AegisCore.Infrastructure.Platform;
 using AegisCore.Infrastructure.RuleEngine;
 using AegisCore.Infrastructure.Search;
 using AegisCore.Infrastructure.Security;
-using AegisCore.Infrastructure.StudentLifecycle;
 using AegisCore.Infrastructure.SsoHitl;
+using AegisCore.Infrastructure.StudentLifecycle;
+using AegisCore.Infrastructure.Support;
 using AegisCore.Infrastructure.Workflow;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +50,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Foundation.IAuditService, AuditService>();
         services.AddScoped<AegisCore.Application.Foundation.IAcademicCalendarService, AcademicCalendarService>();
         services.AddHttpClient("license");
-        services.AddScoped<AegisCore.Application.Licensing.ILicenseService, AegisCore.Infrastructure.Licensing.LicenseService>();
+        services.AddScoped<AegisCore.Application.Licensing.ILicenseService, LicenseService>();
         services.AddScoped<AegisCore.Application.Admissions.IMeritCalculationService, MeritCalculationService>();
         services.AddScoped<AegisCore.Application.Admissions.IIBCCEquivalenceService, IBCCEquivalenceService>();
         services.AddScoped<AegisCore.Application.Admissions.ISeatAllocationService, SeatAllocationService>();
@@ -94,7 +94,8 @@ public static class InfrastructureServiceExtensions
         services.AddGovernance();
         services.AddCurriculumManagement();
         services.AddSsoHitl();
-
+        services.AddAiSupportTicketing();
         return services;
     }
 }
+
