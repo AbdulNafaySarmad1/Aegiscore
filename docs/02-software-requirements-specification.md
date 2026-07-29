@@ -114,7 +114,7 @@ AegisCore provides the following high-level functions:
 
 ### 2.5 Design and Implementation Constraints
 
-1. The system must be implemented in C# 14 on .NET 10 using Blazor for the frontend.
+1. The authoritative backend must use C# 14 on .NET 10; the browser frontend must use Next.js 16 and React 19.
 2. The system must use PostgreSQL as the sole relational database with multi-tenant isolation via Row-Level Security.
 3. The system must use Redis for caching and session management.
 4. The system must implement ABAC via Casbin.NET — role-based access control alone is insufficient.
@@ -235,7 +235,7 @@ As documented in the Vision Document (AEGIS-VISION-001), Section 6.
 
 ### 3.6 System Administration Module
 
-**FR-047:** The system shall allow SuperAdmins to provision new tenants with institution-specific configuration (name, logo, domain, modules enabled).
+**FR-047:** The system shall allow SuperAdmins to provision new tenants with institution-specific configuration (name, logo, domain, campuses, academic policies, workflows, integrations, and branding). Every tenant receives the complete core suite.
 
 **FR-048:** The system shall allow SuperAdmins to create the initial tenant administrator account during provisioning.
 
@@ -249,7 +249,7 @@ As documented in the Vision Document (AEGIS-VISION-001), Section 6.
 
 **FR-053:** The system shall allow administrators to view and query audit logs filtered by tenant, user, action type, and date range.
 
-**FR-054:** The system shall track licence information per tenant including student headcount, expiry date, and module access.
+**FR-054:** The system shall track complete-suite licence information per tenant including institution identity, licensed headcount, deployment identity, activation state, heartbeat status, and expiry date.
 
 **FR-055:** The system shall send automated alerts for system events including backup failures, disk space warnings, and security anomalies.
 
@@ -265,7 +265,7 @@ As documented in the Vision Document (AEGIS-VISION-001), Section 6.
 
 **NFR-004:** Database query execution time shall not exceed 100 milliseconds for 95% of queries under production load.
 
-**NFR-005:** The system shall serve static assets (Blazor WASM files) with a Time to First Byte (TTFB) of less than 50 milliseconds.
+**NFR-005:** The system shall serve Next.js static assets with a Time to First Byte (TTFB) of less than 50 milliseconds.
 
 **NFR-006:** SignalR real-time updates shall be delivered within 500 milliseconds of the triggering event.
 
@@ -327,8 +327,8 @@ As documented in the Vision Document (AEGIS-VISION-001), Section 6.
 
 ### 5.1 User Interfaces
 
-- **Blazor WebAssembly:** Primary user interface for all user roles, rendered in modern web browsers.
-- **MudBlazor Component Library:** UI component framework providing consistent Material Design styling.
+- **Next.js 16 and React 19:** Primary user interface for all user roles, rendered in modern web browsers.
+- **AegisCore design system:** Reusable accessible components providing a consistent institutional interface.
 - **Responsive Design:** All interfaces shall be usable on screens from 320px (mobile) to 2560px (desktop).
 - **Accessibility:** Interfaces shall meet WCAG 2.1 Level AA compliance.
 
@@ -363,7 +363,7 @@ As documented in the Vision Document (AEGIS-VISION-001), Section 6.
 2. **HEC Compliance:** All student record formats, transcript formats, and reporting data structures must conform to HEC specifications.
 3. **Data Sovereignty:** All student PII must remain within Pakistani jurisdiction or approved international jurisdictions as defined by HEC and Ministry of IT policy.
 4. **Technology Stack:** The system must use the specified technology stack (C#/.NET 10, PostgreSQL, Redis, Casbin) — deviations require architectural review and approval.
-5. **Licensing Model:** The system must enforce licence restrictions per tenant based on student headcount and module access.
+5. **Licensing Model:** The system must enforce a complete-suite licence per tenant based on institution identity, contracted headcount, deployment identity, activation state, heartbeat status, and expiry. Core modules cannot be licensed separately.
 6. **Audit Trail:** All modifications to student records, financial transactions, and user permissions must be logged immutably.
 7. **Backward Compatibility:** API changes must maintain backward compatibility for at least one major version.
 
