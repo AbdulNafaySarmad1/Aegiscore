@@ -4,6 +4,7 @@ using AegisCore.API.Authorization;
 using AegisCore.API.Background;
 using AegisCore.API.Hubs;
 using AegisCore.Application.Onboarding;
+using AegisCore.Application.Platform;
 using AegisCore.Infrastructure.Installation;
 using AegisCore.Infrastructure.Onboarding;
 using AegisCore.Infrastructure.Payments.Raast;
