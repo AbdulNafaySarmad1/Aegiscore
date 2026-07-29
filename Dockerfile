@@ -19,7 +19,8 @@ RUN dotnet publish AegisCore.API/AegisCore.API.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache krb5-libs \
+    && addgroup -S appgroup \
     && adduser -S -D -H -s /sbin/nologin -G appgroup appuser \
     && mkdir -p /app/storage /app/config \
     && chown -R appuser /app
