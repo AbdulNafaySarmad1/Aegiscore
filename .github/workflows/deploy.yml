@@ -60,7 +60,9 @@ jobs:
           npm test -- --runInBand
 
       - name: Generate isolated runtime configuration
-        run: ./scripts/bootstrap-env.sh .env.ci
+        run: |
+          ./scripts/bootstrap-env.sh .env.ci
+          sed -i 's/AEGISCORE_INSTALLATION_COMPLETED=false/AEGISCORE_INSTALLATION_COMPLETED=true/' .env.ci
 
       - name: Full-stack Docker Compose smoke test
         run: |

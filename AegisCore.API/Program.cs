@@ -111,6 +111,10 @@ app.Use(async (context, next) =>
 });
 app.UseSwaggerPortal();
 
+app.MapGet("/health/installation", (IInstallationStateService installation) =>
+    Results.Ok(new { isInstalled = installation.IsInstalled() }))
+    .AllowAnonymous();
+
 if (!isInstalled)
 {
     app.UseSetupRequired();
@@ -122,6 +126,11 @@ if (!isInstalled)
     app.MapControllers();
     app.MapGet("/health", () => Results.Text("Healthy"));
     app.MapGet("/health/live", () => Results.Text("Healthy"));
+    app.MapGet("/health/ready", () => Results.Ok(new
+    {
+        status = "setup_required",
+        message = "AegisCore is healthy and waiting for the guided installation to finish."
+    }));
 
     app.MapGet("/", async context =>
     {

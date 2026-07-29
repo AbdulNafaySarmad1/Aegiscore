@@ -26,6 +26,7 @@ umask 077
 {
   echo "AEGISCORE_PORT=8080"
   echo "AEGISCORE_DEMO_MODE=true"
+  echo "AEGISCORE_INSTALLATION_COMPLETED=false"
   echo "TENANT_ID=$tenant_id"
   echo
   echo "POSTGRES_DB=aegiscore"

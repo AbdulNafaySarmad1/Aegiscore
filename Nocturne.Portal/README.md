@@ -1,12 +1,14 @@
-# Nocturne Portal S8
+# AegisCore Portal
 
-React + TypeScript self-service portal for Student and Faculty roles.
+Next.js 16 + React 19 portal. The .NET API remains the authoritative business,
+security, licensing, workflow, and persistence layer.
 
 ```bash
-npm install
+npm ci
 npm run dev
 npm run build
-npm run test:e2e
 ```
 
-Set `VITE_API_URL` to the API origin when the portal is served separately. SignalR listens on `/hubs/notifications`.
+The production image uses Next.js static export behind Nginx. Nginx serves
+portal routes (including `/setup`) and proxies `/api`, `/hubs`, `/swagger`, and
+`/health` to the AegisCore API container.
