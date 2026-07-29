@@ -118,7 +118,6 @@ public static class AuthenticationServicesExtensions
         services.AddAuthorization();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-        services.AddScoped<IAuthorizationHandler, ModuleAuthorizationHandler>();
         services.AddSingleton<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         return services;
     }
