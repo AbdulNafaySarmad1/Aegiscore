@@ -113,7 +113,6 @@ public sealed class LicenseServiceTests
             ["issued_date"] = DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"),
             ["expiry_date"] = expiry,
             ["max_concurrent_users"] = 1000,
-            ["licensed_modules"] = new JsonArray("academic_calendar", "admissions"),
             ["issued_by"] = "apex-systems"
         };
 
