@@ -13,7 +13,8 @@ services:
       NOCTURNE_REDIS_CONNECTION: ${NOCTURNE_REDIS_CONNECTION:-redis:6379}
       NOCTURNE_STORAGE_PROVIDER: ${NOCTURNE_STORAGE_PROVIDER:-local}
       NOCTURNE_STORAGE_LOCAL_PATH: ${NOCTURNE_STORAGE_LOCAL_PATH:-/app/storage}
-      NOCTURNE_LICENSE_SERVER_URL: ${NOCTURNE_LICENSE_SERVER_URL:-https://license.nocturne.systems}
+      License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.nocturne.systems}
+      License__HmacSecret: ${LICENSE_HMAC_SECRET:?Set LICENSE_HMAC_SECRET in .env or pass --env-file .env.example}
       NOCTURNE_ENCRYPTION_KEY: ${NOCTURNE_ENCRYPTION_KEY:?Set NOCTURNE_ENCRYPTION_KEY in .env or pass --env-file .env.example}
       NOCTURNE_PQC_KEY_BASE64: ${NOCTURNE_PQC_KEY_BASE64:?Set NOCTURNE_PQC_KEY_BASE64 in .env or pass --env-file .env.example}
       NOCTURNE_JWT_SECRET: ${NOCTURNE_JWT_SECRET:?Set NOCTURNE_JWT_SECRET in .env or pass --env-file .env.example}
