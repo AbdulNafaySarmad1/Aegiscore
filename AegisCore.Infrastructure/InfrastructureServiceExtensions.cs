@@ -31,12 +31,15 @@ using AegisCore.Infrastructure.Platform;
 using AegisCore.Infrastructure.RuleEngine;
 using AegisCore.Infrastructure.Search;
 using AegisCore.Infrastructure.Security;
+using AegisCore.Infrastructure.Security.Abac;
 using AegisCore.Infrastructure.SsoHitl;
 using AegisCore.Infrastructure.StudentLifecycle;
 using AegisCore.Infrastructure.Support;
 using AegisCore.Infrastructure.Workflow;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using StackExchange.Redis;
 
 namespace AegisCore.Infrastructure;
 
@@ -45,6 +48,18 @@ public static class InfrastructureServiceExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAegisDbContext(configuration);
+        services.TryAddScoped(typeof(AegisCore.Contracts.Common.Interfaces.IRepository<>), typeof(Repositories.Repository<>));
+        services.TryAddScoped<AegisCore.Contracts.Common.Interfaces.IUnitOfWork, UnitOfWork>();
+        services.TryAddSingleton<IConnectionMultiplexer>(_ =>
+        {
+            var connectionString = configuration["NOCTURNE_REDIS_CONNECTION"]
+                ?? configuration.GetConnectionString("Redis")
+                ?? configuration["Redis:ConnectionString"]
+                ?? "localhost:6379";
+            var options = ConfigurationOptions.Parse(connectionString);
+            options.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(options);
+        });
         services.AddStorageProvider(configuration);
         services.AddScoped<AegisCore.Application.Foundation.IPolicyService, PolicyService>();
         services.AddScoped<AegisCore.Application.Foundation.IAuditService, AuditService>();
@@ -82,6 +97,7 @@ public static class InfrastructureServiceExtensions
         services.AddInternationalization(configuration);
         services.AddConfigCenter(configuration);
         services.AddIdentityGovernance(configuration);
+        services.AddAbacAuthorization();
         services.AddApiGateway(configuration);
         services.AddDegreeAudit(configuration);
         services.AddEnterpriseSearch(configuration);
