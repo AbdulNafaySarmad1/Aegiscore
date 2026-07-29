@@ -6,7 +6,7 @@ using Moq;
 
 namespace AegisCore.Tests;
 
-[CollectionDefinition(Name, DisableParallelization = true)]
+[CollectionDefinition("Installation state", DisableParallelization = true)]
 public sealed class InstallationStateCollection
 {
     public const string Name = "Installation state";
