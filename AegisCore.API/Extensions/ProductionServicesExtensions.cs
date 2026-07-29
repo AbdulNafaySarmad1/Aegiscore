@@ -80,6 +80,7 @@ public static class ProductionServicesExtensions
 {
     public static IServiceCollection AddProductionServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<EnhancedSetupService>();
         return services;
     }
