@@ -1,7 +1,15 @@
-# Nocturne — Complete University ERP Platform Prompts
+# AegisCore — Complete University Operating Suite
+
+> **Architecture:** multi-tenant modular monolith in a monorepo. AegisCore is
+> modular internally, unified commercially, and configurable operationally.
+> Every valid license activates the complete core suite; modules are not sold
+> or licensed separately. See
+> [`docs/architecture/0001-modular-monolith.md`](docs/architecture/0001-modular-monolith.md).
 
 ## Overview
-This is the **complete specification and implementation guide** for Nocturne, a Pakistani university ERP platform built in C# 14 / .NET 10.
+This is the AegisCore university operating platform: a Next.js 16 portal backed
+by a .NET 10/C# 14 authoritative API, PostgreSQL, Redis, background processing,
+and cloud/on-premises deployment paths.
 
 ## Operational local/demo stack
 

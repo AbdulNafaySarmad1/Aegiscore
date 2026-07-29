@@ -50,7 +50,6 @@ public sealed class LicenseService(
                 DateOnly.Parse(Required(payload, "issued_date")),
                 DateOnly.Parse(Required(payload, "expiry_date")),
                 int.Parse(Required(payload, "max_concurrent_users")),
-                payload["licensed_modules"]?.AsArray().Select(v => v?.GetValue<string>() ?? string.Empty).Where(v => v.Length > 0).ToList() ?? [],
                 Required(payload, "issued_by"));
 
             return info.ExpiryDate < DateOnly.FromDateTime(DateTime.UtcNow)
@@ -135,7 +134,7 @@ public sealed class LicenseService(
                 university_id = state.UniversityId,
                 university_name = state.UniversityName,
                 current_user_count = await db.Users.CountAsync(ct),
-                active_modules = JsonNode.Parse(state.LicenseJson)?["licensed_modules"],
+                suite = "complete",
                 timestamp = DateTimeOffset.UtcNow
             }, timeout.Token);
 
@@ -172,22 +171,6 @@ public sealed class LicenseService(
             logger.LogWarning(ex, "License heartbeat failed for license ending {Tail}", Tail(state.LicenseKey));
             return await FailHeartbeatAsync(state, "timeout", ex.Message, ct);
         }
-    }
-
-    public async Task<bool> IsModuleEnabledAsync(string moduleName, CancellationToken ct = default)
-    {
-        var state = await CurrentAsync(ct);
-        if (state is null || IsLocked(state))
-        {
-            return false;
-        }
-
-        var modules = JsonNode.Parse(state.LicenseJson)?["licensed_modules"]?.AsArray()
-            .Select(v => v?.GetValue<string>())
-            .Where(v => !string.IsNullOrWhiteSpace(v))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        return modules?.Contains(moduleName) == true;
     }
 
     public async Task<LicenseRuntimeStatus> GetStatusAsync(CancellationToken ct = default)

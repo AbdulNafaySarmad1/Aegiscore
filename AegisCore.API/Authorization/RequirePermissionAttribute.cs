@@ -31,17 +31,6 @@ public sealed class PermissionPolicyProvider(IOptions<AuthorizationOptions> opti
             return Task.FromResult<AuthorizationPolicy?>(policy);
         }
 
-        const string modulePrefix = "module:";
-        if (policyName.StartsWith(modulePrefix, StringComparison.OrdinalIgnoreCase))
-        {
-            var policy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .AddRequirements(new ModuleRequirement(policyName[modulePrefix.Length..]))
-                .Build();
-
-            return Task.FromResult<AuthorizationPolicy?>(policy);
-        }
-
         return base.GetPolicyAsync(policyName);
     }
 }
