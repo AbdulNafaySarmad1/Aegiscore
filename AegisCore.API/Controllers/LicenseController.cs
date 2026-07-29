@@ -41,6 +41,7 @@ public sealed class NocturneLicenseController(
         return NoContent();
     }
 
+    [AllowAnonymous]
     [HttpPost("/api/license/heartbeat")]
     public async Task<IActionResult> Heartbeat([FromBody] HeartbeatRequest request, CancellationToken ct)
     {
