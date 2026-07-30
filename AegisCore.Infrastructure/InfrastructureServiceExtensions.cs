@@ -65,6 +65,12 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Foundation.IAuditService, AuditService>();
         services.AddScoped<AegisCore.Application.Foundation.IAcademicCalendarService, AcademicCalendarService>();
         services.AddHttpClient("license");
+        services.AddHttpClient("infisical", client =>
+        {
+            var baseUrl = configuration["INFISICAL_URL"];
+            if (Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+                client.BaseAddress = uri;
+        });
         services.AddScoped<AegisCore.Application.Licensing.ILicenseService, AegisCore.Infrastructure.Licensing.LicenseService>();
         services.AddScoped<AegisCore.Application.Admissions.IMeritCalculationService, MeritCalculationService>();
         services.AddScoped<AegisCore.Application.Admissions.IIBCCEquivalenceService, IBCCEquivalenceService>();

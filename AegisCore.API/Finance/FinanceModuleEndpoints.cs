@@ -44,12 +44,10 @@ public static class FinanceModuleEndpoints
         group.MapPost("/payments", async (HttpContext context, RecordFinancePaymentCommand command, IFinanceModuleService finance, CancellationToken ct) =>
             Results.Ok(await finance.RecordPaymentAsync(Tenant(context), command, ct)));
 
-        group.MapPut("/gateways/{slug}", async (string slug, HttpContext context, ConfigureGatewayRequest request, IFinanceModuleService finance, CancellationToken ct) =>
-        {
-            if (!CanManageFinance(context)) return Results.Forbid();
-            var command = new ConfigureGatewayCommand(slug, request.Environment, request.SecretNamespace, request.IsActive);
-            return Results.Ok(await finance.ConfigureGatewayAsync(Tenant(context), UserId(context), command, ct));
-        });
+        group.MapPut("/gateways/{slug}", (string _, HttpContext context) =>
+            CanManageFinance(context)
+                ? Results.StatusCode(StatusCodes.Status410Gone)
+                : Results.Forbid());
 
         return endpoints;
     }
@@ -67,5 +65,4 @@ public static class FinanceModuleEndpoints
     private static bool CanManageFinance(HttpContext context)
         => context.User.IsInRole("Finance") || context.User.IsInRole("CFO") || context.User.IsInRole("Admin") || context.User.IsInRole("SuperAdmin");
 
-    public sealed record ConfigureGatewayRequest(string Environment, string SecretNamespace, bool IsActive);
 }

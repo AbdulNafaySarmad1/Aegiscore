@@ -133,6 +133,8 @@ public sealed class FinanceModuleService(AegisDbContext db) : IFinanceModuleServ
     {
         RequireTenant(tenantId);
         if (command.FeeDemandId == Guid.Empty || command.Amount <= 0m || string.IsNullOrWhiteSpace(command.IdempotencyKey)) throw new ArgumentException("Payment fields are invalid.");
+        if (!string.IsNullOrWhiteSpace(command.GatewaySlug)) throw new InvalidOperationException("Gateway payments must be confirmed by the gateway webhook.");
+        if (!string.Equals(command.Method, "MANUAL", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Only manually verified payments may use this endpoint.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var existing = await db.Set<FinancePayment>().IgnoreQueryFilters().SingleOrDefaultAsync(p => p.TenantId == tenantId && p.IdempotencyKey == command.IdempotencyKey, ct);
         if (existing is not null) return existing;

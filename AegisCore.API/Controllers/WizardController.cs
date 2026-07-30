@@ -15,6 +15,7 @@ public sealed class WizardController(
     IConfiguration configuration,
     WizardSessionService sessions,
     WizardProvisioningService provisioning,
+    WizardGatewayService gateways,
     WizardStateService state,
     OnboardingService onboarding,
     IInstallationStateService installation) : ControllerBase
@@ -50,6 +51,30 @@ public sealed class WizardController(
         var data = step == 3 ? SanitizeGatewayStep(request.Data) : request.Data;
         var session = await sessions.SaveAsync(TenantId(), request.SessionId, step, data, ct);
         return Ok(new { success = true, nextStep = Math.Min(session.CurrentStep, 7), sessionId = session.Id });
+    }
+
+    [HttpPost("gateways/{slug}/configure")]
+    public async Task<IActionResult> ConfigureGateway(string slug, [FromBody] JsonElement request, CancellationToken ct)
+    {
+        var session = await sessions.GetOrCreateAsync(TenantId(), HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+        if (!string.Equals(session.LicenseMode, "paid", StringComparison.OrdinalIgnoreCase))
+            return UnprocessableEntity(new { success = false, error = "Payment gateways are disabled in demo mode." });
+        try
+        {
+            var result = await gateways.ConfigureAsync(TenantId(), slug, request, ct);
+            await sessions.MarkGatewayConfiguredAsync(TenantId(), session.Id, result.GatewaySlug, ct);
+            return Ok(result);
+        }
+        catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
+        catch (InvalidOperationException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
+    }
+
+    [HttpPost("gateways/{slug}/health-check")]
+    public async Task<IActionResult> GatewayHealthCheck(string slug, CancellationToken ct)
+    {
+        try { return Ok(await gateways.HealthCheckAsync(TenantId(), slug, ct)); }
+        catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
+        catch (InvalidOperationException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
     }
 
     [HttpPost("complete")]

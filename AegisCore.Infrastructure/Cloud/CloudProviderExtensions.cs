@@ -2,6 +2,7 @@ using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Infrastructure.Cloud.Azure;
 using AegisCore.Infrastructure.Cloud.Aws;
 using AegisCore.Infrastructure.Cloud.Gcp;
+using AegisCore.Infrastructure.Cloud.Infisical;
 using AegisCore.Infrastructure.Cloud.OnPremise;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ public static class CloudProviderExtensions
                 "AZURE" => new AzureSecretService(configuration, sp.GetRequiredService<ILogger<AzureSecretService>>()),
                 "AWS" => new AwsSecretsManagerService(configuration, sp.GetRequiredService<ILogger<AwsSecretsManagerService>>()),
                 "GCP" => new GcpSecretManagerService(configuration, sp.GetRequiredService<ILogger<GcpSecretManagerService>>()),
+                "INFISICAL" => new InfisicalSecretService(sp.GetRequiredService<IHttpClientFactory>(), configuration),
                 _ => new EnvironmentVariableSecretService(sp.GetRequiredService<ILogger<EnvironmentVariableSecretService>>())
             });
 

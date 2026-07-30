@@ -61,6 +61,21 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
         return session;
     }
 
+    public async Task MarkGatewayConfiguredAsync(Guid tenantId, Guid sessionId, string gatewaySlug, CancellationToken ct)
+    {
+        var session = await db.WizardSessions.IgnoreQueryFilters()
+            .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
+            ?? throw new KeyNotFoundException("Wizard session was not found.");
+        var root = JsonNode.Parse(session.StepData)?.AsObject() ?? new JsonObject();
+        var step = root["step3"]?.AsObject() ?? new JsonObject();
+        var configured = step["configuredGateways"] as JsonArray ?? [];
+        if (!configured.Any(x => string.Equals(x?.GetValue<string>(), gatewaySlug, StringComparison.OrdinalIgnoreCase))) configured.Add(gatewaySlug);
+        step["configuredGateways"] = configured;
+        root["step3"] = step;
+        session.StepData = root.ToJsonString(JsonOptions);
+        await db.SaveChangesAsync(ct);
+    }
+
     public async Task<WizardSession> CompleteAsync(Guid tenantId, Guid sessionId, string confirmedBy, CancellationToken ct)
     {
         var session = await db.WizardSessions.IgnoreQueryFilters()

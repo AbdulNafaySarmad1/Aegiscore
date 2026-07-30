@@ -13,6 +13,7 @@ using AegisCore.Infrastructure.Security;
 using AegisCore.Infrastructure.Payments.Raast;
 using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure.Cloud.R2;
+using AegisCore.Infrastructure.Cloud;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -67,12 +68,19 @@ public static class SetupServicesExtensions
     public static IServiceCollection AddSetupServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAegisDbContext(configuration);
+        services.AddCloudProvider(configuration);
+        services.AddHttpClient("infisical", client =>
+        {
+            if (Uri.TryCreate(configuration["INFISICAL_URL"], UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+                client.BaseAddress = uri;
+        });
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<WizardStateService>();
         services.AddSingleton<OnboardingService>();
         services.AddSingleton<EnhancedSetupService>();
         services.AddScoped<WizardSessionService>();
         services.AddScoped<WizardProvisioningService>();
+        services.AddScoped<WizardGatewayService>();
         services.AddScoped<SetupImportService>();
         services.AddControllers();
         return services;
