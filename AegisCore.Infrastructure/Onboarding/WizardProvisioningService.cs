@@ -15,6 +15,9 @@ public sealed class WizardProvisioningService(AegisDbContext db)
         var fees = root["step5"]?.AsObject() ?? throw new InvalidOperationException("Fee structure is missing.");
         var standard = Required(finance, "standard").ToUpperInvariant();
         var baseCurrency = Required(finance, "baseCurrency").ToUpperInvariant();
+        var licenseStep = root["step0"]?.AsObject() ?? throw new InvalidOperationException("License selection is missing.");
+        var licenseMode = Required(licenseStep, "mode").ToLowerInvariant();
+        if (licenseMode is not ("demo" or "paid")) throw new InvalidOperationException("License mode is invalid.");
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
         var campus = await db.Campuses.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.IsMain, ct);
@@ -111,6 +114,24 @@ public sealed class WizardProvisioningService(AegisDbContext db)
             db.FeeStructures.Add(structure);
         }
         await db.SaveChangesAsync(ct);
+        var license = await db.Licenses.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct);
+        if (license is null)
+        {
+            var demo = licenseMode == "demo";
+            license = new License
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, CustomerName = Required(university, "name"),
+                CustomerEmail = university["contactEmail"]?.GetValue<string>(),
+                LicenseKey = demo ? $"DEMO-{tenantId:N}" : Required(licenseStep, "licenseKey"),
+                Edition = demo ? LicenseEdition.Community : LicenseEdition.Professional,
+                Status = demo ? LicenseStatus.Trial : LicenseStatus.Active,
+                MaxUsers = demo ? 500 : int.MaxValue, MaxCampuses = demo ? 1 : int.MaxValue,
+                FeatureEntitlementsJson = new JsonObject { ["mode"] = licenseMode, ["baseCurrency"] = baseCurrency, ["standard"] = standard }.ToJsonString(),
+                IssuedAt = DateTime.UtcNow, ExpiresAt = demo ? DateTime.UtcNow.AddDays(30) : null
+            };
+            db.Licenses.Add(license);
+            await db.SaveChangesAsync(ct);
+        }
         await transaction.CommitAsync(ct);
     }
 
