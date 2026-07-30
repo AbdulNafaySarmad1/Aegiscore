@@ -11,6 +11,7 @@ using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Onboarding;
 using AegisCore.Infrastructure.Security;
 using AegisCore.Infrastructure.Payments.Raast;
+using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure.Cloud.R2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -70,6 +71,8 @@ public static class SetupServicesExtensions
         services.AddSingleton<WizardStateService>();
         services.AddSingleton<OnboardingService>();
         services.AddSingleton<EnhancedSetupService>();
+        services.AddScoped<WizardSessionService>();
+        services.AddScoped<WizardProvisioningService>();
         services.AddScoped<SetupImportService>();
         services.AddControllers();
         return services;
@@ -81,7 +84,9 @@ public static class ProductionServicesExtensions
     public static IServiceCollection AddProductionServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<EnhancedSetupService>();
+        services.AddFinanceModule();
         return services;
     }
 }
@@ -115,6 +120,19 @@ public static class AuthenticationServicesExtensions
                 secret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
             }
             options.RequireHttpsMetadata = false;
+            var publicKeyPem = configuration["Jwt:PublicKey"];
+            if (!string.IsNullOrWhiteSpace(publicKeyPem) && !publicKeyPem.StartsWith("${", StringComparison.Ordinal))
+            {
+                var publicKey = RSA.Create();
+                publicKey.ImportFromPem(publicKeyPem.ToCharArray());
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true, ValidIssuer = "https://aegiscore.pk", ValidateAudience = true, ValidAudience = audience,
+                    ValidateLifetime = true, ValidateIssuerSigningKey = true, IssuerSigningKey = new RsaSecurityKey(publicKey),
+                    ClockSkew = TimeSpan.FromMinutes(2), ValidAlgorithms = [SecurityAlgorithms.RsaSha256]
+                };
+                return;
+            }
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = false, ValidateAudience = true, ValidAudience = audience, ValidateLifetime = true,

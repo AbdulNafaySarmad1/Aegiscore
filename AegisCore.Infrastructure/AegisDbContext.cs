@@ -1592,6 +1592,9 @@ public class AegisDbContext : DbContext
     public DbSet<AcademicHoliday> AcademicHolidays => Set<AcademicHoliday>();
     public DbSet<CrossDeptPermissionRequest> CrossDeptPermissionRequests => Set<CrossDeptPermissionRequest>();
     public DbSet<LicenseState> LicenseStates => Set<LicenseState>();
+
+    public DbSet<WizardSession> WizardSessions => Set<WizardSession>();
+    public DbSet<WizardAdminCredential> WizardAdminCredentials => Set<WizardAdminCredential>();
     public DbSet<AdmissionApplication> AdmissionApplications => Set<AdmissionApplication>();
     public DbSet<ApplicationDocument> ApplicationDocuments => Set<ApplicationDocument>();
     public DbSet<MeritList> MeritLists => Set<MeritList>();
@@ -1614,6 +1617,16 @@ public class AegisDbContext : DbContext
     public DbSet<StudentFeeDue> StudentFeeDues => Set<StudentFeeDue>();
     public DbSet<StudentFeePayment> StudentFeePayments => Set<StudentFeePayment>();
     public DbSet<CostCenter> CostCenters => Set<CostCenter>();
+    public DbSet<FinanceVoucher> FinanceVouchers => Set<FinanceVoucher>();
+    public DbSet<FinanceVoucherLine> FinanceVoucherLines => Set<FinanceVoucherLine>();
+    public DbSet<FinanceVoucherApproval> FinanceVoucherApprovals => Set<FinanceVoucherApproval>();
+    public DbSet<FinanceVoucherSequence> FinanceVoucherSequences => Set<FinanceVoucherSequence>();
+    public DbSet<FeeDemand> FeeDemands => Set<FeeDemand>();
+    public DbSet<FeeInstallment> FeeInstallments => Set<FeeInstallment>();
+    public DbSet<FinancePayment> FinancePayments => Set<FinancePayment>();
+    public DbSet<PaymentGatewayConfiguration> PaymentGatewayConfigurations => Set<PaymentGatewayConfiguration>();
+    public DbSet<PaymentGatewayEvent> PaymentGatewayEvents => Set<PaymentGatewayEvent>();
+    public DbSet<ExchangeRateSnapshot> ExchangeRateSnapshots => Set<ExchangeRateSnapshot>();
     public DbSet<ProcurementRequisition> ProcurementRequisitions => Set<ProcurementRequisition>();
     public DbSet<RequisitionLineItem> RequisitionLineItems => Set<RequisitionLineItem>();
     public DbSet<Vendor> Vendors => Set<Vendor>();
@@ -1843,6 +1856,26 @@ public class AegisDbContext : DbContext
             entity.Property(e => e.LastHeartbeatStatus).HasMaxLength(20);
         });
 
+        modelBuilder.Entity<WizardSession>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.CompletedAt });
+            entity.Property(e => e.LicenseMode).HasMaxLength(10).IsRequired();
+            entity.Property(e => e.LicenseKey).HasMaxLength(50);
+            entity.Property(e => e.StepData).HasColumnType("jsonb").IsRequired();
+            entity.Property(e => e.CreatedByIp).HasMaxLength(64);
+        });
+
+        modelBuilder.Entity<WizardAdminCredential>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.SessionId, e.Email }).IsUnique();
+            entity.Property(e => e.FullName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Email).HasMaxLength(300).IsRequired();
+            entity.Property(e => e.RoleName).HasMaxLength(80).IsRequired();
+            entity.Property(e => e.PasswordHash).HasMaxLength(2000).IsRequired();
+        });
+
         modelBuilder.Entity<AdmissionApplication>(entity =>
         {
             entity.HasIndex(e => e.Cnic).IsUnique();
@@ -1963,6 +1996,55 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => e.FeeDueId);
             entity.HasIndex(e => e.ReferenceNumber);
         });
+
+        modelBuilder.Entity<FinanceVoucher>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.VoucherNumber }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.CreatedAt });
+            entity.HasMany(e => e.Lines).WithOne(e => e.Voucher).HasForeignKey(e => e.FinanceVoucherId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.Approvals).WithOne().HasForeignKey(e => e.FinanceVoucherId).OnDelete(DeleteBehavior.Restrict);
+            entity.Property(e => e.PqcSignature).HasColumnType("bytea");
+        });
+
+        modelBuilder.Entity<FinanceVoucherLine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId });
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherLines_OneSided", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)"));
+        });
+
+        modelBuilder.Entity<FinanceVoucherApproval>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId, e.ApproverUserId }).IsUnique());
+
+        modelBuilder.Entity<FinanceVoucherSequence>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.VoucherType, e.FiscalYear }).IsUnique());
+
+        modelBuilder.Entity<FeeDemand>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.DemandNumber }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Status });
+            entity.HasMany(e => e.Installments).WithOne(e => e.Demand).HasForeignKey(e => e.FeeDemandId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<FeeInstallment>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.FeeDemandId, e.Sequence }).IsUnique());
+
+        modelBuilder.Entity<FinancePayment>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.IdempotencyKey }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.FeeDemandId, e.Status });
+        });
+
+        modelBuilder.Entity<PaymentGatewayConfiguration>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.GatewaySlug }).IsUnique());
+
+        modelBuilder.Entity<PaymentGatewayEvent>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.CreatedAt });
+            entity.HasIndex(e => new { e.TenantId, e.GatewaySlug, e.ReferenceId });
+        });
+
+        modelBuilder.Entity<ExchangeRateSnapshot>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.BaseCurrency, e.QuoteCurrency, e.ValidForDate }).IsUnique());
 
         modelBuilder.Entity<CostCenter>(entity =>
         {

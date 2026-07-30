@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { SetupWizard } from "@/components/setup-wizard";
+import { WizardShell } from "@/components/wizard/WizardShell";
 
 export const metadata: Metadata = {
   title: "University setup"
 };
 
 export default function SetupPage() {
-  return <SetupWizard />;
+  return <WizardShell />;
 }

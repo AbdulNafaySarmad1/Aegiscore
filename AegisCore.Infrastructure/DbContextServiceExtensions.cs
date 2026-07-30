@@ -1,7 +1,8 @@
 using AegisCore.Infrastructure.Config;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Infrastructure;
 
@@ -10,13 +11,15 @@ public static class DbContextServiceExtensions
     public static IServiceCollection AddAegisDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = BuildConnectionString(configuration);
+        services.AddHttpContextAccessor();
+        services.AddSingleton<TenantSessionInterceptor>();
 
-        services.AddDbContext<AegisDbContext>(options =>
+        services.AddDbContext<AegisDbContext>((serviceProvider, options) =>
             options.UseNpgsql(connectionString, npgsql =>
             {
                 npgsql.MigrationsAssembly(typeof(AegisDbContext).Assembly.GetName().Name);
                 npgsql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-            }));
+            }).AddInterceptors(serviceProvider.GetRequiredService<TenantSessionInterceptor>()));
 
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<AegisDbContext>());
 

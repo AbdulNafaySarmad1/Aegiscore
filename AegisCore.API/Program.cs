@@ -2,6 +2,7 @@ using Serilog;
 using AegisCore.API.Background;
 using AegisCore.API.Extensions;
 using AegisCore.API.Hubs;
+using AegisCore.API.Finance;
 using AegisCore.API.Middleware;
 using AegisCore.Application;
 using AegisCore.Application.Maintenance;
@@ -177,6 +178,7 @@ else
     app.MapHub<StateMachineHub>("/hubs/statemachine");
     app.MapHub<NotificationHub>("/hubs/notifications");
     app.MapControllers();
+    app.MapFinanceModuleEndpoints();
 
     try
     {

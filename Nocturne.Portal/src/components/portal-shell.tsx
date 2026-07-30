@@ -10,6 +10,7 @@ import {
   ClipboardCheck,
   Command,
   CreditCard,
+  Landmark,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -79,6 +80,7 @@ const navigation: Record<Role, NavGroup[]> = {
       { label: "Approvals", icon: ClipboardCheck, badge: "8" }
     ] },
     { label: "Administration", items: [
+      { label: "Finance", icon: Landmark },
       { label: "Organization", icon: Building2 },
       { label: "Access control", icon: ShieldCheck },
       { label: "Configuration", icon: Settings }
@@ -202,7 +204,10 @@ export function PortalShell() {
                 <button
                   key={item.label}
                   className={active === item.label ? "active" : ""}
-                  onClick={() => { setActive(item.label); setMenuOpen(false); }}
+                  onClick={() => {
+                    if (item.label === "Finance") window.location.assign("/finance/");
+                    else { setActive(item.label); setMenuOpen(false); }
+                  }}
                 >
                   <item.icon aria-hidden />
                   <span>{item.label}</span>

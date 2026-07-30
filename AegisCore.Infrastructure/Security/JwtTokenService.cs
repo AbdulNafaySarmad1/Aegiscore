@@ -13,8 +13,9 @@ namespace AegisCore.Infrastructure.Security;
 /// </summary>
 public class JwtTokenService : IJwtTokenService
 {
-    private readonly RSA _privateKey;
-    private readonly RSA _publicKey;
+    private readonly SecurityKey _signingKey;
+    private readonly SecurityKey _validationKey;
+    private readonly string _algorithm;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="JwtTokenService"/> class.
@@ -22,22 +23,34 @@ public class JwtTokenService : IJwtTokenService
     /// <param name="configuration">The application configuration.</param>
     public JwtTokenService(IConfiguration configuration)
     {
-        var privateKeyPem = configuration["Jwt:PrivateKey"] ?? throw new InvalidOperationException("JWT private key not configured");
-        var publicKeyPem = configuration["Jwt:PublicKey"] ?? throw new InvalidOperationException("JWT public key not configured");
+        var privateKeyPem = configuration["Jwt:PrivateKey"];
+        var publicKeyPem = configuration["Jwt:PublicKey"];
+        if (!string.IsNullOrWhiteSpace(privateKeyPem) && !privateKeyPem.StartsWith("${", StringComparison.Ordinal) &&
+            !string.IsNullOrWhiteSpace(publicKeyPem) && !publicKeyPem.StartsWith("${", StringComparison.Ordinal))
+        {
+            var privateKey = RSA.Create();
+            privateKey.ImportFromPem(privateKeyPem.ToCharArray());
+            var publicKey = RSA.Create();
+            publicKey.ImportFromPem(publicKeyPem.ToCharArray());
+            _signingKey = new RsaSecurityKey(privateKey);
+            _validationKey = new RsaSecurityKey(publicKey);
+            _algorithm = SecurityAlgorithms.RsaSha256;
+            return;
+        }
 
-        _privateKey = RSA.Create();
-        _privateKey.ImportFromPem(privateKeyPem.ToCharArray());
-
-        _publicKey = RSA.Create();
-        _publicKey.ImportFromPem(publicKeyPem.ToCharArray());
+        var secret = configuration["NOCTURNE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
+        if (string.IsNullOrWhiteSpace(secret)) throw new InvalidOperationException("JWT signing keys are not configured.");
+        _signingKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
+        _validationKey = _signingKey;
+        _algorithm = SecurityAlgorithms.HmacSha256;
     }
 
     /// <inheritdoc />
     public string GenerateAccessToken(User user)
     {
         var credentials = new SigningCredentials(
-            new RsaSecurityKey(_privateKey),
-            SecurityAlgorithms.RsaSha256
+            _signingKey,
+            _algorithm
         );
 
         var claims = new List<Claim>
@@ -75,13 +88,14 @@ public class JwtTokenService : IJwtTokenService
         var validationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new RsaSecurityKey(_publicKey),
+            IssuerSigningKey = _validationKey,
             ValidateIssuer = true,
             ValidIssuer = "https://aegiscore.pk",
             ValidateAudience = true,
             ValidAudience = "aegiscore-api",
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            ValidAlgorithms = [_algorithm]
         };
 
         return tokenHandler.ValidateToken(token, validationParameters, out _);
