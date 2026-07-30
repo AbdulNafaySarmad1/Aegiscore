@@ -278,6 +278,23 @@ public sealed class FinanceModuleService(AegisDbContext db) : IFinanceModuleServ
             await vouchers.CountAsync(v => v.Status == FinanceStates.PendingApproval, ct));
     }
 
+    public async Task<IReadOnlyList<TrialBalanceLine>> GetTrialBalanceAsync(Guid tenantId, DateTime periodFrom, DateTime periodTo, CancellationToken ct)
+    {
+        RequireTenant(tenantId);
+        if (periodTo < periodFrom) throw new ArgumentException("Report date range is invalid.");
+        return await (
+            from line in db.JournalEntryLines.AsNoTracking()
+            join entry in db.JournalEntries.AsNoTracking() on line.JournalEntryId equals entry.Id
+            join account in db.ChartOfAccounts.AsNoTracking() on line.ChartOfAccountId equals account.Id
+            where line.TenantId == tenantId && entry.TenantId == tenantId && account.TenantId == tenantId && entry.IsPosted && entry.EntryDate >= periodFrom && entry.EntryDate <= periodTo
+            group line by new { account.AccountCode, account.AccountName } into grouped
+            let debit = grouped.Sum(line => line.Debit)
+            let credit = grouped.Sum(line => line.Credit)
+            orderby grouped.Key.AccountCode
+            select new TrialBalanceLine(grouped.Key.AccountCode, grouped.Key.AccountName, debit, credit, debit - credit)
+        ).ToListAsync(ct);
+    }
+
     private async Task<FinanceVoucher> VoucherAsync(Guid tenantId, Guid id, CancellationToken ct)
         => await db.Set<FinanceVoucher>().IgnoreQueryFilters().Include(v => v.Lines).SingleOrDefaultAsync(v => v.Id == id && v.TenantId == tenantId, ct)
             ?? throw new InvalidOperationException("Voucher was not found.");

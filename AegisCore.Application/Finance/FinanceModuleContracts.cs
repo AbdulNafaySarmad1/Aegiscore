@@ -20,6 +20,7 @@ public sealed record RecordFinancePaymentCommand(Guid FeeDemandId, Guid? FeeInst
 public sealed record RecordGatewayPaymentCommand(Guid FeeDemandId, Guid? FeeInstallmentId, decimal Amount, string Currency, string WebhookId, string ExternalReference, string SanitizedPayloadJson, bool IsSandbox);
 public sealed record ConfigureGatewayCommand(string GatewaySlug, string Environment, string SecretNamespace, bool IsActive);
 public sealed record FinanceDashboardSummary(decimal OpenReceivables, decimal PostedThisPeriod, decimal PendingApprovalAmount, int OpenDemandCount, int PendingVoucherCount);
+public sealed record TrialBalanceLine(string AccountCode, string AccountName, decimal Debit, decimal Credit, decimal Balance);
 
 public interface IFinanceModuleService
 {
@@ -32,4 +33,5 @@ public interface IFinanceModuleService
     Task<FinancePayment> RecordGatewayPaymentAsync(Guid tenantId, string gatewaySlug, RecordGatewayPaymentCommand command, CancellationToken ct);
     Task<PaymentGatewayConfiguration> ConfigureGatewayAsync(Guid tenantId, Guid actorId, ConfigureGatewayCommand command, CancellationToken ct);
     Task<FinanceDashboardSummary> GetDashboardAsync(Guid tenantId, CancellationToken ct);
+    Task<IReadOnlyList<TrialBalanceLine>> GetTrialBalanceAsync(Guid tenantId, DateTime from, DateTime to, CancellationToken ct);
 }

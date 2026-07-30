@@ -13,6 +13,12 @@ public static class FinanceModuleEndpoints
         group.MapGet("/dashboard", async (HttpContext context, IFinanceModuleService finance, CancellationToken ct) =>
             Results.Ok(await finance.GetDashboardAsync(Tenant(context), ct)));
 
+        group.MapGet("/reports/trial-balance", async (DateTime from, DateTime to, HttpContext context, IFinanceModuleService finance, CancellationToken ct) =>
+        {
+            if (!CanManageFinance(context)) return Results.Forbid();
+            return Results.Ok(new { from, to, lines = await finance.GetTrialBalanceAsync(Tenant(context), from, to, ct) });
+        });
+
         group.MapPost("/vouchers", async (HttpContext context, CreateVoucherCommand command, IFinanceModuleService finance, CancellationToken ct) =>
         {
             if (!CanManageFinance(context)) return Results.Forbid();
