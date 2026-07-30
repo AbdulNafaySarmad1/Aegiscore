@@ -24,6 +24,7 @@ public sealed class FinanceVoucher : ITenantScoped
     [MaxLength(80)] public string? PqcAlgorithm { get; set; }
     [MaxLength(200)] public string? PqcKeyId { get; set; }
     public byte[]? PqcSignature { get; set; }
+    public byte[]? PqcPublicKey { get; set; }
     public Guid TenantId { get; set; }
     public ICollection<FinanceVoucherLine> Lines { get; set; } = [];
     public ICollection<FinanceVoucherApproval> Approvals { get; set; } = [];

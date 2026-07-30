@@ -82,6 +82,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
             voucher.PqcAlgorithm = signature.Algorithm;
             voucher.PqcKeyId = signature.KeyId;
             voucher.PqcSignature = signature.Signature;
+            voucher.PqcPublicKey = signature.PublicKey;
         }
         db.Set<FinanceVoucherApproval>().Add(approval);
         voucher.Status = command.Approve ? FinanceStates.Approved : FinanceStates.Rejected;

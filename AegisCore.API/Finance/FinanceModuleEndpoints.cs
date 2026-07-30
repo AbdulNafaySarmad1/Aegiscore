@@ -1,6 +1,9 @@
 using System.Security.Claims;
 using AegisCore.Application.Finance;
+using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Finance;
+using AegisCore.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.API.Finance;
 
@@ -17,6 +20,23 @@ public static class FinanceModuleEndpoints
         {
             if (!CanManageFinance(context)) return Results.Forbid();
             return Results.Ok(new { from, to, lines = await finance.GetTrialBalanceAsync(Tenant(context), from, to, ct) });
+        });
+
+        group.MapGet("/vouchers/{id:guid}/verification", async (Guid id, HttpContext context, AegisDbContext db, CancellationToken ct) =>
+        {
+            var voucher = await db.Set<FinanceVoucher>().AsNoTracking()
+                .SingleOrDefaultAsync(x => x.TenantId == Tenant(context) && x.Id == id, ct);
+            if (voucher is null) return Results.NotFound();
+            return Results.Ok(new
+            {
+                voucher.Id,
+                voucher.VoucherNumber,
+                voucher.Status,
+                voucher.PqcAlgorithm,
+                voucher.PqcKeyId,
+                Signature = voucher.PqcSignature is null ? null : Convert.ToBase64String(voucher.PqcSignature),
+                PublicKey = voucher.PqcPublicKey is null ? null : Convert.ToBase64String(voucher.PqcPublicKey)
+            });
         });
 
         group.MapPost("/vouchers", async (HttpContext context, CreateVoucherCommand command, IFinanceModuleService finance, CancellationToken ct) =>
