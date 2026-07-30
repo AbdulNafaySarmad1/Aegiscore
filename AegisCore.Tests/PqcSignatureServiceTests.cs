@@ -2,11 +2,22 @@ using System.Collections.Concurrent;
 using System.Text;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Infrastructure.Security.Pqc;
+using AegisCore.Infrastructure.Finance;
 
 namespace AegisCore.Tests;
 
 public sealed class PqcSignatureServiceTests
 {
+    [Fact]
+    public void MerkleTreeDuplicatesOddLeafWithoutMutatingInput()
+    {
+        var first = Encoding.UTF8.GetBytes("first");
+        var root = FinanceMerkleTree.ComputeRoot([first, Encoding.UTF8.GetBytes("second"), Encoding.UTF8.GetBytes("third")]);
+
+        Assert.Equal(32, root.Length);
+        Assert.Equal("first", Encoding.UTF8.GetString(first));
+    }
+
     [Fact]
     public async Task DilithiumSignatureRoundTripsAndRejectsTampering()
     {

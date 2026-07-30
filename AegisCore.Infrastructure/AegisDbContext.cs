@@ -1627,6 +1627,7 @@ public class AegisDbContext : DbContext
     public DbSet<PaymentGatewayConfiguration> PaymentGatewayConfigurations => Set<PaymentGatewayConfiguration>();
     public DbSet<PaymentGatewayEvent> PaymentGatewayEvents => Set<PaymentGatewayEvent>();
     public DbSet<ExchangeRateSnapshot> ExchangeRateSnapshots => Set<ExchangeRateSnapshot>();
+    public DbSet<FinanceAuditSeal> FinanceAuditSeals => Set<FinanceAuditSeal>();
     public DbSet<ProcurementRequisition> ProcurementRequisitions => Set<ProcurementRequisition>();
     public DbSet<RequisitionLineItem> RequisitionLineItems => Set<RequisitionLineItem>();
     public DbSet<Vendor> Vendors => Set<Vendor>();
@@ -2045,6 +2046,14 @@ public class AegisDbContext : DbContext
 
         modelBuilder.Entity<ExchangeRateSnapshot>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.BaseCurrency, e.QuoteCurrency, e.ValidForDate }).IsUnique());
+
+        modelBuilder.Entity<FinanceAuditSeal>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.SealedAt });
+            entity.Property(e => e.MerkleRoot).HasColumnType("bytea");
+            entity.Property(e => e.Signature).HasColumnType("bytea");
+            entity.Property(e => e.PublicKey).HasColumnType("bytea");
+        });
 
         modelBuilder.Entity<CostCenter>(entity =>
         {

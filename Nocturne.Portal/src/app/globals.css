@@ -94,6 +94,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .finance-empty > svg { width: 28px; height: 28px; color: var(--green); margin-bottom: 4px; }
 .finance-empty strong { color: var(--ink); font-size: 13px; }
 .finance-empty span { max-width: 260px; font-size: 11px; }
+.finance-security-panel { min-height: 0; margin-top: 18px; }
+.security-posture-grid { display: grid; grid-template-columns: 1.3fr repeat(4, minmax(0, 1fr)); gap: 1px; padding: 1px; background: var(--line); }
+.security-posture-grid > div { min-width: 0; display: grid; align-content: center; gap: 7px; min-height: 86px; padding: 16px; background: var(--surface); }
+.security-posture-grid small { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; }
+.security-posture-grid strong { min-width: 0; overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.security-status { display: flex !important; grid-template-columns: none !important; align-items: center; gap: 10px !important; }
+.security-status.green .control-dot { color: var(--green); background: var(--green-soft); }
+.security-status.amber .control-dot { color: var(--amber); background: var(--amber-soft); }
+.security-status.red .control-dot { color: var(--red); background: var(--red-soft); }
+.security-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px !important; }
+@media (max-width: 920px) { .security-posture-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .security-status { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .security-posture-grid { grid-template-columns: 1fr; } .security-status { grid-column: auto; } }
 
 /* Portal shell */
 .portal-shell { min-height: 100vh; display: grid; grid-template-columns: 268px minmax(0, 1fr); }

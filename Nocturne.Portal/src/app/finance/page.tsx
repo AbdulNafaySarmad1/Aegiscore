@@ -12,26 +12,42 @@ type Summary = {
   pendingVoucherCount: number;
 };
 
+type SecurityPosture = {
+  chainIntegrity: "green" | "amber" | "red";
+  lastSealTimestamp: string | null;
+  merkleRoot: string | null;
+  signatureAlgorithm: string | null;
+  keyId: string | null;
+  eventCount: number;
+};
+
 const money = (value: number) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(value);
 
 export default function FinancePage() {
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [security, setSecurity] = useState<SecurityPosture | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    apiGet<Summary>("/api/finance/v2/dashboard")
-      .then(setSummary)
+    Promise.all([
+      apiGet<Summary>("/api/finance/v2/dashboard"),
+      apiGet<SecurityPosture>("/api/finance/v2/security-posture")
+    ])
+      .then(([dashboard, posture]) => { setSummary(dashboard); setSecurity(posture); })
       .catch((reason: unknown) => setError(reason instanceof ApiError ? reason.message : "Finance data could not be loaded."))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    apiGet<Summary>("/api/finance/v2/dashboard")
-      .then(data => { if (!cancelled) setSummary(data); })
+    Promise.all([
+      apiGet<Summary>("/api/finance/v2/dashboard"),
+      apiGet<SecurityPosture>("/api/finance/v2/security-posture")
+    ])
+      .then(([dashboard, posture]) => { if (!cancelled) { setSummary(dashboard); setSecurity(posture); } })
       .catch((reason: unknown) => { if (!cancelled) setError(reason instanceof ApiError ? reason.message : "Finance data could not be loaded."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -64,7 +80,7 @@ export default function FinancePage() {
             <Control label="Tenant-scoped finance records" detail="PostgreSQL RLS enabled" />
             <Control label="Double-entry posting" detail="Database balance trigger" />
             <Control label="Maker-checker separation" detail="API enforced" />
-            <Control label="PQC voucher signature" detail="Awaiting ML-DSA provider" pending />
+            <Control label="PQC voucher signature" detail="ML-DSA approval signature" />
           </div>
         </article>
         <article className="surface finance-panel">
@@ -73,6 +89,17 @@ export default function FinancePage() {
             {summary?.pendingVoucherCount ? <><ArrowDownRight /><strong>{summary.pendingVoucherCount} voucher(s) awaiting approval</strong><span>Open the voucher queue to review maker submissions.</span></> : <><CheckCircle2 /><strong>No vouchers awaiting approval</strong><span>The maker-checker queue is clear.</span></>}
           </div>
         </article>
+      </section>
+
+      <section className="surface finance-panel finance-security-panel" aria-labelledby="security-posture-heading">
+        <div className="surface-heading"><div><h2 id="security-posture-heading">Security posture</h2><p>Append-only audit sealing and signature verification</p></div><ShieldCheck /></div>
+        <div className="security-posture-grid">
+          <div className={`security-status ${security?.chainIntegrity ?? "amber"}`}><span className="control-dot">{security?.chainIntegrity === "green" ? "✓" : "!"}</span><strong>{security?.chainIntegrity === "green" ? "Chain verified" : security?.chainIntegrity === "red" ? "Verification failed" : "Awaiting first seal"}</strong></div>
+          <div><small>Last seal</small><strong>{security?.lastSealTimestamp ? new Date(security.lastSealTimestamp).toLocaleString() : "Not sealed yet"}</strong></div>
+          <div><small>Merkle root</small><strong className="security-mono">{security?.merkleRoot ?? "-"}</strong></div>
+          <div><small>Signing key</small><strong>{security?.signatureAlgorithm ?? "-"} {security?.keyId ? `· ${security.keyId}` : ""}</strong></div>
+          <div><small>Events sealed</small><strong>{security?.eventCount ?? 0}</strong></div>
+        </div>
       </section>
     </main>
   );

@@ -3,6 +3,7 @@ using AegisCore.Application.Finance;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.API.Finance;
@@ -20,6 +21,23 @@ public static class FinanceModuleEndpoints
         {
             if (!CanManageFinance(context)) return Results.Forbid();
             return Results.Ok(new { from, to, lines = await finance.GetTrialBalanceAsync(Tenant(context), from, to, ct) });
+        });
+
+        group.MapGet("/security-posture", async (HttpContext context, AegisDbContext db, IPqcSignatureService pqc, CancellationToken ct) =>
+        {
+            if (!CanManageFinance(context)) return Results.Forbid();
+            var seal = await db.FinanceAuditSeals.AsNoTracking()
+                .OrderByDescending(x => x.SealedAt).FirstOrDefaultAsync(ct);
+            var chainIntegrity = seal is null ? "amber" : VerifySeal(Tenant(context), seal, pqc) ? "green" : "red";
+            return Results.Ok(new
+            {
+                chainIntegrity,
+                lastSealTimestamp = seal?.SealedAt,
+                merkleRoot = seal is null ? null : Convert.ToHexString(seal.MerkleRoot).ToLowerInvariant(),
+                signatureAlgorithm = seal?.Algorithm,
+                keyId = seal?.KeyId,
+                eventCount = seal?.EventCount ?? 0
+            });
         });
 
         group.MapGet("/vouchers/{id:guid}/verification", async (Guid id, HttpContext context, AegisDbContext db, CancellationToken ct) =>
@@ -90,5 +108,11 @@ public static class FinanceModuleEndpoints
 
     private static bool CanManageFinance(HttpContext context)
         => context.User.IsInRole("Finance") || context.User.IsInRole("CFO") || context.User.IsInRole("Admin") || context.User.IsInRole("SuperAdmin");
+
+    private static bool VerifySeal(Guid tenantId, FinanceAuditSeal seal, IPqcSignatureService pqc)
+    {
+        var payload = System.Text.Encoding.UTF8.GetBytes($"{tenantId:D}|{seal.PeriodStart:O}|{seal.PeriodEnd:O}|{seal.EventCount}|{Convert.ToHexString(seal.MerkleRoot)}");
+        return pqc.Verify(seal.Algorithm, payload, seal.Signature, seal.PublicKey);
+    }
 
 }
