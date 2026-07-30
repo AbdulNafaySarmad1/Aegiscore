@@ -256,6 +256,82 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         return payment;
     }
 
+    public async Task<FinancePaymentPlanConfiguration> ConfigurePaymentPlanAsync(Guid tenantId, ConfigurePaymentPlanCommand command, CancellationToken ct)
+    {
+        RequireTenant(tenantId);
+        var planType = NormalizePlanType(command.PlanType);
+        if (command.SurchargePercent is < 0m or > 100m || command.MinimumDownPaymentPercent is < 0m or > 100m || command.LatePenaltyPercent is < 0m or > 100m || command.LatePenaltyAmount < 0m || command.MaximumDuration < 0 || command.MaximumMissedInstallments is < 1 or > 12)
+            throw new ArgumentException("Payment plan configuration is invalid.");
+        var configuration = await db.Set<FinancePaymentPlanConfiguration>().IgnoreQueryFilters()
+            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.PlanType == planType, ct);
+        if (configuration is null)
+        {
+            configuration = new FinancePaymentPlanConfiguration { Id = Guid.NewGuid(), TenantId = tenantId, PlanType = planType };
+            db.Set<FinancePaymentPlanConfiguration>().Add(configuration);
+        }
+        configuration.Enabled = command.Enabled;
+        configuration.SurchargePercent = command.SurchargePercent;
+        configuration.MinimumDownPaymentPercent = command.MinimumDownPaymentPercent;
+        configuration.MaximumDuration = command.MaximumDuration;
+        configuration.LatePenaltyAmount = command.LatePenaltyAmount;
+        configuration.LatePenaltyPercent = command.LatePenaltyPercent;
+        configuration.MaximumMissedInstallments = command.MaximumMissedInstallments;
+        configuration.RequiresApproval = command.RequiresApproval;
+        configuration.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(ct);
+        return configuration;
+    }
+
+    public async Task<FinancePaymentPlan> CreatePaymentPlanAsync(Guid tenantId, CreatePaymentPlanCommand command, CancellationToken ct)
+    {
+        RequireTenant(tenantId);
+        if (command.FeeDemandId == Guid.Empty || command.StartDate == default) throw new ArgumentException("Fee demand and start date are required.");
+        var planType = NormalizePlanType(command.PlanType);
+        var demand = await db.Set<FeeDemand>().IgnoreQueryFilters().Include(x => x.Installments)
+            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.FeeDemandId, ct)
+            ?? throw new InvalidOperationException("Fee demand was not found.");
+        if (demand.PaidAmount > 0m || await db.Set<FinancePaymentPlan>().IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.FeeDemandId == demand.Id, ct)) throw new InvalidOperationException("A paid or planned fee demand cannot be rescheduled.");
+        var configuration = await db.Set<FinancePaymentPlanConfiguration>().IgnoreQueryFilters()
+            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.PlanType == planType && x.Enabled, ct);
+        if (planType != "full" && configuration is null) throw new InvalidOperationException("This payment plan is not enabled for the tenant.");
+        var count = command.InstallmentCount > 0 ? command.InstallmentCount : planType switch { "full" => 1, "semester-split" => 2, "monthly" => 6, "weekly" => 16, "annual" => 1, _ => 0 };
+        if (count < 1 || (configuration?.MaximumDuration > 0 && count > configuration.MaximumDuration)) throw new ArgumentException("Installment count exceeds the configured plan duration.");
+
+        var subtotal = demand.TotalAmount;
+        var surcharge = Math.Round(subtotal * (configuration?.SurchargePercent ?? 0m) / 100m, 4, MidpointRounding.ToEven);
+        var total = subtotal + surcharge;
+        var plan = new FinancePaymentPlan
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, StudentId = demand.StudentId, FeeDemandId = demand.Id,
+            PlanType = planType, Status = configuration?.RequiresApproval == true ? "PENDING_APPROVAL" : "ACTIVE",
+            Subtotal = subtotal, SurchargeAmount = surcharge, TotalAmount = total, InstallmentCount = count, StartDate = command.StartDate,
+            ApprovedAt = configuration?.RequiresApproval == true ? null : DateTime.UtcNow
+        };
+        db.Set<FeeInstallment>().RemoveRange(demand.Installments);
+        demand.TotalAmount = total;
+        demand.OutstandingAmount = total;
+        demand.Installments = FinancePaymentPlanSchedule.Build(plan, count);
+        var minimumDownPayment = total * (configuration?.MinimumDownPaymentPercent ?? 0m) / 100m;
+        if (demand.Installments.First().Amount < minimumDownPayment) throw new InvalidOperationException("The generated schedule does not meet the configured minimum down payment.");
+        db.Set<FinancePaymentPlan>().Add(plan);
+        await db.SaveChangesAsync(ct);
+        return plan;
+    }
+
+    public async Task<FinancePaymentPlan> ApprovePaymentPlanAsync(Guid tenantId, Guid planId, Guid approverId, CancellationToken ct)
+    {
+        RequireTenant(tenantId);
+        if (approverId == Guid.Empty) throw new ArgumentException("Approver identity is required.");
+        var plan = await db.Set<FinancePaymentPlan>().IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == planId, ct)
+            ?? throw new InvalidOperationException("Payment plan was not found.");
+        if (!string.Equals(plan.Status, "PENDING_APPROVAL", StringComparison.Ordinal)) throw new InvalidOperationException("Payment plan is not awaiting approval.");
+        plan.Status = "ACTIVE";
+        plan.ApprovedByUserId = approverId;
+        plan.ApprovedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(ct);
+        return plan;
+    }
+
     public async Task<PaymentGatewayConfiguration> ConfigureGatewayAsync(Guid tenantId, Guid actorId, ConfigureGatewayCommand command, CancellationToken ct)
     {
         RequireTenant(tenantId);
@@ -321,6 +397,13 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         var normalized = currency.Trim().ToUpperInvariant();
         if (normalized.Length != 3 || normalized.Any(c => c is < 'A' or > 'Z')) throw new ArgumentException("Currency must be an ISO 4217 code.");
+        return normalized;
+    }
+
+    private static string NormalizePlanType(string value)
+    {
+        var normalized = value.Trim().ToLowerInvariant().Replace('_', '-');
+        if (normalized is not ("full" or "semester-split" or "monthly" or "weekly" or "annual" or "custom")) throw new ArgumentException("Payment plan type is invalid.");
         return normalized;
     }
 

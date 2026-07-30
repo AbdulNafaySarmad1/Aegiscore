@@ -19,6 +19,22 @@ public sealed class PqcSignatureServiceTests
     }
 
     [Fact]
+    public void MonthlySchedulePreservesTotalWithFinalRoundingAdjustment()
+    {
+        var plan = new AegisCore.Domain.Entities.FinancePaymentPlan
+        {
+            TenantId = Guid.NewGuid(), FeeDemandId = Guid.NewGuid(), PlanType = "monthly",
+            TotalAmount = 100m, StartDate = new DateTime(2026, 8, 1)
+        };
+
+        var installments = FinancePaymentPlanSchedule.Build(plan, 3);
+
+        Assert.Equal(plan.TotalAmount, installments.Sum(x => x.Amount));
+        Assert.Equal(new DateTime(2026, 9, 1), installments[1].DueDate);
+        Assert.Equal(3, installments.Count);
+    }
+
+    [Fact]
     public async Task DilithiumSignatureRoundTripsAndRejectsTampering()
     {
         var secrets = new MemorySecretService();

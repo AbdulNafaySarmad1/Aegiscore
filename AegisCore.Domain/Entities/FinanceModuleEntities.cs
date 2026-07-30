@@ -83,8 +83,47 @@ public sealed class FeeDemand : ITenantScoped
     public DateTime IssuedAt { get; set; } = DateTime.UtcNow;
     public DateTime DueDate { get; set; }
     public Guid TenantId { get; set; }
+    public FinancePaymentPlan? PaymentPlan { get; set; }
     public ICollection<FeeInstallment> Installments { get; set; } = [];
     public ICollection<FinancePayment> Payments { get; set; } = [];
+}
+
+[Table("FinancePaymentPlanConfigurations")]
+public sealed class FinancePaymentPlanConfiguration : ITenantScoped
+{
+    [Key] public Guid Id { get; set; }
+    [Required, MaxLength(20)] public string PlanType { get; set; } = "full";
+    public bool Enabled { get; set; } = true;
+    [Column(TypeName = "numeric(9,4)")] public decimal SurchargePercent { get; set; }
+    [Column(TypeName = "numeric(9,4)")] public decimal MinimumDownPaymentPercent { get; set; }
+    public int MaximumDuration { get; set; }
+    [Column(TypeName = "numeric(19,4)")] public decimal LatePenaltyAmount { get; set; }
+    [Column(TypeName = "numeric(9,4)")] public decimal LatePenaltyPercent { get; set; }
+    public int MaximumMissedInstallments { get; set; } = 2;
+    public bool RequiresApproval { get; set; }
+    [Required] public Guid TenantId { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+
+[Table("FinancePaymentPlans")]
+public sealed class FinancePaymentPlan : ITenantScoped
+{
+    [Key] public Guid Id { get; set; }
+    public Guid StudentId { get; set; }
+    public Guid FeeDemandId { get; set; }
+    [Required, MaxLength(20)] public string PlanType { get; set; } = "full";
+    [Required, MaxLength(20)] public string Status { get; set; } = "PENDING_APPROVAL";
+    [Column(TypeName = "numeric(19,4)")] public decimal Subtotal { get; set; }
+    [Column(TypeName = "numeric(19,4)")] public decimal SurchargeAmount { get; set; }
+    [Column(TypeName = "numeric(19,4)")] public decimal TotalAmount { get; set; }
+    public int InstallmentCount { get; set; }
+    public DateTime StartDate { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
+    public DateTime? ApprovedAt { get; set; }
+    public int MissedInstallments { get; set; }
+    public DateTime? CancelledAt { get; set; }
+    public Guid TenantId { get; set; }
+    [ForeignKey(nameof(FeeDemandId))] public FeeDemand Demand { get; set; } = null!;
 }
 
 [Table("FeeInstallments")]

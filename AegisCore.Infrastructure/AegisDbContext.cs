@@ -1623,6 +1623,8 @@ public class AegisDbContext : DbContext
     public DbSet<FinanceVoucherSequence> FinanceVoucherSequences => Set<FinanceVoucherSequence>();
     public DbSet<FeeDemand> FeeDemands => Set<FeeDemand>();
     public DbSet<FeeInstallment> FeeInstallments => Set<FeeInstallment>();
+    public DbSet<FinancePaymentPlanConfiguration> FinancePaymentPlanConfigurations => Set<FinancePaymentPlanConfiguration>();
+    public DbSet<FinancePaymentPlan> FinancePaymentPlans => Set<FinancePaymentPlan>();
     public DbSet<FinancePayment> FinancePayments => Set<FinancePayment>();
     public DbSet<PaymentGatewayConfiguration> PaymentGatewayConfigurations => Set<PaymentGatewayConfiguration>();
     public DbSet<PaymentGatewayEvent> PaymentGatewayEvents => Set<PaymentGatewayEvent>();
@@ -2046,6 +2048,16 @@ public class AegisDbContext : DbContext
 
         modelBuilder.Entity<ExchangeRateSnapshot>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.BaseCurrency, e.QuoteCurrency, e.ValidForDate }).IsUnique());
+
+        modelBuilder.Entity<FinancePaymentPlanConfiguration>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.PlanType }).IsUnique());
+
+        modelBuilder.Entity<FinancePaymentPlan>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Status });
+            entity.HasIndex(e => new { e.TenantId, e.FeeDemandId }).IsUnique();
+            entity.HasOne(e => e.Demand).WithOne(e => e.PaymentPlan).HasForeignKey<FinancePaymentPlan>(e => e.FeeDemandId).OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<FinanceAuditSeal>(entity =>
         {

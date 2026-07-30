@@ -85,6 +85,24 @@ public static class FinanceModuleEndpoints
             return Results.Ok(await finance.CreateFeeDemandAsync(Tenant(context), command, ct));
         });
 
+        group.MapPut("/payment-plans/configurations", async (HttpContext context, ConfigurePaymentPlanCommand command, IFinanceModuleService finance, CancellationToken ct) =>
+        {
+            if (!CanManageFinance(context)) return Results.Forbid();
+            return Results.Ok(await finance.ConfigurePaymentPlanAsync(Tenant(context), command, ct));
+        });
+
+        group.MapPost("/payment-plans", async (HttpContext context, CreatePaymentPlanCommand command, IFinanceModuleService finance, CancellationToken ct) =>
+        {
+            if (!CanManageFinance(context)) return Results.Forbid();
+            return Results.Ok(await finance.CreatePaymentPlanAsync(Tenant(context), command, ct));
+        });
+
+        group.MapPost("/payment-plans/{id:guid}/approve", async (Guid id, HttpContext context, IFinanceModuleService finance, CancellationToken ct) =>
+        {
+            if (!CanManageFinance(context)) return Results.Forbid();
+            return Results.Ok(await finance.ApprovePaymentPlanAsync(Tenant(context), id, UserId(context), ct));
+        });
+
         group.MapPost("/payments", async (HttpContext context, RecordFinancePaymentCommand command, IFinanceModuleService finance, CancellationToken ct) =>
             Results.Ok(await finance.RecordPaymentAsync(Tenant(context), command, ct)));
 
