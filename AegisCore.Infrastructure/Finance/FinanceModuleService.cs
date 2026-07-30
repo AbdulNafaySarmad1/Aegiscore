@@ -1,4 +1,6 @@
 using System.Data;
+using System.Security.Cryptography;
+using System.Text;
 using AegisCore.Application.Finance;
 using AegisCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -162,6 +164,57 @@ public sealed class FinanceModuleService(AegisDbContext db) : IFinanceModuleServ
             installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL";
         }
         db.Set<FinancePayment>().Add(payment);
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+        return payment;
+    }
+
+    public async Task<FinancePayment> RecordGatewayPaymentAsync(Guid tenantId, string gatewaySlug, RecordGatewayPaymentCommand command, CancellationToken ct)
+    {
+        RequireTenant(tenantId);
+        var gateway = gatewaySlug.Trim().ToLowerInvariant();
+        if (gateway.Length is < 2 or > 40 || gateway.Any(c => !(char.IsAsciiLetterOrDigit(c) || c == '-'))) throw new ArgumentException("Gateway is invalid.");
+        if (command.FeeDemandId == Guid.Empty || command.Amount <= 0m || command.WebhookId.Length is < 1 or > 100 || command.ExternalReference.Length is < 1 or > 200)
+            throw new ArgumentException("Gateway payment fields are invalid.");
+        if (command.SanitizedPayloadJson.Length > 20000) throw new ArgumentException("Gateway payload is too large.");
+        var currency = NormalizeCurrency(command.Currency);
+
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        var existing = await db.Set<FinancePayment>().IgnoreQueryFilters()
+            .SingleOrDefaultAsync(p => p.TenantId == tenantId && p.WebhookId == command.WebhookId, ct);
+        if (existing is not null) return existing;
+
+        var demand = await db.Set<FeeDemand>().IgnoreQueryFilters().Include(d => d.Installments)
+            .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
+            ?? throw new InvalidOperationException("Fee demand was not found.");
+        if (!string.Equals(demand.Currency, currency, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Payment currency does not match the fee demand.");
+        if (command.Amount > demand.OutstandingAmount) throw new InvalidOperationException("Payment exceeds the outstanding demand.");
+        var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
+        if (command.FeeInstallmentId is not null && installment is null) throw new InvalidOperationException("Fee installment was not found.");
+
+        var payment = new FinancePayment
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, FeeDemandId = demand.Id, FeeInstallmentId = installment?.Id,
+            IdempotencyKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{gateway}:{command.WebhookId}"))).ToLowerInvariant(),
+            Method = "WEBHOOK", GatewaySlug = gateway, ExternalReference = command.ExternalReference,
+            Amount = command.Amount, Status = "SETTLED", WebhookId = command.WebhookId, SettledAt = DateTime.UtcNow
+        };
+        demand.PaidAmount += command.Amount;
+        demand.OutstandingAmount -= command.Amount;
+        demand.Status = demand.OutstandingAmount == 0m ? "PAID" : "PARTIAL";
+        if (installment is not null)
+        {
+            installment.PaidAmount += command.Amount;
+            installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL";
+        }
+        db.Set<FinancePayment>().Add(payment);
+        db.Set<PaymentGatewayEvent>().Add(new PaymentGatewayEvent
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, GatewaySlug = gateway, EventType = "PAYMENT_CONFIRMED",
+            ReferenceId = command.ExternalReference, FinancePaymentId = payment.Id, Amount = command.Amount,
+            Currency = currency, Status = "PROCESSED", IsSandbox = command.IsSandbox,
+            SanitizedPayloadJson = command.SanitizedPayloadJson
+        });
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         return payment;
