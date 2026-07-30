@@ -13,6 +13,8 @@ public sealed class WizardProvisioningService(AegisDbContext db)
         var academic = root["step2"]?.AsObject() ?? throw new InvalidOperationException("Academic structure is missing.");
         var finance = root["step4"]?.AsObject() ?? throw new InvalidOperationException("Finance configuration is missing.");
         var fees = root["step5"]?.AsObject() ?? throw new InvalidOperationException("Fee structure is missing.");
+        var standard = Required(finance, "standard").ToUpperInvariant();
+        var baseCurrency = Required(finance, "baseCurrency").ToUpperInvariant();
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
         var campus = await db.Campuses.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.IsMain, ct);
@@ -59,6 +61,33 @@ public sealed class WizardProvisioningService(AegisDbContext db)
             db.AcademicYears.Add(year);
             db.Semesters.Add(new Semester { Id = Guid.NewGuid(), AcademicYearId = year.Id, Name = academic["term"]?.GetValue<string>() ?? "Current term", Type = academic["calendarType"]?.GetValue<string>() ?? "Semester", StartDate = start, EndDate = end, IsCurrent = true, Status = "active" });
         }
+
+        var fiscalLabel = Required(finance, "fiscalYear");
+        if (!await db.FiscalYears.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Name == fiscalLabel, ct))
+        {
+            var fiscalStartMonth = finance["fiscalYearStartMonth"]?.GetValue<int?>() is { } configuredMonth && configuredMonth is >= 1 and <= 12 ? configuredMonth : 1;
+            var fiscalStartYear = DateTime.UtcNow.Month >= fiscalStartMonth ? DateTime.UtcNow.Year : DateTime.UtcNow.Year - 1;
+            db.FiscalYears.Add(new FiscalYear
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, Name = fiscalLabel,
+                StartDate = new DateTime(fiscalStartYear, fiscalStartMonth, 1),
+                EndDate = new DateTime(fiscalStartYear + 1, fiscalStartMonth, 1).AddDays(-1), IsClosed = false
+            });
+        }
+
+        var accounts = new (string Code, string Name, AccountType Type)[]
+        {
+            ("1010", $"Bank - {baseCurrency}", AccountType.Asset),
+            ("1100", "Student fee receivable", AccountType.Asset),
+            ("2000", "Student deposits payable", AccountType.Liability),
+            ("3000", "Retained funds", AccountType.Equity),
+            ("4010", $"Tuition revenue - {standard}", AccountType.Revenue),
+            ("4020", "Scholarship expense", AccountType.Expense),
+            ("5000", "Operating expenses", AccountType.Expense)
+        };
+        foreach (var account in accounts)
+            if (!await db.ChartOfAccounts.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.AccountCode == account.Code, ct))
+                db.ChartOfAccounts.Add(new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = account.Code, AccountName = account.Name, AccountType = account.Type, IsActive = true });
 
         var programs = new List<DegreeProgram>();
         foreach (var item in academic["programmes"]?.AsArray() ?? [])
