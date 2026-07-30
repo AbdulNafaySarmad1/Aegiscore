@@ -3,11 +3,12 @@ using System.Security.Cryptography;
 using System.Text;
 using AegisCore.Application.Finance;
 using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.Infrastructure.Finance;
 
-public sealed class FinanceModuleService(AegisDbContext db) : IFinanceModuleService
+public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService pqc) : IFinanceModuleService
 {
     public async Task<FinanceVoucher> CreateVoucherAsync(Guid tenantId, Guid makerId, CreateVoucherCommand command, CancellationToken ct)
     {
@@ -71,6 +72,17 @@ public sealed class FinanceModuleService(AegisDbContext db) : IFinanceModuleServ
             Id = Guid.NewGuid(), FinanceVoucherId = voucher.Id, TenantId = tenantId, ApproverUserId = actorId,
             Decision = command.Approve ? "APPROVED" : "REJECTED", Note = command.Note
         };
+        if (command.Approve)
+        {
+            var signingPayload = Encoding.UTF8.GetBytes($"{tenantId:D}|{voucher.Id:D}|{voucher.VoucherNumber}|{voucher.TotalAmount:0.0000}|{actorId:D}|{approval.CreatedAt:O}");
+            var signature = await pqc.SignAsync(tenantId, "voucher-approval", signingPayload, archival: false, ct);
+            approval.PqcAlgorithm = signature.Algorithm;
+            approval.PqcKeyId = signature.KeyId;
+            approval.PqcSignature = signature.Signature;
+            voucher.PqcAlgorithm = signature.Algorithm;
+            voucher.PqcKeyId = signature.KeyId;
+            voucher.PqcSignature = signature.Signature;
+        }
         db.Set<FinanceVoucherApproval>().Add(approval);
         voucher.Status = command.Approve ? FinanceStates.Approved : FinanceStates.Rejected;
         voucher.RejectionNote = command.Approve ? null : command.Note;
