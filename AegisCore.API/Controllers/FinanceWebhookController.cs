@@ -28,6 +28,7 @@ public sealed class FinanceWebhookController(
         if (tenantId == Guid.Empty || string.IsNullOrWhiteSpace(gatewaySlug)) return Ok(new { accepted = true });
         var gateway = gatewaySlug.Trim().ToLowerInvariant();
         if (gateway.Length > 40 || gateway.Any(c => !(char.IsAsciiLetterOrDigit(c) || c == '-'))) return Ok(new { accepted = true });
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
         var configuration = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.GatewaySlug == gateway && x.IsActive, ct);
         if (configuration is null || !string.Equals(configuration.SecretNamespace, $"/tenants/{tenantId:D}/gateways/{gateway}", StringComparison.Ordinal)) return Ok(new { accepted = true });
