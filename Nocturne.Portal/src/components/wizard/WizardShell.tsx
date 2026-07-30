@@ -48,7 +48,10 @@ export function WizardShell() {
     try {
       const result = await apiPost<{ success: boolean; nextStep: number }>(`/api/wizard/step/${step}/save`, { sessionId: session.sessionId, data: current });
       const nextStep = Math.min(result.nextStep, 7);
-      const nextSession = { ...session, currentStep: nextStep, licenseMode: (data.step0?.mode as Mode) ?? session.licenseMode, data: { ...data } };
+      const storedData = step === 6
+        ? { ...data, step6: { ...current, users: Array.isArray(current.users) ? (current.users as User[]).map(user => ({ name: user.name, email: user.email, role: user.role })) : [] } }
+        : { ...data };
+      const nextSession = { ...session, currentStep: nextStep, licenseMode: (data.step0?.mode as Mode) ?? session.licenseMode, data: storedData };
       setSession(nextSession); setStep(nextStep); localStorage.setItem("nocturne_wizard_session", JSON.stringify(nextSession));
     } catch (error) { setNotice(error instanceof Error ? error.message : "The step could not be saved."); }
     finally { setBusy(false); }

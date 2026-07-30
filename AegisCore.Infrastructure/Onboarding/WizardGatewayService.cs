@@ -69,6 +69,9 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
         var configuration = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.GatewaySlug == normalized, ct)
             ?? throw new InvalidOperationException("Gateway is not configured.");
+        var expectedNamespace = $"/tenants/{tenantId:D}/gateways/{normalized}";
+        if (!string.Equals(configuration.SecretNamespace, expectedNamespace, StringComparison.Ordinal))
+            throw new InvalidOperationException("Gateway secret namespace is invalid.");
         var missing = new List<string>();
         foreach (var field in required)
             if (!await secrets.SecretExistsAsync($"{configuration.SecretNamespace}/{field}", ct)) missing.Add(field);
