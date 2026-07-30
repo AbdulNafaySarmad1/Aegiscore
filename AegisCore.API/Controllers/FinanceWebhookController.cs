@@ -13,7 +13,6 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [AllowAnonymous]
-[IgnoreAntiforgeryToken]
 [Route("api/webhooks")]
 public sealed class FinanceWebhookController(
     AegisDbContext db,
