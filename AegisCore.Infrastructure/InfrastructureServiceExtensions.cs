@@ -32,6 +32,7 @@ using AegisCore.Infrastructure.RuleEngine;
 using AegisCore.Infrastructure.Search;
 using AegisCore.Infrastructure.Security;
 using AegisCore.Infrastructure.Security.Abac;
+using AegisCore.Infrastructure.Security.Pqc;
 using AegisCore.Infrastructure.SsoHitl;
 using AegisCore.Infrastructure.StudentLifecycle;
 using AegisCore.Infrastructure.Support;
@@ -85,6 +86,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Finance.IAccountingService, AccountingService>();
         services.AddScoped<AegisCore.Application.Finance.IBudgetService, BudgetService>();
         services.AddCloudProvider(configuration);
+        services.AddScoped<IPqcSignatureService, PqcSignatureService>();
         services.AddComplianceCenter(configuration);
         services.AddLoginAudit();
         services.AddPlatformServices(configuration);

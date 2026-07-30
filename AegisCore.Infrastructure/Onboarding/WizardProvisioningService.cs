@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using System.Security.Cryptography;
 using AegisCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -122,7 +123,7 @@ public sealed class WizardProvisioningService(AegisDbContext db)
             {
                 Id = Guid.NewGuid(), TenantId = tenantId, CustomerName = Required(university, "name"),
                 CustomerEmail = university["contactEmail"]?.GetValue<string>(),
-                LicenseKey = demo ? $"DEMO-{tenantId:N}" : Required(licenseStep, "licenseKey"),
+                LicenseKey = demo ? Convert.ToHexString(RandomNumberGenerator.GetBytes(24)) : Required(licenseStep, "licenseKey"),
                 Edition = demo ? LicenseEdition.Community : LicenseEdition.Professional,
                 Status = demo ? LicenseStatus.Trial : LicenseStatus.Active,
                 MaxUsers = demo ? 500 : int.MaxValue, MaxCampuses = demo ? 1 : int.MaxValue,
