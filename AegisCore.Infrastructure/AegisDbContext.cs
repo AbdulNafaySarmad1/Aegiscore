@@ -1391,6 +1391,10 @@ public class AegisDbContext : DbContext
     public DbSet<ReplicationScaleEvent> ReplicationScaleEvents => Set<ReplicationScaleEvent>();
     public DbSet<ReplicationLagAlert> ReplicationLagAlerts => Set<ReplicationLagAlert>();
 
+    // Sync-Lag (pend write correction window)
+    public DbSet<SyncLagConfig> SyncLagConfigs => Set<SyncLagConfig>();
+    public DbSet<SyncLagEntry> SyncLagEntries => Set<SyncLagEntry>();
+
     /// <summary>
     /// Export logs.
     /// </summary>
