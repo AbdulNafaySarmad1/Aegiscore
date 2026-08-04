@@ -6,6 +6,12 @@
     "orientation": "portrait",
     "scheme": "aegiscore",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "pk.edu.aegiscore.mobile",
@@ -15,7 +21,11 @@
     },
     "android": {
       "package": "pk.edu.aegiscore.mobile",
-      "permissions": ["USE_BIOMETRIC", "POST_NOTIFICATIONS"]
+      "permissions": ["USE_BIOMETRIC", "POST_NOTIFICATIONS"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0F172A"
+      }
     },
     "plugins": [
       "expo-secure-store",

@@ -38,6 +38,7 @@ ENV ASPNETCORE_URLS=http://+:8080 \
 COPY --from=build --chown=appuser /app/publish .
 
 COPY --chown=appuser formats/ /app/formats/
+COPY --chown=appuser aegiscorelogo.png /app/aegiscore-logo.png
 
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

@@ -48,4 +48,22 @@ export function PortalShell() {
   </div></PersonalityModeProvider>;
 }
 
-function Brand() { return <Link className="aegis-brand" href="/" aria-label="AegisCore home"><span className="brand-glyph"><ShieldCheck /></span><span><strong>AegisCore</strong><small>University ERP</small></span></Link>; }
+function Brand() {
+  const [clientLogo, setClientLogo] = useState<string | null>(null);
+  useEffect(() => {
+    apiGet<{ logoUrl: string }>("/api/branding/client-logo").then(r => setClientLogo(r.logoUrl)).catch(() => {});
+  }, []);
+
+  return (
+    <Link className="aegis-brand" href="/" aria-label="AegisCore home" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
+      <img src="/aegiscore-logo.png" alt="AegisCore" style={{ height: 32, width: "auto", borderRadius: 4 }} />
+      {clientLogo && (
+        <>
+          <span style={{ color: "var(--line)", fontSize: "1.2rem", fontWeight: 300 }}>|</span>
+          <img src={clientLogo} alt="University" style={{ height: 28, width: "auto", borderRadius: 4 }} />
+        </>
+      )}
+      <span><strong>AegisCore</strong><small>University ERP</small></span>
+    </Link>
+  );
+}
