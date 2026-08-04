@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, CheckCircle2, Clock, Goal, RefreshCw, ShieldCheck, Timer, TrendingDown, XCircle } from "lucide-react";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 
 type CriterionStatus = "Fully Met" | "Substantially Met" | "Partially Met" | "Not Met";
 type Criterion = { id: string; name: string; category: string; status: CriterionStatus; score: number; maxScore: number };
@@ -34,18 +35,19 @@ function effortBadge(e: string) {
 }
 
 export default function ReadinessPage() {
+  const t = usePersonalityTranslations("academic");
   const [data, setData] = useState<ReadinessData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    apiGet<ReadinessData>("/api/readiness/compute")
-      .then(d => { if (!cancelled) { setData(d); setError(null); } })
-      .catch(() => { if (!cancelled) setError("Failed to compute readiness score"); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    const ctrl = new AbortController();
+    apiGet<ReadinessData>("/api/readiness/compute", ctrl.signal)
+      .then(d => { if (!ctrl.signal.aborted) { setData(d); setError(null); } })
+      .catch(() => { if (!ctrl.signal.aborted) setError("Failed to compute readiness score"); })
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
+    return () => ctrl.abort();
   }, []);
 
   function refreshData() {
@@ -72,7 +74,7 @@ export default function ReadinessPage() {
     return s >= 80 ? "var(--green)" : s >= 50 ? "var(--amber)" : "var(--red)";
   }, [data]);
 
-  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>Computing readiness score...</main>;
+  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("computingReadiness")}</main>;
   if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
   if (!data) return null;
 
@@ -81,12 +83,12 @@ export default function ReadinessPage() {
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Accreditation Engineering</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Accreditation Readiness</h1>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("readiness")}</h1>
           <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Live HEC/PEC compliance scoring, gap analysis, and predictive readiness forecasting</span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={checkFreshness} disabled={checking} style={{ minHeight: 42, padding: "0 16px", border: "1px solid var(--line)", borderRadius: 8, background: "var(--surface)", color: "var(--blue-600)", cursor: "pointer", fontWeight: 700, fontSize: 11, display: "flex", alignItems: "center", gap: 6 }}>
-            <RefreshCw style={{ width: 14 }} /> {checking ? "Checking..." : "Check Freshness"}
+            <RefreshCw style={{ width: 14 }} /> {checking ? t("checkingFreshness") : t("checkFreshness")}
           </button>
         </div>
       </header>
@@ -96,7 +98,7 @@ export default function ReadinessPage() {
           <div style={{ textAlign: "center" }}>
             <CircularGauge score={data.overallScore} color={gaugeColor} />
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--muted)" }}>Overall Score</div>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--muted)" }}>{t("overallScore")}</div>
               <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: "-1.5px", color: gaugeColor }}>{data.overallScore}%</div>
             </div>
           </div>
@@ -107,7 +109,7 @@ export default function ReadinessPage() {
               </div>
               <div style={{ display: "grid" }}>
                 <strong style={{ fontSize: 22, letterSpacing: "-.5px", color: urgencyColor }}>{data.daysUntilAudit}</strong>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>Days until audit</small>
+                <small style={{ color: "var(--muted)", fontSize: 10 }}>{t("daysUntilAudit")}</small>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)" }}>
@@ -116,7 +118,7 @@ export default function ReadinessPage() {
               </div>
               <div style={{ display: "grid" }}>
                 <strong style={{ fontSize: 22, letterSpacing: "-.5px", color: data.complianceVelocity >= 0 ? "var(--green)" : "var(--red)" }}>{data.complianceVelocity > 0 ? "+" : ""}{data.complianceVelocity}%</strong>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>Compliance velocity (weekly)</small>
+                <small style={{ color: "var(--muted)", fontSize: 10 }}>{t("complianceVelocity")}</small>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)" }}>
@@ -125,19 +127,19 @@ export default function ReadinessPage() {
               </div>
               <div style={{ display: "grid" }}>
                 <strong style={{ fontSize: 22, letterSpacing: "-.5px", color: "var(--green)" }}>{data.criteria.filter(c => c.status === "Fully Met").length}/{data.criteria.length}</strong>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>Criteria fully met</small>
+                <small style={{ color: "var(--muted)", fontSize: 10 }}>{t("criteriaFullyMet")}</small>
               </div>
             </div>
           </div>
         </div>
 
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Alerts Feed</h2><p>{data.alerts.length} updates</p></div><AlertCircle /></div>
+          <div className="surface-heading"><div><h2>{t("alertsFeed")}</h2><p>{data.alerts.length} updates</p></div><AlertCircle /></div>
           <div style={{ maxHeight: 360, overflow: "auto" }}>
             {data.alerts.length === 0 ? (
               <div style={{ minHeight: 160, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)" }}>
                 <ShieldCheck style={{ width: 28, color: "var(--green)" }} />
-                <span>All clear — no alerts</span>
+                <span>{t("allClear")}</span>
               </div>
             ) : (
               data.alerts.map(a => (
@@ -157,7 +159,7 @@ export default function ReadinessPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden", marginBottom: 18 }}>
-        <div className="surface-heading"><div><h2>Criteria Breakdown</h2><p>{data.criteria.length} criteria evaluated across all standards</p></div><Goal /></div>
+        <div className="surface-heading"><div><h2>{t("criteriaBreakdown")}</h2><p>{data.criteria.length} criteria evaluated across all standards</p></div><Goal /></div>
         <div style={{ overflow: "auto" }}>
           <table style={{ width: "100%", minWidth: 750, borderCollapse: "collapse" }}>
             <thead>
@@ -189,12 +191,12 @@ export default function ReadinessPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Gap Analysis</h2><p>{data.gaps.length} gaps identified with effort estimates and priorities</p></div><Clock /></div>
+        <div className="surface-heading"><div><h2>{t("gapAnalysis")}</h2><p>{data.gaps.length} gaps identified with effort estimates and priorities</p></div><Clock /></div>
         {data.gaps.length === 0 ? (
           <div style={{ minHeight: 160, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)" }}>
             <CheckCircle2 style={{ width: 28, color: "var(--green)" }} />
-            <strong>No gaps identified</strong>
-            <span>All criteria are met or in progress</span>
+            <strong>{t("noGapsIdentified")}</strong>
+            <span>{t("noGapsDesc")}</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>

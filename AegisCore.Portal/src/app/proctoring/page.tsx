@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, Camera, CheckCircle2, Clock, Eye, Lock, Monitor, PlayCircle, ShieldAlert, ShieldCheck, Upload, UserCheck } from "lucide-react";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 
 type IntegrityStatus = "Clean" | "Review" | "Referred";
 type StudentIntegrity = { studentId: string; studentName: string; status: IntegrityStatus; warnings: number };
@@ -28,6 +29,7 @@ function severityPill(s: string) {
 const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)", background: "var(--canvas)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" };
 
 export default function ProctoringPage() {
+  const t = usePersonalityTranslations("academic");
   const [students, setStudents] = useState<StudentIntegrity[]>([]);
   const [events, setEvents] = useState<ProctorEvent[]>([]);
   const [sessions, setSessions] = useState<SessionData[]>([]);
@@ -43,13 +45,15 @@ export default function ProctoringPage() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    const ctrl = new AbortController();
     Promise.all([
-      apiGet<StudentIntegrity[]>("/api/proctoring/integrity").catch(() => [] as StudentIntegrity[]),
-      apiGet<ProctorEvent[]>("/api/proctoring/events").catch(() => [] as ProctorEvent[]),
-      apiGet<SessionData[]>("/api/proctoring/sessions").catch(() => [] as SessionData[])
+      apiGet<StudentIntegrity[]>("/api/proctoring/integrity", ctrl.signal).catch(() => [] as StudentIntegrity[]),
+      apiGet<ProctorEvent[]>("/api/proctoring/events", ctrl.signal).catch(() => [] as ProctorEvent[]),
+      apiGet<SessionData[]>("/api/proctoring/sessions", ctrl.signal).catch(() => [] as SessionData[])
     ]).then(([s, ev, se]) => {
-      setStudents(s); setEvents(ev); setSessions(se); setLoading(false);
-    }).catch(() => { setError("Failed to load proctoring data"); setLoading(false); });
+      if (!ctrl.signal.aborted) { setStudents(s); setEvents(ev); setSessions(se); setLoading(false); }
+    }).catch(() => { if (!ctrl.signal.aborted) { setError("Failed to load proctoring data"); setLoading(false); } });
+    return () => ctrl.abort();
   }, []);
 
   async function createSession(e: React.FormEvent) {
@@ -83,7 +87,7 @@ export default function ProctoringPage() {
   const review = students.filter(s => s.status === "Review").length;
   const referred = students.filter(s => s.status === "Referred").length;
 
-  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>Loading proctoring dashboard...</main>;
+  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingProctoring")}</main>;
   if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
 
   return (
@@ -91,7 +95,7 @@ export default function ProctoringPage() {
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Examination Security</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Online Exam Proctoring</h1>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("proctoring")}</h1>
           <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Remote exam integrity monitoring, face analysis, browser lockdown, and forensic event tracking</span>
         </div>
       </header>
@@ -121,7 +125,7 @@ export default function ProctoringPage() {
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.2fr) minmax(360px, 0.7fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Create Proctoring Session</h2><p>Launch a new remote exam monitoring session</p></div><Monitor /></div>
+          <div className="surface-heading"><div><h2>{t("createSession")}</h2><p>Launch a new remote exam monitoring session</p></div><Monitor /></div>
           <form onSubmit={createSession} style={{ display: "grid", gap: 12, padding: 18 }}>
             {sessionMsg && (
               <div style={{ padding: "10px 14px", borderRadius: 8, border: sessionMsg.startsWith("error") ? "1px solid #ecc0c6" : "1px solid #aaddc9", color: sessionMsg.startsWith("error") ? "var(--red)" : "var(--green)", background: sessionMsg.startsWith("error") ? "var(--red-soft)" : "var(--green-soft)", fontSize: 11, display: "flex", alignItems: "center", gap: 6 }}>
@@ -139,29 +143,29 @@ export default function ProctoringPage() {
               </label>
             </div>
             <button type="submit" disabled={creating} style={{ padding: "0.7rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: creating ? 0.6 : 1 }}>
-              <PlayCircle style={{ width: 15 }} /> {creating ? "Creating..." : "Start Session"}
+              <PlayCircle style={{ width: 15 }} /> {creating ? "Creating..." : t("startSession")}
             </button>
           </form>
         </div>
 
         <div style={{ display: "grid", gap: 18 }}>
           <div className="surface" style={{ overflow: "hidden" }}>
-            <div className="surface-heading"><div><h2>Face Analysis</h2><p>Upload a frame for biometric verification</p></div><Camera /></div>
+            <div className="surface-heading"><div><h2>{t("faceAnalysis")}</h2><p>Upload a frame for biometric verification</p></div><Camera /></div>
             <div style={{ padding: 18 }}>
               <label style={{ minHeight: 39, display: "grid", placeItems: "center", border: "1px dashed var(--line-strong)", borderRadius: 8, color: "var(--blue-600)", cursor: "pointer", fontSize: 10, fontWeight: 700, padding: 10, marginBottom: 10 }}>
                 <Upload style={{ marginRight: 6 }} /> {file ? file.name : "Upload face capture (JPEG/PNG)"}
                 <input type="file" accept="image/jpeg,image/png" style={{ display: "none" }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
               </label>
               <button onClick={uploadFace} disabled={!file || uploading} style={{ width: "100%", padding: "0.6rem", border: "1px solid var(--line)", borderRadius: 8, background: "var(--surface)", color: "var(--blue-600)", cursor: "pointer", fontWeight: 700, fontSize: 11, opacity: !file ? 0.5 : 1 }}>
-                {uploading ? "Analyzing..." : "Analyze Face"}
+                {uploading ? "Analyzing..." : t("analyzeFace")}
               </button>
             </div>
           </div>
           <div className="surface" style={{ overflow: "hidden" }}>
-            <div className="surface-heading"><div><h2>Lockdown Validation</h2><p>Verify browser lockdown compliance</p></div><Lock /></div>
+            <div className="surface-heading"><div><h2>{t("lockdownValidation")}</h2><p>Verify browser lockdown compliance</p></div><Lock /></div>
             <div style={{ padding: 18 }}>
               <button onClick={validateLockdown} style={{ width: "100%", padding: "0.6rem", border: "1px solid var(--line)", borderRadius: 8, background: "var(--surface)", color: "var(--blue-600)", cursor: "pointer", fontWeight: 700, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <ShieldCheck style={{ width: 15 }} /> Validate Lockdown Status
+                <ShieldCheck style={{ width: 15 }} /> {t("validateLockdownStatus")}
               </button>
             </div>
           </div>
@@ -169,11 +173,11 @@ export default function ProctoringPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden", marginBottom: 18 }}>
-        <div className="surface-heading"><div><h2>Student Integrity Grid</h2><p>{students.length} students under monitoring</p></div><Eye /></div>
+        <div className="surface-heading"><div><h2>{t("studentIntegrityGrid")}</h2><p>{students.length} students under monitoring</p></div><Eye /></div>
         {students.length === 0 ? (
           <div style={{ minHeight: 160, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <UserCheck style={{ width: 28, color: "var(--green)" }} />
-            <span>No students in proctoring sessions</span>
+            <span>{t("noStudentsInSessions")}</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>
@@ -203,12 +207,12 @@ export default function ProctoringPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Proctor Event Log</h2><p>{events.length} events recorded</p></div><Clock /></div>
+        <div className="surface-heading"><div><h2>{t("proctorEventLog")}</h2><p>{events.length} events recorded</p></div><Clock /></div>
         {events.length === 0 ? (
           <div style={{ minHeight: 160, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <CheckCircle2 style={{ width: 28, color: "var(--green)" }} />
-            <strong>No events recorded</strong>
-            <span>All sessions operating normally</span>
+            <strong>{t("noEventsRecorded")}</strong>
+            <span>{t("noEventsDesc")}</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>

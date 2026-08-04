@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, BarChart3, BookOpen, CheckCircle2, ClipboardList, FileText, GraduationCap, PenLine, Send } from "lucide-react";
 import Link from "next/link";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 
 type AssessmentScheme = { id: string; name: string; courseId: string; courseName: string; components: { label: string; weight: number }[] };
 
@@ -22,6 +23,7 @@ function pubBadge(s: string) {
 const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)", background: "var(--canvas)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" };
 
 export default function ExaminationsPage() {
+  const t = usePersonalityTranslations("academic");
   const [schemes, setSchemes] = useState<AssessmentScheme[]>([]);
   const [slots, setSlots] = useState<PublicationSlot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,12 +41,14 @@ export default function ExaminationsPage() {
   const [pubResult, setPubResult] = useState<string | null>(null);
 
   useEffect(() => {
+    const ctrl = new AbortController();
     Promise.all([
-      apiGet<AssessmentScheme[]>("/api/examinations/schemes").catch(() => [] as AssessmentScheme[]),
-      apiGet<PublicationSlot[]>("/api/examinations/publication-slots").catch(() => [] as PublicationSlot[])
+      apiGet<AssessmentScheme[]>("/api/examinations/schemes", ctrl.signal).catch(() => [] as AssessmentScheme[]),
+      apiGet<PublicationSlot[]>("/api/examinations/publication-slots", ctrl.signal).catch(() => [] as PublicationSlot[])
     ]).then(([sc, sl]) => {
-      setSchemes(sc); setSlots(sl); setLoading(false);
-    }).catch(() => { setError("Failed to load examination data"); setLoading(false); });
+      if (!ctrl.signal.aborted) { setSchemes(sc); setSlots(sl); setLoading(false); }
+    }).catch(() => { if (!ctrl.signal.aborted) { setError("Failed to load examination data"); setLoading(false); } });
+    return () => ctrl.abort();
   }, []);
 
   async function submitMarks(e: React.FormEvent) {
@@ -68,7 +72,7 @@ export default function ExaminationsPage() {
     finally { setPublishingId(null); }
   }
 
-  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>Loading examination dashboard...</main>;
+  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingExaminations")}</main>;
   if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
 
   return (
@@ -76,17 +80,17 @@ export default function ExaminationsPage() {
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Examination Management</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Examinations</h1>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("examinations")}</h1>
           <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Assessment schemes, marks entry, result publication, and grade distribution analysis</span>
         </div>
         <Link href="/grade-distributions" style={{ minHeight: 42, padding: "0 16px", border: "1px solid var(--line)", borderRadius: 8, background: "var(--surface)", color: "var(--blue-600)", cursor: "pointer", fontWeight: 700, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
-          <BarChart3 style={{ width: 14 }} /> Grade Distributions
+          <BarChart3 style={{ width: 14 }} /> {t("gradeDistributions")}
         </Link>
       </header>
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.2fr) minmax(360px, 0.7fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Marks Entry</h2><p>Record student marks for course assessment components</p></div><PenLine /></div>
+          <div className="surface-heading"><div><h2>{t("marksEntry")}</h2><p>Record student marks for course assessment components</p></div><PenLine /></div>
           <form onSubmit={submitMarks} style={{ display: "grid", gap: 12, padding: 18 }}>
             {entryMsg && (
               <div style={{ padding: "10px 14px", borderRadius: 8, border: entryMsg.startsWith("error") ? "1px solid #ecc0c6" : "1px solid #aaddc9", color: entryMsg.startsWith("error") ? "var(--red)" : "var(--green)", background: entryMsg.startsWith("error") ? "var(--red-soft)" : "var(--green-soft)", fontSize: 11, display: "flex", alignItems: "center", gap: 6 }}>
@@ -118,19 +122,19 @@ export default function ExaminationsPage() {
               </div>
             </div>
             <button type="submit" disabled={submitting} style={{ padding: "0.7rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: submitting ? 0.6 : 1 }}>
-              <Send style={{ width: 14 }} /> {submitting ? "Recording..." : "Record Marks"}
+              <Send style={{ width: 14 }} /> {submitting ? t("recording") : t("recordMarks")}
             </button>
           </form>
         </div>
 
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Result Publication</h2><p>Publish finalized results to student portals</p></div><FileText /></div>
+          <div className="surface-heading"><div><h2>{t("resultPublication")}</h2><p>Publish finalized results to student portals</p></div><FileText /></div>
           <div style={{ padding: 18 }}>
             {pubResult && <div style={{ padding: "10px 14px", borderRadius: 8, border: pubResult.includes("failed") ? "1px solid #ecc0c6" : "1px solid #aaddc9", color: pubResult.includes("failed") ? "var(--red)" : "var(--green)", background: pubResult.includes("failed") ? "var(--red-soft)" : "var(--green-soft)", fontSize: 11, display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>{pubResult.includes("failed") ? <AlertCircle style={{ width: 15 }} /> : <CheckCircle2 style={{ width: 15 }} />}{pubResult}</div>}
             {slots.length === 0 ? (
               <div style={{ minHeight: 120, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 20, color: "var(--muted)" }}>
                 <ClipboardList style={{ width: 24, opacity: 0.5 }} />
-                <span style={{ fontSize: 11 }}>No publication slots configured</span>
+                <span style={{ fontSize: 11 }}>{t("noPublicationSlots")}</span>
               </div>
             ) : (
               <div style={{ display: "grid", gap: 10 }}>
@@ -146,7 +150,7 @@ export default function ExaminationsPage() {
                     </div>
                     <button onClick={() => publishResults(s.id)} disabled={publishingId === s.id || s.status === "Published"}
                       style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: s.status === "Published" ? "var(--surface-soft)" : "var(--blue-600)", color: s.status === "Published" ? "var(--muted)" : "#fff", cursor: s.status === "Published" ? "default" : "pointer", fontWeight: 700, fontSize: 11, whiteSpace: "nowrap", opacity: publishingId === s.id ? 0.6 : 1 }}>
-                      {publishingId === s.id ? "Publishing..." : s.status === "Published" ? "Published" : "Publish"}
+                      {publishingId === s.id ? t("publishing") : s.status === "Published" ? "Published" : t("publishResults")}
                     </button>
                   </div>
                 ))}
@@ -157,12 +161,12 @@ export default function ExaminationsPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Assessment Schemes</h2><p>{schemes.length} schemes defined across courses</p></div><BookOpen /></div>
+        <div className="surface-heading"><div><h2>{t("assessmentSchemes")}</h2><p>{schemes.length} schemes defined across courses</p></div><BookOpen /></div>
         {schemes.length === 0 ? (
           <div style={{ minHeight: 180, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <GraduationCap style={{ width: 28, opacity: 0.5 }} />
-            <strong>No assessment schemes defined</strong>
-            <span>Configure assessment components for your courses</span>
+            <strong>{t("noSchemesDefined")}</strong>
+            <span>{t("noSchemesDesc")}</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>

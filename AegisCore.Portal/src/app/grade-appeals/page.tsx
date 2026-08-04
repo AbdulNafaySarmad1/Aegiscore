@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, CheckCircle2, FileSearch, FileText, FolderOpen, Scale, Send, Upload } from "lucide-react";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 
 type AppealStatus = "Pending" | "UnderReview" | "Resolved" | "Rejected";
 type Appeal = {
@@ -41,6 +42,7 @@ function statusBadge(status: AppealStatus) {
 const inputS: React.CSSProperties = { padding: "0.55rem 0.7rem", borderRadius: 8, border: "1px solid var(--line)", background: "var(--canvas)", color: "var(--ink)", fontSize: "0.82rem", width: "100%", boxSizing: "border-box" };
 
 export default function GradeAppealsPage() {
+  const t = usePersonalityTranslations("academic");
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,12 +61,12 @@ export default function GradeAppealsPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    apiGet<Appeal[]>("/api/grade-appeals")
-      .then(d => { if (!cancelled) { setAppeals(d); setError(null); } })
-      .catch(() => { if (!cancelled) setError("Failed to load appeals"); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    const ctrl = new AbortController();
+    apiGet<Appeal[]>("/api/grade-appeals", ctrl.signal)
+      .then(d => { if (!ctrl.signal.aborted) { setAppeals(d); setError(null); } })
+      .catch(() => { if (!ctrl.signal.aborted) setError("Failed to load appeals"); })
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
+    return () => ctrl.abort();
   }, []);
 
   const refreshAppeals = () => {
@@ -122,8 +124,8 @@ export default function GradeAppealsPage() {
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Academic Governance</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Grade Appeals</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Submit, classify, and adjudicate grade appeals with committee brief generation</span>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("gradeAppeals")}</h1>
+          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>{t("gradeAppealsDesc")}</span>
         </div>
       </header>
 
@@ -135,7 +137,7 @@ export default function GradeAppealsPage() {
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(380px, 0.8fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Appeal Submissions</h2><p>File a new grade appeal with supporting documentation</p></div><Scale /></div>
+          <div className="surface-heading"><div><h2>{t("appealSubmissions")}</h2><p>File a new grade appeal with supporting documentation</p></div><Scale /></div>
           <form onSubmit={submitAppeal} style={{ display: "grid", gap: 12, padding: 18 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
               <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
@@ -160,22 +162,22 @@ export default function GradeAppealsPage() {
               <textarea placeholder="Explain the basis for this appeal in detail..." value={grounds} onChange={e => setGrounds(e.target.value)} rows={3} style={{ ...inputS, resize: "vertical" }} required />
             </label>
             <label style={{ minHeight: 39, display: "grid", placeItems: "center", border: "1px dashed var(--line-strong)", borderRadius: 8, color: "var(--blue-600)", cursor: "pointer", fontSize: 10, fontWeight: 700, padding: "10px" }}>
-              <Upload style={{ marginRight: 6 }} /> {file ? file.name : "Attach supporting document (PDF, max 10MB)"}
+              <Upload style={{ marginRight: 6 }} /> {file ? file.name : t("attachDoc")}
               <input type="file" accept=".pdf,.doc,.docx" style={{ display: "none" }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
             </label>
             <button type="submit" disabled={submitting} style={{ padding: "0.7rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: submitting ? 0.6 : 1 }}>
-              {submitting ? "Submitting..." : <><Send style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Submit Appeal</>}
+              {submitting ? t("submitting") : <><Send style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />{t("submitAppeal")}</>}
             </button>
           </form>
         </div>
 
         <div style={{ display: "grid", gap: 18 }}>
           <div className="surface" style={{ padding: 20 }}>
-            <h3 style={{ margin: "0 0 16px", fontSize: 13, color: "var(--ink)" }}>Appeal Pipeline</h3>
+            <h3 style={{ margin: "0 0 16px", fontSize: 13, color: "var(--ink)" }}>{t("appealPipeline")}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
               <div style={{ padding: 14, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)", textAlign: "center" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: "var(--green)" }}>{resolved}</div>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>Resolved</small>
+                <small style={{ color: "var(--muted)", fontSize: 10 }}>{t("resolved")}</small>
               </div>
               <div style={{ padding: 14, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)", textAlign: "center" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: rejectionRate > 30 ? "var(--red)" : "var(--amber)" }}>{rejectionRate}%</div>
@@ -202,16 +204,16 @@ export default function GradeAppealsPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Appeals Registry</h2><p>{appeals.length} records</p></div><FileText /></div>
+        <div className="surface-heading"><div><h2>{t("appealsRegistry")}</h2><p>{appeals.length} records</p></div><FileText /></div>
         {loading ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "var(--muted)" }}>Loading appeals...</div>
+          <div style={{ padding: "3rem", textAlign: "center", color: "var(--muted)" }}>{t("loadingAppeals")}</div>
         ) : error ? (
           <div style={{ padding: "2rem", textAlign: "center", color: "var(--red)" }}>{error}</div>
         ) : appeals.length === 0 ? (
           <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <FolderOpen style={{ width: 28, color: "var(--green)" }} />
-            <strong>No appeals filed</strong>
-            <span>Submit the first grade appeal using the form above</span>
+            <strong>{t("noAppealsFiled")}</strong>
+            <span>{t("noAppealsDesc")}</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>
@@ -245,7 +247,7 @@ export default function GradeAppealsPage() {
                 ))}
               </tbody>
             </table>
-            {generatingBrief && <div style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 11 }}>Generating committee brief...</div>}
+            {generatingBrief && <div style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 11 }}>{t("generatingBrief")}</div>}
           </div>
         )}
       </section>

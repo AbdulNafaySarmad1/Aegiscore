@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api-client";
 import { AlertCircle, Building2, FileCheck2, Globe, GraduationCap, TrendingUp, UserPlus } from "lucide-react";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 
 type PlacementStatus = "Placed" | "OfferAccepted" | "Interviewing" | "Searching" | "NotParticipating";
 type Placement = {
@@ -50,6 +51,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 function money(val: number) { return new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(val); }
 
 export default function PlacementPage() {
+  const t = usePersonalityTranslations("academic");
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -62,13 +64,15 @@ export default function PlacementPage() {
   const [checkError, setCheckError] = useState<string | null>(null);
 
   useEffect(() => {
+    const ctrl = new AbortController();
     Promise.all([
-      apiGet<Placement[]>("/api/placement/active").catch(() => [] as Placement[]),
-      apiGet<Analytics>("/api/placement/analytics").catch(() => null as Analytics | null),
-      apiGet<Partner[]>("/api/placement/partners").catch(() => [] as Partner[])
+      apiGet<Placement[]>("/api/placement/active", ctrl.signal).catch(() => [] as Placement[]),
+      apiGet<Analytics>("/api/placement/analytics", ctrl.signal).catch(() => null as Analytics | null),
+      apiGet<Partner[]>("/api/placement/partners", ctrl.signal).catch(() => [] as Partner[])
     ]).then(([pl, an, pa]) => {
-      setPlacements(pl); setAnalytics(an); setPartners(pa); setLoading(false);
-    }).catch(() => { setError("Failed to load placement data"); setLoading(false); });
+      if (!ctrl.signal.aborted) { setPlacements(pl); setAnalytics(an); setPartners(pa); setLoading(false); }
+    }).catch(() => { if (!ctrl.signal.aborted) { setError("Failed to load placement data"); setLoading(false); } });
+    return () => ctrl.abort();
   }, []);
 
   async function checkReadiness(e: React.FormEvent) {
@@ -81,7 +85,7 @@ export default function PlacementPage() {
     finally { setChecking(false); }
   }
 
-  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>Loading placement dashboard...</main>;
+  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingPlacement")}</main>;
   if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
 
   const placed = placements.filter(p => p.status === "Placed" || p.status === "OfferAccepted").length;
@@ -92,49 +96,49 @@ export default function PlacementPage() {
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Career Services</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Internship &amp; Placement</h1>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("placement")}</h1>
           <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Student readiness assessment, active placement tracking, analytics, and partner management</span>
         </div>
       </header>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 18 }}>
         <div style={{ padding: 20, borderRadius: 14, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>Placement Rate</span>
+          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>{t("placementRate")}</span>
           <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px", color: analytics && analytics.placementRate >= 80 ? "var(--green)" : analytics && analytics.placementRate >= 50 ? "var(--amber)" : "var(--red)" }}>
-            {analytics ? `${analytics.placementRate}%` : "—"}
+            {analytics ? `${analytics.placementRate}%` : "\u2014"}
           </div>
-          <small style={{ color: "var(--muted)" }}>{placed} students placed</small>
+          <small style={{ color: "var(--muted)" }}>{placed} {t("studentsPlaced")}</small>
         </div>
         <div style={{ padding: 20, borderRadius: 14, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>Avg Stipend</span>
-          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px" }}>{analytics ? money(analytics.avgStipend) : "—"}</div>
-          <small style={{ color: "var(--muted)" }}>per month</small>
+          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>{t("avgStipend")}</span>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px" }}>{analytics ? money(analytics.avgStipend) : "\u2014"}</div>
+          <small style={{ color: "var(--muted)" }}>{t("perMonth")}</small>
         </div>
         <div style={{ padding: 20, borderRadius: 14, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>Time to Place</span>
-          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px" }}>{analytics ? `${analytics.avgTimeToPlace}d` : "—"}</div>
-          <small style={{ color: "var(--muted)" }}>average from search</small>
+          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>{t("timeToPlace")}</span>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px" }}>{analytics ? `${analytics.avgTimeToPlace}d` : "\u2014"}</div>
+          <small style={{ color: "var(--muted)" }}>{t("averageFromSearch")}</small>
         </div>
         <div style={{ padding: 20, borderRadius: 14, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>Partner Companies</span>
-          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px", color: "var(--blue-600)" }}>{analytics?.partnerCompanies ?? "—"}</div>
-          <small style={{ color: "var(--muted)" }}>active engagements</small>
+          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>{t("partnerCompanies")}</span>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px", color: "var(--blue-600)" }}>{analytics?.partnerCompanies ?? "\u2014"}</div>
+          <small style={{ color: "var(--muted)" }}>{t("activeEngagements")}</small>
         </div>
         <div style={{ padding: 20, borderRadius: 14, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>Offers Made</span>
-          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px", color: analytics && analytics.offersMade > 0 ? "var(--green)" : "var(--muted)" }}>{analytics?.offersMade ?? "—"}</div>
-          <small style={{ color: "var(--muted)" }}>{interviewing} in pipeline</small>
+          <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px" }}>{t("offersMade")}</span>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.5px", margin: "8px 0 3px", color: analytics && analytics.offersMade > 0 ? "var(--green)" : "var(--muted)" }}>{analytics?.offersMade ?? "\u2014"}</div>
+          <small style={{ color: "var(--muted)" }}>{interviewing} {t("inPipeline")}</small>
         </div>
       </div>
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(380px, 0.75fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Student Readiness Checker</h2><p>Evaluate employability skills and generate improvement recommendations</p></div><FileCheck2 /></div>
+          <div className="surface-heading"><div><h2>{t("studentReadiness")}</h2><p>Evaluate employability skills and generate improvement recommendations</p></div><FileCheck2 /></div>
           <form onSubmit={checkReadiness} style={{ padding: 18 }}>
             <div style={{ display: "flex", gap: 10 }}>
               <input placeholder="Enter student ID..." value={readinessId} onChange={e => setReadinessId(e.target.value)} style={inputS} required />
               <button type="submit" disabled={checking} style={{ minHeight: 42, padding: "0 20px", border: "none", borderRadius: 8, background: "var(--blue-600)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", opacity: checking ? 0.6 : 1 }}>
-                {checking ? "Analyzing..." : "Check Readiness"}
+                {checking ? "Analyzing..." : t("checkReadiness")}
               </button>
             </div>
             {checkError && <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, border: "1px solid #ecc0c6", color: "var(--red)", background: "var(--red-soft)", fontSize: 11, display: "flex", alignItems: "center", gap: 6 }}><AlertCircle style={{ width: 15 }} />{checkError}</div>}
@@ -148,10 +152,10 @@ export default function PlacementPage() {
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-1px", color: readiness.overallScore >= 80 ? "var(--green)" : readiness.overallScore >= 50 ? "var(--amber)" : "var(--red)" }}>{readiness.overallScore}%</div>
-                  <div style={{ fontSize: 10, color: "var(--muted)" }}>Readiness Score</div>
+                  <div style={{ fontSize: 10, color: "var(--muted)" }}>{t("readinessScore")}</div>
                 </div>
               </div>
-              <h4 style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 8px" }}>Skill Assessment</h4>
+              <h4 style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 8px" }}>{t("skillAssessment")}</h4>
               {readiness.skills.map((s, i) => (
                 <div key={i} style={{ display: "grid", gridTemplateColumns: "120px 1fr 40px", gap: 10, alignItems: "center", marginBottom: 6 }}>
                   <span style={{ fontSize: 11, fontWeight: 600 }}>{s.skill}</span>
@@ -163,7 +167,7 @@ export default function PlacementPage() {
               ))}
               {readiness.recommendations.length > 0 && (
                 <div style={{ marginTop: 12 }}>
-                  <h4 style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 6px" }}>Recommendations</h4>
+                  <h4 style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 6px" }}>{t("recommendations")}</h4>
                   {readiness.recommendations.map((r, i) => (
                     <div key={i} style={{ fontSize: 11, padding: "6px 0", borderTop: "1px solid var(--line)", display: "flex", alignItems: "center", gap: 6 }}>
                       <TrendingUp style={{ width: 14, color: "var(--blue-600)" }} /> {r}
@@ -176,12 +180,12 @@ export default function PlacementPage() {
         </div>
 
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Partner Management</h2><p>{partners.length} industry partners</p></div><Building2 /></div>
+          <div className="surface-heading"><div><h2>{t("partnerManagement")}</h2><p>{partners.length} industry partners</p></div><Building2 /></div>
           <div style={{ padding: 18, maxHeight: 400, overflow: "auto" }}>
             {partners.length === 0 ? (
               <div style={{ minHeight: 120, display: "grid", placeItems: "center", alignContent: "center", gap: 8, color: "var(--muted)" }}>
                 <Globe style={{ width: 24, opacity: 0.5 }} />
-                <span style={{ fontSize: 11 }}>No partner companies registered</span>
+                <span style={{ fontSize: 11 }}>{t("noPartnerCompanies")}</span>
               </div>
             ) : (
               partners.map(p => (
@@ -204,12 +208,12 @@ export default function PlacementPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Active Placements</h2><p>{placements.length} student placements tracked</p></div><GraduationCap /></div>
+        <div className="surface-heading"><div><h2>{t("activePlacements")}</h2><p>{placements.length} student placements tracked</p></div><GraduationCap /></div>
         {placements.length === 0 ? (
           <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <UserPlus style={{ width: 28, color: "var(--green)" }} />
-            <strong>No active placements</strong>
-            <span>Placements will appear here once students are matched with employers</span>
+            <strong>{t("noActivePlacements")}</strong>
+            <span>{t("noActivePlacementsDesc")}</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>

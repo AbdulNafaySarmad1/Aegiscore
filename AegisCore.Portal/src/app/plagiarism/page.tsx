@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { apiPost } from "@/lib/api-client";
 import { AlertCircle, FileSearch, FileText, Gauge, Layers, ScanEye, ShieldAlert, Zap } from "lucide-react";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 
 type MatchTab = "verbatim" | "paraphrase" | "structural" | "ai";
 type MatchBreakdown = { type: MatchTab; label: string; percent: number; count: number };
@@ -20,6 +21,7 @@ const tabIcons: Record<MatchTab, typeof FileSearch> = { verbatim: FileText, para
 const inputS: React.CSSProperties = { padding: "0.6rem 0.75rem", borderRadius: 8, border: "1px solid var(--line)", background: "var(--canvas)", color: "var(--ink)", fontSize: "0.82rem", width: "100%", boxSizing: "border-box", resize: "vertical" };
 
 export default function PlagiarismPage() {
+  const t = usePersonalityTranslations("academic");
   const [text, setText] = useState("");
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -41,22 +43,22 @@ export default function PlagiarismPage() {
     ? result.overallSimilarity <= 15 ? "var(--green)" : result.overallSimilarity <= 40 ? "var(--amber)" : "var(--red)"
     : "var(--line)";
   const gaugeLabel = result
-    ? result.overallSimilarity <= 15 ? "Low Risk" : result.overallSimilarity <= 40 ? "Moderate" : "High Risk"
-    : "—";
+    ? result.overallSimilarity <= 15 ? t("lowRisk") : result.overallSimilarity <= 40 ? t("moderate") : t("highRisk")
+    : "\u2014";
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Academic Integrity</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Plagiarism Detection</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Multi-dimensional similarity analysis with verbatim, paraphrase, structural, and AI-generation detection</span>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("plagiarism")}</h1>
+          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>{t("gradeAppealsDesc")}</span>
         </div>
       </header>
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(340px, 0.8fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Document Scanner</h2><p>Paste text to check for plagiarism across all dimensions</p></div><ScanEye /></div>
+          <div className="surface-heading"><div><h2>{t("documentScanner")}</h2><p>Paste text to check for plagiarism across all dimensions</p></div><ScanEye /></div>
           <div style={{ padding: 18 }}>
             <textarea
               placeholder="Paste the assignment or document text here for analysis..."
@@ -68,7 +70,7 @@ export default function PlagiarismPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
               <span style={{ color: "var(--muted)", fontSize: 10 }}>{text.length} characters · ~{Math.round(text.split(/\s+/).filter(Boolean).length)} words</span>
               <button onClick={scan} disabled={scanning || !text.trim()} style={{ padding: "0.65rem 1.4rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", gap: 6, opacity: !text.trim() ? 0.5 : 1 }}>
-                <FileSearch style={{ width: 15 }} /> {scanning ? "Scanning..." : "Scan Document"}
+                <FileSearch style={{ width: 15 }} /> {scanning ? t("scanning") : t("scanDocument")}
               </button>
             </div>
             {error && <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, border: "1px solid #ecc0c6", color: "var(--red)", background: "var(--red-soft)", fontSize: 11, display: "flex", alignItems: "center", gap: 6 }}><AlertCircle style={{ width: 15 }} />{error}</div>}
@@ -76,7 +78,7 @@ export default function PlagiarismPage() {
         </div>
 
         <div className="surface" style={{ overflow: "hidden", display: "grid", alignContent: "center", justifyItems: "center", padding: 36 }}>
-          <h3 style={{ margin: "0 0 12px", fontSize: 13, color: "var(--ink)" }}>Similarity Score</h3>
+          <h3 style={{ margin: "0 0 12px", fontSize: 13, color: "var(--ink)" }}>{t("similarityScore")}</h3>
           <svg viewBox="0 0 180 140" style={{ width: 180, height: 140 }}>
             <defs>
               <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
@@ -88,7 +90,7 @@ export default function PlagiarismPage() {
             <g transform="translate(90, 100)">
               <path d={describeArc(0, 0, 64, 135, 405)} fill="none" stroke="var(--surface-soft)" strokeWidth={14} strokeLinecap="round" />
               <path d={describeArc(0, 0, 64, 135, 135 + gaugeAngle)} fill="none" stroke={gaugeColor} strokeWidth={14} strokeLinecap="round" style={{ transition: "stroke-dashoffset .6s ease, stroke .6s ease" }} />
-              <text textAnchor="middle" y="8" style={{ fontSize: 30, fontWeight: 800, fill: "var(--ink)", letterSpacing: "-1px" }}>{result ? `${result.overallSimilarity}%` : "—"}</text>
+              <text textAnchor="middle" y="8" style={{ fontSize: 30, fontWeight: 800, fill: "var(--ink)", letterSpacing: "-1px" }}>{result ? `${result.overallSimilarity}%` : "\u2014"}</text>
               <text textAnchor="middle" y="26" style={{ fontSize: 10, fill: gaugeColor, fontWeight: 700 }}>{gaugeLabel}</text>
             </g>
           </svg>
@@ -136,12 +138,12 @@ export default function PlagiarismPage() {
                     {activeTab === "ai" && b.percent > 10 && (
                       <div style={{ padding: "12px 14px", borderRadius: 8, border: "1px solid var(--line)", background: "var(--amber-soft)", display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
                         <ShieldAlert style={{ width: 16, color: "var(--amber)" }} />
-                        <span>AI-generation probability exceeds threshold. Review recommended.</span>
+                        <span>{t("aiWarning")}</span>
                       </div>
                     )}
                     {activeTab === "verbatim" && result.sources.length > 0 && (
                       <div style={{ marginTop: 8 }}>
-                        <h4 style={{ fontSize: 11, color: "var(--muted)", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: ".5px" }}>Matched Sources</h4>
+                        <h4 style={{ fontSize: 11, color: "var(--muted)", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: ".5px" }}>{t("matchedSources")}</h4>
                         {result.sources.map((s, i) => (
                           <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: "1px solid var(--line)", fontSize: 11 }}>
                             <span style={{ maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
@@ -156,7 +158,7 @@ export default function PlagiarismPage() {
             </div>
 
             <div className="surface" style={{ overflow: "hidden" }}>
-              <div className="surface-heading"><div><h2>Collusion Graph</h2><p>Student-to-student similarity mapping</p></div></div>
+              <div className="surface-heading"><div><h2>{t("collusionGraph")}</h2><p>Student-to-student similarity mapping</p></div></div>
               {result.collusionGroup && result.collusionGroup.length > 0 ? (
                 <div style={{ padding: 18 }}>
                   {result.collusionGroup.map((c, i) => (
@@ -172,7 +174,7 @@ export default function PlagiarismPage() {
               ) : (
                 <div style={{ minHeight: 160, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
                   <Gauge style={{ width: 28, opacity: 0.5 }} />
-                  <span>No collusion patterns detected</span>
+                  <span>{t("noCollusionPatterns")}</span>
                 </div>
               )}
             </div>
