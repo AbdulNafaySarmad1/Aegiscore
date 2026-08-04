@@ -1395,6 +1395,12 @@ public class AegisDbContext : DbContext
     public DbSet<SyncLagConfig> SyncLagConfigs => Set<SyncLagConfig>();
     public DbSet<SyncLagEntry> SyncLagEntries => Set<SyncLagEntry>();
 
+    // Tiered Document Vault (R2 PQC storage)
+    public DbSet<DocumentTier> DocumentTiers => Set<DocumentTier>();
+    public DbSet<DocumentVaultEntry> DocumentVaultEntries => Set<DocumentVaultEntry>();
+    public DbSet<DocumentAccessLog> DocumentAccessLogs => Set<DocumentAccessLog>();
+    public DbSet<DocumentRetentionPolicy> DocumentRetentionPolicies => Set<DocumentRetentionPolicy>();
+
     /// <summary>
     /// Export logs.
     /// </summary>
