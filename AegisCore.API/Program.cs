@@ -147,6 +147,7 @@ else
     app.UseSerilogRequestLogging();
     app.UseMiddleware<RequestLoggingMiddleware>();
     app.UseMiddleware<RateLimitingMiddleware>();
+    app.UseMiddleware<RateLimitAuthMiddleware>();
     app.UseMiddleware<AuthenticatedOriginPullsMiddleware>();
     app.UseMiddleware<HybridPqcTransportMiddleware>();
     app.UseMiddleware<SessionBindingMiddleware>();

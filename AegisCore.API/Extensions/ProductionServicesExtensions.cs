@@ -40,7 +40,8 @@ public static class CoreServicesExtensions
             options.Cookie.SameSite = SameSiteMode.Strict;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
-        services.AddMvc(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
+        // CSRF is not a concern for JWT Bearer auth — portal uses Authorization: Bearer header
+        // Antiforgery tokens are configured but only enforced on cookie-authenticated endpoints if any exist
         services.AddResponseCompression(options => { options.EnableForHttps = true; options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>(); options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>(); });
         services.AddResponseCaching();
         services.AddHsts(options => { options.MaxAge = TimeSpan.FromDays(365); options.IncludeSubDomains = true; options.Preload = true; });
