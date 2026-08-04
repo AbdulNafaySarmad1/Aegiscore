@@ -1,0 +1,638 @@
+================================================================================
+AEGISCORE — COMPLETE FUNCTIONALITY REFERENCE
+================================================================================
+
+AegisCore is a quantum-safe institutional ERP for universities. It covers every
+stakeholder from a first-year student paying challan to a Board of Governors
+member reviewing endowment performance.
+
+Technology: .NET 10 (C# 14) backend, Next.js 16 (React 19) frontend,
+PostgreSQL 17 with pgvector, Redis 7, Docker multi-stage Alpine deployment.
+
+================================================================================
+ARCHITECTURE
+================================================================================
+
+Clean Architecture modular monolith with multi-tenant isolation:
+  Domain Layer    — 188 entity classes, 170+ enums
+  Application     — 60+ service interfaces, contracts, DTOs
+  Infrastructure  — EF Core, migrations, repositories, external adapters
+  API             — 62 controllers, SignalR hubs, minimal API endpoints
+  Portal          — 27 page routes, 15 components, 5 i18n locales
+  Tests           — 508 unit/integration tests
+
+================================================================================
+MODULE REFERENCE — ALL 27 MODULES
+================================================================================
+
+ACADEMIC-01 — GRADE APPEALS WORKFLOW
+-----------------------------------------------------------------------
+  Complete lifecycle: eligibility gate → grounds classification (Clerical
+  Error, Rubric Misapplication, Missing Submission, Bias Claim, Policy
+  Violation, Extenuating Circumstance) → evidence audit with strength
+  scoring → faculty response template → committee brief generation →
+  outcome processing (Upheld/Partially Upheld/Dismissed/Deferred).
+  Frontend: submission form with file upload, appeals table with status
+  badges, committee brief viewer, classify/decision actions.
+
+ACADEMIC-02 — AUTO GRADE DISTRIBUTION ANALYSIS
+-----------------------------------------------------------------------
+  Statistical profiling per course: mean, median, mode, standard deviation,
+  variance, skewness, kurtosis, pass/failure/distinction rates, percentile
+  breakdown. Anomaly detection: high failure rate (>35%), grade inflation
+  (>60% distinction), clustering anomaly (std dev <5), bimodal distribution,
+  significant deviation from historical baseline, section-to-section variance.
+  Frontend: course selector, stat cards, distribution bar chart, anomaly
+  alerts table with severity color-coding.
+
+ACADEMIC-03 — PLAGIARISM DETECTION ACROSS SEMESTERS
+-----------------------------------------------------------------------
+  Multi-layer scan: verbatim match, paraphrase detection (cosine similarity
+  on sentence embeddings), structural fingerprinting (paragraph ordering,
+  citation placement), cross-semester ghost-writing detection (Burrows'
+  Delta style consistency), collusion ring detection via similarity graph
+  clustering, AI-generated content probability (burstiness/perplexity).
+  Tier classification: Tier 1 Administrative (<15%), Tier 2 Academic
+  Misconduct (15-40%), Tier 3 Severe Misconduct (>40%), Tier 4 Collusion Ring.
+  Frontend: text input with Scan, SVG gauge with color bands, 4 match-type
+  tabs, matched sources list, collusion graph section.
+
+ACADEMIC-04 — PLAGIARISM DETECTION API INTEGRATION (TURNITIN/ITHENTICATE)
+-----------------------------------------------------------------------
+  Pluggable middleware: submission orchestration with PII stripping,
+  result ingestion and normalization, policy application engine with
+  excluded sources filtering, faculty-facing interpretation with traffic
+  light classification, student-facing report with citation guidance,
+  API health monitoring with retry logic. Supports Turnitin, iThenticate,
+  and custom providers.
+
+ACADEMIC-05 — CONVOCATION MANAGEMENT
+-----------------------------------------------------------------------
+  End-to-end ceremony pipeline: eligibility determination (credits,
+  CGPA, dues, thesis, library clearance, disciplinary), ceremony
+  logistics (seating, procession, name pronunciation, guest tickets),
+  degree certificate production (serial numbering, tamper-evident),
+  HEC attestation workflow, live ceremony day-of dashboard with QR
+  check-in, post-ceremony reconciliation and alumni record creation.
+  Frontend: ceremony creation form, eligibility grid, certificate
+  generation pipeline, attendance check-in.
+
+ACADEMIC-06 — DISCIPLINARY CASE MANAGEMENT
+-----------------------------------------------------------------------
+  Full due process workflow: intake and triage (severity: Minor/Moderate/
+  Severe/Critical), investigation management (evidence checklist, witness
+  interviews, document chain of custody), charge formulation (policy clause
+  mapping), hearing orchestration (schedule, hearing pack, procedural
+  script), sanctions engine (escalation logic based on prior cases),
+  appeals processing, immutable audit trail.
+  Entities: MisconductCase, MisconductEvidence with PostgreSQL enum types.
+
+ACADEMIC-07 — SEMESTER FREEZE & DEFERRAL WORKFLOW
+-----------------------------------------------------------------------
+  Handles all lifecycle pause events: eligibility and timing analysis
+  (week 1-2 full refund, week 3-4 partial refund, week 9+ medical only,
+  freeze quota tracking), financial impact (refund calculation, credit
+  adjustment, aid impact), academic continuity plan (per-course snapshot,
+  prerequisite gap detection), documentation processing (medical cert,
+  financial statement validation), stakeholder notification chain (student,
+  faculty, finance, hostel, library, international office, scholarship body),
+  return management (45-day advance notification, re-orientation checklist).
+
+ACADEMIC-08 — ONLINE EXAM PROCTORING
+-----------------------------------------------------------------------
+  Remote exam integrity engine: pre-exam environment verification (system
+  check, ID verification via face match + liveness detection, room scan,
+  browser lockdown), real-time monitoring (face absent from frame >10s,
+  multiple faces detected, eye gaze off-screen, speech/whisper detection,
+  tab switching, copy-paste attempts), adaptive response protocols (INFO/
+  WARNING/CRITICAL with auto-submit on egregious violations), post-exam
+  forensic analysis (answer pattern analysis, collusion detection, time-
+  per-question anomaly), results integration with integrity hold period.
+  Frontend: session creation, student integrity grid, proctor event log.
+
+ACADEMIC-09 — INTERNSHIP & PLACEMENT TRACKING
+-----------------------------------------------------------------------
+  Career pipeline: student readiness assessment (skills gap vs industry
+  requirements, resume/LinkedIn scoring), opportunity matching engine
+  (skill alignment, geographic preference, stipend filter), placement
+  tracking workflow (registration, MOU generation, milestone calendar:
+  week 1 check-in, mid-internship report, supervisor evaluation),
+  monitoring and compliance (overdue reports, exploitative placement
+  flagging), assessment and grading (supervisor 40% + report 30% +
+  presentation 20% + attendance 10%), analytics dashboard (placement
+  rate, time-to-placement, stipend distribution, company retention).
+  Frontend: readiness checker, partner list, active placements table,
+  analytics cards.
+
+ACADEMIC-10 — ACCREDITATION VISIT MODE (ONE-CLICK AUDIT VIEW)
+-----------------------------------------------------------------------
+  Precision audit instrument: system-wide read-only toggle during visit,
+  time-limited access tokens for external reviewers, evidence compilation
+  engine (enrollment trends, faculty qualification matrix, curriculum
+  compliance map, CLO/PLO attainment rates, infrastructure reports,
+  financial health indicators), prior findings response dashboard,
+  program-specific drill-down (CLO/PLO heat maps, assessment compliance,
+  faculty ratios, sample student work), real-time natural language query
+  support for reviewers, visit logistics (room booking, schedule, secure
+  document printing), post-visit deactivation with full activity log.
+
+ACADEMIC-11 — ACCREDITATION MAPPING LAYER (HEC/PEC OVERLAY)
+-----------------------------------------------------------------------
+  Live compliance overlay on curriculum tree: credit hour compliance
+  (category-wise tally vs HEC/PEC/ABET requirements), PLO coverage
+  analysis (courses addressing each outcome, insufficient coverage
+  flagging), Bloom's taxonomy distribution (Remember→Create levels vs
+  framework requirements), course type distribution (theory/lab/project
+  ratios), gap resolution recommendations (specific CLO/PLO additions
+  with effort estimates), multi-framework conflict detection, regulatory
+  update monitoring with delta analysis on framework changes.
+
+ACADEMIC-12 — HISTORICAL TREE VERSIONING (CURRICULUM DIFF VIEW)
+-----------------------------------------------------------------------
+  Immutable curriculum history: semantic versioning (major.minor.patch),
+  intelligent diff generation (added/removed/modified courses with
+  field-level comparison, prerequisite chain cascade effects, credit
+  hour delta, PLO mapping changes, Bloom's distribution shift),
+  regulatory impact assessment (HEC notification triggers), student
+  cohort impact analysis (grandfather/migrate/hybrid options, per-cohort
+  impact matrix), timeline visualization, controlled rollback capability
+  with dual-approval requirement.
+  Entities: CurriculumVersionRecord, CurriculumChangeHistory.
+
+ACADEMIC-13 — CURRICULUM TREE (OBSIDIAN-STYLE WITH IMPORT)
+-----------------------------------------------------------------------
+  Dynamic knowledge graph: force-directed visualization (courses as
+  nodes, prerequisites as directed edges, node size by credits,
+  clustering by semester/department/PLO), intelligent import engine
+  (PDF table extraction with OCR, Excel/CSV parsing, auto-schema
+  detection, merged cell handling, deduplication, credit hour format
+  detection including "3+0", "0+1", "3+0/2+1"), real-time validation
+  (credit limits, prerequisite conflicts, circular dependency detection,
+  CLO/PLO coverage gaps, Bloom's level distribution), CLO-PLO mapping
+  interface, Obsidian-style bidirectional linking and path tracing.
+  Frontend: vis-network graph with semester color coding.
+
+ACADEMIC-14 — PREREQUISITE CONFLICT DETECTION (LIVE RIPPLE EFFECT)
+-----------------------------------------------------------------------
+  Real-time simulation engine: Type 1 prerequisite not met (student
+  registered without required course), Type 2 circular prerequisite
+  (DFS cycle detection in dependency graph), Type 3 offering sequence
+  conflict (prerequisite offered after dependent course), Type 4 credit
+  load conflict, Type 5 orphaned prerequisite (deactivated course still
+  referenced), Type 6 graduation bottleneck (single course on critical
+  path for >50% of students). Change impact simulation: ripple effect
+  across all dependents with affected student counts. Registration guard:
+  real-time prerequisite check during course enrollment.
+  Frontend: conflict detector, circular scan, impact simulator.
+
+ACADEMIC-15 — STUDENT PROGRESS OVERLAY (ON CURRICULUM TREE)
+-----------------------------------------------------------------------
+  Personalized graduation GPS: course status per student (Completed/
+  InProgress/Unlocked/Locked/Blocked/Failed/Waived), credit completion
+  percentages by category (core/elective/lab/project), graduation pathway
+  analysis (optimal course sequence, critical path identification, best/
+  base/at-risk scenario modeling), risk early warning (CGPA below threshold,
+  scholarship at risk, failed prerequisite cascade, course only offered
+  annually, internship deadline), personalized recommendations (next
+  semester course selection, GPA improvement strategy, probation
+  recovery targets). Advisor dashboard: portfolio view of advisees with
+  intervention queue.
+  Backed by DegreeAuditController with what-if scenario support.
+
+ACADEMIC-16 — WORKLOAD HEATMAP (CREDIT HOURS VISUALIZATION)
+-----------------------------------------------------------------------
+  Institution-wide load intelligence: faculty workload analysis (teaching
+  hours, contact hours, enrollment load, administrative duties vs policy
+  limits, Underloaded/Optimal/Overloaded/Critical status), heatmap matrix
+  per week, student assessment density calendar (exam/quiz/assignment
+  clustering with collision detection and "finals crunch" factor),
+  student credit load distribution (below-minimum/maximum flagging,
+  program-level overload patterns), curriculum balance analysis (semester
+  variance, lab/theory alternation), historical trend and predictive
+  analysis (enrollment growth → faculty demand forecast).
+  Entities: FacultyWorkload with UnitType and HourPerWeek.
+
+================================================================================
+FINANCE-17 — AI-POWERED FEE DEFAULTER PREDICTION (DEFAULTSENSE)
+================================================================================
+  Predictive financial intelligence: per-student feature engineering
+  (payment behavior: days late trend, partial payment frequency, bounced
+  payments; academic correlation: CGPA trajectory, attendance rate,
+  academic standing; financial profile: scholarship coverage %, aid gaps,
+  year of study; contextual: time in semester, economic calendar),
+  default probability scoring (0.0-1.0) with risk tier classification
+  (GREEN 0-0.3 standard follow-up, YELLOW 0.3-0.6 proactive outreach,
+  ORANGE 0.6-0.8 intervention required, RED 0.8-1.0 immediate escalation),
+  intervention strategy generation per tier (reminders, payment plan
+  offers, financial aid referral, director escalation, registration block),
+  cash flow forecasting (weekly expected inflows, projected shortfall,
+  recovery rate estimates, semester budget alerts at >10% variance),
+  intervention outcome tracking with closed feedback loop to prediction
+  model. Ethical guardrails: no gender/ethnicity/religion-based prediction,
+  scholarship flag separation, dignity language enforcement, support-first
+  escalation. ML engine: train, predict, identify risk drivers, evaluate
+  performance. Frontend: risk tier distribution cards, student lookup,
+  intervention generator, cash flow forecast table.
+
+================================================================================
+HR-18 — VISITING FACULTY MARKETPLACE (FACULTYEXCHANGE)
+================================================================================
+  Intelligent recruitment and deployment: verified talent pool with HEC
+  eligibility determination per course level (100-700), intelligent
+  matching engine (specialization alignment, qualification level, teaching
+  experience, availability, prior engagement performance, compensation fit,
+  industry experience → weighted composite score → ranked top-5 shortlist),
+  profile vetting (degree attestation, CNIC validation, employment history,
+  research publications, reference checks, credentials expiry tracking),
+  engagement and contracting (auto-generated contracts from templates with
+  IP clause, confidentiality, delivery milestones, e-signature workflow),
+  performance monitoring (attendance tracking, grade submission compliance,
+  student feedback, mid-semester self-evaluation, unexpected absence
+  substitute search), compensation processing (per-credit rate calculation,
+  withholding tax deduction, payment voucher generation), pool health
+  analytics (specialization shortage flagging at <3 available, demand vs
+  supply gap, average time-to-fill, rehire rate, pool growth recommendations).
+  Frontend: faculty registration, slot matching grid, contract generation,
+  performance rating panel.
+
+================================================================================
+MANAGEMENT-19 — ACCREDITATION READINESS SCORE (LIVE HEC/PEC METER)
+================================================================================
+  Real-time compliance intelligence: criterion-level scoring (Fully Met
+  1.0 / Substantially Met 0.75 / Partially Met 0.5 / Minimally Met 0.25 /
+  Not Met 0.0 → weighted by framework-defined importance), category rollup
+  (HEC Section A: Governance, B: Faculty, C: Curriculum projections),
+  overall framework score (0-100% with EXCELLENT/GOOD/SATISFACTORY/NEEDS_
+  IMPROVEMENT/CRITICAL_RISK interpretation), live meter: circular gauge
+  with color zones, trend sparkline over 12 months, days-until-audit
+  countdown with urgency color, compliance velocity (at this rate, will
+  we hit 85%?), gap analysis drill-down (specific gap, evidence needed,
+  responsible owner, effort estimate QuickWin <1wk/ShortTerm 1-4wk/
+  MediumTerm 1-3mo/LongTerm >3mo, impact on score, priority rank),
+  prior findings tracker with corrective action status and overdue alerts,
+  predictive readiness forecast (best/expected/worst case at audit date),
+  automated evidence staleness monitoring (daily freshness checks against
+  configured thresholds, auto-notification to owners), executive alert
+  system (score drops >5%, any NOT_MET criterion, <30 days to audit with
+  <75% score). Frontend: circular gauge, countdown, compliance velocity,
+  criteria breakdown table with mini progress bars, gap analysis with
+  effort/priority badges, alerts feed.
+
+================================================================================
+MANAGEMENT-20 — CHANCELLOR / BOARD OF GOVERNORS PORTAL (BOARDVIEW)
+================================================================================
+  Executive intelligence layer: institutional health score (Academic
+  Excellence Index, Financial Stability Score, Accreditation Compliance,
+  Student Success Score, Faculty Quality Index, Composite Ranking),
+  key performance indicators (enrollment vs target vs last year, gross
+  fee collection %, CGPA distribution, faculty-to-student ratio,
+  accreditation status per program, graduate employment rate, research
+  publications, HEC ranking indicators), role-based filtering (Chancellor:
+  strategic view + rankings; VC: operational + faculty; Board Member:
+  financial health + governance — NO individual student/faculty data;
+  Treasurer: financial only; Syndicate: HR + academic governance),
+  board meeting intelligence pack (auto-generated executive summary,
+  frozen point-in-time dashboard snapshot, agenda items with supporting
+  data, decision briefs with options/recommendations/impact/risk, previous
+  resolution implementation status), strategic plan monitoring (current
+  vs target, % achieved, time elapsed vs remaining, trajectory projection,
+  at-risk flags with interventions), benchmarking (peer comparison,
+  national average comparison, HEC ranking factor gap analysis), escalated
+  alerts management (financial <60% collection, academic accreditation at
+  risk, HR critical shortage, compliance directive non-compliance,
+  reputational), board pack PDF generation with secure distribution.
+  Frontend: 6 metric cards (A-F grades), strategic goals with progress
+  bars, board meeting pack generator, alerts feed, benchmark table.
+
+================================================================================
+STUDENT LIFECYCLE-21 — VOICE ASSISTANT (NIDABOT) — URDU SUPPORT
+================================================================================
+  Multilingual voice intelligence: speech processing pipeline (language
+  detection: Urdu/Roman Urdu/English/code-switched, ASR transcription with
+  confidence scoring, auto-clarification on low confidence), intent
+  understanding in natural Urdu ("Mera result kya hai?" → QUERY_RESULTS,
+  "Fees kitni baki hai?" → QUERY_OUTSTANDING_FEES, "Schedule kab hai?"
+  → QUERY_TIMETABLE, "Roll number slip chahiye" → REQUEST_DOCUMENT),
+  student intents (results, fees, timetable, attendance, document requests,
+  admission forms, leave, appointments), faculty intents (class list, grades
+  submission, attendance), parent intents (graduation status, payment status),
+  response generation (formal Urdu with natural English loanwords, answer-
+  first principle, one-piece-at-a-time), ERP action execution (query
+  retrieval, form submission guidance, document generation/delivery,
+  appointment scheduling, complaint recording, payment initiation),
+  accessibility features (slow speech mode "Dhire bolein", repeat,
+  simplified language "Aasan alfaaz mein", elderly detection → slower TTS),
+  human escalation triggers (ASR confidence < threshold after 2 retries,
+  intent unclassified after 2 clarifications, explicit "Insaan se baat
+  karni hai", emotional distress, serious complaint → immediate intervention).
+  Frontend: language selector buttons, text/audio input, transcript display,
+  intent classification card, response display, session history.
+
+================================================================================
+STUDENT LIFECYCLE-22 — STUDENT ACHIEVEMENT GAMIFICATION (ACHIEVECORE)
+================================================================================
+  Behavioral motivation system: achievement detection across categories
+  (Academic: Dean's List, CGPA milestones 3.0/3.5/3.7/4.0, perfect semester,
+  most-improved, course top-performer, research publication; Engagement:
+  perfect attendance, first submission, streak achievements; Lifecycle:
+  admission, first semester, halfway, internship, graduation; Community:
+  student council, sports, volunteer hours), badge issuance with verification
+  hash (Open Badge Standard compatible), Dean's List processing (semester-
+  end eligibility check, Registrar 48-hour verification, formal letter
+  generation, transcript notation, parent notification, website update),
+  leaderboard engine (by CGPA, improvement rate, badge count, attendance;
+  anonymization option, opt-out support, historical snapshots, department
+  filtering), personalized achievement roadmap (next badge recommendations
+  with progress bars, Dean's List qualification predictor, goal setting
+  with grade requirements calculator), analytics (does gamification correlate
+  with improved attendance/GPA/retention? most earned badges, zero-badge
+  students as engagement concern, cohort recognition gap analysis).
+  Frontend: badge catalog grid, student detection, Dean's List processor,
+  leaderboard, roadmap viewer.
+
+================================================================================
+STUDENT LIFECYCLE-23 — STUDENT MENTAL HEALTH TICKETING (SAFESPACE)
+================================================================================
+  Anonymous trauma-informed support: fully anonymous intake (no student
+  ID/name/roll number, auto-generated anonymous token, preferred contact
+  method), concern classification (ROUTINE: general stress, academic
+  pressure, mild anxiety → standard 24h queue; URGENT: significant
+  distress, relationship crisis, grief → priority 4h queue; CRISIS:
+  self-harm or suicidal ideation → IMMEDIATE bypass), NLP keyword
+  detection (explicit: "want to die", "kill myself"; implicit: "nobody
+  would miss me", "won't be here for long" → crisis protocol), intelligent
+  counselor routing (specialization match, language preference, caseload
+  balancing, continuity routing for prior sessions), counselor interface
+  (severity-sorted queue, concern summary, secure messaging, video call
+  scheduling, private case notes invisible to student/administration,
+  one-click CRISIS escalation), mandatory reporting protocol (imminent
+  harm → campus security + Dean within 15 min; child safeguarding under
+  18 → legal authority; student informed of disclosure), follow-up and
+  wellness monitoring (48-hour URGENT check-in, 7-day ROUTINE follow-up,
+  opt-in weekly pulse surveys, exam period spike detection → proactive
+  welfare outreach, curated Urdu+English mental health resource library),
+  aggregate reporting (ticket volume by type, severity trend, response
+  time vs SLA, counselor caseload distribution, peak stress periods by
+  academic calendar — NO individual data).
+  Frontend: anonymous ticket form, counselor queue cards, mandatory
+  report trigger panel, 4 metric cards.
+
+================================================================================
+STUDENT LIFECYCLE-24 — FOREIGN STUDENT VISA & DOCUMENT TRACKING (MORA)
+================================================================================
+  Immigration compliance: foreign student registry (nationality, passport
+  number/expiry, visa type/number/expiry, entry date, MORA registration
+  ID, program, compliance status: Fully Compliant/Action Required/Non
+  Compliant/Critical), document expiry tracking with tiered alerts (90 days
+  informational, 60 days action reminder, 30 days urgent, 14 days critical,
+  7 days emergency, Expired immediate notification with compliance breach),
+  MORA reporting compliance (semester enrollment verification in MORA
+  format, batch submission, new student registration triggers on enrollment,
+  graduation/departure notification, query response tracking), enrollment
+  letter generation (auto-generated for visa renewal: student details,
+  university letterhead, Registrar digital signature, MORA registration
+  number, QR verification code), visa renewal support (nationality-specific
+  document checklist, timeline calculation, pre-filled application forms,
+  International Office appointment scheduling, renewal tracking: Submitted
+  → Processing → Approved/Rejected), compliance breach management (academic
+  service freeze condition, embassy notification if required by bilateral
+  agreement, administrative delay exception protection), International
+  Office dashboard (students by nationality, compliance rate, expiry
+  calendar 30/60/90 days, MORA submission status, action queue sorted by
+  urgency). Frontend: registration form, expiry alert panel (color-coded
+  by urgency), MORA submission, visa renewal workflow, compliance report.
+
+================================================================================
+OPTIONAL-25 — STUDENT UNION & ELECTIONS MODULE (ELECTCORE)
+================================================================================
+  Democratic governance engine: election setup (positions, seats, terms,
+  schedule milestones with automatic reminders, code of conduct auto-
+  drafting), nomination processing (candidate eligibility verification
+  against CGPA/discipline/endorsement rules, objection window with
+  investigation workflow, verified candidate publication), voter
+  verification and registration (voter roll generation, one-person-one-
+  vote enforcement with unique anonymous tokens, biometric/ID-scan/OTP
+  authentication), secure ballot engine (online: encrypted ballot with
+  vote identity separation, real-time duplicate detection, cryptographic
+  ballot chain, tamper detection; physical: QR-coded ballot papers, scan
+  digitization with confidence scoring, ambiguous ballot review),
+  result computation and certification (tabulation per position,
+  simple/preferential/runoff methods, preliminary → verified → certified
+  pipeline, automatic recount trigger at <2% margin, tamper-evident
+  certification document), post-election (simultaneous multi-channel
+  announcement, loser notification, winner seat confirmation, handover
+  briefing workflow, 5-year audit archive, 48-hour complaint window,
+  turnout analysis). Frontend: election timeline, candidate nomination,
+  voter token issuance, encrypted balloting, results tally + certification.
+
+================================================================================
+OPTIONAL-26 — CAFETERIA MANAGEMENT (FOODCORE)
+================================================================================
+  Food operations platform: digital menu publication (auto-published daily,
+  student pre-order 15-min advance, queue management with estimated ready
+  time, real-time availability, nutritional information, allergen flagging
+  against student health profile), cashless payment (student wallet top-up,
+  QR scan at counter, meal plan deduction within daily allowance, split
+  payment wallet+plan, transaction history, low balance alert, digital
+  receipt), demand forecasting (historical sales → predicted daily demand
+  by day-of-week/time-of-day/semester-period, adjusted for exam/event/
+  holiday, prep quantity recommendations, real-time sell-through monitoring
+  with oversell/undersell alerts), inventory and supplier management (raw
+  material consumption vs sales tracking, low stock/expiry alerts, purchase
+  order auto-generation at reorder points, approved vendor list, perishable
+  expiry tracking, waste log with regulatory and cost tracking), vendor
+  performance (daily revenue, hygiene compliance checklist digital submission,
+  menu adherence, complaint tracking, halal certification status and renewal,
+  monthly score: Excellent/Satisfactory/Needs Improvement/Warning/Contract
+  At Risk), analytics (daily revenue per unit, most/least popular items,
+  peak hour traffic, average spend, meal plan utilization, waste percentage,
+  student satisfaction). Frontend: unit management, menu items, order
+  placement, pending orders table, demand forecast, vendor scorecard form,
+  inventory alerts, waste log.
+
+================================================================================
+OPTIONAL-27 — TRANSPORT MANAGEMENT (TRANSITCORE)
+================================================================================
+  Intelligent fleet orchestration: fleet and route management (vehicle
+  registry with specs, route optimization by student home stop clustering,
+  seat allocation by proximity, dynamic rerouting on breakdown, timetable
+  publication), real-time GPS tracking (live vehicle location map,
+  ETA calculation per stop, geofence alerts on route deviation, speed
+  monitoring with instant driver+management notification >60 km/h, stop
+  arrival auto-log, journey completion logging), student boarding management
+  (QR code ID scan on boarding → attendance log, no-show → parent
+  notification, unauthorized boarding detection → driver alert, daily
+  boarding report per route, absence pattern → welfare officer alert),
+  safety and compliance (vehicle registration/fitness/insurance expiry →
+  tiered alerts, driver license/medical/training expiry tracking, HARD
+  RULE: expired = grounded, incident logging with investigation workflow,
+  daily digital pre-trip inspection: brakes/tires/lights/emergency exits/
+  first aid kit), financial management (fee collection integration, service
+  suspension on outstanding payment with grace period, revenue per route
+  viability analysis, cost per km/student calculation, fuel consumption
+  tracking, fleet maintenance cost and depreciation), parent and student
+  communication (real-time bus location sharing, "Bus is 10 min from your
+  stop" notification, service disruption alerts, "Your child has not boarded
+  their expected return bus" alert, feedback per journey), analytics
+  (route utilization over/under capacity, stop demand analysis, fuel
+  efficiency trends, driver performance: punctuality + incidents + feedback,
+  cost-per-student per route → rationalization recommendations, next semester
+  demand forecast based on new student intake geography). Full entity model:
+  TransportRoute, RouteStop, TransportVehicle, TransportDriver, DriverShift,
+  DriverIncident, BusAttendance, FuelLog, GPSLocation, VehicleMaintenance.
+  Finance-side fleet integration: cost posting, trip recording, profile
+  registration with depreciation, maintenance scheduling, disposal with
+  asset write-off, fleet summary. Frontend: fleet status grid, route
+  management table, GPS tracking panel, QR scan boarding log, compliance
+  alerts table, fee summary, 4 metric cards.
+
+================================================================================
+CROSS-CUTTING SYSTEMS
+================================================================================
+
+COURSE CATALOG INGESTION ENGINE
+-----------------------------------------------------------------------
+  Document-to-database pipeline: accepts scanned PDF (CamScan, Adobe
+  Scan), digital PDF, images (JPG/PNG/WEBP/HEIC), Excel/CSV, Word
+  documents. Multi-stage: document reception → classification (MIME
+  type + magic bytes + text density detection for scanned vs digital
+  decision) → text extraction (digital: layout-preserving text; scanned:
+  OCR with deskew/contrast enhancement, configurable provider: Google
+  Vision/Azure/AWS Textract/Tesseract) → structure detection (degree
+  program headers, semester grouping, table columns identified by content
+  pattern not position, credit hour format detection "3+0"/"0+1"/"3+0/
+  2+1", prerequisite chain detection, removed course detection via
+  strikethrough/greyed text) → data normalization → validation (code
+  pattern, credit limits, prerequisite graph: circular/orphan/forward
+  detection, duplicate detection with update candidate flagging) →
+  review queue (confidence-scored items needing human review, image crop
+  alongside parsed data, approve/reject) → database insertion (transactional
+  per degree program, idempotent import). Versioned catalogs with full
+  history. Degree tree computation: DAG graph of prerequisite relationships,
+  critical path identification for graduation bottlenecks.
+
+AUTO CLASS GENERATION & LMS INTEGRATION
+-----------------------------------------------------------------------
+  Semester-start automation: trigger (scheduled cron/manual/API/event on
+  enrollment close) → course offering resolution (open offerings with
+  enrolled counts) → student distribution across sections (strategy:
+  alphabetical/random/balanced/manual/existing) → faculty assignment
+  (primary_secondary/split_sections/shared_all/manual) → class record
+  creation → LMS provisioning via pluggable adapters.
+  Supported LMS: Google Classroom (Workspace Admin SDK, course creation,
+  teacher/student enrollment via directory, enrollment code option),
+  Microsoft Teams (Graph Education API, team creation with channels,
+  OneNote class notebook), Moodle (Web Services API, category mapping,
+  manual/self/cohort enrollment, coexistence modes: provision_only/
+  bidirectional_sync/readonly_import/sso_only, SSO via OAuth2/SAML),
+  Custom (HTTP-based adapter with configurable endpoints and payload
+  templates). Directory integration: Google Workspace, Azure AD, LDAP,
+  Local, Custom. Roster sync with conflict resolution and alert thresholds.
+
+PERSONALITY MODE
+-----------------------------------------------------------------------
+  Voice register system with 8 role personas (Governance, Executive
+  Leadership, Academic Leadership, Administration, Finance, Faculty,
+  Support Staff, Students). Four UX moment classifications (Idle, Loading,
+  Success, Warning, Error, Empty State, Onboarding, Celebration) × three
+  stake levels (Low, Medium, High, Irreversible). .personality i18n key
+  variants in Gen Z Pakistani English (Sadapay energy): Urdu phrases
+  welcome where natural ("ho gaya", "set hai", "bhai"), max one emoji
+  on success, never on warnings/errors, never sacrifice amounts or
+  reference numbers for jokes, never sarcastic about money. 272-line
+  i18n file across 5 locales: en-PK/US/GB, ar-AE, ms-MY. Per-user toggle
+  with global lock-off capability. Finance/Governance/Executive roles
+  permanently locked OFF. Irreversible action confirmations excluded.
+  Personality-translator hook with silent fallback to standard keys.
+
+NOCTURNE CHART SYSTEM
+-----------------------------------------------------------------------
+  Five laws: Omniscient Hover (tooltip shows value + context + trend),
+  Native Zoom (scroll/pinch/drag-select with session persistence),
+  Device Omnipresence (375px-3840px, mobile touch targets 44×44px),
+  Intelligent Curve Narration (insight chips computed from live data,
+  never hardcoded), Accessibility (aria-labels, keyboard navigation,
+  screen-reader data table toggle, high contrast, prefers-reduced-motion).
+  Component tree: NChart (root, delegates by type) → NChartHeader
+  (title, subtitle, insight chip, date range, export menu) → NChartCanvas
+  (ResponsiveContainer with token-driven dimensions) → NChartTooltip,
+  NZoomLayer, NChartLegend, NChartDataTable, NChartGauge (pure SVG
+  circular, animated with color zones), NChartHeatmap (calendar grid
+  with intensity scale). Supported types: line, area, bar, donut,
+  treemap, scatter, histogram, heatmap, waterfall, gauge, gantt, bullet.
+  Forbidden types: 3D pie, dual Y-axis, radar/spider, plain donut >7
+  slices. Anomaly detection: >Nσ above/below mean, zero-when-nonzero,
+  sudden trend reversal — all computed at render time.
+
+DISASTER & CONTINUITY RECOVERY (DCR)
+-----------------------------------------------------------------------
+  Streaming replication to warm standby, WAL archiving to S3-compatible
+  object storage, automated snapshots on configurable cron schedule,
+  health monitoring every N seconds with failover threshold, manual or
+  automatic failover with webhook alerts. RTO <60 seconds (auto), RPO
+  <5 seconds (streaming) / <WAL interval (archival). Point-in-time
+  recovery: restore base snapshot, replay WAL to target timestamp,
+  promote recovered instance. Full runbook: pre-flight checks, manual
+  failover procedure, PITR recovery, snapshot management, health
+  monitoring script. Kubernetes manifests: 16 YAML files (deployments,
+  statefulsets, services, HPA, PDB, ingress, network policies, configmaps).
+
+================================================================================
+INFRASTRUCTURE & DEPLOYMENT
+================================================================================
+
+Docker: multi-stage Alpine builds (.NET 10 SDK → runtime), non-root
+user (uid 1001), health checks baked in, zero secrets in image layers.
+Target image size: <300MB compressed. Cold start: <15 seconds.
+
+Three deployment modes (same image, env-driven behavior):
+  LOCAL:   Postgres+Redis in compose, local storage, no DCR
+  CLOUD:   Managed Postgres+Redis, S3-compatible storage, DCR active
+  HYBRID:  On-prem primary + cloud replica, WAL to object storage
+
+Environment: fail-fast on missing REQUIRED_* env vars, secrets via
+provider abstraction (none/AWS/GCP/Azure/Vault/HashiCorp Vault),
+log format json/pretty, OpenTelemetry exporter for observability.
+
+Seeds: 30+ demo records (badges, Dean's List, cafeteria menu, risk
+scores, readiness, board alerts, strategic goals, visiting faculty,
+grade appeals) auto-run on first boot.
+
+================================================================================
+SECURITY & COMPLIANCE
+================================================================================
+
+Auth: JWT Bearer + Casbin ABAC + RBAC hybrid. Argon2 password hashing,
+ML-DSA post-quantum signature verification, brute force protection,
+login audit trail. Multi-tenant isolation via TenantId global query
+filter. Demo mode, license enforcement, PQC transport layer.
+
+================================================================================
+PAYMENT & FINANCE
+================================================================================
+
+40+ finance migrations: General Ledger, Accounts Payable/Receivable,
+Procurement (requisition → PO → goods receipt → invoice), Treasury
+(cash management, investments), Payroll (Pakistan-compliant: EOBI,
+income tax, provident fund), Tax configuration, Foreign currency with
+exposure tracking, Petty cash with imprest, Fleet finance (depreciation,
+disposal), Library fine processing, Scholarship lifecycle, PIFRA/HEC
+compliance, PQC cryptographic audit seals, Merkle root ledger chain,
+RAAST real-time payments, Stripe/Billplz/DuitNow gateways.
+
+================================================================================
+TENANT CONFIGURATION
+================================================================================
+
+Every value is dynamic — zero hardcoding: currency format (South Asian
+PKR 1,20,000 vs Western PKR 120,000), fiscal year start/end (not
+assumed Jul-Jun), locale (en-PK default, ur-PK available), calendar
+type (Gregorian/Hijri), anomaly threshold sigma, feature flags, payment
+provider, branding colors injected as CSS vars at runtime, course code
+pattern, degree levels, credit hour limits, OCR preferences, LMS configs,
+distribution strategies, section capacities, notification channels,
+personality mode defaults per role.
+
+================================================================================
+END OF DOCUMENT — Apex Systems (Pvt.) Ltd. — Confidential
+================================================================================

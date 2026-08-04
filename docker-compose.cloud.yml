@@ -1,0 +1,49 @@
+# -------------------------------------------------------------------
+# docker-compose.cloud.yml — AegisCore CLOUD override
+#
+# Used in CLOUD mode where Postgres and Redis are managed externally
+# (e.g. AWS RDS / Azure Database / GCP Cloud SQL / ElastiCache).
+#
+# This file overrides the base docker-compose.yml to:
+#   - Remove postgres and redis services (they are managed)
+#   - Use pre-built images for api and portal
+#   - Set DEPLOYMENT_MODE=cloud on both services
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d
+# -------------------------------------------------------------------
+
+services:
+  api:
+    image: ${AEGISCORE_API_IMAGE:-ghcr.io/abdulnafaysarmad1/aegiscore-api}:${IMAGE_TAG:-latest}
+    build: !reset null
+    environment:
+      DEPLOYMENT_MODE: cloud
+      AEGISCORE_DB_CONNECTION: ${DATABASE_URL:?DATABASE_URL must be set in .env for cloud mode}
+      AEGISCORE_REDIS_CONNECTION: ${REDIS_URL:?REDIS_URL must be set in .env for cloud mode}
+    depends_on:
+      postgres:
+        condition: null
+      redis:
+        condition: null
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  portal:
+    image: ${AEGISCORE_PORTAL_IMAGE:-ghcr.io/abdulnafaysarmad1/aegiscore-portal}:${IMAGE_TAG:-latest}
+    build: !reset null
+    environment:
+      DEPLOYMENT_MODE: cloud
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres: !reset null
+  redis: !reset null

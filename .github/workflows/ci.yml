@@ -1,0 +1,83 @@
+# -----------------------------------------------------------------------------
+# AegisCore — Continuous Integration Workflow
+# Runs on every push and on pull requests targeting main.
+# Validates backend build+tests, frontend build+typecheck, and Docker builds.
+# -----------------------------------------------------------------------------
+
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-backend:
+    name: Build & Test (.NET)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore AegisCore.slnx
+
+      - name: Build
+        run: dotnet build AegisCore.slnx --no-restore -m:1 -p:BuildInParallel=false --configuration Release
+
+      - name: Test
+        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release --verbosity normal -m:1 -p:BuildInParallel=false
+
+  build-frontend:
+    name: Build & Typecheck (Portal)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: AegisCore.Portal/package-lock.json
+
+      - name: Install
+        working-directory: AegisCore.Portal
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: AegisCore.Portal
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: AegisCore.Portal
+        run: npm run build
+
+  docker-verify:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        run: docker build -t aegiscore-api:ci-test .
+
+      - name: Build Portal image
+        run: docker build -t aegiscore-portal:ci-test AegisCore.Portal

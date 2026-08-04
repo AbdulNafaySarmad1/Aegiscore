@@ -1,0 +1,114 @@
+# -------------------------------------------------------------------
+# docker-compose.hybrid.yml — AegisCore HYBRID override
+#
+# HYBRID mode runs a local Postgres primary with WAL archiving to
+# S3-compatible object storage, a local Redis primary, and the api
+# and portal services configured to use them.
+#
+# This file:
+#   - Renames postgres -> postgres-primary with WAL archiving config
+#   - Renames redis -> redis-primary
+#   - Sets DEPLOYMENT_MODE=hybrid on api and portal
+#   - Mounts the WAL archive script for postgres archive_command
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.hybrid.yml up -d
+# -------------------------------------------------------------------
+
+services:
+  api:
+    environment:
+      DEPLOYMENT_MODE: hybrid
+      AEGISCORE_DB_CONNECTION: Host=postgres-primary;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+    depends_on:
+      postgres:
+        condition: null
+      redis:
+        condition: null
+      postgres-primary:
+        condition: service_healthy
+      redis-primary:
+        condition: service_healthy
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  portal:
+    environment:
+      DEPLOYMENT_MODE: hybrid
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres: !reset null
+  redis: !reset null
+
+  postgres-primary:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aegiscore}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-aegiscore_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}}
+      APP_DB_USER: ${POSTGRES_USER:-aegiscore}
+      APP_DB_PASSWORD: ${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=5
+      -c archive_mode=on
+      -c archive_command='/usr/local/bin/wal-archive.sh %p %f'
+      -c archive_timeout=60
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init/010-harden-app-role.sh:/docker-entrypoint-initdb.d/010-harden-app-role.sh:ro
+      - ./docker/postgres/wal-archive.sh:/usr/local/bin/wal-archive.sh:ro
+    environment:
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:-}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-}
+      WAL_ARCHIVE_BUCKET: ${WAL_ARCHIVE_BUCKET:-aegiscore-wal}
+      WAL_ARCHIVE_PREFIX: ${WAL_ARCHIVE_PREFIX:-wal}
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis-primary:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}"]
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$${REDIS_PASSWORD} redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - redis_data:/data
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
