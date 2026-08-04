@@ -87,8 +87,8 @@ export default function SyncLagPage() {
         <div style={cardS}>
           <h3 style={h3}><Settings size={16} /> Sync-Lag Configuration</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.75rem" }}>
-            <div><div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Grace Period (seconds)</div><input type="number" style={inp} value={config.defaultGracePeriodSeconds} onChange={e => setConfig({ ...config, defaultGracePeriodSeconds: parseInt(e.target.value) || 300 })} /></div>
-            <div><div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Max Grace Period (seconds)</div><input type="number" style={inp} value={config.maxGracePeriodSeconds} onChange={e => setConfig({ ...config, maxGracePeriodSeconds: parseInt(e.target.value) || 3600 })} /></div>
+            <div><div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Grace Period (seconds)</div><input type="number" step="1" min="1" style={inp} value={config.defaultGracePeriodSeconds} onChange={e => setConfig({ ...config, defaultGracePeriodSeconds: parseInt(e.target.value) || 300 })} /></div>
+            <div><div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Max Grace Period (seconds)</div><input type="number" step="1" min="1" style={inp} value={config.maxGracePeriodSeconds} onChange={e => setConfig({ ...config, maxGracePeriodSeconds: parseInt(e.target.value) || 86400 })} /></div>
           </div>
           <div style={{ marginTop: "0.75rem", display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
             <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.85rem", color: "var(--ink)", cursor: "pointer" }}>

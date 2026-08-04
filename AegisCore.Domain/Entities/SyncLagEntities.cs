@@ -7,8 +7,8 @@ namespace AegisCore.Domain.Entities;
 public class SyncLagConfig
 {
     [Key] public Guid Id { get; set; }
-    public int DefaultGracePeriodSeconds { get; set; } = 300; // 5 min default — IT can change
-    public int MaxGracePeriodSeconds { get; set; } = 3600;     // max 1 hour
+    public int DefaultGracePeriodSeconds { get; set; } = 300; // 5 min default, IT sets any value
+    public int MaxGracePeriodSeconds { get; set; } = 86400;    // configurable to any value (default 24h)
     public bool AutoCommitOnGraceExpiry { get; set; } = true;
     public bool RequireAdminApprovalForCorrections { get; set; } = true;
     [MaxLength(50)] public string CorrectionPermission { get; set; } = "AdminOnly"; // AdminOnly | OwnerOnly | Anyone

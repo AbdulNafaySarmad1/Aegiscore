@@ -25,8 +25,8 @@ public class SyncLagService : ISyncLagService
     public async Task<SyncLagConfig> UpdateConfigAsync(SyncLagConfig config, CancellationToken ct)
     {
         var existing = await GetConfigAsync(ct);
-        existing.DefaultGracePeriodSeconds = config.DefaultGracePeriodSeconds;
-        existing.MaxGracePeriodSeconds = config.MaxGracePeriodSeconds;
+        existing.DefaultGracePeriodSeconds = Math.Max(1, config.DefaultGracePeriodSeconds);
+        existing.MaxGracePeriodSeconds = Math.Max(existing.DefaultGracePeriodSeconds, config.MaxGracePeriodSeconds);
         existing.AutoCommitOnGraceExpiry = config.AutoCommitOnGraceExpiry;
         existing.RequireAdminApprovalForCorrections = config.RequireAdminApprovalForCorrections;
         existing.CorrectionPermission = config.CorrectionPermission;
