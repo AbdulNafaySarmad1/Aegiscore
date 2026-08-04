@@ -29,10 +29,9 @@ public class PqcCryptographyOptions
     public string? MasterKeyBase64 { get; set; }
 }
 
-public class PqcCryptographyService : IPqcCryptographyService
+public sealed class PqcCryptographyService : IPqcCryptographyService, IDisposable
 {
     private readonly byte[] _key;
-    private readonly byte[] _nonce;
     private readonly PqcAlgorithm _algorithm;
     private readonly ILogger<PqcCryptographyService> _logger;
 
@@ -40,11 +39,11 @@ public class PqcCryptographyService : IPqcCryptographyService
     {
         _algorithm = options.Value.Algorithm;
         _logger = logger;
-        var configuredKey = Environment.GetEnvironmentVariable("NOCTURNE_PQC_KEY_BASE64")
+        var configuredKey = Environment.GetEnvironmentVariable("AEGISCORE_PQC_KEY_BASE64")
             ?? options.Value.MasterKeyBase64;
         if (string.IsNullOrWhiteSpace(configuredKey))
         {
-            throw new InvalidOperationException("PQC master key is required. Configure NOCTURNE_PQC_KEY_BASE64 with a 32-byte base64 value.");
+            throw new InvalidOperationException("PQC master key is required. Configure AEGISCORE_PQC_KEY_BASE64 with a 32-byte base64 value.");
         }
 
         _key = Convert.FromBase64String(configuredKey);
@@ -52,18 +51,16 @@ public class PqcCryptographyService : IPqcCryptographyService
         {
             throw new InvalidOperationException("PQC master key must decode to exactly 32 bytes.");
         }
-        _nonce = new byte[12];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(_nonce);
     }
 
     public PqcAlgorithm CurrentAlgorithm => _algorithm;
 
     public byte[] Encrypt(ReadOnlySpan<byte> plaintext, ReadOnlySpan<byte> associatedData = default)
     {
+        var nonce = RandomNumberGenerator.GetBytes(12);
         var cipher = new Org.BouncyCastle.Crypto.Modes.GcmBlockCipher(new Org.BouncyCastle.Crypto.Engines.AesEngine());
         var parameters = new Org.BouncyCastle.Crypto.Parameters.AeadParameters(
-            new Org.BouncyCastle.Crypto.Parameters.KeyParameter(_key), 128, _nonce);
+            new Org.BouncyCastle.Crypto.Parameters.KeyParameter(_key), 128, nonce, associatedData.ToArray());
         cipher.Init(true, parameters);
 
         var input = plaintext.ToArray();
@@ -71,15 +68,16 @@ public class PqcCryptographyService : IPqcCryptographyService
         var len = cipher.ProcessBytes(input, 0, input.Length, output, 0);
         cipher.DoFinal(output, len);
 
-        var result = new byte[_nonce.Length + output.Length];
-        Buffer.BlockCopy(_nonce, 0, result, 0, _nonce.Length);
-        Buffer.BlockCopy(output, 0, result, _nonce.Length, output.Length);
+        var result = new byte[nonce.Length + output.Length];
+        Buffer.BlockCopy(nonce, 0, result, 0, nonce.Length);
+        Buffer.BlockCopy(output, 0, result, nonce.Length, output.Length);
         return result;
     }
 
     public byte[] Decrypt(ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> associatedData = default)
     {
         var data = ciphertext.ToArray();
+        if (data.Length < 28) throw new CryptographicException("Ciphertext is truncated.");
         var nonce = new byte[12];
         Buffer.BlockCopy(data, 0, nonce, 0, 12);
         var body = new byte[data.Length - 12];
@@ -87,13 +85,21 @@ public class PqcCryptographyService : IPqcCryptographyService
 
         var cipher = new Org.BouncyCastle.Crypto.Modes.GcmBlockCipher(new Org.BouncyCastle.Crypto.Engines.AesEngine());
         var parameters = new Org.BouncyCastle.Crypto.Parameters.AeadParameters(
-            new Org.BouncyCastle.Crypto.Parameters.KeyParameter(_key), 128, nonce);
+            new Org.BouncyCastle.Crypto.Parameters.KeyParameter(_key), 128, nonce, associatedData.ToArray());
         cipher.Init(false, parameters);
 
         var output = new byte[cipher.GetOutputSize(body.Length)];
         var len = cipher.ProcessBytes(body, 0, body.Length, output, 0);
-        cipher.DoFinal(output, len);
-        return output;
+        try
+        {
+            cipher.DoFinal(output, len);
+            return output;
+        }
+        catch (Org.BouncyCastle.Crypto.InvalidCipherTextException ex)
+        {
+            CryptographicOperations.ZeroMemory(output);
+            throw new CryptographicException("Ciphertext authentication failed.", ex);
+        }
     }
 
     public string EncryptString(string plaintext)
@@ -107,6 +113,8 @@ public class PqcCryptographyService : IPqcCryptographyService
         var bytes = Convert.FromBase64String(ciphertext);
         return System.Text.Encoding.UTF8.GetString(Decrypt(bytes));
     }
+
+    public void Dispose() => CryptographicOperations.ZeroMemory(_key);
 }
 
 public class WeeklySnapshotService : BackgroundService

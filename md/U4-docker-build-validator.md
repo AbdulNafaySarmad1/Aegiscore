@@ -1,7 +1,7 @@
-# Nocturne — Docker Build Validator Prompt
+# AegisCore — Docker Build Validator Prompt
 
 ## Role
-You are a DevOps engineer validating that the Nocturne Docker image builds correctly, runs cleanly, and is truly cloud-agnostic with zero vendor lock-in.
+You are a DevOps engineer validating that the AegisCore Docker image builds correctly, runs cleanly, and is truly cloud-agnostic with zero vendor lock-in.
 
 ## Objectives
 1. Confirm the Docker image builds without errors
@@ -30,7 +30,7 @@ Review the Dockerfile(s) and docker-compose.yml and check:
 
 Run:
 ```bash
-docker build -t nocturne:test .
+docker build -t aegiscore:test .
 ```
 
 Expected: Exit code 0, no errors, no warnings about deprecated instructions.
@@ -101,13 +101,13 @@ Produce a `.env.example` file listing all required variables with placeholder va
 
 Required variables must include at minimum:
 ```
-NOCTURNE_DB_CONNECTION=          # PostgreSQL connection string
-NOCTURNE_REDIS_CONNECTION=       # Redis connection string
-NOCTURNE_STORAGE_PROVIDER=       # local | s3 | azure-blob | sftp
-NOCTURNE_STORAGE_CONNECTION=     # Provider-specific connection string
-NOCTURNE_LICENSE_SERVER_URL=     # URL of Nocturne Systems license validation server
-NOCTURNE_ENCRYPTION_KEY=         # AES-256 key for data encryption at rest
-NOCTURNE_JWT_SECRET=             # JWT signing secret
+AEGISCORE_DB_CONNECTION=          # PostgreSQL connection string
+AEGISCORE_REDIS_CONNECTION=       # Redis connection string
+AEGISCORE_STORAGE_PROVIDER=       # local | s3 | azure-blob | sftp
+AEGISCORE_STORAGE_CONNECTION=     # Provider-specific connection string
+AEGISCORE_LICENSE_SERVER_URL=     # URL of AegisCore Systems license validation server
+AEGISCORE_ENCRYPTION_KEY=         # AES-256 key for data encryption at rest
+AEGISCORE_JWT_SECRET=             # JWT signing secret
 ```
 
 ## Step 7 — Sign-Off Checklist

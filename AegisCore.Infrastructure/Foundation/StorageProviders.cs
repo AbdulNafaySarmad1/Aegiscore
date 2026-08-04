@@ -7,7 +7,7 @@ namespace AegisCore.Infrastructure.Foundation;
 public sealed class LocalDiskStorageProvider(IConfiguration configuration) : IStorageProvider
 {
     private readonly string _basePath = Path.GetFullPath(
-        configuration["NOCTURNE_STORAGE_LOCAL_PATH"]
+        configuration["AEGISCORE_STORAGE_LOCAL_PATH"]
         ?? configuration["Storage:LocalPath"]
         ?? Path.Combine(AppContext.BaseDirectory, "storage"));
 
@@ -88,10 +88,10 @@ public class FileBackedStorageProvider : IStorageProvider
     public FileBackedStorageProvider(string provider, IConfiguration configuration)
     {
         var root = configuration[$"Storage:{provider}:LocalPath"]
-            ?? configuration[$"NOCTURNE_{provider.ToUpperInvariant()}_STORAGE_LOCAL_PATH"]
+            ?? configuration[$"AEGISCORE_{provider.ToUpperInvariant()}_STORAGE_LOCAL_PATH"]
             ?? Path.Combine(AppContext.BaseDirectory, "storage", provider);
         _inner = new LocalDiskStorageProvider(new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["NOCTURNE_STORAGE_LOCAL_PATH"] = root })
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["AEGISCORE_STORAGE_LOCAL_PATH"] = root })
             .Build());
     }
 
@@ -124,7 +124,7 @@ public static class StorageServiceExtensions
 {
     public static IServiceCollection AddStorageProvider(this IServiceCollection services, IConfiguration configuration)
     {
-        var provider = (configuration["NOCTURNE_STORAGE_PROVIDER"] ?? configuration["Storage:Provider"] ?? "local").ToLowerInvariant();
+        var provider = (configuration["AEGISCORE_STORAGE_PROVIDER"] ?? configuration["Storage:Provider"] ?? "local").ToLowerInvariant();
 
         services.AddSingleton<IStorageProvider>(_ => provider switch
         {

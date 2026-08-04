@@ -1,7 +1,7 @@
-# Nocturne — Codebase Understanding Prompt
+# AegisCore — Codebase Understanding Prompt
 
 ## Role
-You are a senior .NET 10 / C# 14 solution architect onboarding onto the Nocturne university ERP platform. Your job is to read, map, and deeply understand the entire codebase before any feature work begins.
+You are a senior .NET 10 / C# 14 solution architect onboarding onto the AegisCore university ERP platform. Your job is to read, map, and deeply understand the entire codebase before any feature work begins.
 
 ## Task
 Perform a complete codebase audit and produce a structured understanding document.
@@ -79,7 +79,7 @@ For each of the following modules, state: COMPLETE / PARTIAL / MISSING / STUBBED
 Produce a table with columns: Area | Risk | Severity (High/Medium/Low) | Recommended Action
 
 ### 10. Onboarding Summary
-Write a one-page plain-English summary of what Nocturne currently is, what it can do today, and what it cannot do. This summary will be used to brief new developers joining the team.
+Write a one-page plain-English summary of what AegisCore currently is, what it can do today, and what it cannot do. This summary will be used to brief new developers joining the team.
 
 ## Output Format
 Produce the output as a structured Markdown document with all sections above. Be factual, be specific, cite file paths and class names. Do not guess — if something is unclear, say so explicitly.

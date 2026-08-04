@@ -1,7 +1,7 @@
-# Nocturne — Sprint 11: Extended Student Lifecycle (Placement + Alumni + Activities)
+# AegisCore — Sprint 11: Extended Student Lifecycle (Placement + Alumni + Activities)
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building the extended student lifecycle modules for Nocturne. These manage student development beyond academics: placement, alumni engagement, and extracurricular activities.
+You are a senior .NET 10 / C# 14 engineer building the extended student lifecycle modules for AegisCore. These manage student development beyond academics: placement, alumni engagement, and extracurricular activities.
 
 ---
 

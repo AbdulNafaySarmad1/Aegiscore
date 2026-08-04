@@ -45,7 +45,7 @@ public class CampusOperationsService : ICampusOperationsService
         visitor.BadgeNumber = passNumber;
         visitor.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
-        var payload = $"NOCTURNE|VISITOR|{visitorId:N}|{passNumber}|{validFrom:O}|{validTo:O}";
+        var payload = $"AEGISCORE|VISITOR|{visitorId:N}|{passNumber}|{validFrom:O}|{validTo:O}";
         return new VisitorGatePassDto(visitorId, passNumber, payload, validFrom, validTo);
     }
 }

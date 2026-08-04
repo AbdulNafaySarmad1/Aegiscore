@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aegiscore-api-config
+  namespace: aegiscore
+data:
+  ASPNETCORE_URLS: http://+:8080
+  Setup__Mode: "false"
+  AEGISCORE_STORAGE_PROVIDER: local
+  AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
+  AEGISCORE_REDIS_CONNECTION: aegiscore-redis:6379
+  License__ServerUrl: https://license.aegiscore.systems
+  Database__AutoMigrate: "false"

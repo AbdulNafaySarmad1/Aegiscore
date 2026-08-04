@@ -17,6 +17,9 @@ public class User
     [MaxLength(300)]
     public string Email { get; set; } = string.Empty;
 
+    [MaxLength(2000)]
+    public string? PasswordHash { get; set; }
+
     [MaxLength(100)]
     public string FirstName { get; set; } = string.Empty;
 

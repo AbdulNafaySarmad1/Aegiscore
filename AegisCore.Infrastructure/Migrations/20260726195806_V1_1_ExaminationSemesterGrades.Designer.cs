@@ -10092,7 +10092,7 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<decimal>("GrossAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("NocturneAmount")
+                    b.Property<decimal>("AegisCoreAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("RecordedAt")

@@ -1,4 +1,4 @@
-# Nocturne — Multi-Tenant SSO, 2FA Enforcement & Agentic HITL Exam Pipeline (U14)
+# AegisCore — Multi-Tenant SSO, 2FA Enforcement & Agentic HITL Exam Pipeline (U14)
 
 ## Role
 You are a security architect + AI engineer designing:
@@ -18,7 +18,7 @@ University A uses: Microsoft Entra ID (Office 365)
 University B uses: Google Workspace
 University C uses: Okta
 University D uses: Custom LDAP
-University E uses: Nothing (Nocturne handles auth)
+University E uses: Nothing (AegisCore handles auth)
 
 How do we support all without hardcoding?
 ```
@@ -26,13 +26,13 @@ How do we support all without hardcoding?
 ### Solution: Multi-Tenant SSO Gateway
 
 ```
-Nocturne.university.edu.pk/login
+AegisCore.university.edu.pk/login
     ↓
     "Which university are you from?"
     ↓
 User enters: University email (e.g., student@university.edu.pk)
     ↓
-Nocturne looks up: What's the domain? university.edu.pk
+AegisCore looks up: What's the domain? university.edu.pk
     ↓
 Query: SELECT sso_provider FROM universities WHERE domain = 'university.edu.pk'
     ↓
@@ -50,9 +50,9 @@ Microsoft redirects back: Here's the JWT token with claims:
       "university": "SSUET"
     }
     ↓
-Nocturne validates: Yes, this Microsoft ID is legitimate
+AegisCore validates: Yes, this Microsoft ID is legitimate
     ↓
-Nocturne creates session: First-time login?
+AegisCore creates session: First-time login?
     ├─ YES: Force 2FA setup + password change
     └─ NO: Redirect to dashboard
 ```
@@ -68,7 +68,7 @@ CREATE TABLE universities (
     logo_url TEXT, -- For login page branding
     
     -- SSO Configuration
-    sso_provider ENUM('microsoft', 'google', 'okta', 'ldap', 'nocturne'),
+    sso_provider ENUM('microsoft', 'google', 'okta', 'ldap', 'aegiscore'),
     sso_tenant_id TEXT, -- For Microsoft Entra ID
     sso_client_id TEXT,
     sso_client_secret TEXT ENCRYPTED, -- AES-256
@@ -97,10 +97,10 @@ CREATE TABLE users (
     -- SSO Identity
     sso_provider VARCHAR(50), -- "microsoft", "google", etc.
     sso_id VARCHAR(500), -- External ID from SSO provider
-    sso_email VARCHAR(255), -- May differ from Nocturne email
+    sso_email VARCHAR(255), -- May differ from AegisCore email
     
     -- Authentication
-    password_hash VARCHAR(255), -- Bcrypt (for Nocturne auth only)
+    password_hash VARCHAR(255), -- Bcrypt (for AegisCore auth only)
     password_changed_at TIMESTAMPTZ,
     password_expires_at TIMESTAMPTZ,
     temporary_password BOOLEAN DEFAULT false, -- First login?
@@ -457,7 +457,7 @@ public class MultiTenantAuthController : ControllerBase
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nocturne Login</title>
+    <title>AegisCore Login</title>
     <style>
         :root {
             --primary-color: var(--university-primary);

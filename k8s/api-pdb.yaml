@@ -1,10 +1,10 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: nocturne-api
-  namespace: nocturne
+  name: aegiscore-api
+  namespace: aegiscore
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: nocturne-api
+      app: aegiscore-api

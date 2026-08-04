@@ -1,7 +1,7 @@
-# Nocturne — Sprint 13: Mobile Apps (Student + Faculty Native Apps)
+# AegisCore — Sprint 13: Mobile Apps (Student + Faculty Native Apps)
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building native mobile apps for Nocturne. These are lightweight complements to the web portals, optimized for offline access and mobile-first UX. Use React Native for code sharing (80%+) while maintaining native excellence on iOS and Android.
+You are a senior .NET 10 / C# 14 engineer building native mobile apps for AegisCore. These are lightweight complements to the web portals, optimized for offline access and mobile-first UX. Use React Native for code sharing (80%+) while maintaining native excellence on iOS and Android.
 
 ---
 
@@ -21,7 +21,7 @@ You are a senior .NET 10 / C# 14 engineer building native mobile apps for Noctur
 
 ### Project Structure
 ```
-nocturne-mobile/
+aegiscore-mobile/
 ├── apps/
 │   ├── student/          # Student app entrypoint
 │   ├── faculty/          # Faculty app entrypoint
@@ -77,7 +77,7 @@ export const schema = appSchema({
 import { QueryClient } from '@tanstack/react-query';
 
 export const apiClient = axios.create({
-  baseURL: 'https://nocturne.ssuet.edu.pk/api',
+  baseURL: 'https://aegiscore.ssuet.edu.pk/api',
   timeout: 10000
 });
 

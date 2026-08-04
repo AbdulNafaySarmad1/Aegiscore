@@ -68,7 +68,7 @@ is the moving integration tag for this recovery branch.
 ## 📋 File Structure
 
 ```
-nocturne-prompts/
+aegiscore-prompts/
 ├── INDEX.md                          # Start here - roadmap & navigation
 ├── README.md                         # This file
 ├── utility/
@@ -106,7 +106,7 @@ nocturne-prompts/
 1. Open Claude chat
 2. Copy entire contents of a prompt file (e.g., S1-foundation.md)
 3. Paste into chat
-4. Add: "I'm Abdul, building Nocturne in C# 14/.NET 10. Here's my codebase structure [paste U1 output]. Build this sprint."
+4. Add: "I'm Abdul, building AegisCore in C# 14/.NET 10. Here's my codebase structure [paste U1 output]. Build this sprint."
 5. Claude generates all code for that sprint
 6. Repeat for each sprint
 ```
@@ -119,7 +119,7 @@ nocturne-prompts/
 
 ---
 
-## 🎯 Key Features (What Nocturne Includes)
+## 🎯 Key Features (What AegisCore Includes)
 
 ### Academic
 - ✅ SHAP-explainable merit lists (statistical rigor)
@@ -148,7 +148,7 @@ nocturne-prompts/
 ### Ecosystem
 - ✅ Community plugin system (developers earn ₱35K-140K per plugin)
 - ✅ Plugin marketplace (discovery, installation, ratings)
-- ✅ Revenue sharing (30% Nocturne Systems, 70% developer)
+- ✅ Revenue sharing (30% AegisCore Systems, 70% developer)
 
 ### Mobile
 - ✅ React Native iOS + Android apps

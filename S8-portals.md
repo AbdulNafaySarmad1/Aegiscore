@@ -1,7 +1,7 @@
-# Nocturne — Sprint 8: Student & Faculty Self-Service Portals
+# AegisCore — Sprint 8: Student & Faculty Self-Service Portals
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building the student and faculty self-service portals for Nocturne. These are critical touchpoints where end users interact daily with the system.
+You are a senior .NET 10 / C# 14 engineer building the student and faculty self-service portals for AegisCore. These are critical touchpoints where end users interact daily with the system.
 
 ---
 

@@ -32,6 +32,7 @@ using AegisCore.Infrastructure.RuleEngine;
 using AegisCore.Infrastructure.Search;
 using AegisCore.Infrastructure.Security;
 using AegisCore.Infrastructure.Security.Abac;
+using AegisCore.Infrastructure.Security.Pqc;
 using AegisCore.Infrastructure.SsoHitl;
 using AegisCore.Infrastructure.StudentLifecycle;
 using AegisCore.Infrastructure.Support;
@@ -52,9 +53,11 @@ public static class InfrastructureServiceExtensions
         services.TryAddScoped<AegisCore.Contracts.Common.Interfaces.IUnitOfWork, UnitOfWork>();
         services.TryAddSingleton<IConnectionMultiplexer>(_ =>
         {
-            var connectionString = configuration["NOCTURNE_REDIS_CONNECTION"]
-                ?? configuration.GetConnectionString("Redis")
-                ?? configuration["Redis:ConnectionString"]
+            var connectionString = FirstConfigured(
+                configuration["AEGISCORE_REDIS_CONNECTION"],
+                configuration["REDIS_CONNECTION_STRING"],
+                configuration.GetConnectionString("Redis"),
+                configuration["Redis:ConnectionString"])
                 ?? "localhost:6379";
             var options = ConfigurationOptions.Parse(connectionString);
             options.AbortOnConnectFail = false;
@@ -65,6 +68,12 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Foundation.IAuditService, AuditService>();
         services.AddScoped<AegisCore.Application.Foundation.IAcademicCalendarService, AcademicCalendarService>();
         services.AddHttpClient("license");
+        services.AddHttpClient("infisical", client =>
+        {
+            var baseUrl = configuration["INFISICAL_URL"];
+            if (Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+                client.BaseAddress = uri;
+        });
         services.AddScoped<AegisCore.Application.Licensing.ILicenseService, AegisCore.Infrastructure.Licensing.LicenseService>();
         services.AddScoped<AegisCore.Application.Admissions.IMeritCalculationService, MeritCalculationService>();
         services.AddScoped<AegisCore.Application.Admissions.IIBCCEquivalenceService, IBCCEquivalenceService>();
@@ -79,6 +88,9 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Finance.IAccountingService, AccountingService>();
         services.AddScoped<AegisCore.Application.Finance.IBudgetService, BudgetService>();
         services.AddCloudProvider(configuration);
+        services.AddPqcCryptography();
+        services.AddSingleton<IHybridPqcReplayStore, RedisHybridPqcReplayStore>();
+        services.AddScoped<IPqcSignatureService, PqcSignatureService>();
         services.AddComplianceCenter(configuration);
         services.AddLoginAudit();
         services.AddPlatformServices(configuration);
@@ -113,4 +125,7 @@ public static class InfrastructureServiceExtensions
         services.AddAiSupportTicketing();
         return services;
     }
+
+    private static string? FirstConfigured(params string?[] values) => values.FirstOrDefault(value =>
+        !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal));
 }

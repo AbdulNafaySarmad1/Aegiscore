@@ -4,7 +4,9 @@ services:
   portal:
     image: ${AEGISCORE_PORTAL_IMAGE:-aegiscore-portal:local}
     build:
-      context: ./Nocturne.Portal
+      context: ./AegisCore.Portal
+    environment:
+      AEGISCORE_API_INTERNAL_URL: http://api:8080
     ports:
       - "${AEGISCORE_PORT:-8080}:8080"
     depends_on:
@@ -21,31 +23,42 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /var/cache/nginx
-      - /var/run
 
   api:
     image: ${AEGISCORE_API_IMAGE:-aegiscore-api:local}
     build: .
     environment:
       ASPNETCORE_URLS: http://+:8080
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       Runtime__DemoMode: ${AEGISCORE_DEMO_MODE:-true}
       AEGISCORE_INSTALLATION_COMPLETED: ${AEGISCORE_INSTALLATION_COMPLETED:-false}
       Database__AutoMigrate: "true"
       Deployment__FailOnReadinessError: "true"
       AEGISCORE_CLOUD_PROVIDER: ONPREMISE
+      AEGISCORE_SECRET_PROVIDER: ${AEGISCORE_SECRET_PROVIDER:-FILE}
+      AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
       TENANT_ID: ${TENANT_ID:?Run ./scripts/bootstrap-env.sh first}
-      NOCTURNE_DB_CONNECTION: Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first};SslMode=Disable
-      NOCTURNE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
-      NOCTURNE_STORAGE_PROVIDER: local
-      NOCTURNE_STORAGE_LOCAL_PATH: /app/storage
-      License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.nocturne.systems}
+      AEGISCORE_DB_CONNECTION: Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first};SslMode=Disable
+      AEGISCORE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+      AEGISCORE_STORAGE_PROVIDER: local
+      AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
+      License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.aegiscore.systems}
       License__HmacSecret: ${LICENSE_HMAC_SECRET:?Run ./scripts/bootstrap-env.sh first}
-      NOCTURNE_ENCRYPTION_KEY: ${NOCTURNE_ENCRYPTION_KEY:?Run ./scripts/bootstrap-env.sh first}
-      NOCTURNE_PQC_KEY_BASE64: ${NOCTURNE_PQC_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
-      NOCTURNE_JWT_SECRET: ${NOCTURNE_JWT_SECRET:?Run ./scripts/bootstrap-env.sh first}
+      AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:?Run ./scripts/bootstrap-env.sh first}
+      AEGISCORE_PQC_KEY_BASE64: ${AEGISCORE_PQC_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
+      AEGISCORE_JWT_SECRET: ${AEGISCORE_JWT_SECRET:?Run ./scripts/bootstrap-env.sh first}
       Governance__FeedbackEncryptionKeyBase64: ${GOVERNANCE_FEEDBACK_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
+      HybridPqcTransport__Enforce: ${AEGISCORE_REQUIRE_EDGE_PQC:-false}
+      HybridPqcTransport__EdgeProofKeyBase64: ${AEGISCORE_EDGE_PQC_PROOF_KEY_BASE64:-}
+      DataProtection__KeyPath: /app/config/data-protection
+      DataProtection__CertificatePath: ${AEGISCORE_DATA_PROTECTION_CERTIFICATE_PATH:-}
+      DataProtection__CertificatePassword: ${AEGISCORE_DATA_PROTECTION_CERTIFICATE_PASSWORD:-}
+      PaymentGateways__raast__BaseUrl: ${RAAST_BASE_URL:-https://api.raast.gov.pk/v1/}
+      PaymentGateways__stripe__BaseUrl: ${STRIPE_BASE_URL:-https://api.stripe.com/}
+      PaymentGateways__plaid-ach__BaseUrl: ${PLAID_BASE_URL:-https://production.plaid.com/}
+      PaymentGateways__gocardless__BaseUrl: ${GOCARDLESS_BASE_URL:-https://api.gocardless.com/}
+      PaymentGateways__billplz-fpx__BaseUrl: ${BILLPLZ_BASE_URL:-https://www.billplz.com/}
+      PaymentGateways__duitnow-qr__BaseUrl: ${DUITNOW_BASE_URL:-}
       AI__Provider: ${AI_PROVIDER:-ollama}
       AI__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/}
       AI__Ollama__Model: ${OLLAMA_MODEL:-qwen2.5:7b}
@@ -71,19 +84,25 @@ services:
     volumes:
       - api_storage:/app/storage
       - api_config:/app/config
+      - ./.aegiscore:/run/aegiscore-secrets:ro
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
 
   postgres:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-aegiscore}
-      POSTGRES_USER: ${POSTGRES_USER:-aegiscore}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-aegiscore_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}}
+      APP_DB_USER: ${POSTGRES_USER:-aegiscore}
+      APP_DB_PASSWORD: ${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aegiscore} -d ${POSTGRES_DB:-aegiscore}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -92,6 +111,7 @@ services:
       - backend
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init/010-harden-app-role.sh:/docker-entrypoint-initdb.d/010-harden-app-role.sh:ro
     security_opt:
       - no-new-privileges:true
 

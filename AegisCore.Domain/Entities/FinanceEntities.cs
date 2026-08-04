@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
@@ -61,7 +62,7 @@ public class StudentFeePayment
 }
 
 [Table("CostCenters")]
-public class CostCenter
+public class CostCenter : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [Required, MaxLength(20)] public string Code { get; set; } = string.Empty;
@@ -69,6 +70,7 @@ public class CostCenter
     public Guid? DepartmentId { get; set; }
     [Column(TypeName = "decimal(15,2)")] public decimal BudgetAllocation { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public Guid TenantId { get; set; }
 }
 
 [Table("ProcurementRequisitions")]

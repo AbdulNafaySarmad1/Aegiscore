@@ -1,10 +1,10 @@
-# Nocturne Cloud-Agnosticism Report
+# AegisCore Cloud-Agnosticism Report
 
 Date: 2026-07-26
 
 ## Scope
 
-This audit covers runtime storage, secret, and encryption dependencies for the Nocturne backend.
+This audit covers runtime storage, secret, and encryption dependencies for the AegisCore backend.
 
 ## Findings
 
@@ -12,7 +12,7 @@ Storage is routed through `IStorageProvider`. The configured providers `local`, 
 
 Secrets are routed through `ISecretService` with environment, Azure Key Vault, AWS Secrets Manager, and GCP Secret Manager implementations already present. Deployment configs use environment variables and do not bake secrets into the image.
 
-Encryption key material is no longer hardcoded in the PQC service. `NOCTURNE_PQC_KEY_BASE64` must be a 32-byte base64 value supplied by the selected secret provider or deployment environment.
+Encryption key material is no longer hardcoded in the PQC service. `AEGISCORE_PQC_KEY_BASE64` must be a 32-byte base64 value supplied by the selected secret provider or deployment environment.
 
 ## Verification
 

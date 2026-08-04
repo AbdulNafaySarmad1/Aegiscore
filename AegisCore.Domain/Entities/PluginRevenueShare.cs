@@ -14,7 +14,7 @@ public class PluginRevenueShare
     [Column(TypeName = "decimal(18,2)")]
     public decimal GrossAmount { get; set; }
     [Column(TypeName = "decimal(18,2)")]
-    public decimal NocturneAmount { get; set; }
+    public decimal AegisCoreAmount { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal DeveloperAmount { get; set; }
     public DateTime RecordedAt { get; set; } = DateTime.UtcNow;

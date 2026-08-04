@@ -1,7 +1,8 @@
 using AegisCore.Infrastructure.Config;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Infrastructure;
 
@@ -10,13 +11,15 @@ public static class DbContextServiceExtensions
     public static IServiceCollection AddAegisDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = BuildConnectionString(configuration);
+        services.AddHttpContextAccessor();
+        services.AddSingleton<TenantSessionInterceptor>();
 
-        services.AddDbContext<AegisDbContext>(options =>
+        services.AddDbContext<AegisDbContext>((serviceProvider, options) =>
             options.UseNpgsql(connectionString, npgsql =>
             {
                 npgsql.MigrationsAssembly(typeof(AegisDbContext).Assembly.GetName().Name);
                 npgsql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-            }));
+            }).AddInterceptors(serviceProvider.GetRequiredService<TenantSessionInterceptor>()));
 
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<AegisDbContext>());
 
@@ -28,10 +31,10 @@ public static class DbContextServiceExtensions
         var explicitCs = configuration.GetConnectionString("Default")
             ?? configuration["ConnectionStrings:Default"]
             ?? configuration["Database:ConnectionString"]
-            ?? configuration["NOCTURNE_DB_CONNECTION"]
+            ?? configuration["AEGISCORE_DB_CONNECTION"]
             ?? configuration["POSTGRES_CONNECTION_STRING"];
-        if (!string.IsNullOrWhiteSpace(explicitCs))
-            return explicitCs;
+        if (IsConfigured(explicitCs))
+            return explicitCs!;
 
         var host = configuration["DB_HOST"] ?? configuration["POSTGRES_HOST"] ?? "localhost";
         var port = configuration["DB_PORT"] ?? configuration["POSTGRES_PORT"] ?? "5432";
@@ -43,4 +46,7 @@ public static class DbContextServiceExtensions
 
         return $"Host={host};Port={port};Database={db};Username={user};Password={password};SslMode={ssl}";
     }
+
+    private static bool IsConfigured(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal);
 }

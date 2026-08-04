@@ -4,8 +4,8 @@ Date: 2026-07-26
 
 ## Current Native Android State
 
-- Source copied to `nocturne-android/`.
-- API endpoint uses `NOCTURNE_API_BASE_URL`.
+- Source copied to `aegiscore-android/`.
+- API endpoint uses `AEGISCORE_API_BASE_URL`.
 - `compileSdk` and `targetSdk` are 35.
 - `minSdk` is 26.
 - No generated `.gradle` or build output was copied.
@@ -27,8 +27,8 @@ Not run in this workspace because the Gradle wrapper/toolchain is not present in
 
 ## Standalone Repository Files
 
-- Added `nocturne-android/.gitignore`.
-- Added `nocturne-android/README.md`.
-- Added `nocturne-android/CONTRIBUTING.md`.
-- Added `nocturne-android/.github/workflows/android-build.yml`.
-- Added `nocturne-android/.github/workflows/android-deploy.yml`.
+- Added `aegiscore-android/.gitignore`.
+- Added `aegiscore-android/README.md`.
+- Added `aegiscore-android/CONTRIBUTING.md`.
+- Added `aegiscore-android/.github/workflows/android-build.yml`.
+- Added `aegiscore-android/.github/workflows/android-deploy.yml`.

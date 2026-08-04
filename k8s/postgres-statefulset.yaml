@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nocturne-postgres
-  namespace: nocturne
+  name: aegiscore-postgres
+  namespace: aegiscore
 spec:
-  serviceName: nocturne-postgres
+  serviceName: aegiscore-postgres
   replicas: 1
   selector:
     matchLabels:
-      app: nocturne-postgres
+      app: aegiscore-postgres
   template:
     metadata:
       labels:
-        app: nocturne-postgres
+        app: aegiscore-postgres
     spec:
       containers:
         - name: postgres
@@ -21,20 +21,34 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: nocturne
+              value: aegiscore
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: nocturne-runtime-secrets
-                  key: POSTGRES_USER
+                  name: aegiscore-runtime-secrets
+                  key: POSTGRES_ADMIN_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: nocturne-runtime-secrets
+                  name: aegiscore-runtime-secrets
+                  key: POSTGRES_ADMIN_PASSWORD
+            - name: APP_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: aegiscore-runtime-secrets
+                  key: POSTGRES_USER
+            - name: APP_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aegiscore-runtime-secrets
                   key: POSTGRES_PASSWORD
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d/010-harden-app-role.sh
+              subPath: 010-harden-app-role.sh
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -42,6 +56,11 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
+      volumes:
+        - name: postgres-init
+          configMap:
+            name: aegiscore-postgres-init
+            defaultMode: 0555
   volumeClaimTemplates:
     - metadata:
         name: data

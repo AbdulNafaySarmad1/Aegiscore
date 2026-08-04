@@ -1,7 +1,7 @@
-# Nocturne — Cloud Agnosticism Mandate (U7)
+# AegisCore — Cloud Agnosticism Mandate (U7)
 
 ## Role
-You are a senior .NET 10 / C# 14 architect ensuring Nocturne is **100% cloud-agnostic**. Zero vendor lock-in. Pakistani universities must be able to run this on Azure, AWS, GCP, local servers, private data centers, or any cloud provider without changing a single line of application code.
+You are a senior .NET 10 / C# 14 architect ensuring AegisCore is **100% cloud-agnostic**. Zero vendor lock-in. Pakistani universities must be able to run this on Azure, AWS, GCP, local servers, private data centers, or any cloud provider without changing a single line of application code.
 
 This is a **compliance audit + implementation spec** combined.
 
@@ -102,7 +102,7 @@ gs://bucket-name
 
 **REQUIRED:**
 ```
-Host=localhost;Database=nocturne;Username=postgres;Password=***;Port=5432
+Host=localhost;Database=aegiscore;Username=postgres;Password=***;Port=5432
 redis://localhost:6379
 s3://bucket-name (with provider-agnostic client)
 file:///mnt/storage/  (for local)
@@ -117,13 +117,13 @@ grep -r "Environment\.GetEnvironmentVariable" **/*.cs
 ```
 
 Examples of what MUST be env vars:
-- `NOCTURNE_DB_CONNECTION` — database connection string
-- `NOCTURNE_REDIS_CONNECTION` — cache connection string
-- `NOCTURNE_STORAGE_PROVIDER` — local | s3 | azure | sftp | gcs
-- `NOCTURNE_STORAGE_CONNECTION` — provider-specific connection
-- `NOCTURNE_ENCRYPTION_KEY` — AES-256 key for data at rest
-- `NOCTURNE_HEARTBEAT_ENABLED` — true/false for license
-- `NOCTURNE_ANALYTICS_ENABLED` — true/false
+- `AEGISCORE_DB_CONNECTION` — database connection string
+- `AEGISCORE_REDIS_CONNECTION` — cache connection string
+- `AEGISCORE_STORAGE_PROVIDER` — local | s3 | azure | sftp | gcs
+- `AEGISCORE_STORAGE_CONNECTION` — provider-specific connection
+- `AEGISCORE_ENCRYPTION_KEY` — AES-256 key for data at rest
+- `AEGISCORE_HEARTBEAT_ENABLED` — true/false for license
+- `AEGISCORE_ANALYTICS_ENABLED` — true/false
 
 **Rule:** No hardcoded URLs, credentials, or cloud-specific paths.
 
@@ -492,7 +492,7 @@ public class VaultSecretsProvider : ISecretProvider
     public async Task<string> GetSecretAsync(string secretName, CancellationToken ct = default)
     {
         var secret = await _vault.V1.Secrets.KeyValue.V2.ReadSecretAsync(
-            $"nocturne/{secretName}",
+            $"aegiscore/{secretName}",
             cancellationToken: ct
         );
         return secret.Data.Data["value"].ToString();
@@ -501,7 +501,7 @@ public class VaultSecretsProvider : ISecretProvider
     public async Task SetSecretAsync(string secretName, string secretValue, CancellationToken ct = default)
     {
         await _vault.V1.Secrets.KeyValue.V2.WriteSecretAsync(
-            $"nocturne/{secretName}",
+            $"aegiscore/{secretName}",
             new Dictionary<string, object> { { "value", secretValue } },
             cancellationToken: ct
         );
@@ -617,14 +617,14 @@ public class AesEncryptionService : IEncryptionService
 
 ```bash
 # List all required env vars
-NOCTURNE_DB_PROVIDER=postgresql
-NOCTURNE_DB_CONNECTION=Host=postgres;Database=nocturne;Username=postgres;Password=***;Port=5432
-NOCTURNE_REDIS_CONNECTION=redis://redis:6379
-NOCTURNE_STORAGE_PROVIDER=local|s3|sftp
-NOCTURNE_STORAGE_CONNECTION=<provider-specific>
-NOCTURNE_ENCRYPTION_KEY=<base64-encoded-256-bit-key>
-NOCTURNE_LICENSE_SERVER_URL=https://license.apex-systems.com
-NOCTURNE_HEARTBEAT_ENABLED=true
+AEGISCORE_DB_PROVIDER=postgresql
+AEGISCORE_DB_CONNECTION=Host=postgres;Database=aegiscore;Username=postgres;Password=***;Port=5432
+AEGISCORE_REDIS_CONNECTION=redis://redis:6379
+AEGISCORE_STORAGE_PROVIDER=local|s3|sftp
+AEGISCORE_STORAGE_CONNECTION=<provider-specific>
+AEGISCORE_ENCRYPTION_KEY=<base64-encoded-256-bit-key>
+AEGISCORE_LICENSE_SERVER_URL=https://license.apex-systems.com
+AEGISCORE_HEARTBEAT_ENABLED=true
 ```
 
 **Test:** Run app with ONLY env vars (no appsettings.json hardcoding).
@@ -638,9 +638,9 @@ services:
   app:
     build: .
     environment:
-      NOCTURNE_STORAGE_PROVIDER: local
-      NOCTURNE_STORAGE_CONNECTION: /app/storage
-      NOCTURNE_DB_CONNECTION: Host=postgres;Database=nocturne;...
+      AEGISCORE_STORAGE_PROVIDER: local
+      AEGISCORE_STORAGE_CONNECTION: /app/storage
+      AEGISCORE_DB_CONNECTION: Host=postgres;Database=aegiscore;...
   postgres:
     image: postgres:16
 ```
@@ -655,8 +655,8 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
   app:
     environment:
-      NOCTURNE_STORAGE_PROVIDER: s3
-      NOCTURNE_STORAGE_CONNECTION: Endpoint=http://minio:9000;AccessKey=minioadmin;SecretKey=minioadmin;BucketName=nocturne
+      AEGISCORE_STORAGE_PROVIDER: s3
+      AEGISCORE_STORAGE_CONNECTION: Endpoint=http://minio:9000;AccessKey=minioadmin;SecretKey=minioadmin;BucketName=aegiscore
 ```
 
 #### Test 3: SFTP (Private Data Center)
@@ -664,8 +664,8 @@ services:
 services:
   app:
     environment:
-      NOCTURNE_STORAGE_PROVIDER: sftp
-      NOCTURNE_STORAGE_CONNECTION: Host=sftp.university.com;Username=storage;Password=***;BasePath=/data/nocturne
+      AEGISCORE_STORAGE_PROVIDER: sftp
+      AEGISCORE_STORAGE_CONNECTION: Host=sftp.university.com;Username=storage;Password=***;BasePath=/data/aegiscore
 ```
 
 ### 3. Deployment Checklist
@@ -739,7 +739,7 @@ Deployment:
 
 When you show this to SSUET or any Pakistani university:
 
-> "Nocturne is completely cloud-agnostic. Whether you run it locally on your servers, on AWS in an Indian data center, on Azure in Singapore, or on a private cloud — **the code is identical, zero changes**. You control your data. You choose your infrastructure. No vendor lock-in. No data leaving your jurisdiction unless YOU decide to."
+> "AegisCore is completely cloud-agnostic. Whether you run it locally on your servers, on AWS in an Indian data center, on Azure in Singapore, or on a private cloud — **the code is identical, zero changes**. You control your data. You choose your infrastructure. No vendor lock-in. No data leaving your jurisdiction unless YOU decide to."
 
 **Proof:**
 - Show docker-compose with local disk + PostgreSQL (works on their laptop)
@@ -771,6 +771,6 @@ When implementing cloud agnosticism:
 
 Add this to your contract with universities:
 
-> "Nocturne is designed with zero assumption of cloud-vendor infrastructure. All data encryption, backup, and redundancy is the university's responsibility. Nocturne Systems does not auto-backup, does not access university data, and does not transmit data outside university's chosen infrastructure. License heartbeat (08:00 AM daily, 10s timeout) is the only outbound connection, which can be disabled offline for air-gapped deployments."
+> "AegisCore is designed with zero assumption of cloud-vendor infrastructure. All data encryption, backup, and redundancy is the university's responsibility. AegisCore Systems does not auto-backup, does not access university data, and does not transmit data outside university's chosen infrastructure. License heartbeat (08:00 AM daily, 10s timeout) is the only outbound connection, which can be disabled offline for air-gapped deployments."
 
 This is your competitive advantage over Blackbaud / Ellucian / banner. They're cloud-only. You're **anywhere**.

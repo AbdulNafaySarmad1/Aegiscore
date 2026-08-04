@@ -1,7 +1,7 @@
-# Nocturne — Governance, Permission Overrides, Feedback & Replication (U10)
+# AegisCore — Governance, Permission Overrides, Feedback & Replication (U10)
 
 ## Role
-You are a senior platform architect designing Nocturne's governance layer. This covers:
+You are a senior platform architect designing AegisCore's governance layer. This covers:
 1. **Intentional Replication Lag** — Prevent automatic replica syncs; force deliberate, configured delays
 2. **Permission Overrides** — HOD can override grades, section assignments, fees for exceptional cases
 3. **Anonymous Feedback** — Students evaluate teachers/courses; zero traceability
@@ -32,9 +32,9 @@ Primary Database (PostgreSQL)
     ├─ Write API calls go HERE (marks, grades, fees)
     ├─ Cached in Redis (15-minute TTL)
     └─ Replication Stream (12-hour lag)
-         ├─ Read Replica 1 (database1.read.nocturne.edu.pk)
-         ├─ Read Replica 2 (database2.read.nocturne.edu.pk)
-         └─ Write Replica (database.write.nocturne.edu.pk) — for backup writes only
+         ├─ Read Replica 1 (database1.read.aegiscore.edu.pk)
+         ├─ Read Replica 2 (database2.read.aegiscore.edu.pk)
+         └─ Write Replica (database.write.aegiscore.edu.pk) — for backup writes only
 ```
 
 ### Replication Lag Configuration
@@ -72,7 +72,7 @@ CREATE TABLE system_configuration (
     redis_cache_ttl_minutes INT DEFAULT 15,
     
     -- DNS
-    subdomain_name TEXT, -- e.g., "nocturne.ssuet.edu.pk"
+    subdomain_name TEXT, -- e.g., "aegiscore.ssuet.edu.pk"
     custom_dns_enabled BOOLEAN DEFAULT false,
     dns_nameserver_1 TEXT,
     dns_nameserver_2 TEXT,
@@ -1221,6 +1221,6 @@ public class GovernanceWizardStep : WizardStep
 
 **This is governance + smart defaults + automatic corrections.**
 
-University tells Nocturne once (at setup) what their policies are. Then Nocturne enforces them automatically. Overrides are tracked. Fees recalculate. Data is safe.
+University tells AegisCore once (at setup) what their policies are. Then AegisCore enforces them automatically. Overrides are tracked. Fees recalculate. Data is safe.
 
 This is enterprise-grade ERP thinking. 🔥

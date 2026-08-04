@@ -1,7 +1,7 @@
-# Nocturne — Sprint 12: Asset Management + Inventory + HEC Reporting
+# AegisCore — Sprint 12: Asset Management + Inventory + HEC Reporting
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building the asset and inventory management for Nocturne, plus HEC compliance reporting (HEMIS, mandatory disclosures, accreditation evidence).
+You are a senior .NET 10 / C# 14 engineer building the asset and inventory management for AegisCore, plus HEC compliance reporting (HEMIS, mandatory disclosures, accreditation evidence).
 
 ---
 
@@ -178,15 +178,15 @@ public interface IInventoryService
 CREATE TABLE hemis_export_mappings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     hemis_field_name VARCHAR(100) NOT NULL,
-    nocturne_table VARCHAR(100) NOT NULL,
-    nocturne_column VARCHAR(100) NOT NULL,
+    aegiscore_table VARCHAR(100) NOT NULL,
+    aegiscore_column VARCHAR(100) NOT NULL,
     transformation_function TEXT, -- optional SQL/code
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ```
 
 ### One-Click HEMIS Export
-- Map Nocturne fields to HEC's HEMIS structure
+- Map AegisCore fields to HEC's HEMIS structure
 - Extract data for current academic year
 - Generate Excel workbook in HEC format
 - Includes:

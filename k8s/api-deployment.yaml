@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nocturne-api
-  namespace: nocturne
+  name: aegiscore-api
+  namespace: aegiscore
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nocturne-api
+      app: aegiscore-api
   template:
     metadata:
       labels:
-        app: nocturne-api
+        app: aegiscore-api
     spec:
       securityContext:
         runAsNonRoot: true
@@ -25,9 +25,15 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: nocturne-api-config
+                name: aegiscore-api-config
             - secretRef:
-                name: nocturne-runtime-secrets
+                name: aegiscore-runtime-secrets
+          volumeMounts:
+            - name: data-protection-keys
+              mountPath: /app/config/data-protection
+            - name: data-protection-certificate
+              mountPath: /run/aegiscore-secrets
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health/ready
@@ -48,3 +54,13 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
+      volumes:
+        - name: data-protection-keys
+          persistentVolumeClaim:
+            claimName: aegiscore-data-protection
+        - name: data-protection-certificate
+          secret:
+            secretName: aegiscore-data-protection-certificate
+            items:
+              - key: data-protection.pfx
+                path: data-protection.pfx

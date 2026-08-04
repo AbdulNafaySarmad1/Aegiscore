@@ -21,6 +21,7 @@ public sealed class SetupRequiredMiddleware
         var isSetupPath =
             path.StartsWith("/setup", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWith("/api/setup", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/api/wizard", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWith("/health", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWith("/favicon.ico", StringComparison.OrdinalIgnoreCase) ||

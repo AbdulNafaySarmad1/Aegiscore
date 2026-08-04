@@ -1,11 +1,11 @@
 # MASTER ORCHESTRATION PROMPT FOR CODEX (GPT-5.5)
-## Nocturne Full Build Pipeline
+## AegisCore Full Build Pipeline
 
 ---
 
 ## INSTRUCTION SET FOR CODEX
 
-You are orchestrating the complete build of **Nocturne Systems** — a multi-tenant university ERP for Pakistani universities.
+You are orchestrating the complete build of **AegisCore Systems** — a multi-tenant university ERP for Pakistani universities.
 
 **Your Role:** Follow the build order below EXACTLY. For each step, read the referenced prompt file, execute it with the provided codebase/context, and output production-ready code + architecture.
 
@@ -31,7 +31,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 1: FOUNDATION (Weeks 1-3)
 
 #### STEP 1: U1 — Codebase Understanding
-**File:** `nocturne-prompts/utility/U1-codebase-understanding.md`
+**File:** `aegiscore-prompts/utility/U1-codebase-understanding.md`
 
 **Action:**
 ```
@@ -46,7 +46,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 4. Output:
    - Codebase audit report (1 page)
    - Architecture diagram (ASCII)
-   - Gaps vs Nocturne architecture
+   - Gaps vs AegisCore architecture
    - Cleanup tasks for next step
 ```
 
@@ -55,7 +55,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 2: S1 — Foundation
-**File:** `nocturne-prompts/sprints/S1-foundation.md`
+**File:** `aegiscore-prompts/sprints/S1-foundation.md`
 
 **Action:**
 ```
@@ -83,7 +83,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 3: U6 — License Engine
-**File:** `nocturne-prompts/utility/U6-license-engine.md`
+**File:** `aegiscore-prompts/utility/U6-license-engine.md`
 
 **Action:**
 ```
@@ -110,7 +110,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 2: CORE ACADEMIC (Weeks 4-12)
 
 #### STEP 4: S2 — Admissions
-**File:** `nocturne-prompts/sprints/S2-admissions.md`
+**File:** `aegiscore-prompts/sprints/S2-admissions.md`
 
 **Action:**
 ```
@@ -139,7 +139,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 5: S3 — Examination
-**File:** `nocturne-prompts/sprints/S3-examination.md`
+**File:** `aegiscore-prompts/sprints/S3-examination.md`
 
 **Action:**
 ```
@@ -168,7 +168,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 6: S5 — OBE & CIS
-**File:** `nocturne-prompts/sprints/S5-obe-cis.md`
+**File:** `aegiscore-prompts/sprints/S5-obe-cis.md`
 
 **Action:**
 ```
@@ -198,7 +198,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 3: OPERATIONS (Weeks 13-18)
 
 #### STEP 7: S4 — HR & Payroll
-**File:** `nocturne-prompts/sprints/S4-hr.md`
+**File:** `aegiscore-prompts/sprints/S4-hr.md`
 
 **Action:**
 ```
@@ -227,7 +227,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 8: S7 — Finance
-**File:** `nocturne-prompts/sprints/S7-finance.md`
+**File:** `aegiscore-prompts/sprints/S7-finance.md`
 
 **Action:**
 ```
@@ -257,7 +257,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 9: S9 — Communications
-**File:** `nocturne-prompts/sprints/S9-communications.md`
+**File:** `aegiscore-prompts/sprints/S9-communications.md`
 
 **Action:**
 ```
@@ -288,7 +288,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 4: INTERFACES (Weeks 19-23)
 
 #### STEP 10: S8 — Portals
-**File:** `nocturne-prompts/sprints/S8-portals.md`
+**File:** `aegiscore-prompts/sprints/S8-portals.md`
 
 **Action:**
 ```
@@ -336,7 +336,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 11: S6 — Microsoft Ecosystem
-**File:** `nocturne-prompts/sprints/S6-microsoft-ecosystem.md`
+**File:** `aegiscore-prompts/sprints/S6-microsoft-ecosystem.md`
 
 **Action:**
 ```
@@ -348,7 +348,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
      ├─ Add faculty as owners
      ├─ Add students as members
    - Moodle LTI 1.3 integration
-     ├─ Grade passback to Nocturne
+     ├─ Grade passback to AegisCore
      ├─ Deep linking
    - Power BI embedded dashboards (5 role-specific)
      ├─ VC: University KPIs
@@ -372,7 +372,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 5: EXTENDED MODULES (Weeks 24-28)
 
 #### STEP 12: S10 — Campus Operations
-**File:** `nocturne-prompts/sprints/S10-campus-ops.md`
+**File:** `aegiscore-prompts/sprints/S10-campus-ops.md`
 
 **Action:**
 ```
@@ -404,7 +404,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 13: S11 — Student Lifecycle
-**File:** `nocturne-prompts/sprints/S11-student-lifecycle.md`
+**File:** `aegiscore-prompts/sprints/S11-student-lifecycle.md`
 
 **Action:**
 ```
@@ -438,7 +438,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 14: S12 — Asset & Inventory + HEC
-**File:** `nocturne-prompts/sprints/S12-asset-inventory-hec.md`
+**File:** `aegiscore-prompts/sprints/S12-asset-inventory-hec.md`
 
 **Action:**
 ```
@@ -474,7 +474,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 6: MOBILE APPS (Weeks 29-34)
 
 #### STEP 15: S13 — Mobile Apps
-**File:** `nocturne-prompts/sprints/S13-mobile-apps.md`
+**File:** `aegiscore-prompts/sprints/S13-mobile-apps.md`
 
 **Action:**
 ```
@@ -523,7 +523,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 7: GOVERNANCE & ADVANCED FEATURES
 
 #### STEP 16: U10 — Governance, Overrides & Feedback
-**File:** `nocturne-prompts/utility/U10-governance-overrides-feedback.md`
+**File:** `aegiscore-prompts/utility/U10-governance-overrides-feedback.md`
 
 **Action:**
 ```
@@ -562,7 +562,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 17: U11 — Course Trees, Workload & Offline
-**File:** `nocturne-prompts/utility/U11-course-trees-workload-offline.md`
+**File:** `aegiscore-prompts/utility/U11-course-trees-workload-offline.md`
 
 **Action:**
 ```
@@ -605,7 +605,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ---
 
 #### STEP 18: U14 — Multi-Tenant SSO, 2FA & Agentic HITL Exams
-**File:** `nocturne-prompts/utility/U14-multitenant-sso-hitl-exams.md`
+**File:** `aegiscore-prompts/utility/U14-multitenant-sso-hitl-exams.md`
 
 **Action:**
 ```
@@ -617,7 +617,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
      ├─ Google Workspace
      ├─ Okta
      ├─ LDAP
-     ├─ Nocturne native auth fallback
+     ├─ AegisCore native auth fallback
      ├─ Auto-detect via email domain
    - Per-university branding
      ├─ Logo per university
@@ -668,7 +668,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 8: NATIVE MOBILE (OPTIONAL BUT RECOMMENDED)
 
 #### STEP 19: U13 — Native Mobile & Docker Integration
-**File:** `nocturne-prompts/utility/U13-native-mobile-docker-integration.md`
+**File:** `aegiscore-prompts/utility/U13-native-mobile-docker-integration.md`
 
 **Action:**
 ```
@@ -714,7 +714,7 @@ You are orchestrating the complete build of **Nocturne Systems** — a multi-ten
 ### PHASE 9: MAINTENANCE & UTILITIES (USE BETWEEN SPRINTS)
 
 #### STEP 20: U2 — Patch (Use After Each Sprint)
-**File:** `nocturne-prompts/utility/U2-patch.md`
+**File:** `aegiscore-prompts/utility/U2-patch.md`
 
 **Action:**
 ```
@@ -729,7 +729,7 @@ After each sprint, review output for bugs:
 ---
 
 #### STEP 21: U3 — Cleanup (Use After Every 2 Sprints)
-**File:** `nocturne-prompts/utility/U3-cleanup.md`
+**File:** `aegiscore-prompts/utility/U3-cleanup.md`
 
 **Action:**
 ```
@@ -744,7 +744,7 @@ After every 2 sprints, clean up codebase:
 ---
 
 #### STEP 22: U4 — Docker Build Validator (Use Before EVERY Deployment)
-**File:** `nocturne-prompts/utility/U4-docker-build-validator.md`
+**File:** `aegiscore-prompts/utility/U4-docker-build-validator.md`
 
 **Action:**
 ```
@@ -762,7 +762,7 @@ Before deploying any sprint:
 ### PHASE 10: INFRASTRUCTURE & DEPLOYMENT
 
 #### STEP 23: U7 — Cloud Agnosticism Verification
-**File:** `nocturne-prompts/utility/U7-cloud-agnosticism.md`
+**File:** `aegiscore-prompts/utility/U7-cloud-agnosticism.md`
 
 **Action:**
 ```
@@ -786,7 +786,7 @@ After S1 complete, verify cloud-agnosticism:
 ---
 
 #### STEP 24: U12 — Deployment & Distribution
-**File:** `nocturne-prompts/utility/U12-deployment-distribution.md`
+**File:** `aegiscore-prompts/utility/U12-deployment-distribution.md`
 
 **Action:**
 ```
@@ -810,7 +810,7 @@ When all sprints complete (S13 mobile done), deploy:
 
 3. Web Deployment (Portal)
    ├─ Deploy to Vercel or Cloudflare Pages
-   ├─ Custom domain: nocturne.university.edu.pk
+   ├─ Custom domain: aegiscore.university.edu.pk
    ├─ SSL/TLS via Cloudflare
    ├─ CDN caching enabled
 
@@ -857,14 +857,14 @@ When all sprints complete (S13 mobile done), deploy:
 ### PHASE 11: ECOSYSTEM & GO-TO-MARKET
 
 #### STEP 25: U8 — Competitive Analysis
-**File:** `nocturne-prompts/utility/U8-competitive-analysis.md`
+**File:** `aegiscore-prompts/utility/U8-competitive-analysis.md`
 
 **Action:**
 ```
 After deployment, market positioning:
 1. Read U8 prompt
 2. Analyze competitive landscape
-3. Identify Nocturne's unique advantages:
+3. Identify AegisCore's unique advantages:
    - SHAP-explainable merit (no competitor has this)
    - OBE + CIS scanner (no competitor has this)
    - 100% cloud-agnostic (EduSuite/Futuresol are cloud-only)
@@ -882,7 +882,7 @@ After deployment, market positioning:
 ---
 
 #### STEP 26: U9 — Community Plugins
-**File:** `nocturne-prompts/utility/U9-community-plugins.md`
+**File:** `aegiscore-prompts/utility/U9-community-plugins.md`
 
 **Action:**
 ```
@@ -893,14 +893,14 @@ To build ecosystem:
    ├─ Plugin upload
    ├─ Version management
    ├─ Review queue
-   ├─ Earnings dashboard (30% Nocturne, 70% developer)
+   ├─ Earnings dashboard (30% AegisCore, 70% developer)
 4. Build plugin marketplace
    ├─ Discover plugins
    ├─ Install/uninstall
    ├─ Revenue sharing
 5. Output:
    - Plugin SDK (NuGet package)
-   - CLI tool (dotnet nocturne-plugin)
+   - CLI tool (dotnet aegiscore-plugin)
    - Developer portal (React)
    - Revenue tracking service
    - Sample plugin (reference implementation)
@@ -1002,4 +1002,4 @@ For EVERY step, deliver:
 
 This is enterprise-grade software engineering. Every output must be production-ready. No shortcuts. No "future optimization." Ship quality or don't ship.
 
-**You've got this. Let's build Nocturne. 🚀**
+**You've got this. Let's build AegisCore. 🚀**

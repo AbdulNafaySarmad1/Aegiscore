@@ -1,18 +1,18 @@
-# Nocturne Plugin Ecosystem
+# AegisCore Plugin Ecosystem
 
 ## SDK
 
-`Nocturne.PluginSdk` exposes `INocturnePlugin`, `INocturnePluginContext`, and `NocturnePluginManifest`.
+`AegisCore.PluginSdk` exposes `IAegisCorePlugin`, `IAegisCorePluginContext`, and `AegisCorePluginManifest`.
 
 ## CLI
 
 Install locally with:
 
-`dotnet pack Nocturne.PluginCli/Nocturne.PluginCli.csproj -c Release`
+`dotnet pack AegisCore.PluginCli/AegisCore.PluginCli.csproj -c Release`
 
 Then install the generated tool package and run:
 
-`nocturne-plugin init fee-reconciliation developer@example.com`
+`aegiscore-plugin init fee-reconciliation developer@example.com`
 
 ## Marketplace
 
@@ -22,8 +22,8 @@ Revenue sharing is recorded through:
 
 `POST /api/marketplace/revenue`
 
-Split: 30% Nocturne, 70% developer.
+Split: 30% AegisCore, 70% developer.
 
 ## Sample
 
-`sample-plugins/fee-reconciliation/nocturne-plugin.json` is a reference plugin manifest.
+`sample-plugins/fee-reconciliation/aegiscore-plugin.json` is a reference plugin manifest.

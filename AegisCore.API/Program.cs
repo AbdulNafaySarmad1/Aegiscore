@@ -2,6 +2,7 @@ using Serilog;
 using AegisCore.API.Background;
 using AegisCore.API.Extensions;
 using AegisCore.API.Hubs;
+using AegisCore.API.Finance;
 using AegisCore.API.Middleware;
 using AegisCore.Application;
 using AegisCore.Application.Maintenance;
@@ -147,13 +148,15 @@ else
     app.UseMiddleware<RequestLoggingMiddleware>();
     app.UseMiddleware<RateLimitingMiddleware>();
     app.UseMiddleware<AuthenticatedOriginPullsMiddleware>();
+    app.UseMiddleware<HybridPqcTransportMiddleware>();
     app.UseMiddleware<SessionBindingMiddleware>();
 
     app.UseCors("CloudflarePages");
     app.UseAuthentication();
     app.UseMiddleware<DemoIdentityMiddleware>();
-    app.UseAuthorization();
     app.UseMiddleware<LicenseLockoutMiddleware>();
+    app.UseMiddleware<TenantContextMiddleware>();
+    app.UseAuthorization();
 
     app.UseMiddleware<TurnstileMiddleware>();
     app.UseMiddleware<AbacMiddleware>();
@@ -173,10 +176,21 @@ else
             statusCode: StatusCodes.Status503ServiceUnavailable);
     }).AllowAnonymous();
     app.MapHealthChecks("/health/detail").RequireAuthorization();
+    app.MapGet("/api/session", (HttpContext context) => Results.Ok(new
+    {
+        userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+        tenantId = context.User.FindFirst("tenant_id")?.Value ?? context.User.FindFirst("tid")?.Value,
+        studentId = context.User.FindFirst("student_id")?.Value,
+        departmentId = context.User.FindFirst("department_id")?.Value,
+        name = context.User.Identity?.Name ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "AegisCore user",
+        roles = context.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().Order().ToArray()
+    })).RequireAuthorization();
 
     app.MapHub<StateMachineHub>("/hubs/statemachine");
     app.MapHub<NotificationHub>("/hubs/notifications");
+    app.MapHub<FinanceHub>("/hubs/finance");
     app.MapControllers();
+    app.MapFinanceModuleEndpoints();
 
     try
     {

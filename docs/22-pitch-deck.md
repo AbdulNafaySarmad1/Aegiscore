@@ -1,6 +1,6 @@
-# Nocturne Pitch Deck
+# AegisCore Pitch Deck
 
-## Slide 1: Nocturne Systems
+## Slide 1: AegisCore Systems
 Pakistan-native university ERP for regulated academic operations.
 
 ## Slide 2: The Problem
@@ -12,7 +12,7 @@ HEC reporting, accreditation pressure, digital payments, hybrid delivery, and st
 ## Slide 4: Current Alternatives
 Cloud ERPs, custom CMS rollouts, spreadsheets, and single-module tools.
 
-## Slide 5: Nocturne Difference
+## Slide 5: AegisCore Difference
 Auditable decisions, cloud-agnostic deployment, offline-first mobility, and Pakistan compliance in one platform.
 
 ## Slide 6: Admissions

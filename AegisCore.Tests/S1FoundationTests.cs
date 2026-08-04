@@ -123,7 +123,7 @@ public sealed class S1FoundationTests
             "..", "..", "..", "..",
             "AegisCore.Infrastructure",
             "Migrations",
-            "V1.0_NocturneBaseline.sql"));
+            "V1.0_AegisCoreBaseline.sql"));
 
         Assert.Contains("ALTER TABLE \"AuditLogs\" ENABLE ROW LEVEL SECURITY", sql);
         Assert.Contains("CREATE POLICY audit_log_no_delete", sql);

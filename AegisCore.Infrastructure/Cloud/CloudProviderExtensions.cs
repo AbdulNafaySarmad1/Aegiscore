@@ -2,6 +2,7 @@ using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Infrastructure.Cloud.Azure;
 using AegisCore.Infrastructure.Cloud.Aws;
 using AegisCore.Infrastructure.Cloud.Gcp;
+using AegisCore.Infrastructure.Cloud.Infisical;
 using AegisCore.Infrastructure.Cloud.OnPremise;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,14 +15,19 @@ public static class CloudProviderExtensions
     public static IServiceCollection AddCloudProvider(this IServiceCollection services, IConfiguration configuration)
     {
         var provider = (configuration["AEGISCORE_CLOUD_PROVIDER"] ?? "ONPREMISE").ToUpperInvariant();
+        var secretProvider = (configuration["AEGISCORE_SECRET_PROVIDER"]
+            ?? (configuration.GetValue<bool>("Runtime:DemoMode") ? "FILE" : "INFISICAL")).ToUpperInvariant();
 
         services.AddSingleton<ISecretService>(sp =>
-            provider switch
+            secretProvider switch
             {
                 "AZURE" => new AzureSecretService(configuration, sp.GetRequiredService<ILogger<AzureSecretService>>()),
                 "AWS" => new AwsSecretsManagerService(configuration, sp.GetRequiredService<ILogger<AwsSecretsManagerService>>()),
                 "GCP" => new GcpSecretManagerService(configuration, sp.GetRequiredService<ILogger<GcpSecretManagerService>>()),
-                _ => new EnvironmentVariableSecretService(sp.GetRequiredService<ILogger<EnvironmentVariableSecretService>>())
+                "INFISICAL" => new InfisicalSecretService(sp.GetRequiredService<IHttpClientFactory>(), configuration, sp.GetRequiredService<StackExchange.Redis.IConnectionMultiplexer>()),
+                "FILE" => new EncryptedFileSecretService(configuration),
+                "ENVIRONMENT" => new EnvironmentVariableSecretService(sp.GetRequiredService<ILogger<EnvironmentVariableSecretService>>()),
+                _ => throw new InvalidOperationException("AEGISCORE_SECRET_PROVIDER must be INFISICAL, FILE, ENVIRONMENT, AZURE, AWS, or GCP.")
             });
 
         services.AddSingleton<IStorageService>(sp =>

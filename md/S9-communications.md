@@ -1,7 +1,7 @@
-# Nocturne — Sprint 9: Communications Hub (WhatsApp + Email + SMS + Notifications)
+# AegisCore — Sprint 9: Communications Hub (WhatsApp + Email + SMS + Notifications)
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building the unified communications engine for Nocturne. WhatsApp achieves 95%+ open rates; email is under 20%. We're using both strategically.
+You are a senior .NET 10 / C# 14 engineer building the unified communications engine for AegisCore. WhatsApp achieves 95%+ open rates; email is under 20%. We're using both strategically.
 
 ---
 

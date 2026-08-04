@@ -1,5 +1,8 @@
 using AegisCore.Infrastructure.Foundation;
+using AegisCore.Infrastructure.Cloud.R2;
+using AegisCore.Infrastructure.Cloud.OnPremise;
 using AegisCore.Infrastructure.Security.Pqc;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -10,11 +13,35 @@ namespace AegisCore.Tests;
 public sealed class FoundationStorageTests
 {
     [Fact]
+    public async Task EncryptedFileSecretService_Persists_And_Rejects_Tampering()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "aegiscore-vault-" + Guid.NewGuid());
+        var path = Path.Combine(root, "vault.bin");
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["AEGISCORE_LOCAL_SECRET_PATH"] = path,
+            ["AEGISCORE_PQC_KEY_BASE64"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+        }).Build();
+        var first = new EncryptedFileSecretService(configuration);
+        await first.SetSecretAsync("/tenants/test/pqc/private", "sensitive-value");
+
+        var reloaded = new EncryptedFileSecretService(configuration);
+        Assert.Equal("sensitive-value", await reloaded.GetSecretAsync("/tenants/test/pqc/private"));
+        var encrypted = await File.ReadAllBytesAsync(path);
+        Assert.DoesNotContain("sensitive-value"u8.ToArray(), encrypted);
+
+        var bytes = encrypted;
+        bytes[^1] ^= 1;
+        await File.WriteAllBytesAsync(path, bytes);
+        await Assert.ThrowsAnyAsync<CryptographicException>(() => reloaded.GetSecretAsync("/tenants/test/pqc/private"));
+    }
+
+    [Fact]
     public async Task LocalDiskStorageProvider_RoundTrips_And_BlocksTraversal()
     {
         var root = Path.Combine(Path.GetTempPath(), "aegiscore-storage-" + Guid.NewGuid());
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["NOCTURNE_STORAGE_LOCAL_PATH"] = root })
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["AEGISCORE_STORAGE_LOCAL_PATH"] = root })
             .Build();
 
         var storage = new LocalDiskStorageProvider(configuration);
@@ -43,8 +70,8 @@ public sealed class FoundationStorageTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["NOCTURNE_STORAGE_PROVIDER"] = provider,
-                ["NOCTURNE_STORAGE_LOCAL_PATH"] = root,
+                ["AEGISCORE_STORAGE_PROVIDER"] = provider,
+                ["AEGISCORE_STORAGE_LOCAL_PATH"] = root,
                 [$"Storage:{provider}:LocalPath"] = root
             })
             .Build();
@@ -72,5 +99,25 @@ public sealed class FoundationStorageTests
         var ciphertext = crypto.EncryptString("secret");
 
         Assert.Equal("secret", crypto.DecryptString(ciphertext));
+    }
+
+    [Fact]
+    public async Task FinanceObjectStorage_Uses_Configured_LocalProvider()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "aegiscore-finance-storage-" + Guid.NewGuid());
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["AEGISCORE_STORAGE_PROVIDER"] = "local",
+            ["AEGISCORE_STORAGE_LOCAL_PATH"] = root
+        }).Build();
+        using var services = new ServiceCollection().AddStorageProvider(configuration).AddR2Storage(configuration).BuildServiceProvider();
+        var storage = services.GetRequiredService<IR2StorageService>();
+
+        await using var upload = new MemoryStream("evidence"u8.ToArray());
+        await storage.UploadAsync("audit/evidence.json", upload, "application/json");
+
+        await using var downloaded = await storage.DownloadAsync("audit/evidence.json");
+        Assert.NotNull(downloaded);
+        Assert.Null(await storage.DownloadAsync("audit/missing.json"));
     }
 }

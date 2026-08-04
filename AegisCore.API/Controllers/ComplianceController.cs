@@ -2,12 +2,15 @@ using AegisCore.Application.Compliance;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/compliance")]
+[Authorize(Roles = "Auditor,Finance,Finance Controller,CFO,Admin,SuperAdmin")]
 public class ComplianceController : ControllerBase
 {
     private readonly IComplianceService _complianceService;
@@ -99,10 +102,12 @@ public class ComplianceController : ControllerBase
     {
         if (!Enum.TryParse<AuditFindingSeverity>(request.Severity, true, out var severity))
             return BadRequest(new { error = "invalid_severity" });
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"), out var actorId) || actorId == Guid.Empty)
+            return Unauthorized();
 
         var finding = await _complianceService.ReportFindingAsync(
             request.ControlId, request.Title, request.Description, severity,
-            Guid.Empty, "Auditor", cancellationToken);
+            actorId, User.FindFirstValue(ClaimTypes.Name) ?? User.Identity?.Name ?? "Authenticated auditor", cancellationToken);
 
         return Ok(new FindingDto { Id = finding.Id, Title = finding.Title, Severity = finding.Severity.ToString(), Status = finding.Status.ToString() });
     }

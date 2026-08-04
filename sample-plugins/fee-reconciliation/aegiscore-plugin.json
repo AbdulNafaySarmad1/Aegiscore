@@ -1,0 +1,14 @@
+{
+  "name": "fee-reconciliation",
+  "version": "1.0.0",
+  "description": "Reconciles imported bank payments against AegisCore fee invoices.",
+  "category": "Finance",
+  "pricingModel": "RevenueShare",
+  "price": 0,
+  "developerName": "AegisCore Systems",
+  "developerEmail": "plugins@aegiscore.systems",
+  "requiredPermissions": [
+    "finance.fees.read",
+    "finance.payments.write"
+  ]
+}

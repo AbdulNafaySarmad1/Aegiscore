@@ -1,7 +1,7 @@
-# Nocturne Competitive Analysis — Gap Matrix vs Pakistani Education ERPs
+# AegisCore Competitive Analysis — Gap Matrix vs Pakistani Education ERPs
 
 ## Executive Summary
-Nocturne's unfair advantages:
+AegisCore's unfair advantages:
 1. **100% Cloud Agnostic** — competitors lock you in; we don't
 2. **Zero Per-Student Licensing** — like OpenEduCat, but modern stack
 3. **Explainable AI (SHAP)** — merit lists you can defend in court
@@ -11,7 +11,7 @@ Nocturne's unfair advantages:
 
 ---
 
-## Competitor Feature Matrix vs Nocturne
+## Competitor Feature Matrix vs AegisCore
 
 ### 1. EDUSUITE (Strongest Local Competitor)
 
@@ -24,7 +24,7 @@ Nocturne's unfair advantages:
 - ✅ Cloud-based, AES-256 encryption
 - ✅ Multi-campus support
 
-**What Nocturne Has That EduSuite Doesn't:**
+**What AegisCore Has That EduSuite Doesn't:**
 - ✅ **SHAP-based merit lists** (explainable, defendable) — EduSuite likely just scores
 - ✅ **OBE/CLO-PLO mapping** (HEC accreditation engine) — EduSuite has none
 - ✅ **100% cloud-agnostic** — EduSuite is cloud-only (data sovereignty issue)
@@ -36,12 +36,12 @@ Nocturne's unfair advantages:
 - ✅ **Moodle LMS native sync** — not just API bolts-on
 - ✅ **Power BI embedded** (role-specific dashboards) — their dashboards likely generic
 
-**Nocturne Gaps vs EduSuite:**
+**AegisCore Gaps vs EduSuite:**
 - ❌ Teacher scheduling AI (need to build)
 - ❌ Automated section building (need to build)
 - ❌ WhatsApp integration (we have comms hub, but WhatsApp specific templates might lag)
 
-**Verdict:** Nocturne wins on **data sovereignty + explainability + accreditation**. EduSuite wins on **AI scheduling** (but that's pluggable). This is a **data residency fight** — universities care about keeping data in Pakistan.
+**Verdict:** AegisCore wins on **data sovereignty + explainability + accreditation**. EduSuite wins on **AI scheduling** (but that's pluggable). This is a **data residency fight** — universities care about keeping data in Pakistan.
 
 ---
 
@@ -58,7 +58,7 @@ Nocturne's unfair advantages:
 - ✅ Parent-teacher portal (mobile)
 - ✅ Real-time attendance stamps to parents
 
-**What Nocturne Has That SyberEdge Doesn't:**
+**What AegisCore Has That SyberEdge Doesn't:**
 - ✅ **Cloud agnosticism** — SyberEdge likely proprietary hardware lock-in
 - ✅ **R + SHAP merit calculations** — statistical rigor
 - ✅ **OBE framework** (HEC accreditation) — SyberEdge has none
@@ -72,13 +72,13 @@ Nocturne's unfair advantages:
 - ✅ **Alumni engagement** (not just student lifecycle)
 - ✅ **Placement cell** (job board + recruiter management)
 
-**Nocturne Gaps vs SyberEdge:**
+**AegisCore Gaps vs SyberEdge:**
 - ❌ Hardware integration (biometric, RFID, smart card) — need middleware
 - ❌ Real-time physical attendance sync (biometric gates) — they've built this deeply
 - ❌ Hostel room assignment algorithms (complex constraints)
 - ❌ RFID library tracking (hardware-dependent)
 
-**Verdict:** Nocturne wins on **software sophistication + data sovereignty**. SyberEdge wins on **hardware integration** (but that's often a university's own procurement problem). Universities choosing between these will ask: "Do I want integrated hardware, or do I want to own my data?"
+**Verdict:** AegisCore wins on **software sophistication + data sovereignty**. SyberEdge wins on **hardware integration** (but that's often a university's own procurement problem). Universities choosing between these will ask: "Do I want integrated hardware, or do I want to own my data?"
 
 ---
 
@@ -94,7 +94,7 @@ Nocturne's unfair advantages:
 - ✅ Medical college modules
 - ✅ Quick deployment (weeks, not months)
 
-**What Nocturne Has That Futuresol Doesn't:**
+**What AegisCore Has That Futuresol Doesn't:**
 - ✅ **SHAP-explainable merit** (vs Futuresol's basic automation)
 - ✅ **OBE/CLO-PLO mapping** (HEC accreditation engine)
 - ✅ **CIS auto-scanner** (PDFs → CLOs)
@@ -107,13 +107,13 @@ Nocturne's unfair advantages:
 - ✅ **Research output tracking** (faculty publications, grants)
 - ✅ **Alumni engagement** (lifetime value)
 
-**Nocturne Gaps vs Futuresol:**
+**AegisCore Gaps vs Futuresol:**
 - ❌ Board-specific templates (BISE formatting rules) — need to build per board
 - ❌ Cadet college specific workflows (military discipline tracking?) — niche
 - ❌ Medical college specific workflows (clinical rotations?) — niche
 - ❌ Proven track record (Futuresol has 10+ years; we're new)
 
-**Verdict:** Nocturne wins on **compliance + data sovereignty + ecosystem**. Futuresol wins on **board-specific templates + deployment speed**. This is a **"proven vs innovative"** fight. Universities will choose based on risk appetite. SSUET will choose innovation + sovereignty. Government colleges might choose proven.
+**Verdict:** AegisCore wins on **compliance + data sovereignty + ecosystem**. Futuresol wins on **board-specific templates + deployment speed**. This is a **"proven vs innovative"** fight. Universities will choose based on risk appetite. SSUET will choose innovation + sovereignty. Government colleges might choose proven.
 
 ---
 
@@ -127,7 +127,7 @@ Nocturne's unfair advantages:
 - ✅ Audit trails
 - ✅ Community-driven development
 
-**What Nocturne Has That OpenEduCat Doesn't:**
+**What AegisCore Has That OpenEduCat Doesn't:**
 - ✅ **Modern stack** (C# 14 .NET 10 vs OpenEduCat's likely older stack)
 - ✅ **SHAP-explainable merit lists** (statistical rigor)
 - ✅ **OBE framework** (HEC accreditation engine)
@@ -141,13 +141,13 @@ Nocturne's unfair advantages:
 - ✅ **R + SHAP integration** (statistical compliance)
 - ✅ **WhatsApp comms hub** (95% open rates)
 
-**What OpenEduCat Has That Nocturne Doesn't:**
+**What OpenEduCat Has That AegisCore Doesn't:**
 - ✅ **10+ years community trust** (we're new)
 - ✅ **100% open-source** (we're proprietary, but cloud-agnostic)
 - ✅ **Proven deployments** (MITS, many Indian universities)
 - ✅ **Zero licensing fees** (we have license keys)
 
-**Verdict:** This is the **hardest fight**. OpenEduCat is free, on-prem, and proven. Nocturne is modern, governanced, and integrated. Universities choosing between them will ask: "Do I want free + custom-maintained, or do I want turnkey + governed?" SSUET will choose turnkey + governed because they want someone to blame if it breaks.
+**Verdict:** This is the **hardest fight**. OpenEduCat is free, on-prem, and proven. AegisCore is modern, governanced, and integrated. Universities choosing between them will ask: "Do I want free + custom-maintained, or do I want turnkey + governed?" SSUET will choose turnkey + governed because they want someone to blame if it breaks.
 
 ---
 
@@ -162,7 +162,7 @@ Nocturne's unfair advantages:
 - ✅ Performance appraisal
 - ✅ Large-scale payroll (multi-campus, multi-currency if needed)
 
-**What Nocturne Has That TimeTrax Doesn't:**
+**What AegisCore Has That TimeTrax Doesn't:**
 - ✅ **Student SIS** (they're HR-focused, not educational)
 - ✅ **OBE/CLO-PLO mapping** (they have no academic outcome tracking)
 - ✅ **CIS scanner** (not relevant to their domain)
@@ -173,13 +173,13 @@ Nocturne's unfair advantages:
 - ✅ **Placement cell** (they're not recruiting for students)
 - ✅ **Research tracking** (faculty publications)
 
-**What TimeTrax Has That Nocturne Doesn't:**
+**What TimeTrax Has That AegisCore Doesn't:**
 - ✅ **Deep payroll expertise** (Pakistan tax compliance, EOBI, PF)
 - ✅ **Multi-campus staff management** (we have dept-level, they have global)
 - ✅ **Procurement integration** (vendor management, rate contracts)
 - ✅ **Asset tracking** (depreciation, maintenance contracts)
 
-**Verdict:** This is a **non-fight** — different products for different buyers. TimeTrax is for HR directors managing 500+ staff. Nocturne is for registrars managing 10,000+ students. They could actually **co-exist** — university buys TimeTrax for payroll, Nocturne for student lifecycle. Or we **integrate via API** (our HR module talks to their payroll engine).
+**Verdict:** This is a **non-fight** — different products for different buyers. TimeTrax is for HR directors managing 500+ staff. AegisCore is for registrars managing 10,000+ students. They could actually **co-exist** — university buys TimeTrax for payroll, AegisCore for student lifecycle. Or we **integrate via API** (our HR module talks to their payroll engine).
 
 ---
 
@@ -193,7 +193,7 @@ Nocturne's unfair advantages:
 - ✅ 24/7 global support
 - ✅ Compliance with every global standard
 
-**What Nocturne Has That Oracle/SAP/Dynamics Doesn't:**
+**What AegisCore Has That Oracle/SAP/Dynamics Doesn't:**
 - ✅ **Pakistan-specific out-of-box** (no customization needed)
 - ✅ **SHAP merit lists** (statistical rigor)
 - ✅ **OBE framework** (HEC accreditation)
@@ -210,22 +210,22 @@ Nocturne's unfair advantages:
 - ✅ **Deployment speed** (1 month vs 12 months)
 - ✅ **Cost** (₱8M/year vs ₱50M+/year)
 
-**What Global ERPs Have That Nocturne Doesn't:**
+**What Global ERPs Have That AegisCore Doesn't:**
 - ✅ **10+ year track record** (we're 1 month old)
 - ✅ **1000+ Pakistani implementations** (we have 0)
 - ✅ **Global support team** (we're 3 people)
 - ✅ **Every integration ever built** (we're building integrations)
 
-**Verdict:** This is the **size fight**. Global ERPs are for government universities, military institutions, and paranoid CTOs. Nocturne is for SSUET, FAST, IBA, and forward-thinking private universities that want sovereignty + innovation. Universities choosing between us will ask: "Do I want global support on a platform not built for me, or local innovation built for me?"
+**Verdict:** This is the **size fight**. Global ERPs are for government universities, military institutions, and paranoid CTOs. AegisCore is for SSUET, FAST, IBA, and forward-thinking private universities that want sovereignty + innovation. Universities choosing between us will ask: "Do I want global support on a platform not built for me, or local innovation built for me?"
 
 ---
 
-## Nocturne's Unfair Advantages (Why We Win)
+## AegisCore's Unfair Advantages (Why We Win)
 
 ### 1. **SHAP-Explainable Merit Lists**
 **Why it matters:** Pakistani courts + HEC + parents will challenge merit lists. With SHAP, you can show exactly why student X ranked #42 (matric 65% contributed 15 points, FSc 72% contributed 18 points, entry test 850 contributed 9 points). 
 
-**How to use it:** When SSUET selects Nocturne, highlight: "Your merit lists are legally defensible."
+**How to use it:** When SSUET selects AegisCore, highlight: "Your merit lists are legally defensible."
 
 ### 2. **100% Cloud Agnostic = Data Sovereignty**
 **Why it matters:** Pakistan has data residency concerns. Universities don't want data on US servers.
@@ -263,7 +263,7 @@ Nocturne's unfair advantages:
 **How to use it:** When talking to VC: "Merit lists use SHAP (explainable). Risk models use Basel III (financial). This is statistical rigor, not guessing."
 
 ### 9. **Moodle + Teams Ecosystem**
-**Why it matters:** Universities already have Moodle or Teams. Nocturne syncs seamlessly.
+**Why it matters:** Universities already have Moodle or Teams. AegisCore syncs seamlessly.
 
 **How to use it:** When demoing: "Grades sync to Moodle. Teams classes auto-created. All without you lifting a finger."
 
@@ -318,7 +318,7 @@ Nocturne's unfair advantages:
 **Our pitch:** "Futuresol deploys fast. We deploy smarter. SHAP merit lists, OBE framework, offline-first mobile. Long-term partnership, not quick project."
 
 ### When Competing vs OpenEduCat
-**Our pitch:** "OpenEduCat is free & open-source. We're modern & governanced. You get Nocturne Systems on-call when things break. Community won't answer at 2 AM."
+**Our pitch:** "OpenEduCat is free & open-source. We're modern & governanced. You get AegisCore Systems on-call when things break. Community won't answer at 2 AM."
 
 ### When Competing vs Global ERPs
 **Our pitch:** "Global ERPs are powerful but bloated. We're built for Pakistani universities. Data sovereignty. 1-month deployment vs 12. ₱8M vs ₱50M."
@@ -376,7 +376,7 @@ Nocturne's unfair advantages:
 
 ## Build vs Buy Decision Matrix
 
-| Feature | Nocturne | EduSuite | SyberEdge | Futuresol | OpenEduCat | Build Cost |
+| Feature | AegisCore | EduSuite | SyberEdge | Futuresol | OpenEduCat | Build Cost |
 |---------|-----------|----------|-----------|-----------|------------|-----------|
 | SHAP Merit | ✅ Native | ❌ No | ❌ No | ❌ No | ❌ No | **High (R + ML)** |
 | OBE/CLO-PLO | ✅ Native | ❌ No | ❌ No | ❌ No | ❌ No | **Medium (DB schema)** |
@@ -393,7 +393,7 @@ Nocturne's unfair advantages:
 
 ## Conclusion
 
-**Nocturne is strongest where:**
+**AegisCore is strongest where:**
 - Data sovereignty matters (vs EduSuite, Futuresol, Global ERPs)
 - Academic compliance matters (vs SyberEdge, TimeTrax)
 - Explainability matters (vs all of them)
@@ -401,7 +401,7 @@ Nocturne's unfair advantages:
 - Mobile offline matters (vs all of them)
 - Modern stack matters (vs OpenEduCat)
 
-**Nocturne is weakest where:**
+**AegisCore is weakest where:**
 - Proven track record matters (vs Futuresol, SyberEdge, OpenEduCat)
 - Hardware integration matters (vs SyberEdge)
 - AI scheduling matters (vs EduSuite)

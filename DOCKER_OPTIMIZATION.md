@@ -13,7 +13,7 @@
 ## Local Commands
 
 ```bash
-docker build -t nocturne-api:optimized .
+docker build -t aegiscore-api:optimized .
 docker compose --env-file .env.example up -d --build
 curl http://localhost:8080/health
 docker compose --env-file .env.example down

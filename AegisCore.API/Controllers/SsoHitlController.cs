@@ -22,7 +22,7 @@ public sealed class SsoHitlController(IMultiTenantSsoService sso, ITwoFactorServ
     public IActionResult Setup2Fa()
     {
         var secret = twoFactor.GenerateSecret();
-        return Ok(new { secret, backupCodes = twoFactor.GenerateBackupCodes(), otpauth = $"otpauth://totp/Nocturne:user?secret={secret}&issuer=Nocturne" });
+        return Ok(new { secret, backupCodes = twoFactor.GenerateBackupCodes(), otpauth = $"otpauth://totp/AegisCore:user?secret={secret}&issuer=AegisCore" });
     }
 
     [HttpPost("auth/2fa/verify")]

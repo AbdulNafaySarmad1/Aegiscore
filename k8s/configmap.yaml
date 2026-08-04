@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nocturne-api-config
-  namespace: nocturne
+  name: aegiscore-api-config
+  namespace: aegiscore
 data:
   ASPNETCORE_URLS: http://+:8080
   ASPNETCORE_ENVIRONMENT: Production
@@ -11,7 +11,12 @@ data:
   Runtime__DemoMode: "false"
   Deployment__FailOnReadinessError: "true"
   AEGISCORE_CLOUD_PROVIDER: ONPREMISE
-  NOCTURNE_STORAGE_PROVIDER: local
-  NOCTURNE_STORAGE_LOCAL_PATH: /app/storage
-  License__ServerUrl: https://license.nocturne.systems
+  AEGISCORE_SECRET_PROVIDER: INFISICAL
+  AEGISCORE_STORAGE_PROVIDER: local
+  AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
+  DataProtection__KeyPath: /app/config/data-protection
+  DataProtection__CertificatePath: /run/aegiscore-secrets/data-protection.pfx
+  HybridPqcTransport__Enforce: "true"
+  HybridPqcTransport__MaxSkewSeconds: "60"
+  License__ServerUrl: https://license.aegiscore.systems
   Database__AutoMigrate: "true"
