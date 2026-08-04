@@ -4,7 +4,9 @@ using System.Text;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using AegisCore.API.Middleware;
+using AegisCore.Application.DataImport;
 using AegisCore.Contracts.Abstractions.Cloud;
+using AegisCore.Domain.Entities;
 using AegisCore.Application.Onboarding;
 using AegisCore.Infrastructure.Installation;
 using AegisCore.Infrastructure.Onboarding;
@@ -249,6 +251,78 @@ public sealed class WizardController(
         });
     }
 
+    [HttpPost("import-demo-data")]
+    public async Task<IActionResult> ImportDemoData([FromBody] DemoImportRequest request, [FromServices] IDataImportService dataImport, CancellationToken ct)
+    {
+        var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
+        if (!isDemo) return BadRequest(new { error = "Demo mode is not enabled. Set Runtime:DemoMode=true to use this feature." });
+
+        if (string.IsNullOrWhiteSpace(request.ConnectionString))
+            return BadRequest(new { error = "Connection string is required." });
+        if (request.DbType is not ("PostgreSQL" or "MySQL" or "MSSQL" or "Oracle"))
+            return BadRequest(new { error = "Unsupported database type. Use PostgreSQL, MySQL, MSSQL, or Oracle." });
+
+        var conn = new ExternalDbConnection
+        {
+            Name = $"Demo import — {DateTime.UtcNow:yyyy-MM-dd HH:mm}",
+            DbType = request.DbType,
+            ConnectionString = request.ConnectionString,
+            TenantId = TenantId()
+        };
+
+        try
+        {
+            conn = await dataImport.AddConnectionAsync(conn, ct);
+            var connectionOk = await dataImport.TestConnectionAsync(conn.Id, ct);
+            if (!connectionOk)
+                return BadRequest(new { error = "Connection test failed. Verify your connection string and ensure the target database is reachable from this server." });
+
+            var tables = await dataImport.DiscoverTablesAsync(conn.Id, null, ct);
+            var autoMapped = AutoMapTables(tables);
+
+            var importResults = new List<object>();
+            foreach (var (table, entityType) in autoMapped)
+            {
+                try
+                {
+                    var columns = await dataImport.DiscoverColumnsAsync(conn.Id, table, null, ct);
+                    var fieldMappings = AutoMapColumns(entityType, columns);
+                    if (fieldMappings.Count < 2)
+                    {
+                        importResults.Add(new { table, entityType, status = "Skipped", reason = "Too few auto-mapped columns (minimum 2 required)." });
+                        continue;
+                    }
+
+                    var query = request.DbType == "PostgreSQL"
+                        ? $"SELECT * FROM \"{table}\" LIMIT 1000"
+                        : $"SELECT * FROM [{table}]";
+
+                    var job = await dataImport.StartImportAsync(conn.Id, entityType, query, fieldMappings, null, ct);
+                    importResults.Add(new { table, entityType, job.Id, job.Status, job.TotalRows, job.SuccessRows, job.ErrorRows, job.SkippedRows });
+                }
+                catch (Exception ex)
+                {
+                    importResults.Add(new { table, entityType, status = "Failed", reason = ex.Message });
+                }
+            }
+
+            return Ok(new
+            {
+                success = true,
+                connectionId = conn.Id,
+                tablesDiscovered = tables.Count,
+                tablesAutoMapped = autoMapped.Count,
+                autoMappedTables = autoMapped.Select(m => new { m.Table, m.EntityType }).ToList(),
+                results = importResults,
+                note = request.DbType != "PostgreSQL" ? "Non-PostgreSQL sources use simulated discovery. Only PostgreSQL provides real column metadata and actual row import." : null
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = $"Import pipeline failed: {ex.Message}" });
+        }
+    }
+
     [HttpPost("generate-secrets")]
     public async Task<IActionResult> GenerateSecrets(CancellationToken ct)
     {
@@ -441,9 +515,83 @@ public sealed class WizardController(
 
     private static bool IsE164Phone(JsonElement data, string name)
         => data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String && value.GetString() is { Length: <= 16 } phone && Regex.IsMatch(phone, "^\\+[1-9][0-9]{7,14}$", RegexOptions.CultureInvariant);
+
+    private static List<(string Table, string EntityType)> AutoMapTables(List<string> tables)
+    {
+        var result = new List<(string, string)>();
+        foreach (var table in tables)
+        {
+            var lower = table.ToLowerInvariant();
+            string? entityType = null;
+            if (lower.Contains("student") || lower.Contains("learner"))
+                entityType = "Student";
+            else if (lower.Contains("facult") || lower.Contains("teacher") || lower.Contains("instructor") || lower.Contains("professor"))
+                entityType = "Faculty";
+            else if (lower.Contains("course") || lower.Contains("subject") || lower.Contains("class"))
+                entityType = "Course";
+            else if (lower.Contains("grade") || lower.Contains("mark") || lower.Contains("result") || lower.Contains("score"))
+                entityType = "Grade";
+            else if (lower.Contains("enroll") || lower.Contains("registr"))
+                entityType = "Enrollment";
+            else if (lower.Contains("fee") || lower.Contains("payment") || lower.Contains("invoice") || lower.Contains("bill"))
+                entityType = "Fee";
+            else if (lower.Contains("depart"))
+                entityType = "Department";
+            else if (lower.Contains("program") || lower.Contains("programme"))
+                entityType = "Programme";
+            if (entityType is not null)
+                result.Add((table, entityType));
+        }
+        return result;
+    }
+
+    private static readonly Dictionary<string, string[]> ColumnToPropertyMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["FirstName"] = new[] { "first_name", "firstname", "fname", "given_name", "givenname", "forename", "name_first" },
+        ["LastName"] = new[] { "last_name", "lastname", "lname", "surname", "family_name", "familyname", "name_last" },
+        ["Email"] = new[] { "email", "email_address", "emailaddress", "e_mail", "mail" },
+        ["PhoneNumber"] = new[] { "phone", "phone_number", "phonenumber", "mobile", "contact", "cell", "telephone", "tel" },
+        ["DateOfBirth"] = new[] { "date_of_birth", "dob", "birthdate", "birth_date", "dateofbirth", "bday" },
+        ["RegistrationNumber"] = new[] { "registration_number", "reg_number", "regno", "registration_no", "roll_number", "rollno", "student_number" },
+        ["StudentId"] = new[] { "student_id", "studentid", "id", "user_id", "userid", "uid", "sid" },
+        ["Code"] = new[] { "code", "course_code", "course_code", "subject_code", "class_code", "short_code", "shortcode" },
+        ["Title"] = new[] { "title", "name", "course_name", "subject_name", "class_name", "full_name", "fullname", "display_name" },
+        ["Description"] = new[] { "description", "desc", "details", "summary", "info", "notes" },
+        ["UniversityId"] = new[] { "university_id", "universityid", "uni_id", "uniid", "matriculation_number", "matric", "matric_no", "enrollment_number" },
+        ["FullName"] = new[] { "full_name", "fullname", "display_name", "displayname" },
+    };
+
+    private static Dictionary<string, string> AutoMapColumns(string entityType, List<ColumnInfo> columns)
+    {
+        var mappings = new Dictionary<string, string>();
+        var usedSourceColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kvp in ColumnToPropertyMap)
+        {
+            foreach (var col in columns)
+            {
+                if (usedSourceColumns.Contains(col.Name)) continue;
+                if (kvp.Value.Contains(col.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    mappings[col.Name] = kvp.Key;
+                    usedSourceColumns.Add(col.Name);
+                    break;
+                }
+            }
+        }
+
+        foreach (var col in columns)
+        {
+            if (usedSourceColumns.Contains(col.Name)) continue;
+            mappings[col.Name] = col.Name;
+        }
+
+        return mappings;
+    }
 }
 
 public sealed record ValidateLicenseRequest(string LicenseKey);
 public sealed record ChangeWizardModeRequest(Guid SessionId, string Mode, string? LicenseKey);
 public sealed record SaveStepRequest(Guid SessionId, JsonElement Data);
 public sealed record CompleteWizardRequest(Guid SessionId, string ConfirmedBy, DateTimeOffset Timestamp);
+public sealed record DemoImportRequest(string ConnectionString, string DbType);

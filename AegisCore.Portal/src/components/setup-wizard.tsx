@@ -7,6 +7,7 @@ import {
   Check,
   CheckCircle2,
   Circle,
+  Database,
   Download,
   FileCheck2,
   KeyRound,
@@ -33,6 +34,21 @@ type Review = {
   checks: Array<{ name: string; passed: boolean; detail: string }>;
 };
 
+type DemoImportResult = {
+  success: boolean;
+  connectionId: string;
+  tablesDiscovered: number;
+  tablesAutoMapped: number;
+  autoMappedTables: Array<{ table: string; entityType: string }>;
+  results: Array<{
+    table: string; entityType: string; status?: string; reason?: string;
+    id?: string; totalRows?: number; successRows?: number; errorRows?: number; skippedRows?: number;
+  }>;
+  note?: string;
+};
+
+type DemoStatus = { isDemo: boolean; expiryUtc?: string; remainingDays?: number };
+
 const stepLabels = ["Institution", "Infrastructure", "Templates", "Hierarchy", "Import", "Access", "Review"];
 const requiredFiles = ["departments", "students", "faculty", "courses"];
 const allFiles = ["departments", "students", "faculty", "employees", "programs", "courses", "enrollments", "attendance", "examinations", "marks", "financial"];
@@ -54,6 +70,10 @@ export function SetupWizard() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [installed, setInstalled] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+  const [showDbImport, setShowDbImport] = useState(false);
+  const [dbConn, setDbConn] = useState({ connectionString: "", dbType: "PostgreSQL" });
+  const [importResult, setImportResult] = useState<DemoImportResult | null>(null);
   const [institution, setInstitution] = useState(emptyInstitution);
   const [infra, setInfra] = useState(defaultInfrastructure);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -74,6 +94,9 @@ export function SetupWizard() {
         }
       })
       .catch(error => setNotice({ kind: "error", text: error instanceof Error ? error.message : "Setup API is unavailable." }));
+    apiGet<DemoStatus>("/api/wizard/demo-status")
+      .then(s => setDemoMode(s.isDemo))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -215,6 +238,19 @@ export function SetupWizard() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function runDbImport() {
+    await run(async () => {
+      const result = await apiPost<DemoImportResult>("/api/wizard/import-demo-data", {
+        connectionString: dbConn.connectionString,
+        dbType: dbConn.dbType
+      });
+      setImportResult(result);
+      if (result.success) {
+        setNotice({ kind: "success", text: `Imported data from ${result.tablesAutoMapped} auto-mapped tables across ${result.results.filter(r => r.status !== "Skipped").length} entities.` });
+      }
+    });
   }
 
   async function goLive() {
@@ -367,6 +403,86 @@ export function SetupWizard() {
                 <span><strong>{requiredFiles.filter(key => validations[key]?.isValid).length}/{requiredFiles.length}</strong><small>Required datasets valid</small></span>
                 <p>Upload completed templates. Validation never imports partial or malformed records.</p>
               </div>
+
+              {demoMode && !showDbImport && (
+                <div className="setup-callout">
+                  <Database />
+                  <span><strong>Pull from your existing database</strong><small>Import live records directly from PostgreSQL, MySQL, MSSQL, or Oracle instead of uploading files.</small></span>
+                  <button className="secondary-button" onClick={() => setShowDbImport(true)}>Connect database</button>
+                </div>
+              )}
+
+              {demoMode && showDbImport && (
+                <div className="db-import-panel">
+                  <div className="db-import-header">
+                    <span><Database /><strong>Database Import</strong></span>
+                    <button className="back-button" onClick={() => { setShowDbImport(false); setImportResult(null); }}><ArrowLeft /> Hide</button>
+                  </div>
+                  <div className="form-grid narrow">
+                    <label className="field">
+                      <span>Connection string<b> *</b></span>
+                      <input value={dbConn.connectionString} onChange={e => setDbConn({ ...dbConn, connectionString: e.target.value })} placeholder="Host=localhost;Database=mydb;Username=user;Password=pass" />
+                      <small>Provide the full connection string for your existing database.</small>
+                    </label>
+                    <label className="field">
+                      <span>Database type<b> *</b></span>
+                      <select value={dbConn.dbType} onChange={e => setDbConn({ ...dbConn, dbType: e.target.value })}>
+                        <option value="PostgreSQL">PostgreSQL</option>
+                        <option value="MySQL">MySQL</option>
+                        <option value="MSSQL">Microsoft SQL Server</option>
+                        <option value="Oracle">Oracle</option>
+                      </select>
+                    </label>
+                    <div className="field-actions">
+                      <button className="primary-button" disabled={busy || !dbConn.connectionString} onClick={runDbImport}>
+                        {busy ? <LoaderCircle className="spin" /> : <Download />} Run import
+                      </button>
+                    </div>
+                  </div>
+
+                  {importResult?.success && (
+                    <div className="import-results">
+                      <div className="form-notice success" role="status">
+                        <CheckCircle2 />
+                        {importResult.tablesDiscovered} tables discovered, {importResult.tablesAutoMapped} auto-mapped across {importResult.results.filter(r => r.status !== "Skipped" && r.status !== "Failed").length} imports
+                      </div>
+                      {importResult.note && <div className="form-notice info"><Circle />{importResult.note}</div>}
+                      {importResult.autoMappedTables.length > 0 && (
+                        <div className="mapped-tables">
+                          <strong>Auto-mapped tables:</strong>
+                          <div className="mapping-chips">
+                            {importResult.autoMappedTables.map(m => (
+                              <span key={m.table} className="mapping-chip">
+                                <small>{m.table}</small> → <b>{m.entityType}</b>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="import-job-results">
+                        {importResult.results.map((r, i) => (
+                          <article key={i} className={r.status === "Failed" ? "failed" : r.status === "Skipped" ? "skipped" : "completed"}>
+                            <span><strong>{r.table}</strong><small>→ {r.entityType}</small></span>
+                            {r.status === "Completed" || r.status === "CompletedWithErrors" ? (
+                              <div className="job-stats">
+                                <b>{r.successRows ?? 0}</b> rows imported
+                                {(r.errorRows ?? 0) > 0 && <span className="err">{(r.errorRows ?? 0)} errors</span>}
+                              </div>
+                            ) : (
+                              <span className="err">{r.reason ?? r.status}</span>
+                            )}
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {importResult && !importResult.success && (
+                    <div className="form-notice error" role="status"><Circle />Import failed. Check the connection string and database reachability.</div>
+                  )}
+                </div>
+              )}
+
               <div className="upload-grid">
                 {allFiles.map(type => {
                   const result = validations[type];
