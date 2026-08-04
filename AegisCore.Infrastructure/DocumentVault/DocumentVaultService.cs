@@ -1,17 +1,15 @@
 using System.Security.Cryptography;
+using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.DocumentVault;
-using AegisCore.Application.Foundation;
 using AegisCore.Domain.Entities;
-using Amazon.S3;
-using Amazon.S3.Model;
 using Microsoft.Extensions.Logging;
 
 namespace AegisCore.Infrastructure.DocumentVault;
 
 public class DocumentVaultService : IDocumentVaultService
 {
-    private readonly IAmazonS3? _s3;
+    private readonly IStorageService _storage;
     private readonly IRepository<DocumentVaultEntry> _docRepo;
     private readonly IRepository<DocumentTier> _tierRepo;
     private readonly IRepository<DocumentAccessLog> _logRepo;
@@ -20,16 +18,16 @@ public class DocumentVaultService : IDocumentVaultService
     private readonly string _defaultBucket;
 
     public DocumentVaultService(
-        IAmazonS3? s3,
+        IStorageService storage,
         IRepository<DocumentVaultEntry> docRepo,
         IRepository<DocumentTier> tierRepo,
         IRepository<DocumentAccessLog> logRepo,
         IRepository<DocumentRetentionPolicy> policyRepo,
         ILogger<DocumentVaultService> logger)
     {
-        _s3 = s3; _docRepo = docRepo; _tierRepo = tierRepo;
+        _storage = storage; _docRepo = docRepo; _tierRepo = tierRepo;
         _logRepo = logRepo; _policyRepo = policyRepo; _logger = logger;
-        _defaultBucket = Environment.GetEnvironmentVariable("R2_BUCKET_NAME") ?? Environment.GetEnvironmentVariable("R2:BucketName") ?? "aegiscore-vault";
+        _defaultBucket = Environment.GetEnvironmentVariable("STORAGE_BUCKET") ?? Environment.GetEnvironmentVariable("R2_BUCKET_NAME") ?? Environment.GetEnvironmentVariable("R2:BucketName") ?? "aegiscore-vault";
     }
 
     public async Task SeedDefaultTiersAsync(Guid tenantId, CancellationToken ct)
@@ -84,40 +82,14 @@ public class DocumentVaultService : IDocumentVaultService
         // Generate PQC signature (ML-DSA simulation — replace with actual ML-DSA when PQC lib is available)
         var (signature, publicKey) = GeneratePqcSignature(hash);
 
-        // Upload to R2 with Object Lock
+        // Upload to storage provider (works with: local MinIO, AWS S3, Azure Blob, GCP Cloud Storage, Cloudflare R2)
         var storageKey = $"{tier.StoragePrefix}{DateTime.UtcNow:yyyy/MM/dd}/{Guid.NewGuid():N}/{fileName}";
         var lockUntil = DateTime.UtcNow.AddDays(tier.RetentionDays);
+        var bucket = tier.BucketName ?? _defaultBucket;
 
-        if (_s3 != null && tier.ObjectLockMode == "COMPLIANCE")
-        {
-            var putReq = new PutObjectRequest
-            {
-                BucketName = tier.BucketName ?? _defaultBucket,
-                Key = storageKey,
-                InputStream = content,
-                ContentType = contentType,
-                ObjectLockMode = ObjectLockMode.Compliance,
-                ObjectLockRetainUntilDate = lockUntil
-            };
-            await _s3.PutObjectAsync(putReq, ct);
-        }
-        else if (_s3 != null)
-        {
-            var putReq = new PutObjectRequest
-            {
-                BucketName = tier.BucketName ?? _defaultBucket,
-                Key = storageKey,
-                InputStream = content,
-                ContentType = contentType,
-                ObjectLockMode = ObjectLockMode.Governance,
-                ObjectLockRetainUntilDate = lockUntil
-            };
-            await _s3.PutObjectAsync(putReq, ct);
-        }
-        else
-        {
-            _logger.LogWarning("R2/S3 client not available — document stored in database reference only. Storage key: {Key}", storageKey);
-        }
+        await _storage.CreateBucketIfNotExistsAsync(bucket, ct);
+        var storageUrl = await _storage.UploadAsync(bucket, storageKey, content, contentType, StorageVisibility.Private, ct);
+        _logger.LogInformation("Document stored via {Provider} at {Bucket}/{Key} — retention until {LockUntil}", _storage.GetType().Name, bucket, storageKey, lockUntil);
 
         var entry = new DocumentVaultEntry
         {
@@ -127,7 +99,7 @@ public class DocumentVaultService : IDocumentVaultService
             PqcSignatureBase64 = signature, PqcPublicKeyBase64 = publicKey,
             Sha512Hash = hashHex, IsPqcVerified = true, PqcVerifiedAt = DateTime.UtcNow,
             StorageBucket = tier.BucketName ?? _defaultBucket, StorageKey = storageKey,
-            StorageUrl = _s3 != null ? $"https://{tier.BucketName ?? _defaultBucket}.r2.cloudflarestorage.com/{storageKey}" : null,
+            StorageUrl = storageUrl,
             UploadedAt = DateTime.UtcNow, RetentionExpiresAt = lockUntil,
             IsRetentionLocked = true, LockMode = tier.ObjectLockMode, LockedUntil = lockUntil,
             UploadedByUserId = uploadedByUserId, UploadedByRole = uploadedByRole,
@@ -163,16 +135,17 @@ public class DocumentVaultService : IDocumentVaultService
             return null;
         }
 
-        if (_s3 != null && doc.StorageKey != null)
+        if (doc.StorageBucket != null && doc.StorageKey != null)
         {
             try
             {
-                var response = await _s3.GetObjectAsync(doc.StorageBucket, doc.StorageKey, ct);
+                var stream = await _storage.DownloadAsync(doc.StorageBucket, doc.StorageKey, ct);
                 var ms = new MemoryStream();
-                await response.ResponseStream.CopyToAsync(ms, ct);
+                await stream.CopyToAsync(ms, ct);
+                stream.Dispose();
                 ms.Position = 0;
 
-                // Re-verify hash on download
+                // Re-verify hash on download — tamper detection
                 var hash = await SHA512.HashDataAsync(ms, ct);
                 ms.Position = 0;
                 var hashHex = Convert.ToHexString(hash).ToLowerInvariant();
@@ -184,9 +157,9 @@ public class DocumentVaultService : IDocumentVaultService
 
                 return ms;
             }
-            catch (AmazonS3Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "R2 download failed for document {Id}", documentId);
+                _logger.LogError(ex, "Download failed for document {Id} via {Provider}", documentId, _storage.GetType().Name);
                 return null;
             }
         }
@@ -199,13 +172,14 @@ public class DocumentVaultService : IDocumentVaultService
         var doc = await _docRepo.GetByIdAsync(documentId, ct);
         if (doc == null) return false;
 
-        if (_s3 != null && doc.StorageKey != null)
+        if (doc.StorageBucket != null && doc.StorageKey != null)
         {
             try
             {
-                var response = await _s3.GetObjectAsync(doc.StorageBucket, doc.StorageKey, ct);
+                var stream = await _storage.DownloadAsync(doc.StorageBucket, doc.StorageKey, ct);
                 using var ms = new MemoryStream();
-                await response.ResponseStream.CopyToAsync(ms, ct);
+                await stream.CopyToAsync(ms, ct);
+                stream.Dispose();
                 ms.Position = 0;
                 var hash = await SHA512.HashDataAsync(ms, ct);
                 var hashHex = Convert.ToHexString(hash).ToLowerInvariant();
