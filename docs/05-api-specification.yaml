@@ -13,12 +13,12 @@ info:
     **Rate Limiting:** All endpoints are rate-limited. Headers `X-RateLimit-Limit`,
     `X-RateLimit-Remaining`, and `X-RateLimit-Reset` are included in responses.
   contact:
-    name: Apex Systems (Pvt.) Ltd.
-    email: support@apexsystems.pk
-    url: https://apexsystems.pk
+    name: Nocturne Systems (Pvt.) Ltd.
+    email: support@nocturnesystems.pk
+    url: https://nocturnesystems.pk
   license:
     name: Proprietary
-    url: https://apexsystems.pk/license
+    url: https://nocturnesystems.pk/license
 
 servers:
   - url: https://api.aegiscore.pk/v1

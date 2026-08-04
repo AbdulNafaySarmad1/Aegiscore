@@ -1,6 +1,6 @@
 # AegisCore Mobile Apps
 
-Cross-platform mobile applications for the AegisCore University ERP system, built by Apex Systems (Pvt.) Ltd.
+Cross-platform mobile applications for the AegisCore University ERP system, built by Nocturne Systems (Pvt.) Ltd.
 
 ## Apps Included
 
@@ -64,4 +64,4 @@ Update the API base URL in:
 
 ## License
 
-Proprietary — Apex Systems (Pvt.) Ltd. All rights reserved.
+Proprietary — Nocturne Systems (Pvt.) Ltd. All rights reserved.

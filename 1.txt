@@ -863,7 +863,7 @@ Every component:
   - prefers-reduced-motion handled
   - prefers-color-scheme handled (light/dark tokens both defined)
 
-This is not a UI kit. This is the flagship product of Apex Systems.
+This is not a UI kit. This is the flagship product of Nocturne Systems.
 Every screen is a demo. Every interaction is a sales pitch.
 Build it like the CFO of the biggest university in the country 
 is watching over your shoulder and you need them to open their

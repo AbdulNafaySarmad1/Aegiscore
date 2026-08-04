@@ -17,7 +17,7 @@
 
 ## 1. Information Security Policy Statement
 
-Apex Systems (Pvt.) Ltd. is committed to protecting the confidentiality, integrity, and availability of all information assets entrusted to AegisCore by Pakistani public universities. This Security Architecture Document defines the controls, processes, and technologies implemented to achieve security objectives aligned with ISO/IEC 27001:2022, the NIST Cybersecurity Framework, and OWASP Application Security Verification Standard (ASVS) Level 2.
+Nocturne Systems (Pvt.) Ltd. is committed to protecting the confidentiality, integrity, and availability of all information assets entrusted to AegisCore by Pakistani public universities. This Security Architecture Document defines the controls, processes, and technologies implemented to achieve security objectives aligned with ISO/IEC 27001:2022, the NIST Cybersecurity Framework, and OWASP Application Security Verification Standard (ASVS) Level 2.
 
 The security architecture is founded on the following principles:
 
