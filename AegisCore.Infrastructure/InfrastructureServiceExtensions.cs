@@ -37,6 +37,10 @@ using AegisCore.Infrastructure.SsoHitl;
 using AegisCore.Infrastructure.StudentLifecycle;
 using AegisCore.Infrastructure.Support;
 using AegisCore.Infrastructure.Workflow;
+using AegisCore.Infrastructure.Finance;
+using AegisCore.Infrastructure.Hr;
+using AegisCore.Infrastructure.Campus;
+using AegisCore.Infrastructure.CampusOperations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -123,6 +127,17 @@ public static class InfrastructureServiceExtensions
         services.AddCurriculumManagement();
         services.AddSsoHitl();
         services.AddAiSupportTicketing();
+        services.AddDefaultPrediction();
+        services.AddVisitingFaculty();
+        services.AddAccreditation();
+        services.AddBoardPortal();
+        services.AddVoiceAssistant();
+        services.AddGamification();
+        services.AddMentalHealth();
+        services.AddForeignStudent();
+        services.AddElections();
+        services.AddCafeteria();
+        services.AddTransport();
         return services;
     }
 
