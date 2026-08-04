@@ -1385,6 +1385,12 @@ public class AegisDbContext : DbContext
     /// </summary>
     public DbSet<FieldMappingTemplate> FieldMappingTemplates => Set<FieldMappingTemplate>();
 
+    // Replication Management
+    public DbSet<ReplicationScalingConfig> ReplicationScalingConfigs => Set<ReplicationScalingConfig>();
+    public DbSet<ReplicaHealthLog> ReplicaHealthLogs => Set<ReplicaHealthLog>();
+    public DbSet<ReplicationScaleEvent> ReplicationScaleEvents => Set<ReplicationScaleEvent>();
+    public DbSet<ReplicationLagAlert> ReplicationLagAlerts => Set<ReplicationLagAlert>();
+
     /// <summary>
     /// Export logs.
     /// </summary>

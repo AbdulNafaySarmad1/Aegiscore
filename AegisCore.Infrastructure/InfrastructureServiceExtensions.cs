@@ -38,6 +38,8 @@ using AegisCore.Infrastructure.SsoHitl;
 using AegisCore.Infrastructure.StudentLifecycle;
 using AegisCore.Infrastructure.Support;
 using AegisCore.Infrastructure.Workflow;
+using AegisCore.Infrastructure.DataImport;
+using AegisCore.Infrastructure.Replication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -98,6 +100,7 @@ public static class InfrastructureServiceExtensions
         services.AddDisasterRecovery(configuration);
         services.AddExtendedPlatform();
         services.AddDataImport();
+        services.AddReplication();
         services.AddRuleEngine(configuration);
         services.AddSystemAlerting();
         services.AddCoreErpModules();
