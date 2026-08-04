@@ -1,11 +1,12 @@
 using System.Text.Json;
 using AegisCore.Application.DataImport;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
-[ApiController][Route("api/data-import")] public class DataImportController : ControllerBase { private IDataImportService _s; public DataImportController(IDataImportService s) => _s = s;
+[ApiController][Route("api/data-import")] [Authorize] public class DataImportController : ControllerBase { private IDataImportService _s; public DataImportController(IDataImportService s) => _s = s;
 
 [HttpPost("connections")] public async Task<IActionResult> AddConnection([FromBody] ExternalDbConnection conn, CancellationToken ct) => Ok(await _s.AddConnectionAsync(conn, ct));
 

@@ -1401,6 +1401,9 @@ public class AegisDbContext : DbContext
     public DbSet<DocumentAccessLog> DocumentAccessLogs => Set<DocumentAccessLog>();
     public DbSet<DocumentRetentionPolicy> DocumentRetentionPolicies => Set<DocumentRetentionPolicy>();
 
+    // Profile Pictures
+    public DbSet<ProfilePictureRecord> ProfilePictureRecords => Set<ProfilePictureRecord>();
+
     /// <summary>
     /// Export logs.
     /// </summary>

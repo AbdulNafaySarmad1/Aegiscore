@@ -3,6 +3,7 @@ using AegisCore.Application.Identity;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
@@ -48,6 +49,7 @@ public class IdentityController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpGet("users")]
     public async Task<IActionResult> ListUsers([FromQuery] string? status, CancellationToken cancellationToken)
     {

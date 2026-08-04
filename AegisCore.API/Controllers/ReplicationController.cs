@@ -1,9 +1,11 @@
 using AegisCore.Application.Replication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/admin/replication")]
+[Authorize]
 public class ReplicationController : ControllerBase
 {
     private readonly IReplicaManagerService _svc;
@@ -67,7 +69,7 @@ public class ReplicationController : ControllerBase
     public async Task<IActionResult> RouteRead(CancellationToken ct)
     {
         var conn = await _svc.RouteReadConnectionAsync(ct);
-        return Ok(new { routed = conn != null, maskedConnection = conn?.Replace(conn.Substring(conn.IndexOf("Password=") + 9, Math.Min(20, conn.Length - conn.IndexOf("Password=") - 9)), "***") ?? "primary" });
+        return Ok(new { routed = conn != null, maskedConnection = conn != null ? conn.Split(';').Select(p => p.TrimStart().StartsWith("Password=") || p.TrimStart().StartsWith("PWD=") ? "Password=***" : p).Aggregate((a,b) => a + ";" + b) : "primary" });
     }
 
     [HttpGet("config")]

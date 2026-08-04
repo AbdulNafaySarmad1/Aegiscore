@@ -42,6 +42,7 @@ using AegisCore.Infrastructure.DataImport;
 using AegisCore.Infrastructure.Replication;
 using AegisCore.Infrastructure.SyncLag;
 using AegisCore.Infrastructure.DocumentVault;
+using AegisCore.Infrastructure.ProfilePictures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -105,6 +106,7 @@ public static class InfrastructureServiceExtensions
         services.AddReplication();
         services.AddSyncLag();
         services.AddDocumentVault();
+        services.AddProfilePictures();
         services.AddRuleEngine(configuration);
         services.AddSystemAlerting();
         services.AddCoreErpModules();

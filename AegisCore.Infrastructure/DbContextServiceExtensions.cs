@@ -44,7 +44,9 @@ public static class DbContextServiceExtensions
         var ssl = (configuration["DB_SSL"] ?? "Require").Equals("Disable", StringComparison.OrdinalIgnoreCase)
             ? "Disable" : "Require";
 
-        return $"Host={host};Port={port};Database={db};Username={user};Password={password};SslMode={ssl}";
+        var pool = configuration.GetValue<int?>("DB_POOL_MAX") ?? 200;
+        var timeout = configuration.GetValue<int?>("DB_COMMAND_TIMEOUT") ?? 30;
+        return $"Host={host};Port={port};Database={db};Username={user};Password={password};SslMode={ssl};MaxPoolSize={pool};CommandTimeout={timeout};Pooling=true;ConnectionIdleLifetime=300;ConnectionPruningInterval=10";
     }
 
     private static bool IsConfigured(string? value) =>

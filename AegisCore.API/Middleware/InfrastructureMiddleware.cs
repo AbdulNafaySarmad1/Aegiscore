@@ -63,6 +63,14 @@ public class GlobalExceptionMiddleware
         context.Response.Headers["X-Frame-Options"] = "DENY";
         context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(self)";
+        context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+        context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
+
+        // Cache control for static assets — aggressive caching with immutable
+        if (context.Request.Path.StartsWithSegments("/api/profile-pictures"))
+        {
+            context.Response.Headers["Cache-Control"] = "public, max-age=3600, immutable";
+        }
 
         try
         {
@@ -70,16 +78,14 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception at {Path}", context.Request.Path);
-            Console.Error.WriteLine(ex);
+            _logger.LogError(ex, "Unhandled exception at {Path} — TraceId: {TraceId}", context.Request.Path, context.TraceIdentifier);
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
-            var isDev = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>().IsDevelopment();
             await context.Response.WriteAsJsonAsync(new
             {
                 error = "internal_server_error",
                 traceId = context.TraceIdentifier,
-                message = isDev ? ex.Message : "An unexpected error occurred. Reference: " + context.TraceIdentifier
+                message = "An unexpected error occurred. Reference: " + context.TraceIdentifier
             });
         }
     }
@@ -257,7 +263,7 @@ public class TurnstileMiddleware
                 return;
             }
 
-            using var httpClient = new HttpClient();
+            using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
             var payload = new Dictionary<string, string>
             {
                 ["secret"] = secret,

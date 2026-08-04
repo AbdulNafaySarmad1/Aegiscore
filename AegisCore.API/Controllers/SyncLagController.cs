@@ -1,10 +1,12 @@
 using AegisCore.Application.SyncLag;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/admin/sync-lag")]
+[Authorize]
 public class SyncLagController : ControllerBase
 {
     private readonly ISyncLagService _svc;

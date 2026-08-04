@@ -1,6 +1,7 @@
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
@@ -27,7 +28,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/ai/analytics")] public class AIAnalyticsController : ControllerBase { private IAIAnalyticsService _s; public AIAnalyticsController(IAIAnalyticsService s) => _s = s; [HttpPost("feedback")] public async Task<IActionResult> Feedback([FromQuery] string domain, [FromQuery] bool thumbsUp, [FromQuery] int rating, [FromQuery] string? comment, CancellationToken ct) { await _s.RecordFeedbackAsync(Guid.Empty, domain, thumbsUp, rating, comment, ct); return Ok(); } [HttpGet] public async Task<IActionResult> Analytics([FromQuery] string domain, CancellationToken ct) => Ok(await _s.GetAnalyticsAsync(domain, null, null, ct)); }
 
-[ApiController][Route("api/admin/licenses")] public class LicenseController : ControllerBase { private ILicenseService _s; public LicenseController(ILicenseService s) => _s = s; [HttpPost] public async Task<IActionResult> Issue([FromBody] License l, CancellationToken ct) => Ok(await _s.IssueLicenseAsync(l.CustomerName, l.CustomerEmail??"", l.Edition, l.MaxUsers, l.ExpiresAt, ct)); [HttpGet("validate/{key}")] public async Task<IActionResult> Validate(string key, CancellationToken ct) { var valid = await _s.ValidateLicenseAsync(key, ct); return Ok(new { key, valid }); } [HttpPost("{id:guid}/revoke")] public async Task<IActionResult> Revoke(Guid id, [FromQuery] string reason, CancellationToken ct) { await _s.RevokeLicenseAsync(id, reason, ct); return Ok(new { message = "License revoked." }); } }
+[ApiController][Route("api/admin/licenses")] [Authorize(Roles = "Admin,SuperAdmin")] public class LicenseController : ControllerBase { private ILicenseService _s; public LicenseController(ILicenseService s) => _s = s; [HttpPost] public async Task<IActionResult> Issue([FromBody] License l, CancellationToken ct) => Ok(await _s.IssueLicenseAsync(l.CustomerName, l.CustomerEmail??"", l.Edition, l.MaxUsers, l.ExpiresAt, ct)); [HttpGet("validate/{key}")] public async Task<IActionResult> Validate(string key, CancellationToken ct) { var valid = await _s.ValidateLicenseAsync(key, ct); return Ok(new { key, valid }); } [HttpPost("{id:guid}/revoke")] public async Task<IActionResult> Revoke(Guid id, [FromQuery] string reason, CancellationToken ct) { await _s.RevokeLicenseAsync(id, reason, ct); return Ok(new { message = "License revoked." }); } }
 
 [ApiController][Route("api/customer")] public class CustomerPortalController : ControllerBase { private ICustomerPortalService _s; public CustomerPortalController(ICustomerPortalService s) => _s = s; [HttpPost("tickets")] public async Task<IActionResult> CreateTicket([FromBody] SupportTicket t, CancellationToken ct) => Ok(await _s.CreateTicketAsync(t.Subject, t.Description??"", t.CustomerId, ct)); [HttpGet("releases")] public async Task<IActionResult> Releases(CancellationToken ct) => Ok(await _s.GetReleasesAsync(ct)); }
 

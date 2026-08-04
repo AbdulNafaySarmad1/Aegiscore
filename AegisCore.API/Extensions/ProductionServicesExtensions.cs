@@ -40,6 +40,9 @@ public static class CoreServicesExtensions
             options.Cookie.SameSite = SameSiteMode.Strict;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
+        services.AddMvc(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
+        services.AddResponseCompression(options => { options.EnableForHttps = true; options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>(); options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>(); });
+        services.AddResponseCaching();
         services.AddHsts(options => { options.MaxAge = TimeSpan.FromDays(365); options.IncludeSubDomains = true; options.Preload = true; });
         services.AddCors(options => options.AddPolicy("CloudflarePages", policy =>
         {
@@ -212,7 +215,7 @@ public static class BackgroundWorkersExtensions
     {
         services.AddRaastPayments();
         services.AddR2Storage(configuration);
-        services.AddSignalR(options => { options.EnableDetailedErrors = true; options.MaximumReceiveMessageSize = 64 * 1024; options.StreamBufferCapacity = 10; });
+        services.AddSignalR(options => { options.EnableDetailedErrors = false; options.MaximumReceiveMessageSize = 64 * 1024; options.StreamBufferCapacity = 10; });
         services.AddHostedService<LicenseHeartbeatHostedService>();
         services.AddHttpClient<RaastApiClient>(client =>
         {

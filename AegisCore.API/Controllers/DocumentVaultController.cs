@@ -44,6 +44,7 @@ public class DocumentVaultController : ControllerBase
         return Ok(dto);
     }
 
+    [RequestSizeLimit(50 * 1024 * 1024)]
     [HttpPost("upload")]
     public async Task<IActionResult> Upload([FromQuery] string fileName, [FromQuery] string contentType, [FromQuery] string category, [FromQuery] Guid uploadedByUserId, [FromQuery] string uploadedByRole, CancellationToken ct)
     {
