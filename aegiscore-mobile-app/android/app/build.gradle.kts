@@ -7,20 +7,55 @@ plugins {
 
 android {
     namespace = "pk.edu.aegiscore.mobile"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "pk.edu.aegiscore.mobile"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
         buildConfigField("String", "AEGISCORE_API_BASE_URL", "\"${System.getenv("AEGISCORE_API_BASE_URL") ?: "https://api.aegiscore.local"}\"")
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("AEGISCORE_KEYSTORE_PATH") ?: "${rootProject.projectDir}/keystore/release.jks")
+            storePassword = System.getenv("AEGISCORE_KEYSTORE_PASSWORD") ?: ""
+            keyAlias = System.getenv("AEGISCORE_KEY_ALIAS") ?: "aegiscore"
+            keyPassword = System.getenv("AEGISCORE_KEY_PASSWORD") ?: ""
+
+            if (storePassword.isBlank()) {
+                // Fall back to debug keystore for local builds — CI must provide env vars
+                storeFile = file(System.getenv("HOME") + "/.android/debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
+    }
+
+    bundle {
+        language { enableSplit = false }
+        density { enableSplit = true }
     }
 }
 

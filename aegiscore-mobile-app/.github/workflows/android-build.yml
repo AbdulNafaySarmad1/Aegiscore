@@ -11,14 +11,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-      - name: Build
-        run: ./gradlew build
-      - name: Upload outputs
+          java-version: "21"
+
+      - name: Build debug (verify compilation)
+        run: ./gradlew assembleDebug
+
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: aegiscore-android
-          path: app/build/outputs/
+          name: aegiscore-android-debug
+          path: app/build/outputs/apk/debug/
+
+      - name: Build release bundle (verify signing and AAB)
+        run: ./gradlew bundleRelease
+        env:
+          AEGISCORE_KEYSTORE_PASSWORD: android
+          AEGISCORE_KEY_ALIAS: androiddebugkey
+          AEGISCORE_KEY_PASSWORD: android
