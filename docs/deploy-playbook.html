@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AegisCore Deployment Playbook — Zero Stress Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0F172A; --blue: #3B82F6; --blue-light: #EFF6FF; --blue-dark: #1D4ED8;
+  --white: #FFFFFF; --gray: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+  --gray-300: #CBD5E1; --gray-500: #64748B; --gray-700: #334155; --gray-900: #0F172A;
+  --green: #22C55E; --green-soft: #F0FDF4; --green-dark: #166534;
+  --amber: #F59E0B; --amber-soft: #FFFBEB; --amber-dark: #92400E;
+  --red: #EF4444; --red-soft: #FEF2F2; --red-dark: #991B1B;
+  --violet: #8B5CF6; --violet-soft: #F5F3FF;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;font-size:17px;line-height:1.7;color:var(--gray-700);background:var(--gray-100);-webkit-font-smoothing:antialiased}
+a.skip-link{position:absolute;top:-100px;left:0;background:var(--blue);color:var(--white);padding:0.625rem 1.25rem;z-index:100;text-decoration:none;border-radius:0 0 6px 0;font-weight:600}
+a.skip-link:focus{top:0}
+
+/* Top bar */
+.top-bar{background:var(--navy);color:var(--white);padding:0.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.top-bar h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em}
+.top-bar .badge{background:var(--green);color:var(--white);padding:0.3rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:700}
+.progress-bar{height:3px;background:var(--blue);transition:width 0.3s;position:fixed;top:48px;left:0;z-index:50}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1E3A5F 100%);color:var(--white);padding:3.5rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;top:-50%;right:-20%;width:500px;height:500px;background:radial-gradient(circle,rgba(59,130,246,0.15),transparent 70%);border-radius:50%}
+.hero h1{font-size:2.5rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.5rem;position:relative;z-index:1}
+.hero p{font-size:1.15rem;opacity:0.85;max-width:640px;margin:0 auto;position:relative;z-index:1}
+.hero-meta{display:flex;gap:1.5rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;position:relative;z-index:1}
+.hero-meta span{display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;opacity:0.75}
+
+/* Main content */
+main{max-width:860px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+/* Phase cards */
+.phase{background:var(--white);border-radius:16px;box-shadow:var(--shadow);margin-bottom:2rem;overflow:hidden;border:1px solid var(--gray-200);transition:box-shadow 0.2s}
+.phase:hover{box-shadow:var(--shadow-lg)}
+.phase-header{padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;cursor:pointer;user-select:none;border-bottom:1px solid transparent}
+.phase-header:hover{background:var(--gray)}
+.phase-header .phase-num{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0}
+.phase-header .phase-num.num-blue{background:var(--blue);color:var(--white)}
+.phase-header .phase-num.num-green{background:var(--green);color:var(--white)}
+.phase-header .phase-num.num-violet{background:var(--violet);color:var(--white)}
+.phase-header .phase-num.num-amber{background:var(--amber);color:var(--white)}
+.phase-header h2{font-size:1.15rem;color:var(--gray-900);margin:0}
+.phase-header .phase-time{font-size:0.8rem;color:var(--gray-500);margin-left:auto;white-space:nowrap}
+.phase-body{padding:0 1.5rem 1.5rem}
+.phase-body.collapsed{display:none}
+
+/* Steps */
+ol.steps{counter-reset:step;list-style:none;padding:0}
+ol.steps > li{counter-increment:step;position:relative;padding:1.25rem 1rem 1.25rem 3.25rem;border-bottom:1px solid var(--gray-100)}
+ol.steps > li:last-child{border-bottom:none}
+ol.steps > li::before{content:counter(step);position:absolute;left:0.5rem;top:1.25rem;width:1.8rem;height:1.8rem;background:var(--blue);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem}
+ol.steps > li.done::before{background:var(--green);content:"\2713"}
+.step-title{font-weight:600;color:var(--gray-900);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.5rem}
+code{background:var(--gray-100);padding:0.15rem 0.45rem;border-radius:4px;font-size:0.88em;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;color:var(--blue-dark)}
+pre{background:var(--navy);color:var(--white);padding:1rem 1.25rem;border-radius:10px;overflow-x:auto;margin:0.75rem 0;font-size:0.85rem;position:relative}
+pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.copy-btn{position:absolute;top:0.5rem;right:0.5rem;background:rgba(255,255,255,0.12);color:var(--white);border:none;padding:0.25rem 0.625rem;border-radius:6px;cursor:pointer;font-size:0.75rem;font-family:Inter,sans-serif;opacity:0;transition:opacity 0.2s}
+pre:hover .copy-btn{opacity:1}
+.copy-btn.copied{background:var(--green)}
+
+/* Callouts */
+.callout{padding:1rem 1.25rem;border-radius:10px;margin:0.75rem 0;display:flex;gap:0.75rem;align-items:flex-start;font-size:0.9rem}
+.callout-info{background:var(--blue-light);border:1px solid var(--blue)}
+.callout-warn{background:var(--amber-soft);border:1px solid var(--amber)}
+.callout-ok{background:var(--green-soft);border:1px solid var(--green)}
+.callout-icon{font-size:1.15rem;flex-shrink:0;line-height:1}
+.callout strong{display:block;margin-bottom:0.15rem;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.04em}
+
+/* DNS table */
+.dns-table{width:100%;border-collapse:collapse;margin:0.75rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--gray-200)}
+.dns-table th{background:var(--gray-100);padding:0.625rem 1rem;text-align:left;font-size:0.8rem;font-weight:600;color:var(--gray-700);text-transform:uppercase;letter-spacing:0.03em}
+.dns-table td{padding:0.625rem 1rem;font-size:0.9rem;border-top:1px solid var(--gray-100)}
+.dns-table td code{color:var(--blue);font-weight:600}
+
+/* Checkbox style for steps */
+.step-done{display:inline-flex;align-items:center;gap:0.35rem;color:var(--green-dark);font-size:0.82rem;font-weight:600;margin-left:0.5rem;opacity:0;transition:opacity 0.3s}
+.step-done.visible{opacity:1}
+
+/* Pulse */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+
+/* Footer */
+footer{padding:2rem;text-align:center;color:var(--gray-500);font-size:0.8rem;border-top:1px solid var(--gray-200)}
+
+@media(max-width:640px){
+  .hero h1{font-size:1.5rem}
+  .hero{padding:2rem 1rem}
+  main{padding:1rem}
+  .phase-header{padding:1rem}
+  ol.steps > li{padding-left:2.75rem}
+  pre{font-size:0.78rem}
+}
+@media print{
+  body{background:white;color:black}
+  .top-bar,.progress-bar{display:none}
+  .phase{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  pre{background:#f5f5f5;color:black;border:1px solid #ddd}
+  .hero{background:none;color:black;padding:1rem 0}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="top-bar">
+  <h1>AegisCore Deploy Playbook</h1>
+  <span class="badge pulse" id="step-counter">Pre-flight</span>
+</div>
+<div class="progress-bar" id="progress"></div>
+
+<header class="hero">
+  <h1>Deployment Playbook</h1>
+  <p>Every single step, every single command, exactly what to expect. You will not be surprised.</p>
+  <div class="hero-meta">
+    <span>&#9200; Total time: 30&ndash;45 minutes</span>
+    <span>&#128187; One Linux server (Ubuntu 24)</span>
+    <span>&#128274; SSL included at no cost</span>
+    <span>&#9989; All commands copy-paste ready</span>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ========== PHASE 0 ========== -->
+<div class="phase" id="phase0">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-violet">P0</div>
+    <h2>Pre-Flight &mdash; Before You Touch the Server</h2>
+    <span class="phase-time">5 min</span>
+  </div>
+  <div class="phase-body">
+    <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>Do this at home the night before</strong> This phase has zero risk. You are just collecting information.</div></div>
+
+    <ol class="steps">
+      <li>
+        <div class="step-title">Get the server IP and SSH credentials from the client</div>
+        <p>You need three things from their IT person:</p>
+        <table class="dns-table">
+          <tr><td><strong>Server IP</strong></td><td><code>203.0.113.50</code></td><td>The public IP of the Ubuntu 24 server</td></tr>
+          <tr><td><strong>SSH user</strong></td><td><code>ubuntu</code> or <code>root</code></td><td>Who you log in as</td></tr>
+          <tr><td><strong>SSH key or password</strong></td><td><code>~/.ssh/client_key.pem</code></td><td>How you authenticate</td></tr>
+        </table>
+        <div class="callout callout-warn"><span class="callout-icon">&#9888;</span><div><strong>If they don't have a server yet</strong> Any Ubuntu 24 VPS works. DigitalOcean, Hetzner, Linode, AWS EC2 — pick the $20/month tier minimum. You need 8GB RAM.</div></div>
+      </li>
+      <li>
+        <div class="step-title">Get the subdomain they want</div>
+        <p>Ask: "What URL should people use to access the ERP?"</p>
+        <p>Typical answer: <code>erp.clientuniversity.edu.pk</code> or <code>aegiscore.clientuniversity.edu.pk</code></p>
+      </li>
+      <li>
+        <div class="step-title">Confirm: Do they have a managed database or are we running everything on this server?</div>
+        <p>If they say <strong>"We have a managed database"</strong> &rarr; You need their connection string. Ask for it now.</p>
+        <p>If they say <strong>"Everything on this server"</strong> &rarr; Good. LOCAL mode. No extra steps.</p>
+      </li>
+      <li>
+        <div class="step-title">SSH into the server to verify you can reach it</div>
+        <pre><code>ssh ubuntu@203.0.113.50</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>If you see a welcome prompt, you're in. Type <code>exit</code> to leave for now.</p>
+        <div class="callout callout-warn"><span class="callout-icon">&#9888;</span><div><strong>Connection refused?</strong> The server firewall might be blocking port 22. Ask their IT to open it, or use their cloud console's browser-based SSH.</div></div>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========== PHASE 1 ========== -->
+<div class="phase" id="phase1">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-blue">P1</div>
+    <h2>Phase 1 &mdash; Install Docker on the Server</h2>
+    <span class="phase-time">5 min</span>
+  </div>
+  <div class="phase-body">
+    <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>Run this once, never again</strong> Docker is a one-time install. After this, deployments are just docker compose commands.</div></div>
+
+    <ol class="steps">
+      <li>
+        <div class="step-title">SSH into the server</div>
+        <pre><code>ssh ubuntu@203.0.113.50</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Update packages</div>
+        <pre><code>sudo apt update && sudo apt upgrade -y</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Install Docker (official script, one command)</div>
+        <pre><code>curl -fsSL https://get.docker.com | sudo sh</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>This downloads and installs Docker Engine and Docker Compose together. Takes about 2 minutes.</p>
+      </li>
+      <li>
+        <div class="step-title">Add yourself to the docker group (so you don't need sudo every time)</div>
+        <pre><code>sudo usermod -aG docker $USER</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Log out and back in for the group change to take effect</div>
+        <pre><code>exit
+ssh ubuntu@203.0.113.50</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Verify Docker is working</div>
+        <pre><code>docker --version
+docker compose version</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="callout callout-ok"><span class="callout-icon">&#9989;</span><div><strong>Expected output</strong> You should see version numbers like "Docker version 28.x.x" and "Docker Compose version v2.x.x". If you see both, Docker is ready.</div></div>
+        <div class="callout callout-warn"><span class="callout-icon">&#9888;</span><div><strong>"docker: command not found"</strong> You might need to start a fresh shell. Try <code>newgrp docker</code> or just SSH in again. If that doesn't work, run <code>sudo systemctl enable docker --now</code>.</div></div>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========== PHASE 2 ========== -->
+<div class="phase" id="phase2">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-blue">P2</div>
+    <h2>Phase 2 &mdash; Clone AegisCore and Generate Secrets</h2>
+    <span class="phase-time">5 min</span>
+  </div>
+  <div class="phase-body">
+    <ol class="steps">
+      <li>
+        <div class="step-title">Clone the repository onto the server</div>
+        <pre><code>git clone https://github.com/nocturnesystems/aegiscore.git /opt/aegiscore
+cd /opt/aegiscore</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>Customize this URL</strong> Replace the GitHub URL with wherever your AegisCore repo actually lives. If the client is air-gapped, scp a tarball instead and extract it to /opt/aegiscore.</div></div>
+      </li>
+      <li>
+        <div class="step-title">Make the scripts executable</div>
+        <pre><code>chmod +x scripts/*.sh</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Run the bootstrap script</div>
+        <pre><code>./scripts/bootstrap-env.sh</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>The script will ask:</p>
+        <table class="dns-table">
+          <tr><td><strong>Question 1</strong></td><td>"Which deployment mode? (1) LOCAL (2) CLOUD (3) HYBRID"</td></tr>
+          <tr><td><strong>Question 2</strong></td><td>(If CLOUD) "Which secrets provider?"</td></tr>
+        </table>
+        <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>Which mode to pick</strong> Pick LOCAL if everything runs on this one server. Pick CLOUD if the client has a managed PostgreSQL service (RDS, Azure DB, Cloud SQL). The script handles everything else automatically.</div></div>
+        <p>The script generates a <code>.env</code> file with all cryptographic secrets, database passwords, and configuration. It prints a masked summary — you'll see every key name but the values are hidden.</p>
+        <div class="callout callout-ok"><span class="callout-icon">&#9989;</span><div><strong>You should see</strong> "Created .env with mode 600" followed by a list of masked keys like <code>AEGISCORE_JWT_SECRET=****</code>, <code>POSTGRES_PASSWORD=****</code>, etc.</div></div>
+      </li>
+      <li>
+        <div class="step-title">If you picked CLOUD mode: edit .env and paste the database connection strings</div>
+        <p>Open <code>.env</code> in nano:</p>
+        <pre><code>nano .env</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Find these two lines and fill them in:</p>
+        <pre><code>DATABASE_URL=Host=mydb.postgres.database.azure.com;Port=5432;Database=aegiscore;Username=aegiscore@mydb;Password=THEIR_PASSWORD;SslMode=Require
+REDIS_URL=myredis.redis.cache.windows.net:6380,password=THEIR_PASSWORD,ssl=True</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Press <code>Ctrl+X</code>, then <code>Y</code>, then <code>Enter</code> to save and exit nano.</p>
+        <div class="callout callout-warn"><span class="callout-icon">&#9888;</span><div><strong>Connection string format</strong> The connection string MUST be in Npgsql format for PostgreSQL and StackExchange.Redis format for Redis. If you're unsure, ask the client's DBA to provide them in these exact formats.</div></div>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========== PHASE 3 ========== -->
+<div class="phase" id="phase3">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-green">P3</div>
+    <h2>Phase 3 &mdash; Deploy (this is the big one)</h2>
+    <span class="phase-time">10&ndash;15 min</span>
+  </div>
+  <div class="phase-body">
+    <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>One command</strong> This is the only deploy command you need. The script handles building, starting, migrating, and verifying.</div></div>
+
+    <ol class="steps">
+      <li>
+        <div class="step-title">Run the deploy script</div>
+        <pre><code>./scripts/deploy.sh local</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Use <code>./scripts/deploy.sh cloud</code> or <code>./scripts/deploy.sh hybrid</code> to match your mode from Phase 2.</p>
+      </li>
+      <li>
+        <div class="step-title">What happens, in order, and what you'll see</div>
+        <p>The script runs through these stages. Watch the terminal output:</p>
+        <table class="dns-table">
+          <tr><td>1. Validate .env</td><td>Checks DEPLOYMENT_MODE matches. If it doesn't, stops immediately with a clear error.</td></tr>
+          <tr><td>2. Build images</td><td>Docker builds the API and Portal containers. You'll see <code>dotnet restore</code> and <code>npm install</code> scroll by. First time: 3-5 minutes. Subsequent: 30 seconds (cached).</td></tr>
+          <tr><td>3. Start containers</td><td>You'll see <code>Container aegiscore-postgres-1  Healthy</code> and similar lines. Wait for all services to report Healthy.</td></tr>
+          <tr><td>4. Wait for Postgres</td><td>Script pauses, checking every 2 seconds. You'll see dots printing: <code>......</code>. Usually 10-15 seconds.</td></tr>
+          <tr><td>5. Run migrations</td><td>EF Core creates all 200+ database tables. You'll see <code>Applying migration V2_0_ExtendedPlatformModules</code> and similar lines. Takes 5-15 seconds.</td></tr>
+          <tr><td>6. Health check</td><td>Script curls the health endpoint every 5 seconds: <code>Attempt 1/30... Attempt 2/30...</code>. Stops as soon as it gets HTTP 200.</td></tr>
+          <tr><td>7. Banner</td><td>Big ASCII art banner with URLs and mode.</td></tr>
+        </table>
+      </li>
+      <li>
+        <div class="step-title">What the success banner looks like</div>
+        <pre><code>====================================================
+ AegisCore — Deployment Complete
+ Mode:       LOCAL
+ Portal:     http://localhost:3000
+ API:        http://localhost:8080
+ Health:     OK (200)  —  responded in 2.1s
+ Timestamp:  2026-08-05 14:32:15 UTC
+====================================================</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+    </ol>
+
+    <div class="callout callout-warn"><span class="callout-icon">&#9888;</span><div><strong>What if health check fails after 30 attempts?</strong> The script exits with an error. Run <code>docker compose logs api</code> to see what the API container is complaining about. 90% of the time it's a database connection issue — check the DATABASE_URL format in .env. 9% of the time it's a port conflict — something else is using port 3000 or 8080. 1% of the time it's a genuine bug — read the logs and look for "FATAL" or "Exception".</div></div>
+  </div>
+</div>
+
+<!-- ========== PHASE 4 ========== -->
+<div class="phase" id="phase4">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-green">P4</div>
+    <h2>Phase 4 &mdash; First Login &amp; Setup Wizard</h2>
+    <span class="phase-time">5 min</span>
+  </div>
+  <div class="phase-body">
+    <ol class="steps">
+      <li>
+        <div class="step-title">Open the portal</div>
+        <p>On your own laptop (not the server), open a browser to:</p>
+        <pre><code>http://203.0.113.50:3000</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Replace the IP with the server's actual IP. You should see the AegisCore setup wizard.</p>
+      </li>
+      <li>
+        <div class="step-title">Fill out the setup wizard</div>
+        <p>The wizard asks these questions. Fill them out with the client's information:</p>
+        <table class="dns-table">
+          <tr><td>University full name</td><td>e.g., "National University of Sciences and Technology"</td></tr>
+          <tr><td>University short name</td><td>e.g., "NUST"</td></tr>
+          <tr><td>Admin email</td><td>e.g., "admin@nust.edu.pk"</td></tr>
+          <tr><td>Admin full name</td><td>e.g., "Dr. Ahmed Khan"</td></tr>
+          <tr><td>University domain</td><td>e.g., "nust.edu.pk"</td></tr>
+          <tr><td>Current semester</td><td>e.g., "Fall 2026"</td></tr>
+          <tr><td>Semester start/end</td><td>e.g., "2026-09-01" to "2027-01-15"</td></tr>
+        </table>
+      </li>
+      <li>
+        <div class="step-title">After the wizard completes, you're at the login screen</div>
+        <p>The wizard creates the Super Admin account, seeds demo data (badges, cafeteria menu, risk scores, board alerts, etc.), and redirects to login.</p>
+      </li>
+      <li>
+        <div class="step-title">Log in with the Super Admin credentials</div>
+        <table class="dns-table">
+          <tr><td><strong>Email</strong></td><td>The admin email you entered in the wizard</td></tr>
+          <tr><td><strong>Password</strong></td><td>The password you set in the wizard</td></tr>
+        </table>
+      </li>
+      <li>
+        <div class="step-title">Verify the dashboard loads</div>
+        <p>You should see the Command Center with role-gated sidebar navigation. Click around a few modules — Grade Appeals, Fee Defaulter, Board Portal — to confirm they load data from the seed.</p>
+        <div class="callout callout-ok"><span class="callout-icon">&#9989;</span><div><strong>You are LIVE</strong> The application is running, the database is populated, and the Super Admin can log in. The ERP is operational.</div></div>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========== PHASE 5 ========== -->
+<div class="phase" id="phase5">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-amber">P5</div>
+    <h2>Phase 5 &mdash; Set Up the Domain &amp; SSL</h2>
+    <span class="phase-time">10 min</span>
+  </div>
+  <div class="phase-body">
+    <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>This makes it a real website</strong> Right now the app is on an IP address with a port number. This phase gives it a proper domain name with HTTPS.</div></div>
+
+    <ol class="steps">
+      <li>
+        <div class="step-title">Ask the client to create a DNS record</div>
+        <p>Tell them: "Log into your domain registrar and add this record:"</p>
+        <table class="dns-table">
+          <tr><th>Type</th><th>Name</th><th>Value</th><th>TTL</th></tr>
+          <tr><td><strong>A</strong></td><td><code>erp</code></td><td><code>203.0.113.50</code></td><td>3600 (or Auto)</td></tr>
+        </table>
+        <p>This creates <code>erp.clientuniversity.edu.pk</code> pointing to your server.</p>
+        <div class="callout callout-warn"><span class="callout-icon">&#9888;</span><div><strong>DNS takes time</strong> It can take anywhere from 2 minutes to 4 hours for DNS to propagate globally. Test with: <code>ping erp.clientuniversity.edu.pk</code>. If it resolves to your server IP, DNS is ready.</div></div>
+      </li>
+      <li>
+        <div class="step-title">Install Nginx</div>
+        <pre><code>sudo apt install nginx -y</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Create the Nginx config</div>
+        <pre><code>sudo nano /etc/nginx/sites-available/aegiscore</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Paste this entire block (replace the domain):</p>
+        <pre><code>server {
+    listen 80;
+    server_name erp.clientuniversity.edu.pk;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    client_max_body_size 50m;
+}</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </li>
+      <li>
+        <div class="step-title">Enable the site and test the config</div>
+        <pre><code>sudo ln -s /etc/nginx/sites-available/aegiscore /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="callout callout-ok"><span class="callout-icon">&#9989;</span><div><strong>Expected output</strong> <code>nginx: configuration file /etc/nginx/nginx.conf test is successful</code></div></div>
+        <p>Now <code>http://erp.clientuniversity.edu.pk</code> should load the AegisCore login page.</p>
+      </li>
+      <li>
+        <div class="step-title">Install Certbot and get SSL (automatic, free)</div>
+        <pre><code>sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d erp.clientuniversity.edu.pk</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Certbot will ask:</p>
+        <table class="dns-table">
+          <tr><td>Email address</td><td>Enter yours — used for expiry warnings</td></tr>
+          <tr><td>Terms of service</td><td>Type <code>A</code> to agree</td></tr>
+          <tr><td>Redirect HTTP to HTTPS?</td><td>Type <code>2</code> (Redirect)</td></tr>
+        </table>
+        <p>That's it. Certbot automatically:</p>
+        <ul style="padding-left:1.5rem">
+          <li>Obtains a free Let's Encrypt certificate (valid 90 days)</li>
+          <li>Configures Nginx to serve HTTPS</li>
+          <li>Sets up a cron job to auto-renew the certificate before expiry</li>
+        </ul>
+      </li>
+      <li>
+        <div class="step-title">Verify HTTPS works</div>
+        <p>Open <code>https://erp.clientuniversity.edu.pk</code>. You should see the green padlock in your browser's address bar.</p>
+        <div class="callout callout-ok"><span class="callout-icon">&#9989;</span><div><strong>Done</strong> The ERP is now accessible at a proper domain with HTTPS. You are production-ready.</div></div>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========== PHASE 6 ========== -->
+<div class="phase" id="phase6">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-amber">P6</div>
+    <h2>Phase 6 &mdash; Production Hardening</h2>
+    <span class="phase-time">3 min</span>
+  </div>
+  <div class="phase-body">
+    <div class="callout callout-info"><span class="callout-icon">&#128161;</span><div><strong>Do these before you hand over the server</strong> Three quick things that prevent problems later.</div></div>
+
+    <ol class="steps">
+      <li>
+        <div class="step-title">Restrict .env permissions</div>
+        <pre><code>chmod 600 /opt/aegiscore/.env</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Only the file owner can read it. All secrets are now locked down.</p>
+      </li>
+      <li>
+        <div class="step-title">Set up auto-restart on reboot</div>
+        <pre><code>sudo tee /etc/systemd/system/aegiscore.service &lt;&lt;'EOF'
+[Unit]
+Description=AegisCore ERP
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/aegiscore
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable aegiscore</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <p>Now if the server reboots (power outage, kernel update), AegisCore starts automatically. No human needed.</p>
+      </li>
+      <li>
+        <div class="step-title">Set up firewall</div>
+        <pre><code>sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 80/tcp    # HTTP
+sudo ufw allow 443/tcp   # HTTPS
+sudo ufw enable
+sudo ufw status</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="callout callout-ok"><span class="callout-icon">&#9989;</span><div><strong>Expected</strong> You should see ports 22, 80, and 443 ALLOW. Ports 3000 and 8080 should NOT be in the list — they're only accessible from inside the server now.</div></div>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ========== TROUBLESHOOTING ========== -->
+<div class="phase" id="troubleshoot">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-num num-amber" style="background:var(--red)">!</div>
+    <h2>Quick Reference &mdash; If Something Goes Wrong</h2>
+    <span class="phase-time">Reference</span>
+  </div>
+  <div class="phase-body">
+    <table class="dns-table">
+      <tr><th style="width:30%">Problem</th><th style="width:70%">Fix</th></tr>
+      <tr>
+        <td><strong>"docker: command not found"</strong></td>
+        <td>Docker didn't install or you're not in the docker group. Run: <code>sudo usermod -aG docker $USER</code> then <code>newgrp docker</code>. If still broken: <code>sudo apt install docker.io docker-compose-v2 -y</code></td>
+      </tr>
+      <tr>
+        <td><strong>"port is already allocated"</strong></td>
+        <td>Something is using port 3000 or 8080. Find it: <code>sudo lsof -i :3000</code> and <code>sudo lsof -i :8080</code>. Kill the process or change the ports in .env.</td>
+      </tr>
+      <tr>
+        <td><strong>"connection refused" during health check</strong></td>
+        <td>API didn't start. Run <code>docker compose logs api | tail -50</code>. Look for "FATAL" or "Exception" lines. 90% chance the database connection string in .env is wrong.</td>
+      </tr>
+      <tr>
+        <td><strong>"migration failed"</strong></td>
+        <td>Database schema mismatch. Run <code>docker compose exec api dotnet ef database update</code> manually and read the error. If a migration is corrupted, you may need to drop and recreate the database (emergency only).</td>
+      </tr>
+      <tr>
+        <td><strong>SSL certificate doesn't work</strong></td>
+        <td>DNS hasn't propagated yet. Wait 30 minutes. Test with <code>dig erp.clientuniversity.edu.pk</code> — if it doesn't return your server IP, DNS is not ready. Certbot needs DNS to resolve before it can issue a certificate.</td>
+      </tr>
+      <tr>
+        <td><strong>"502 Bad Gateway" from Nginx</strong></td>
+        <td>Portal or API container is down. Run <code>docker compose ps</code> — all services should show "Up" and "healthy". If a service shows "unhealthy" or "exited", restart it: <code>docker compose restart api</code> or <code>docker compose restart portal</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Server ran out of disk space</strong></td>
+        <td>Docker images and logs accumulate. Run <code>docker system prune -a --volumes</code> to clean everything unused. Warning: this deletes stopped containers and unused images. Don't run while AegisCore is running.</td>
+      </tr>
+      <tr>
+        <td><strong>Need to update AegisCore</strong></td>
+        <td><pre><code>cd /opt/aegiscore
+git pull
+./scripts/deploy.sh local</code></pre>This rebuilds, restarts, and runs any new migrations automatically. About 2-3 minutes of downtime on LOCAL mode.</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <p>&copy; Nocturne Systems (Pvt.) Ltd. &middot; Deployment Playbook v2.0</p>
+  <p>Keep this bookmarked. You will not need to memorize anything.</p>
+</footer>
+
+<script>
+// Phase collapse
+function togglePhase(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('collapsed');
+  localStorage.setItem('phase-' + header.parentElement.id, body.classList.contains('collapsed'));
+}
+
+// Restore collapse state
+document.querySelectorAll('.phase').forEach(p => {
+  const collapsed = localStorage.getItem('phase-' + p.id);
+  if (collapsed === 'true') p.querySelector('.phase-body').classList.add('collapsed');
+});
+
+// Copy code
+function copyCode(btn) {
+  const pre = btn.parentElement;
+  const code = pre.textContent.replace(/Copy$/, '').trim();
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    btn.textContent = 'Failed';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+// Step completion tracking
+document.querySelectorAll('.steps li').forEach(li => {
+  li.addEventListener('click', function(e) {
+    if (e.target.closest('button') || e.target.closest('pre') || e.target.closest('code')) return;
+    this.classList.toggle('done');
+    updateProgress();
+  });
+});
+
+function updateProgress() {
+  const total = document.querySelectorAll('.steps li').length;
+  const done = document.querySelectorAll('.steps li.done').length;
+  const pct = total > 0 ? (done / total) * 100 : 0;
+  document.getElementById('progress').style.width = pct + '%';
+  const badge = document.getElementById('step-counter');
+  if (done === 0) { badge.textContent = 'Pre-flight'; badge.className = 'badge pulse'; }
+  else if (done < total) { badge.textContent = done + '/' + total + ' steps'; badge.className = 'badge pulse'; badge.style.background = 'var(--blue)'; }
+  else { badge.textContent = 'All done!'; badge.className = 'badge'; badge.style.background = 'var(--green)'; badge.style.animation = 'none'; }
+}
+
+// Scroll progress
+window.addEventListener('scroll', function() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+  document.getElementById('progress').style.width = pct + '%';
+});
+</script>
+</body>
+</html>
