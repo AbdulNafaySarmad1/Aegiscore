@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using AegisCore.API.Middleware;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Application.Onboarding;
 using AegisCore.Infrastructure.Installation;
@@ -133,6 +134,119 @@ public sealed class WizardController(
         try { return Ok(await gateways.HealthCheckAsync(TenantId(), slug, ct)); }
         catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
         catch (InvalidOperationException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
+    }
+
+    [HttpPost("upload-branding/{type}"), RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadBranding(string type, CancellationToken ct)
+    {
+        if (type is not ("logo" or "background"))
+            return BadRequest(new { error = "Type must be 'logo' or 'background'." });
+
+        using var ms = new MemoryStream();
+        await Request.Body.CopyToAsync(ms, ct);
+        ms.Position = 0;
+
+        if (ms.Length < 1024 || ms.Length > 10 * 1024 * 1024)
+            return BadRequest(new { error = "File must be between 1KB and 10MB." });
+
+        // Validate it's an actual image
+        var header = new byte[4];
+        ms.Read(header, 0, 4);
+        ms.Position = 0;
+        var isPng = header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47;
+        var isJpeg = header[0] == 0xFF && header[1] == 0xD8;
+        if (!isPng && !isJpeg)
+            return BadRequest(new { error = "Only PNG and JPEG images are accepted." });
+
+        var contentType = isPng ? "image/png" : "image/jpeg";
+        var ext = isPng ? "png" : "jpg";
+
+        var storage = HttpContext.RequestServices.GetRequiredService<IStorageService>();
+        var bucket = configuration["STORAGE_BUCKET"] ?? configuration["R2:BucketName"] ?? "aegiscore";
+        await storage.CreateBucketIfNotExistsAsync(bucket, ct);
+        var key = $"branding/{type}.{ext}";
+        var url = await storage.UploadAsync(bucket, key, ms, contentType, StorageVisibility.Public, ct);
+
+        // Store as config so it survives restarts
+        var configKey = type == "logo" ? "Branding:ClientLogoUrl" : "Branding:LoginBackgroundUrl";
+        await secrets.SetSecretAsync(configKey, url, ct);
+
+        return Ok(new { url, type, message = $"{type} uploaded successfully." });
+    }
+
+    [HttpGet("branding/{type}")]
+    public async Task<IActionResult> GetBranding(string type, CancellationToken ct)
+    {
+        if (type is not ("logo" or "background"))
+            return BadRequest(new { error = "Type must be 'logo' or 'background'." });
+
+        var configKey = type == "logo" ? "Branding:ClientLogoUrl" : "Branding:LoginBackgroundUrl";
+        var url = configuration[configKey] ?? configuration[$"AEGISCORE_CLIENT_{type.ToUpperInvariant()}_URL"];
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            try
+            {
+                var bucket = configuration["STORAGE_BUCKET"] ?? "aegiscore";
+                var storage = HttpContext.RequestServices.GetRequiredService<IStorageService>();
+                var ext = type == "logo" ? "png" : "jpg";
+                if (await storage.ExistsAsync(bucket, $"branding/{type}.{ext}", ct))
+                    url = (await storage.GetPresignedUrlAsync(bucket, $"branding/{type}.{ext}", TimeSpan.FromHours(24), ct)) ?? "";
+            }
+            catch { }
+        }
+
+        return Ok(new { url = url ?? "" });
+    }
+
+    [HttpPost("activate-demo")]
+    public async Task<IActionResult> ActivateDemo([FromQuery] int expiryDays, CancellationToken ct)
+    {
+        var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
+        if (!isDemo) return BadRequest(new { error = "Demo mode is not enabled. Set Runtime:DemoMode=true in .env to use this feature." });
+
+        var existingExpiry = configuration["Runtime:DemoExpiryUtc"];
+        if (!string.IsNullOrWhiteSpace(existingExpiry))
+            return BadRequest(new { error = "Demo expiry has already been set and cannot be changed. Current expiry: " + existingExpiry });
+
+        if (expiryDays < 1 || expiryDays > 365)
+            return BadRequest(new { error = "Expiry must be between 1 and 365 days." });
+
+        var expiry = DateTime.UtcNow.AddDays(expiryDays).ToString("O");
+        var hmacKey = configuration["AEGISCORE_ENCRYPTION_KEY"] ?? await secrets.GetSecretAsync("AEGISCORE_ENCRYPTION_KEY", ct);
+        var signature = DemoExpiryMiddleware.SignExpiry(expiry, hmacKey);
+
+        await secrets.SetSecretAsync("Runtime__DemoExpiryUtc", expiry, ct);
+        await secrets.SetSecretAsync("Runtime__DemoExpirySignature", signature, ct);
+
+        return Ok(new
+        {
+            message = $"Demo activated. Expires in {expiryDays} days on {expiry}.",
+            expiry,
+            immutable = true,
+            note = "Once set, the demo expiry CANNOT be changed. The signature prevents tampering."
+        });
+    }
+
+    [AllowAnonymous]
+    [HttpGet("demo-status")]
+    public IActionResult DemoStatus()
+    {
+        var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
+        if (!isDemo) return Ok(new { isDemo = false });
+
+        var expiry = configuration["Runtime:DemoExpiryUtc"];
+        TimeSpan? remaining = null;
+        if (DateTime.TryParse(expiry, out var exp))
+            remaining = exp - DateTime.UtcNow;
+
+        return Ok(new
+        {
+            isDemo = true,
+            expiryUtc = expiry,
+            remainingDays = remaining?.TotalDays ?? -1,
+            remainingHours = remaining?.TotalHours ?? -1,
+            isExpired = remaining.HasValue && remaining.Value.TotalSeconds <= 0
+        });
     }
 
     [HttpPost("generate-secrets")]

@@ -20,6 +20,9 @@ export function PortalShell() {
   const [error, setError] = useState<string | null>(null);
   const [dark, setDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [demoStatus, setDemoStatus] = useState<{ isDemo: boolean; remainingDays: number } | null>(null);
+
+  useEffect(() => { apiGet<{ isDemo: boolean; remainingDays: number }>("/api/wizard/demo-status").then(setDemoStatus).catch(() => {}); }, []);
 
   useEffect(() => { apiGet<Session>("/api/session").then(setSession).catch(() => setError(t("signIn"))); }, [t]);
   useEffect(() => { document.documentElement.dataset.theme = dark ? "dark" : "light"; }, [dark]);
@@ -43,6 +46,11 @@ export function PortalShell() {
     <aside className={`portal-sidebar ${menuOpen ? "open" : ""}`}><div className="sidebar-top"><Brand /><button className="icon-button mobile-only" onClick={() => setMenuOpen(false)} aria-label={t("closeNavigation")}><X /></button></div><nav className="primary-nav" aria-label={t("primaryNavigation")}><section><h2>{t("workspace")}</h2>{links.map(item => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}><item.icon aria-hidden /><span>{item.label}</span></Link>)}</section></nav><div className="sidebar-footer"><Link href="/support"><CircleHelp />{t("help")}</Link></div></aside>
     {menuOpen && <button className="sidebar-scrim" onClick={() => setMenuOpen(false)} aria-label={t("closeNavigation")} />}
     <main className="portal-main"><header className="portal-header"><button className="icon-button mobile-only" onClick={() => setMenuOpen(true)} aria-label={t("openNavigation")}><Menu /></button><Brand /><div className="header-actions"><LocaleSwitcher label={t("locale")} /><PersonalityToggle /><button className="icon-button" onClick={() => setDark(value => !value)} aria-label={t("toggleTheme")}>{dark ? <Sun /> : <Moon />}</button><div className="profile-chip"><UserRound /><span><strong>{session.name}</strong><small>{session.roles.join(", ") || t("user")}</small></span></div></div></header>
+      {demoStatus?.isDemo && (
+        <div style={{ padding: "0.5rem 1rem", textAlign: "center", background: "var(--amber-soft)", color: "var(--amber-dark)", fontSize: "0.8rem", fontWeight: 600 }}>
+          DEMO MODE — {Math.max(0, Math.ceil(demoStatus.remainingDays))} days remaining. This instance will shut down when the demo period ends.
+        </div>
+      )}
       <section className="command-page"><div className="page-heading"><div><p>{t("tenantWorkspace")}</p><h1>{t("title")}</h1><span>{t("subtitle")}</span></div></div><section className="quick-actions" aria-label={t("available")}><h2>{t("available")}</h2><div>{links.slice(1).map(item => <Link key={item.href} href={item.href}><item.icon /><span><strong>{item.label}</strong><small>{t("openWorkspace")}</small></span></Link>)}</div></section><section className="surface finance-panel"><div className="surface-heading"><div><h2>{t("sessionSecurity")}</h2><p>{t("sessionDetail")}</p></div><ShieldCheck /></div><div className="finance-control-list"><div className="finance-control"><ShieldCheck /><span><strong>{t("authenticated")}</strong><small>Tenant {session.tenantId}</small></span></div><div className="finance-control"><BookOpenCheck /><span><strong>{t("roleNavigation")}</strong><small>{t("assignedRoles", { count: session.roles.length })}</small></span></div><div className="finance-control"><CalendarDays /><span><strong>{t("liveData")}</strong><small>{t("noSimulation")}</small></span></div></div></section></section>
     </main>
   </div></PersonalityModeProvider>;
@@ -51,19 +59,16 @@ export function PortalShell() {
 function Brand() {
   const [clientLogo, setClientLogo] = useState<string | null>(null);
   useEffect(() => {
-    apiGet<{ logoUrl: string }>("/api/branding/client-logo").then(r => setClientLogo(r.logoUrl)).catch(() => {});
+    apiGet<{ url: string }>("/api/wizard/branding/logo").then(r => setClientLogo(r.url)).catch(() => {});
   }, []);
 
   return (
-    <Link className="aegis-brand" href="/" aria-label="AegisCore home" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
-      <img src="/aegiscore-logo.png" alt="AegisCore" style={{ height: 32, width: "auto", borderRadius: 4 }} />
+    <Link className="aegis-brand" href="/" aria-label="AegisCore home" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", minWidth: 0 }}>
+      <img src="/aegiscore-logo.png" alt="AegisCore" style={{ height: 32, width: "auto", borderRadius: 4, flexShrink: 0 }} />
       {clientLogo && (
-        <>
-          <span style={{ color: "var(--line)", fontSize: "1.2rem", fontWeight: 300 }}>|</span>
-          <img src={clientLogo} alt="University" style={{ height: 28, width: "auto", borderRadius: 4 }} />
-        </>
+        <img src={clientLogo} alt="University" className="brand-client-logo" style={{ height: 28, width: "auto", borderRadius: 4, flexShrink: 0 }} />
       )}
-      <span><strong>AegisCore</strong><small>University ERP</small></span>
+      <span className="brand-text"><strong>AegisCore</strong><small>University ERP</small></span>
     </Link>
   );
 }

@@ -149,6 +149,7 @@ else
     app.UseMiddleware<RateLimitingMiddleware>();
     app.UseMiddleware<RateLimitAuthMiddleware>();
     app.UseMiddleware<AuthenticatedOriginPullsMiddleware>();
+    app.UseMiddleware<DemoExpiryMiddleware>();
     app.UseMiddleware<HybridPqcTransportMiddleware>();
     app.UseMiddleware<SessionBindingMiddleware>();
 
