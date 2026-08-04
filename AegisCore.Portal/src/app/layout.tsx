@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getPortalLocale } from "@/i18n/server";
 import { portalMessages } from "@/i18n/messages";
+import { personalityMessages } from "@/i18n/personality-messages";
+import { PersonalityLayoutWrapper } from "@/components/personality-layout-wrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,9 +24,10 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getPortalLocale();
+  const messages = { ...portalMessages[locale], ...personalityMessages[locale] };
   return (
     <html lang={locale} dir={locale === "ar-AE" ? "rtl" : "ltr"}>
-      <body><NextIntlClientProvider locale={locale} messages={portalMessages[locale]}>{children}</NextIntlClientProvider></body>
+      <body><NextIntlClientProvider locale={locale} messages={messages}><PersonalityLayoutWrapper>{children}</PersonalityLayoutWrapper></NextIntlClientProvider></body>
     </html>
   );
 }

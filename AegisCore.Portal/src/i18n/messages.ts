@@ -79,7 +79,7 @@ const en = {
     installmentProgress: "Instalment {sequence} payment progress", payments: "Payments",
     receiptDetail: "Confirmed receipts carry a PQC verification reference.", receiptAvailable: "PQC receipt available",
     scholarships: "Scholarships and aid", scholarshipsDetail: "Active awards and renewal dates", noDemands: "No fee demands",
-    noPayments: "No payments recorded", noAwards: "No scholarship awards"
+    noPayments: "No payments recorded", noAwards: "No scholarship awards", feesStatusLoading: "Loading fee status…"
     ,payRaast: "Pay via Raast", payGateway: "Pay securely", requestingPayment: "Requesting payment...",
     paymentRequested: "Payment request sent. Approve it in your payment app.", paymentRequestFailed: "Payment request could not be started.",
     openPaymentApp: "Open payment app", cashFlowWaterfall: "Cash flow waterfall", budgetBurn: "Budget burn",
