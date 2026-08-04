@@ -135,6 +135,44 @@ public sealed class WizardController(
         catch (InvalidOperationException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
     }
 
+    [HttpPost("generate-secrets")]
+    public async Task<IActionResult> GenerateSecrets(CancellationToken ct)
+    {
+        var provider = (configuration["AEGISCORE_SECRET_PROVIDER"] ?? "FILE").Trim().ToUpperInvariant();
+        if (provider is "INFISICAL" or "AZURE" or "AWS" or "GCP")
+            return Ok(new { success = true, message = "Using external secrets provider — no local generation needed.", provider });
+
+        var generated = new Dictionary<string, string>();
+        var requiredSecrets = new[] {
+            "AEGISCORE_JWT_SECRET", "AEGISCORE_ENCRYPTION_KEY", "AEGISCORE_PQC_KEY_BASE64",
+            "LICENSE_HMAC_SECRET", "GOVERNANCE_FEEDBACK_KEY_BASE64"
+        };
+
+        foreach (var key in requiredSecrets)
+        {
+            var existing = Environment.GetEnvironmentVariable(key);
+            if (!string.IsNullOrWhiteSpace(existing)) { generated[key] = "already-set"; continue; }
+
+            var value = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(48));
+            await secrets.SetSecretAsync(key, value, ct);
+            generated[key] = "generated";
+        }
+
+        return Ok(new { success = true, message = $"{generated.Count(kv => kv.Value == "generated")} secrets generated, {generated.Count(kv => kv.Value == "already-set")} already present.", generated });
+    }
+
+    [HttpGet("secrets-status")]
+    public async Task<IActionResult> SecretsStatus(CancellationToken ct)
+    {
+        var requiredSecrets = new[] { "AEGISCORE_JWT_SECRET", "AEGISCORE_ENCRYPTION_KEY", "AEGISCORE_PQC_KEY_BASE64", "LICENSE_HMAC_SECRET" };
+        var status = new Dictionary<string, bool>();
+        foreach (var key in requiredSecrets)
+            status[key] = await secrets.SecretExistsAsync(key, ct) || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(key));
+        var allPresent = status.Values.All(v => v);
+        var provider = (configuration["AEGISCORE_SECRET_PROVIDER"] ?? "FILE").Trim().ToUpperInvariant();
+        return Ok(new { allPresent, provider, needsGeneration = provider is not ("INFISICAL" or "AZURE" or "AWS" or "GCP") && !allPresent, secrets = status });
+    }
+
     [HttpPost("complete")]
     public async Task<IActionResult> Complete([FromBody] CompleteWizardRequest request, CancellationToken ct)
     {
