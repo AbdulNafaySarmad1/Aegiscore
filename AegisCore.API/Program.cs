@@ -191,6 +191,17 @@ else
     app.MapHub<FinanceHub>("/hubs/finance");
     app.MapControllers();
     app.MapFinanceModuleEndpoints();
+    app.MapDefaultPredictionEndpoints();
+    app.MapVisitingFacultyEndpoints();
+    app.MapAccreditationEndpoints();
+    app.MapBoardPortalEndpoints();
+    app.MapVoiceAssistantEndpoints();
+    app.MapGamificationEndpoints();
+    app.MapMentalHealthEndpoints();
+    app.MapForeignStudentEndpoints();
+    app.MapElectionEndpoints();
+    app.MapCafeteriaEndpoints();
+    app.MapTransportEndpoints();
 
     try
     {
