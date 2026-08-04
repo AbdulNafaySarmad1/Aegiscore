@@ -1,0 +1,5 @@
+StudentId,CourseCode,Semester,AssessmentType,TotalMarks,ObtainedMarks,Grade,GradedBy,GradedAt,Remarks
+STU-2023-0100,CS-305,Fall,Midterm,30,25,B+,FAC-2015-0001,2024-10-15T10:30:00,Strong performance in algorithm analysis section.
+STU-2023-0100,CS-305,Fall,Final,50,42,B,FAC-2015-0001,2024-12-20T14:00:00,Needs improvement in NLP concepts.
+STU-2023-0100,CS-305,Fall,Project,20,18,A,FAC-2015-0001,2024-12-10T09:00:00,Excellent chatbot implementation.
+STU-2023-0100,CS-305,Fall,Lab,0,0,A,FAC-2022-0078,2024-12-15T11:30:00,Consistent lab performance throughout semester.

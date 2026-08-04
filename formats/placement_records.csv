@@ -1,0 +1,5 @@
+StudentId,CompanyName,Role,Stipend,StartDate,EndDate,SupervisorName,SupervisorEmail,Status,Mode
+STU-2023-0100,CureMD,Data Science Intern,35000,2025-06-01,2025-08-31,Sarah Malik,sarah.malik@curemd.com,Applied,OnSite
+STU-2022-0005,Systems Limited,Software Engineer,80000,2025-01-15,2025-06-30,Omar Farooq,omar.farooq@systemsltd.com,Accepted,Hybrid
+STU-2022-0042,CureSkin,Full Stack Developer Intern,40000,2025-07-01,2025-09-30,Ahmed Raza,ahmed.raza@cureskin.pk,Offered,Remote
+STU-2021-0012,Arbisoft,Junior Software Engineer,95000,2024-09-01,,Nida Shah,nida.shah@arbisoft.com,Completed,OnSite

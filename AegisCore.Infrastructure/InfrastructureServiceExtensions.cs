@@ -27,6 +27,7 @@ using AegisCore.Infrastructure.Marketplace;
 using AegisCore.Infrastructure.MicrosoftEcosystem;
 using AegisCore.Infrastructure.Onboarding;
 using AegisCore.Infrastructure.Obe;
+using AegisCore.Infrastructure.DataImport;
 using AegisCore.Infrastructure.Platform;
 using AegisCore.Infrastructure.RuleEngine;
 using AegisCore.Infrastructure.Search;
@@ -96,6 +97,7 @@ public static class InfrastructureServiceExtensions
         services.AddPlatformServices(configuration);
         services.AddDisasterRecovery(configuration);
         services.AddExtendedPlatform();
+        services.AddDataImport();
         services.AddRuleEngine(configuration);
         services.AddSystemAlerting();
         services.AddCoreErpModules();

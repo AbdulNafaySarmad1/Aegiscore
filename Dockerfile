@@ -37,6 +37,8 @@ ENV ASPNETCORE_URLS=http://+:8080 \
 
 COPY --from=build --chown=appuser /app/publish .
 
+COPY --chown=appuser formats/ /app/formats/
+
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD wget -q -O - http://localhost:8080/health >/dev/null || exit 1

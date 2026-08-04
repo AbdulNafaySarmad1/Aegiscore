@@ -1371,6 +1371,21 @@ public class AegisDbContext : DbContext
     public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
 
     /// <summary>
+    /// External database connections.
+    /// </summary>
+    public DbSet<ExternalDbConnection> ExternalDbConnections => Set<ExternalDbConnection>();
+
+    /// <summary>
+    /// Data import jobs.
+    /// </summary>
+    public DbSet<DataImportJob> DataImportJobs => Set<DataImportJob>();
+
+    /// <summary>
+    /// Field mapping templates.
+    /// </summary>
+    public DbSet<FieldMappingTemplate> FieldMappingTemplates => Set<FieldMappingTemplate>();
+
+    /// <summary>
     /// Export logs.
     /// </summary>
     public DbSet<ExportLog> ExportLogs => Set<ExportLog>();
