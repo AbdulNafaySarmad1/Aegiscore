@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: nocturne-api
-  namespace: nocturne
+  name: aegiscore-api
+  namespace: aegiscore
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: nocturne-api
+    name: aegiscore-api
   minReplicas: 3
   maxReplicas: 10
   metrics:

@@ -1,51 +1,51 @@
-# Nocturne Build Completion Evidence
+# AegisCore Build Completion Evidence
 
 Date: 2026-07-29
 
 ## Local Verification
 
-- Backend solution build: `dotnet build Nocturne.slnx -m:1 -p:BuildInParallel=false`
+- Backend solution build: `dotnet build AegisCore.slnx -m:1 -p:BuildInParallel=false`
   - Result: passed, 0 warnings, 0 errors.
 - Backend tests: `dotnet test AegisCore.Tests/AegisCore.Tests.csproj -m:1 -p:BuildInParallel=false`
   - Result: 351 passed, 0 failed.
-- Solution test pass: `dotnet test Nocturne.slnx -m:1 -p:BuildInParallel=false`
+- Solution test pass: `dotnet test AegisCore.slnx -m:1 -p:BuildInParallel=false`
   - Result: 351 passed, 0 failed.
 - Omitted root projects:
   - `dotnet build AegisCore.Setup/AegisCore.Setup.csproj --no-restore -p:BuildInParallel=false`: passed, 0 warnings, 0 errors.
   - `dotnet build AegisCore.Web/AegisCore.Web.csproj --no-restore -p:BuildInParallel=false`: passed, 0 warnings, 0 errors.
 - Plugin projects:
-  - Root and split `Nocturne.PluginCli` and `Nocturne.PluginSdk` builds passed with 0 warnings and 0 errors.
-- Portal build: `npm run build` in `Nocturne.Portal`
+  - Root and split `AegisCore.PluginCli` and `AegisCore.PluginSdk` builds passed with 0 warnings and 0 errors.
+- Portal build: `npm run build` in `AegisCore.Portal`
   - Result: passed.
-- Portal E2E: `npm run dev` plus `npm run test:e2e` in `Nocturne.Portal`
+- Portal E2E: `npm run dev` plus `npm run test:e2e` in `AegisCore.Portal`
   - Result: Cypress `portals.cy.ts` passed, 1 passed, 0 failed.
 - Portal production dependency audit: `npm audit --omit=dev`
   - Result: 0 vulnerabilities.
-- Portal full dependency audit: `npm audit` in `Nocturne.Portal`
+- Portal full dependency audit: `npm audit` in `AegisCore.Portal`
   - Result: 0 vulnerabilities after bumping Vite, Storybook, Cypress, and `@vitejs/plugin-react`.
-- Mobile typecheck: `npm run typecheck` in `Nocturne.Mobile`
+- Mobile typecheck: `npm run typecheck` in `AegisCore.Mobile`
   - Result: passed.
-- Mobile tests: `npm test` in `Nocturne.Mobile`
+- Mobile tests: `npm test` in `AegisCore.Mobile`
   - Result: 1 passed, 0 failed.
 - Mobile Expo export: `EXPO_NO_TELEMETRY=1 npx expo export --platform all --output-dir dist-check`
   - Result: Android and iOS bundles exported.
 - Mobile production dependency audit: `npm audit --omit=dev`
   - Result: 0 vulnerabilities.
 - Native mobile source checks:
-  - Android and iOS source/config inspected under `Nocturne.Native`.
+  - Android and iOS source/config inspected under `AegisCore.Native`.
   - Android Compose build config now applies `org.jetbrains.kotlin.plugin.compose` and enables Compose/build config.
-  - Native API base URL is configurable through `NOCTURNE_API_BASE_URL`; no university-specific API URL remains in native source.
+  - Native API base URL is configurable through `AEGISCORE_API_BASE_URL`; no university-specific API URL remains in native source.
   - Local binary build not run: `gradle` and `swift` are not installed in this workspace image.
 - Plugin packages:
-  - `dotnet pack Nocturne.PluginSdk/Nocturne.PluginSdk.csproj -c Release -o /tmp/nocturne-pack-check`: produced `Nocturne.PluginSdk.1.0.0.nupkg` (6,055 bytes).
-  - `dotnet pack Nocturne.PluginCli/Nocturne.PluginCli.csproj -c Release -o /tmp/nocturne-pack-check`: produced `Nocturne.PluginCli.1.0.0.nupkg` (15,734 bytes).
+  - `dotnet pack AegisCore.PluginSdk/AegisCore.PluginSdk.csproj -c Release -o /tmp/aegiscore-pack-check`: produced `AegisCore.PluginSdk.1.0.0.nupkg` (6,055 bytes).
+  - `dotnet pack AegisCore.PluginCli/AegisCore.PluginCli.csproj -c Release -o /tmp/aegiscore-pack-check`: produced `AegisCore.PluginCli.1.0.0.nupkg` (15,734 bytes).
 - Deployment manifest checks:
   - GitHub Actions deployment step now gates on `DEPLOY_ENABLED` and applies runtime ConfigMap/dependencies before the API deployment.
   - Kubernetes NetworkPolicy now allows DNS egress on TCP/UDP 53 plus HTTP/HTTPS egress.
   - Local server-side/client-side Kubernetes dry-run not run: `kubectl` is not installed in this workspace image.
 - Docker images:
   - Root: `docker build --network=host -t aegiscore-api:alpine-verified .`
-  - Split: `docker build --network=host -t aegiscore-api:split-alpine-verified .` from `nocturne-backend`.
+  - Split: `docker build --network=host -t aegiscore-api:split-alpine-verified .` from `aegiscore-backend`.
   - Result: both passed using `mcr.microsoft.com/dotnet/aspnet:10.0-alpine`; runtime installs no external Alpine packages.
 - Docker smoke:
   - Root and split containers ran as the configured non-root `appuser`.
@@ -53,31 +53,31 @@ Date: 2026-07-29
   - Root image metadata: `user=appuser`, 109,831,744 bytes.
   - Disposable smoke-test containers were stopped after verification.
 - Docker Compose local stack:
-  - `docker compose --env-file .env.example config`: rendered API/Postgres/Redis stack with `NOCTURNE_DB_CONNECTION`, `NOCTURNE_STORAGE_LOCAL_PATH`, install-completed flag, and Postgres health dependency.
+  - `docker compose --env-file .env.example config`: rendered API/Postgres/Redis stack with `AEGISCORE_DB_CONNECTION`, `AEGISCORE_STORAGE_LOCAL_PATH`, install-completed flag, and Postgres health dependency.
   - `docker compose --env-file .env.example up -d --build`: built and started API, PostgreSQL, and Redis.
   - Compose API status: `healthy`.
   - Endpoint: `GET /health` returned `200 Healthy`.
   - OpenAPI: `GET /swagger/v1/swagger.json` returned `200`, OpenAPI `3.0.1`, 280 paths, including admissions, curriculum, license, marketplace, and setup test routes.
-  - Compose PostgreSQL migration history contained `20260726160353_V1_0_NocturneBaseline`.
+  - Compose PostgreSQL migration history contained `20260726160353_V1_0_AegisCoreBaseline`.
   - Cleanup: `docker compose --env-file .env.example down` stopped and removed containers/network.
 - Security dependency audit:
   - `dotnet list AegisCore.API/AegisCore.API.csproj package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json`: no vulnerable packages.
-  - `npm audit` in `Nocturne.Portal`, `nocturne-frontend`, `Nocturne.Mobile`, and `nocturne-mobile/react-native`: 0 vulnerabilities.
+  - `npm audit` in `AegisCore.Portal`, `aegiscore-frontend`, `AegisCore.Mobile`, and `aegiscore-mobile/react-native`: 0 vulnerabilities.
   - Snyk CLI authentication: `snyk whoami` succeeded, but authenticated `snyk code test --json` did not return within the bounded scan window and was stopped; no Snyk finding was available to triage.
 - Split repository validation:
-- `nocturne-backend`: `dotnet test Nocturne.slnx -m:1 -p:BuildInParallel=false` passed, 351 tests; NuGet vulnerability audit found no vulnerable packages.
-  - `nocturne-frontend`: `npm run build` passed; full `npm audit` found 0 vulnerabilities.
-  - `nocturne-mobile/react-native`: `npm run typecheck` passed; `npm test` passed, 1 test; full `npm audit` found 0 vulnerabilities.
+- `aegiscore-backend`: `dotnet test AegisCore.slnx -m:1 -p:BuildInParallel=false` passed, 351 tests; NuGet vulnerability audit found no vulnerable packages.
+  - `aegiscore-frontend`: `npm run build` passed; full `npm audit` found 0 vulnerabilities.
+  - `aegiscore-mobile/react-native`: `npm run typecheck` passed; `npm test` passed, 1 test; full `npm audit` found 0 vulnerabilities.
 - Secret scan:
   - `rg` scan found no dummy keys/passwords in runtime source/manifests outside example env documentation.
   - Compose now uses environment interpolation instead of hardcoding dummy runtime secrets in `docker-compose.yml`.
 - Database migration artifacts:
-  - `AegisCore.Infrastructure/Migrations/20260726160353_V1_0_NocturneBaseline.cs`
+  - `AegisCore.Infrastructure/Migrations/20260726160353_V1_0_AegisCoreBaseline.cs`
   - `AegisCore.Infrastructure/Migrations/AegisDbContextModelSnapshot.cs`
-  - `AegisCore.Infrastructure/Migrations/V1.0_NocturneBaseline.sql`
-  - `dotnet tool run dotnet-ef migrations add V1_0_NocturneBaseline ... --no-build`: generated baseline migration.
+  - `AegisCore.Infrastructure/Migrations/V1.0_AegisCoreBaseline.sql`
+  - `dotnet tool run dotnet-ef migrations add V1_0_AegisCoreBaseline ... --no-build`: generated baseline migration.
   - `dotnet tool run dotnet-ef migrations script ... --idempotent`: generated 364,127-byte PostgreSQL SQL script.
-  - Disposable `postgres:17-alpine` on `localhost:15432`: `database update` applied `20260726160353_V1_0_NocturneBaseline`; `migrations list` returned the applied migration.
+  - Disposable `postgres:17-alpine` on `localhost:15432`: `database update` applied `20260726160353_V1_0_AegisCoreBaseline`; `migrations list` returned the applied migration.
 
 ## Latest Corrections
 
@@ -89,9 +89,9 @@ Date: 2026-07-29
 - Added design-time `AegisDbContextFactory`, EF baseline migration, idempotent SQL script, and opt-in runtime migration hook.
 - Fixed PostgreSQL filtered-index SQL for `ResearchPatents.PatentNumber` migration generation.
 - Refreshed portal build, Cypress E2E, mobile typecheck/test, and production dependency audit evidence.
-- Fixed native Android Compose Gradle wiring and moved native API endpoint selection to `NOCTURNE_API_BASE_URL`.
+- Fixed native Android Compose Gradle wiring and moved native API endpoint selection to `AEGISCORE_API_BASE_URL`.
 - Repacked plugin SDK/CLI and fixed Kubernetes deployment ordering plus DNS egress.
-- Fixed documented DB connection env resolution by supporting `NOCTURNE_DB_CONNECTION` in runtime and design-time DbContext creation.
+- Fixed documented DB connection env resolution by supporting `AEGISCORE_DB_CONNECTION` in runtime and design-time DbContext creation.
 - Fixed local Compose startup env, Postgres health dependency, auto-migration, and storage path naming.
 - Fixed production startup crashes from unresolved search URL placeholders and duplicate infrastructure registration.
 - Made public `/health` a top-of-pipeline liveness endpoint; authenticated `/health/detail` remains for dependency health checks.
@@ -117,7 +117,7 @@ Date: 2026-07-29
 - Final verification on 2026-07-29: root and split backend suites each passed 53/53; the final API image rebuilt successfully as `aegiscore-api:security-verified`; source hygiene and `git diff --check` passed; the final NuGet audit reported no vulnerable packages.
 - License heartbeat hardening: both backend copies require the resolved heartbeat endpoint to be an absolute HTTPS URL before posting; root and split backend suites passed 53/53 after the change.
 - Replaced the Debian API runtime with `mcr.microsoft.com/dotnet/aspnet:10.0-alpine` in both backend trees; both images built successfully, the final image measured 113,152,000 bytes, and it returned `Healthy` from `GET /health` as a non-root container.
-- Fixed the Kubernetes deployment secret wiring so production `NOCTURNE_JWT_SECRET` is supplied in both synchronized GitHub Actions workflows and documented in the deployment runbook.
+- Fixed the Kubernetes deployment secret wiring so production `AEGISCORE_JWT_SECRET` is supplied in both synchronized GitHub Actions workflows and documented in the deployment runbook.
 - Fixed the license heartbeat configuration mismatch by allowing `License:ServerUrl` as the documented fallback endpoint and supplied `License__HmacSecret` through both production deployment workflows.
 - Final Docker correction: removed runtime `apk add curl shadow` dependency and switched the image healthcheck to Alpine BusyBox `wget`, keeping both synchronized Dockerfiles buildable when Alpine package mirrors are unavailable.
 

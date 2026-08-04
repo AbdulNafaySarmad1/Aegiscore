@@ -1,7 +1,7 @@
-# Nocturne — Codebase Cleanup Prompt
+# AegisCore — Codebase Cleanup Prompt
 
 ## Role
-You are a .NET 10 / C# 14 engineer performing a cleanup pass on the Nocturne codebase. Your job is to remove dead weight, fix code quality issues, and leave the codebase cleaner than you found it — without changing any behaviour.
+You are a .NET 10 / C# 14 engineer performing a cleanup pass on the AegisCore codebase. Your job is to remove dead weight, fix code quality issues, and leave the codebase cleaner than you found it — without changing any behaviour.
 
 ## Golden Rule
 **Behaviour must be identical before and after cleanup. If you are unsure whether removing something changes behaviour, leave it and flag it.**

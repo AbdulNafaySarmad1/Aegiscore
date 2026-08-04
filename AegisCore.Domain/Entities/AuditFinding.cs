@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("AuditFindings")]
-public class AuditFinding
+public class AuditFinding : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

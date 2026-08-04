@@ -31,7 +31,7 @@ public sealed class AegisDbContextFactory : IDesignTimeDbContextFactory<AegisDbC
         var explicitCs = configuration.GetConnectionString("Default")
             ?? configuration["ConnectionStrings:Default"]
             ?? configuration["Database:ConnectionString"]
-            ?? configuration["NOCTURNE_DB_CONNECTION"]
+            ?? configuration["AEGISCORE_DB_CONNECTION"]
             ?? configuration["POSTGRES_CONNECTION_STRING"];
         if (!string.IsNullOrWhiteSpace(explicitCs))
             return explicitCs;

@@ -14,6 +14,7 @@ namespace AegisCore.Infrastructure;
 public class AegisDbContext : DbContext
 {
     private readonly IHttpContextAccessor? _httpContextAccessor;
+    public Guid CurrentTenantId => _httpContextAccessor?.HttpContext?.Items["TenantId"] as Guid? ?? Guid.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AegisDbContext"/> class.
@@ -1593,6 +1594,7 @@ public class AegisDbContext : DbContext
     public DbSet<CrossDeptPermissionRequest> CrossDeptPermissionRequests => Set<CrossDeptPermissionRequest>();
     public DbSet<LicenseState> LicenseStates => Set<LicenseState>();
 
+    public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<WizardSession> WizardSessions => Set<WizardSession>();
     public DbSet<WizardAdminCredential> WizardAdminCredentials => Set<WizardAdminCredential>();
     public DbSet<AdmissionApplication> AdmissionApplications => Set<AdmissionApplication>();
@@ -1620,6 +1622,9 @@ public class AegisDbContext : DbContext
     public DbSet<FinanceVoucher> FinanceVouchers => Set<FinanceVoucher>();
     public DbSet<FinanceVoucherLine> FinanceVoucherLines => Set<FinanceVoucherLine>();
     public DbSet<FinanceVoucherApproval> FinanceVoucherApprovals => Set<FinanceVoucherApproval>();
+    public DbSet<FinanceVoucherApprovalRule> FinanceVoucherApprovalRules => Set<FinanceVoucherApprovalRule>();
+    public DbSet<FinanceVoucherAttachment> FinanceVoucherAttachments => Set<FinanceVoucherAttachment>();
+    public DbSet<FinanceVoucherReversal> FinanceVoucherReversals => Set<FinanceVoucherReversal>();
     public DbSet<FinanceVoucherSequence> FinanceVoucherSequences => Set<FinanceVoucherSequence>();
     public DbSet<FeeDemand> FeeDemands => Set<FeeDemand>();
     public DbSet<FeeInstallment> FeeInstallments => Set<FeeInstallment>();
@@ -1629,7 +1634,81 @@ public class AegisDbContext : DbContext
     public DbSet<PaymentGatewayConfiguration> PaymentGatewayConfigurations => Set<PaymentGatewayConfiguration>();
     public DbSet<PaymentGatewayEvent> PaymentGatewayEvents => Set<PaymentGatewayEvent>();
     public DbSet<ExchangeRateSnapshot> ExchangeRateSnapshots => Set<ExchangeRateSnapshot>();
+    public DbSet<FinanceForeignCurrencyTransaction> FinanceForeignCurrencyTransactions => Set<FinanceForeignCurrencyTransaction>();
+    public DbSet<FinanceReportArtifact> FinanceReportArtifacts => Set<FinanceReportArtifact>();
+    public DbSet<FinanceReportProfile> FinanceReportProfiles => Set<FinanceReportProfile>();
+    public DbSet<TenantFinanceConfiguration> TenantFinanceConfigurations => Set<TenantFinanceConfiguration>();
+    public DbSet<FinanceAccountingStandardPolicy> FinanceAccountingStandardPolicies => Set<FinanceAccountingStandardPolicy>();
+    public DbSet<FinanceReportingEntity> FinanceReportingEntities => Set<FinanceReportingEntity>();
+    public DbSet<FinanceRestatementRule> FinanceRestatementRules => Set<FinanceRestatementRule>();
+    public DbSet<FinanceRestatementRun> FinanceRestatementRuns => Set<FinanceRestatementRun>();
+    public DbSet<FinanceRestatementMemoLine> FinanceRestatementMemoLines => Set<FinanceRestatementMemoLine>();
+    public DbSet<FinanceConsolidationGroup> FinanceConsolidationGroups => Set<FinanceConsolidationGroup>();
+    public DbSet<FinanceConsolidationMember> FinanceConsolidationMembers => Set<FinanceConsolidationMember>();
+    public DbSet<FinanceEliminationRule> FinanceEliminationRules => Set<FinanceEliminationRule>();
+    public DbSet<FinanceConsolidationRun> FinanceConsolidationRuns => Set<FinanceConsolidationRun>();
+    public DbSet<FinanceConsolidationMemoLine> FinanceConsolidationMemoLines => Set<FinanceConsolidationMemoLine>();
+    public DbSet<FinancePqcKey> FinancePqcKeys => Set<FinancePqcKey>();
+    public DbSet<FinancePqcKeyCeremony> FinancePqcKeyCeremonies => Set<FinancePqcKeyCeremony>();
+    public DbSet<FinancePqcKeyCeremonyApproval> FinancePqcKeyCeremonyApprovals => Set<FinancePqcKeyCeremonyApproval>();
+    public DbSet<FinanceLedgerSignature> FinanceLedgerSignatures => Set<FinanceLedgerSignature>();
+    public DbSet<FinanceSecurityDeposit> FinanceSecurityDeposits => Set<FinanceSecurityDeposit>();
+    public DbSet<FinanceSecurityDepositDeduction> FinanceSecurityDepositDeductions => Set<FinanceSecurityDepositDeduction>();
     public DbSet<FinanceAuditSeal> FinanceAuditSeals => Set<FinanceAuditSeal>();
+    public DbSet<FinanceVendor> FinanceVendors => Set<FinanceVendor>();
+    public DbSet<FinanceVendorContact> FinanceVendorContacts => Set<FinanceVendorContact>();
+    public DbSet<FinanceStandingPurchaseOrder> FinanceStandingPurchaseOrders => Set<FinanceStandingPurchaseOrder>();
+    public DbSet<FinanceStandingPurchaseOrderSpend> FinanceStandingPurchaseOrderSpend => Set<FinanceStandingPurchaseOrderSpend>();
+    public DbSet<FinancePurchaseOrder> FinancePurchaseOrders => Set<FinancePurchaseOrder>();
+    public DbSet<FinancePurchaseOrderLine> FinancePurchaseOrderLines => Set<FinancePurchaseOrderLine>();
+    public DbSet<FinanceGoodsReceipt> FinanceGoodsReceipts => Set<FinanceGoodsReceipt>();
+    public DbSet<FinanceGoodsReceiptLine> FinanceGoodsReceiptLines => Set<FinanceGoodsReceiptLine>();
+    public DbSet<FinanceVendorInvoice> FinanceVendorInvoices => Set<FinanceVendorInvoice>();
+    public DbSet<FinanceVendorInvoiceLine> FinanceVendorInvoiceLines => Set<FinanceVendorInvoiceLine>();
+    public DbSet<FinanceThreeWayMatch> FinanceThreeWayMatches => Set<FinanceThreeWayMatch>();
+    public DbSet<FinanceVendorContract> FinanceVendorContracts => Set<FinanceVendorContract>();
+    public DbSet<FinanceVendorDocument> FinanceVendorDocuments => Set<FinanceVendorDocument>();
+    public DbSet<FinancePayrollPosting> FinancePayrollPostings => Set<FinancePayrollPosting>();
+    public DbSet<FinancePayrollPostingLine> FinancePayrollPostingLines => Set<FinancePayrollPostingLine>();
+    public DbSet<FinancePayrollBankInstruction> FinancePayrollBankInstructions => Set<FinancePayrollBankInstruction>();
+    public DbSet<FinancePayrollPaymentFile> FinancePayrollPaymentFiles => Set<FinancePayrollPaymentFile>();
+    public DbSet<FinanceGratuityAssumption> FinanceGratuityAssumptions => Set<FinanceGratuityAssumption>();
+    public DbSet<FinanceGratuityValuation> FinanceGratuityValuations => Set<FinanceGratuityValuation>();
+    public DbSet<FinanceBankAccount> FinanceBankAccounts => Set<FinanceBankAccount>();
+    public DbSet<FinanceBankFeedTransaction> FinanceBankFeedTransactions => Set<FinanceBankFeedTransaction>();
+    public DbSet<FinanceGrant> FinanceGrants => Set<FinanceGrant>();
+    public DbSet<FinanceScholarshipProgram> FinanceScholarshipPrograms => Set<FinanceScholarshipProgram>();
+    public DbSet<FinanceScholarshipApplication> FinanceScholarshipApplications => Set<FinanceScholarshipApplication>();
+    public DbSet<FinanceScholarshipApplicationEvent> FinanceScholarshipApplicationEvents => Set<FinanceScholarshipApplicationEvent>();
+    public DbSet<FinanceScholarshipAward> FinanceScholarshipAwards => Set<FinanceScholarshipAward>();
+    public DbSet<FinanceAssetAccountingEvent> FinanceAssetAccountingEvents => Set<FinanceAssetAccountingEvent>();
+    public DbSet<FinanceUtilityBill> FinanceUtilityBills => Set<FinanceUtilityBill>();
+    public DbSet<FinanceUtilityAllocation> FinanceUtilityAllocations => Set<FinanceUtilityAllocation>();
+    public DbSet<FinanceInsurancePolicy> FinanceInsurancePolicies => Set<FinanceInsurancePolicy>();
+    public DbSet<FinanceInsuranceClaim> FinanceInsuranceClaims => Set<FinanceInsuranceClaim>();
+    public DbSet<FinanceInventoryItem> FinanceInventoryItems => Set<FinanceInventoryItem>();
+    public DbSet<FinanceInventoryMovement> FinanceInventoryMovements => Set<FinanceInventoryMovement>();
+    public DbSet<FinanceFleetCostPosting> FinanceFleetCostPostings => Set<FinanceFleetCostPosting>();
+    public DbSet<FinanceFleetTrip> FinanceFleetTrips => Set<FinanceFleetTrip>();
+    public DbSet<FinanceFleetProfile> FinanceFleetProfiles => Set<FinanceFleetProfile>();
+    public DbSet<FinanceInvestmentFund> FinanceInvestmentFunds => Set<FinanceInvestmentFund>();
+    public DbSet<FinanceInvestmentHolding> FinanceInvestmentHoldings => Set<FinanceInvestmentHolding>();
+    public DbSet<FinanceInvestmentTransaction> FinanceInvestmentTransactions => Set<FinanceInvestmentTransaction>();
+    public DbSet<FinanceInvestmentBenchmark> FinanceInvestmentBenchmarks => Set<FinanceInvestmentBenchmark>();
+    public DbSet<FinanceRegulatorySchema> FinanceRegulatorySchemas => Set<FinanceRegulatorySchema>();
+    public DbSet<FinanceRegulatorySubmission> FinanceRegulatorySubmissions => Set<FinanceRegulatorySubmission>();
+    public DbSet<FinanceControlEvaluationBatch> FinanceControlEvaluationBatches => Set<FinanceControlEvaluationBatch>();
+    public DbSet<FinanceSodRule> FinanceSodRules => Set<FinanceSodRule>();
+    public DbSet<FinanceAuditorEngagement> FinanceAuditorEngagements => Set<FinanceAuditorEngagement>();
+    public DbSet<FinanceAuditSample> FinanceAuditSamples => Set<FinanceAuditSample>();
+    public DbSet<FinanceAuditEvidencePackage> FinanceAuditEvidencePackages => Set<FinanceAuditEvidencePackage>();
+    public DbSet<FinanceTaxRule> FinanceTaxRules => Set<FinanceTaxRule>();
+    public DbSet<FinanceWithholdingRecord> FinanceWithholdingRecords => Set<FinanceWithholdingRecord>();
+    public DbSet<FinancePettyCashFund> FinancePettyCashFunds => Set<FinancePettyCashFund>();
+    public DbSet<FinancePettyCashExpense> FinancePettyCashExpenses => Set<FinancePettyCashExpense>();
+    public DbSet<FinancePettyCashCount> FinancePettyCashCounts => Set<FinancePettyCashCount>();
+    public DbSet<FinanceLibraryAcquisition> FinanceLibraryAcquisitions => Set<FinanceLibraryAcquisition>();
+    public DbSet<FinanceLibraryFine> FinanceLibraryFines => Set<FinanceLibraryFine>();
     public DbSet<ProcurementRequisition> ProcurementRequisitions => Set<ProcurementRequisition>();
     public DbSet<RequisitionLineItem> RequisitionLineItems => Set<RequisitionLineItem>();
     public DbSet<Vendor> Vendors => Set<Vendor>();
@@ -1663,16 +1742,14 @@ public class AegisDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // Apply global query filter for multi-tenancy
-        var currentTenantId = _httpContextAccessor?.HttpContext?.Items["TenantId"] as Guid?;
-
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(ITenantScoped).IsAssignableFrom(entityType.ClrType))
             {
                 var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var tenantProperty = Expression.Property(parameter, "TenantId");
-                var tenantIdConstant = Expression.Constant(currentTenantId ?? Guid.Empty);
-                var equal = Expression.Equal(tenantProperty, tenantIdConstant);
+                var contextTenant = Expression.Property(Expression.Constant(this), nameof(CurrentTenantId));
+                var equal = Expression.Equal(tenantProperty, contextTenant);
                 var lambda = Expression.Lambda(equal, parameter);
 
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
@@ -1859,6 +1936,15 @@ public class AegisDbContext : DbContext
             entity.Property(e => e.LastHeartbeatStatus).HasMaxLength(20);
         });
 
+        modelBuilder.Entity<Tenant>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ShortName).IsUnique();
+            entity.Property(e => e.Name).HasMaxLength(300).IsRequired();
+            entity.Property(e => e.ShortName).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.LicenseMode).HasMaxLength(10).IsRequired();
+        });
+
         modelBuilder.Entity<WizardSession>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -1971,6 +2057,189 @@ public class AegisDbContext : DbContext
             entity.HasMany(e => e.Payslips).WithOne(e => e.PayrollRun).HasForeignKey(e => e.PayrollRunId);
         });
 
+        modelBuilder.Entity<FinancePayrollPosting>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Period }).IsUnique();
+            entity.HasMany(e => e.Lines).WithOne(e => e.Posting).HasForeignKey(e => e.FinancePayrollPostingId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinancePayrollPostingLine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinancePayrollPostingId, e.EmployeeId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.CostCenterId });
+        });
+        modelBuilder.Entity<FinancePayrollBankInstruction>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.EmployeeId }).IsUnique();
+            entity.Property(e => e.EncryptedAccountReference).HasColumnType("bytea");
+        });
+        modelBuilder.Entity<FinancePayrollPaymentFile>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.PayrollPostingId, e.Format }).IsUnique();
+            entity.Property(e => e.PqcSignature).HasColumnType("bytea");
+        });
+        modelBuilder.Entity<FinanceGratuityAssumption>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.EffectiveFrom }).IsUnique();
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceGratuityAssumptions_Rates", "\"DiscountRatePercent\" >= 0 AND \"SalaryGrowthRatePercent\" >= 0 AND \"TurnoverRatePercent\" >= 0 AND \"BenefitDivisor\" > 0 AND \"RetirementHorizonYears\" > 0"));
+        });
+        modelBuilder.Entity<FinanceGratuityValuation>(entity => entity.HasIndex(e => new { e.TenantId, e.ValuationDate }).IsUnique());
+        modelBuilder.Entity<FinanceBankAccount>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.AccountReference }).IsUnique();
+            entity.HasMany(e => e.FeedTransactions).WithOne(e => e.BankAccount).HasForeignKey(e => e.FinanceBankAccountId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceBankFeedTransaction>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinanceBankAccountId, e.ExternalId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.BookingDate });
+        });
+        modelBuilder.Entity<FinanceGrant>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.DonorName, e.Purpose });
+            entity.HasMany(e => e.Awards).WithOne(e => e.Grant).HasForeignKey(e => e.GrantId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceScholarshipProgram>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Name }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.ClosesAt });
+            entity.HasOne(e => e.Grant).WithMany().HasForeignKey(e => e.GrantId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.Applications).WithOne(e => e.Program).HasForeignKey(e => e.ProgramId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceScholarshipPrograms_Values", "\"CoverageValue\" > 0 AND \"DurationMonths\" > 0 AND \"ClosesAt\" > \"OpensAt\""));
+        });
+        modelBuilder.Entity<FinanceScholarshipApplication>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ProgramId, e.StudentId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.AppliedAt });
+            entity.HasMany(e => e.Events).WithOne(e => e.Application).HasForeignKey(e => e.ApplicationId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceScholarshipApplicationEvent>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ApplicationId, e.OccurredAt });
+        });
+        modelBuilder.Entity<FinanceScholarshipAward>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.AwardedAt });
+            entity.HasIndex(e => new { e.TenantId, e.GrantId });
+            entity.HasIndex(e => new { e.TenantId, e.ApplicationId }).IsUnique().HasFilter("\"ApplicationId\" IS NOT NULL");
+        });
+        modelBuilder.Entity<FinanceAssetAccountingEvent>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.AssetId, e.OccurredAt });
+            entity.HasIndex(e => e.JournalEntryId).IsUnique().HasFilter("\"JournalEntryId\" IS NOT NULL");
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceAssetAccountingEvents_Values", "\"PreviousCarryingValue\" >= 0 AND \"NewCarryingValue\" >= 0 AND \"Proceeds\" >= 0"));
+        });
+        modelBuilder.Entity<FinanceUtilityBill>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.AccountNumber, e.BillingPeriodStart, e.BillingPeriodEnd }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.DueDate });
+            entity.HasMany(e => e.Allocations).WithOne(e => e.Bill).HasForeignKey(e => e.FinanceUtilityBillId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceUtilityAllocation>(entity => entity.HasIndex(e => new { e.TenantId, e.FinanceUtilityBillId, e.CostCenterId }).IsUnique());
+        modelBuilder.Entity<FinanceInsurancePolicy>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.PolicyNumber }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.RenewalDate, e.Status });
+            entity.HasMany(e => e.Claims).WithOne(e => e.Policy).HasForeignKey(e => e.FinanceInsurancePolicyId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceInsuranceClaim>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ClaimNumber }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.FiledAt });
+        });
+        modelBuilder.Entity<FinanceInventoryItem>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ItemCode }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.OnHandQuantity });
+            entity.HasMany(e => e.Movements).WithOne(e => e.Item).HasForeignKey(e => e.FinanceInventoryItemId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceInventoryMovement>(entity => entity.HasIndex(e => new { e.TenantId, e.FinanceInventoryItemId, e.MovementDate }));
+        modelBuilder.Entity<FinanceFleetCostPosting>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.TransportVehicleId, e.CostDate });
+            entity.HasIndex(e => e.JournalEntryId).IsUnique();
+        });
+        modelBuilder.Entity<FinanceFleetTrip>(entity => entity.HasIndex(e => new { e.TenantId, e.TransportVehicleId, e.TripDate }));
+        modelBuilder.Entity<FinanceFleetProfile>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.TransportVehicleId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.NextServiceAt, e.Status });
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceFleetProfiles_Service", "\"ModelYear\" >= 1900 AND \"ServiceIntervalDays\" > 0 AND \"ServiceIntervalKm\" > 0 AND \"CurrentOdometer\" >= 0"));
+        });
+        modelBuilder.Entity<FinanceInvestmentFund>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Name }).IsUnique();
+            entity.HasMany(e => e.Holdings).WithOne(e => e.Fund).HasForeignKey(e => e.FinanceInvestmentFundId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceInvestmentHolding>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Issuer, e.InstrumentType });
+            entity.HasIndex(e => new { e.TenantId, e.MaturityDate, e.Status });
+            entity.HasMany(e => e.Transactions).WithOne(e => e.Holding).HasForeignKey(e => e.FinanceInvestmentHoldingId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceInvestmentTransaction>(entity => entity.HasIndex(e => new { e.TenantId, e.FinanceInvestmentHoldingId, e.TransactionDate }));
+        modelBuilder.Entity<FinanceInvestmentBenchmark>(entity => entity.HasIndex(e => new { e.TenantId, e.Name, e.ObservationDate }).IsUnique());
+        modelBuilder.Entity<FinanceRegulatorySchema>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Code, e.Version }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Code, e.IsActive });
+            entity.Property(e => e.DefinitionJson).HasColumnType("jsonb");
+        });
+        modelBuilder.Entity<FinanceRegulatorySubmission>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.RegulatorySchemaId, e.GeneratedAt });
+            entity.Property(e => e.PqcSignature).HasColumnType("bytea");
+            entity.Property(e => e.PqcPublicKey).HasColumnType("bytea");
+        });
+        modelBuilder.Entity<FinanceControlEvaluationBatch>(entity =>
+        {
+            entity.Property(e => e.Trigger).HasMaxLength(40);
+            entity.Property(e => e.ReferenceType).HasMaxLength(80);
+            entity.Property(e => e.ResultsJson).HasColumnType("jsonb");
+            entity.Property(e => e.ContentHash).HasMaxLength(64);
+            entity.HasIndex(e => new { e.TenantId, e.EvaluatedAt });
+            entity.HasIndex(e => new { e.TenantId, e.ReferenceType, e.ReferenceId });
+        });
+        modelBuilder.Entity<FinanceSodRule>(entity =>
+        {
+            entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IncompatibleActionsJson).HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
+        });
+        modelBuilder.Entity<FinanceAuditorEngagement>(entity =>
+        {
+            entity.Property(e => e.AuditorName).HasMaxLength(200);
+            entity.Property(e => e.AuditorEmail).HasMaxLength(320);
+            entity.Property(e => e.TokenHash).HasMaxLength(64);
+            entity.Property(e => e.ScopesJson).HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.TenantId, e.ExpiresAt });
+            entity.HasIndex(e => e.TokenHash).IsUnique();
+        });
+        modelBuilder.Entity<FinanceAuditSample>(entity =>
+        {
+            entity.Property(e => e.PopulationType).HasMaxLength(40);
+            entity.Property(e => e.SeedHash).HasMaxLength(64);
+            entity.Property(e => e.SelectedReferencesJson).HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.TenantId, e.AuditorEngagementId, e.CreatedAt });
+        });
+        modelBuilder.Entity<FinanceAuditEvidencePackage>(entity =>
+        {
+            entity.Property(e => e.Framework).HasMaxLength(40);
+            entity.Property(e => e.StorageKey).HasMaxLength(500);
+            entity.Property(e => e.ContentHash).HasMaxLength(64);
+            entity.Property(e => e.PqcAlgorithm).HasMaxLength(80);
+            entity.Property(e => e.PqcKeyId).HasMaxLength(200);
+            entity.Property(e => e.PqcSignature).HasColumnType("bytea");
+            entity.Property(e => e.PqcPublicKey).HasColumnType("bytea");
+            entity.HasIndex(e => new { e.TenantId, e.GeneratedAt });
+        });
+        modelBuilder.Entity<FinanceTaxRule>(entity => entity.HasIndex(e => new { e.TenantId, e.TaxType, e.Jurisdiction, e.VendorCategory, e.EffectiveFrom }));
+        modelBuilder.Entity<FinanceWithholdingRecord>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.PaymentReference }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.FilingPeriod, e.TaxType });
+        });
+
         modelBuilder.Entity<Payslip>(entity =>
         {
             entity.HasIndex(e => new { e.PayrollRunId, e.EmployeeId }).IsUnique();
@@ -2012,11 +2281,32 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FinanceVoucherLine>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId });
+            entity.HasIndex(e => new { e.TenantId, e.ChartOfAccountId });
             entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherLines_OneSided", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)"));
         });
 
         modelBuilder.Entity<FinanceVoucherApproval>(entity =>
-            entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId, e.ApproverUserId }).IsUnique());
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId, e.ApproverUserId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId, e.ApproverRole });
+        });
+
+        modelBuilder.Entity<FinanceVoucherApprovalRule>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Currency, e.MinimumAmount }).IsUnique();
+            entity.Property(e => e.RequiredRolesJson).HasColumnType("jsonb");
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherApprovalRules_Range", "\"MinimumAmount\" >= 0 AND (\"MaximumAmount\" IS NULL OR \"MaximumAmount\" > \"MinimumAmount\") AND \"MinimumApprovals\" > 0"));
+        });
+        modelBuilder.Entity<FinanceVoucherAttachment>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId });
+            entity.HasIndex(e => new { e.TenantId, e.Sha256 });
+        });
+        modelBuilder.Entity<FinanceVoucherReversal>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.OriginalVoucherId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.ReversalVoucherId }).IsUnique();
+        });
 
         modelBuilder.Entity<FinanceVoucherSequence>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.VoucherType, e.FiscalYear }).IsUnique());
@@ -2025,6 +2315,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.DemandNumber }).IsUnique();
             entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Status });
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.DueDate });
             entity.HasMany(e => e.Installments).WithOne(e => e.Demand).HasForeignKey(e => e.FeeDemandId).OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -2034,6 +2325,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FinancePayment>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.IdempotencyKey }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.WebhookId }).IsUnique().HasFilter("\"WebhookId\" IS NOT NULL");
             entity.HasIndex(e => new { e.TenantId, e.FeeDemandId, e.Status });
         });
 
@@ -2044,10 +2336,18 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.CreatedAt });
             entity.HasIndex(e => new { e.TenantId, e.GatewaySlug, e.ReferenceId });
+            entity.HasIndex(e => new { e.TenantId, e.GatewaySlug, e.CreatedAt });
         });
 
         modelBuilder.Entity<ExchangeRateSnapshot>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.BaseCurrency, e.QuoteCurrency, e.ValidForDate }).IsUnique());
+
+        modelBuilder.Entity<FinanceForeignCurrencyTransaction>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ForeignCurrency, e.CreatedAt });
+            entity.HasIndex(e => new { e.TenantId, e.SourceType, e.SourceId });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceForeignCurrencyTransactions_CurrenciesDiffer", "\"ForeignCurrency\" <> \"FunctionalCurrency\""));
+        });
 
         modelBuilder.Entity<FinancePaymentPlanConfiguration>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.PlanType }).IsUnique());
@@ -2059,6 +2359,15 @@ public class AegisDbContext : DbContext
             entity.HasOne(e => e.Demand).WithOne(e => e.PaymentPlan).HasForeignKey<FinancePaymentPlan>(e => e.FeeDemandId).OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<FinanceSecurityDeposit>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Status });
+            entity.HasMany(e => e.Deductions).WithOne(e => e.Deposit).HasForeignKey(e => e.SecurityDepositId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<FinanceSecurityDepositDeduction>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.SecurityDepositId, e.CreatedAt }));
+
         modelBuilder.Entity<FinanceAuditSeal>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.SealedAt });
@@ -2067,9 +2376,179 @@ public class AegisDbContext : DbContext
             entity.Property(e => e.PublicKey).HasColumnType("bytea");
         });
 
+        modelBuilder.Entity<FinancePqcKey>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Purpose, e.KeyId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Purpose, e.IsActive, e.ExpiresAt });
+            entity.Property(e => e.PublicKey).HasColumnType("bytea");
+        });
+
+        modelBuilder.Entity<FinancePqcKeyCeremony>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Purpose, e.Status });
+            entity.HasMany(e => e.Approvals).WithOne(e => e.Ceremony).HasForeignKey(e => e.CeremonyId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePqcKeyCeremonies_Threshold", "\"RequiredApprovals\" BETWEEN 2 AND 20"));
+        });
+        modelBuilder.Entity<FinancePqcKeyCeremonyApproval>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.CeremonyId, e.ApprovedByUserId }).IsUnique();
+            entity.Property(e => e.ApprovalDigest).HasColumnType("bytea");
+        });
+        modelBuilder.Entity<FinanceLedgerSignature>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.JournalEntryId }).IsUnique();
+            entity.Property(e => e.Signature).HasColumnType("bytea");
+            entity.Property(e => e.PublicKey).HasColumnType("bytea");
+        });
+
+        modelBuilder.Entity<TenantFinanceConfiguration>(entity =>
+        {
+            entity.HasIndex(e => e.TenantId).IsUnique();
+            entity.Property(e => e.AdditionalCurrenciesJson).HasColumnType("jsonb");
+            entity.Property(e => e.TaxSettingsJson).HasColumnType("jsonb");
+            entity.ToTable(t => t.HasCheckConstraint("CK_TenantFinanceConfigurations_LibraryThreshold", "\"LibraryCapitalizationThreshold\" >= 0"));
+        });
+
+        modelBuilder.Entity<FinanceAccountingStandardPolicy>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.StandardCode, e.PolicyCode, e.EffectiveFrom }).IsUnique();
+            entity.Property(e => e.ValueJson).HasColumnType("jsonb");
+        });
+        modelBuilder.Entity<FinanceReportingEntity>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.ParentEntityId, e.IsActive });
+        });
+        modelBuilder.Entity<FinanceRestatementRule>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.SourceStandard, e.TargetStandard, e.IsActive });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceRestatementRules_Factor", "\"Factor\" <> 0 AND \"SourceAccountId\" <> \"TargetAccountId\""));
+        });
+        modelBuilder.Entity<FinanceRestatementRun>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.SourceStandard, e.TargetStandard, e.CreatedAt });
+            entity.HasMany(e => e.Lines).WithOne(e => e.Run).HasForeignKey(e => e.RestatementRunId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceRestatementMemoLine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.RestatementRunId, e.ChartOfAccountId });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceRestatementMemoLines_OneSide", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)"));
+        });
+        modelBuilder.Entity<FinanceConsolidationGroup>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Name }).IsUnique();
+            entity.HasMany(e => e.Members).WithOne(e => e.Group).HasForeignKey(e => e.ConsolidationGroupId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceConsolidationMember>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.ConsolidationGroupId, e.ReportingEntityId, e.EffectiveFrom }).IsUnique());
+        modelBuilder.Entity<FinanceEliminationRule>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.ConsolidationGroupId, e.IsActive }));
+        modelBuilder.Entity<FinanceConsolidationRun>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ConsolidationGroupId, e.CreatedAt });
+            entity.HasMany(e => e.Lines).WithOne(e => e.Run).HasForeignKey(e => e.ConsolidationRunId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceConsolidationMemoLine>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.ConsolidationRunId, e.ChartOfAccountId }));
+
+        modelBuilder.Entity<FinancePettyCashFund>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.DepartmentId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.IsActive });
+            entity.HasMany(e => e.Expenses).WithOne(e => e.Fund).HasForeignKey(e => e.FinancePettyCashFundId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.Counts).WithOne(e => e.Fund).HasForeignKey(e => e.FinancePettyCashFundId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashFunds_PositiveFloat", "\"FloatAmount\" > 0 AND \"CurrentBalance\" >= 0 AND \"CurrentBalance\" <= \"FloatAmount\""));
+        });
+        modelBuilder.Entity<FinancePettyCashExpense>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinancePettyCashFundId, e.SpentAt });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashExpenses_PositiveAmount", "\"Amount\" > 0"));
+        });
+        modelBuilder.Entity<FinancePettyCashCount>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.FinancePettyCashFundId, e.CountedAt });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashCounts_NonNegativeBalances", "\"SystemBalance\" >= 0 AND \"PhysicalBalance\" >= 0"));
+        });
+        modelBuilder.Entity<FinanceLibraryAcquisition>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.AcquiredAt });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceLibraryAcquisitions_NonNegativeAmounts", "\"Cost\" >= 0 AND \"FairValue\" >= 0 AND \"AccumulatedAmortization\" >= 0"));
+        });
+        modelBuilder.Entity<FinanceLibraryFine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Status });
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceLibraryFines_PositiveAmount", "\"Amount\" > 0"));
+        });
+
+        modelBuilder.Entity<FinanceVendor>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.LegalName });
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.Category });
+            entity.HasMany(e => e.Contacts).WithOne(e => e.Vendor).HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.StandingPurchaseOrders).WithOne(e => e.Vendor).HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceVendorContact>(entity => entity.HasIndex(e => new { e.TenantId, e.VendorId }));
+        modelBuilder.Entity<FinanceStandingPurchaseOrder>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Number }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.EndsOn });
+            entity.HasMany(e => e.Spend).WithOne(e => e.StandingPurchaseOrder).HasForeignKey(e => e.StandingPurchaseOrderId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceStandingPurchaseOrderSpend>(entity => entity.HasIndex(e => new { e.TenantId, e.StandingPurchaseOrderId, e.SpentAt }));
+        modelBuilder.Entity<FinancePurchaseOrder>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Number }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.VendorId, e.Status });
+            entity.HasMany(e => e.Lines).WithOne().HasForeignKey(e => e.PurchaseOrderId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<FinanceVendor>().WithMany().HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinancePurchaseOrders_PositiveTotal", "\"TotalAmount\" > 0"));
+        });
+        modelBuilder.Entity<FinancePurchaseOrderLine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.PurchaseOrderId });
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinancePurchaseOrderLines_Amounts", "\"Quantity\" > 0 AND \"UnitPrice\" >= 0 AND \"LineTotal\" = \"Quantity\" * \"UnitPrice\""));
+        });
+        modelBuilder.Entity<FinanceGoodsReceipt>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.Number }).IsUnique();
+            entity.HasMany(e => e.Lines).WithOne().HasForeignKey(e => e.GoodsReceiptId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<FinancePurchaseOrder>().WithMany().HasForeignKey(e => e.PurchaseOrderId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceGoodsReceiptLine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.PurchaseOrderLineId });
+            entity.HasOne<FinancePurchaseOrderLine>().WithMany().HasForeignKey(e => e.PurchaseOrderLineId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceGoodsReceiptLines_Amounts", "\"QuantityAccepted\" >= 0 AND \"QuantityRejected\" >= 0 AND (\"QuantityAccepted\" + \"QuantityRejected\") > 0"));
+        });
+        modelBuilder.Entity<FinanceVendorInvoice>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.VendorId, e.InvoiceNumber }).IsUnique();
+            entity.HasMany(e => e.Lines).WithOne().HasForeignKey(e => e.VendorInvoiceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<FinancePurchaseOrder>().WithMany().HasForeignKey(e => e.PurchaseOrderId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<FinanceVendor>().WithMany().HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceVendorInvoiceLine>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.VendorInvoiceId });
+            entity.HasOne<FinancePurchaseOrderLine>().WithMany().HasForeignKey(e => e.PurchaseOrderLineId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceThreeWayMatch>(entity => entity.HasIndex(e => new { e.TenantId, e.VendorInvoiceId }).IsUnique());
+        modelBuilder.Entity<FinanceVendorContract>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ContractNumber }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.EndsOn });
+            entity.HasOne<FinanceVendor>().WithMany().HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FinanceVendorDocument>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.VendorId, e.UploadedAt });
+            entity.HasOne<FinanceVendor>().WithMany().HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
+            entity.Property(e => e.PqcSignature).HasColumnType("bytea");
+        });
+
         modelBuilder.Entity<CostCenter>(entity =>
         {
-            entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
         });
 
         modelBuilder.Entity<ProcurementRequisition>(entity =>
@@ -2337,7 +2816,7 @@ public class AegisDbContext : DbContext
         // Department
         modelBuilder.Entity<Department>(entity =>
         {
-            entity.HasIndex(e => e.Code).IsUnique().HasFilter(null);
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique().HasFilter(null);
         });
 
         // Student
@@ -2386,6 +2865,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<JournalEntry>(entity =>
         {
             entity.HasIndex(e => e.EntryNumber).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.IsPosted, e.IsSandbox, e.EntryDate });
         });
 
         // Employee
@@ -2743,18 +3223,18 @@ public class AegisDbContext : DbContext
         });
     }
 
-    private static PolicyConfig SeedPolicy(string id, string module, string key, string value, string valueType, string description) => new()
+    private static PolicyConfig SeedPolicy(string id, string module, string policyName, string policyValue, string valueType, string description)
     {
-        Id = Guid.Parse(id),
-        Module = module,
-        Key = key,
-        Value = value,
-        ValueType = valueType,
-        Description = description,
-        CreatedBy = Guid.Empty,
-        EffectiveFrom = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
-        CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero)
-    };
+        var policy = new PolicyConfig
+        {
+            Id = Guid.Parse(id), Module = module, Value = policyValue, ValueType = valueType,
+            Description = description, CreatedBy = Guid.Empty,
+            EffectiveFrom = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero)
+        };
+        typeof(PolicyConfig).GetProperty(nameof(PolicyConfig.Key))!.SetValue(policy, policyName);
+        return policy;
+    }
 }
 
 /// <summary>

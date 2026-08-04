@@ -1,7 +1,7 @@
-# Nocturne — Sprint 10: Campus Operations (Library + Transport + Visitor Management)
+# AegisCore — Sprint 10: Campus Operations (Library + Transport + Visitor Management)
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building campus operations modules for Nocturne. These handle day-to-day operational workflows outside academics.
+You are a senior .NET 10 / C# 14 engineer building campus operations modules for AegisCore. These handle day-to-day operational workflows outside academics.
 
 ---
 

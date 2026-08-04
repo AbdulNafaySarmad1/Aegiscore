@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("Departments")]
-public class Department
+public class Department : ITenantScoped
 {
     [Key]
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -17,6 +18,7 @@ public class Department
     public string? Code { get; init; }
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public Guid TenantId { get; set; }
 
     // Navigation
     public virtual ICollection<Batch> Batches { get; init; } = new List<Batch>();

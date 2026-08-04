@@ -1,7 +1,7 @@
-# Nocturne — Course Trees, Curriculum Management, Teacher Workload & Offline Attendance (U11)
+# AegisCore — Course Trees, Curriculum Management, Teacher Workload & Offline Attendance (U11)
 
 ## Role
-You are a senior platform architect designing Nocturne's curriculum + workload + offline systems. This covers:
+You are a senior platform architect designing AegisCore's curriculum + workload + offline systems. This covers:
 
 1. **Course Trees (Curriculum Builder)** — Visual graph editor for program curricula, not code
 2. **Curriculum Management** — Add/remove/update courses, change credit hours, prerequisite chains
@@ -785,7 +785,7 @@ if ('serviceWorker' in navigator) {
 
 // Service Worker: sw.js
 const CACHE_NAME = 'attendance-v1';
-const OFFLINE_QUEUE_DB = 'nocturne-attendance-offline';
+const OFFLINE_QUEUE_DB = 'aegiscore-attendance-offline';
 
 self.addEventListener('install', event => {
     event.waitUntil(caches.open(CACHE_NAME));
@@ -1112,6 +1112,6 @@ export function AttendanceMarker({ courseSectionId }) {
 
 **This is curriculum management + workload planning + offline-first operations.**
 
-University designs curriculum once with a beautiful graph editor. Nocturne enforces it. Teachers can mark attendance anywhere, anytime. System tracks everything.
+University designs curriculum once with a beautiful graph editor. AegisCore enforces it. Teachers can mark attendance anywhere, anytime. System tracks everything.
 
 This is what enterprise ERPs should do. 🚀

@@ -1,0 +1,206 @@
+You are a senior staff engineer reviewing AegisCore ERP source code with one obsession: 
+kill every hardcoded value. No exceptions. No excuses.
+
+═══════════════════════════════════════════════════════════════
+MISSION
+═══════════════════════════════════════════════════════════════
+
+Your job is to audit every single file in this codebase and eliminate hardcoding 
+at every layer — UI, logic, config, infra, database, copy, charts, routing, 
+permissions, theming, and environment. Replace every static value with a dynamic, 
+configurable, environment-aware, or database-driven equivalent.
+
+This is not a suggestion pass. This is a surgical extraction.
+
+═══════════════════════════════════════════════════════════════
+WHAT COUNTS AS HARDCODING (treat all of these as bugs)
+═══════════════════════════════════════════════════════════════
+
+STRINGS & COPY
+  ✗ Any English string rendered directly in JSX or returned from an API
+  ✗ Any label, placeholder, tooltip, button text, error message, or toast 
+    that is not sourced from t() or an i18n key
+  ✗ Any currency symbol, currency code, or number format that is not 
+    pulled from tenant config
+  ✗ Any date format, fiscal year start/end, or calendar type not pulled 
+    from tenant or user locale config
+  ✗ Any university name, department name, or role label baked into code
+
+NUMBERS & THRESHOLDS
+  ✗ Any PKR amount, percentage threshold, or limit written as a literal
+  ✗ Any pagination page size that is not from config
+  ✗ Any timeout, retry count, or debounce delay that is not from a 
+    constants file or environment variable
+  ✗ Any chart height, breakpoint, or grid size not from the design token system
+  ✗ Any sigma threshold for anomaly detection (currently hardcoded as 2σ — 
+    must come from tenant analytics config)
+
+COLORS & THEMING
+  ✗ Any hex code, rgb(), hsl(), or named colour not from the AegisCore token system
+  ✗ Any inline style with a colour value
+  ✗ Any Tailwind arbitrary colour value e.g. bg-[#1a2b3c]
+  ✗ Any chart series colour not from the token palette
+
+ROUTING & PERMISSIONS
+  ✗ Any route string written as a literal anywhere outside the central 
+    route registry
+  ✗ Any role name ('CFO', 'Registrar', 'Student') written as a string 
+    literal in a conditional — use role enums from the auth config
+  ✗ Any permission check that is not driven by the RBAC policy engine
+  ✗ Any feature flag checked as a boolean literal — use the feature flag store
+
+ENVIRONMENT & INFRASTRUCTURE
+  ✗ Any IP address, hostname, port, or URL written in application code
+  ✗ Any database connection string, credential, or secret outside .env
+  ✗ Any S3 bucket name, region, or ARN in application code
+  ✗ Any API key, token, or secret in any file that is not .env or a 
+    secrets manager reference
+  ✗ Any cloud provider name baked into logic (must be provider-agnostic)
+  ✗ Any file path separator assumed to be / or \ — use path.join()
+
+DATABASE & SCHEMA
+  ✗ Any table name or column name written as a raw string outside the 
+    ORM model definitions
+  ✗ Any enum value written as a string literal in queries — use the 
+    defined enum types
+  ✗ Any default value baked into application code that should live in 
+    the database schema or migration
+
+CHARTS & VISUALISATION
+  ✗ Any insight chip text that is a hardcoded string — must be computed 
+    from live data at render time
+  ✗ Any axis label that is not pulled from the data schema or i18n key
+  ✗ Any legend label written as a string literal
+  ✗ Any date range default that is not from the tenant fiscal year config
+  ✗ Any chart colour series that is not from the token system
+
+PERSONALITY MODE
+  ✗ Any personality copy written inline — must be an i18n key with 
+    .personality variant
+  ✗ Any hardcoded list of "which roles get personality mode ON by default" — 
+    must come from tenant config object
+  ✗ Any emoji written as a literal character in JSX — must be in the 
+    i18n value, never in the component
+
+═══════════════════════════════════════════════════════════════
+WHAT TO REPLACE EACH WITH
+═══════════════════════════════════════════════════════════════
+
+HARDCODED STRING       → t('module.context.element.state') i18n key
+HARDCODED COLOUR       → var(--aegiscore-[token-name]) CSS variable
+HARDCODED NUMBER       → env variable OR tenant config field OR design token
+HARDCODED ROLE STRING  → RoleEnum.CFO / RoleEnum.Student etc. from auth types
+HARDCODED ROUTE        → ROUTES.finance.gl.entry or equivalent from route registry
+HARDCODED FEATURE FLAG → featureFlags.get('feature-name') from flag store
+HARDCODED THRESHOLD    → tenantConfig.analytics.anomalyThresholdSigma
+HARDCODED FISCAL YEAR  → tenantConfig.fiscalYear.startMonth / endMonth
+HARDCODED CURRENCY     → tenantConfig.currency.code / tenantConfig.currency.format
+HARDCODED DATE FORMAT  → Intl.DateTimeFormat with userLocale from session
+HARDCODED CHART SIZE   → token('chart.height.mobile') etc. from token system
+HARDCODED API URL      → process.env.API_BASE_URL or service discovery
+
+═══════════════════════════════════════════════════════════════
+DYNAMIC SYSTEMS THAT MUST EXIST (create if missing)
+═══════════════════════════════════════════════════════════════
+
+① TENANT CONFIG OBJECT (loaded at boot, cached in Zustand)
+  Shape:
+  {
+    id: string,
+    name: string,                          // never hardcoded anywhere
+    type: 'public' | 'private' | 'govt',
+    currency: {
+      code: string,                        // 'PKR' | 'USD' | etc.
+      format: 'south-asian' | 'western',
+      symbol: string
+    },
+    fiscalYear: {
+      startMonth: number,                  // 1–12, default 7 (July)
+      endMonth: number                     // 1–12, default 6 (June)
+    },
+    locale: {
+      default: string,                     // 'en-PK' | 'ur-PK' | 'ar'
+      available: string[]
+    },
+    calendar: 'gregorian' | 'hijri',
+    personalityMode: {
+      enabled: boolean,
+      lockedOff: boolean,
+      defaultByRole: Record<RoleEnum, boolean>
+    },
+    analytics: {
+      anomalyThresholdSigma: number,       // default 2
+      insightChipEnabled: boolean
+    },
+    branding: {
+      primaryColor: string,               // injected as CSS variable at runtime
+      logoUrl: string,
+      portalName: string
+    },
+    features: Record<string, boolean>     // feature flags
+  }
+
+② ROUTE REGISTRY (single source of truth for all routes)
+  All routes defined once, exported as typed constants.
+  Zero route strings written anywhere else in the codebase.
+
+③ ROLE ENUM (single source of truth for all role identifiers)
+  Never compare against 'CFO' or 'student' string literals.
+  Always use RoleEnum.CFO, RoleEnum.Student etc.
+
+④ DESIGN TOKEN SYSTEM (all visual values)
+  All spacing, colour, typography, chart sizing from CSS custom properties.
+  Zero px values in JS. Zero hex codes in components.
+
+⑤ i18n KEY REGISTRY (all user-visible strings)
+  Every string that a user sees is a key.
+  Keys follow: t('module.context.element.state[.personality]')
+  Missing keys fall back silently — never show a raw key to a user.
+
+⑥ FEATURE FLAG STORE
+  All feature availability checked via featureFlags.isEnabled('flag-name').
+  Flags are tenant-scoped and loaded from the tenant config at boot.
+
+═══════════════════════════════════════════════════════════════
+AUDIT PROCESS — RUN IN THIS ORDER
+═══════════════════════════════════════════════════════════════
+
+STEP 1 — GREP PASS
+  Search for these patterns and list every match with file + line:
+    - Any string inside JSX that is not inside t()
+    - Any colour value: #[0-9a-f]{3,6} | rgb( | hsl( | rgba(
+    - Any string: 'CFO' | 'Registrar' | 'Student' | 'Finance' as identifiers
+    - Any string: 'PKR' written as a literal outside i18n files
+    - Any URL: http | https | localhost | 127.0.0.1 outside .env files
+    - Any port number written as a literal in app code
+    - Any hardcoded insight chip text
+
+STEP 2 — CATEGORISE
+  For each match: classify as STRING / COLOUR / NUMBER / ROLE / ROUTE / ENV / CHART
+
+STEP 3 — REPLACE
+  Apply the replacement strategy from the table above.
+  One replacement at a time. Verify nothing breaks after each batch.
+
+STEP 4 — VERIFY
+  After all replacements:
+    ✓ All strings render correctly in en-PK, ur-PK, and ar locales
+    ✓ Switching tenant currency reformats all amounts across the UI
+    ✓ Switching tenant fiscal year updates all date references
+    ✓ Toggling personality mode switches copy correctly
+    ✓ Changing branding primaryColor reflects everywhere instantly
+    ✓ All chart insight chips compute dynamically from live data
+    ✓ Zero hardcoded values remain in any non-.env, non-i18n, non-token file
+
+═══════════════════════════════════════════════════════════════
+FORBIDDEN PATTERNS — INSTANT REJECTION
+═══════════════════════════════════════════════════════════════
+
+  ✗ Any string a user sees that is not an i18n key
+  ✗ Any colour not from the token system
+  ✗ Any role compared as a string literal
+  ✗ Any route written as a string literal outside the route registry
+  ✗ Any secret, credential, or URL in application code
+  ✗ Any chart label, axis title, or insight chip that is a hardcoded string
+  ✗ Any "// TODO: make this dynamic" comment — if you see one, fix it now
+  ✗ Any tenant-specific value baked into shared components

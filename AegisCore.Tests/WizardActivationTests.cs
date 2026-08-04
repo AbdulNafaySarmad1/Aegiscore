@@ -1,0 +1,103 @@
+using System.Collections.Concurrent;
+using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Abstractions.Cloud;
+using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Finance;
+using AegisCore.Infrastructure.Onboarding;
+using AegisCore.Infrastructure.Security.Pqc;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+
+namespace AegisCore.Tests;
+
+public sealed class WizardActivationTests
+{
+    [Fact]
+    public async Task ModeSelection_CompletesStepZeroAndPersistsOnlyServerSideState()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        await using var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options);
+        await db.Database.EnsureCreatedAsync();
+        var tenantId = Guid.NewGuid();
+        var session = new WizardSession { Id = Guid.NewGuid(), TenantId = tenantId };
+        db.WizardSessions.Add(session);
+        await db.SaveChangesAsync();
+        var service = new WizardSessionService(db, Mock.Of<IPasswordHashingService>());
+
+        var changed = await service.ChangeModeAsync(tenantId, session.Id, "live", "AE-LICENSE", CancellationToken.None);
+
+        Assert.Equal(1, changed.CurrentStep);
+        Assert.Equal("paid", changed.LicenseMode);
+        Assert.Equal("AE-LICENSE", changed.LicenseKey);
+        Assert.Contains("\"licenseValidated\":true", changed.StepData, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Activation_RollsBackInvalidConfirmation_ThenCreatesTenantUsersAndPqcRegistry()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        await using var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options);
+        await db.Database.EnsureCreatedAsync();
+        var tenantId = Guid.NewGuid();
+        var session = new WizardSession
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, CurrentStep = 8, LicenseMode = "demo", StepData = CompleteStepData
+        };
+        db.WizardSessions.Add(session);
+        db.WizardAdminCredentials.AddRange(
+            Credential(session, tenantId, "admin@aegiscore.test", "Super Admin"),
+            Credential(session, tenantId, "finance@aegiscore.test", "Finance Controller"));
+        await db.SaveChangesAsync();
+        var passwords = new Mock<IPasswordHashingService>();
+        var sessions = new WizardSessionService(db, passwords.Object);
+        var queue = new PqcSigningQueue();
+        await queue.StartAsync(CancellationToken.None);
+        try
+        {
+            var signer = new PqcSignatureService(new MemorySecretService(), db, queue);
+            var activation = new WizardActivationService(db, sessions, new WizardProvisioningService(db, signer, new AccountingStandardsEngine(db)));
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => activation.ActivateAsync(tenantId, session.Id, "attacker@invalid.test", CancellationToken.None));
+            Assert.False(await db.Tenants.AnyAsync());
+            Assert.Null((await db.WizardSessions.IgnoreQueryFilters().SingleAsync()).CompletedAt);
+
+            await activation.ActivateAsync(tenantId, session.Id, "admin@aegiscore.test", CancellationToken.None);
+
+            var tenant = await db.Tenants.SingleAsync();
+            Assert.Equal("AEGIS", tenant.ShortName);
+            Assert.True(tenant.IsActive);
+            Assert.Equal(2, await db.Users.IgnoreQueryFilters().CountAsync(x => x.TenantId == tenantId));
+            Assert.Contains(await db.FinancePqcKeys.IgnoreQueryFilters().ToListAsync(), key => key.TenantId == tenantId && key.Purpose == "voucher-approval" && key.IsActive);
+            Assert.NotNull((await db.WizardSessions.IgnoreQueryFilters().SingleAsync()).CompletedAt);
+        }
+        finally { await queue.StopAsync(CancellationToken.None); }
+    }
+
+    private static WizardAdminCredential Credential(WizardSession session, Guid tenantId, string email, string role)
+        => new() { Id = Guid.NewGuid(), SessionId = session.Id, TenantId = tenantId, FullName = role, Email = email, RoleName = role, PasswordHash = "argon2id-test-hash" };
+
+    private const string CompleteStepData = """
+        {
+          "step0":{"mode":"demo"},
+          "step1":{"name":"Aegis University","shortName":"AEGIS","street":"1 University Road","city":"Karachi","country":"Pakistan","timezone":"Asia/Karachi","language":"English","contactName":"Admin User","contactEmail":"admin@aegiscore.test"},
+          "step2":{"departments":[{"name":"Computer Science","code":"CS"}],"programmes":[{"name":"BS Computer Science","code":"BSCS","degreeLevel":"Bachelor","duration":8,"creditHours":130}],"academicYear":"2026-2027","semesterStart":"2026-08-01","semesterEnd":"2026-12-31","calendarType":"Semester","term":"Fall 2026"},
+          "step4":{"standard":"IFRS","baseCurrency":"PKR","fiscalYear":"FY2026-27","fiscalYearStartMonth":7,"rateSource":"SBP"},
+          "step5":{"assignmentAmount":"125000"},
+          "step6":{"users":[{"name":"Admin User","email":"admin@aegiscore.test","role":"Super Admin"},{"name":"Finance User","email":"finance@aegiscore.test","role":"Finance Controller"}]},
+          "step7":{"confirmed":true}
+        }
+        """;
+
+    private sealed class MemorySecretService : ISecretService
+    {
+        private readonly ConcurrentDictionary<string, string> _values = new(StringComparer.Ordinal);
+        public Task<string> GetSecretAsync(string secretName, CancellationToken cancellationToken = default) => Task.FromResult(_values[secretName]);
+        public Task SetSecretAsync(string secretName, string value, CancellationToken cancellationToken = default) { _values[secretName] = value; return Task.CompletedTask; }
+        public Task DeleteSecretAsync(string secretName, CancellationToken cancellationToken = default) { _values.TryRemove(secretName, out _); return Task.CompletedTask; }
+        public Task<bool> SecretExistsAsync(string secretName, CancellationToken cancellationToken = default) => Task.FromResult(_values.ContainsKey(secretName));
+    }
+}

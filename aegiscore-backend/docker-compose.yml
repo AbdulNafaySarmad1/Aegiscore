@@ -1,0 +1,49 @@
+services:
+  api:
+    image: aegiscore-api:latest
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
+      Setup__Mode: "false"
+      AEGISCORE_INSTALLATION_COMPLETED: "true"
+      Database__AutoMigrate: "true"
+      AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:?Set AEGISCORE_DB_CONNECTION in .env or pass --env-file .env.example}
+      AEGISCORE_REDIS_CONNECTION: ${AEGISCORE_REDIS_CONNECTION:-redis:6379}
+      AEGISCORE_STORAGE_PROVIDER: ${AEGISCORE_STORAGE_PROVIDER:-local}
+      AEGISCORE_STORAGE_LOCAL_PATH: ${AEGISCORE_STORAGE_LOCAL_PATH:-/app/storage}
+      AEGISCORE_LICENSE_SERVER_URL: ${AEGISCORE_LICENSE_SERVER_URL:-https://license.aegiscore.systems}
+      AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:?Set AEGISCORE_ENCRYPTION_KEY in .env or pass --env-file .env.example}
+      AEGISCORE_PQC_KEY_BASE64: ${AEGISCORE_PQC_KEY_BASE64:?Set AEGISCORE_PQC_KEY_BASE64 in .env or pass --env-file .env.example}
+      AEGISCORE_JWT_SECRET: ${AEGISCORE_JWT_SECRET:?Set AEGISCORE_JWT_SECRET in .env or pass --env-file .env.example}
+      Governance__FeedbackEncryptionKeyBase64: ${Governance__FeedbackEncryptionKeyBase64:?Set Governance__FeedbackEncryptionKeyBase64 in .env or pass --env-file .env.example}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aegiscore}
+      POSTGRES_USER: ${POSTGRES_USER:-aegiscore}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env or pass --env-file .env.example}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegiscore -d aegiscore"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

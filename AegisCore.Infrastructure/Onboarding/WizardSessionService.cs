@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text;
 using AegisCore.Domain.Entities;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Infrastructure;
@@ -10,6 +11,7 @@ namespace AegisCore.Infrastructure.Onboarding;
 public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingService passwords)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private const int MaxStepPayloadBytes = 128 * 1024;
 
     public async Task<WizardSession> GetOrCreateAsync(Guid tenantId, string? ip, CancellationToken ct)
     {
@@ -23,9 +25,14 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
         return session;
     }
 
+    public Task<WizardSession?> FindAsync(Guid tenantId, Guid sessionId, CancellationToken ct)
+        => db.WizardSessions.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId, ct);
+
     public async Task<WizardSession> SaveAsync(Guid tenantId, Guid sessionId, int step, JsonElement data, CancellationToken ct)
     {
         if (step is < 0 or > 7) throw new ArgumentOutOfRangeException(nameof(step));
+        if (Encoding.UTF8.GetByteCount(data.GetRawText()) > MaxStepPayloadBytes)
+            throw new InvalidOperationException("Wizard step payload exceeds the 128 KiB limit.");
         var session = await db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
             ?? throw new KeyNotFoundException("Wizard session was not found.");
@@ -57,6 +64,46 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
         if (step == 0 && data.TryGetProperty("mode", out var mode)) session.LicenseMode = mode.GetString() ?? "demo";
         if (step == 0 && data.TryGetProperty("licenseKey", out var key) && key.ValueKind == JsonValueKind.String)
             session.LicenseKey = key.GetString();
+        await db.SaveChangesAsync(ct);
+        return session;
+    }
+
+    public async Task<WizardSession> ChangeModeAsync(Guid tenantId, Guid sessionId, string mode, string? licenseKey, CancellationToken ct)
+    {
+        var normalizedMode = mode.Trim().ToLowerInvariant() switch
+        {
+            "demo" => "demo",
+            "paid" or "live" => "paid",
+            _ => throw new ArgumentException("Mode must be demo or live.", nameof(mode))
+        };
+        var session = await db.WizardSessions.IgnoreQueryFilters()
+            .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
+            ?? throw new KeyNotFoundException("Wizard session was not found.");
+
+        session.LicenseMode = normalizedMode;
+        session.LicenseKey = normalizedMode == "paid" ? licenseKey?.Trim() : null;
+        var root = JsonNode.Parse(session.StepData)?.AsObject() ?? new JsonObject();
+        var step0 = root["step0"]?.AsObject() ?? new JsonObject();
+        step0["mode"] = normalizedMode;
+        if (normalizedMode == "paid")
+        {
+            step0["licenseKey"] = session.LicenseKey;
+            step0["licenseValidated"] = true;
+        }
+        else
+        {
+            step0.Remove("licenseKey");
+            step0.Remove("licenseValidated");
+            var step3 = root["step3"]?.AsObject() ?? new JsonObject();
+            step3["enabledGateways"] = new JsonArray();
+            step3["configuredGateways"] = new JsonArray();
+            root["step3"] = step3;
+        }
+        root["step0"] = step0;
+        session.StepData = root.ToJsonString(JsonOptions);
+        session.CurrentStep = Math.Max(session.CurrentStep, 1);
+        if (normalizedMode == "paid" && session.CurrentStep > 3)
+            session.CurrentStep = 3;
         await db.SaveChangesAsync(ct);
         return session;
     }
@@ -105,7 +152,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
             var role = await db.Roles.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Name == credential.RoleName, ct);
             if (role is null)
             {
-                role = new Role { Id = Guid.NewGuid(), TenantId = tenantId, Name = credential.RoleName, IsSystem = true, Description = "Created by the Nocturne setup wizard." };
+                role = new Role { Id = Guid.NewGuid(), TenantId = tenantId, Name = credential.RoleName, IsSystem = true, Description = "Created by the AegisCore setup wizard." };
                 db.Roles.Add(role);
             }
             if (!await db.UserRoles.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.UserId == user.Id && x.RoleId == role.Id, ct))

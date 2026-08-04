@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 namespace AegisCore.API.Controllers;
 
 [ApiController]
-public sealed class NocturneLicenseController(
+public sealed class AegisCoreLicenseController(
     ILicenseService licenses,
     AegisDbContext db,
     IConfiguration configuration) : ControllerBase
@@ -46,7 +46,7 @@ public sealed class NocturneLicenseController(
     public async Task<IActionResult> Heartbeat([FromBody] HeartbeatRequest request, CancellationToken ct)
     {
         var configuredToken = configuration["License:HeartbeatServerToken"];
-        var suppliedToken = Request.Headers["X-Nocturne-License-Token"].ToString();
+        var suppliedToken = Request.Headers["X-AegisCore-License-Token"].ToString();
         if (string.IsNullOrWhiteSpace(configuredToken)
             || string.IsNullOrWhiteSpace(suppliedToken)
             || !CryptographicOperations.FixedTimeEquals(

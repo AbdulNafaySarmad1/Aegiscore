@@ -1,0 +1,458 @@
+═══════════════════════════════════════════════════════════════════════════════════
+AUTO CLASS GENERATION ENGINE & LMS INTEGRATION
+═══════════════════════════════════════════════════════════════════════════════════
+
+The system automatically generates classes, assigns faculty, enrolls students,
+and provisions those classes in the university's chosen LMS — Google Classroom,
+Microsoft Teams, Moodle, or any configured integration.
+
+Everything is dynamic. The system does not assume which LMS is in use.
+It does not assume class sizes. It does not assume faculty assignment rules.
+It does not assume naming conventions.
+Everything is driven by tenant configuration.
+
+═══════════════════════════════════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════════════════════════════════
+
+CLASS:
+  A class is a specific offering of a course in a specific semester,
+  with a specific faculty member, a specific set of enrolled students,
+  and a specific section number.
+  Classes are provisioned in the LMS as rooms, teams, or course spaces.
+
+SECTION:
+  If a course has more students than tenantConfig.classes.maxStudentsPerSection,
+  it is split into multiple sections. Each section is a separate class.
+  Section capacity is configurable at tenant level, degree level, course level,
+  and offering level — most specific config wins.
+
+AUTO GENERATION:
+  At the start of each semester (or on demand), the engine:
+    → Reads all active course offerings for the semester
+    → Reads enrolled students per course offering
+    → Reads faculty assignments per course offering
+    → Splits into sections based on capacity config
+    → Generates class records in the database
+    → Provisions class spaces in the configured LMS
+    → Assigns faculty and students to those spaces
+    → Sends notifications to faculty and students
+
+═══════════════════════════════════════════════════════════════════════════════════
+CLASS GENERATION ENGINE — STEP BY STEP
+═══════════════════════════════════════════════════════════════════════════════════
+
+STEP 1 — TRIGGER
+  Auto class generation is triggered by:
+    → Scheduled trigger: tenantConfig.classes.autoGenerateCron
+      (e.g. '0 8 1 9 *' = 08:00 on 1 September every year)
+    → Manual trigger: authorised role initiates via UI
+    → API trigger: POST /api/classes/generate
+    → Event trigger: enrollment period closes for a semester
+
+  On trigger:
+    → Resolve target semester from tenantConfig.academicCalendar
+    → Create ClassGenerationJob record
+    → Return jobId — processing is async
+
+STEP 2 — COURSE OFFERING RESOLUTION
+  For the target semester:
+    → Fetch all CourseOffering records with status = 'open'
+    → For each offering:
+      → Count enrolled students
+      → Resolve assigned faculty (may be multiple per course)
+      → Resolve section capacity:
+          offering.capacity
+          ?? tenantConfig.classes.capacityByCourseType[course.courseType]
+          ?? tenantConfig.classes.defaultCapacity
+      → Calculate sections needed:
+          sectionsNeeded = ceil(enrolledCount / sectionCapacity)
+      → If sectionsNeeded > tenantConfig.classes.maxSectionsPerCourse:
+          flag for admin review
+
+STEP 3 — STUDENT DISTRIBUTION
+  Distribute students across sections:
+    → Distribution strategy from tenantConfig.classes.distributionStrategy:
+        'alphabetical'    → sort by student name, fill sections sequentially
+        'random'          → random assignment (seeded for reproducibility)
+        'balanced'        → balance gender, CGPA, or other attributes
+                            (attributes defined in tenantConfig.classes.balanceAttributes)
+        'manual'          → generate sections but do not assign students
+                            (admin assigns manually)
+        'existing'        → preserve existing section assignments from previous semester
+                            where possible
+    → Store section assignment per student per course in StudentSectionEnrollment
+
+STEP 4 — FACULTY ASSIGNMENT
+  Assign faculty to sections:
+    → If single faculty for course: assigned to all sections
+    → If multiple faculty: distribute per tenantConfig.classes.facultyDistributionRules
+        'primary_secondary'   → one primary, others as co-instructors
+        'split_sections'      → each faculty owns specific sections
+        'shared_all'          → all faculty on all sections
+        'manual'              → flag for admin to assign
+    → If no faculty assigned yet: class created with status = 'pending_faculty'
+      and relevant role notified via tenantConfig.classes.notifyRoleId
+
+STEP 5 — CLASS RECORD CREATION
+  Create Class record for each section:
+
+  Class {
+    id:                   string
+    tenantId:             string
+    courseOfferingId:     string
+    courseId:             string
+    sectionNumber:        number
+    sectionLabel:         string          // generated from tenantConfig.classes.sectionLabelPattern
+                                          // e.g. '{courseCode}-{semester}-{year}-{sectionNumber}'
+                                          // e.g. 'CS-116T-Fall-2025-A'
+    academicYear:         string
+    semester:             string
+    primaryFacultyId:     string | null
+    coFacultyIds:         string[]
+    enrolledStudentIds:   string[]
+    capacity:             number
+    enrolledCount:        number
+    status:               string          // 'draft' | 'active' | 'pending_faculty' |
+                                          // 'pending_lms' | 'lms_provisioned' | 'cancelled'
+    lmsProvisions:        LMSProvision[]  // one per configured LMS integration
+    generationJobId:      string
+    createdAt:            timestamp
+  }
+
+  LMSProvision {
+    lmsId:                string          // which LMS integration
+    externalId:           string          // the ID in the external LMS
+    externalUrl:          string | null   // link to the class in the LMS
+    status:               string          // 'pending' | 'provisioned' | 'failed' | 'synced'
+    lastSyncAt:           timestamp | null
+    provisionedAt:        timestamp | null
+    errorLog:             string | null
+  }
+
+STEP 6 — LMS PROVISIONING
+  For each configured LMS integration (can be multiple simultaneously):
+    → Resolve LMS adapter from tenantConfig.lms.integrations[].provider
+    → Call adapter.provisionClass(class, lmsConfig)
+    → Store external ID and URL in LMSProvision
+    → On failure: retry tenantConfig.lms.retryAttempts times
+      with tenantConfig.lms.retryDelayMs backoff
+    → On final failure: status = 'failed', alert notifyRoleId
+
+STEP 7 — NOTIFICATION
+  On class generation completion:
+    → Notify faculty: t('class.generation.faculty.notify', { classLabel, courseTitle, studentCount, lmsUrl })
+    → Notify students: t('class.generation.student.notify', { classLabel, courseTitle, facultyName, lmsUrl })
+    → Notification channel from tenantConfig.notifications.preferredChannel
+      ('email' | 'sms' | 'in_app' | 'push' | 'all')
+    → Notification templates are i18n keys — fully dynamic
+
+═══════════════════════════════════════════════════════════════════════════════════
+LMS INTEGRATION ARCHITECTURE — PLUGGABLE ADAPTER PATTERN
+═══════════════════════════════════════════════════════════════════════════════════
+
+Every LMS integration is an adapter implementing the same interface.
+The engine calls the interface — it does not know which LMS is behind it.
+New LMS integrations are added as new adapters — zero changes to the engine.
+
+LMSAdapter interface {
+  provisionClass(class: Class, config: LMSConfig): Promise<LMSProvision>
+  updateClass(class: Class, config: LMSConfig): Promise<LMSProvision>
+  archiveClass(classId: string, config: LMSConfig): Promise<void>
+  addMember(classId: string, member: Member, role: string, config: LMSConfig): Promise<void>
+  removeMember(classId: string, memberId: string, config: LMSConfig): Promise<void>
+  syncRoster(classId: string, config: LMSConfig): Promise<RosterSyncResult>
+  getClassUrl(externalId: string, config: LMSConfig): Promise<string>
+  healthCheck(config: LMSConfig): Promise<HealthCheckResult>
+}
+
+─────────────────────────────────────────────────────────────────────────────────
+ADAPTER 1 — GOOGLE CLASSROOM
+─────────────────────────────────────────────────────────────────────────────────
+
+  Config (from tenantConfig.lms.integrations where provider = 'google_classroom'):
+    provider:             'google_classroom'
+    credentials:          from SECRETS_PROVIDER — never hardcoded
+    domain:               string            // university's Google Workspace domain
+    adminEmail:           string            // service account impersonation email
+    classNamePattern:     string            // i18n key or template string
+                                            // e.g. '{courseCode} - {courseTitle} - {semester} {year}'
+    classSectionPattern:  string            // e.g. 'Section {sectionLabel}'
+    defaultCalendarId:    string | null     // link to Google Calendar if configured
+    autoInvite:           boolean           // send invite vs just add to roster
+    enrollmentCode:       boolean           // generate enrollment codes
+    syncSchedule:         string            // cron for roster sync
+
+  provisionClass implementation:
+    → Authenticate via Google Workspace Admin SDK (service account)
+    → Create Google Classroom course:
+        name: t(config.classNamePattern, { courseCode, courseTitle, semester, year })
+        section: t(config.classSectionPattern, { sectionLabel })
+        ownerId: primaryFaculty.googleEmail (resolved from university directory)
+    → Add co-faculty as teachers via Google Classroom API
+    → Add students as students via Google Classroom API
+      (using student.googleEmail from university directory)
+    → If autoInvite = true: send invitations via API
+    → Store course.id as externalId
+    → Store course alternateLink as externalUrl
+
+  Directory resolution:
+    → Faculty and student Google emails resolved from university directory
+    → Directory provider from tenantConfig.directory.provider:
+        'google_workspace'  → Google Directory API
+        'azure_ad'          → Microsoft Graph API
+        'ldap'              → LDAP/Active Directory
+        'local'             → AegisCore user database
+        'custom'            → pluggable adapter
+    → If email not found in directory: flag user, skip provisioning for that member,
+      alert notifyRoleId
+
+─────────────────────────────────────────────────────────────────────────────────
+ADAPTER 2 — MICROSOFT TEAMS
+─────────────────────────────────────────────────────────────────────────────────
+
+  Config:
+    provider:             'microsoft_teams'
+    credentials:          from SECRETS_PROVIDER
+    tenantId:             string            // Azure AD tenant ID — from env, never hardcoded
+    teamNamePattern:      string            // template pattern
+    channelStructure:     ChannelConfig[]   // which channels to create per class
+    autoCreateCalendar:   boolean
+    autoCreateNotebook:   boolean          // OneNote class notebook
+    syncSchedule:         string
+
+  ChannelConfig {
+    nameKey:              string            // i18n key for channel name
+    type:                 string            // 'standard' | 'private'
+    defaultMembers:       string            // 'all' | 'faculty_only' | 'students_only'
+  }
+
+  provisionClass implementation:
+    → Authenticate via Microsoft Graph API (app registration)
+    → Create Team via Microsoft Education API:
+        displayName: t(config.teamNamePattern, { courseCode, courseTitle, semester, year })
+        mailNickname: generated from courseCode + section + semester
+        template: 'educationClass'
+    → Add channels per config.channelStructure
+    → Add faculty as owners via Graph API
+    → Add students as members via Graph API
+    → If autoCreateNotebook: provision OneNote Class Notebook
+    → If autoCreateCalendar: create calendar events for class schedule
+    → Store team.id as externalId
+    → Store team webUrl as externalUrl
+
+─────────────────────────────────────────────────────────────────────────────────
+ADAPTER 3 — MOODLE
+─────────────────────────────────────────────────────────────────────────────────
+
+  Config:
+    provider:             'moodle'
+    baseUrl:              string            // university's Moodle instance URL — from env
+    wsToken:              string            // from SECRETS_PROVIDER
+    wsFunction:           string            // Moodle web service endpoint
+    courseFormatPlugin:   string            // Moodle course format — configurable
+    categoryMapping:      CategoryMap[]     // how degree programs map to Moodle categories
+    enrollmentMethod:     string            // 'manual' | 'self' | 'cohort'
+    roleMapping: {
+      faculty:            number            // Moodle role ID for teacher
+      student:            number            // Moodle role ID for student
+      coFaculty:          number            // Moodle role ID for non-editing teacher
+    }
+    syncSchedule:         string
+    fullName:             string            // pattern for Moodle course full name
+    shortName:            string            // pattern for Moodle course short name
+
+  CategoryMap {
+    degreeSlug:           string            // our degree program slug
+    moodleCategoryId:     number            // Moodle category ID
+  }
+
+  provisionClass implementation:
+    → Authenticate via Moodle Web Services token
+    → Resolve Moodle category ID from config.categoryMapping[degree.slug]
+    → Create Moodle course via core_course_create_courses:
+        fullname:   t(config.fullName, { courseCode, courseTitle, semester, year, section })
+        shortname:  t(config.shortName, { courseCode, semester, section })
+        categoryid: resolved category ID
+        format:     config.courseFormatPlugin
+    → Enroll faculty via enrol_manual_enrol_users with config.roleMapping.faculty
+    → Enroll co-faculty with config.roleMapping.coFaculty
+    → Enroll students with config.roleMapping.student
+    → Store Moodle course ID as externalId
+    → Construct and store Moodle course URL as externalUrl
+
+  MOODLE COEXISTENCE MODE:
+    The university already has Moodle running. AegisCore must integrate without
+    disrupting existing Moodle setup.
+
+    coexistenceMode config options:
+      'provision_only':
+        → AegisCore creates new courses in Moodle for new offerings
+        → Existing Moodle courses are untouched
+        → No sync back from Moodle to AegisCore
+
+      'bidirectional_sync':
+        → AegisCore provisions new courses in Moodle
+        → Moodle grade submissions sync back to AegisCore
+        → Enrollment changes in either system sync to the other
+        → Conflict resolution: tenantConfig.lms.conflictResolution
+          'aegiscore_wins' | 'moodle_wins' | 'latest_wins' | 'flag_for_review'
+
+      'readonly_import':
+        → AegisCore reads existing Moodle courses and imports them
+        → No write to Moodle
+        → AegisCore is the system of record for everything except content
+
+      'sso_only':
+        → AegisCore provides SSO via Moodle's auth plugin
+        → No course provisioning — Moodle manages courses independently
+        → AegisCore syncs enrollment data only
+
+    Moodle SSO integration:
+      → Moodle auth plugin: auth_oauth2 or auth_saml2
+      → Identity provider: AegisCore acts as OAuth2/SAML IdP
+      → Students and faculty log into Moodle with their AegisCore credentials
+      → No separate Moodle account management
+
+─────────────────────────────────────────────────────────────────────────────────
+ADAPTER 4 — CUSTOM / GENERIC LMS
+─────────────────────────────────────────────────────────────────────────────────
+
+  For LMS platforms not natively supported:
+
+  Config:
+    provider:             'custom'
+    adapterModulePath:    string            // path to custom adapter module
+    baseUrl:              string            // from env
+    authMethod:           string            // 'api_key' | 'oauth2' | 'basic' | 'custom'
+    authConfig:           object            // from SECRETS_PROVIDER
+    webhookSecret:        string            // from SECRETS_PROVIDER
+    provisionEndpoint:    string            // POST endpoint for class creation
+    enrollEndpoint:       string            // POST endpoint for enrollment
+    syncEndpoint:         string | null     // GET endpoint for roster sync
+    payloadTemplate:      object            // JSON template for API calls
+                                            // supports interpolation of class fields
+
+  The custom adapter sends HTTP requests to the LMS API using the configured
+  endpoints and payload templates. No code changes needed for new LMS platforms.
+
+═══════════════════════════════════════════════════════════════════════════════════
+ROSTER SYNC — ONGOING SYNCHRONISATION AFTER PROVISIONING
+═══════════════════════════════════════════════════════════════════════════════════
+
+After initial provisioning, rosters must stay in sync as:
+  → Students add/drop courses
+  → Faculty assignments change
+  → Section reassignments occur
+  → Students are suspended or reinstated
+
+Sync is driven by events, not polling where possible:
+  → Enrollment change event → trigger syncRoster for affected class
+  → Faculty assignment change → trigger syncRoster
+  → If LMS supports webhooks: register webhook to receive changes from LMS
+  → If LMS does not support webhooks: poll on tenantConfig.lms.syncSchedule cron
+
+Sync conflict resolution:
+  → Driven by tenantConfig.lms.conflictResolution per LMS integration
+  → All conflicts logged to LMSSyncLog with full diff
+  → Conflicts above tenantConfig.lms.conflictAlertThreshold per day
+    trigger alert to notifyRoleId
+
+═══════════════════════════════════════════════════════════════════════════════════
+TENANT CONFIGURATION FOR CLASS GENERATION & LMS
+═══════════════════════════════════════════════════════════════════════════════════
+
+tenantConfig.classes {
+  autoGenerateCron:             string        // cron expression
+  defaultCapacity:              number
+  capacityByCourseType:         Record<string, number>
+  maxSectionsPerCourse:         number
+  sectionLabelPattern:          string        // template for section labels
+  distributionStrategy:         string
+  balanceAttributes:            string[]
+  facultyDistributionRules:     string
+  notifyRoleId:                 string
+  requireAdminApproval:         boolean       // if true, classes need approval before LMS provision
+}
+
+tenantConfig.lms {
+  integrations: [
+    {
+      id:                       string        // UUID for this integration config
+      provider:                 string        // 'google_classroom' | 'microsoft_teams' |
+                                              // 'moodle' | 'custom'
+      enabled:                  boolean
+      isPrimary:                boolean       // primary LMS (shown in student portal)
+      coexistenceMode:          string        // for Moodle
+      retryAttempts:            number
+      retryDelayMs:             number
+      syncSchedule:             string
+      conflictResolution:       string
+      conflictAlertThreshold:   number
+      notifyRoleId:             string
+      // provider-specific config per adapter spec above
+    }
+  ]
+}
+
+tenantConfig.directory {
+  provider:                     string        // 'google_workspace' | 'azure_ad' |
+                                              // 'ldap' | 'local' | 'custom'
+  credentials:                  from SECRETS_PROVIDER
+  syncSchedule:                 string
+  userIdentifierField:          string        // which field maps to LMS user
+                                              // e.g. 'email' | 'username' | 'employeeId'
+}
+
+tenantConfig.notifications {
+  preferredChannel:             string        // 'email' | 'sms' | 'in_app' | 'push' | 'all'
+  classGenerationTemplates: {
+    faculty:                    string        // i18n key
+    student:                    string        // i18n key
+  }
+}
+
+═══════════════════════════════════════════════════════════════════════════════════
+WHAT IS NEVER HARDCODED IN THIS SYSTEM
+═══════════════════════════════════════════════════════════════════════════════════
+
+  ✗ LMS provider names in engine logic — adapter pattern only
+  ✗ Section capacity — always from config
+  ✗ Student distribution strategy — always from config
+  ✗ Class or team naming conventions — always from i18n key patterns
+  ✗ LMS credentials — always from SECRETS_PROVIDER
+  ✗ LMS URLs — always from env or tenantConfig
+  ✗ Notification templates — always i18n keys
+  ✗ Cron schedules — always from tenantConfig
+  ✗ Role IDs in LMS (e.g. Moodle role IDs) — always from tenantConfig
+  ✗ Google Workspace domain — always from tenantConfig
+  ✗ Azure AD tenant ID — always from env
+  ✗ Sync conflict resolution rules — always from tenantConfig
+  ✗ Faculty assignment rules — always from tenantConfig
+  ✗ Directory provider — always from tenantConfig
+
+═══════════════════════════════════════════════════════════════════════════════════
+DONE CHECKLIST — CLASS GENERATION & LMS
+═══════════════════════════════════════════════════════════════════════════════════
+
+  ✓ Class generation triggered by cron, manual, API, and event
+  ✓ Section capacity resolved from most-specific config — never hardcoded
+  ✓ Student distribution strategy driven by tenantConfig
+  ✓ Faculty assignment rules driven by tenantConfig
+  ✓ LMS provisioning via pluggable adapter — engine never knows which LMS
+  ✓ Google Classroom adapter: creates course, adds faculty, adds students via directory
+  ✓ Microsoft Teams adapter: creates team, channels, adds owners and members
+  ✓ Moodle adapter: supports provision_only, bidirectional_sync, readonly_import, sso_only
+  ✓ Custom adapter: HTTP-based, no code changes needed for new platforms
+  ✓ Roster sync driven by events with polling fallback
+  ✓ Sync conflicts logged and alerted per config
+  ✓ Directory lookup pluggable — Google, Azure AD, LDAP, local, custom
+  ✓ All notifications via i18n keys — no hardcoded strings
+  ✓ All credentials via SECRETS_PROVIDER — never in code or config files
+  ✓ Multiple LMS integrations simultaneously per tenant
+  ✓ Class generation requires admin approval if tenantConfig.classes.requireAdminApproval
+  ✓ Moodle coexistence — does not disrupt existing Moodle setup
+  ✓ SSO from AegisCore to Moodle via OAuth2 or SAML
+  ✓ All LMS provisioning async with jobId tracking
+  ✓ Failed provisions retried per tenantConfig.lms.retryAttempts
+  ✓ All class and section labels from configurable patterns — never hardcoded

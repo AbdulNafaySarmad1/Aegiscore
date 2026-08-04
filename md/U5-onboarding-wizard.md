@@ -1,7 +1,7 @@
-# Nocturne — Onboarding Wizard Prompt
+# AegisCore — Onboarding Wizard Prompt
 
 ## Role
-You are a senior .NET 10 / C# 14 full-stack engineer building the Nocturne first-run onboarding wizard. This wizard is the very first thing any university sees when they spin up Nocturne for the first time. It must be polished, bulletproof, fully dynamic, and work for ANY university — zero hardcoding of any institution-specific value anywhere.
+You are a senior .NET 10 / C# 14 full-stack engineer building the AegisCore first-run onboarding wizard. This wizard is the very first thing any university sees when they spin up AegisCore for the first time. It must be polished, bulletproof, fully dynamic, and work for ANY university — zero hardcoding of any institution-specific value anywhere.
 
 ## Context
 - Stack: C# 14, .NET 10, Blazor Server (or Razor Pages — whichever is already in use in the project)
@@ -17,8 +17,8 @@ You are a senior .NET 10 / C# 14 full-stack engineer building the Nocturne first
 ## Wizard Flow — 7 Steps
 
 ### Step 1 — Welcome Screen
-- Display Nocturne logo and version number (pulled from assembly, not hardcoded)
-- Heading: "Welcome to Nocturne — Let's get your university set up"
+- Display AegisCore logo and version number (pulled from assembly, not hardcoded)
+- Heading: "Welcome to AegisCore — Let's get your university set up"
 - Single CTA button: "Begin Setup"
 - No university-specific content on this screen
 
@@ -71,14 +71,14 @@ Fields:
 
 ### Step 6 — Subdomain & DNS Setup
 Display:
-- "Your Nocturne portal will be accessible at a subdomain of your university website."
-- **Suggested subdomain prefix** (editable text input, default: `nocturne`)
-  - Preview updates live: `nocturne.ssuet.edu.pk` (using university website from Step 2)
+- "Your AegisCore portal will be accessible at a subdomain of your university website."
+- **Suggested subdomain prefix** (editable text input, default: `aegiscore`)
+  - Preview updates live: `aegiscore.ssuet.edu.pk` (using university website from Step 2)
 - **Generate DNS Record** button — produces the exact DNS record they need to add:
 
 ```
 Type:  CNAME
-Name:  nocturne          (or whatever prefix they chose)
+Name:  aegiscore          (or whatever prefix they chose)
 Value: [Cloudflare Pages deployment URL]
 TTL:   Auto
 ```
@@ -86,7 +86,7 @@ TTL:   Auto
 - Display this record in a clearly formatted box with a one-click copy button
 - Instructions: "Log in to your domain registrar or DNS provider and add this CNAME record. DNS propagation typically takes 5–30 minutes."
 - **Verify DNS** button — polls the DNS record every 10 seconds for up to 5 minutes
-  - Success: "DNS verified! Your portal is live at https://nocturne.ssuet.edu.pk"
+  - Success: "DNS verified! Your portal is live at https://aegiscore.ssuet.edu.pk"
   - Timeout: "DNS not yet propagated. You can continue setup and verify later."
 - Option to skip and verify later (non-blocking)
 
@@ -94,9 +94,9 @@ TTL:   Auto
 Fields:
 - **License Key** (text input, required)
   - Option A: Raw paste — user types or pastes the key directly
-  - Option B: Upload license file — user uploads a `.aegis` license file (JSON, cryptographically signed by Nocturne Systems)
+  - Option B: Upload license file — user uploads a `.aegis` license file (JSON, cryptographically signed by AegisCore Systems)
   - Toggle between both options
-- **Validate License** button — calls Nocturne Systems license validation server
+- **Validate License** button — calls AegisCore Systems license validation server
   - On success: show license details:
     - University name (must match Step 2 — if mismatch, reject with clear error)
     - Licensed modules (list with green checkmarks)
@@ -106,7 +106,7 @@ Fields:
 - Do NOT complete wizard until license is validated
 
 ### Completion Screen
-- "Nocturne is ready."
+- "AegisCore is ready."
 - Summary card showing:
   - University name and logo
   - Portal URL
@@ -128,7 +128,7 @@ Fields:
 ### Configuration Storage
 - All wizard outputs stored in a `system_config` table: `key | value | is_encrypted | created_at | updated_at`
 - Sensitive values (connection strings, secrets) encrypted at rest using AES-256
-- Encryption key injected via `NOCTURNE_ENCRYPTION_KEY` environment variable
+- Encryption key injected via `AEGISCORE_ENCRYPTION_KEY` environment variable
 
 ### Security
 - Wizard endpoint is completely unauthenticated (no login required — it runs before any user exists)
@@ -137,8 +137,8 @@ Fields:
 
 ### Theming
 - University primary/secondary colours from Step 2 applied immediately across the UI
-- University logo replaces Nocturne logo in the top bar after Step 2 is saved
-- All subsequent Nocturne screens use these colours and logo — fully white-labelled
+- University logo replaces AegisCore logo in the top bar after Step 2 is saved
+- All subsequent AegisCore screens use these colours and logo — fully white-labelled
 
 ### Error Handling
 - Every step has a "Previous" button (except Step 1)

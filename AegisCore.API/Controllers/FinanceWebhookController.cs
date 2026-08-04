@@ -4,6 +4,7 @@ using System.Text.Json;
 using AegisCore.Application.Finance;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,8 @@ public sealed class FinanceWebhookController(
     AegisDbContext db,
     ISecretService secrets,
     IConnectionMultiplexer redis,
-    IFinanceModuleService finance) : ControllerBase
+    IFinanceModuleService finance,
+    IPqcSignatureService pqc) : ControllerBase
 {
     [HttpPost("{tenantId:guid}/{gatewaySlug}")]
     [RequestSizeLimit(1_048_576)]
@@ -36,6 +38,9 @@ public sealed class FinanceWebhookController(
         var raw = await reader.ReadToEndAsync(ct);
         var signature = Request.Headers["X-Gateway-Signature"].ToString();
         if (raw.Length == 0 || !await IsValidSignatureAsync(configuration.SecretNamespace, raw, signature, ct)) return Ok(new { accepted = true });
+        if (configuration.Environment.Equals("production", StringComparison.OrdinalIgnoreCase)
+            && !await IsValidPqcSignatureAsync(configuration.SecretNamespace, raw, Request.Headers["X-Gateway-PQC-Signature"].ToString(), ct))
+            return Ok(new { accepted = true });
 
         GatewayEnvelope envelope;
         try { envelope = Parse(raw); }
@@ -74,6 +79,20 @@ public sealed class FinanceWebhookController(
             catch (FormatException) { return false; }
         }
         return CryptographicOperations.FixedTimeEquals(expected, actual);
+    }
+
+    private async Task<bool> IsValidPqcSignatureAsync(string secretNamespace, string raw, string supplied, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(supplied)) return false;
+        try
+        {
+            var algorithm = await secrets.GetSecretAsync($"{secretNamespace}/PQC_ALGORITHM", ct);
+            var publicKey = Convert.FromBase64String(await secrets.GetSecretAsync($"{secretNamespace}/PQC_PUBLIC_KEY", ct));
+            var signature = Convert.FromBase64String(supplied);
+            return string.Equals(algorithm, "ML-DSA-65", StringComparison.Ordinal) && pqc.Verify(algorithm, Encoding.UTF8.GetBytes(raw), signature, publicKey);
+        }
+        catch (FormatException) { return false; }
+        catch (InvalidOperationException) { return false; }
     }
 
     private static GatewayEnvelope Parse(string raw)

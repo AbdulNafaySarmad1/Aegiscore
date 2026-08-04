@@ -1,0 +1,57 @@
+{
+  "IFRS": {
+    "basis": "accrual",
+    "receivables_loss_model": "IFRS_9_ECL_STAGE_1_2_3",
+    "revenue": "IFRS_15_FIVE_STEP",
+    "leases": "IFRS_16_SINGLE_MODEL",
+    "inventory_cost_methods": ["FIFO", "WEIGHTED_AVERAGE"],
+    "development_costs": "CAPITALIZE_WHEN_CRITERIA_MET",
+    "comparative_profit_loss_years": 1,
+    "budget_actual_required": false,
+    "interest_accounts_allowed": true
+  },
+  "US_GAAP": {
+    "basis": "accrual",
+    "receivables_loss_model": "ASC_326_CECL",
+    "revenue": "ASC_606",
+    "leases": "ASC_842_DUAL_MODEL",
+    "inventory_cost_methods": ["FIFO", "WEIGHTED_AVERAGE", "LIFO"],
+    "development_costs": "EXPENSE",
+    "comparative_profit_loss_years": 2,
+    "budget_actual_required": false,
+    "interest_accounts_allowed": true
+  },
+  "FRS_102": {
+    "basis": "accrual",
+    "receivables_loss_model": "SECTION_11_12_INCURRED_LOSS",
+    "revenue": "SECTION_23",
+    "leases": "SECTION_20_OPERATING_FINANCE",
+    "inventory_cost_methods": ["FIFO", "WEIGHTED_AVERAGE"],
+    "development_costs": "POLICY_ELECTION",
+    "comparative_profit_loss_years": 1,
+    "budget_actual_required": false,
+    "interest_accounts_allowed": true
+  },
+  "IPSAS": {
+    "basis": "tenant_entity_election_cash_or_accrual",
+    "receivables_loss_model": "IPSAS_41_EXPECTED_CREDIT_LOSS",
+    "revenue": "IPSAS_23_NON_EXCHANGE",
+    "leases": "IPSAS_43",
+    "inventory_cost_methods": ["FIFO", "WEIGHTED_AVERAGE"],
+    "development_costs": "CAPITALIZE_WHEN_CRITERIA_MET",
+    "comparative_profit_loss_years": 1,
+    "budget_actual_required": true,
+    "interest_accounts_allowed": true
+  },
+  "AAOIFI": {
+    "basis": "accrual",
+    "receivables_loss_model": "FAS_30_IMPAIRMENT",
+    "revenue": "FAS_28_MURABAHA",
+    "leases": "FAS_32_IJARAH",
+    "inventory_cost_methods": ["FIFO", "WEIGHTED_AVERAGE"],
+    "development_costs": "EXPENSE_UNLESS_APPROVED",
+    "comparative_profit_loss_years": 1,
+    "budget_actual_required": false,
+    "interest_accounts_allowed": false
+  }
+}

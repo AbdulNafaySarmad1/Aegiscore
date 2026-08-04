@@ -1,8 +1,8 @@
-# Nocturne Cloud Concerns Pitch
+# AegisCore Cloud Concerns Pitch
 
 ## Position
 
-Nocturne does not force a university into one cloud. The same backend can run on local servers, Kubernetes, Azure, AWS-compatible S3/MinIO, or a mixed setup.
+AegisCore does not force a university into one cloud. The same backend can run on local servers, Kubernetes, Azure, AWS-compatible S3/MinIO, or a mixed setup.
 
 ## Architecture
 
@@ -11,7 +11,7 @@ Portal / Mobile Apps
         |
       HTTPS
         |
-Nocturne API on Docker/Kubernetes
+AegisCore API on Docker/Kubernetes
         |
  +------+---------+----------+
  |                |          |

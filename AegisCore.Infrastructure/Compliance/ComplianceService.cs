@@ -3,6 +3,7 @@ using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace AegisCore.Infrastructure.Compliance;
 
@@ -13,18 +14,24 @@ public class ComplianceService : IComplianceService
     private readonly IAuditFindingRepository _findingRepo;
     private readonly ICorrectiveActionPlanRepository _capRepo;
     private readonly ILogger<ComplianceService> _logger;
+    private readonly AegisDbContext _db;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ComplianceService(
         IComplianceFrameworkRepository frameworkRepo,
         IComplianceControlRepository controlRepo,
         IAuditFindingRepository findingRepo,
         ICorrectiveActionPlanRepository capRepo,
+        AegisDbContext db,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<ComplianceService> logger)
     {
         _frameworkRepo = frameworkRepo;
         _controlRepo = controlRepo;
         _findingRepo = findingRepo;
         _capRepo = capRepo;
+        _db = db;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -36,10 +43,11 @@ public class ComplianceService : IComplianceService
 
         var framework = new ComplianceFramework
         {
-            Id = Guid.NewGuid(), Name = name, Code = code, Description = description, Status = ComplianceFrameworkStatus.Active
+            Id = Guid.NewGuid(), TenantId = TenantId(), Name = name, Code = code, Description = description, Status = ComplianceFrameworkStatus.Active
         };
 
         await _frameworkRepo.AddAsync(framework, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Compliance framework registered: {Name} ({Code})", name, code);
         return framework;
     }
@@ -51,12 +59,13 @@ public class ComplianceService : IComplianceService
 
         var control = new ComplianceControl
         {
-            Id = Guid.NewGuid(), FrameworkId = frameworkId, ControlCode = controlCode, Title = title,
+            Id = Guid.NewGuid(), TenantId = TenantId(), FrameworkId = frameworkId, ControlCode = controlCode, Title = title,
             Description = description, OwnerUserId = ownerUserId, OwnerName = ownerName,
             Status = ControlStatus.InProgress, NextReviewDate = DateTime.UtcNow.AddYears(1)
         };
 
         await _controlRepo.AddAsync(control, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
         return control;
     }
 
@@ -68,6 +77,7 @@ public class ComplianceService : IComplianceService
         control.Status = newStatus;
         control.LastReviewedAt = DateTime.UtcNow;
         await _controlRepo.UpdateAsync(control, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Control {Code} status updated to {Status}", control.ControlCode, newStatus);
         return control;
@@ -75,13 +85,15 @@ public class ComplianceService : IComplianceService
 
     public async Task<ControlEvidence> AttachEvidenceAsync(Guid controlId, string fileUrl, string description, Guid uploadedByUserId, CancellationToken cancellationToken = default)
     {
+        _ = await _controlRepo.GetByIdAsync(controlId, cancellationToken) ?? throw new InvalidOperationException("Control not found.");
         var evidence = new ControlEvidence
         {
-            Id = Guid.NewGuid(), ControlId = controlId, FileUrl = fileUrl,
+            Id = Guid.NewGuid(), TenantId = TenantId(), ControlId = controlId, FileUrl = fileUrl,
             Description = description, UploadedByUserId = uploadedByUserId
         };
 
-        await _controlRepo.UpdateAsync(new ComplianceControl(), cancellationToken); // evidence will be added via navigation property
+        _db.ControlEvidences.Add(evidence);
+        await _db.SaveChangesAsync(cancellationToken);
         return evidence;
     }
 
@@ -89,12 +101,13 @@ public class ComplianceService : IComplianceService
     {
         var finding = new AuditFinding
         {
-            Id = Guid.NewGuid(), ControlId = controlId, Title = title, Description = description,
+            Id = Guid.NewGuid(), TenantId = TenantId(), ControlId = controlId, Title = title, Description = description,
             Severity = severity, Status = AuditFindingStatus.Open,
             IdentifiedByUserId = identifiedById, IdentifiedByName = identifiedByName
         };
 
         await _findingRepo.AddAsync(finding, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Audit finding reported: {Title} ({Severity})", title, severity);
         return finding;
     }
@@ -103,12 +116,13 @@ public class ComplianceService : IComplianceService
     {
         var cap = new CorrectiveActionPlan
         {
-            Id = Guid.NewGuid(), FindingId = findingId, Description = description,
+            Id = Guid.NewGuid(), TenantId = TenantId(), FindingId = findingId, Description = description,
             AssignedToUserId = assigneeId, AssignedToName = assigneeName, DueDate = dueDate,
             Status = CAPStatus.Planned
         };
 
         await _capRepo.AddAsync(cap, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
         return cap;
     }
 
@@ -129,6 +143,8 @@ public class ComplianceService : IComplianceService
             finding.ResolvedAt = DateTime.UtcNow;
             await _findingRepo.UpdateAsync(finding, cancellationToken);
         }
+
+        await _db.SaveChangesAsync(cancellationToken);
 
         return cap;
     }
@@ -178,4 +194,9 @@ public class ComplianceService : IComplianceService
             }).ToList()
         };
     }
+
+    private Guid TenantId()
+        => _httpContextAccessor.HttpContext?.Items["TenantId"] as Guid? is { } tenantId && tenantId != Guid.Empty
+            ? tenantId
+            : throw new InvalidOperationException("Tenant context is required.");
 }

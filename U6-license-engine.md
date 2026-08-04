@@ -1,18 +1,18 @@
-# Nocturne — License Engine Prompt
+# AegisCore — License Engine Prompt
 
 ## Role
-You are a .NET 10 / C# 14 engineer building the license validation and enforcement engine for Nocturne. This is not optional — every running instance phones home to Nocturne Systems license server at 08:00 every morning. If the heartbeat fails, the system locks itself.
+You are a .NET 10 / C# 14 engineer building the license validation and enforcement engine for AegisCore. This is not optional — every running instance phones home to AegisCore Systems license server at 08:00 every morning. If the heartbeat fails, the system locks itself.
 
 ## Architecture
 
-### License Server (Nocturne Systems side)
+### License Server (AegisCore Systems side)
 You maintain a separate service (can be same codebase, separate API endpoint, or separate service entirely) that:
 - Issues cryptographically signed license keys
 - Stores license state (active / revoked / expired)
 - Accepts heartbeat pings from university instances
 - Returns heartbeat response (valid / invalid / revoked / expired)
 
-### University Instance (Nocturne side)
+### University Instance (AegisCore side)
 - Contains only a **license validator** — it does not generate keys
 - Stores a copy of the license key
 - Runs a daily heartbeat scheduler at 08:00 AM
@@ -137,7 +137,7 @@ public class LicenseHeartbeatHostedService : BackgroundService
 ```
 
 ### Heartbeat Logic
-1. At 08:00 AM exactly (within 1-minute window), make HTTPS POST to Nocturne Systems license server:
+1. At 08:00 AM exactly (within 1-minute window), make HTTPS POST to AegisCore Systems license server:
    ```
    POST /api/license/heartbeat
    {
@@ -245,12 +245,12 @@ public async Task<IActionResult> CreateAdmissionAsync(...)
 
 Implementation:
 - `[RequireModule]` attribute checks `license_json.licensed_modules` array
-- Returns **HTTP 403** with message: "This module is not included in your license. Contact Nocturne Systems to upgrade."
+- Returns **HTTP 403** with message: "This module is not included in your license. Contact AegisCore Systems to upgrade."
 - Cache module check results in Redis (invalidate on license change)
 
 ---
 
-## Task 7 — License Server Endpoint (Nocturne Systems)
+## Task 7 — License Server Endpoint (AegisCore Systems)
 
 You maintain a separate endpoint (or service) that responds to heartbeat requests:
 
@@ -258,7 +258,7 @@ You maintain a separate endpoint (or service) that responds to heartbeat request
 [HttpPost("/api/license/heartbeat")]
 public async Task<IActionResult> ValidateHeartbeatAsync(HeartbeatRequest req)
 {
-    // Lookup license in Nocturne Systems database
+    // Lookup license in AegisCore Systems database
     var license = await _db.Licenses.FirstOrDefaultAsync(
         l => l.UniversityId == req.UniversityId
     );

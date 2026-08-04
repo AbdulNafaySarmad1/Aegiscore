@@ -1,9 +1,13 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using AegisCore.Infrastructure;
 
 #nullable disable
 
 namespace AegisCore.Infrastructure.Migrations;
 
+[DbContext(typeof(AegisDbContext))]
+[Migration("20260731002000_FinancePaymentPlans")]
 public partial class FinancePaymentPlans : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)

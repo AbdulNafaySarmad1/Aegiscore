@@ -1,7 +1,7 @@
-# Nocturne — Sprint 6: Microsoft Ecosystem (Teams + Moodle LMS + Power BI)
+# AegisCore — Sprint 6: Microsoft Ecosystem (Teams + Moodle LMS + Power BI)
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer integrating Nocturne with the Microsoft ecosystem: automatic Teams class creation, Moodle LMS roster sync, and embedded Power BI dashboards for role-specific analytics.
+You are a senior .NET 10 / C# 14 engineer integrating AegisCore with the Microsoft ecosystem: automatic Teams class creation, Moodle LMS roster sync, and embedded Power BI dashboards for role-specific analytics.
 
 ---
 
@@ -160,8 +160,8 @@ CREATE TABLE teams_sync_log (
 
 ### Setup
 - Moodle instance (self-hosted on Hetzner)
-- LTI 1.3 connection configured between Nocturne and Moodle
-- Nocturne = Tool Consumer, Moodle = Tool Provider
+- LTI 1.3 connection configured between AegisCore and Moodle
+- AegisCore = Tool Consumer, Moodle = Tool Provider
 
 ### Database Table
 ```sql
@@ -213,7 +213,7 @@ public class MoodleRosterSyncService
 }
 ```
 
-### Grade Passback (Moodle Grades → Nocturne)
+### Grade Passback (Moodle Grades → AegisCore)
 ```csharp
 public class MoodleGradePassbackService
 {
@@ -236,7 +236,7 @@ public class MoodleGradePassbackService
             
             if (enrollment != null)
             {
-                // Create or update marks in Nocturne from Moodle
+                // Create or update marks in AegisCore from Moodle
                 var marks = new CourseMarks
                 {
                     CourseId = courseId,
@@ -256,7 +256,7 @@ public class MoodleGradePassbackService
 
 ### SSO (Microsoft 365 Login → Moodle)
 - Moodle OAuth2 provider: Azure AD
-- Same login credentials across Nocturne, Teams, Moodle
+- Same login credentials across AegisCore, Teams, Moodle
 - No separate password management
 
 ---
@@ -265,7 +265,7 @@ public class MoodleGradePassbackService
 
 ### Setup
 - Azure Power BI Premium capacity (or Pro licenses)
-- Nocturne service principal with Power BI API permissions
+- AegisCore service principal with Power BI API permissions
 - Data gateway: PostgreSQL → Power BI Service
 
 ### Database for Embed Config
@@ -397,7 +397,7 @@ public class PowerBIEmbeddedService
 - [ ] Teams auto-provisioning service (Graph API integration)
 - [ ] Teams enrollment sync (add/remove students)
 - [ ] Moodle roster sync (course enrollments)
-- [ ] Moodle grade passback (assignment grades → Nocturne marks)
+- [ ] Moodle grade passback (assignment grades → AegisCore marks)
 - [ ] SSO setup (Azure AD → Moodle)
 - [ ] 5 Power BI dashboards (VC, Registrar, Dean, HOD, Faculty)
 - [ ] Row-level security for HOD/Faculty dashboards

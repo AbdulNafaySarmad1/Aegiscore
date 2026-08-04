@@ -2814,6 +2814,10 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("AccountType")
                         .HasColumnType("integer");
 
+                    b.Property<string>("CashFlowCategory")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -3527,9 +3531,12 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("TenantId", "Code")
                         .IsUnique();
 
                     b.ToTable("CostCenters");
@@ -4662,9 +4669,12 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("TenantId", "Code")
                         .IsUnique();
 
                     b.ToTable("Departments");
@@ -6171,6 +6181,8 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("TenantId", "DemandNumber")
                         .IsUnique();
 
+                    b.HasIndex("TenantId", "Status", "DueDate");
+
                     b.HasIndex("TenantId", "StudentId", "Status");
 
                     b.ToTable("FeeDemands");
@@ -6191,7 +6203,16 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("FeeDemandId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("LastPenaltyAppliedOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("PaidAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("PenaltyAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("RecognizedAmount")
                         .HasColumnType("numeric(19,4)");
 
                     b.Property<int>("Sequence")
@@ -6278,6 +6299,1620 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("FeeStructures");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceAccountingStandardPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PolicyCode")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("StandardCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ValueJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StandardCode", "PolicyCode", "EffectiveFrom")
+                        .IsUnique();
+
+                    b.ToTable("FinanceAccountingStandardPolicies");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceAssetAccountingEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("NewCarryingValue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("PreviousCarryingValue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("Proceeds")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JournalEntryId")
+                        .IsUnique()
+                        .HasFilter("\"JournalEntryId\" IS NOT NULL");
+
+                    b.HasIndex("TenantId", "AssetId", "OccurredAt");
+
+                    b.ToTable("FinanceAssetAccountingEvents", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceAssetAccountingEvents_Values", "\"PreviousCarryingValue\" >= 0 AND \"NewCarryingValue\" >= 0 AND \"Proceeds\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceAuditEvidencePackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditorEngagementId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Framework")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GeneratedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("PeriodFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PeriodTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PqcAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("PqcKeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PqcPublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("PqcSignature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "GeneratedAt");
+
+                    b.ToTable("FinanceAuditEvidencePackages");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceAuditSample", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuditorEngagementId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PeriodFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PeriodTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PopulationCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PopulationType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<int>("SampleSize")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SeedHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("SelectedReferencesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "AuditorEngagementId", "CreatedAt");
+
+                    b.ToTable("FinanceAuditSamples");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceAuditSeal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Algorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int>("EventCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("KeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("MerkleRoot")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("PublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime>("SealedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("Signature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "SealedAt");
+
+                    b.ToTable("FinanceAuditSeals");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceAuditorEngagement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AuditorEmail")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<string>("AuditorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RevokedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ScopesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "ExpiresAt");
+
+                    b.ToTable("FinanceAuditorEngagements");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceBankAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountReference")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("character varying(34)");
+
+                    b.Property<Guid>("ChartOfAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "AccountReference")
+                        .IsUnique();
+
+                    b.ToTable("FinanceBankAccounts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceBankFeedTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("BookingDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("FinanceBankAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("MatchedJournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Narration")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceBankAccountId");
+
+                    b.HasIndex("TenantId", "FinanceBankAccountId", "ExternalId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "BookingDate");
+
+                    b.ToTable("FinanceBankFeedTransactions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("PresentationCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("FinanceConsolidationGroups");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConsolidationGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReportingEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsolidationGroupId");
+
+                    b.HasIndex("TenantId", "ConsolidationGroupId", "ReportingEntityId", "EffectiveFrom")
+                        .IsUnique();
+
+                    b.ToTable("FinanceConsolidationMembers");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationMemoLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChartOfAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ConsolidatedBalance")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("ConsolidationRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("EliminationAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("LedgerBalance")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsolidationRunId");
+
+                    b.HasIndex("TenantId", "ConsolidationRunId", "ChartOfAccountId");
+
+                    b.ToTable("FinanceConsolidationMemoLines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConsolidationGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("PeriodFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PeriodTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ConsolidationGroupId", "CreatedAt");
+
+                    b.ToTable("FinanceConsolidationRuns");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceControlEvaluationBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("ControlCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("EvaluatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FlaggedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PassedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ReferenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReferenceType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("ResultsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "EvaluatedAt");
+
+                    b.HasIndex("TenantId", "ReferenceType", "ReferenceId");
+
+                    b.ToTable("FinanceControlEvaluationBatches");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceEliminationRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConsolidationGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CounterpartAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SourceAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ConsolidationGroupId", "IsActive");
+
+                    b.ToTable("FinanceEliminationRules");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceFleetCostPosting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CostDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CostType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Litres")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("Odometer")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TransportVehicleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JournalEntryId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "TransportVehicleId", "CostDate");
+
+                    b.ToTable("FinanceFleetCostPostings");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceFleetProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("CurrentOdometer")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("CustodianUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FuelType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("LastServiceAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Make")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int>("ModelYear")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("NextServiceAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ServiceIntervalDays")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("ServiceIntervalKm")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TransportVehicleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "TransportVehicleId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "NextServiceAt", "Status");
+
+                    b.ToTable("FinanceFleetProfiles", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceFleetProfiles_Service", "\"ModelYear\" >= 1900 AND \"ServiceIntervalDays\" > 0 AND \"ServiceIntervalKm\" > 0 AND \"CurrentOdometer\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceFleetTrip", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("DistanceKm")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("FromLocation")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ToLocation")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("TransportVehicleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("TripDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "TransportVehicleId", "TripDate");
+
+                    b.ToTable("FinanceFleetTrips");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceForeignCurrencyTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("ForeignAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("ForeignCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<decimal>("FunctionalAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("FunctionalCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<bool>("IsSettled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("RateDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RateSource")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("RateUsed")
+                        .HasColumnType("numeric(24,12)");
+
+                    b.Property<decimal>("RealizedFxGainLoss")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime?>("SettledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ForeignCurrency", "CreatedAt");
+
+                    b.HasIndex("TenantId", "SourceType", "SourceId");
+
+                    b.ToTable("FinanceForeignCurrencyTransactions", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceForeignCurrencyTransactions_CurrenciesDiffer", "\"ForeignCurrency\" <> \"FunctionalCurrency\"");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGoodsReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfirmedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique();
+
+                    b.ToTable("FinanceGoodsReceipts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGoodsReceiptLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GoodsReceiptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("PurchaseOrderLineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("QuantityAccepted")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("QuantityRejected")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GoodsReceiptId");
+
+                    b.HasIndex("PurchaseOrderLineId");
+
+                    b.HasIndex("TenantId", "PurchaseOrderLineId");
+
+                    b.ToTable("FinanceGoodsReceiptLines", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceGoodsReceiptLines_Amounts", "\"QuantityAccepted\" >= 0 AND \"QuantityRejected\" >= 0 AND (\"QuantityAccepted\" + \"QuantityRejected\") > 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGrant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AwardAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("DonorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal>("ReceivedAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("SpentAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DonorName", "Purpose");
+
+                    b.ToTable("FinanceGrants");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGratuityAssumption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("BenefitDivisor")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<decimal>("DiscountRatePercent")
+                        .HasColumnType("numeric(9,6)");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RetirementHorizonYears")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SalaryGrowthRatePercent")
+                        .HasColumnType("numeric(9,6)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TurnoverRatePercent")
+                        .HasColumnType("numeric(9,6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "EffectiveFrom")
+                        .IsUnique();
+
+                    b.ToTable("FinanceGratuityAssumptions", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceGratuityAssumptions_Rates", "\"DiscountRatePercent\" >= 0 AND \"SalaryGrowthRatePercent\" >= 0 AND \"TurnoverRatePercent\" >= 0 AND \"BenefitDivisor\" > 0 AND \"RetirementHorizonYears\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGratuityValuation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssumptionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("CurrentServiceCost")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("DefinedBenefitObligation")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("InterestCost")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ValuationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ValuationDate")
+                        .IsUnique();
+
+                    b.ToTable("FinanceGratuityValuations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInsuranceClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClaimNumber")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<decimal>("ClaimedAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("FiledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FinanceInsurancePolicyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("SettledAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime?>("SettledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceInsurancePolicyId");
+
+                    b.HasIndex("TenantId", "ClaimNumber")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "FiledAt");
+
+                    b.ToTable("FinanceInsuranceClaims");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInsurancePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AmortizedThrough")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("CoverageAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Insurer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PolicyNumber")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("PolicyType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<decimal>("Premium")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("RenewalDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PolicyNumber")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "RenewalDate", "Status");
+
+                    b.ToTable("FinanceInsurancePolicies");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInventoryItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CostMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ItemCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("OnHandQuantity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("ReorderLevel")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("ReorderQuantity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<decimal>("WeightedAverageCost")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ItemCode")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "OnHandQuantity");
+
+                    b.ToTable("FinanceInventoryItems");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInventoryMovement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FinanceInventoryItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("MovementDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MovementType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceInventoryItemId");
+
+                    b.HasIndex("TenantId", "FinanceInventoryItemId", "MovementDate");
+
+                    b.ToTable("FinanceInventoryMovements");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentBenchmark", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AnnualReturnPercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime>("ObservationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Name", "ObservationDate")
+                        .IsUnique();
+
+                    b.ToTable("FinanceInvestmentBenchmarks");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentFund", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<decimal>("CurrentValue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("FundType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<decimal>("Principal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("ReserveTarget")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("SpendingRatePercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("FinanceInvestmentFunds");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentHolding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AnnualYieldPercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<string>("AssetClass")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<decimal>("CostBasis")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<Guid>("FinanceInvestmentFundId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("InstrumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Issuer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("MarketValue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime?>("MaturityDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Measurement")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceInvestmentFundId");
+
+                    b.HasIndex("TenantId", "Issuer", "InstrumentType");
+
+                    b.HasIndex("TenantId", "MaturityDate", "Status");
+
+                    b.ToTable("FinanceInvestmentHoldings");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("FinanceInvestmentHoldingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("GainOrLoss")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceInvestmentHoldingId");
+
+                    b.HasIndex("TenantId", "FinanceInvestmentHoldingId", "TransactionDate");
+
+                    b.ToTable("FinanceInvestmentTransactions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceLedgerSignature", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Algorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<Guid>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("KeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("Signature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime>("SignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "JournalEntryId")
+                        .IsUnique();
+
+                    b.ToTable("FinanceLedgerSignatures");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceLibraryAcquisition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountingTreatment")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("AccumulatedAmortization")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<decimal>("FairValue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("LibraryBookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("SubscriptionEndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("UsefulLifeMonths")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Status", "AcquiredAt");
+
+                    b.ToTable("FinanceLibraryAcquisitions", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceLibraryAcquisitions_NonNegativeAmounts", "\"Cost\" >= 0 AND \"FairValue\" >= 0 AND \"AccumulatedAmortization\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceLibraryFine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("AssessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("FineType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("LibraryBookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StudentId", "Status");
+
+                    b.ToTable("FinanceLibraryFines", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceLibraryFines_PositiveAmount", "\"Amount\" > 0");
+                        });
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6336,9 +7971,2135 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("TenantId", "IdempotencyKey")
                         .IsUnique();
 
+                    b.HasIndex("TenantId", "WebhookId")
+                        .IsUnique()
+                        .HasFilter("\"WebhookId\" IS NOT NULL");
+
                     b.HasIndex("TenantId", "FeeDemandId", "Status");
 
                     b.ToTable("FinancePayments");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePaymentPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FeeDemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("InstallmentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MissedInstallments")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PlanType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("SurchargeAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FeeDemandId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "FeeDemandId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "StudentId", "Status");
+
+                    b.ToTable("FinancePaymentPlans");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePaymentPlanConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("LatePenaltyAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("LatePenaltyPercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<int>("MaximumDuration")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaximumMissedInstallments")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("MinimumDownPaymentPercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<string>("PlanType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("SurchargePercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PlanType")
+                        .IsUnique();
+
+                    b.ToTable("FinancePaymentPlanConfigurations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayrollBankInstruction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("EncryptedAccountReference")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RoutingCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("FinancePayrollBankInstructions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayrollPaymentFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GeneratedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PayrollPostingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PqcAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("PqcKeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PqcSignature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("RecordCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PayrollPostingId", "Format")
+                        .IsUnique();
+
+                    b.ToTable("FinancePayrollPaymentFiles");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayrollPosting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Eobi")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("Gratuity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("GrossSalary")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ImportedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("IncomeTax")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("NetSalary")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<decimal>("SocialSecurity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Period")
+                        .IsUnique();
+
+                    b.ToTable("FinancePayrollPostings");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayrollPostingLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Eobi")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("FinancePayrollPostingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Gratuity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("GrossSalary")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("IncomeTax")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("NetSalary")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("SocialSecurity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinancePayrollPostingId");
+
+                    b.HasIndex("TenantId", "CostCenterId");
+
+                    b.HasIndex("TenantId", "FinancePayrollPostingId", "EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("FinancePayrollPostingLines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePettyCashCount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfirmedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CountedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Discrepancy")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("FinancePettyCashFundId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("InitiatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal>("PhysicalBalance")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("SystemBalance")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinancePettyCashFundId");
+
+                    b.HasIndex("TenantId", "FinancePettyCashFundId", "CountedAt");
+
+                    b.ToTable("FinancePettyCashCounts", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinancePettyCashCounts_NonNegativeBalances", "\"SystemBalance\" >= 0 AND \"PhysicalBalance\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePettyCashExpense", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("FinancePettyCashFundId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReceiptHash")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("SpentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VendorName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinancePettyCashFundId");
+
+                    b.HasIndex("TenantId", "FinancePettyCashFundId", "SpentAt");
+
+                    b.ToTable("FinancePettyCashExpenses", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinancePettyCashExpenses_PositiveAmount", "\"Amount\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePettyCashFund", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<decimal>("CurrentBalance")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("CustodianUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("FloatAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DepartmentId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.ToTable("FinancePettyCashFunds", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinancePettyCashFunds_PositiveFloat", "\"FloatAmount\" > 0 AND \"CurrentBalance\" >= 0 AND \"CurrentBalance\" <= \"FloatAmount\"");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePqcKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Algorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("KeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("PublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("SecretNamespace")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Purpose", "KeyId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Purpose", "IsActive", "ExpiresAt");
+
+                    b.ToTable("FinancePqcKeys");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePqcKeyCeremony", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActivatedKeyId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Algorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RequiredApprovals")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Purpose", "Status");
+
+                    b.ToTable("FinancePqcKeyCeremonies", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinancePqcKeyCeremonies_Threshold", "\"RequiredApprovals\" BETWEEN 2 AND 20");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePqcKeyCeremonyApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("ApprovalDigest")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CeremonyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CeremonyId");
+
+                    b.HasIndex("TenantId", "CeremonyId", "ApprovedByUserId")
+                        .IsUnique();
+
+                    b.ToTable("FinancePqcKeyCeremonyApprovals");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePurchaseOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "VendorId", "Status");
+
+                    b.ToTable("FinancePurchaseOrders", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinancePurchaseOrders_PositiveTotal", "\"TotalAmount\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePurchaseOrderLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("ExpenseAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("TenantId", "PurchaseOrderId");
+
+                    b.ToTable("FinancePurchaseOrderLines", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinancePurchaseOrderLines_Amounts", "\"Quantity\" > 0 AND \"UnitPrice\" >= 0 AND \"LineTotal\" = \"Quantity\" * \"UnitPrice\"");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRegulatorySchema", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DefinitionJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("NamespaceUri")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("RootElement")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code", "IsActive");
+
+                    b.HasIndex("TenantId", "Code", "Version")
+                        .IsUnique();
+
+                    b.ToTable("FinanceRegulatorySchemas");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRegulatorySubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GeneratedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PeriodLabel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PqcAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("PqcKeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PqcPublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("PqcSignature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<Guid>("RegulatorySchemaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "RegulatorySchemaId", "GeneratedAt");
+
+                    b.ToTable("FinanceRegulatorySubmissions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceReportArtifact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GeneratedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PeriodLabel")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("PqcAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("PqcKeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PqcPublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("PqcSignature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ReportType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FinanceReportArtifacts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceReportProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("BudgetVsActual")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ComparativeYears")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Delivery")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("FundFilter")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("FunderName")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<bool>("GrantDrawdown")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("PeriodType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<bool>("PqcEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RateMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ReportCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<bool>("RestrictedFundUtilisation")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Schedule")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("TargetStandard")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FinanceReportProfiles");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceReportingEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("FunctionalCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid?>("ParentEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "ParentEntityId", "IsActive");
+
+                    b.ToTable("FinanceReportingEntities");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRestatementMemoLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChartOfAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Credit")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("Debit")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("RestatementRuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RestatementRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestatementRunId");
+
+                    b.HasIndex("TenantId", "RestatementRunId", "ChartOfAccountId");
+
+                    b.ToTable("FinanceRestatementMemoLines", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceRestatementMemoLines_OneSide", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRestatementRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Factor")
+                        .HasColumnType("numeric(19,8)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Rationale")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("SourceAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceStandard")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TargetAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TargetStandard")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "SourceStandard", "TargetStandard", "IsActive");
+
+                    b.ToTable("FinanceRestatementRules", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceRestatementRules_Factor", "\"Factor\" <> 0 AND \"SourceAccountId\" <> \"TargetAccountId\"");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRestatementRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("PeriodFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("PeriodTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SourceStandard")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("TargetStandard")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "SourceStandard", "TargetStandard", "CreatedAt");
+
+                    b.ToTable("FinanceRestatementRuns");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipApplication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApplicantStatement")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("AppliedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("AwardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("Cgpa")
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DecidedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DecisionNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProgramId");
+
+                    b.HasIndex("TenantId", "ProgramId", "StudentId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "AppliedAt");
+
+                    b.ToTable("FinanceScholarshipApplications");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipApplicationEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FromStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ToStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId");
+
+                    b.HasIndex("TenantId", "ApplicationId", "OccurredAt");
+
+                    b.ToTable("FinanceScholarshipApplicationEvents");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipAward", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AwardedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CoverageType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("DisbursementMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid?>("GrantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("RenewalReviewAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ScholarshipType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GrantId");
+
+                    b.HasIndex("TenantId", "ApplicationId")
+                        .IsUnique()
+                        .HasFilter("\"ApplicationId\" IS NOT NULL");
+
+                    b.HasIndex("TenantId", "GrantId");
+
+                    b.HasIndex("TenantId", "StudentId", "AwardedAt");
+
+                    b.ToTable("FinanceScholarshipAwards");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipProgram", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AllowsStacking")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("ClosesAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CoverageType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("CoverageValue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DisbursementMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("DurationMonths")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("GrantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("MinimumCgpa")
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("OpensAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ScholarshipType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GrantId");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "ClosesAt");
+
+                    b.ToTable("FinanceScholarshipPrograms", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceScholarshipPrograms_Values", "\"CoverageValue\" > 0 AND \"DurationMonths\" > 0 AND \"ClosesAt\" > \"OpensAt\"");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceSecurityDeposit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AssessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CollectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("DepositType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<decimal>("ForfeitedAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime?>("RefundRequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RefundSlaDays")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("RefundedAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("ResolutionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StudentId", "Status");
+
+                    b.ToTable("FinanceSecurityDeposits");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceSecurityDepositDeduction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("SecurityDepositId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SecurityDepositId");
+
+                    b.HasIndex("TenantId", "SecurityDepositId", "CreatedAt");
+
+                    b.ToTable("FinanceSecurityDepositDeductions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceSodRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("IncompatibleActionsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("FinanceSodRules");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceStandingPurchaseOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("EndsOn")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("LimitAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateOnly>("StartsOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UsedAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "EndsOn");
+
+                    b.ToTable("FinanceStandingPurchaseOrders");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceStandingPurchaseOrderSpend", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("SpentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("StandingPurchaseOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StandingPurchaseOrderId");
+
+                    b.HasIndex("TenantId", "StandingPurchaseOrderId", "SpentAt");
+
+                    b.ToTable("FinanceStandingPurchaseOrderSpend");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceTaxRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("FilerRatePercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<decimal>("NonFilerMultiplier")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<string>("TaxType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VendorCategory")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "TaxType", "Jurisdiction", "VendorCategory", "EffectiveFrom");
+
+                    b.ToTable("FinanceTaxRules");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceThreeWayMatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("InvoiceTotal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("MatchedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MatchedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("PurchaseOrderTotal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("ReceivedTotal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Variance")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("VendorInvoiceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "VendorInvoiceId")
+                        .IsUnique();
+
+                    b.ToTable("FinanceThreeWayMatches");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceUtilityAllocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FinanceUtilityBillId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceUtilityBillId");
+
+                    b.HasIndex("TenantId", "FinanceUtilityBillId", "CostCenterId")
+                        .IsUnique();
+
+                    b.ToTable("FinanceUtilityAllocations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceUtilityBill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<decimal>("AmountDue")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("BillingPeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("BillingPeriodStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitsConsumed")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("UtilityType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Status", "DueDate");
+
+                    b.HasIndex("TenantId", "AccountNumber", "BillingPeriodStart", "BillingPeriodEnd")
+                        .IsUnique();
+
+                    b.ToTable("FinanceUtilityBills");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Iban")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("InvoiceCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<DateTime?>("LastSanctionsScreenedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LegalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PaymentTerms")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("PerformanceScore")
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<string>("RaastId")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("RelationshipNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("SanctionsReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("SanctionsStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Swift")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("TaxId")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Tier")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
+                    b.Property<string>("TradeName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "LegalName");
+
+                    b.HasIndex("TenantId", "Status", "Category");
+
+                    b.ToTable("FinanceVendors");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorContact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Designation")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Mobile")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.HasIndex("TenantId", "VendorId");
+
+                    b.ToTable("FinanceVendorContacts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorContract", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContractNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateOnly>("EndsOn")
+                        .HasColumnType("date");
+
+                    b.Property<int>("RenewalNoticeDays")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SlaScore")
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<DateOnly>("StartsOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.HasIndex("TenantId", "ContractNumber")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status", "EndsOn");
+
+                    b.ToTable("FinanceVendorContracts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<string>("PqcAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("PqcKeyId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PqcSignature")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.HasIndex("TenantId", "VendorId", "UploadedAt");
+
+                    b.ToTable("FinanceVendorDocuments");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorInvoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("PaymentVoucherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("VendorId");
+
+                    b.HasIndex("TenantId", "VendorId", "InvoiceNumber")
+                        .IsUnique();
+
+                    b.ToTable("FinanceVendorInvoices");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorInvoiceLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("PurchaseOrderLineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("VendorInvoiceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderLineId");
+
+                    b.HasIndex("VendorInvoiceId");
+
+                    b.HasIndex("TenantId", "VendorInvoiceId");
+
+                    b.ToTable("FinanceVendorInvoiceLines");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucher", b =>
@@ -6381,6 +10142,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<string>("PqcKeyId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("PqcPublicKey")
+                        .HasColumnType("bytea");
 
                     b.Property<byte[]>("PqcSignature")
                         .HasColumnType("bytea");
@@ -6426,6 +10190,11 @@ namespace AegisCore.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ApproverRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<Guid>("ApproverUserId")
                         .HasColumnType("uuid");
 
@@ -6462,10 +10231,103 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.HasIndex("FinanceVoucherId");
 
+                    b.HasIndex("TenantId", "FinanceVoucherId", "ApproverRole");
+
                     b.HasIndex("TenantId", "FinanceVoucherId", "ApproverUserId")
                         .IsUnique();
 
                     b.ToTable("FinanceVoucherApprovals");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucherApprovalRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal?>("MaximumAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("MinimumAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<int>("MinimumApprovals")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RequiredRolesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Currency", "MinimumAmount")
+                        .IsUnique();
+
+                    b.ToTable("FinanceVoucherApprovalRules", t =>
+                        {
+                            t.HasCheckConstraint("CK_FinanceVoucherApprovalRules_Range", "\"MinimumAmount\" >= 0 AND (\"MaximumAmount\" IS NULL OR \"MaximumAmount\" > \"MinimumAmount\") AND \"MinimumApprovals\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucherAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<Guid>("FinanceVoucherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FinanceVoucherId");
+
+                    b.HasIndex("TenantId", "Sha256");
+
+                    b.ToTable("FinanceVoucherAttachments");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucherLine", b =>
@@ -6478,6 +10340,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CounterpartyReportingEntityId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Credit")
@@ -6493,6 +10358,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("FinanceVoucherId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ReportingEntityId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
@@ -6500,12 +10368,51 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.HasIndex("FinanceVoucherId");
 
+                    b.HasIndex("TenantId", "ChartOfAccountId");
+
                     b.HasIndex("TenantId", "FinanceVoucherId");
 
                     b.ToTable("FinanceVoucherLines", t =>
                         {
                             t.HasCheckConstraint("CK_FinanceVoucherLines_OneSided", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)");
                         });
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucherReversal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OriginalVoucherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ReversalVoucherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "OriginalVoucherId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "ReversalVoucherId")
+                        .IsUnique();
+
+                    b.ToTable("FinanceVoucherReversals");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucherSequence", b =>
@@ -6534,6 +10441,71 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("FinanceVoucherSequences");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceWithholdingRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AppliedRatePercent")
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<string>("FilerStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("FilingPeriod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("GrossAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PaymentReference")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid?>("TaxRuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TaxType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("WithheldAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<DateTime>("WithheldAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PaymentReference")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "FilingPeriod", "TaxType");
+
+                    b.ToTable("FinanceWithholdingRecords");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FinePayment", b =>
@@ -8292,6 +12264,10 @@ namespace AegisCore.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CanonicalPayload")
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -8301,6 +12277,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<DateTime>("EntryDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("EntryHash")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("EntryNumber")
                         .IsRequired()
@@ -8313,11 +12292,17 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<bool>("IsPosted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsSandbox")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("PostedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("PostedByUserId")
                         .HasColumnType("uuid");
+
+                    b.Property<byte[]>("PreviousHash")
+                        .HasColumnType("bytea");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -8333,6 +12318,8 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("EntryNumber")
                         .IsUnique();
 
+                    b.HasIndex("TenantId", "IsPosted", "IsSandbox", "EntryDate");
+
                     b.ToTable("JournalEntries");
                 });
 
@@ -8343,6 +12330,12 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ChartOfAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CostCenterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CounterpartyReportingEntityId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Credit")
@@ -8356,6 +12349,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("JournalEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ReportingEntityId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TenantId")
@@ -10332,6 +14328,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.HasIndex("TenantId", "CreatedAt");
 
+                    b.HasIndex("TenantId", "GatewaySlug", "CreatedAt");
+
                     b.HasIndex("TenantId", "GatewaySlug", "ReferenceId");
 
                     b.ToTable("PaymentGatewayEvents");
@@ -10580,6 +14578,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<decimal>("AegisCoreAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("DeveloperAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -10591,9 +14592,6 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("GrossAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("NocturneAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("RecordedAt")
@@ -14104,6 +18102,105 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("TeamsSyncLogs");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.Tenant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ActivatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LicenseMode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShortName")
+                        .IsUnique();
+
+                    b.ToTable("Tenants");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.TenantFinanceConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AdditionalCurrenciesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("BaseCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("FiscalYearLabel")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("FiscalYearStartMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("LibraryCapitalizationThreshold")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<string>("PrimaryStandard")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("RateApiKeySecretName")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("RateSource")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("TaxSettingsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("TenantFinanceConfigurations", t =>
+                        {
+                            t.HasCheckConstraint("CK_TenantFinanceConfigurations_LibraryThreshold", "\"LibraryCapitalizationThreshold\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.TicketComment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -16413,12 +20510,342 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Navigation("StudentFee");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceBankFeedTransaction", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceBankAccount", "BankAccount")
+                        .WithMany("FeedTransactions")
+                        .HasForeignKey("FinanceBankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BankAccount");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationMember", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceConsolidationGroup", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("ConsolidationGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationMemoLine", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceConsolidationRun", "Run")
+                        .WithMany("Lines")
+                        .HasForeignKey("ConsolidationRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGoodsReceipt", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePurchaseOrder", null)
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGoodsReceiptLine", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceGoodsReceipt", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("GoodsReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AegisCore.Domain.Entities.FinancePurchaseOrderLine", null)
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderLineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInsuranceClaim", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceInsurancePolicy", "Policy")
+                        .WithMany("Claims")
+                        .HasForeignKey("FinanceInsurancePolicyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInventoryMovement", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceInventoryItem", "Item")
+                        .WithMany("Movements")
+                        .HasForeignKey("FinanceInventoryItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentHolding", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceInvestmentFund", "Fund")
+                        .WithMany("Holdings")
+                        .HasForeignKey("FinanceInvestmentFundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Fund");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentTransaction", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceInvestmentHolding", "Holding")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FinanceInvestmentHoldingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Holding");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayment", b =>
                 {
                     b.HasOne("AegisCore.Domain.Entities.FeeDemand", null)
                         .WithMany("Payments")
                         .HasForeignKey("FeeDemandId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePaymentPlan", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FeeDemand", "Demand")
+                        .WithOne("PaymentPlan")
+                        .HasForeignKey("AegisCore.Domain.Entities.FinancePaymentPlan", "FeeDemandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Demand");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayrollPostingLine", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePayrollPosting", "Posting")
+                        .WithMany("Lines")
+                        .HasForeignKey("FinancePayrollPostingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Posting");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePettyCashCount", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePettyCashFund", "Fund")
+                        .WithMany("Counts")
+                        .HasForeignKey("FinancePettyCashFundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Fund");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePettyCashExpense", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePettyCashFund", "Fund")
+                        .WithMany("Expenses")
+                        .HasForeignKey("FinancePettyCashFundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Fund");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePqcKeyCeremonyApproval", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePqcKeyCeremony", "Ceremony")
+                        .WithMany("Approvals")
+                        .HasForeignKey("CeremonyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Ceremony");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePurchaseOrder", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendor", null)
+                        .WithMany()
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePurchaseOrderLine", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePurchaseOrder", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRestatementMemoLine", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceRestatementRun", "Run")
+                        .WithMany("Lines")
+                        .HasForeignKey("RestatementRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipApplication", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceScholarshipProgram", "Program")
+                        .WithMany("Applications")
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Program");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipApplicationEvent", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceScholarshipApplication", "Application")
+                        .WithMany("Events")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipAward", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceGrant", "Grant")
+                        .WithMany("Awards")
+                        .HasForeignKey("GrantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Grant");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipProgram", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceGrant", "Grant")
+                        .WithMany()
+                        .HasForeignKey("GrantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Grant");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceSecurityDepositDeduction", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceSecurityDeposit", "Deposit")
+                        .WithMany("Deductions")
+                        .HasForeignKey("SecurityDepositId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Deposit");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceStandingPurchaseOrder", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendor", "Vendor")
+                        .WithMany("StandingPurchaseOrders")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceStandingPurchaseOrderSpend", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceStandingPurchaseOrder", "StandingPurchaseOrder")
+                        .WithMany("Spend")
+                        .HasForeignKey("StandingPurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StandingPurchaseOrder");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceUtilityAllocation", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceUtilityBill", "Bill")
+                        .WithMany("Allocations")
+                        .HasForeignKey("FinanceUtilityBillId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Bill");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorContact", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendor", "Vendor")
+                        .WithMany("Contacts")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorContract", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendor", null)
+                        .WithMany()
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorDocument", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendor", null)
+                        .WithMany()
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorInvoice", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePurchaseOrder", null)
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendor", null)
+                        .WithMany()
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorInvoiceLine", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.FinancePurchaseOrderLine", null)
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderLineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AegisCore.Domain.Entities.FinanceVendorInvoice", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("VendorInvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -17605,12 +22032,123 @@ namespace AegisCore.Infrastructure.Migrations
                 {
                     b.Navigation("Installments");
 
+                    b.Navigation("PaymentPlan");
+
                     b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FeeStructure", b =>
                 {
                     b.Navigation("Components");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceBankAccount", b =>
+                {
+                    b.Navigation("FeedTransactions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationGroup", b =>
+                {
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceConsolidationRun", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGoodsReceipt", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceGrant", b =>
+                {
+                    b.Navigation("Awards");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInsurancePolicy", b =>
+                {
+                    b.Navigation("Claims");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInventoryItem", b =>
+                {
+                    b.Navigation("Movements");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentFund", b =>
+                {
+                    b.Navigation("Holdings");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceInvestmentHolding", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePayrollPosting", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePettyCashFund", b =>
+                {
+                    b.Navigation("Counts");
+
+                    b.Navigation("Expenses");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePqcKeyCeremony", b =>
+                {
+                    b.Navigation("Approvals");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinancePurchaseOrder", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceRestatementRun", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipApplication", b =>
+                {
+                    b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceScholarshipProgram", b =>
+                {
+                    b.Navigation("Applications");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceSecurityDeposit", b =>
+                {
+                    b.Navigation("Deductions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceStandingPurchaseOrder", b =>
+                {
+                    b.Navigation("Spend");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceUtilityBill", b =>
+                {
+                    b.Navigation("Allocations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendor", b =>
+                {
+                    b.Navigation("Contacts");
+
+                    b.Navigation("StandingPurchaseOrders");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVendorInvoice", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FinanceVoucher", b =>

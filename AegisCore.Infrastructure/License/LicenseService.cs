@@ -126,8 +126,8 @@ public sealed class LicenseService(
             var client = httpClientFactory.CreateClient("license");
             if (configuration["License:HeartbeatServerToken"] is { Length: > 0 } token)
             {
-                client.DefaultRequestHeaders.Remove("X-Nocturne-License-Token");
-                client.DefaultRequestHeaders.TryAddWithoutValidation("X-Nocturne-License-Token", token);
+                client.DefaultRequestHeaders.Remove("X-AegisCore-License-Token");
+                client.DefaultRequestHeaders.TryAddWithoutValidation("X-AegisCore-License-Token", token);
             }
             var response = await client.PostAsJsonAsync(heartbeatUri, new
             {

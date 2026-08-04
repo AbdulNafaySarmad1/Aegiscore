@@ -1,38 +1,43 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 // GAP 01 — Finance / General Ledger
 
-[Table("ChartOfAccounts")] public class ChartOfAccount { [Key] public Guid Id { get; set; }
+[Table("ChartOfAccounts")] public class ChartOfAccount : ITenantScoped { [Key] public Guid Id { get; set; }
     [Required][MaxLength(50)] public string AccountCode { get; set; } = ""; [MaxLength(200)] public string AccountName { get; set; } = "";
+    [MaxLength(20)] public string? CashFlowCategory { get; set; }
     public AccountType AccountType { get; set; } public Guid? ParentAccountId { get; set; }
     public bool IsActive { get; set; } = true; public DateTime CreatedAt { get; set; } = DateTime.UtcNow; public Guid TenantId { get; set; } }
 
-[Table("JournalEntries")] public class JournalEntry { [Key] public Guid Id { get; set; }
+[Table("JournalEntries")] public class JournalEntry : ITenantScoped { [Key] public Guid Id { get; set; }
     [MaxLength(50)] public string EntryNumber { get; set; } = ""; public JournalEntryType EntryType { get; set; }
     [MaxLength(1000)] public string? Description { get; set; } public DateTime EntryDate { get; set; }
     [Column(TypeName = "decimal(18,2)")] public decimal TotalDebit { get; set; }
     [Column(TypeName = "decimal(18,2)")] public decimal TotalCredit { get; set; }
-    public bool IsPosted { get; set; } public Guid? PostedByUserId { get; set; } public DateTime? PostedAt { get; set; }
+    public bool IsPosted { get; set; } public bool IsSandbox { get; set; } public Guid? PostedByUserId { get; set; } public DateTime? PostedAt { get; set; }
+    public byte[]? PreviousHash { get; set; } [MaxLength(3000)] public string? CanonicalPayload { get; set; } public byte[]? EntryHash { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow; public Guid TenantId { get; set; }
     public ICollection<JournalEntryLine> Lines { get; set; } = []; }
 
-[Table("JournalEntryLines")] public class JournalEntryLine { [Key] public Guid Id { get; set; }
+[Table("JournalEntryLines")] public class JournalEntryLine : ITenantScoped { [Key] public Guid Id { get; set; }
     public Guid JournalEntryId { get; set; } public Guid ChartOfAccountId { get; set; }
+    public Guid? CostCenterId { get; set; }
+    public Guid? ReportingEntityId { get; set; } public Guid? CounterpartyReportingEntityId { get; set; }
     [Column(TypeName = "decimal(18,2)")] public decimal Debit { get; set; }
     [Column(TypeName = "decimal(18,2)")] public decimal Credit { get; set; }
     [MaxLength(500)] public string? Description { get; set; } public Guid TenantId { get; set; }
     [ForeignKey(nameof(JournalEntryId))] public JournalEntry JournalEntry { get; set; } = null!; }
 
-[Table("FiscalPeriods")] public class FiscalPeriod { [Key] public Guid Id { get; set; }
+[Table("FiscalPeriods")] public class FiscalPeriod : ITenantScoped { [Key] public Guid Id { get; set; }
     public Guid FiscalYearId { get; set; } [MaxLength(50)] public string Name { get; set; } = "";
     public DateTime StartDate { get; set; } public DateTime EndDate { get; set; } public bool IsClosed { get; set; }
     public Guid TenantId { get; set; }
     [ForeignKey(nameof(FiscalYearId))] public FiscalYear FiscalYear { get; set; } = null!; }
 
-[Table("FiscalYears")] public class FiscalYear { [Key] public Guid Id { get; set; }
+[Table("FiscalYears")] public class FiscalYear : ITenantScoped { [Key] public Guid Id { get; set; }
     [MaxLength(50)] public string Name { get; set; } = ""; public DateTime StartDate { get; set; } public DateTime EndDate { get; set; }
     public bool IsClosed { get; set; } public Guid TenantId { get; set; }
     public ICollection<FiscalPeriod> Periods { get; set; } = []; }

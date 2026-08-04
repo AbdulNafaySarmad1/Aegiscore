@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using AegisCore.Infrastructure;
 
 #nullable disable
 
 namespace AegisCore.Infrastructure.Migrations;
 
+[DbContext(typeof(AegisDbContext))]
 [Migration("20260731000000_FinanceWebhookIdempotency")]
 public partial class FinanceWebhookIdempotency : Migration
 {

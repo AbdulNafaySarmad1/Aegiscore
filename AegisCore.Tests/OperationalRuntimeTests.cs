@@ -65,7 +65,7 @@ public sealed class OperationalRuntimeTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["NOCTURNE_REDIS_CONNECTION"] = "redis:6379,password=runtime-secret",
+                ["AEGISCORE_REDIS_CONNECTION"] = "redis:6379,password=runtime-secret",
                 ["ConnectionStrings:Redis"] = "localhost:6379"
             })
             .Build();

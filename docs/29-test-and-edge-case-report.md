@@ -4,15 +4,15 @@ Date: 2026-07-29
 
 ## Current Executed Tests
 
-- Backend solution: `dotnet test Nocturne.slnx -m:1 -p:BuildInParallel=false`
+- Backend solution: `dotnet test AegisCore.slnx -m:1 -p:BuildInParallel=false`
 - Result: 351 passed, 0 failed.
-- Split backend: `dotnet test Nocturne.slnx -m:1 -p:BuildInParallel=false` in `nocturne-backend`
+- Split backend: `dotnet test AegisCore.slnx -m:1 -p:BuildInParallel=false` in `aegiscore-backend`
 - Result: 351 passed, 0 failed.
 - Portal source and split: `npm run build` and full `npm audit`
 - Result: builds passed, full audits found 0 vulnerabilities.
-- Mobile source: `npm run typecheck`, `npm test`, and full `npm audit` in `Nocturne.Mobile`
+- Mobile source: `npm run typecheck`, `npm test`, and full `npm audit` in `AegisCore.Mobile`
 - Result: typecheck passed, 1 test passed, audit found 0 vulnerabilities.
-- Mobile split: `npm run typecheck`, `npm test`, and full `npm audit` in `nocturne-mobile/react-native`
+- Mobile split: `npm run typecheck`, `npm test`, and full `npm audit` in `aegiscore-mobile/react-native`
 - Result: typecheck passed, 1 test passed, audit found 0 vulnerabilities.
 - NuGet API graph: `dotnet list AegisCore.API/AegisCore.API.csproj package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json`
 - Result: no vulnerable packages.

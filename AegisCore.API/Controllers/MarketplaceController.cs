@@ -235,7 +235,7 @@ public class MarketplaceController : ControllerBase
             TenantId = request.TenantId,
             DeveloperEmail = extension.DeveloperEmail ?? "",
             GrossAmount = split.GrossAmount,
-            NocturneAmount = split.NocturneAmount,
+            AegisCoreAmount = split.AegisCoreAmount,
             DeveloperAmount = split.DeveloperAmount
         };
 
@@ -256,7 +256,7 @@ public class MarketplaceController : ControllerBase
         {
             developerEmail = email,
             gross = rows.Sum(r => r.GrossAmount),
-            nocturne = rows.Sum(r => r.NocturneAmount),
+            aegiscore = rows.Sum(r => r.AegisCoreAmount),
             developer = rows.Sum(r => r.DeveloperAmount),
             rows
         });

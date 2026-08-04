@@ -133,16 +133,19 @@ public sealed class SupportTicketService
         await EnsureSchemaAsync(ct);
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(ct);
-        var sql = """
+        const string sql = """
             SELECT id, tenant_id, requester_id, title, description, category, priority, status,
                    ai_response, ai_confidence, customer_rating, customer_feedback, human_response,
                    created_at, resolved_at
               FROM support_tickets
              WHERE tenant_id = @tenant
-            """ + (allowAll ? "" : " AND requester_id = @requester") + " ORDER BY created_at DESC LIMIT 250;";
+               AND (@allow_all OR requester_id = @requester)
+             ORDER BY created_at DESC LIMIT 250;
+            """;
         await using var command = new NpgsqlCommand(sql, connection);
         command.Parameters.AddWithValue("tenant", tenantId);
-        if (!allowAll) command.Parameters.AddWithValue("requester", requesterId);
+        command.Parameters.AddWithValue("allow_all", allowAll);
+        command.Parameters.AddWithValue("requester", requesterId);
         await using var reader = await command.ExecuteReaderAsync(ct);
         var tickets = new List<SupportTicketDto>();
         while (await reader.ReadAsync(ct)) tickets.Add(ReadTicket(reader));
@@ -159,17 +162,19 @@ public sealed class SupportTicketService
         await EnsureSchemaAsync(ct);
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(ct);
-        var sql = """
+        const string sql = """
             SELECT id, tenant_id, requester_id, title, description, category, priority, status,
                    ai_response, ai_confidence, customer_rating, customer_feedback, human_response,
                    created_at, resolved_at
               FROM support_tickets
              WHERE tenant_id = @tenant AND id = @id
-            """ + (allowAll ? "" : " AND requester_id = @requester") + ";";
+               AND (@allow_all OR requester_id = @requester);
+            """;
         await using var command = new NpgsqlCommand(sql, connection);
         command.Parameters.AddWithValue("tenant", tenantId);
         command.Parameters.AddWithValue("id", ticketId);
-        if (!allowAll) command.Parameters.AddWithValue("requester", requesterId);
+        command.Parameters.AddWithValue("allow_all", allowAll);
+        command.Parameters.AddWithValue("requester", requesterId);
         await using var reader = await command.ExecuteReaderAsync(ct);
         return await reader.ReadAsync(ct) ? ReadTicket(reader) : null;
     }
@@ -382,21 +387,34 @@ public sealed class SupportTicketService
 
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(ct);
-        var predicates = terms.Select((_, i) => $"(question ILIKE @q{i} OR answer ILIKE @q{i})").ToArray();
-        var sql = $"""
+        const string sql = """
             SELECT question, answer,
-                   ({string.Join(" + ", terms.Select((_, i) => $"CASE WHEN question ILIKE @q{i} OR answer ILIKE @q{i} THEN 1 ELSE 0 END"))}) AS score
+                   (CASE WHEN question ILIKE @q0 OR answer ILIKE @q0 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q1 OR answer ILIKE @q1 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q2 OR answer ILIKE @q2 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q3 OR answer ILIKE @q3 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q4 OR answer ILIKE @q4 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q5 OR answer ILIKE @q5 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q6 OR answer ILIKE @q6 THEN 1 ELSE 0 END
+                  + CASE WHEN question ILIKE @q7 OR answer ILIKE @q7 THEN 1 ELSE 0 END) AS score
               FROM support_knowledge_base
              WHERE tenant_id = @tenant AND is_active = TRUE
                AND (category = @category OR category = 'other')
-               AND ({string.Join(" OR ", predicates)})
+               AND (question ILIKE @q0 OR answer ILIKE @q0
+                 OR question ILIKE @q1 OR answer ILIKE @q1
+                 OR question ILIKE @q2 OR answer ILIKE @q2
+                 OR question ILIKE @q3 OR answer ILIKE @q3
+                 OR question ILIKE @q4 OR answer ILIKE @q4
+                 OR question ILIKE @q5 OR answer ILIKE @q5
+                 OR question ILIKE @q6 OR answer ILIKE @q6
+                 OR question ILIKE @q7 OR answer ILIKE @q7)
              ORDER BY score DESC, helpful_count DESC, created_at DESC
              LIMIT 5;
             """;
         await using var command = new NpgsqlCommand(sql, connection);
         command.Parameters.AddWithValue("tenant", tenantId);
         command.Parameters.AddWithValue("category", category);
-        for (var i = 0; i < terms.Length; i++) command.Parameters.AddWithValue($"q{i}", $"%{terms[i]}%");
+        for (var i = 0; i < 8; i++) command.Parameters.AddWithValue($"q{i}", i < terms.Length ? $"%{terms[i]}%" : "\u0001");
         await using var reader = await command.ExecuteReaderAsync(ct);
         var result = new List<KnowledgeMatch>();
         while (await reader.ReadAsync(ct)) result.Add(new(reader.GetString(0), reader.GetString(1)));
@@ -578,7 +596,7 @@ public sealed class SupportTicketService
         var explicitValue = configuration.GetConnectionString("Default")
             ?? configuration["ConnectionStrings:Default"]
             ?? configuration["Database:ConnectionString"]
-            ?? configuration["NOCTURNE_DB_CONNECTION"]
+            ?? configuration["AEGISCORE_DB_CONNECTION"]
             ?? configuration["POSTGRES_CONNECTION_STRING"];
         if (!string.IsNullOrWhiteSpace(explicitValue)) return explicitValue;
         var host = configuration["DB_HOST"] ?? configuration["POSTGRES_HOST"] ?? "localhost";

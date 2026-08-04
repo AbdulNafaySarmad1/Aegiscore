@@ -1,11 +1,13 @@
 using System.Text.Json.Nodes;
 using System.Security.Cryptography;
 using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure.Security.Pqc;
+using AegisCore.Application.Finance;
 using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.Infrastructure.Onboarding;
 
-public sealed class WizardProvisioningService(AegisDbContext db)
+public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureService pqc, IAccountingStandardsEngine accounting)
 {
     public async Task ProvisionAsync(Guid tenantId, string stepData, CancellationToken ct)
     {
@@ -14,13 +16,40 @@ public sealed class WizardProvisioningService(AegisDbContext db)
         var academic = root["step2"]?.AsObject() ?? throw new InvalidOperationException("Academic structure is missing.");
         var finance = root["step4"]?.AsObject() ?? throw new InvalidOperationException("Finance configuration is missing.");
         var fees = root["step5"]?.AsObject() ?? throw new InvalidOperationException("Fee structure is missing.");
-        var standard = Required(finance, "standard").ToUpperInvariant();
+        var standard = Required(finance, "standard").ToUpperInvariant().Replace(' ', '_');
         var baseCurrency = Required(finance, "baseCurrency").ToUpperInvariant();
         var licenseStep = root["step0"]?.AsObject() ?? throw new InvalidOperationException("License selection is missing.");
         var licenseMode = Required(licenseStep, "mode").ToLowerInvariant();
         if (licenseMode is not ("demo" or "paid")) throw new InvalidOperationException("License mode is invalid.");
 
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var ownsTransaction = db.Database.CurrentTransaction is null;
+        await using var transaction = ownsTransaction ? await db.Database.BeginTransactionAsync(ct) : null;
+        var tenant = await db.Tenants.SingleOrDefaultAsync(x => x.Id == tenantId, ct);
+        if (tenant is null)
+        {
+            tenant = new Tenant { Id = tenantId, CreatedAt = DateTimeOffset.UtcNow };
+            db.Tenants.Add(tenant);
+        }
+        tenant.Name = Required(university, "name");
+        tenant.ShortName = Required(university, "shortName").ToUpperInvariant();
+        tenant.LicenseMode = licenseMode;
+        tenant.IsActive = true;
+        tenant.ActivatedAt ??= DateTimeOffset.UtcNow;
+        var financeConfiguration = await db.TenantFinanceConfigurations.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct);
+        if (financeConfiguration is null)
+        {
+            financeConfiguration = new TenantFinanceConfiguration { Id = Guid.NewGuid(), TenantId = tenantId };
+            db.TenantFinanceConfigurations.Add(financeConfiguration);
+        }
+        financeConfiguration.PrimaryStandard = standard;
+        financeConfiguration.FiscalYearStartMonth = finance["fiscalYearStartMonth"]?.GetValue<int?>() is { } financeMonth && financeMonth is >= 1 and <= 12 ? financeMonth : 1;
+        financeConfiguration.FiscalYearLabel = Required(finance, "fiscalYear");
+        financeConfiguration.BaseCurrency = baseCurrency;
+        financeConfiguration.AdditionalCurrenciesJson = finance["additionalCurrencies"]?.ToJsonString() ?? "[]";
+        financeConfiguration.RateSource = Required(finance, "rateSource").ToUpperInvariant().Replace(' ', '_');
+        financeConfiguration.RateApiKeySecretName = finance["rateApiKeySecretName"]?.GetValue<string>();
+        financeConfiguration.TaxSettingsJson = finance["tax"]?.ToJsonString() ?? "{}";
+        financeConfiguration.UpdatedAt = DateTime.UtcNow;
         var campus = await db.Campuses.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.IsMain, ct);
         if (campus is null)
         {
@@ -46,10 +75,10 @@ public sealed class WizardProvisioningService(AegisDbContext db)
             var name = item?["name"]?.GetValue<string>()?.Trim();
             if (string.IsNullOrWhiteSpace(name)) continue;
             var code = item?["code"]?.GetValue<string>()?.Trim().ToUpperInvariant() ?? name[..Math.Min(8, name.Length)].ToUpperInvariant();
-            var department = await db.Departments.SingleOrDefaultAsync(x => x.Code == code || x.Name == name, ct);
+            var department = await db.Departments.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && (x.Code == code || x.Name == name), ct);
             if (department is null)
             {
-                department = new Department { Id = Guid.NewGuid(), Name = name, Code = code };
+                department = new Department { Id = Guid.NewGuid(), TenantId = tenantId, Name = name, Code = code };
                 db.Departments.Add(department);
             }
             departments[code] = department;
@@ -79,19 +108,19 @@ public sealed class WizardProvisioningService(AegisDbContext db)
             });
         }
 
-        var accounts = new (string Code, string Name, AccountType Type)[]
+        var accounts = new (string Code, string Name, AccountType Type, string? CashFlowCategory)[]
         {
-            ("1010", $"Bank - {baseCurrency}", AccountType.Asset),
-            ("1100", "Student fee receivable", AccountType.Asset),
-            ("2000", "Student deposits payable", AccountType.Liability),
-            ("3000", "Retained funds", AccountType.Equity),
-            ("4010", $"Tuition revenue - {standard}", AccountType.Revenue),
-            ("4020", "Scholarship expense", AccountType.Expense),
-            ("5000", "Operating expenses", AccountType.Expense)
+            ("1010", $"Bank - {baseCurrency}", AccountType.Asset, null),
+            ("1100", "Student fee receivable", AccountType.Asset, "OPERATING"),
+            ("2000", "Student deposits payable", AccountType.Liability, "FINANCING"),
+            ("3000", "Retained funds", AccountType.Equity, "FINANCING"),
+            ("4010", $"Tuition revenue - {standard}", AccountType.Revenue, "OPERATING"),
+            ("4020", "Scholarship expense", AccountType.Expense, "OPERATING"),
+            ("5000", "Operating expenses", AccountType.Expense, "OPERATING")
         };
         foreach (var account in accounts)
             if (!await db.ChartOfAccounts.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.AccountCode == account.Code, ct))
-                db.ChartOfAccounts.Add(new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = account.Code, AccountName = account.Name, AccountType = account.Type, IsActive = true });
+                db.ChartOfAccounts.Add(new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = account.Code, AccountName = account.Name, AccountType = account.Type, CashFlowCategory = account.CashFlowCategory, IsActive = true });
 
         var programs = new List<DegreeProgram>();
         foreach (var item in academic["programmes"]?.AsArray() ?? [])
@@ -133,7 +162,9 @@ public sealed class WizardProvisioningService(AegisDbContext db)
             db.Licenses.Add(license);
             await db.SaveChangesAsync(ct);
         }
-        await transaction.CommitAsync(ct);
+        await pqc.SignAsync(tenantId, "voucher-approval", ReadOnlyMemory<byte>.Empty, archival: false, ct);
+        if (transaction is not null) await transaction.CommitAsync(ct);
+        await accounting.GetContextAsync(tenantId, ct);
     }
 
     private static string Required(JsonObject value, string fieldName) => value[fieldName]?.GetValue<string>()?.Trim() is { Length: > 0 } result ? result : throw new InvalidOperationException($"Required wizard field '{fieldName}' is missing.");

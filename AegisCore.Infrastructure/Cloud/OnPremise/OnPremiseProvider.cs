@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using AegisCore.Contracts.Abstractions.Cloud;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -26,6 +27,121 @@ public class EnvironmentVariableSecretService : ISecretService
 
     public Task<bool> SecretExistsAsync(string secretName, CancellationToken ct = default)
     { var v = Environment.GetEnvironmentVariable(secretName); return Task.FromResult(v != null); }
+}
+
+public sealed class EncryptedFileSecretService : ISecretService
+{
+    private readonly string _path;
+    private readonly byte[] _key;
+    private readonly SemaphoreSlim _gate = new(1, 1);
+
+    public EncryptedFileSecretService(IConfiguration configuration)
+    {
+        _path = configuration["AEGISCORE_LOCAL_SECRET_PATH"] ?? "/app/config/secrets/vault.bin";
+        var encodedKey = configuration["AEGISCORE_PQC_KEY_BASE64"]
+            ?? throw new InvalidOperationException("AEGISCORE_PQC_KEY_BASE64 is required for the encrypted local secret vault.");
+        _key = Convert.FromBase64String(encodedKey);
+        if (_key.Length != 32) throw new InvalidOperationException("AEGISCORE_PQC_KEY_BASE64 must decode to exactly 32 bytes.");
+    }
+
+    public async Task<string> GetSecretAsync(string secretName, CancellationToken cancellationToken = default)
+    {
+        ValidateName(secretName);
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var values = await ReadAsync(cancellationToken);
+            return values.TryGetValue(secretName, out var value)
+                ? value
+                : throw new KeyNotFoundException("The requested secret is unavailable.");
+        }
+        finally { _gate.Release(); }
+    }
+
+    public async Task SetSecretAsync(string secretName, string value, CancellationToken cancellationToken = default)
+    {
+        ValidateName(secretName);
+        if (string.IsNullOrEmpty(value) || value.Length > 1_048_576) throw new ArgumentException("Secret value is required and must not exceed 1 MiB.");
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var values = await ReadAsync(cancellationToken);
+            values[secretName] = value;
+            await WriteAsync(values, cancellationToken);
+        }
+        finally { _gate.Release(); }
+    }
+
+    public async Task DeleteSecretAsync(string secretName, CancellationToken cancellationToken = default)
+    {
+        ValidateName(secretName);
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var values = await ReadAsync(cancellationToken);
+            if (values.Remove(secretName)) await WriteAsync(values, cancellationToken);
+        }
+        finally { _gate.Release(); }
+    }
+
+    public async Task<bool> SecretExistsAsync(string secretName, CancellationToken cancellationToken = default)
+    {
+        ValidateName(secretName);
+        await _gate.WaitAsync(cancellationToken);
+        try { return (await ReadAsync(cancellationToken)).ContainsKey(secretName); }
+        finally { _gate.Release(); }
+    }
+
+    private async Task<Dictionary<string, string>> ReadAsync(CancellationToken ct)
+    {
+        if (!File.Exists(_path)) return new(StringComparer.Ordinal);
+        var envelope = await File.ReadAllBytesAsync(_path, ct);
+        if (envelope.Length < 29 || envelope[0] != 1) throw new CryptographicException("The local secret vault is invalid.");
+        var plaintext = new byte[envelope.Length - 29];
+        try
+        {
+            using var aes = new AesGcm(_key, 16);
+            aes.Decrypt(envelope.AsSpan(1, 12), envelope.AsSpan(29), envelope.AsSpan(13, 16), plaintext);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(plaintext)
+                ?? new(StringComparer.Ordinal);
+        }
+        finally { CryptographicOperations.ZeroMemory(plaintext); }
+    }
+
+    private async Task WriteAsync(Dictionary<string, string> values, CancellationToken ct)
+    {
+        var directory = Path.GetDirectoryName(_path) ?? throw new InvalidOperationException("Local secret vault path is invalid.");
+        Directory.CreateDirectory(directory);
+        var plaintext = JsonSerializer.SerializeToUtf8Bytes(values);
+        var nonce = RandomNumberGenerator.GetBytes(12);
+        var envelope = new byte[29 + plaintext.Length];
+        envelope[0] = 1;
+        nonce.CopyTo(envelope, 1);
+        try
+        {
+            using var aes = new AesGcm(_key, 16);
+            aes.Encrypt(nonce, plaintext, envelope.AsSpan(29), envelope.AsSpan(13, 16));
+            var temporary = $"{_path}.{Guid.NewGuid():N}.tmp";
+            try
+            {
+                await File.WriteAllBytesAsync(temporary, envelope, ct);
+                if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(temporary, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                File.Move(temporary, _path, true);
+            }
+            finally { if (File.Exists(temporary)) File.Delete(temporary); }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plaintext);
+            CryptographicOperations.ZeroMemory(envelope);
+        }
+    }
+
+    private static void ValidateName(string secretName)
+    {
+        if (string.IsNullOrWhiteSpace(secretName) || secretName.Length > 512 || secretName.Any(char.IsControl))
+            throw new ArgumentException("Secret name is invalid.");
+    }
 }
 
 public class SmtpEmailService : IEmailService

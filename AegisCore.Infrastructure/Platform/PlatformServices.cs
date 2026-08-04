@@ -133,7 +133,7 @@ public class NotificationPlatformService : INotificationPlatformService
         var pass = _configuration["Email:Password"];
         if (!string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(pass)) client.Credentials = new NetworkCredential(user, pass);
 
-        using var message = new MailMessage(_configuration["Email:FromAddress"] ?? "no-reply@nocturne.local", to, subject, body) { IsBodyHtml = true };
+        using var message = new MailMessage(_configuration["Email:FromAddress"] ?? "no-reply@aegiscore.local", to, subject, body) { IsBodyHtml = true };
         await client.SendMailAsync(message, ct);
     }
 

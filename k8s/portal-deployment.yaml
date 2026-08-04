@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aegiscore-portal
-  namespace: nocturne
+  namespace: aegiscore
 spec:
   replicas: 2
   selector:

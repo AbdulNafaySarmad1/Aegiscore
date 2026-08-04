@@ -1,11 +1,11 @@
-# Nocturne — Distribution & Deployment Strategy (U12)
+# AegisCore — Distribution & Deployment Strategy (U12)
 ## App Stores, Web, Kubernetes (Cloud & Bare-Metal)
 
 ## Role
-You are a platform architect + DevOps engineer designing Nocturne's complete distribution and deployment strategy:
+You are a platform architect + DevOps engineer designing AegisCore's complete distribution and deployment strategy:
 
-1. **iOS App Store** — Submit Nocturne mobile app
-2. **Google Play Store** — Submit Nocturne mobile app
+1. **iOS App Store** — Submit AegisCore mobile app
+2. **Google Play Store** — Submit AegisCore mobile app
 3. **Web Deployment** — University websites hosting
 4. **Kubernetes (Cloud)** — Azure Singapore option
 5. **Kubernetes (On-Prem)** — Bare-metal server option for universities that refuse cloud
@@ -24,8 +24,8 @@ Apple Developer Program ($99/year)
 ├─ Accept agreements
 ├─ Activate certificates
 └─ Create app bundle identifiers
-    ├─ com.nocturne.student (student app)
-    └─ com.nocturne.faculty (faculty app)
+    ├─ com.aegiscore.student (student app)
+    └─ com.aegiscore.faculty (faculty app)
 ```
 
 #### 2. Code Signing Setup
@@ -51,8 +51,8 @@ Apple Developer Program ($99/year)
 // app.json (Expo)
 {
   "expo": {
-    "name": "Nocturne Student",
-    "slug": "nocturne-student",
+    "name": "AegisCore Student",
+    "slug": "aegiscore-student",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
@@ -71,17 +71,17 @@ Apple Developer Program ($99/year)
     ],
     "ios": {
       "supportsTabletMode": true,
-      "bundleIdentifier": "com.nocturne.student",
+      "bundleIdentifier": "com.aegiscore.student",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "Allow Nocturne to use camera for biometric authentication",
-        "NSLocationWhenInUseUsageDescription": "Allow Nocturne to access your location for campus services",
-        "NSFaceIDUsageDescription": "Use Face ID to unlock Nocturne",
-        "NSBiometricsUsageDescription": "Use Touch ID to unlock Nocturne"
+        "NSCameraUsageDescription": "Allow AegisCore to use camera for biometric authentication",
+        "NSLocationWhenInUseUsageDescription": "Allow AegisCore to access your location for campus services",
+        "NSFaceIDUsageDescription": "Use Face ID to unlock AegisCore",
+        "NSBiometricsUsageDescription": "Use Touch ID to unlock AegisCore"
       }
     },
     "android": {
-      "bundleIdentifier": "com.nocturne.student",
+      "bundleIdentifier": "com.aegiscore.student",
       "versionCode": 1
     }
   }
@@ -104,10 +104,10 @@ Apple Developer Program ($99/year)
 
 **Metadata for App Store:**
 ```
-App Name: Nocturne Student
+App Name: AegisCore Student
 Subtitle: University Management at Your Fingertips
 Description:
-  "Nocturne Student connects you to your university instantly.
+  "AegisCore Student connects you to your university instantly.
    - Check attendance & grades
    - Pay fees via JazzCash/EasyPaisa
    - Access courses & materials
@@ -128,7 +128,7 @@ Content Rights: Original
 
 **Must include:**
 ```
-Privacy Policy (on website: nocturne.pk/privacy)
+Privacy Policy (on website: aegiscore.pk/privacy)
 ├─ Data we collect (name, email, student ID, grades, attendance)
 ├─ How we use data (display in app, analytics)
 ├─ Data storage (PostgreSQL, encrypted at rest)
@@ -137,7 +137,7 @@ Privacy Policy (on website: nocturne.pk/privacy)
 ├─ User rights (export, delete, access)
 └─ Security measures (AES-256, HTTPS, TLS)
 
-Terms of Service (on website: nocturne.pk/terms)
+Terms of Service (on website: aegiscore.pk/terms)
 ├─ Acceptable use
 ├─ Account responsibility
 ├─ Content ownership
@@ -161,9 +161,9 @@ eas build --platform ios --auto-submit
 
 ```
 1. Create App Record
-   └─ App Name: Nocturne Student
-   └─ Bundle ID: com.nocturne.student
-   └─ SKU: NOCTURNE-STU-001
+   └─ App Name: AegisCore Student
+   └─ Bundle ID: com.aegiscore.student
+   └─ SKU: AEGISCORE-STU-001
    └─ User Access: Students
 
 2. Pricing
@@ -172,14 +172,14 @@ eas build --platform ios --auto-submit
 3. Version Release
    └─ Version: 1.0.0
    └─ Build: Select build from Xcode Cloud
-   └─ Marketing URL: nocturne.pk/ios
-   └─ Support URL: support.nocturne.pk
+   └─ Marketing URL: aegiscore.pk/ios
+   └─ Support URL: support.aegiscore.pk
 
 4. App Information
-   └─ Privacy Policy: https://nocturne.pk/privacy
+   └─ Privacy Policy: https://aegiscore.pk/privacy
    └─ Category: Education
    └─ Age Rating: 4+
-   └─ Copyright: © 2024 Nocturne Systems
+   └─ Copyright: © 2024 AegisCore Systems
 
 5. App Preview & Screenshots
    └─ 5 iPad screenshots (2732 x 2048)
@@ -190,15 +190,15 @@ eas build --platform ios --auto-submit
    └─ Subtitle: "University Management at Your Fingertips"
    └─ Description: [See above]
    └─ Keywords: university, student, grades, attendance
-   └─ Support URL: support.nocturne.pk
-   └─ Marketing URL: nocturne.pk
-   └─ Privacy Policy: nocturne.pk/privacy
+   └─ Support URL: support.aegiscore.pk
+   └─ Marketing URL: aegiscore.pk
+   └─ Privacy Policy: aegiscore.pk/privacy
 
 7. Review Notes (for Apple reviewer)
-   "Nocturne Student is a university management app for Pakistani
+   "AegisCore Student is a university management app for Pakistani
     universities. Students check grades, attendance, pay fees,
     and access course materials. Demo account:
-    user@demo.nocturne.pk / demo123456
+    user@demo.aegiscore.pk / demo123456
     (accounts are university-specific)"
 
 8. Submit for Review
@@ -230,7 +230,7 @@ Google Play Developer Account ($25 one-time)
 ├─ Create Google Account
 ├─ Enroll in Google Play
 ├─ Set up billing
-├─ Create app bundle ID: com.nocturne.student
+├─ Create app bundle ID: com.aegiscore.student
 └─ Accept Play Developer policies
 ```
 
@@ -241,7 +241,7 @@ Google Play Developer Account ($25 one-time)
 # You just upload the AAB (Android App Bundle)
 
 # Generate signing certificate (if doing manual)
-# keytool -genkey -v -keystore nocturne.keystore -alias nocturne -keyalg RSA -keysize 2048 -validity 10000
+# keytool -genkey -v -keystore aegiscore.keystore -alias aegiscore -keyalg RSA -keysize 2048 -validity 10000
 
 # Build AAB (Android App Bundle)
 # Using React Native + EAS:
@@ -254,8 +254,8 @@ eas build --platform android --auto-submit
 
 ```
 1. Create App Entry
-   └─ App Name: Nocturne Student
-   └─ Package Name: com.nocturne.student
+   └─ App Name: AegisCore Student
+   └─ Package Name: com.aegiscore.student
    └─ App Category: Education
    └─ Ads: No
 
@@ -285,7 +285,7 @@ eas build --platform android --auto-submit
    └─ Show app name + key feature
 
 7. App Description
-   "Nocturne Student: Your university in your pocket.
+   "AegisCore Student: Your university in your pocket.
     • Check real-time attendance
     • View grades and transcripts
     • Pay fees via JazzCash/EasyPaisa
@@ -297,7 +297,7 @@ eas build --platform android --auto-submit
    "University management app for students"
 
 9. Privacy Policy
-   └─ URL: nocturne.pk/privacy (REQUIRED)
+   └─ URL: aegiscore.pk/privacy (REQUIRED)
 
 10. Release Notes
     "Initial release - complete student management"
@@ -309,7 +309,7 @@ eas build --platform android --auto-submit
 # Using Expo + EAS
 eas build --platform android
 
-# Output: nocturne-student.aab (Android App Bundle)
+# Output: aegiscore-student.aab (Android App Bundle)
 # Size: ~50-70 MB (will be ~30 MB after compression on device)
 ```
 
@@ -337,7 +337,7 @@ Before submitting to production:
 
 ```
 1. Upload Build
-   └─ Upload nocturne-student.aab
+   └─ Upload aegiscore-student.aab
    └─ Build is automatically tested
    └─ Optimized for all screen sizes
 
@@ -366,15 +366,15 @@ Before submitting to production:
 ### Architecture
 
 ```
-Domain: nocturne.university.edu.pk
+Domain: aegiscore.university.edu.pk
   ├─ DNS → Cloudflare (DDoS protection)
-  ├─ Frontend: nocturne.university.edu.pk/
+  ├─ Frontend: aegiscore.university.edu.pk/
   │   └─ Static React/Next.js (Cloudflare Pages or Vercel)
   │
-  ├─ API: api.nocturne.university.edu.pk
+  ├─ API: api.aegiscore.university.edu.pk
   │   └─ Kubernetes service (Azure or bare-metal)
   │
-  └─ Admin: admin.nocturne.university.edu.pk
+  └─ Admin: admin.aegiscore.university.edu.pk
       └─ Same Kubernetes backend
 ```
 
@@ -390,13 +390,13 @@ Domain: nocturne.university.edu.pk
   "dns": [
     {
       "type": "A",
-      "name": "nocturne",
+      "name": "aegiscore",
       "content": "YOUR_SERVER_IP"
     },
     {
       "type": "CNAME",
-      "name": "api.nocturne",
-      "content": "nocturne.university.edu.pk"
+      "name": "api.aegiscore",
+      "content": "aegiscore.university.edu.pk"
     }
   ],
   
@@ -421,11 +421,11 @@ Domain: nocturne.university.edu.pk
 ```bash
 # Option 1: Vercel (recommended for React/Next.js)
 npm i -g vercel
-vercel --prod --name nocturne-student
+vercel --prod --name aegiscore-student
 
 # Creates:
-# nocturne-student.vercel.app (staging)
-# nocturne.university.edu.pk (production via custom domain)
+# aegiscore-student.vercel.app (staging)
+# aegiscore.university.edu.pk (production via custom domain)
 
 # Option 2: Cloudflare Pages (free, fast)
 wrangler pages publish dist
@@ -441,13 +441,13 @@ wrangler pages publish dist
   "buildCommand": "npm run build",
   "outputDirectory": "out",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://api.nocturne.university.edu.pk",
+    "NEXT_PUBLIC_API_URL": "https://api.aegiscore.university.edu.pk",
     "NEXT_PUBLIC_UNIVERSITY": "SSUET"
   },
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://api.nocturne.university.edu.pk/:path*"
+      "destination": "https://api.aegiscore.university.edu.pk/:path*"
     }
   ]
 }
@@ -467,13 +467,13 @@ az login
 
 # Create resource group in Singapore
 az group create \
-  --name nocturne-rg \
+  --name aegiscore-rg \
   --location southeastasia
 
 # Create AKS cluster (Singapore region)
 az aks create \
-  --resource-group nocturne-rg \
-  --name nocturne-cluster \
+  --resource-group aegiscore-rg \
+  --name aegiscore-cluster \
   --node-count 3 \
   --vm-set-type VirtualMachineScaleSets \
   --node-vm-size Standard_B4ms \
@@ -483,8 +483,8 @@ az aks create \
 
 # Get credentials
 az aks get-credentials \
-  --resource-group nocturne-rg \
-  --name nocturne-cluster
+  --resource-group aegiscore-rg \
+  --name aegiscore-cluster
 ```
 
 #### 2. Container Registry (Azure Container Registry)
@@ -492,16 +492,16 @@ az aks get-credentials \
 ```bash
 # Create ACR
 az acr create \
-  --resource-group nocturne-rg \
-  --name nocturnepk \
+  --resource-group aegiscore-rg \
+  --name aegiscorepk \
   --sku Basic
 
 # Build and push image
 az acr build \
-  --registry nocturnepk \
-  --image nocturne-api:latest .
+  --registry aegiscorepk \
+  --image aegiscore-api:latest .
 
-# Result: nocturnepk.azurecr.io/nocturne-api:latest
+# Result: aegiscorepk.azurecr.io/aegiscore-api:latest
 ```
 
 #### 3. Kubernetes Manifests
@@ -511,15 +511,15 @@ az acr build \
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: nocturne
+  name: aegiscore
 ---
 
 # secret.yaml (database credentials)
 apiVersion: v1
 kind: Secret
 metadata:
-  name: nocturne-secrets
-  namespace: nocturne
+  name: aegiscore-secrets
+  namespace: aegiscore
 type: Opaque
 data:
   DATABASE_URL: cG9zdGdyZXM6Ly9ub2N0dXJuZTpwYXNzd29yZEBkYi5ub2N0dXJuZS5lZHUucGs6NTQzMi9ub2N0dXJuZQ==
@@ -530,8 +530,8 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nocturne-config
-  namespace: nocturne
+  name: aegiscore-config
+  namespace: aegiscore
 data:
   ASPNETCORE_ENVIRONMENT: Production
   AZURE_REGION: southeastasia
@@ -542,21 +542,21 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nocturne-api
-  namespace: nocturne
+  name: aegiscore-api
+  namespace: aegiscore
 spec:
   replicas: 3 # High availability
   selector:
     matchLabels:
-      app: nocturne-api
+      app: aegiscore-api
   template:
     metadata:
       labels:
-        app: nocturne-api
+        app: aegiscore-api
     spec:
       containers:
-      - name: nocturne-api
-        image: nocturnepk.azurecr.io/nocturne-api:latest
+      - name: aegiscore-api
+        image: aegiscorepk.azurecr.io/aegiscore-api:latest
         imagePullPolicy: Always
         
         ports:
@@ -567,17 +567,17 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: nocturne-secrets
+              name: aegiscore-secrets
               key: DATABASE_URL
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
-              name: nocturne-secrets
+              name: aegiscore-secrets
               key: REDIS_URL
         - name: ASPNETCORE_ENVIRONMENT
           valueFrom:
             configMapKeyRef:
-              name: nocturne-config
+              name: aegiscore-config
               key: ASPNETCORE_ENVIRONMENT
         
         livenessProbe:
@@ -612,7 +612,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - nocturne-api
+                  - aegiscore-api
               topologyKey: kubernetes.io/hostname
 ---
 
@@ -620,12 +620,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nocturne-api
-  namespace: nocturne
+  name: aegiscore-api
+  namespace: aegiscore
 spec:
   type: LoadBalancer
   selector:
-    app: nocturne-api
+    app: aegiscore-api
   ports:
   - port: 80
     targetPort: 5000
@@ -636,25 +636,25 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nocturne-ingress
-  namespace: nocturne
+  name: aegiscore-ingress
+  namespace: aegiscore
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - api.nocturne.university.edu.pk
-    secretName: nocturne-tls
+    - api.aegiscore.university.edu.pk
+    secretName: aegiscore-tls
   rules:
-  - host: api.nocturne.university.edu.pk
+  - host: api.aegiscore.university.edu.pk
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: nocturne-api
+            name: aegiscore-api
             port:
               number: 80
 ---
@@ -663,13 +663,13 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: nocturne-api-hpa
-  namespace: nocturne
+  name: aegiscore-api-hpa
+  namespace: aegiscore
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: nocturne-api
+    name: aegiscore-api
   minReplicas: 3
   maxReplicas: 10
   metrics:
@@ -700,15 +700,15 @@ kubectl apply -f ingress.yaml
 kubectl apply -f hpa.yaml
 
 # Verify deployment
-kubectl get pods -n nocturne
-kubectl get svc -n nocturne
-kubectl get ingress -n nocturne
+kubectl get pods -n aegiscore
+kubectl get svc -n aegiscore
+kubectl get ingress -n aegiscore
 
 # Check logs
-kubectl logs -n nocturne deployment/nocturne-api
+kubectl logs -n aegiscore deployment/aegiscore-api
 
 # Get load balancer IP
-kubectl get svc -n nocturne nocturne-api
+kubectl get svc -n aegiscore aegiscore-api
 # → Copy EXTERNAL-IP
 # → Point DNS A record to this IP
 ```
@@ -730,7 +730,7 @@ Minimum Setup:
 │  └─ OS: Ubuntu 22.04 LTS
 │
 ├─ Network:
-│  ├─ Dedicated VLAN for Nocturne
+│  ├─ Dedicated VLAN for AegisCore
 │  ├─ Static IPs for all servers
 │  ├─ Load balancer (hardware or Keepalived)
 │  └─ Firewall rules (only HTTP/HTTPS/SSH allowed)
@@ -785,7 +785,7 @@ sudo sysctl --system
 sudo kubeadm init \
   --pod-network-cidr=10.244.0.0/16 \
   --service-cidr=10.96.0.0/12 \
-  --control-plane-endpoint=nocturne-control.university.edu.pk \
+  --control-plane-endpoint=aegiscore-control.university.edu.pk \
   --apiserver-advertise-address=192.168.1.10
 
 # Save the output! You'll need the join command for worker nodes
@@ -863,7 +863,7 @@ spec:
 EOF
 ```
 
-#### 8. Deploy Nocturne (Same manifests as Azure)
+#### 8. Deploy AegisCore (Same manifests as Azure)
 
 ```bash
 # Same YAML files as Azure deployment
@@ -876,7 +876,7 @@ kubectl apply -f ingress.yaml
 kubectl apply -f hpa.yaml
 
 # Verify
-kubectl get all -n nocturne
+kubectl get all -n aegiscore
 ```
 
 #### 9. Backup Strategy (On-Premises Critical)
@@ -886,7 +886,7 @@ kubectl get all -n nocturne
 configuration:
   backupStorageLocation:
     provider: aws
-    bucket: university-nocturne-backups
+    bucket: university-aegiscore-backups
     config:
       s3Url: https://minio.university.edu.pk # Self-hosted MinIO
   
@@ -896,7 +896,7 @@ configuration:
       template:
         ttl: "720h"
         includedNamespaces:
-          - nocturne
+          - aegiscore
 ```
 
 #### 10. Monitoring & Logging
@@ -913,7 +913,7 @@ helm install kibana elastic/kibana -n logging
 
 # Monitor cluster health
 kubectl top nodes
-kubectl top pods -n nocturne
+kubectl top pods -n aegiscore
 ```
 
 ---
@@ -964,7 +964,7 @@ jobs:
     - name: Security scan
       run: |
         dotnet tool install -g SharpLab.CLI
-        dotnet sonarscanner begin /k:nocturne /d:sonar.host.url=${{ secrets.SONAR_HOST }} /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+        dotnet sonarscanner begin /k:aegiscore /d:sonar.host.url=${{ secrets.SONAR_HOST }} /d:sonar.login=${{ secrets.SONAR_TOKEN }}
         dotnet build
         dotnet sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
 
@@ -978,13 +978,13 @@ jobs:
     
     - name: Build Docker image
       run: |
-        docker build -t nocturne-api:${{ github.sha }} .
-        docker tag nocturne-api:${{ github.sha }} nocturne-api:latest
+        docker build -t aegiscore-api:${{ github.sha }} .
+        docker tag aegiscore-api:${{ github.sha }} aegiscore-api:latest
     
     - name: Push to registry (Azure)
       run: |
-        echo ${{ secrets.AZURE_REGISTRY_PASSWORD }} | docker login -u nocturne --password-stdin nocturnepk.azurecr.io
-        docker push nocturnepk.azurecr.io/nocturne-api:${{ github.sha }}
+        echo ${{ secrets.AZURE_REGISTRY_PASSWORD }} | docker login -u aegiscore --password-stdin aegiscorepk.azurecr.io
+        docker push aegiscorepk.azurecr.io/aegiscore-api:${{ github.sha }}
 
   deploy-azure:
     needs: build-docker
@@ -997,9 +997,9 @@ jobs:
     - name: Deploy to AKS
       run: |
         az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-        az aks get-credentials --resource-group nocturne-rg --name nocturne-cluster
-        kubectl set image deployment/nocturne-api nocturne-api=nocturnepk.azurecr.io/nocturne-api:${{ github.sha }} -n nocturne
-        kubectl rollout status deployment/nocturne-api -n nocturne
+        az aks get-credentials --resource-group aegiscore-rg --name aegiscore-cluster
+        kubectl set image deployment/aegiscore-api aegiscore-api=aegiscorepk.azurecr.io/aegiscore-api:${{ github.sha }} -n aegiscore
+        kubectl rollout status deployment/aegiscore-api -n aegiscore
 
   build-ios:
     needs: test
@@ -1044,7 +1044,7 @@ jobs:
         curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
           -H 'Content-type: application/json' \
           -d '{
-            "text": "Nocturne deployment successful!",
+            "text": "AegisCore deployment successful!",
             "blocks": [
               {
                 "type": "section",
@@ -1087,7 +1087,7 @@ jobs:
 ### Launch Day
 - [ ] Release iOS app on App Store
 - [ ] Release Android app on Play Store
-- [ ] Go live on web: nocturne.university.edu.pk
+- [ ] Go live on web: aegiscore.university.edu.pk
 - [ ] Monitor for crashes + errors
 - [ ] Respond to user feedback
 

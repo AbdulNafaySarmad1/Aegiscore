@@ -53,9 +53,11 @@ public static class InfrastructureServiceExtensions
         services.TryAddScoped<AegisCore.Contracts.Common.Interfaces.IUnitOfWork, UnitOfWork>();
         services.TryAddSingleton<IConnectionMultiplexer>(_ =>
         {
-            var connectionString = configuration["NOCTURNE_REDIS_CONNECTION"]
-                ?? configuration.GetConnectionString("Redis")
-                ?? configuration["Redis:ConnectionString"]
+            var connectionString = FirstConfigured(
+                configuration["AEGISCORE_REDIS_CONNECTION"],
+                configuration["REDIS_CONNECTION_STRING"],
+                configuration.GetConnectionString("Redis"),
+                configuration["Redis:ConnectionString"])
                 ?? "localhost:6379";
             var options = ConfigurationOptions.Parse(connectionString);
             options.AbortOnConnectFail = false;
@@ -86,6 +88,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Finance.IAccountingService, AccountingService>();
         services.AddScoped<AegisCore.Application.Finance.IBudgetService, BudgetService>();
         services.AddCloudProvider(configuration);
+        services.AddPqcCryptography();
+        services.AddSingleton<IHybridPqcReplayStore, RedisHybridPqcReplayStore>();
         services.AddScoped<IPqcSignatureService, PqcSignatureService>();
         services.AddComplianceCenter(configuration);
         services.AddLoginAudit();
@@ -121,4 +125,7 @@ public static class InfrastructureServiceExtensions
         services.AddAiSupportTicketing();
         return services;
     }
+
+    private static string? FirstConfigured(params string?[] values) => values.FirstOrDefault(value =>
+        !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal));
 }

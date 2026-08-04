@@ -101,3 +101,82 @@ public sealed class FinanceAuditSealWorker(
         }
     }
 }
+
+public sealed record FinanceLedgerIntegrityFailure(Guid EntryId, string EntryNumber, string Reason);
+public sealed record FinanceLedgerIntegrityResult(bool IsValid, IReadOnlyList<FinanceLedgerIntegrityFailure> Failures);
+
+public sealed class FinanceLedgerIntegrityService(AegisDbContext db, IPqcSignatureService pqc)
+{
+    public async Task<bool> VerifyAsync(Guid tenantId, CancellationToken ct = default)
+        => (await VerifyDetailedAsync(tenantId, ct)).IsValid;
+
+    public async Task<FinanceLedgerIntegrityResult> VerifyDetailedAsync(Guid tenantId, CancellationToken ct = default)
+    {
+        var entries = await db.JournalEntries.IgnoreQueryFilters().AsNoTracking()
+            .Where(x => x.TenantId == tenantId && x.IsPosted)
+            .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+            .Select(x => new { x.Id, x.EntryNumber, x.PreviousHash, x.CanonicalPayload, x.EntryHash }).ToListAsync(ct);
+        var signatures = await db.FinanceLedgerSignatures.IgnoreQueryFilters().AsNoTracking()
+            .Where(x => x.TenantId == tenantId).ToDictionaryAsync(x => x.JournalEntryId, ct);
+        byte[] previous = new byte[32];
+        var failures = new List<FinanceLedgerIntegrityFailure>();
+        foreach (var entry in entries)
+        {
+            if (entry.PreviousHash is null)
+                failures.Add(new(entry.Id, entry.EntryNumber, "previous_hash_mismatch"));
+            else if (!CryptographicOperations.FixedTimeEquals(previous, entry.PreviousHash))
+                failures.Add(new(entry.Id, entry.EntryNumber, "previous_hash_mismatch"));
+            if (entry.EntryHash is null || entry.CanonicalPayload is null)
+            {
+                failures.Add(new(entry.Id, entry.EntryNumber, "entry_hash_missing"));
+                if (entry.EntryHash is not null) previous = entry.EntryHash;
+                continue;
+            }
+            if (entry.PreviousHash is not null)
+            {
+                var calculated = SHA256.HashData([.. entry.PreviousHash, .. Encoding.UTF8.GetBytes(entry.CanonicalPayload)]);
+                if (!CryptographicOperations.FixedTimeEquals(calculated, entry.EntryHash))
+                    failures.Add(new(entry.Id, entry.EntryNumber, "entry_hash_mismatch"));
+            }
+            if (!signatures.TryGetValue(entry.Id, out var signature))
+                failures.Add(new(entry.Id, entry.EntryNumber, "signature_missing"));
+            else if (!pqc.Verify(signature.Algorithm, entry.EntryHash, signature.Signature, signature.PublicKey))
+                failures.Add(new(entry.Id, entry.EntryNumber, "signature_invalid"));
+            previous = entry.EntryHash;
+        }
+        return new(failures.Count == 0, failures);
+    }
+}
+
+public sealed class FinanceLedgerSignatureWorker(IServiceScopeFactory scopes, ILogger<FinanceLedgerSignatureWorker> logger) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
+        do
+        {
+            try
+            {
+                await using var scope = scopes.CreateAsyncScope();
+                var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+                var signer = scope.ServiceProvider.GetRequiredService<IPqcSignatureService>();
+                var pending = await db.JournalEntries.IgnoreQueryFilters().AsNoTracking()
+                    .Where(x => x.IsPosted && x.EntryHash != null && !db.FinanceLedgerSignatures.IgnoreQueryFilters().Any(s => s.JournalEntryId == x.Id))
+                    .OrderBy(x => x.CreatedAt).Take(100).Select(x => new { x.Id, x.TenantId, x.EntryHash }).ToListAsync(stoppingToken);
+                foreach (var entry in pending)
+                {
+                    await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {entry.TenantId:D}, false)", stoppingToken);
+                    var signed = await signer.SignAsync(entry.TenantId, "ledger-archive", entry.EntryHash!, archival: true, stoppingToken);
+                    db.FinanceLedgerSignatures.Add(new FinanceLedgerSignature
+                    {
+                        Id = Guid.NewGuid(), TenantId = entry.TenantId, JournalEntryId = entry.Id, Algorithm = signed.Algorithm,
+                        KeyId = signed.KeyId, Signature = signed.Signature, PublicKey = signed.PublicKey, SignedAt = DateTime.UtcNow
+                    });
+                    await db.SaveChangesAsync(stoppingToken);
+                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
+            catch (Exception ex) { logger.LogError(ex, "Ledger archival signing failed."); }
+        } while (await timer.WaitForNextTickAsync(stoppingToken));
+    }
+}

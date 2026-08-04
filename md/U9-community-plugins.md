@@ -1,8 +1,8 @@
-# Nocturne — Community Plugin Ecosystem (U9)
+# AegisCore — Community Plugin Ecosystem (U9)
 ## Build Complete Platform, Let Community Extend
 
 ## Context
-**Nocturne ships COMPLETE Day 1 with all core features:**
+**AegisCore ships COMPLETE Day 1 with all core features:**
 - ✅ Admissions (merit via SHAP, quota management, payments)
 - ✅ Examination (grading, transcripts, hall tickets, result publication)
 - ✅ HR (recruitment, payroll Pakistan-compliant, leave, appraisals)
@@ -16,16 +16,16 @@
 - ✅ Asset & Inventory Management
 - ✅ Mobile Apps (offline-first React Native)
 
-**Zero gaps. Universities run Nocturne perfectly without any plugins.**
+**Zero gaps. Universities run AegisCore perfectly without any plugins.**
 
 ---
 
 ## Role
-You are a senior platform architect designing Nocturne's plugin ecosystem. Plugins are NOT for filling gaps. Plugins are for **customization, integration, and regional variation**.
+You are a senior platform architect designing AegisCore's plugin ecosystem. Plugins are NOT for filling gaps. Plugins are for **customization, integration, and regional variation**.
 
 This is WordPress. WordPress ships with blogging built-in. Plugins don't make blogging work — blogging already works. Plugins extend it (SEO, analytics, payment processing, etc.).
 
-Nocturne ships with ERP built-in. Plugins don't make ERP work — ERP already works. Plugins customize it (university-specific rules, legacy system integration, provincial board variations, etc.).
+AegisCore ships with ERP built-in. Plugins don't make ERP work — ERP already works. Plugins customize it (university-specific rules, legacy system integration, provincial board variations, etc.).
 
 ---
 
@@ -35,20 +35,20 @@ Nocturne ships with ERP built-in. Plugins don't make ERP work — ERP already wo
 **Plugins are for things beyond "standard ERP" — customization, integration, niche workflows, regional rules:**
 
 1. **University Customization** — SSUET wants special hostel allocation algorithm (maximize occupancy vs student preferences). Build plugin.
-2. **Vendor Integration** — University has RFID library system already installed. Build plugin to sync book returns to Nocturne inventory.
+2. **Vendor Integration** — University has RFID library system already installed. Build plugin to sync book returns to AegisCore inventory.
 3. **Niche Workflows** — Medical college wants resident rotation scheduling (ICU 6 weeks → ward 4 weeks → OPD 2 weeks). Build plugin.
 4. **Regional Board Variations** — Punjab Board, Sindh Board, Federal Board have different grading scales. Build plugin per board.
-5. **Institutional Innovation** — FAST wants AI-powered class recommendation system. Build plugin on top of Nocturne.
+5. **Institutional Innovation** — FAST wants AI-powered class recommendation system. Build plugin on top of AegisCore.
 6. **Revenue for Community** — Pakistani developers want ₱50K-500K projects. Plugins = recurring income for them.
 
 **Plugins are NOT fixing broken core. Core is already complete. Plugins are adding optional customization on top.**
 
 ### Network Effects
-1. **Nocturne is feature-complete and production-ready → universities buy it (₱8M/year)**
+1. **AegisCore is feature-complete and production-ready → universities buy it (₱8M/year)**
 2. **Universities want customization → they buy plugins (₱75K average per plugin)**
 3. **Developers want income → they build plugins (₱35K-140K profit per plugin at 70% cut)**
 4. **More successful plugins → more ecosystem reputation → attracts more developers → more plugins**
-5. **More ecosystem depth → more customization options → Nocturne becomes more compelling**
+5. **More ecosystem depth → more customization options → AegisCore becomes more compelling**
 6. **Competitors are still building base ERP; you're already selling advanced customization**
 
 ---
@@ -88,8 +88,8 @@ my-plugin/
   "description": "AI-driven teacher scheduling with conflict resolution",
   "long_description": "Automatically assign teachers to courses minimizing scheduling conflicts. Respects teacher preferences, course requirements, and availability.",
   "icon": "scheduling.png",
-  "homepage": "https://github.com/ahmeddeveloper/nocturne-scheduling",
-  "repository": "https://github.com/ahmeddeveloper/nocturne-scheduling",
+  "homepage": "https://github.com/ahmeddeveloper/aegiscore-scheduling",
+  "repository": "https://github.com/ahmeddeveloper/aegiscore-scheduling",
   "license": "MIT",
   "price_usd": 0,
   "price_pkr": 50000,
@@ -98,10 +98,10 @@ my-plugin/
   "trial_days": 14,
   "category": "academic | finance | hr | operations | reporting | integration",
   "tags": ["scheduling", "ai", "automation", "faculty"],
-  "requires_nocturne_version": ">=1.0.0",
+  "requires_aegiscore_version": ">=1.0.0",
   "dependencies": [
     {
-      "plugin_id": "com.nocturne.timetable",
+      "plugin_id": "com.aegiscore.timetable",
       "version": ">=1.0.0"
     }
   ],
@@ -123,7 +123,7 @@ my-plugin/
   "screenshots": ["screenshot1.png", "screenshot2.png"],
   "reviews_enabled": true,
   "mature_content": false,
-  "tested_nocturne_versions": ["1.0.0", "1.0.1", "1.0.2"],
+  "tested_aegiscore_versions": ["1.0.0", "1.0.1", "1.0.2"],
   "status": "approved | pending-review | rejected"
 }
 ```
@@ -191,7 +191,7 @@ public abstract class AegicorePlugin
 
 ### Hook System (Events + Filters)
 
-Plugins hook into Nocturne's lifecycle:
+Plugins hook into AegisCore's lifecycle:
 
 ```csharp
 public interface IHookRegistry
@@ -211,7 +211,7 @@ public interface IHookRegistry
 ### Example Plugin Implementation
 
 ```csharp
-public class TeacherSchedulingPlugin : NocturnePlugin
+public class TeacherSchedulingPlugin : AegisCorePlugin
 {
     public override string PluginId => "com.teachertools.scheduling";
     public override string PluginName => "Teacher Scheduling AI";
@@ -299,7 +299,7 @@ GET /api/marketplace/plugins
 - Description + long description
 - Pricing (one-time vs subscription)
 - Rating (1-5 stars, number of reviews)
-- Requirements (Nocturne version, permissions)
+- Requirements (AegisCore version, permissions)
 - Release notes / changelog
 - Developer profile
 - Install button
@@ -307,7 +307,7 @@ GET /api/marketplace/plugins
 #### 3. Installation
 ```
 [Install Plugin Button]
-  → Nocturne Systems (or university) downloads plugin from marketplace
+  → AegisCore Systems (or university) downloads plugin from marketplace
   → Verify cryptographic signature (security)
   → Run database migrations
   → Register hooks
@@ -335,7 +335,7 @@ public class PluginSettings
 }
 ```
 
-Nocturne auto-generates settings UI from these attributes.
+AegisCore auto-generates settings UI from these attributes.
 
 ---
 
@@ -346,13 +346,13 @@ Nocturne auto-generates settings UI from these attributes.
 ```
 1. ONE-TIME PURCHASE
    - Plugin costs ₱50,000 (example)
-   - Nocturne Systems takes 30% → ₱15,000
+   - AegisCore Systems takes 30% → ₱15,000
    - Developer takes 70% → ₱35,000
    - Buyer owns the plugin forever
 
 2. SUBSCRIPTION (Monthly)
    - Plugin costs ₱10,000/month
-   - Nocturne Systems takes 30% → ₱3,000/month
+   - AegisCore Systems takes 30% → ₱3,000/month
    - Developer takes 70% → ₱7,000/month
    - Renewable each month
 
@@ -363,7 +363,7 @@ Nocturne auto-generates settings UI from these attributes.
 
 4. REVENUE SHARE (In-App Purchase)
    - Plugin generates revenue (e.g., job board premium postings)
-   - Nocturne Systems takes 10% (lower cut for native revenue)
+   - AegisCore Systems takes 10% (lower cut for native revenue)
    - Developer/University takes 90%
 ```
 
@@ -399,26 +399,26 @@ Top Plugins by Revenue:
 
 ```bash
 # Install SDK
-dotnet tool install nocturne-cli --global
+dotnet tool install aegiscore-cli --global
 
 # Create new plugin
-nocturne-cli create-plugin --name "My Plugin" --category academic
+aegiscore-cli create-plugin --name "My Plugin" --category academic
 # → Generates project structure + plugin.json + base class
 
 # Develop locally
-nocturne-cli dev --watch
+aegiscore-cli dev --watch
 # → Auto-reloads plugin on code changes
 
 # Test
-nocturne-cli test
+aegiscore-cli test
 # → Runs unit tests + integration tests
 
 # Build
-nocturne-cli build
+aegiscore-cli build
 # → Compiles + signs cryptographically
 
 # Submit to marketplace
-nocturne-cli submit --name "My Plugin" --version 1.0.0
+aegiscore-cli submit --name "My Plugin" --version 1.0.0
 # → Uploads to marketplace, queues for review
 ```
 
@@ -426,7 +426,7 @@ nocturne-cli submit --name "My Plugin" --version 1.0.0
 
 ```csharp
 [TestClass]
-public class TeacherSchedulingTests : NocturnePluginTest<TeacherSchedulingPlugin>
+public class TeacherSchedulingTests : AegisCorePluginTest<TeacherSchedulingPlugin>
 {
     [TestMethod]
     public async Task ShouldDetectSchedulingConflict()
@@ -473,7 +473,7 @@ AI-driven teacher scheduling with conflict resolution.
 
 ## Installation
 ```bash
-nocturne-cli install teacher-scheduling-ai
+aegiscore-cli install teacher-scheduling-ai
 ```
 
 ## Configuration
@@ -533,11 +533,11 @@ GitHub Issues: https://github.com/...
 
 3. **Functional Review** (5 business days)
    - [ ] Plugin does what README says
-   - [ ] No conflicts with core Nocturne
+   - [ ] No conflicts with core AegisCore
    - [ ] No conflicts with popular plugins
    - [ ] UI/UX is reasonable
    - [ ] Documentation is clear
-   - [ ] Works on stated Nocturne versions
+   - [ ] Works on stated AegisCore versions
 
 4. **Approval**
    - Plugin marked "approved" in marketplace
@@ -547,12 +547,12 @@ GitHub Issues: https://github.com/...
 
 **Plugins must NOT:**
 - ❌ Access other plugins' data
-- ❌ Modify core Nocturne files
+- ❌ Modify core AegisCore files
 - ❌ Call private/internal APIs
 - ❌ Store credentials in code
 - ❌ Export data outside university's infrastructure (unless user explicitly allows)
 - ❌ Phone home to developer's servers without disclosure
-- ❌ Implement licensing that conflicts with Nocturne licensing
+- ❌ Implement licensing that conflicts with AegisCore licensing
 
 **Plugins SHOULD:**
 - ✅ Use public APIs only
@@ -588,12 +588,12 @@ Plugins can be removed from marketplace if:
 | RFID Library System | Operations | Library Automation Co. | ₱100K + ₱8K/month | Third-party vendor |
 | Research Output Dashboard | Reporting | Pakistan Institute of Tech | Free | University sharing |
 | Alumni Donation Campaign | Finance | Freelance Dev | ₱30K one-time | Individual developer |
-| Slack Integration | Integration | Nocturne Systems | Free | Native Apex plugin |
+| Slack Integration | Integration | AegisCore Systems | Free | Native Apex plugin |
 | Attendance Dashboard Mobile | Reporting | Mobile Dev Agency | ₱25K one-time | Dev shop built it |
 
 ### Potential Revenue
 
-If Nocturne gets 500 Pakistani universities (30% market):
+If AegisCore gets 500 Pakistani universities (30% market):
 
 **Conservative Scenario:**
 - 80% install 3 paid plugins each → 1,200 plugin purchases
@@ -635,7 +635,7 @@ If Nocturne gets 500 Pakistani universities (30% market):
 - [ ] Review queue system
 
 ### Week 3-4: Tools & Documentation
-- [ ] Plugin SDK (nocturne-cli)
+- [ ] Plugin SDK (aegiscore-cli)
 - [ ] Plugin template + boilerplate
 - [ ] Documentation site (plugin development guide)
 - [ ] Example plugin (reference implementation)

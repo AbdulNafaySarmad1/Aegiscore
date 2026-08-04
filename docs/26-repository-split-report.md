@@ -4,10 +4,10 @@ Date: 2026-07-26
 
 ## Created Working Trees
 
-- `nocturne-backend/`: API, application, contracts, domain, infrastructure, tests, plugin SDK/CLI, Docker, Compose, Kubernetes, backend CI.
-- `nocturne-frontend/`: React/Vite portal without `node_modules` or `dist`.
-- `nocturne-mobile/`: Expo app under `react-native/`, native Kotlin under `android/`, native Swift under `ios/`.
-- `nocturne-android/`: standalone native Android app with Android-specific README, gitignore, and CI workflows.
+- `aegiscore-backend/`: API, application, contracts, domain, infrastructure, tests, plugin SDK/CLI, Docker, Compose, Kubernetes, backend CI.
+- `aegiscore-frontend/`: React/Vite portal without `node_modules` or `dist`.
+- `aegiscore-mobile/`: Expo app under `react-native/`, native Kotlin under `android/`, native Swift under `ios/`.
+- `aegiscore-android/`: standalone native Android app with Android-specific README, gitignore, and CI workflows.
 
 ## Added Split Artifacts
 
@@ -19,9 +19,9 @@ Date: 2026-07-26
 
 ## Validation
 
-- `nocturne-backend`: `dotnet test Nocturne.slnx -m:1 -p:BuildInParallel=false` passed, 51 tests; NuGet vulnerability audit found no vulnerable packages.
-- `nocturne-frontend`: `npm run build` passed; full `npm audit` found 0 vulnerabilities.
-- `nocturne-mobile/react-native`: `npm run typecheck` passed; `npm test` passed, 1 test; full `npm audit` found 0 vulnerabilities.
+- `aegiscore-backend`: `dotnet test AegisCore.slnx -m:1 -p:BuildInParallel=false` passed, 51 tests; NuGet vulnerability audit found no vulnerable packages.
+- `aegiscore-frontend`: `npm run build` passed; full `npm audit` found 0 vulnerabilities.
+- `aegiscore-mobile/react-native`: `npm run typecheck` passed; `npm test` passed, 1 test; full `npm audit` found 0 vulnerabilities.
 - Root Compose stack: `docker compose --env-file .env.example up -d --build` built and started API/PostgreSQL/Redis; `/health` returned `Healthy`; `/swagger/v1/swagger.json` returned OpenAPI `3.0.1`.
 
 ## Not Performed

@@ -31,10 +31,10 @@ public static class DbContextServiceExtensions
         var explicitCs = configuration.GetConnectionString("Default")
             ?? configuration["ConnectionStrings:Default"]
             ?? configuration["Database:ConnectionString"]
-            ?? configuration["NOCTURNE_DB_CONNECTION"]
+            ?? configuration["AEGISCORE_DB_CONNECTION"]
             ?? configuration["POSTGRES_CONNECTION_STRING"];
-        if (!string.IsNullOrWhiteSpace(explicitCs))
-            return explicitCs;
+        if (IsConfigured(explicitCs))
+            return explicitCs!;
 
         var host = configuration["DB_HOST"] ?? configuration["POSTGRES_HOST"] ?? "localhost";
         var port = configuration["DB_PORT"] ?? configuration["POSTGRES_PORT"] ?? "5432";
@@ -46,4 +46,7 @@ public static class DbContextServiceExtensions
 
         return $"Host={host};Port={port};Database={db};Username={user};Password={password};SslMode={ssl}";
     }
+
+    private static bool IsConfigured(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal);
 }

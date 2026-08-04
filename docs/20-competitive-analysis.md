@@ -1,4 +1,4 @@
-# Nocturne Competitive Analysis
+# AegisCore Competitive Analysis
 
 Date: 2026-07-26
 
@@ -19,7 +19,7 @@ Futuresol: CloudCampus/Cloud UMS ERP for schools, colleges, and universities wit
 
 HEC/Punjab CMS-style ERP: institutional ERP aimed at automating the student lifecycle from admission to graduation/alumni, including recruiting/admissions, student records, gradebook, academic advisement, financials, hostel, and contributor relations.
 
-## Nocturne Differentiators
+## AegisCore Differentiators
 
 - SHAP-explainable admissions merit scoring for auditable quota and seat decisions.
 - OBE + CIS scanner with CLO extraction and HEC HEMIS exports.
@@ -31,8 +31,8 @@ HEC/Punjab CMS-style ERP: institutional ERP aimed at automating the student life
 
 ## Position
 
-Nocturne should not compete as another generic campus ERP. It should be sold as a Pakistan-native university operating system for regulated academic decisions: admissions merit, examinations, OBE/accreditation, finance, payroll, governance, and offline mobility.
+AegisCore should not compete as another generic campus ERP. It should be sold as a Pakistan-native university operating system for regulated academic decisions: admissions merit, examinations, OBE/accreditation, finance, payroll, governance, and offline mobility.
 
 ## Risk
 
-Competitors already have live sales channels and simpler school/college positioning. Nocturne should target universities that need auditability, compliance, and deployment control more than quick school ERP onboarding.
+Competitors already have live sales channels and simpler school/college positioning. AegisCore should target universities that need auditability, compliance, and deployment control more than quick school ERP onboarding.

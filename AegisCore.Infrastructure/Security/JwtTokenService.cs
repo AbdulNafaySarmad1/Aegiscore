@@ -38,7 +38,7 @@ public class JwtTokenService : IJwtTokenService
             return;
         }
 
-        var secret = configuration["NOCTURNE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
+        var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
         if (string.IsNullOrWhiteSpace(secret)) throw new InvalidOperationException("JWT signing keys are not configured.");
         _signingKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
         _validationKey = _signingKey;

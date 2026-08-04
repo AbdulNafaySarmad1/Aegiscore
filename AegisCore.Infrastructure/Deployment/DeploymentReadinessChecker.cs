@@ -48,7 +48,7 @@ public class DeploymentReadinessChecker
         var name = "PostgreSQL Connectivity";
         try
         {
-            var cs = _configuration["NOCTURNE_DB_CONNECTION"]
+            var cs = _configuration["AEGISCORE_DB_CONNECTION"]
                 ?? _configuration["POSTGRES_CONNECTION_STRING"]
                 ?? _configuration.GetConnectionString("Postgres")
                 ?? _configuration.GetConnectionString("SupabasePostgres")
@@ -67,6 +67,14 @@ public class DeploymentReadinessChecker
             await cmd.ExecuteScalarAsync(ct);
 
             _checks.Add(new ReadinessCheck(name, true, "Connected successfully."));
+            await using var roleCommand = new NpgsqlCommand("SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user", conn);
+            await using var reader = await roleCommand.ExecuteReaderAsync(ct);
+            if (!await reader.ReadAsync(ct))
+                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", false, "The connected database role could not be inspected."));
+            else if (reader.GetBoolean(0) || reader.GetBoolean(1))
+                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", false, "The API database role must not be SUPERUSER or BYPASSRLS."));
+            else
+                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The API role cannot bypass row-level security."));
         }
         catch (Exception ex)
         {
@@ -87,7 +95,7 @@ public class DeploymentReadinessChecker
 
             await using var redis = await ConnectionMultiplexer.ConnectAsync(options);
             await redis.GetDatabase().PingAsync();
-            _checks.Add(new ReadinessCheck(name, true, $"Connected to {cs}."));
+            _checks.Add(new ReadinessCheck(name, true, $"Connected to {DescribeRedisEndpoint(options)}."));
         }
         catch (Exception ex)
         {
@@ -97,11 +105,21 @@ public class DeploymentReadinessChecker
 
     public static string ResolveRedisConnectionString(IConfiguration configuration)
     {
-        return configuration["NOCTURNE_REDIS_CONNECTION"]
-            ?? configuration["REDIS_CONNECTION_STRING"]
-            ?? configuration.GetConnectionString("Redis")
-            ?? configuration["Redis:ConnectionString"]
+        return new[]
+            {
+                configuration["AEGISCORE_REDIS_CONNECTION"],
+                configuration["REDIS_CONNECTION_STRING"],
+                configuration.GetConnectionString("Redis"),
+                configuration["Redis:ConnectionString"]
+            }
+            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal))
             ?? "localhost:6379";
+    }
+
+    private static string DescribeRedisEndpoint(ConfigurationOptions options)
+    {
+        var endpoint = options.EndPoints.FirstOrDefault();
+        return endpoint is null ? "configured endpoint" : endpoint.ToString() ?? "configured endpoint";
     }
 
     private void CheckJwtConfig()
@@ -109,12 +127,12 @@ public class DeploymentReadinessChecker
         var name = "JWT Configuration";
         var authority = _configuration["Auth:Authority"];
         var audience = _configuration["Auth:Audience"] ?? "aegiscore-api";
-        var symmetricSecret = _configuration["NOCTURNE_JWT_SECRET"] ?? _configuration["Jwt:Secret"];
+        var symmetricSecret = _configuration["AEGISCORE_JWT_SECRET"] ?? _configuration["Jwt:Secret"];
 
         if (!string.IsNullOrWhiteSpace(symmetricSecret))
             _checks.Add(new ReadinessCheck(name, true, $"Local signing key configured for audience {audience}."));
         else if (string.IsNullOrEmpty(authority))
-            _checks.Add(new ReadinessCheck(name, false, "Configure Auth:Authority or NOCTURNE_JWT_SECRET."));
+            _checks.Add(new ReadinessCheck(name, false, "Configure Auth:Authority or AEGISCORE_JWT_SECRET."));
         else
             _checks.Add(new ReadinessCheck(name, true, $"Authority={authority}, Audience={audience}"));
     }

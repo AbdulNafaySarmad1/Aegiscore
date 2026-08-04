@@ -1,7 +1,10 @@
 using AegisCore.Application.ApiGateway;
+using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AegisCore.API.Middleware;
 
@@ -137,6 +140,87 @@ public class SessionBindingMiddleware
         }
 
         await _next(context);
+    }
+}
+
+public sealed class HybridPqcTransportMiddleware(RequestDelegate next, IConfiguration configuration, IHybridPqcReplayStore replayStore)
+{
+    public async Task InvokeAsync(HttpContext context)
+    {
+        if (!context.Request.Path.StartsWithSegments("/api/finance", StringComparison.OrdinalIgnoreCase)
+            || !configuration.GetValue("HybridPqcTransport:Enforce", false))
+        {
+            await next(context);
+            return;
+        }
+
+        var mode = context.Request.Headers["X-AegisCore-PQC-Transport"].ToString();
+        var timestampText = context.Request.Headers["X-AegisCore-PQC-Timestamp"].ToString();
+        var nonce = context.Request.Headers["X-AegisCore-PQC-Nonce"].ToString();
+        var contentHashText = context.Request.Headers["X-AegisCore-Content-SHA256"].ToString();
+        var supplied = context.Request.Headers["X-AegisCore-PQC-Proof"].ToString();
+        var secretText = configuration["HybridPqcTransport:EdgeProofKeyBase64"];
+        var skewSeconds = Math.Clamp(configuration.GetValue("HybridPqcTransport:MaxSkewSeconds", 60), 10, 300);
+        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        if (!long.TryParse(timestampText, out var timestamp)
+            || timestamp < now - skewSeconds
+            || timestamp > now + skewSeconds
+            || !string.Equals(mode, "ml-kem-1024+x25519", StringComparison.OrdinalIgnoreCase)
+            || nonce.Length is < 16 or > 128
+            || nonce.Any(c => !(char.IsAsciiLetterOrDigit(c) || c is '-' or '_'))
+            || string.IsNullOrWhiteSpace(secretText))
+        {
+            await RejectAsync(context);
+            return;
+        }
+
+        byte[] secret;
+        byte[] proof;
+        byte[] claimedContentHash;
+        try
+        {
+            secret = Convert.FromBase64String(secretText);
+            proof = Convert.FromBase64String(supplied);
+            claimedContentHash = Convert.FromBase64String(contentHashText);
+        }
+        catch (FormatException) { await RejectAsync(context); return; }
+        try
+        {
+            if (secret.Length < 32 || proof.Length != 32 || claimedContentHash.Length != 32)
+            {
+                await RejectAsync(context);
+                return;
+            }
+            context.Request.EnableBuffering();
+            var actualContentHash = await SHA256.HashDataAsync(context.Request.Body, context.RequestAborted);
+            context.Request.Body.Position = 0;
+            if (!CryptographicOperations.FixedTimeEquals(actualContentHash, claimedContentHash))
+            {
+                await RejectAsync(context);
+                return;
+            }
+            var message = Encoding.UTF8.GetBytes($"{context.Request.Method}|{context.Request.Path}|{context.Request.QueryString}|{timestampText}|{nonce}|{mode.ToLowerInvariant()}|{contentHashText}");
+            var expected = HMACSHA256.HashData(secret, message);
+            if (!CryptographicOperations.FixedTimeEquals(expected, proof))
+            {
+                await RejectAsync(context);
+                return;
+            }
+            if (!await replayStore.TryUseAsync(nonce, TimeSpan.FromSeconds(skewSeconds * 2L), context.RequestAborted))
+            {
+                await RejectAsync(context);
+                return;
+            }
+        }
+        finally { CryptographicOperations.ZeroMemory(secret); }
+
+        await next(context);
+    }
+
+    private static async Task RejectAsync(HttpContext context)
+    {
+        context.Response.StatusCode = StatusCodes.Status426UpgradeRequired;
+        await context.Response.WriteAsJsonAsync(new { error = "hybrid_pqc_transport_required" });
     }
 }
 

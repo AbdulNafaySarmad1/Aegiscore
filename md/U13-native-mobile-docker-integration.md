@@ -1,4 +1,4 @@
-# Nocturne — Native Mobile Architecture & Docker Integration (U13)
+# AegisCore — Native Mobile Architecture & Docker Integration (U13)
 
 ## Role
 You are a mobile architect + DevOps engineer explaining:
@@ -23,14 +23,14 @@ You are a mobile architect + DevOps engineer explaining:
 ```
 Phone (Kotlin/Swift App)
     ↓
-    Makes HTTP request to: api.nocturne.university.edu.pk
+    Makes HTTP request to: api.aegiscore.university.edu.pk
     ↓
 Internet
     ↓
 Kubernetes/Docker cluster (Azure or on-prem)
-    ├─ Container 1: Nocturne API (C# .NET in Docker)
-    ├─ Container 2: Nocturne API (C# .NET in Docker)
-    └─ Container 3: Nocturne API (C# .NET in Docker)
+    ├─ Container 1: AegisCore API (C# .NET in Docker)
+    ├─ Container 2: AegisCore API (C# .NET in Docker)
+    └─ Container 3: AegisCore API (C# .NET in Docker)
     ↓
 PostgreSQL database
 ```
@@ -38,13 +38,13 @@ PostgreSQL database
 ### Flow Explained
 
 ```
-1. Student opens Nocturne app on iPhone
+1. Student opens AegisCore app on iPhone
    ├─ App is Swift code compiled to native iPhone binary
    └─ Binary runs on iPhone processor (ARM)
 
 2. Student taps "Check Attendance"
    ├─ App makes HTTP request: GET /api/attendance/student/abc123
-   └─ Request goes over internet to: api.nocturne.university.edu.pk
+   └─ Request goes over internet to: api.aegiscore.university.edu.pk
 
 3. Request arrives at Kubernetes cluster
    ├─ Load balancer receives request
@@ -90,7 +90,7 @@ PostgreSQL database
 ### Kotlin + Android Architecture
 
 ```
-Nocturne Android App (Kotlin)
+AegisCore Android App (Kotlin)
 ├─ UI Layer
 │  ├─ LoginActivity
 │  ├─ DashboardActivity
@@ -110,7 +110,7 @@ Nocturne Android App (Kotlin)
 │
 ├─ Network Layer
 │  └─ Retrofit HTTP client
-│      └─ Calls: api.nocturne.university.edu.pk/api/*
+│      └─ Calls: api.aegiscore.university.edu.pk/api/*
 │
 ├─ Local Storage
 │  ├─ Room database (offline cache)
@@ -313,7 +313,7 @@ interface AttendanceDao {
 
 ```bash
 # Android Studio project structure
-nocturne-android/
+aegiscore-android/
 ├─ app/src/main/kotlin/
 │  ├─ MainActivity.kt
 │  ├─ ui/
@@ -353,7 +353,7 @@ app/build/outputs/bundle/release/app-release.aab (~15 MB, auto-compressed on dow
 ### Swift + iOS Architecture
 
 ```
-Nocturne iOS App (Swift)
+AegisCore iOS App (Swift)
 ├─ SwiftUI Views
 │  ├─ LoginView
 │  ├─ DashboardView
@@ -373,7 +373,7 @@ Nocturne iOS App (Swift)
 │
 ├─ Networking
 │  └─ URLSession HTTP client
-│      └─ Calls: api.nocturne.university.edu.pk/api/*
+│      └─ Calls: api.aegiscore.university.edu.pk/api/*
 │
 ├─ Local Storage
 │  ├─ Core Data (offline cache)
@@ -548,7 +548,7 @@ actor AttendanceService {
 // APIClient.swift (URLSession wrapper)
 actor APIClient {
     private let baseURL: URL = {
-        URL(string: "https://api.nocturne.university.edu.pk")!
+        URL(string: "https://api.aegiscore.university.edu.pk")!
     }()
     
     func post<T: Decodable>(
@@ -599,7 +599,7 @@ class KeychainManager {
     static func saveToken(_ token: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "nocturne-auth-token",
+            kSecAttrAccount as String: "aegiscore-auth-token",
             kSecValueData as String: token.data(using: .utf8)!
         ]
         
@@ -610,7 +610,7 @@ class KeychainManager {
     static func getToken() -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "nocturne-auth-token",
+            kSecAttrAccount as String: "aegiscore-auth-token",
             kSecReturnData as String: true
         ]
         
@@ -627,10 +627,10 @@ class KeychainManager {
 
 ```bash
 # Xcode project structure
-nocturne-ios/
-├─ Nocturne.xcodeproj
-├─ Nocturne/
-│  ├─ NocturneApp.swift (SwiftUI entry point)
+aegiscore-ios/
+├─ AegisCore.xcodeproj
+├─ AegisCore/
+│  ├─ AegisCoreApp.swift (SwiftUI entry point)
 │  ├─ Views/
 │  │  ├─ LoginView.swift
 │  │  ├─ DashboardView.swift
@@ -642,14 +642,14 @@ nocturne-ios/
 │  ├─ Storage/
 │  │  └─ CoreDataManager.swift
 │  └─ Assets/
-├─ Nocturne.xcdatamodeld (Core Data schema)
+├─ AegisCore.xcdatamodeld (Core Data schema)
 └─ Info.plist
 
 # Build command (via Xcode)
-xcodebuild -scheme Nocturne -configuration Release
+xcodebuild -scheme AegisCore -configuration Release
 
 # IPA output
-build/Release-iphoneos/Nocturne.app
+build/Release-iphoneos/AegisCore.app
 
 # Or via XCode Cloud
 # → Automatic CI/CD, signing, App Store submission
@@ -673,7 +673,7 @@ Kubernetes LoadBalancer (cloud or on-prem)
 Docker Container (Pod 1)
 ├─ Language: C# .NET 10
 ├─ Runtime: .NET runtime
-├─ Code: Your Nocturne API
+├─ Code: Your AegisCore API
 └─ Purpose: Handle requests, return JSON
     ↓
 PostgreSQL Database
@@ -682,14 +682,14 @@ PostgreSQL Database
 ### Docker Image Build (Backend)
 
 ```dockerfile
-# Dockerfile (for Nocturne API)
+# Dockerfile (for AegisCore API)
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /app
 
 # Copy csproj and restore dependencies
-COPY ["Nocturne.csproj", "./"]
-RUN dotnet restore "Nocturne.csproj"
+COPY ["AegisCore.csproj", "./"]
+RUN dotnet restore "AegisCore.csproj"
 
 # Copy source code
 COPY . .
@@ -717,23 +717,23 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 EXPOSE 5000
 
 # Run app
-ENTRYPOINT ["dotnet", "Nocturne.dll"]
+ENTRYPOINT ["dotnet", "AegisCore.dll"]
 ```
 
 ### Build & Push Docker Image
 
 ```bash
 # Build Docker image
-docker build -t nocturne-api:1.0.0 .
+docker build -t aegiscore-api:1.0.0 .
 
 # Tag for container registry (Azure example)
-docker tag nocturne-api:1.0.0 nocturnepk.azurecr.io/nocturne-api:1.0.0
+docker tag aegiscore-api:1.0.0 aegiscorepk.azurecr.io/aegiscore-api:1.0.0
 
 # Login to registry
-echo $AZURE_PASSWORD | docker login -u nocturne --password-stdin nocturnepk.azurecr.io
+echo $AZURE_PASSWORD | docker login -u aegiscore --password-stdin aegiscorepk.azurecr.io
 
 # Push to registry
-docker push nocturnepk.azurecr.io/nocturne-api:1.0.0
+docker push aegiscorepk.azurecr.io/aegiscore-api:1.0.0
 
 # Kubernetes automatically pulls this image and runs it:
 # → 3 pods, each running this Docker image
@@ -748,7 +748,7 @@ docker push nocturnepk.azurecr.io/nocturne-api:1.0.0
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    NOCTURNE ECOSYSTEM                            │
+│                    AEGISCORE ECOSYSTEM                            │
 └─────────────────────────────────────────────────────────────────┘
 
 🍎 iOS Student App (Swift)        📱 Android Student App (Kotlin)
@@ -764,7 +764,7 @@ docker push nocturnepk.azurecr.io/nocturne-api:1.0.0
                    │ HTTPS Requests
                    │ (REST API)
                    ↓
-        api.nocturne.university.edu.pk
+        api.aegiscore.university.edu.pk
                    │
         ┌──────────┴──────────┐
         │                     │
@@ -793,7 +793,7 @@ docker push nocturnepk.azurecr.io/nocturne-api:1.0.0
 ### Data Flow: Student Marks Attendance
 
 ```
-1. Student opens Nocturne App (Swift)
+1. Student opens AegisCore App (Swift)
    ├─ App is native compiled machine code
    └─ Runs on iPhone processor (ARM)
 
@@ -805,7 +805,7 @@ docker push nocturnepk.azurecr.io/nocturne-api:1.0.0
    └─ Step 3: Online path
       ├─ Create HTTP request:
       │  ├─ Method: POST
-      │  ├─ URL: https://api.nocturne.university.edu.pk/api/attendance/mark
+      │  ├─ URL: https://api.aegiscore.university.edu.pk/api/attendance/mark
       │  ├─ Headers: { Authorization: Bearer <jwt_token> }
       │  └─ Body: { studentId: "abc123", status: "present" }
       │
@@ -849,7 +849,7 @@ docker push nocturnepk.azurecr.io/nocturne-api:1.0.0
    │
    ├─ App creates sync request:
    │  ├─ Method: POST
-   │  ├─ URL: https://api.nocturne.university.edu.pk/api/attendance/sync-offline
+   │  ├─ URL: https://api.aegiscore.university.edu.pk/api/attendance/sync-offline
    │  └─ Body: [
    │      { studentId: "abc123", status: "present", markedAt: "2:30 PM" },
    │      { studentId: "abc123", status: "present", markedAt: "3:15 PM" },

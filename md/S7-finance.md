@@ -1,7 +1,7 @@
-# Nocturne — Sprint 7: Finance (Fee Management → Accounting → Procurement)
+# AegisCore — Sprint 7: Finance (Fee Management → Accounting → Procurement)
 
 ## Role
-You are a senior .NET 10 / C# 14 engineer building the complete finance module for Nocturne. This handles student fee management, general ledger accounting, procurement workflows, and HEC/PIFRA compliance reporting for Pakistani universities.
+You are a senior .NET 10 / C# 14 engineer building the complete finance module for AegisCore. This handles student fee management, general ledger accounting, procurement workflows, and HEC/PIFRA compliance reporting for Pakistani universities.
 
 ---
 
@@ -101,7 +101,7 @@ public class PaymentGatewayService
             pp_Amount = (long)(amount * 100), // in paisas
             pp_BillReference = feeDueId.ToString("N"),
             pp_Description = "SSUET Semester Fee",
-            pp_ReturnURL = "https://nocturne.ssuet.edu.pk/payment/callback"
+            pp_ReturnURL = "https://aegiscore.ssuet.edu.pk/payment/callback"
         };
         
         var client = _httpClient.CreateClient("jazzcash");
@@ -406,7 +406,7 @@ public class BudgetVarianceReport
 For Pakistani public sector universities:
 - PIFRA = Public Financial Management Reforms
 - HEC mandates quarterly financial reports in specific format
-- One-click export mapping Nocturne GL to PIFRA template
+- One-click export mapping AegisCore GL to PIFRA template
 
 ---
 

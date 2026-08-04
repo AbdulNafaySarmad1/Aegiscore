@@ -1,4 +1,4 @@
-# Nocturne Complete Prompt Library — Master Index
+# AegisCore Complete Prompt Library — Master Index
 
 ## Overview
 You have **19 comprehensive prompts** organized into two categories:
@@ -13,7 +13,7 @@ You have **19 comprehensive prompts** organized into two categories:
 ### **U1 — Codebase Understanding**
 **File:** `U1-codebase-understanding.md`
 
-Read this FIRST before starting any sprint. This prompt audits your entire Nocturne codebase:
+Read this FIRST before starting any sprint. This prompt audits your entire AegisCore codebase:
 - Solution structure & projects
 - Domain model & entities
 - Database layer (ORM, migrations)
@@ -99,7 +99,7 @@ The first-run experience. University IT spins Docker → wizard appears → conf
 ### **U6 — License Engine**
 **File:** `U6-license-engine.md`
 
-Daily heartbeat validation. University server pings Nocturne Systems at 08:00 AM. Fail twice → lockout. You override manually.
+Daily heartbeat validation. University server pings AegisCore Systems at 08:00 AM. Fail twice → lockout. You override manually.
 
 **Components:**
 - License key format (JWT + signature)
@@ -225,8 +225,8 @@ Auto-provision Teams classes, sync Moodle rosters + grades, embed Power BI dashb
 - Teams auto-provisioning (Graph API)
 - Teams enrollment sync (add/remove students)
 - Moodle LMS integration (LTI 1.3)
-- Roster sync (Nocturne → Moodle)
-- Grade passback (Moodle → Nocturne marks)
+- Roster sync (AegisCore → Moodle)
+- Grade passback (Moodle → AegisCore marks)
 - SSO setup (Azure AD → Moodle)
 - Power BI embedded dashboards (5 role-specific reports)
 - Row-level security (HOD sees only their dept)
@@ -449,7 +449,7 @@ S1 (Foundation)
 ### For Claude
 1. **Copy the ENTIRE content of a single `.md` file**
 2. **Paste it into a new chat with Claude**
-3. **Add context:** "I'm Abdul, building Nocturne (C# 14 .NET 10). Here's Sprint 2 prompt. Here's the current codebase structure [paste codebase summary from U1]. Build it."
+3. **Add context:** "I'm Abdul, building AegisCore (C# 14 .NET 10). Here's Sprint 2 prompt. Here's the current codebase structure [paste codebase summary from U1]. Build it."
 4. Claude generates code following the prompt spec
 
 ### For Manual Development
@@ -493,7 +493,7 @@ S1 (Foundation)
 - **Are all 19 files complete?** YES ✅
 - **Can I modify these prompts?** YES — treat them as living templates
 - **Can I run multiple sprints in parallel?** YES — as long as S1 is done first
-- **How long to build all of Nocturne?** 8 months (1 person 8h/day) or 2 months (4 people parallel)
+- **How long to build all of AegisCore?** 8 months (1 person 8h/day) or 2 months (4 people parallel)
 - **Should I follow the exact sprint order?** Mostly yes, but S6 (Microsoft Ecosystem) can start earlier
 - **What if a sprint fails/gets blocked?** Use U2 (Patch) or U3 (Cleanup) to fix issues, then retry
 

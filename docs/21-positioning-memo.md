@@ -1,8 +1,8 @@
-# Nocturne Positioning Memo
+# AegisCore Positioning Memo
 
 ## One-Line Positioning
 
-Nocturne is the cloud-agnostic university ERP for Pakistani higher education, built for auditable academic decisions, regulatory reporting, offline mobility, and local finance/payroll compliance.
+AegisCore is the cloud-agnostic university ERP for Pakistani higher education, built for auditable academic decisions, regulatory reporting, offline mobility, and local finance/payroll compliance.
 
 ## Primary Buyer
 
@@ -22,4 +22,4 @@ Start with high-pain regulated workflows: admissions merit, examination/CGPA con
 
 ## Message
 
-Generic ERPs digitize forms. Nocturne governs university operations where mistakes become appeals, audit findings, accreditation issues, and fee disputes.
+Generic ERPs digitize forms. AegisCore governs university operations where mistakes become appeals, audit findings, accreditation issues, and fee disputes.

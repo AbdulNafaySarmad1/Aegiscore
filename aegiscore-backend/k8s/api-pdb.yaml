@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aegiscore-api
+  namespace: aegiscore
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: aegiscore-api

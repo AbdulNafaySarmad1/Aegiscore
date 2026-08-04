@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Starting Nocturne Docker stack..."
+echo "Starting AegisCore Docker stack..."
 docker compose --env-file .env.example up -d --build
 
 echo "Waiting for http://localhost:8080/health ..."
 deadline=$((SECONDS + 90))
 until curl -fsS http://localhost:8080/health >/dev/null; do
   if [ "$SECONDS" -ge "$deadline" ]; then
-    echo "Nocturne did not become healthy within 90 seconds."
+    echo "AegisCore did not become healthy within 90 seconds."
     docker compose --env-file .env.example ps
     exit 1
   fi
@@ -16,7 +16,7 @@ until curl -fsS http://localhost:8080/health >/dev/null; do
 done
 
 url="http://localhost:8080"
-echo "Nocturne is ready: $url"
+echo "AegisCore is ready: $url"
 case "${OSTYPE:-}" in
   darwin*) open "$url" ;;
   msys*|win32*) start "$url" ;;

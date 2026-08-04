@@ -10,7 +10,7 @@ public class UniversitySsoProfile
     [Required, MaxLength(20)] public string Code { get; set; } = string.Empty;
     [Required, MaxLength(200)] public string Name { get; set; } = string.Empty;
     [Required, MaxLength(100)] public string Domain { get; set; } = string.Empty;
-    [Required, MaxLength(20)] public string SsoProvider { get; set; } = "nocturne";
+    [Required, MaxLength(20)] public string SsoProvider { get; set; } = "aegiscore";
     public string? SsoTenantId { get; set; }
     public string? SsoClientId { get; set; }
     public string? SsoClientSecretEncrypted { get; set; }
@@ -40,7 +40,7 @@ public class SsoSession
 {
     [Key] public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    [Required, MaxLength(20)] public string Provider { get; set; } = "nocturne";
+    [Required, MaxLength(20)] public string Provider { get; set; } = "aegiscore";
     [Required] public string AccessTokenEncrypted { get; set; } = string.Empty;
     public string? RefreshTokenEncrypted { get; set; }
     public DateTimeOffset TokenExpiresAt { get; set; }

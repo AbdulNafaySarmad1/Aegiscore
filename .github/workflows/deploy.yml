@@ -34,26 +34,31 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: |
-            Nocturne.Portal/package-lock.json
-            Nocturne.Mobile/package-lock.json
+            AegisCore.Portal/package-lock.json
+            AegisCore.Mobile/package-lock.json
 
       - name: Restore backend
-        run: dotnet restore Nocturne.slnx
+        run: dotnet restore AegisCore.slnx
 
       - name: Build backend
-        run: dotnet build Nocturne.slnx --no-restore -m:1 -p:BuildInParallel=false --configuration Release
+        run: dotnet build AegisCore.slnx --no-restore -m:1 -p:BuildInParallel=false --configuration Release
 
       - name: Backend tests
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release -m:1 -p:BuildInParallel=false --collect:"XPlat Code Coverage"
 
       - name: Portal install and build
-        working-directory: Nocturne.Portal
+        working-directory: AegisCore.Portal
         run: |
           npm ci
           npm run build
 
+      - name: PQC backend/frontend interoperability
+        run: |
+          dotnet run --project AegisCore.LedgerVerifier/AegisCore.LedgerVerifier.csproj --no-build --configuration Release -- --generate-ml-dsa-fixture /tmp/pqc-interop.json
+          node tests/verify-pqc-interop.mjs /tmp/pqc-interop.json
+
       - name: Mobile install, typecheck, and tests
-        working-directory: Nocturne.Mobile
+        working-directory: AegisCore.Mobile
         run: |
           npm ci
           npm run typecheck
@@ -123,7 +128,7 @@ jobs:
             CHANNEL_TAG=latest
           fi
           docker build -t "${API_IMAGE}:${IMAGE_TAG}" -t "${API_IMAGE}:${CHANNEL_TAG}" .
-          docker build -t "${PORTAL_IMAGE}:${IMAGE_TAG}" -t "${PORTAL_IMAGE}:${CHANNEL_TAG}" Nocturne.Portal
+          docker build -t "${PORTAL_IMAGE}:${IMAGE_TAG}" -t "${PORTAL_IMAGE}:${CHANNEL_TAG}" AegisCore.Portal
           docker push "${API_IMAGE}:${IMAGE_TAG}"
           docker push "${API_IMAGE}:${CHANNEL_TAG}"
           docker push "${PORTAL_IMAGE}:${IMAGE_TAG}"
@@ -133,35 +138,58 @@ jobs:
         if: ${{ env.DEPLOY_ENABLED == 'true' }}
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-          NOCTURNE_DB_CONNECTION: ${{ secrets.NOCTURNE_DB_CONNECTION }}
-          NOCTURNE_REDIS_CONNECTION: ${{ secrets.NOCTURNE_REDIS_CONNECTION }}
-          NOCTURNE_JWT_SECRET: ${{ secrets.NOCTURNE_JWT_SECRET }}
+          AEGISCORE_DB_CONNECTION: ${{ secrets.AEGISCORE_DB_CONNECTION }}
+          AEGISCORE_REDIS_CONNECTION: ${{ secrets.AEGISCORE_REDIS_CONNECTION }}
+          AEGISCORE_JWT_SECRET: ${{ secrets.AEGISCORE_JWT_SECRET }}
           LICENSE_HMAC_SECRET: ${{ secrets.LICENSE_HMAC_SECRET }}
-          NOCTURNE_PQC_KEY_BASE64: ${{ secrets.NOCTURNE_PQC_KEY_BASE64 }}
+          AEGISCORE_PQC_KEY_BASE64: ${{ secrets.AEGISCORE_PQC_KEY_BASE64 }}
           GOVERNANCE_FEEDBACK_KEY_BASE64: ${{ secrets.GOVERNANCE_FEEDBACK_KEY_BASE64 }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_ADMIN_USER: ${{ secrets.POSTGRES_ADMIN_USER }}
+          POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           TENANT_ID: ${{ secrets.TENANT_ID }}
+          INFISICAL_URL: ${{ secrets.INFISICAL_URL }}
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
+          INFISICAL_WORKSPACE_ID: ${{ secrets.INFISICAL_WORKSPACE_ID }}
+          INFISICAL_ENVIRONMENT: ${{ secrets.INFISICAL_ENVIRONMENT }}
+          DATA_PROTECTION_PFX_BASE64: ${{ secrets.AEGISCORE_DATA_PROTECTION_PFX_BASE64 }}
+          DATA_PROTECTION_PASSWORD: ${{ secrets.AEGISCORE_DATA_PROTECTION_CERTIFICATE_PASSWORD }}
+          HYBRID_PQC_EDGE_PROOF_KEY_BASE64: ${{ secrets.AEGISCORE_EDGE_PQC_PROOF_KEY_BASE64 }}
         run: |
+          test -n "$INFISICAL_URL" -a -n "$INFISICAL_TOKEN" -a -n "$INFISICAL_WORKSPACE_ID" -a -n "$DATA_PROTECTION_PFX_BASE64" -a -n "$DATA_PROTECTION_PASSWORD" -a -n "$HYBRID_PQC_EDGE_PROOF_KEY_BASE64"
           mkdir -p "$HOME/.kube"
           printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
           kubectl apply -f k8s/namespace.yaml
-          kubectl -n nocturne create secret generic nocturne-runtime-secrets \
-            --from-literal=NOCTURNE_DB_CONNECTION="$NOCTURNE_DB_CONNECTION" \
-            --from-literal=NOCTURNE_REDIS_CONNECTION="$NOCTURNE_REDIS_CONNECTION" \
-            --from-literal=NOCTURNE_JWT_SECRET="$NOCTURNE_JWT_SECRET" \
+          kubectl -n aegiscore create secret generic aegiscore-runtime-secrets \
+            --from-literal=AEGISCORE_DB_CONNECTION="$AEGISCORE_DB_CONNECTION" \
+            --from-literal=AEGISCORE_REDIS_CONNECTION="$AEGISCORE_REDIS_CONNECTION" \
+            --from-literal=AEGISCORE_JWT_SECRET="$AEGISCORE_JWT_SECRET" \
             --from-literal=License__HmacSecret="$LICENSE_HMAC_SECRET" \
-            --from-literal=NOCTURNE_PQC_KEY_BASE64="$NOCTURNE_PQC_KEY_BASE64" \
+            --from-literal=AEGISCORE_PQC_KEY_BASE64="$AEGISCORE_PQC_KEY_BASE64" \
             --from-literal=Governance__FeedbackEncryptionKeyBase64="$GOVERNANCE_FEEDBACK_KEY_BASE64" \
             --from-literal=POSTGRES_USER="$POSTGRES_USER" \
             --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --from-literal=POSTGRES_ADMIN_USER="$POSTGRES_ADMIN_USER" \
+            --from-literal=POSTGRES_ADMIN_PASSWORD="$POSTGRES_ADMIN_PASSWORD" \
             --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
             --from-literal=TENANT_ID="$TENANT_ID" \
+            --from-literal=INFISICAL_URL="$INFISICAL_URL" \
+            --from-literal=INFISICAL_TOKEN="$INFISICAL_TOKEN" \
+            --from-literal=INFISICAL_WORKSPACE_ID="$INFISICAL_WORKSPACE_ID" \
+            --from-literal=INFISICAL_ENVIRONMENT="${INFISICAL_ENVIRONMENT:-production}" \
+            --from-literal=DataProtection__CertificatePassword="$DATA_PROTECTION_PASSWORD" \
+            --from-literal=HybridPqcTransport__EdgeProofKeyBase64="$HYBRID_PQC_EDGE_PROOF_KEY_BASE64" \
             --dry-run=client -o yaml | kubectl apply -f -
-          kubectl apply -f k8s/configmap.yaml -f k8s/postgres-statefulset.yaml -f k8s/postgres-service.yaml -f k8s/redis-deployment.yaml -f k8s/redis-service.yaml -f k8s/network-policy.yaml
+          printf '%s' "$DATA_PROTECTION_PFX_BASE64" | base64 --decode > /tmp/data-protection.pfx
+          kubectl -n aegiscore create secret generic aegiscore-data-protection-certificate \
+            --from-file=data-protection.pfx=/tmp/data-protection.pfx \
+            --dry-run=client -o yaml | kubectl apply -f -
+          rm -f /tmp/data-protection.pfx
+          kubectl apply -f k8s/configmap.yaml -f k8s/data-protection-pvc.yaml -f k8s/postgres-init-configmap.yaml -f k8s/postgres-statefulset.yaml -f k8s/postgres-service.yaml -f k8s/redis-deployment.yaml -f k8s/redis-service.yaml -f k8s/network-policy.yaml
           sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/api-deployment.yaml | kubectl apply -f -
           sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" k8s/portal-deployment.yaml | kubectl apply -f -
           kubectl apply -f k8s/api-service.yaml -f k8s/portal-service.yaml -f k8s/api-hpa.yaml -f k8s/api-pdb.yaml -f k8s/ingress.yaml
-          kubectl -n nocturne rollout status deploy/nocturne-api --timeout=300s
-          kubectl -n nocturne rollout status deploy/aegiscore-portal --timeout=300s
+          kubectl -n aegiscore rollout status deploy/aegiscore-api --timeout=300s
+          kubectl -n aegiscore rollout status deploy/aegiscore-portal --timeout=300s
