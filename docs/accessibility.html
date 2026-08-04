@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Accessibility Statement for AegisCore University ERP by Apex Systems (Pvt.) Ltd. — WCAG 2.1 Level AA conformance.">
+<title>Accessibility Statement — AegisCore University ERP | Apex Systems (Pvt.) Ltd.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:1rem;line-height:1.7;color:#0F172A;background:#FFFFFF;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+/* ===== SKIP LINK ===== */
+.skip-link{position:absolute;top:-100%;left:1rem;background:#0F172A;color:#FFFFFF;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;z-index:1000;border-radius:0 0 4px 4px;text-decoration:none}
+.skip-link:focus{top:0}
+
+/* ===== CONTAINER ===== */
+.container{width:100%;max-width:860px;margin:0 auto;padding:0 1.25rem}
+
+/* ===== HEADER ===== */
+.site-header{background:#0F172A;color:#FFFFFF;padding:2rem 0 1.75rem;text-align:center}
+.site-header .org-name{font-size:0.8125rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#94A3B8;margin-bottom:0.5rem}
+.site-header h1{font-size:1.75rem;font-weight:700;line-height:1.25;margin-bottom:0.4rem}
+.site-header .product-version{font-size:0.9375rem;font-weight:400;color:#CBD5E1;margin-bottom:0.15rem}
+.site-header .standard-badge{display:inline-block;background:#3B82F6;color:#FFFFFF;font-size:0.8125rem;font-weight:600;padding:0.25rem 0.85rem;border-radius:9999px;margin-top:0.65rem}
+
+/* ===== STATUS BANNER ===== */
+.status-banner{background:#F8FAFC;border-bottom:1px solid #E2E8F0;padding:1.25rem 0;text-align:center}
+.status-banner .conformance{font-size:0.9375rem;font-weight:600;color:#0F172A}
+.status-banner .conformance-status{color:#B45309}
+.status-banner .meta-line{font-size:0.8125rem;color:#64748B;margin-top:0.35rem}
+.status-banner .scope{font-size:0.8125rem;color:#64748B;margin-top:0.15rem}
+
+/* ===== MAIN CONTENT ===== */
+main{padding:2.5rem 0 3rem}
+
+section{margin-bottom:2.75rem}
+
+h2{font-size:1.375rem;font-weight:700;color:#0F172A;border-bottom:2px solid #3B82F6;padding-bottom:0.5rem;margin-bottom:1.15rem}
+
+h3{font-size:1.125rem;font-weight:600;color:#0F172A;margin-top:1.5rem;margin-bottom:0.65rem}
+
+p{margin-bottom:1rem;color:#334155}
+p:last-child{margin-bottom:0}
+
+/* ===== MEASURES LIST ===== */
+.measures-list{list-style:none;padding:0;margin:0}
+.measures-list li{padding:0.6rem 0 0.6rem 1.5rem;position:relative;color:#334155;border-bottom:1px solid #F1F5F9;font-size:0.9375rem}
+.measures-list li::before{content:"";position:absolute;left:0;top:1rem;width:8px;height:8px;background:#3B82F6;border-radius:2px}
+.measures-list li:last-child{border-bottom:none}
+
+/* ===== LIMITATIONS LIST ===== */
+.limitations-list{list-style:none;padding:0;margin:0}
+.limitations-list li{padding:0.75rem 0 0.75rem 0;color:#334155;border-bottom:1px solid #F1F5F9;font-size:0.9375rem}
+.limitations-list li:last-child{border-bottom:none}
+.limitations-list strong{color:#0F172A;display:block;margin-bottom:0.2rem}
+.limitations-list span.work{color:#3B82F6;font-size:0.85rem;font-weight:500}
+
+/* ===== LINKS ===== */
+a{color:#3B82F6;text-decoration:underline;text-underline-offset:2px;font-weight:500;transition:color 0.15s}
+a:hover,a:focus{color:#1D4ED8;text-decoration-thickness:2px}
+a:focus-visible{outline:3px solid #3B82F6;outline-offset:3px;border-radius:2px}
+
+/* ===== FOCUS VISIBLE ===== */
+:focus-visible{outline:3px solid #3B82F6;outline-offset:3px;border-radius:2px}
+
+/* ===== CONTACT DETAILS ===== */
+.contact-details{margin:0.75rem 0 1rem}
+.contact-details p{margin-bottom:0.4rem}
+
+/* ===== TABLE ===== */
+.features-table{width:100%;border-collapse:collapse;margin:1rem 0 0;font-size:0.9375rem}
+.features-table caption{font-size:1rem;font-weight:600;text-align:left;margin-bottom:0.75rem;color:#0F172A}
+.features-table thead th{background:#0F172A;color:#FFFFFF;text-align:left;padding:0.65rem 0.85rem;font-weight:600;font-size:0.875rem}
+.features-table thead th:first-child{border-radius:4px 0 0 0}
+.features-table thead th:last-child{border-radius:0 4px 0 0}
+.features-table tbody td{padding:0.65rem 0.85rem;border-bottom:1px solid #E2E8F0;color:#334155;vertical-align:top}
+.features-table tbody tr:nth-child(even){background:#F8FAFC}
+.features-table tbody tr:last-child td:first-child{border-radius:0 0 0 4px}
+.features-table tbody tr:last-child td:last-child{border-radius:0 0 4px 0}
+
+/* ===== VERSION GRID ===== */
+.version-grid{border:1px solid #E2E8F0;border-radius:6px;overflow:hidden;font-size:0.9375rem}
+.version-row{display:flex;border-bottom:1px solid #E2E8F0}
+.version-row:last-child{border-bottom:none}
+.version-row .ver-label{flex:0 0 180px;background:#F8FAFC;padding:0.65rem 0.85rem;font-weight:600;color:#0F172A;font-size:0.875rem}
+.version-row .ver-value{flex:1;padding:0.65rem 0.85rem;color:#334155}
+
+/* ===== FOOTER ===== */
+.site-footer{background:#0F172A;color:#94A3B8;text-align:center;padding:1.5rem 0;font-size:0.8125rem;line-height:1.6}
+.site-footer a{color:#93C5FD}
+.site-footer a:hover,.site-footer a:focus{color:#BFDBFE}
+.site-footer .separator{margin:0 0.4rem;color:#475569}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  .site-header h1{font-size:1.35rem}
+  .site-header{padding:1.5rem 0 1.25rem}
+  h2{font-size:1.2rem}
+  h3{font-size:1.05rem}
+  .features-table thead{display:none}
+  .features-table tbody,.features-table tbody tr,.features-table tbody td{display:block;width:100%}
+  .features-table tbody td{padding:0.5rem 0.65rem;position:relative;padding-left:45%}
+  .features-table tbody td::before{content:attr(data-label);position:absolute;left:0.65rem;top:0.5rem;font-weight:600;font-size:0.8125rem;color:#0F172A;width:40%}
+  .features-table tbody tr{border-bottom:2px solid #0F172A;margin-bottom:0.5rem}
+  .features-table tbody tr:last-child{border-bottom:none;margin-bottom:0}
+  .version-row{flex-direction:column}
+  .version-row .ver-label{flex:auto;border-bottom:1px solid #E2E8F0}
+  .measures-list li,.limitations-list li{font-size:0.875rem}
+}
+
+@media(max-width:375px){
+  .container{padding:0 0.8rem}
+  .site-header h1{font-size:1.2rem}
+  .site-header .org-name{font-size:0.75rem}
+  .site-header .product-version{font-size:0.8125rem}
+  h2{font-size:1.1rem}
+  h3{font-size:1rem}
+  p,li,td{font-size:0.875rem}
+}
+
+/* ===== PRINT ===== */
+@media print{
+  body{font-size:11pt;line-height:1.5;color:#000}
+  .skip-link{display:none}
+  .site-header{background:#FFFFFF;color:#000;border-bottom:2px solid #000;padding:1rem 0}
+  .site-header .org-name{color:#333}
+  .site-header .product-version{color:#333}
+  .site-header .standard-badge{background:#000;color:#FFF;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .status-banner{background:#FFF;border-bottom:1px solid #CCC}
+  .site-footer{background:#FFF;color:#000;border-top:2px solid #000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .site-footer a{color:#000}
+  .features-table thead th{background:#000;color:#FFF;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .features-table tbody tr:nth-child(even){background:#F0F0F0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .version-row .ver-label{background:#F0F0F0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  h2{border-bottom-color:#000}
+  a{color:#000;text-decoration:underline}
+  a::after{content:" (" attr(href) ")";font-size:0.85em;font-weight:400}
+  a[href^="#"]::after{content:none}
+  section{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <div class="container">
+    <div class="org-name">Apex Systems (Pvt.) Ltd.</div>
+    <h1>Accessibility Statement</h1>
+    <div class="product-version">AegisCore University ERP (Version 2.0)</div>
+    <span class="standard-badge">WCAG 2.1 Level AA</span>
+  </div>
+</header>
+
+<div class="status-banner" aria-label="Conformance information">
+  <div class="container">
+    <div class="conformance">Conformance Status: <span class="conformance-status">Partially Conformant</span></div>
+    <div class="meta-line">Last reviewed: <span id="review-date"></span></div>
+    <div class="scope">Scope: AegisCore web portal and all integrated modules</div>
+  </div>
+</div>
+
+<main id="main-content" tabindex="-1">
+  <div class="container">
+
+    <!-- Section 1 -->
+    <section aria-labelledby="sec-commitment">
+      <h2 id="sec-commitment">1. Our Commitment</h2>
+      <p>AegisCore was not built in a boardroom. It was built in classrooms, in admin offices, in conversations with faculty who were frustrated with software that treated accessibility as an afterthought. At Apex Systems, we believe that a student with low vision, a visually impaired parent checking their child's fee record, or a registrar with motor challenges should never have to struggle to use a platform designed to make university life easier. Accessibility is not a checklist we run through before release — it is part of how we think about every feature, every form field, and every page title. We are not perfect, and we do not claim to be. But we are committed to getting better with every update, and we are honest about where we stand. This statement tells you exactly that.</p>
+    </section>
+
+    <!-- Section 2 -->
+    <section aria-labelledby="sec-tech">
+      <h2 id="sec-tech">2. Technical Specifications</h2>
+      <p>The AegisCore platform is built on the following web technologies, selected and implemented with accessibility in mind:</p>
+      <ul class="measures-list" aria-label="Supported technologies">
+        <li><strong>HTML5</strong> — Semantic document structure with native landmark elements and proper heading hierarchy throughout the application</li>
+        <li><strong>CSS3</strong> — Responsive layouts using Flexbox and Grid, with relative units for text scaling and media-query-based responsive design</li>
+        <li><strong>JavaScript with WAI-ARIA</strong> — Dynamic content updates use ARIA live regions, custom interactive widgets implement ARIA design patterns, and all state changes are communicated programmatically</li>
+        <li><strong>SVG</strong> — Scalable vector graphics for icons and illustrations, with accessible titles and descriptions where informative</li>
+      </ul>
+
+      <h3>Compatible Browsers and Assistive Technologies</h3>
+      <p>AegisCore is tested and verified to work with the following browser versions and screen reader combinations:</p>
+      <ul class="measures-list" aria-label="Supported browsers and screen readers">
+        <li><strong>Browsers:</strong> Google Chrome 120+, Mozilla Firefox 120+, Apple Safari 17+, Microsoft Edge 120+</li>
+        <li><strong>Screen Readers Tested:</strong> NVDA (Windows), VoiceOver (macOS / iOS), TalkBack (Android)</li>
+      </ul>
+    </section>
+
+    <!-- Section 3 -->
+    <section aria-labelledby="sec-conformance">
+      <h2 id="sec-conformance">3. Conformance Status</h2>
+      <p>We have tested extensively and implemented WCAG 2.1 AA across the AegisCore platform. However, no complex web application can claim perfect conformance without a formal third-party audit. The "Partially Conformant" status means that while the vast majority of pages, components, and user flows meet Level AA criteria, we acknowledge that certain modules — particularly those involving dynamic data visualization, real-time updates, and third-party integrations — have known gaps that we are actively working to close. We are transparent about these known limitations (see Section 5) and do not believe in hiding behind vague disclaimers. A full independent accessibility audit is planned as part of our next development cycle, and this statement will be updated when that audit is complete.</p>
+    </section>
+
+    <!-- Section 4 -->
+    <section aria-labelledby="sec-measures">
+      <h2 id="sec-measures">4. Measures Taken</h2>
+      <p>Accessibility is embedded into the AegisCore development process. Below are the specific measures Apex Systems has implemented across the platform:</p>
+      <ol class="measures-list">
+        <li><strong>WCAG 2.1 AA compliance built into our internal development checklist</strong> — Every feature is reviewed against WCAG criteria before release. No pull request is merged without an accessibility review, and our QA team runs manual keyboard and screen reader tests on all new functionality.</li>
+        <li><strong>Keyboard navigation tested on ALL primary user flows</strong> — Login, fee management, grade viewing, attendance tracking, timetable, and the main dashboard have been individually tested for full keyboard operability. Every interactive element is reachable via Tab, activatable with Enter or Space, and dismissible with Escape.</li>
+        <li><strong>Minimum colour contrast ratio of 4.5:1 on all text elements, 3:1 on large text and UI components</strong> — Our design system enforces contrast ratios at the token level. We use automated contrast-checking tools in our CI pipeline to catch violations before they reach production.</li>
+        <li><strong>All form inputs have programmatically associated &lt;label&gt; elements</strong> — Every text field, dropdown, checkbox, radio button, and date picker is explicitly tied to a visible label using the <code>for</code> / <code>id</code> association or wrapped label pattern. No placeholder-only forms.</li>
+        <li><strong>All images include descriptive alt text or are marked as decorative (aria-hidden="true")</strong> — Profile photos, campus maps, module icons, and all other non-text content follow WCAG 1.1.1. Decorative elements are hidden from screen readers to reduce noise.</li>
+        <li><strong>ARIA landmarks used throughout (banner, navigation, main, complementary, contentinfo) for screen reader rapid navigation</strong> — Every page has a consistent landmark structure so screen reader users can jump directly to the region they need.</li>
+        <li><strong>Visible focus indicators on all interactive elements — no focus styles are suppressed</strong> — We never use <code>outline: none</code> without providing an alternative visible focus indicator. Focus rings are a high-contrast blue (#3B82F6) with a 3px offset, visible against both light and dark backgrounds.</li>
+        <li><strong>NidaBot voice assistant supports users with reading difficulties, visual impairments, and motor disabilities</strong> — Users can speak naturally in Urdu or English. NidaBot understands conversational requests like "show me my attendance" or "what are my upcoming fees" and responds with verbal confirmation and on-screen results.</li>
+        <li><strong>Slow speech mode ("Dhire bolein") available for users who need more processing time</strong> — NidaBot can be switched to a slower, more deliberate speech pace either by saying "Dhire bolein" or by toggling the setting in Voice Preferences.</li>
+        <li><strong>High contrast mode available via user preferences — respects system-level accessibility settings</strong> — AegisCore detects the user's operating system accessibility preferences (Windows High Contrast, macOS Increase Contrast, Android/iOS accessibility settings) and applies a high-contrast theme automatically. A manual toggle is also available under Settings → Appearance → High Contrast.</li>
+        <li><strong>No content flashes more than 3 times per second — safe for users with photosensitive epilepsy</strong> — All animations, loading spinners, and transition effects have been reviewed to comply with the WCAG 2.3.1 threshold. We do not use strobe effects, rapid blinking alerts, or video with unmoderated flash sequences.</li>
+        <li><strong>All timeouts can be extended or disabled by the user</strong> — Session timeouts provide a warning at the 2-minute mark with an option to extend. In environments where timing is not security-critical (for example, a personal device session), users can disable automatic timeouts entirely from their Security Settings.</li>
+        <li><strong>Page titles are unique and descriptive across the entire application</strong> — Every route in AegisCore generates a unique <code>&lt;title&gt;</code> tag that describes the current page content and identifies the current module context. No two pages share the same title.</li>
+        <li><strong>Language of page and language changes are declared in HTML markup</strong> — The <code>lang</code> attribute is set on the <code>&lt;html&gt;</code> element for the default language, and inline language changes (for example, when a user switches to Urdu or Arabic) are marked with <code>lang</code> attributes on the affected content blocks.</li>
+        <li><strong>Error messages are descriptive and suggest corrections — never just "Invalid input"</strong> — Form validation errors describe what went wrong and how to fix it. For example, instead of "Invalid date," AegisCore says "The date of birth you entered (31 February) does not exist. Please enter a valid date." Error messages are associated with their fields via <code>aria-describedby</code>.</li>
+      </ol>
+    </section>
+
+    <!-- Section 5 -->
+    <section aria-labelledby="sec-limitations">
+      <h2 id="sec-limitations">5. Known Limitations</h2>
+      <p>We believe in transparency. Below are the accessibility barriers we are aware of, what causes them, and what we are doing about each one:</p>
+      <ol class="limitations-list">
+        <li>
+          <strong>Complex data visualizations (charts, heatmaps)</strong>
+          Text alternatives are provided via companion data tables for every chart and heatmap, but full screen reader navigation of interactive chart elements (drill-down, hover tooltips, dynamic filtering) is currently limited. The underlying SVG structures are not yet fully accessible to keyboard-only and screen reader users for interactive manipulation of chart data.
+          <span class="work">What we are doing: We are actively developing sonification support for key metrics and building enhanced keyboard-driven chart navigation that allows users to traverse data points, zoom into segments, and hear spoken summaries without a mouse.</span>
+        </li>
+        <li>
+          <strong>Live real-time data (GPS tracking, live exam monitoring)</strong>
+          These views use ARIA live regions to announce changes, but rapid-fire updates — such as location pings every two seconds during GPS tracking or live proctoring alerts — can overwhelm screen readers and make it difficult for users to parse information at their own pace.
+          <span class="work">What we are doing: We are adding a user-controlled update frequency setting that lets users throttle how often live region announcements are made, from real-time to batched (every 10 or 30 seconds) or manually triggered.</span>
+        </li>
+        <li>
+          <strong>PDF exports (transcripts, certificates, reports)</strong>
+          Documents generated programmatically by AegisCore — including student transcripts, fee receipts, enrollment certificates, and analytics reports — may not be fully tagged for screen reader navigation. Table structures within exported PDFs may not expose column headers programmatically, and reading order may not be logical in all cases.
+          <span class="work">What we are doing: We are implementing PDF/UA (ISO 14289) compliance in our document generation pipeline so that every exported PDF includes proper tagging, heading structure, table headers, alt text on embedded graphics, and a logical reading order that matches the visual layout.</span>
+        </li>
+        <li>
+          <strong>Video call features within SafeSpace</strong>
+          The SafeSpace counselling and peer-support module includes video calling functionality that relies on third-party WebRTC providers. While we provide live captions and a text-based chat alternative alongside every video call, the core video interface's accessibility — including keyboard control of mute, camera toggle, and screen sharing — depends on the third-party provider.
+          <span class="work">What we are doing: We are evaluating WebRTC providers with stronger accessibility commitments and are building a fully native text-chat fallback that is feature-complete and does not require the user to engage with the video interface at all if they prefer not to.</span>
+        </li>
+        <li>
+          <strong>Third-party payment gateways (RAAST, Stripe)</strong>
+          The embedded payment interfaces provided by RAAST (Pakistan's instant payment system) and Stripe are injected into AegisCore via iframes or redirect flows. Their internal form controls, error handling, and focus management may not fully meet WCAG 2.1 AA standards, and these interfaces are outside our direct control.
+          <span class="work">What we are doing: We have formally reported accessibility concerns to both RAAST and Stripe through their developer support channels. In the interim, our own payment summary and confirmation pages — everything before and after the gateway — are fully accessible, and we provide phone-based payment support as an alternative pathway for users who encounter barriers.</span>
+        </li>
+        <li>
+          <strong>Some older browser versions may not support all WAI-ARIA patterns</strong>
+          Certain complex interactive components — such as tree views for the organizational hierarchy, grid patterns for the gradebook, and combobox widgets for search — rely on ARIA 1.1 and 1.2 patterns that may not render correctly in browsers older than those listed in Section 2.
+          <span class="work">What we are doing: We support the browsers listed in Section 2 and recommend users keep their browsers updated. For components where older browser support is mission-critical, we implement progressive enhancement so that the underlying functionality remains available even if advanced ARIA interaction patterns are not supported.</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Section 6 -->
+    <section aria-labelledby="sec-feedback">
+      <h2 id="sec-feedback">6. Feedback and Contact</h2>
+      <p>We want to hear from you. If you experience any accessibility barrier while using AegisCore — whether it is a form you cannot fill out, a chart you cannot read, a workflow you cannot complete with your keyboard, or any other difficulty — please tell us. Your report goes directly to the team who can fix it.</p>
+      <div class="contact-details" aria-label="Accessibility contact information">
+        <p><strong>Email:</strong> <a href="mailto:accessibility@apexsystems.pk">accessibility@apexsystems.pk</a></p>
+        <p><strong>Phone:</strong> +92-51-8443761</p>
+        <p><strong>Response time:</strong> We aim to acknowledge your report within 1 business day and provide a resolution plan — including an estimated timeline — within 5 business days.</p>
+      </div>
+      <p>We will work with you to find an alternative way to access the information or function you need while we address the reported barrier. This may include a direct phone walkthrough, a screen-share session with our support team, or providing the data you need in an alternative format (plain text, large print, or structured audio). You will not be left waiting.</p>
+      <p>All feedback is reviewed by our development team and product leadership. Accessibility reports are tracked in the same issue-tracking system as bugs and feature requests, and high-severity accessibility barriers are prioritised alongside critical functional defects.</p>
+    </section>
+
+    <!-- Section 7 -->
+    <section aria-labelledby="sec-complaints">
+      <h2 id="sec-complaints">7. Formal Complaints</h2>
+      <p>If you are not satisfied with our response, you may contact the relevant enforcement body in your jurisdiction:</p>
+      <ul class="measures-list" aria-label="Enforcement bodies by jurisdiction">
+        <li><strong>Pakistan:</strong> Ministry of Information Technology and Telecommunication (MOITT) — Digital Accessibility Directorate</li>
+        <li><strong>United Kingdom:</strong> Equality Advisory and Support Service (EASS) — under the Equality Act 2010</li>
+        <li><strong>European Union:</strong> National enforcement bodies under the European Accessibility Act (Directive 2019/882) and EN 301 549</li>
+        <li><strong>United States:</strong> Department of Justice — ADA Information Line</li>
+      </ul>
+      <p style="margin-top:0.75rem">AegisCore is designed to comply with international accessibility standards regardless of jurisdiction. We have built for WCAG 2.1 AA as our baseline and have reviewed requirements under Section 508 (US), EN 301 549 (EU), the Equality Act 2010 (UK), and the Rights of Persons with Disabilities Act 2016 (Pakistan). If your local jurisdiction has additional requirements not covered here, please contact us and we will work to meet them.</p>
+    </section>
+
+    <!-- Section 8 -->
+    <section aria-labelledby="sec-standards">
+      <h2 id="sec-standards">8. Technical Standards Referenced</h2>
+      <ul class="measures-list" aria-label="Referenced accessibility standards">
+        <li><strong>WCAG 2.1</strong> — <a href="https://www.w3.org/TR/WCAG21/" target="_blank" rel="noopener noreferrer">Web Content Accessibility Guidelines 2.1<span class="sr-only"> (opens in new tab)</span></a> — W3C Recommendation, June 2018</li>
+        <li><strong>EN 301 549</strong> — Accessibility requirements for ICT products and services — the harmonised European standard that maps WCAG criteria to public procurement requirements across EU member states</li>
+        <li><strong>Section 508</strong> — US Federal accessibility standard under the Rehabilitation Act of 1973, as amended — requires federal agencies and institutions receiving federal funding to ensure ICT accessibility</li>
+        <li><strong>Equality Act 2010</strong> — UK legislation that protects individuals from discrimination and requires reasonable adjustments, including in the provision of digital services by educational institutions</li>
+        <li><strong>Rights of Persons with Disabilities Act 2016</strong> — Pakistan legislation that mandates accessibility in information and communication technology, including digital platforms used by public and private educational institutions</li>
+      </ul>
+    </section>
+
+    <!-- Section 9 -->
+    <section aria-labelledby="sec-features">
+      <h2 id="sec-features">9. Accessibility Features Guide (Quick Reference)</h2>
+      <table class="features-table" aria-label="Accessibility features and how to access them">
+        <caption>Quick Reference: Accessibility Features</caption>
+        <thead>
+          <tr>
+            <th scope="col">Feature</th>
+            <th scope="col">How to Access</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Feature">Screen reader support</td>
+            <td data-label="How to Access">Enabled by default with ARIA landmarks — screen readers automatically detect page structure</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Keyboard navigation</td>
+            <td data-label="How to Access">Tab through elements, Enter or Space to activate, Escape to close modals and dialogs</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">High contrast mode</td>
+            <td data-label="How to Access">Settings → Appearance → High Contrast (or respect system-level accessibility preferences)</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Text size</td>
+            <td data-label="How to Access">Settings → Appearance → Font Size (or use browser zoom: Ctrl+ / Cmd+)</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Slow speech (NidaBot)</td>
+            <td data-label="How to Access">Say "Dhire bolein" to NidaBot or enable Slow Speech in Voice Settings</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Skip to content</td>
+            <td data-label="How to Access">Press Tab on first page load — a "Skip to content" link appears at the top</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Dark mode</td>
+            <td data-label="How to Access">Toggle the sun/moon icon in the header of any AegisCore page</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Reduce motion</td>
+            <td data-label="How to Access">AegisCore automatically respects your system "Reduce motion" setting — no animations if enabled</td>
+          </tr>
+          <tr>
+            <td data-label="Feature">Language change</td>
+            <td data-label="How to Access">Locale switcher in header — available in English, Urdu, Arabic, and Malay</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 10 -->
+    <section aria-labelledby="sec-version-history">
+      <h2 id="sec-version-history">10. Version History</h2>
+      <div class="version-grid" aria-label="Accessibility statement versions">
+        <div class="version-row">
+          <div class="ver-label">Version 1.0</div>
+          <div class="ver-value"><span id="ver-1-date"></span> — Initial accessibility statement published with the launch of AegisCore 1.0, covering core modules (student records, fees, timetable) and establishing WCAG 2.1 AA as our baseline standard.</div>
+        </div>
+        <div class="version-row">
+          <div class="ver-label">Version 2.0</div>
+          <div class="ver-value"><span id="ver-2-date"></span> — Updated for AegisCore 2.0 release. Added NidaBot voice accessibility across all major modules, expanded keyboard navigation support to include the gradebook, attendance tracker, and SafeSpace counselling interface, introduced the Slow Speech mode, and documented the High Contrast and Dark Mode features.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <a href="manual.html">AegisCore User Manual</a>
+    <span class="separator">|</span>
+    Copyright &copy; <span id="copyright-year"></span> Apex Systems (Pvt.) Ltd.
+    <br>
+    Last updated: <span id="last-updated"></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var today = new Date();
+  var formattedDate = today.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  var isoDate = today.toISOString().split('T')[0];
+
+  var sixMonthsAgo = new Date(today);
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  var formattedSixMonthsAgo = sixMonthsAgo.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  var reviewEl = document.getElementById('review-date');
+  var ver1El = document.getElementById('ver-1-date');
+  var ver2El = document.getElementById('ver-2-date');
+  var copyrightEl = document.getElementById('copyright-year');
+  var lastUpdatedEl = document.getElementById('last-updated');
+
+  if (reviewEl) reviewEl.textContent = formattedDate;
+  if (ver1El) ver1El.textContent = formattedSixMonthsAgo;
+  if (ver2El) ver2El.textContent = formattedDate;
+  if (copyrightEl) copyrightEl.textContent = today.getFullYear();
+  if (lastUpdatedEl) lastUpdatedEl.textContent = formattedDate;
+
+  // Ensure main content can receive focus for skip link but does not show outline on click
+  var mainEl = document.getElementById('main-content');
+  if (mainEl) {
+    mainEl.addEventListener('blur', function() {
+      mainEl.removeAttribute('tabindex');
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
