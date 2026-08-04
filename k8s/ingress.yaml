@@ -1,3 +1,5 @@
+# AegisCore Ingress — nginx controller, TLS, host-based routing
+# Set AEGISCORE_DOMAIN env var in your deployment pipeline to override the host.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -6,16 +8,25 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - erp.aegiscore.university.edu.pk
+        - ${AEGISCORE_DOMAIN:-erp.aegiscore.university.edu.pk}
       secretName: aegiscore-tls
   rules:
-    - host: erp.aegiscore.university.edu.pk
+    - host: ${AEGISCORE_DOMAIN:-erp.aegiscore.university.edu.pk}
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: aegiscore-api
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:
