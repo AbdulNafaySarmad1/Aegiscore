@@ -88,6 +88,17 @@ public static class ExtendedPlatformServiceExtensions
         services.TryAddScoped<ICatalogIngestionService, CatalogIngestionService>();
         services.TryAddScoped<IClassGenerationService, ClassGenerationService>();
 
+        // Cafeteria + Cross-cutting
+        services.TryAddScoped<ICafeteriaService, CafeteriaService>();
+        services.TryAddScoped<IPersonalityModeService, PersonalityModeService>();
+        services.TryAddScoped<IChartService, ChartService>();
+        services.TryAddScoped<IOcrIntegrationService, OcrIntegrationService>();
+
+        // Improved engines
+        services.TryAddScoped<IPlagiarismEngineService, PlagiarismEngineService>();
+        services.TryAddScoped<IProctoringIntegrationService, ProctoringIntegrationService>();
+        services.TryAddScoped<IDefaulterMlEngineService, DefaulterMlEngineService>();
+
         return services;
     }
 }

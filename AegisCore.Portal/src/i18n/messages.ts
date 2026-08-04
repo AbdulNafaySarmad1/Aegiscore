@@ -66,7 +66,7 @@ const en = {
     mentalHealth: "Mental Health Support", foreignStudents: "Foreign Student Management",
     voiceAssistant: "Voice Assistant (NidaBot)", elections: "Student Elections",
     boardPortal: "Board of Governors Portal", classGeneration: "Class Generation & LMS",
-    catalogIngestion: "Course Catalog Ingestion"
+    catalogIngestion: "Course Catalog Ingestion", cafeteria: "Cafeteria Management"
   }
 } satisfies Record<string, Record<string, string>>;
 

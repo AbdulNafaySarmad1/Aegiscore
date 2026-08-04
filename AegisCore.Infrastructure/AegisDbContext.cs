@@ -1683,6 +1683,27 @@ public class AegisDbContext : DbContext
     public DbSet<LmsConfiguration> LmsConfigurations => Set<LmsConfiguration>();
     public DbSet<DirectorySyncLog> DirectorySyncLogs => Set<DirectorySyncLog>();
 
+    // OPTIONAL-26 Cafeteria Management (FoodCore)
+    public DbSet<CafeteriaUnit> CafeteriaUnits => Set<CafeteriaUnit>();
+    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
+    public DbSet<MealPlan> MealPlans => Set<MealPlan>();
+    public DbSet<FoodOrder> FoodOrders => Set<FoodOrder>();
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<InventoryAlert> InventoryAlerts => Set<InventoryAlert>();
+    public DbSet<VendorScorecard> VendorScorecards => Set<VendorScorecard>();
+    public DbSet<DemandForecast> DemandForecasts => Set<DemandForecast>();
+    public DbSet<WasteLog> WasteLogs => Set<WasteLog>();
+
+    // Cross-cutting: Personality Mode
+    public DbSet<PersonalityConfig> PersonalityConfigs => Set<PersonalityConfig>();
+
+    // Cross-cutting: Chart System
+    public DbSet<ChartConfiguration> ChartConfigurations => Set<ChartConfiguration>();
+    public DbSet<InsightChip> InsightChips => Set<InsightChip>();
+
+    // Cross-cutting: OCR
+    public DbSet<OcrProviderConfig> OcrProviderConfigs => Set<OcrProviderConfig>();
+
     // P-J Login Audit
     /// <summary>
     /// Login audit records.

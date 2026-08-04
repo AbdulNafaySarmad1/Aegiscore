@@ -2064,3 +2064,23 @@ public enum MoodleCoexistenceMode { ProvisionOnly = 1, BidirectionalSync = 2, Re
 public enum StudentDistributionStrategy { Alphabetical = 1, Random = 2, Balanced = 3, Manual = 4, Existing = 5 }
 public enum FacultyDistributionRule { PrimarySecondary = 1, SplitSections = 2, SharedAll = 3, Manual = 4 }
 public enum RosterSyncStatus { Synced = 1, OutOfSync = 2, ConflictDetected = 3, Failed = 4 }
+
+// OPTIONAL-26 Cafeteria Management
+
+public enum MealPlanType { Daily = 1, Weekly = 2, Monthly = 3, Semester = 4 }
+public enum FoodOrderStatus { Placed = 1, Preparing = 2, Ready = 3, Delivered = 4, Cancelled = 5, Refunded = 6 }
+public enum VendorPerformance { Excellent = 1, Satisfactory = 2, NeedsImprovement = 3, Warning = 4, ContractAtRisk = 5 }
+public enum InventoryAlertType { LowStock = 1, ExpiringSoon = 2, Expired = 3, ReorderPoint = 4 }
+public enum MenuItemCategory { MainCourse = 1, Side = 2, Beverage = 3, Snack = 4, Dessert = 5, Combo = 6 }
+
+// Personality Mode
+
+public enum VoiceRegister { Informational = 1, Instructional = 2, Celebratory = 3, CriticalError = 4 }
+public enum UXMoment { Idle = 1, Loading = 2, Success = 3, Warning = 4, Error = 5, EmptyState = 6, Onboarding = 7, Celebration = 8 }
+public enum CopyStakes { Low = 1, Medium = 2, High = 3, Irreversible = 4 }
+
+// Chart System
+
+public enum ChartType { Line = 1, Area = 2, Bar = 3, Donut = 4, Treemap = 5, Scatter = 6, Histogram = 7, Heatmap = 8, Waterfall = 9, Gauge = 10, Gantt = 11, Bullet = 12 }
+public enum InsightType { Trend = 1, Comparison = 2, PartToWhole = 3, Anomaly = 4, Forecast = 5 }
+public enum ZoomLevel { Day = 1, Week = 2, Month = 3, Quarter = 4, Year = 5 }
