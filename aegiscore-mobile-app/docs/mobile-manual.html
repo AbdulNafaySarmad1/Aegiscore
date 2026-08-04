@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AegisCore Mobile Apps — User Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0F172A;--blue:#3B82F6;--blue-light:#EFF6FF;--white:#FFFFFF;--gray:#F8FAFC;--gray-200:#E2E8F0;--gray-500:#64748B;--gray-700:#334155;--gray-900:#0F172A;--green:#22C55E;--green-soft:#F0FDF4;--amber:#F59E0B;--amber-soft:#FFFBEB;--red:#EF4444;--red-soft:#FEF2F2;--text:#1E293B;--muted:#64748B;--surface:#FFFFFF;--line:#E2E8F0}
+@media(prefers-color-scheme:dark){:root{--surface:#1E293B;--text:#F1F5F9;--muted:#94A3B8;--line:#334155;--gray:#1E293B;--gray-200:#334155}}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;font-size:18px;line-height:1.7;color:var(--text);background:var(--gray);-webkit-font-smoothing:antialiased}
+a.skip-link{position:absolute;top:-100px;left:0;background:var(--blue);color:var(--white);padding:0.5rem 1rem;z-index:1000;text-decoration:none;border-radius:0 0 4px 0}
+a.skip-link:focus{top:0}
+main{max-width:960px;margin:0 auto;padding:2rem 1.5rem 4rem}
+header.hero{background:var(--navy);color:var(--white);padding:3rem 1.5rem;text-align:center;margin-bottom:2rem}
+header.hero h1{font-size:2.25rem;font-weight:700;margin-bottom:0.5rem}
+header.hero p{font-size:1.125rem;opacity:0.85;max-width:600px;margin:0 auto}
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.5rem 2rem;margin-bottom:2rem}
+.toc h2{font-size:1.25rem;color:var(--navy);margin-bottom:1rem}
+.toc ol{padding-left:1.25rem}
+.toc li{margin-bottom:0.375rem}
+.toc a{color:var(--blue);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+section{margin-bottom:2.5rem}
+section h2{font-size:1.5rem;color:var(--navy);border-bottom:2px solid var(--blue);padding-bottom:0.375rem;margin-bottom:1rem}
+section h3{font-size:1.15rem;color:var(--navy);margin:1.5rem 0 0.75rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.card h4{font-size:1rem;color:var(--navy);margin-bottom:0.5rem}
+ol.steps{counter-reset:step;list-style:none;padding:0}
+ol.steps li{counter-increment:step;position:relative;padding-left:3rem;margin-bottom:1.25rem;min-height:2.5rem}
+ol.steps li::before{content:counter(step);position:absolute;left:0;top:0;width:2.25rem;height:2.25rem;background:var(--blue);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem}
+.callout{padding:1rem 1.25rem;border-radius:10px;margin:1rem 0;display:flex;gap:0.75rem;align-items:flex-start}
+.callout-warning{background:var(--amber-soft);border:1px solid var(--amber)}
+.callout-tip{background:var(--blue-light);border:1px solid var(--blue)}
+.callout-critical{background:var(--red-soft);border:1px solid var(--red)}
+.callout-icon{font-size:1.25rem;flex-shrink:0}
+.callout-body strong{display:block;margin-bottom:0.25rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--line)}
+th{background:var(--gray);font-weight:600;color:var(--navy);font-size:0.875rem}
+td{font-size:0.9rem}
+tr:last-child td{border-bottom:none}
+code{background:var(--gray);padding:0.125rem 0.375rem;border-radius:4px;font-size:0.875em;font-family:monospace}
+pre{background:var(--navy);color:var(--white);padding:1rem 1.25rem;border-radius:10px;overflow-x:auto;margin:1rem 0}
+pre code{background:none;color:inherit;padding:0}
+.badge{display:inline-block;padding:0.2rem 0.625rem;border-radius:20px;font-size:0.8rem;font-weight:600}
+.badge-green{background:var(--green-soft);color:var(--green)}
+.badge-amber{background:var(--amber-soft);color:var(--amber)}
+.badge-red{background:var(--red-soft);color:var(--red)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;border-top:1px solid var(--line);margin-top:3rem}
+@media(max-width:640px){body{font-size:16px}header.hero h1{font-size:1.5rem}section h2{font-size:1.25rem}}
+@media print{header.hero{background:none;color:var(--text);padding:1rem 0}header.hero h1{font-size:1.5rem}.toc{page-break-after:always}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="hero">
+  <h1>AegisCore Mobile Apps</h1>
+  <p>User manual for students, faculty, and staff using the AegisCore mobile application on iPhone or Android</p>
+</header>
+
+<main id="main-content">
+
+<nav class="toc" aria-label="Table of contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#getting-started">Getting Started — Installing the App</a></li>
+    <li><a href="#signing-in">Signing In</a></li>
+    <li><a href="#your-dashboard">Your Dashboard — What Everything Means</a></li>
+    <li><a href="#for-students">For Students</a></li>
+    <li><a href="#for-faculty">For Faculty</a></li>
+    <li><a href="#offline-mode">Working Offline (Without Internet)</a></li>
+    <li><a href="#biometrics">Biometric Login (Face ID / Fingerprint)</a></li>
+    <li><a href="#push-notifications">Push Notifications</a></li>
+    <li><a href="#role-switching">Switching Between Roles</a></li>
+    <li><a href="#settings">Settings</a></li>
+    <li><a href="#nidabot">NidaBot — Voice Assistant</a></li>
+    <li><a href="#troubleshooting">Troubleshooting Common Problems</a></li>
+    <li><a href="#technical">Technical Reference (IT Admins)</a></li>
+  </ol>
+</nav>
+
+<section id="getting-started">
+  <h2>1. Getting Started — Installing the App</h2>
+
+  <div class="card">
+    <h4>iPhone (iOS)</h4>
+    <ol class="steps">
+      <li>Open the <strong>App Store</strong> on your iPhone. Its icon is a blue square with a white "A".</li>
+      <li>Tap the <strong>Search</strong> tab at the bottom.</li>
+      <li>Type <strong>"AegisCore"</strong> in the search box and tap Search.</li>
+      <li>Look for the app with the shield icon and the name <strong>AegisCore ERP</strong> by Apex Systems (Pvt.) Ltd.</li>
+      <li>Tap <strong>Get</strong> or the download icon. You may need to enter your Apple ID password or use Face ID.</li>
+      <li>The app will appear on your home screen. Tap it to open.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h4>Android</h4>
+    <ol class="steps">
+      <li>Open the <strong>Google Play Store</strong> on your phone. Its icon is a colourful triangle.</li>
+      <li>Tap the <strong>search bar</strong> at the top.</li>
+      <li>Type <strong>"AegisCore"</strong> and tap the search icon.</li>
+      <li>Look for <strong>AegisCore University ERP</strong> by Apex Systems (Pvt.) Ltd.</li>
+      <li>Tap <strong>Install</strong>. The app will download and install automatically.</li>
+      <li>Once installed, tap <strong>Open</strong> or find the AegisCore icon in your app drawer.</li>
+    </ol>
+  </div>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon" aria-hidden="true">&#9888;</span>
+    <div class="callout-body">
+      <strong>Watch out</strong>
+      There may be similar-looking apps. Make sure the developer is <strong>Apex Systems (Pvt.) Ltd.</strong> before installing.
+    </div>
+  </div>
+</section>
+
+<section id="signing-in">
+  <h2>2. Signing In</h2>
+
+  <ol class="steps">
+    <li>Open the AegisCore app. You will see the login screen with the AegisCore shield logo.</li>
+    <li>Enter your <strong>university email address</strong> in the first field. This is the email your university gave you (e.g., ahmed.khan@university.edu.pk).</li>
+    <li>Enter your <strong>password</strong> in the second field. If you have never logged in before, your university's IT department should have given you a temporary password.</li>
+    <li>Tap the blue <strong>Sign In</strong> button.</li>
+    <li>If this is your first login, you will be asked to create a new password. Choose something you can remember but others cannot guess. Use at least 8 characters with a mix of letters and numbers.</li>
+    <li>Once logged in, you will see your Dashboard.</li>
+  </ol>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon" aria-hidden="true">&#128161;</span>
+    <div class="callout-body">
+      <strong>Pro tip</strong>
+      Turn on <strong>Biometric Login</strong> after signing in. Next time you open the app, just use your fingerprint or face instead of typing your password. See <a href="#biometrics">Section 7</a>.
+    </div>
+  </div>
+
+  <h3>What to do if you forgot your password</h3>
+  <ol class="steps">
+    <li>On the login screen, tap <strong>Forgot Password?</strong> below the Sign In button.</li>
+    <li>Enter your university email address and tap <strong>Send Reset Link</strong>.</li>
+    <li>Check your university email inbox (and spam folder) for an email from AegisCore.</li>
+    <li>Click the link in the email and create a new password.</li>
+    <li>Return to the app and sign in with your new password.</li>
+  </ol>
+
+  <div class="callout callout-critical">
+    <span class="callout-icon" aria-hidden="true">&#128680;</span>
+    <div class="callout-body">
+      <strong>Important</strong>
+      If you try the wrong password 5 times, your account will be locked for 15 minutes. Wait and try again, or contact your university IT support.
+    </div>
+  </div>
+</section>
+
+<section id="your-dashboard">
+  <h2>3. Your Dashboard — What Everything Means</h2>
+
+  <p>After signing in, you land on your Dashboard. Here is what every part does:</p>
+
+  <table>
+    <thead>
+      <tr><th>Element</th><th>What it is</th><th>What you do with it</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Top bar</strong></td><td>Shows your name and profile picture</td><td>Tap it to go to your profile settings</td></tr>
+      <tr><td><strong>Bell icon</strong></td><td>Notifications list</td><td>Tap to see your latest notifications. A red dot means you have unread ones.</td></tr>
+      <tr><td><strong>Bottom tabs</strong></td><td>Main navigation: Home, Academics, Finance, More</td><td>Tap any tab to jump to that section</td></tr>
+      <tr><td><strong>Home tab</strong></td><td>Summary cards showing your key info</td><td>Quick glance at grades, fees, attendance, schedule</td></tr>
+      <tr><td><strong>Academics tab</strong></td><td>Grades, attendance, timetable, courses</td><td>View detailed academic information</td></tr>
+      <tr><td><strong>Finance tab</strong></td><td>Fee statement, payments, scholarships</td><td>Check what you owe, make payments, download receipts</td></tr>
+      <tr><td><strong>More tab</strong></td><td>Documents, SafeSpace, NidaBot, Settings</td><td>Access additional features and settings</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon" aria-hidden="true">&#128161;</span>
+    <div class="callout-body">
+      <strong>Pro tip</strong>
+      Pull down on the Dashboard to <strong>refresh</strong> all data. You will see a spinning circle while it loads the latest information from the university server.
+    </div>
+  </div>
+</section>
+
+<section id="for-students">
+  <h2>4. For Students</h2>
+
+  <h3>Viewing Your Grades</h3>
+  <ol class="steps">
+    <li>Tap the <strong>Academics</strong> tab at the bottom.</li>
+    <li>Tap <strong>Grades</strong>.</li>
+    <li>You will see a list of your courses for the current semester. Each row shows: course name, course code, your grade letter, and your marks.</li>
+    <li>Tap any course to see the full breakdown — midterm marks, final exam marks, assignments, and attendance marks.</li>
+    <li>To see a previous semester, tap the <strong>Semester</strong> dropdown at the top and select a different semester.</li>
+  </ol>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon" aria-hidden="true">&#9888;</span>
+    <div class="callout-body">
+      <strong>Watch out</strong>
+      If you believe a grade is wrong, do NOT contact your teacher directly through the app. Use the official <strong>Grade Appeal</strong> process: go to Academics → Grade Appeal → New Appeal. Fill out the form with your reason and submit. The Grade Appeals Committee will review your case. You will be notified of the decision within 10 working days.
+    </div>
+  </div>
+
+  <h3>Checking Your Fees</h3>
+  <ol class="steps">
+    <li>Tap the <strong>Finance</strong> tab at the bottom.</li>
+    <li>You will see your <strong>Fee Statement</strong> showing: Total demanded, Total paid, Outstanding balance.</li>
+    <li>To pay, tap the blue <strong>Pay Now</strong> button.</li>
+    <li>Select your payment method: <strong>RAAST</strong> (instant bank transfer), <strong>Credit/Debit Card</strong>, or <strong>Bank Challan</strong>.</li>
+    <li>Follow the on-screen instructions. For RAAST, you will be redirected to your banking app to approve the payment.</li>
+    <li>After payment, you will see a green confirmation screen. Tap <strong>Download Receipt</strong> to save a PDF copy.</li>
+  </ol>
+
+  <div class="callout callout-critical">
+    <span class="callout-icon" aria-hidden="true">&#128680;</span>
+    <div class="callout-body">
+      <strong>Important</strong>
+      If your payment shows as successful but your fee status has not updated after 24 hours, tap <strong>Finance → Report Issue</strong> and upload your payment receipt. A finance officer will investigate.
+    </div>
+  </div>
+
+  <h3>Your Attendance</h3>
+  <ol class="steps">
+    <li>Tap the <strong>Academics</strong> tab.</li>
+    <li>Tap <strong>Attendance</strong>.</li>
+    <li>You will see a percentage at the top (e.g., "85% Present"). Below that is a list of every class with your attendance status for each day.</li>
+    <li><span class="badge badge-green">Present</span> means you were marked present.</li>
+    <li><span class="badge badge-amber">Late</span> means you arrived after attendance was taken.</li>
+    <li><span class="badge badge-red">Absent</span> means you were marked absent that day.</li>
+    <li>If you need to request leave, tap <strong>Request Leave</strong> at the top, fill out the form with your dates and reason, and submit.</li>
+  </ol>
+
+  <h3>Mental Health Support (SafeSpace)</h3>
+  <div class="callout callout-tip">
+    <span class="callout-icon" aria-hidden="true">&#128161;</span>
+    <div class="callout-body">
+      <strong>This is completely anonymous</strong>
+      When you use SafeSpace, no one — not your faculty, not the admin, not anyone — can see your name unless you choose to share it. Your privacy is protected.
+    </div>
+  </div>
+  <ol class="steps">
+    <li>Tap the <strong>More</strong> tab, then <strong>SafeSpace</strong>.</li>
+    <li>Tap <strong>Submit a Concern</strong>.</li>
+    <li>Choose your concern type from the list (Academic Stress, Anxiety, Family Pressure, Financial Stress, or Other).</li>
+    <li>Write what you are going through in the text box. Be as detailed as you feel comfortable.</li>
+    <li>Choose how urgent this is: <span class="badge badge-green">Routine</span> (I can wait), <span class="badge badge-amber">Urgent</span> (I need help soon), or <span class="badge badge-red">Crisis</span> (I need help right now).</li>
+    <li>Tap <strong>Submit</strong>. You will see a confirmation with a unique code — keep this code if you want to follow up later without revealing your identity.</li>
+    <li>A counselor will contact you within the timeframe based on your urgency selection (24 hours for Routine, 4 hours for Urgent, immediately for Crisis).</li>
+  </ol>
+
+  <div class="callout callout-critical">
+    <span class="callout-icon" aria-hidden="true">&#128680;</span>
+    <div class="callout-body">
+      <strong>If you are in crisis RIGHT NOW</strong>
+      Do not wait. Tap the <strong>Crisis</strong> option when submitting your concern — this bypasses the queue and alerts an on-call counselor immediately. <!-- CUSTOMIZE: Replace with your campus emergency number --> You can also call your campus emergency helpline at <strong>[Campus Emergency Number]</strong> or go to the Student Welfare Office in person during working hours. You are not alone.
+    </div>
+  </div>
+</section>
+
+<section id="for-faculty">
+  <h2>5. For Faculty</h2>
+
+  <h3>Taking Attendance</h3>
+  <ol class="steps">
+    <li>Tap the <strong>Academics</strong> tab.</li>
+    <li>Tap <strong>My Classes</strong>. You will see a list of courses you are teaching this semester.</li>
+    <li>Tap the course for which you want to take attendance.</li>
+    <li>Tap <strong>Take Attendance</strong>.</li>
+    <li>You will see a list of all enrolled students. Next to each name are three buttons: <span class="badge badge-green">Present</span>, <span class="badge badge-amber">Late</span>, <span class="badge badge-red">Absent</span>.</li>
+    <li>Tap the correct status for each student. By default, all students are marked Present.</li>
+    <li>When you are done, tap <strong>Save Attendance</strong> at the bottom. You will see a green confirmation message.</li>
+    <li>The attendance is now saved and visible to students immediately.</li>
+  </ol>
+
+  <h3>Entering Grades</h3>
+  <ol class="steps">
+    <li>Tap <strong>Academics</strong> → <strong>Grading</strong>.</li>
+    <li>Select the course from the list.</li>
+    <li>Choose the assessment component: Midterm, Final Exam, Assignments, or Project.</li>
+    <li>Enter marks for each student in the fields provided. The maximum marks are shown at the top of the column.</li>
+    <li>Use the <strong>Quick Fill</strong> option to mark multiple students with the same score (e.g., if the whole class gets the same attendance mark).</li>
+    <li>Tap <strong>Save Draft</strong> if you are not done, or <strong>Submit Grades</strong> when you are ready to finalize.</li>
+  </ol>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon" aria-hidden="true">&#9888;</span>
+    <div class="callout-body">
+      <strong>Watch out</strong>
+      Once you tap <strong>Submit Grades</strong>, you cannot change them without filing a grade revision request. Double-check all entries before submitting. The grade submission deadline for this semester is shown in red at the top of the grading screen. Submissions after the deadline require Registrar approval.
+    </div>
+  </div>
+
+  <h3>Responding to a Grade Appeal</h3>
+  <ol class="steps">
+    <li>You will receive a notification when a student submits a grade appeal for your course. Tap it to open.</li>
+    <li>Review the student's stated grounds and any attached evidence.</li>
+    <li>You have 5 working days to respond. Enter your response in the text box provided.</li>
+    <li>If you believe the grade was correct, explain why. If you found an error, acknowledge it and suggest the corrected grade.</li>
+    <li>Tap <strong>Submit Response</strong>. The Grade Appeals Committee will review both sides and make a final decision.</li>
+  </ol>
+</section>
+
+<section id="offline-mode">
+  <h2>6. Working Offline (Without Internet)</h2>
+
+  <p>The AegisCore app works even when you do not have an internet connection. Here is how:</p>
+
+  <ol class="steps">
+    <li>When you are connected to the internet, the app <strong>automatically downloads</strong> your latest grades, fee status, timetable, and attendance. You do not need to do anything.</li>
+    <li>If you lose internet connection, a banner will appear at the top saying <strong>"Offline Mode — Showing saved data"</strong>.</li>
+    <li>You can still view your grades, check your timetable, and see your fee status — all from the last saved version.</li>
+    <li>If you are a <strong>faculty member</strong>, you can take attendance while offline. Tap <strong>Take Attendance</strong> as usual — the marks are saved on your phone.</li>
+    <li>When you reconnect to the internet, the app will <strong>automatically sync</strong> all your offline changes. You will see a brief message saying "Syncing..." at the top.</li>
+  </ol>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon" aria-hidden="true">&#9888;</span>
+    <div class="callout-body">
+      <strong>Watch out</strong>
+      Offline attendance must be synced to the server for it to count. Make sure you connect to the internet at least once per day. If you see <strong>"Sync pending"</strong> badge on your attendance, it means the data has not reached the server yet. Open the app while connected to WiFi to trigger the sync.
+    </div>
+  </div>
+</section>
+
+<section id="biometrics">
+  <h2>7. Biometric Login (Face ID / Fingerprint)</h2>
+
+  <p>Instead of typing your password every time, you can use your face or fingerprint to log in.</p>
+
+  <ol class="steps">
+    <li>After signing in with your password, tap <strong>More</strong> → <strong>Settings</strong>.</li>
+    <li>Tap <strong>Security</strong>.</li>
+    <li>Turn on <strong>Biometric Login</strong>.</li>
+    <li>Confirm your password to enable this feature.</li>
+    <li>Next time you open the app, you will see the biometric prompt: <strong>"Use Face ID to sign in"</strong> on iPhone or <strong>"Use fingerprint to sign in"</strong> on Android.</li>
+    <li>Look at your phone (iPhone) or place your finger on the sensor (Android). The app unlocks instantly.</li>
+  </ol>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon" aria-hidden="true">&#128161;</span>
+    <div class="callout-body">
+      <strong>Pro tip</strong>
+      You will still need your password after restarting your phone, after 48 hours of inactivity, or if you add a new fingerprint or face to your device. This is a security feature, not a bug.
+    </div>
+  </div>
+</section>
+
+<section id="push-notifications">
+  <h2>8. Push Notifications</h2>
+
+  <p>The app sends you alerts for important events. The first time you open the app, it will ask: <strong>"AegisCore would like to send you notifications."</strong> Tap <strong>Allow</strong> so you do not miss anything.</p>
+
+  <p>You will receive notifications for:</p>
+  <ul style="padding-left:1.5rem;margin:1rem 0">
+    <li>New grades published</li>
+    <li>Fee payment due or overdue</li>
+    <li>Enrollment confirmation</li>
+    <li>Class schedule changes</li>
+    <li>Grade appeal updates</li>
+    <li>Leave request approved or denied</li>
+    <li>SafeSpace counselor response</li>
+    <li>University-wide announcements</li>
+  </ul>
+
+  <p>To manage which notifications you receive: <strong>More → Settings → Notifications</strong>. Toggle on or off for each category.</p>
+</section>
+
+<section id="role-switching">
+  <h2>9. Switching Between Roles</h2>
+
+  <p>If you have multiple roles at the university (e.g., you are both a Student taking courses and a Teaching Assistant teaching a lab), you can switch between them:</p>
+
+  <ol class="steps">
+    <li>Tap your <strong>profile picture</strong> or name at the top of the screen.</li>
+    <li>Tap <strong>Switch Role</strong>.</li>
+    <li>Select the role you want to use: <strong>Student</strong> or <strong>Faculty</strong>.</li>
+    <li>The app will reload with the dashboard and menu for that role.</li>
+    <li>Your data is kept separate for each role. Grade entries made as Faculty will not appear when you switch to Student view.</li>
+  </ol>
+</section>
+
+<section id="settings">
+  <h2>10. Settings</h2>
+
+  <p>Access settings through: <strong>More → Settings</strong></p>
+
+  <table>
+    <thead><tr><th>Setting</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Language</strong></td><td>Switch between English, Urdu, Arabic, or Malay. The entire app changes language immediately.</td></tr>
+      <tr><td><strong>Dark Mode</strong></td><td>Switch to a dark background that is easier on the eyes at night. Can follow your phone's system setting.</td></tr>
+      <tr><td><strong>Text Size</strong></td><td>Make all text larger or smaller. Choose from Small, Default, Large, Extra Large.</td></tr>
+      <tr><td><strong>High Contrast</strong></td><td>Increases contrast for better readability. Helpful for users with visual impairments.</td></tr>
+      <tr><td><strong>Biometric Login</strong></td><td>Turn face/fingerprint login on or off.</td></tr>
+      <tr><td><strong>Notifications</strong></td><td>Choose which types of notifications you want to receive.</td></tr>
+      <tr><td><strong>Cache Data</strong></td><td>Clear the locally stored offline data. Use this if the app shows outdated information.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="nidabot">
+  <h2>11. NidaBot — Voice Assistant</h2>
+
+  <p>NidaBot lets you talk to AegisCore in English or Urdu instead of tapping through menus.</p>
+
+  <ol class="steps">
+    <li>Tap the <strong>microphone icon</strong> at the bottom-right of any screen.</li>
+    <li>Speak your question clearly. You can speak in English or Urdu.</li>
+    <li>NidaBot will understand and respond with the answer on screen and out loud.</li>
+  </ol>
+
+  <p><strong>Things you can ask NidaBot:</strong></p>
+  <table>
+    <thead><tr><th>English</th><th>Urdu</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>"What are my grades?"</td><td>"Mera result kya hai?"</td><td>Shows your grade list</td></tr>
+      <tr><td>"How much fee do I owe?"</td><td>"Fees kitni baki hai?"</td><td>Shows outstanding balance</td></tr>
+      <tr><td>"What is my schedule today?"</td><td>"Ajj mera schedule kya hai?"</td><td>Shows today's timetable</td></tr>
+      <tr><td>"What is my attendance?"</td><td>"Meri attendance kaisi hai?"</td><td>Shows attendance percentage</td></tr>
+      <tr><td>"I need my roll number slip"</td><td>"Roll number slip chahiye"</td><td>Generates document</td></tr>
+      <tr><td>"I want to take leave"</td><td>"Mujhe chutti leni hai"</td><td>Opens leave request form</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon" aria-hidden="true">&#128161;</span>
+    <div class="callout-body">
+      <strong>Pro tip</strong>
+      If NidaBot does not understand you, say <strong>"Dobara bolein"</strong> (Repeat) and ask again. Say <strong>"Dhire bolein"</strong> (Speak slowly) if the response is too fast. Say <strong>"Aasan alfaaz mein"</strong> (In simple words) for simplified language.
+    </div>
+  </div>
+</section>
+
+<section id="troubleshooting">
+  <h2>12. Troubleshooting Common Problems</h2>
+
+  <table>
+    <thead><tr><th>Problem</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><strong>App won't open / crashes immediately</strong></td><td>1. Restart your phone.<br>2. Update the app from the App Store or Play Store.<br>3. If it still crashes, delete and reinstall the app.</td></tr>
+      <tr><td><strong>"Cannot connect to server" message</strong></td><td>1. Check your internet connection — open a website in your browser to test.<br>2. Switch from mobile data to WiFi, or vice versa.<br>3. Wait a few minutes and try again — the server may be temporarily down for maintenance.</td></tr>
+      <tr><td><strong>Grades or fees not showing</strong></td><td>1. Pull down on the screen to refresh.<br>2. If still blank, the data may not have been published yet. Check with your department or finance office.</td></tr>
+      <tr><td><strong>Biometric login not working</strong></td><td>1. Go to your phone's Settings → Security and make sure Face ID or Fingerprint is set up.<br>2. In the AegisCore app, go to More → Settings → Security and turn Biometric Login off and on again.</td></tr>
+      <tr><td><strong>Payment failed but money deducted</strong></td><td>1. Do NOT try to pay again immediately.<br>2. Go to Finance → Report Issue and upload your bank's transaction confirmation.<br>3. Finance staff will verify the payment within 24 hours.</td></tr>
+      <tr><td><strong>Notifications not appearing</strong></td><td>1. Go to your phone's Settings → Notifications → AegisCore. Make sure "Allow Notifications" is turned ON.<br>2. In the AegisCore app, go to More → Settings → Notifications and check your preferences.</td></tr>
+      <tr><td><strong>App shows data in wrong language</strong></td><td>Go to More → Settings → Language and select your preferred language.</td></tr>
+      <tr><td><strong>"Session expired" message</strong></td><td>Tap OK and sign in again. This happens for security reasons after you have been logged in for a long time.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="technical">
+  <h2>13. Technical Reference (IT Admins)</h2>
+
+  <h3>App Architecture</h3>
+  <p>The AegisCore mobile app is built as two platform-specific native apps and one cross-platform React Native (Expo) app:</p>
+
+  <table>
+    <thead><tr><th>Platform</th><th>Technology</th><th>Build System</th></tr></thead>
+    <tbody>
+      <tr><td>React Native (iOS + Android)</td><td>Expo SDK, TypeScript, Redux, WatermelonDB</td><td>EAS Build</td></tr>
+      <tr><td>Android Native</td><td>Kotlin, Jetpack Compose, Gradle</td><td>GitHub Actions → Play Store</td></tr>
+      <tr><td>iOS Native</td><td>Swift, SwiftUI, Swift Package Manager</td><td>Xcode / EAS Build</td></tr>
+    </tbody>
+  </table>
+
+  <h3>API Connection</h3>
+  <p>The mobile app connects to the AegisCore backend API over HTTPS. Configure the API base URL in:</p>
+  <ul style="padding-left:1.5rem">
+    <li><strong>React Native:</strong> <code>react-native/src/api/client.ts</code> — set <code>AEGISCORE_API_URL</code></li>
+    <li><strong>Android:</strong> <code>android/app/src/main/kotlin/pk/edu/aegiscore/mobile/Api.kt</code> — set <code>BASE_URL</code></li>
+    <li><strong>iOS:</strong> <code>ios/AegisCore/ApiClient.swift</code> — set <code>baseURL</code></li>
+  </ul>
+
+  <h3>Building for App Stores</h3>
+  <pre><code># React Native (Expo) — both platforms
+cd react-native
+npm install
+eas build --platform ios
+eas build --platform android
+
+# Android Native
+cd android
+./gradlew assembleRelease
+# APK at: android/app/build/outputs/apk/release/
+
+# iOS Native
+cd ios
+swift build -c release</code></pre>
+
+  <h3>Environment Variables</h3>
+  <table>
+    <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>AEGISCORE_API_URL</code></td><td>Yes</td><td>Backend API base URL (e.g., https://api.university.edu.pk)</td></tr>
+      <tr><td><code>AEGISCORE_TENANT_ID</code></td><td>Yes</td><td>University tenant identifier</td></tr>
+      <tr><td><code>PUSH_NOTIFICATION_KEY</code></td><td>Yes</td><td>Firebase Cloud Messaging server key</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Offline Database</h3>
+  <p>The app stores data locally using:</p>
+  <ul style="padding-left:1.5rem">
+    <li><strong>React Native:</strong> WatermelonDB (SQLite-based, lazy-loading)</li>
+    <li><strong>Android:</strong> Room (SQLite abstraction)</li>
+    <li><strong>iOS:</strong> Core Data</li>
+  </ul>
+  <p>Offline changes are queued and synced when connectivity is restored. The sync queue is processed in FIFO order with conflict resolution handled server-side. If a sync conflict occurs, the server version wins and the app downloads the latest data.</p>
+
+  <h3>Post-Quantum Security</h3>
+  <p>All API communication between the mobile app and the backend uses Hybrid PQC transport: ML-DSA (FIPS 204) post-quantum signatures for authentication alongside TLS 1.3. This means the connection is secure against both classical and quantum computer attacks.</p>
+</section>
+
+</main>
+
+<footer>
+  <p>AegisCore Mobile Apps — User Manual &middot; Version 2.0</p>
+  <p>&copy; Apex Systems (Pvt.) Ltd. All rights reserved.</p>
+  <p>Last updated: <span id="last-updated"></span></p>
+</footer>
+
+<script>
+document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
