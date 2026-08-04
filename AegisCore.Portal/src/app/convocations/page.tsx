@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { useTranslations } from "next-intl";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 import {
   AlertCircle, Award, Calendar, CheckCircle2, ClipboardCheck, Download,
   FileText, GraduationCap, MapPin, PlusCircle, QrCode, Search, Send,
@@ -81,7 +81,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 };
 
 export default function ConvocationsPage() {
-  const t = useTranslations("academic");
+  const t = usePersonalityTranslations("academic");
 
   const [ceremonies, setCeremonies] = useState<Ceremony[]>([]);
   const [eligibility, setEligibility] = useState<StudentEligibility[]>([]);

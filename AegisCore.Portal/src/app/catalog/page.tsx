@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { useTranslations } from "next-intl";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 import {
   AlertCircle, BookOpen, CheckCircle2, Clock, CloudUpload, FileSearch,
   FileText, GraduationCap, Pencil, RefreshCw, Send, Upload, XCircle, Zap
@@ -49,7 +49,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 };
 
 export default function CatalogPage() {
-  const t = useTranslations("academic");
+  const t = usePersonalityTranslations("academic");
 
   const [jobs, setJobs] = useState<IngestionJob[]>([]);
   const [courses, setCourses] = useState<ExtractedCourse[]>([]);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { useTranslations } from "next-intl";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 import {
   AlertCircle, AlertTriangle, BarChart3, CheckCircle2, Clock, Coffee, DollarSign,
   ForkKnife, Package, PlusCircle, RefreshCw, Send, ShoppingCart, Store, Trash2,
@@ -55,7 +55,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 };
 
 export default function CafeteriaPage() {
-  const t = useTranslations("academic");
+  const t = usePersonalityTranslations("academic");
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);

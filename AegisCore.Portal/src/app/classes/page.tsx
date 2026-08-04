@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { useTranslations } from "next-intl";
+import { usePersonalityTranslations } from "@/lib/personality-translator";
 import {
   AlertCircle, BookOpen, CheckCircle2, Clock, LayoutGrid, RefreshCw,
   Send, Server, Settings, Users, XCircle
@@ -43,7 +43,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 };
 
 export default function ClassesPage() {
-  const t = useTranslations("academic");
+  const t = usePersonalityTranslations("academic");
 
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [sections, setSections] = useState<ClassSection[]>([]);
