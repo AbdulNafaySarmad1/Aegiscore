@@ -1,6 +1,42 @@
 export const portalLocales = ["en-PK", "en-US", "en-GB", "ar-AE", "ms-MY"] as const;
 export type PortalLocale = (typeof portalLocales)[number];
 
+const enNchart = {
+  insightTrendUp: "{measure} up {percentage} this period",
+  insightTrendDown: "{measure} down {percentage} this period",
+  insightTrendFlat: "{measure} holding steady",
+  insightTrendGeneric: "{measure} changed {percentage}",
+  insightRecoveryYes: "Recovered {percentage}% from trough",
+  insightRecoveryNo: "Still {percentage}% below peak",
+  insightDominant: "{segment} dominates at {share}%",
+  measureValue: "Trend",
+  legend: "Chart legend",
+  toggleSeries: "Toggle series",
+  sortBy: "Sort by",
+  dataTable: "Data table",
+  exportCsv: "Export CSV",
+  exportPng: "Export as PNG",
+  export: "Export chart",
+  exportUnavailable: "Export unavailable at this time",
+  toggleDataTable: "Toggle data table",
+  errorMessage: "Unable to render chart",
+  retry: "Retry",
+  emptyTitle: "No data to display",
+  emptySubtitle: "Add data to see your chart here",
+  gauge: "Gauge value",
+  gaugeLabel: "Current value",
+  gaugeLow: "Low",
+  gaugeMedium: "Medium",
+  gaugeHigh: "High",
+  gaugeCritical: "Critical",
+  heatmap: "Activity heatmap",
+  heatmapMore: "More",
+  heatmapLess: "Less",
+  tooltipAboveMean: "Above average ({sigma})",
+  tooltipBelowMean: "Below average ({sigma})",
+  ganttPlaceholder: "Gantt chart will be available soon",
+} satisfies Record<string, string>;
+
 const en = {
   shell: {
     commandCenter: "Command center", feesAid: "Fees and aid", academics: "Academics",
@@ -67,19 +103,22 @@ const en = {
     voiceAssistant: "Voice Assistant (NidaBot)", elections: "Student Elections",
     boardPortal: "Board of Governors Portal", classGeneration: "Class Generation & LMS",
     catalogIngestion: "Course Catalog Ingestion", cafeteria: "Cafeteria Management"
-  }
+  },
+  nchart: enNchart
 } satisfies Record<string, Record<string, string>>;
 
 const ar = {
   shell: { ...en.shell, commandCenter: "مركز القيادة", feesAid: "الرسوم والمساعدات", academics: "الشؤون الأكاديمية", financeDashboard: "لوحة المالية", financeOperations: "عمليات المالية", paymentGateways: "بوابات الدفع", auditCompliance: "التدقيق والامتثال", universityStructure: "هيكل الجامعة", settings: "الإعدادات", loading: "جار تحميل مساحة عمل الجامعة...", workspace: "مساحة العمل", help: "المساعدة والدعم", tenantWorkspace: "مساحة عمل المؤسسة", title: "مركز قيادة AegisCore", subtitle: "تظهر الأدوات وفقاً لصلاحياتك الموثقة.", available: "مساحات العمل المتاحة", openWorkspace: "فتح مساحة العمل", sessionSecurity: "أمن الجلسة", authenticated: "تم التحقق", roleNavigation: "تنقل حسب الدور", liveData: "بيانات مباشرة فقط", locale: "اللغة والمنطقة" },
   finance: { ...en.finance, unavailable: "بيانات المالية غير متاحة أو أن دورك غير مخول.", department: "إدارة المالية", executive: "المالية التنفيذية", executiveDetail: "أداء دفتر الأستاذ والتحصيل والوضع التشفيري.", refresh: "تحديث اللوحة", operations: "العمليات", gateways: "بوابات الدفع", metrics: "مؤشرات المالية", revenue: "الإيرادات", expenses: "المصروفات", net: "صافي الفائض أو العجز", cash: "المركز النقدي", revenueExpense: "الإيرادات والمصروفات", topExpenses: "أعلى فئات المصروفات", accessibleTable: "جدول بيانات ميسر", month: "الشهر", postings: "القيود", category: "الفئة", amount: "المبلغ", feeFunnel: "مسار تحصيل الرسوم", demanded: "المطلوب", collected: "المحصل", overdue: "متأخر", openDemands: "مطالبات مفتوحة", securityPosture: "الوضع الأمني", lastSeal: "آخر ختم", notSealed: "غير مختوم", merkleRoot: "جذر ميركل", key: "المفتاح", verifySignature: "التحقق من توقيع السند", voucherId: "معرف السند", verify: "تحقق", voucher: "السند", status: "الحالة", unsigned: "غير موقع", algorithm: "الخوارزمية" },
-  academic: { ...en.academic }
+  academic: { ...en.academic },
+  nchart: enNchart
 };
 
 const ms = {
   shell: { ...en.shell, commandCenter: "Pusat arahan", feesAid: "Yuran dan bantuan", academics: "Akademik", financeDashboard: "Papan pemuka kewangan", financeOperations: "Operasi kewangan", paymentGateways: "Gerbang pembayaran", auditCompliance: "Audit dan pematuhan", settings: "Tetapan", loading: "Memuatkan ruang kerja universiti...", workspace: "Ruang kerja", help: "Bantuan dan sokongan", tenantWorkspace: "Ruang kerja institusi", title: "Pusat arahan AegisCore", available: "Ruang kerja tersedia", openWorkspace: "Buka ruang kerja", sessionSecurity: "Keselamatan sesi", authenticated: "Disahkan", roleNavigation: "Navigasi mengikut peranan", liveData: "Data langsung sahaja", locale: "Bahasa dan lokal" },
   finance: { ...en.finance, unavailable: "Data kewangan tidak tersedia atau peranan anda tidak dibenarkan.", department: "Jabatan kewangan", executive: "Kewangan eksekutif", refresh: "Muat semula papan pemuka", operations: "Operasi", gateways: "Gerbang", metrics: "Metrik kewangan", revenue: "Hasil", expenses: "Perbelanjaan", net: "Lebihan / defisit bersih", cash: "Kedudukan tunai", revenueExpense: "Hasil dan perbelanjaan", topExpenses: "Kategori perbelanjaan teratas", accessibleTable: "Jadual data boleh akses", month: "Bulan", postings: "Catatan", category: "Kategori", amount: "Jumlah", feeFunnel: "Corong kutipan yuran", demanded: "Dituntut", collected: "Dikutip", overdue: "Tertunggak", openDemands: "Tuntutan terbuka", securityPosture: "Postur keselamatan", lastSeal: "Meterai terakhir", notSealed: "Belum dimeterai", merkleRoot: "Akar Merkle", key: "Kunci", verifySignature: "Sahkan tandatangan baucar", voucherId: "ID baucar", verify: "Sahkan", voucher: "Baucar", status: "Status", unsigned: "Tidak ditandatangani", algorithm: "Algoritma" },
-  academic: { ...en.academic }
+  academic: { ...en.academic },
+  nchart: enNchart
 };
 
 export const portalMessages: Record<PortalLocale, typeof en> = {

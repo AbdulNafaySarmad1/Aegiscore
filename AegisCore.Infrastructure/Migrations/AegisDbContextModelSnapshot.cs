@@ -773,6 +773,84 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("AccreditationReports");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.AchievementBadge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CriteriaJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AchievementBadges");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.AchievementRoadmap", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double?>("CgpaTarget")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NextBadgesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("ProgressBarsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("RequiredGradesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AchievementRoadmaps");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.ActionItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1402,6 +1480,72 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ApiKeys");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.AppealCommitteeBrief", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AppealId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BriefContent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EvidenceMatrixJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RecommendedOptions")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppealCommitteeBriefs");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.AppealEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AppealId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DocumentType")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("Relevance")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppealEvidence");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ApplicationDocument", b =>
@@ -2157,6 +2301,46 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("Batches");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.BenchmarkComparison", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("FactorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<double>("InstitutionValue")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsAboveAverage")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("NationalAverage")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PeerAverage")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PeerInstitutionName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BenchmarkComparisons");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.BenchmarkRun", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2199,6 +2383,94 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BenchmarkRuns");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.BoardAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RecommendedAction")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ResponsibleOfficer")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<DateTime>("TriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BoardAlerts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.BoardMeetingPack", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AgendaItemsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExecutiveSummary")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<bool>("IsDistributed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("MeetingDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PdfUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("PendingDecisionsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("PreviousResolutionsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BoardMeetingPacks");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.BookCopy", b =>
@@ -2476,6 +2748,42 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("CLOPOMappings");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.CafeteriaUnit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("OperatingHours")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CafeteriaUnits");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.CalibrationRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2705,6 +3013,50 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("CampusDrives");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.CandidateNomination", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ElectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("EndorsementCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IneligibilityReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsEligible")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("RequiredEndorsements")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CandidateNominations");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.CareerEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2793,6 +3145,258 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CareerGoals");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CashFlowForecast", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ExpectedCollection")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ForecastWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("ProjectedShortfall")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<double>("RecoveryRateEstimate")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("WeeklyInflowProjectionsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CashFlowForecasts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CatalogCourseRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AnnotationsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("CourseCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CourseCodeNormalised")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CourseTitle")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("CourseTitleNormalised")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("CourseType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("CreditHoursLab")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CreditHoursTheory")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CreditHoursTotal")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DegreeProgram")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("DegreeProgramSlug")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ElectiveSlot")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<double>("ExtractionConfidence")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsInserted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUpdateCandidate")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("RequiresReview")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ReviewReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("SemesterLabel")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SemesterSequence")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CatalogCourseRecords");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CatalogVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChangeLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("DegreeProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("IngestionJobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("PublishedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CatalogVersions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ChangeImpactSimulation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AffectedStudents")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ChangedElementId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DirectlyAffectedCourses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IndirectlyAffectedCourses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InvalidRegistrations")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RippleEffectJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("SimulatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChangeImpactSimulations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ChartConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConfigJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataSourceKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("InsightI18nKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChartConfigurations");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ChartOfAccount", b =>
@@ -2977,6 +3581,116 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("CisUploads");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.Class", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CoFacultyIdsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EnrolledCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EnrolledStudentIdsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("GenerationJobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PrimaryFacultyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SectionLabel")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("SectionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Classes");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ClassGenerationJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FacultyAssigned")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SectionsGenerated")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("StudentsDistributed")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TotalOfferings")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("TriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ClassGenerationJobs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.CloPlomapping", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3058,6 +3772,42 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("AccreditationCommitteeId");
 
                     b.ToTable("CommitteeMembers");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ComplianceBreach", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AcademicServicesFrozen")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("DetectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("EmbassyNotified")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("RegistryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Resolution")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ComplianceBreaches");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ComplianceControl", b =>
@@ -3459,6 +4209,120 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("ControlEvidences");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.Convocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CeremonyDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("GuestTicketsPerStudent")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Venue")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Convocations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ConvocationAttendance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("CertificateCollected")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("CheckInTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ConvocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("GuestCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConvocationAttendance");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ConvocationEligibility", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BlockingReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("CgpaMet")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ConvocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("CreditsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("DisciplinaryCleared")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("DuesCleared")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LibraryCleared")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("ThesisApproved")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConvocationEligibility");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.CorrectiveActionPlan", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3540,6 +4404,44 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CostCenters");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CounselorProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AvailableHours")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("CurrentCaseload")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsOnCall")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("MaxCaseload")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Specializations")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CounselorProfiles");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.CountryPack", b =>
@@ -3672,6 +4574,43 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("CourseAssignments");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.CourseEquivalency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("SourceCourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceInstitution")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TargetCourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CourseEquivalencies");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.CourseGrade", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3724,6 +4663,46 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("StudentId", "SemesterId");
 
                     b.ToTable("CourseGrades");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CourseGradePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("CanRepeat")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("GpaWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("GradeReplacement")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("GradingScheme")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("MaxRepeatAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PassingGrade")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CourseGradePolicies");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.CourseLearningOutcome", b =>
@@ -3797,6 +4776,48 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CourseMarks");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CourseOffering", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid?>("CampusId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("EnrolledCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SectionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CourseOfferings");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.CourseReEnrollment", b =>
@@ -4398,6 +5419,44 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("DataWarehouseTables");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.DeansListEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CertificateUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<double>("Cgpa")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("QualifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeansListEntries");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.DecisionTable", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4453,6 +5512,102 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("DecisionTables");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.DefaulterIntervention", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("InitiatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsSuccessful")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MessageContent")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int?>("Outcome")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OutcomeNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("RiskScoreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TriggeredByTier")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DefaulterInterventions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.DefaulterRiskScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicCorrelationJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("FinancialProfileJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("PaymentBehaviorJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("PredictedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("PredictionConfidence")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ProbabilityScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("RiskDriversJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DefaulterRiskScores");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.DegreeAudit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4502,6 +5657,45 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("DegreeAudits");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.DegreeCertificate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttestationStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ConvocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DegreeTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("HECReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DegreeCertificates");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.DegreeProgram", b =>
@@ -4609,6 +5803,45 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("DegreeRequirements");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.DegreeTree", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CatalogVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ComputedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CriticalPathJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("DegreeProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EdgesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("NodesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SemesterLanesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DegreeTrees");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.DegreeVerification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4649,6 +5882,42 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DegreeVerifications");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.DemandForecast", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Accuracy")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("ActualQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CafeteriaUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ForecastDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MenuItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("PredictedQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DemandForecasts");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.Department", b =>
@@ -4719,6 +5988,77 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DiagnosticFindings");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.DirectorySyncLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ErrorDetailsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Errors")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("UsersCreated")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsersSynced")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsersUpdated")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DirectorySyncLogs");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.DistributionAnomalyAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AnomalyType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("DistributionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RecommendedAction")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DistributionAnomalyAlerts");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.DomainEvent", b =>
@@ -4875,6 +6215,157 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ETLJobs");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.Election", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CampaigningEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CampaigningStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("NominationEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("NominationStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ObserverId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PositionsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("ResultsDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("VotingEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("VotingMethod")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("VotingStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Elections");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ElectionResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AnnouncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CertificationUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("ElectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("VoteCount")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("VotePercentage")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("WinnerId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ElectionResults");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ElectiveSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CreditHoursLab")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CreditHoursTheory")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("DegreeProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EligibleCourseIdsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsStudentChoice")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MinGradeRequired")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SemesterSequence")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SlotCategory")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("SlotLabel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ElectiveSlots");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.EmergencyAlert", b =>
@@ -5130,6 +6621,42 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("ContactEmail");
 
                     b.ToTable("Employers");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.EncryptedBallot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CastAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ElectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EncryptedVoteData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VerificationHash")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("VoterTokenHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EncryptedBallots");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.EnergyReading", b =>
@@ -5403,6 +6930,39 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("EventSchemaVersions");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.EvidenceFreshnessLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CheckedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DaysSinceUpdate")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("EvidenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NotificationMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EvidenceFreshnessLogs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.EvidenceVersion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5657,6 +7217,59 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ExchangeRateSnapshots");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ExecutiveDashboard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("AcademicExcellenceScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("AccreditationScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("CompositeRankingScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("FacultyQualityScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("FinancialStabilityScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("FiscalYear")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("KPIsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("StrategicGoalStatusesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("StudentSuccessScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExecutiveDashboards");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ExportLog", b =>
@@ -5958,6 +7571,42 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FacultyCVs");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FacultySlotMatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("CompositeScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("FacultyProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsSelected")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MatchRationaleJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("MatchedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OpenSlotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FacultySlotMatches");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FacultyWorkload", b =>
@@ -10763,6 +12412,121 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("FloorPlans");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.FoodOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CafeteriaUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EstimatedReadyAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsPreOrder")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("MenuItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TransactionRef")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FoodOrders");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ForeignStudentRegistry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Compliance")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("EntryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpectedGraduation")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MoraRegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("MoraStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nationality")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("PassportExpiry")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PassportNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Program")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("VisaExpiry")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("VisaNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("VisaType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("YearOfStudy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ForeignStudentRegistries");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.FormDefinition", b =>
                 {
                     b.Property<Guid>("Id")
@@ -10880,6 +12644,41 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("FormId");
 
                     b.ToTable("FormSubmissions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FreezeDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DocumentType")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("FreezeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("VerificationNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FreezeDocuments");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FuelLog", b =>
@@ -11040,6 +12839,79 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("GateLogs");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.GradeAppeal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AdjustedGrade")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<string>("AppealGrounds")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<string>("CommitteeDecision")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid?>("CommitteeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FacultyRespondentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("GroundStrength")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GroundType")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsEligible")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PolicyClauseCitation")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SubmittedGrade")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GradeAppeals");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.GradeBand", b =>
                 {
                     b.Property<Guid>("Id")
@@ -11073,6 +12945,89 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("GradeBands");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.GradeDistribution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AnomaliesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurveShape")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("DistinctionRate")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("EnrollmentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("FacultyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("FailureRate")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("HistoricalComparisonJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("Kurtosis")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("LetterDistributionJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("Mean")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Median")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Mode")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PassRate")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PercentileBreakdownJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("SectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<double>("Skewness")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("StdDev")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Variance")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GradeDistributions");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.GradeOverrideRequest", b =>
@@ -11877,6 +13832,117 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("IncidentWitnesses");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.IngestionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClassificationLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CoursesExtracted")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CoursesInserted")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CoursesRequiringReview")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CoursesSkipped")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CoursesUpdated")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("DocumentType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ErrorLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Errors")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("ExtractionConfidence")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("InsertionLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("OriginalDocumentUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("RawExtraction")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Warnings")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IngestionJobs");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.InsightChip", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChartConfigurationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ComputedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("I18nKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InsightChips");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.InspectionChecklistItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -12075,6 +14141,77 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("InterviewSlots");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.InventoryAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("InventoryItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("TriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InventoryAlerts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.InventoryItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CafeteriaUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<double>("QuantityOnHand")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ReorderPoint")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ReorderQuantity")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InventoryItems");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.IoTSensor", b =>
@@ -12724,6 +14861,53 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("LeadTasks");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.LeaderboardEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RankedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ScopeValue")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<double>("Score")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LeaderboardEntries");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.LeaveApplication", b =>
                 {
                     b.Property<Guid>("Id")
@@ -13082,6 +15266,134 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("LicenseStates");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.LmsConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CoexistenceMode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("ConflictAlertThreshold")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConflictResolution")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProviderConfigJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("RetryAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RetryDelayMs")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SyncSchedule")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LmsConfigurations");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.LmsProvision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ErrorLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ExternalUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("LastSyncAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ProvisionedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LmsProvisions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.LmsRosterSyncLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConflictDetailsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("ConflictsDetected")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MembersAdded")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MembersRemoved")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProvisionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LmsRosterSyncLogs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.LmsSyncLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -13397,6 +15709,40 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("MaintenanceTickets");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.MandatoryReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AcknowledgedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AuthorityNotified")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ReportContent")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Trigger")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MandatoryReports");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.MarkModeration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -13476,6 +15822,47 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("MarketingCampaigns");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.MealPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("DailyAllowance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EligibleItemsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MealPlans");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.MedicalVisit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -13517,6 +15904,68 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("MedicalVisits");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.MentalHealthTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Anonymization")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AnonymousToken")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("AssignedCounselorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CaseNotesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ConcernType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CrisisLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CrisisProtocolsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<string>("PreferredContact")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int?>("Resolution")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ResponseDeadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MentalHealthTickets");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.MentorAssignment", b =>
@@ -13572,6 +16021,59 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("MentorAssignmentId");
 
                     b.ToTable("MentoringSessions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.MenuItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AllergensJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("CafeteriaUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Calories")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("IngredientsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsHalal")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MenuItems");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.MeritList", b =>
@@ -13825,6 +16327,45 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("MisconductEvidence");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.MoraSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BatchReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSubmitted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ResponseNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("StudentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MoraSubmissions");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.NoticeBoardItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -14018,6 +16559,39 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("NotificationTemplates");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.OcrProviderConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApiEndpoint")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CredentialRef")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OcrProviderConfigs");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.OfficialModule", b =>
@@ -14505,6 +17079,38 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("Permissions");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.PersonalityConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActiveForUser")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsLockedOff")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PersonalityConfigs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.PlacementRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -14536,6 +17142,146 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PlacementRecords");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.PlagiarismApiSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double?>("AdjustedSimilarity")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("Classification")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("ExcludedSourcesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("ExternalSubmissionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("FacultySummary")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer");
+
+                    b.Property<double?>("RawSimilarity")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceBreakdownJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StudentSummary")
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlagiarismApiSubmissions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.PlagiarismScan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AiGenerationFlagsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CaseRecommendation")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("CollusionGraphJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("InternetMatchesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("OverallSimilarity")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ParaphraseMatchesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("RequiresReview")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("ScannedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("StructuralMatchesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StyleDeviationJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VerbatimMatchesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlagiarismScans");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.PlatformMetric", b =>
@@ -14827,6 +17573,59 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("PowerBiReports");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.PrerequisiteConflict", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AffectedStudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("DetectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ResolutionNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ResolutionSuggestion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("SourceCourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("TargetCourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("TriggerEvent")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PrerequisiteConflicts");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.PreventiveMaintenanceSchedule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -14913,6 +17712,88 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PreviousVisitFindings");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProctorEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ScreenshotUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProctorEvents");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProctoringSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ActualEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ActualStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("CameraRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("LockdownEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("MicRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ScheduledStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Sensitivity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProctoringSessions");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ProcurementRequisition", b =>
@@ -15375,6 +18256,143 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ReadReplicaConfigs");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ReadinessAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<bool>("IsAcknowledged")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("ScoreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("TriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReadinessAlerts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ReadinessGap", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CriterionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Effort")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EvidenceNeeded")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("GapDescription")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<double>("ImpactOnScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("PriorityRank")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ResponsibleOwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ScoreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReadinessGaps");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ReadinessScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CategoryScoresJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("ComplianceVelocity")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("CriterionScoresJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("DaysUntilAudit")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("FrameworkId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FrameworkName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("NextAuditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("OverallScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ScoreHistoryJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReadinessScores");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.RegistrationEnrollment", b =>
@@ -16853,6 +19871,92 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("Semesters");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.SemesterFreeze", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcademicContinuityPlanJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CurrentSemester")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EnrolledCoursesSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime?>("ExpectedReturnDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FreezesUsed")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("HasScholarship")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsInternational")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxFreezeSemesters")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("OutstandingBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ReasonCategory")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReasonDescription")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<decimal>("RefundAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ReturnStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TimingRule")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalSemesters")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SemesterFreezes");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.SensorReading", b =>
                 {
                     b.Property<Guid>("Id")
@@ -17142,6 +20246,51 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("SsoSessions");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.StrategicPlanGoal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("CurrentValue")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("InterventionRecommendation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<double>("PercentAchieved")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("TargetDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("TargetValue")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StrategicPlanGoals");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.Student", b =>
                 {
                     b.Property<Guid>("Id")
@@ -17290,6 +20439,40 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StudentAlerts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.StudentBadge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AchievementDetail")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("BadgeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("NotifiedParent")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VerificationHash")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StudentBadges");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.StudentClearance", b =>
@@ -17636,6 +20819,56 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("StudentHostels");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.StudentProctoringRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AnswerPatternAnalysisJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("CollusionFlagsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("CriticalCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("EscalatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventLogJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("IntegrityStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsEscalated")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("VerificationStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WarningCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StudentProctoringRecords");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.StudentProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -17775,6 +21008,39 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StudentScholarships");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.StudentSectionEnrollment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DistributionStrategy")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("SectionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StudentSectionEnrollments");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.StudentSociety", b =>
@@ -19056,6 +22322,53 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("Vendors");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.VendorScorecard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ComplaintCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("EvaluatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("FoodQualityScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("HalalCertValid")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("HygieneScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Month")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("ServiceScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VendorScorecards");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.VerificationCycle", b =>
                 {
                     b.Property<Guid>("Id")
@@ -19082,6 +22395,235 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("VerificationCycles");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.VisaDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("RegistryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VisaDocuments");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.VisaExpiryAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DaysRemaining")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsNotified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("RegistryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("TriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Urgency")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VisaExpiryAlerts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.VisaRenewal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApplicationDeadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DocumentChecklistJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("RegistryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VisaRenewals");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.VisitingFacultyContract", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("CompensationAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ContractUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CreditHours")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FacultyProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PerformanceDetailsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double?>("PerformanceRating")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("RehireStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VisitingFacultyContracts");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.VisitingFacultyProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AvailabilityJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("AverageRating")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("CNIC")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal>("ExpectedCompensation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("HECEligible")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("HighestQualification")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("PriorEngagementsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SpecializationsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("University")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("VettingStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("YearsOfExperience")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VisitingFacultyProfiles");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.Visitor", b =>
@@ -19198,6 +22740,131 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("VisitorLogs");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.VoiceSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AsrConfidence")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ClarificationAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DetectedLanguage")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntitiesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("EscalationTriggered")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("FallbackReason")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Intent")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResponseAudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ResponseText")
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
+                    b.Property<bool>("SlowMode")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Transcript")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VoiceSessions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.VoterToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ElectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VoterTokens");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.WasteLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CafeteriaUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("EstimatedCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("LoggedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WasteLogs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.WebhookSubscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -19251,6 +22918,39 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WebhookSubscriptions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.WellnessCheckIn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CheckedInAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("RequiresFollowUp")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WellnessCheckIns");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.WizardAdminCredential", b =>
