@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "AegisCore",
+    "slug": "aegiscore-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "aegiscore",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "pk.edu.aegiscore.mobile",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "AegisCore uses Face ID to unlock your saved session."
+      }
+    },
+    "android": {
+      "package": "pk.edu.aegiscore.mobile",
+      "permissions": ["USE_BIOMETRIC", "POST_NOTIFICATIONS"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0F172A"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-local-authentication",
+      "expo-notifications"
+    ],
+    "extra": {
+      "apiBaseUrl": "https://aegiscore.ssuet.edu.pk/api",
+      "eas": {
+        "projectId": "aegiscore-mobile-local"
+      }
+    }
+  }
+}

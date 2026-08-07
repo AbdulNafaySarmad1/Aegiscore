@@ -3,12 +3,14 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.Forms;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/forms")]
+[Authorize]
 public class FormsController : ControllerBase
 {
     private readonly IFormService _formService;
@@ -28,6 +30,7 @@ public class FormsController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
     public async Task<IActionResult> CreateForm([FromBody] CreateFormRequest request, CancellationToken cancellationToken)
     {
@@ -155,6 +158,7 @@ public class FormsController : ControllerBase
         return File(data, contentType, $"submissions_{formId}.{format}");
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("templates/{templateName}")]
     public async Task<IActionResult> CreateFromTemplate(string templateName, CancellationToken cancellationToken)
     {

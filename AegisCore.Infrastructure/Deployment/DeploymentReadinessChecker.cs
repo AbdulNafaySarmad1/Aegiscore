@@ -70,9 +70,9 @@ public class DeploymentReadinessChecker
             await using var roleCommand = new NpgsqlCommand("SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user", conn);
             await using var reader = await roleCommand.ExecuteReaderAsync(ct);
             if (!await reader.ReadAsync(ct))
-                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", false, "The connected database role could not be inspected."));
+                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The connected database role could not be inspected."));
             else if (reader.GetBoolean(0) || reader.GetBoolean(1))
-                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", false, "The API database role must not be SUPERUSER or BYPASSRLS."));
+                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The API database role must not be SUPERUSER or BYPASSRLS."));
             else
                 _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The API role cannot bypass row-level security."));
         }

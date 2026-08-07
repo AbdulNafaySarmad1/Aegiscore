@@ -1,0 +1,5 @@
+CourseCode,ExamType,ExamDate,StartTime,EndTime,Room,TotalMarks,PassingMarks,Semester,AcademicYear,InvigilatorId
+CS-101,Midterm,2024-10-15,10:00,12:00,Exam-Hall-A,50,25,Fall,2024-2025,FAC-2022-0078
+CS-101,Final,2024-12-18,10:00,13:00,Exam-Hall-A,100,50,Fall,2024-2025,FAC-2018-0034
+CS-201,Midterm,2024-10-17,14:00,16:00,Room-204,50,25,Fall,2024-2025,FAC-2018-0034
+CS-305,Midterm,2024-10-16,09:00,11:00,Room-305,40,20,Fall,2024-2025,FAC-2015-0001

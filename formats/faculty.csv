@@ -1,0 +1,4 @@
+FacultyId,FirstName,LastName,Email,CNIC,Designation,Department,Qualification,Specialization,DateOfJoining,EmployeeType,Phone,Address,HighestDegree,University,YearsOfExperience,Password
+FAC-2015-0001,Imran,Sheikh,imran.sheikh@example.com,35202-9876543-1,Professor,Computer Science,PhD,Machine Learning & AI,2015-08-15,Permanent,03004561234,House 89 Model Town Lahore,PhD Computer Science,University of Manchester,15,FacP@ss2024
+FAC-2018-0034,Sana,Tariq,sana.tariq@example.com,42201-8765432-9,Associate Professor,Software Engineering,PhD,Distributed Systems,2018-02-01,Permanent,03125678901,Flat 12-C PECHS Block 6 Karachi,PhD Software Engineering,NUST Islamabad,10,Te@ch!ng24
+FAC-2022-0078,Bilal,Ahmed,bilal.ahmed@example.com,61101-7654321-3,Lecturer,Computer Science,MS,Computer Networks,2022-09-01,Contract,03339012345,Street 23 I-8/4 Islamabad,MS Computer Science,FAST NUCES Lahore,4,P@ssLect24

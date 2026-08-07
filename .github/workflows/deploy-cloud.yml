@@ -1,0 +1,76 @@
+# -----------------------------------------------------------------------------
+# AegisCore — Manual Cloud Deployment Workflow
+# Triggered manually via workflow_dispatch. SSHs into a target server and
+# runs the deployment script with the selected deployment mode.
+#
+# Required GitHub Secrets:
+#   SSH_PRIVATE_KEY — Private key for SSH authentication to the target host.
+#   SSH_USER       — Username for SSH authentication (e.g. ubuntu, root).
+#   GHCR_TOKEN     — Personal access token with read:packages to pull images.
+# -----------------------------------------------------------------------------
+
+name: Deploy to Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_host:
+        description: "SSH hostname of deployment server"
+        required: true
+        type: string
+      deployment_mode:
+        description: "Deployment mode"
+        required: true
+        type: choice
+        default: "CLOUD"
+        options:
+          - LOCAL
+          - CLOUD
+          - HYBRID
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.target_host }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ github.event.inputs.target_host }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            cd /opt/aegiscore || { echo "ERROR: /opt/aegiscore not found"; exit 1; }
+
+            echo "=== Pulling latest code ==="
+            git pull origin main
+
+            echo "=== Running deploy script (mode: ${{ github.event.inputs.deployment_mode }}) ==="
+            export GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}"
+            export DEPLOYMENT_MODE="${{ github.event.inputs.deployment_mode }}"
+            ./scripts/deploy.sh --mode "$DEPLOYMENT_MODE"
+
+            echo "=== Health check ==="
+            sleep 10
+            HEALTH_URL="http://localhost:8080/health/ready"
+            for i in $(seq 1 30); do
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "SUCCESS: Health check passed (HTTP $HTTP_CODE)"
+                curl -s "$HEALTH_URL" | head -c 500
+                exit 0
+              fi
+              echo "Attempt $i/30: health check returned HTTP $HTTP_CODE, retrying..."
+              sleep 10
+            done
+
+            echo "ERROR: Health check failed after 30 attempts"
+            exit 1

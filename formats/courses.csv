@@ -1,0 +1,5 @@
+CourseCode,CourseTitle,CreditHoursTheory,CreditHoursLab,CourseType,Department,SemesterSequence,PrerequisiteCourseCode,Description,SyllabusUrl,MaxStudents
+CS-101,Introduction to Programming,3,1,Core,Computer Science,1,,Fundamental programming concepts using Python: variables control flow functions data structures.,https://syllabus.aegiscore.edu.pk/cs101.pdf,50
+CS-201,Data Structures & Algorithms,3,1,Core,Computer Science,3,CS-101,Linear and non-linear data structures: arrays linked lists stacks queues trees graphs. Algorithm analysis and design.,https://syllabus.aegiscore.edu.pk/cs201.pdf,50
+CS-305,Artificial Intelligence,3,1,Elective,Computer Science,5,CS-101,Foundations of AI: search algorithms knowledge representation machine learning basics natural language processing.,https://syllabus.aegiscore.edu.pk/cs305.pdf,40
+CS-410,Final Year Project I,0,6,Core,Computer Science,7,,Capstone project: problem analysis requirements engineering system design prototyping.,https://syllabus.aegiscore.edu.pk/cs410.pdf,30

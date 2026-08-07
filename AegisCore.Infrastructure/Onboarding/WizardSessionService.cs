@@ -43,6 +43,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
         if (step == 6 && storedData["users"] is JsonArray users)
         {
             db.WizardAdminCredentials.RemoveRange(db.WizardAdminCredentials.Where(x => x.SessionId == sessionId && x.TenantId == tenantId));
+            await db.SaveChangesAsync(ct);
             foreach (var user in users.OfType<JsonObject>())
             {
                 var password = user["password"]?.GetValue<string>() ?? string.Empty;

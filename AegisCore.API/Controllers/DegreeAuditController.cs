@@ -2,12 +2,14 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.DegreeAudit;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/degree-audit")]
+[Authorize(Roles = "Admin,Registrar,SuperAdmin")]
 public class DegreeAuditController : ControllerBase
 {
     private readonly IDegreeAuditService _auditService;

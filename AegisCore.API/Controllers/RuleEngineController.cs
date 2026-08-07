@@ -3,12 +3,14 @@ using AegisCore.Application.RuleEngine;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/rules")]
+[Authorize]
 public class RuleEngineController : ControllerBase
 {
     private readonly IRuleEngineService _ruleService;
@@ -23,6 +25,7 @@ public class RuleEngineController : ControllerBase
         _ruleService = ruleService; _ruleRepo = ruleRepo; _tableRepo = tableRepo; _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
     public async Task<IActionResult> CreateRule([FromBody] CreateRuleRequest request, CancellationToken cancellationToken)
     {
@@ -39,6 +42,7 @@ public class RuleEngineController : ControllerBase
         return Ok(new RuleDto { Id = created.Id, Name = created.Name, Domain = created.Domain.ToString(), Priority = created.Priority, CurrentVersion = created.CurrentVersion });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPut("{ruleId:guid}")]
     public async Task<IActionResult> UpdateRule(Guid ruleId, [FromBody] CreateRuleRequest request, CancellationToken cancellationToken)
     {
@@ -63,6 +67,7 @@ public class RuleEngineController : ControllerBase
         return Ok(new { domain, total = response.Count(), rules = response });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("evaluate/{domain}")]
     public async Task<IActionResult> EvaluateRules(string domain, [FromBody] EvaluateFactsRequest request, CancellationToken cancellationToken)
     {
@@ -73,6 +78,7 @@ public class RuleEngineController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("simulate/{ruleId:guid}")]
     public async Task<IActionResult> SimulateRule(Guid ruleId, [FromBody] EvaluateFactsRequest request, CancellationToken cancellationToken)
     {
@@ -80,6 +86,7 @@ public class RuleEngineController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("decision-tables")]
     public async Task<IActionResult> CreateDecisionTable([FromBody] DecisionTableDto request, CancellationToken cancellationToken)
     {
@@ -98,6 +105,7 @@ public class RuleEngineController : ControllerBase
         return Ok(new { table.Id, table.Name, table.Domain });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("decision-tables/{tableId:guid}/evaluate")]
     public async Task<IActionResult> EvaluateDecisionTable(Guid tableId, [FromBody] EvaluateFactsRequest request, CancellationToken cancellationToken)
     {

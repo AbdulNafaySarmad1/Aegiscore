@@ -15,3 +15,19 @@
 coverage/
 .vite/
 .DS_Store
+
+# Generated test artifacts
+AegisCore.Portal/playwright-report/
+AegisCore.Portal/test-results/
+
+# Local backup files
+*.bak
+*.pre-dbset-dedupe.bak
+
+# Local/generated Graphify data
+graphify-out/
+
+# Kubernetes secrets - use templates / external secret management
+k8s/secret.yaml
+k8s/*secret*.yaml
+k8s/*secrets*.yaml

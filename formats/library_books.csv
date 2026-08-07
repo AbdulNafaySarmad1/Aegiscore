@@ -1,0 +1,5 @@
+BookId,ISBN,Title,Author,Publisher,PublicationYear,Category,TotalCopies,AvailableCopies,ShelfLocation,Price,AcquiredDate
+BK-001,978-0-13-468599-1,Introduction to the Theory of Computation,Michael Sipser,Cengage Learning,2012,Computer Science,10,8,CS-A-001,4500,2020-06-15
+BK-002,978-0-262-03384-8,Introduction to Algorithms,Thomas H. Cormen,MIT Press,2009,Computer Science,15,12,CS-A-002,6500,2019-08-01
+BK-003,978-1-491-94155-3,Clean Code,Robert C. Martin,Prentice Hall,2008,Software Engineering,8,5,SE-B-010,3800,2021-01-10
+BK-004,978-0-596-51774-8,Design Patterns,Erich Gamma,Addison-Wesley,1994,Software Engineering,6,6,SE-B-011,5200,2018-03-20

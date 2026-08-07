@@ -1,4 +1,6 @@
 using AegisCore.Contracts.Abstractions.Cloud;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -6,27 +8,69 @@ namespace AegisCore.Infrastructure.Cloud.Azure;
 
 public class AzureSecretService : ISecretService
 {
+    private readonly SecretClient _client;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AzureSecretService> _logger;
 
     public AzureSecretService(IConfiguration configuration, ILogger<AzureSecretService> logger)
-    { _configuration = configuration; _logger = logger; }
+    {
+        _configuration = configuration;
+        _logger = logger;
+        var vaultUri = configuration["Azure:KeyVaultUri"] ?? configuration["AZURE_KEYVAULT_URI"];
+        if (!string.IsNullOrWhiteSpace(vaultUri))
+        {
+            _client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+            _logger.LogInformation("AzureSecretService initialized for {VaultUri}", vaultUri);
+        }
+    }
 
     public async Task<string> GetSecretAsync(string secretName, CancellationToken ct = default)
     {
-        var vaultUri = _configuration["Azure:KeyVaultUri"] ?? throw new InvalidOperationException("Azure Key Vault URI not configured.");
-        _logger.LogDebug("Fetching secret {Name} from Azure Key Vault", secretName);
-        await Task.CompletedTask;
-        return Environment.GetEnvironmentVariable(secretName) ?? throw new InvalidOperationException($"Secret {secretName} not found.");
+        if (_client != null)
+        {
+            try
+            {
+                var response = await _client.GetSecretAsync(secretName, cancellationToken: ct);
+                return response.Value.Value;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Key Vault read failed for {SecretName} — falling back to environment", secretName);
+            }
+        }
+        return Environment.GetEnvironmentVariable(secretName)
+            ?? throw new InvalidOperationException($"Secret '{secretName}' not found in Key Vault or environment.");
     }
 
-    public Task SetSecretAsync(string secretName, string value, CancellationToken ct = default)
-    { Environment.SetEnvironmentVariable(secretName, value); return Task.CompletedTask; }
+    public async Task SetSecretAsync(string secretName, string value, CancellationToken ct = default)
+    {
+        if (_client != null)
+        {
+            await _client.SetSecretAsync(secretName, value, ct);
+            _logger.LogInformation("Secret {SecretName} written to Azure Key Vault", secretName);
+            return;
+        }
+        _logger.LogWarning("Key Vault not configured — secret {SecretName} stored in environment only", secretName);
+    }
 
-    public async Task DeleteSecretAsync(string secretName, CancellationToken ct = default) { await Task.CompletedTask; }
+    public async Task DeleteSecretAsync(string secretName, CancellationToken ct = default)
+    {
+        if (_client != null)
+        {
+            var operation = await _client.StartDeleteSecretAsync(secretName, ct);
+            await operation.WaitForCompletionAsync(ct);
+        }
+    }
 
-    public Task<bool> SecretExistsAsync(string secretName, CancellationToken ct = default)
-    { var v = Environment.GetEnvironmentVariable(secretName); return Task.FromResult(v != null); }
+    public async Task<bool> SecretExistsAsync(string secretName, CancellationToken ct = default)
+    {
+        if (_client != null)
+        {
+            try { await _client.GetSecretAsync(secretName, cancellationToken: ct); return true; }
+            catch { return false; }
+        }
+        return Environment.GetEnvironmentVariable(secretName) != null;
+    }
 }
 
 public class AzureStorageService : IStorageService

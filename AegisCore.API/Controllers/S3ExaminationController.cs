@@ -122,7 +122,10 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
     [HttpPost("grades/{courseId:guid}/grace")]
     public async Task<IActionResult> Grace(Guid courseId, [FromBody] GraceMarksRequest request, CancellationToken ct)
     {
-        await grading.ApplyGracemarksAsync(courseId, request.Entries, request.ActorId, ct);
+        var actorId = Guid.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : Guid.Empty;
+        if (actorId == Guid.Empty)
+            return Unauthorized(new { error = "Authenticated user identity is required." });
+        await grading.ApplyGracemarksAsync(courseId, request.Entries, actorId, ct);
         return NoContent();
     }
 

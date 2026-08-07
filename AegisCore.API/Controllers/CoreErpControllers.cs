@@ -1,11 +1,13 @@
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 // GAP 03 — Research Management
 [ApiController][Route("api/research")]
+[Authorize]
 public class ResearchController : ControllerBase
 {
     private readonly IRepository<ResearchProject> _projectRepo;
@@ -22,6 +24,7 @@ public class ResearchController : ControllerBase
 
 // GAP 04 — OBE
 [ApiController][Route("api/obe")]
+[Authorize]
 public class OBEController : ControllerBase
 {
     private readonly IRepository<ProgramOutcome> _poRepo;
@@ -36,6 +39,7 @@ public class OBEController : ControllerBase
 
 // GAP 05 — Accreditation
 [ApiController][Route("api/accreditation")]
+[Authorize]
 public class AccreditationController : ControllerBase
 {
     private readonly IRepository<AccreditationBody> _bodyRepo;
@@ -51,6 +55,7 @@ public class AccreditationController : ControllerBase
 
 // GAP 06 — Examination Office
 [ApiController][Route("api/exam")]
+[Authorize]
 public class ExaminationController : ControllerBase
 {
     private readonly IRepository<QuestionBank> _qbRepo;
@@ -64,6 +69,7 @@ public class ExaminationController : ControllerBase
 
 // GAP 07 — Library ERP
 [ApiController][Route("api/library")]
+[Authorize]
 public class LibraryController : ControllerBase
 {
     private readonly IRepository<LibraryBook> _bookRepo;
@@ -78,6 +84,7 @@ public class LibraryController : ControllerBase
 
 // GAP 09 — Campus Asset ERP
 [ApiController][Route("api/assets")]
+[Authorize]
 public class AssetController : ControllerBase
 {
     private readonly IRepository<Asset> _assetRepo;
@@ -89,6 +96,7 @@ public class AssetController : ControllerBase
 
 // GAP 12 — Transportation
 [ApiController][Route("api/transport")]
+[Authorize]
 public class TransportController : ControllerBase
 {
     private readonly IRepository<TransportRoute> _routeRepo;
@@ -102,6 +110,7 @@ public class TransportController : ControllerBase
 
 // GAP 13 — Hostel ERP
 [ApiController][Route("api/hostel")]
+[Authorize]
 public class HostelController : ControllerBase
 {
     private readonly IRepository<HostelBlock> _blockRepo;
@@ -114,6 +123,7 @@ public class HostelController : ControllerBase
 
 // GAP 14 — Student Success
 [ApiController][Route("api/student-success")]
+[Authorize]
 public class StudentSuccessController : ControllerBase
 {
     private readonly IRepository<StudentRiskScore> _riskRepo;
@@ -125,6 +135,7 @@ public class StudentSuccessController : ControllerBase
 
 // GAP 15 — Career Center
 [ApiController][Route("api/career")]
+[Authorize]
 public class CareerController : ControllerBase
 {
     private readonly IRepository<Employer> _empRepo;
@@ -135,12 +146,13 @@ public class CareerController : ControllerBase
 }
 
 // GAP 16 — Admissions CRM
-[ApiController][Route("api/admissions")]
-public class AdmissionsController : ControllerBase
+[ApiController][Route("api/admissions-crm")]
+[Authorize]
+public class AdmissionsCrmController : ControllerBase
 {
     private readonly IRepository<AdmissionLead> _leadRepo;
     private readonly IRepository<MarketingCampaign> _campaignRepo;
-    public AdmissionsController(IRepository<AdmissionLead> l, IRepository<MarketingCampaign> c) { _leadRepo = l; _campaignRepo = c; }
+    public AdmissionsCrmController(IRepository<AdmissionLead> l, IRepository<MarketingCampaign> c) { _leadRepo = l; _campaignRepo = c; }
     [HttpGet("leads")] public async Task<IActionResult> Leads(CancellationToken ct) { var items = await _leadRepo.GetAllAsync(ct); return Ok(new { total = items.Count, leads = items }); }
     [HttpPost("leads")] public async Task<IActionResult> CreateLead([FromBody] AdmissionLead l, CancellationToken ct) { await _leadRepo.AddAsync(l, ct); return Ok(l); }
     [HttpGet("campaigns")] public async Task<IActionResult> Campaigns(CancellationToken ct) { var items = await _campaignRepo.GetAllAsync(ct); return Ok(new { total = items.Count, campaigns = items }); }
@@ -148,6 +160,7 @@ public class AdmissionsController : ControllerBase
 
 // GAP 17 — Business Intelligence
 [ApiController][Route("api/bi")]
+[Authorize]
 public class BIController : ControllerBase
 {
     private readonly IRepository<Dashboard> _dashboardRepo;

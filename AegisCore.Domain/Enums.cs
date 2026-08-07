@@ -1290,7 +1290,8 @@ public enum NotificationChannel
 {
     Email = 1,
     SMS = 2,
-    InApp = 3
+    InApp = 3,
+    WhatsApp = 4
 }
 
 public enum NotificationStatus
@@ -1924,3 +1925,163 @@ public enum LoginProvider
 }
 
 public enum DeviceType { Desktop = 1, Mobile = 2, Tablet = 3, Api = 4, Bot = 5 }
+
+// P111 Grade Appeals
+
+public enum AppealStatus { Submitted = 1, UnderReview = 2, FacultyResponseReceived = 3, CommitteeReview = 4, Upheld = 5, PartiallyUpheld = 6, Dismissed = 7, Deferred = 8, Appealed = 9 }
+public enum AppealGroundType { ClericalError = 1, RubricMisapplication = 2, MissingSubmission = 3, BiasClaim = 4, PolicyViolation = 5, ExtenuatingCircumstance = 6 }
+public enum EvidenceStrength { None = 0, Weak = 1, Moderate = 2, Strong = 3, Conclusive = 4 }
+public enum EvidenceRelevance { High = 1, Medium = 2, Low = 3 }
+
+// P112 Grade Distribution Analysis
+
+public enum DistributionAnomaly { HighFailureRate = 1, GradeInflation = 2, ClusteringAnomaly = 3, SignificantDeviation = 4, BimodalDistribution = 5, SectionVariance = 6 }
+public enum GradeCurveShape { Normal = 1, LeftSkewed = 2, RightSkewed = 3, Bimodal = 4, Uniform = 5, Leptokurtic = 6, Platykurtic = 7 }
+
+// P113 Plagiarism Detection
+
+public enum SimilarityTier { Tier1_Administrative = 1, Tier2_AcademicMisconduct = 2, Tier3_SevereMisconduct = 3, Tier4_CollusionRing = 4 }
+public enum PlagiarismLayer { Verbatim = 1, Paraphrase = 2, Structural = 3, StyleDeviation = 4 }
+public enum CollusionSeverity { Cluster = 1, Ring = 2, Network = 3 }
+
+// P114 Plagiarism API Integration
+
+public enum ApiProviderType { Turnitin = 1, IThenticate = 2, Custom = 3 }
+public enum PlagiarismSubmissionStatus { Queued = 1, Processing = 2, Completed = 3, Failed = 4, Retrying = 5 }
+public enum SimilarityClassification { Pass = 1, ReviewRequired = 2, Flagged = 3 }
+
+// P115 Convocation Management
+
+public enum ConvocationStatus { Planning = 1, InvitationsSent = 2, Rehearsal = 3, InProgress = 4, Completed = 5, Cancelled = 6 }
+public enum ConvoEligibility { Eligible = 1, ConditionallyEligible = 2, Ineligible = 3 }
+public enum CertificateStatus { Queued = 1, Printing = 2, QualityCheck = 3, Ready = 4, Dispatched = 5, Collected = 6, Uncollected = 7 }
+public enum AttestationStatus { Pending = 1, Submitted = 2, Processing = 3, Attested = 4, Rejected = 5 }
+public enum CeremonyAttendance { Registered = 1, CheckedIn = 2, Absent = 3, Late = 4 }
+
+// P116 Semester Freeze & Deferral
+
+public enum FreezeType { Freeze = 1, Deferral = 2, Withdrawal = 3, LateWithdrawal = 4 }
+public enum FreezeReasonCategory { Medical = 1, Financial = 2, Personal = 3, AcademicDifficulty = 4, Employment = 5, FamilyEmergency = 6, Military = 7, Other = 8 }
+public enum FreezeStatus { Requested = 1, UnderReview = 2, Approved = 3, Rejected = 4, InEffect = 5, Resumed = 6 }
+public enum FreezeTimingRule { Week1to2_FullRefund = 1, Week3to4_PartialRefund = 2, Week5to8_NoRefund = 3, Week9Plus_MedicalOnly = 4 }
+public enum FreezeReturnStatus { Notified = 1, Confirmed = 2, Extended = 3, NoResponse = 4, Returned = 5 }
+
+// P117 Online Exam Proctoring
+
+public enum ProctoringMode { LiveHuman = 1, AiAutomated = 2, Hybrid = 3, RecordReview = 4 }
+public enum ProctorEventSeverity { Info = 1, Warning = 2, Critical = 3 }
+public enum StudentIntegrityStatus { Clean = 1, ReviewRecommended = 2, ReferredToOfficer = 3 }
+public enum EnvironmentVerificationStatus { NotStarted = 1, InProgress = 2, Passed = 3, Failed = 4, NeedsSupport = 5 }
+
+// P118 Prerequisite Conflict Detection
+
+public enum ConflictType { PrerequisiteNotMet = 1, CircularPrerequisite = 2, OfferingSequenceConflict = 3, CreditLoadConflict = 4, OrphanedPrerequisite = 5, GraduationBottleneck = 6 }
+public enum ConflictSeverity { None = 0, Low = 1, Moderate = 2, High = 3, Critical = 4 }
+public enum ChangeEventType { CourseAdded = 1, CourseRemoved = 2, PrerequisiteAdded = 3, PrerequisiteRemoved = 4, CreditChange = 5, SemesterAssignmentChange = 6, CourseDeactivated = 7 }
+public enum EdgeType { Hard = 1, Soft = 2, Concurrent = 3 }
+
+// P119 Fee Defaulter Prediction (extends existing)
+
+public enum DefaulterRiskTier { Green = 1, Yellow = 2, Orange = 3, Red = 4 }
+public enum DefaulterInterventionType { StandardReminder = 1, PersonalOutreach = 2, PaymentPlanOffer = 3, FinancialAidReferral = 4, OfficerCall = 5, EmergencyAssistance = 6, BlockRegistration = 7, FormalNotice = 8, DirectorEscalation = 9 }
+public enum DefaulterInterventionOutcome { Paid = 1, PaymentPlanSetup = 2, AidApproved = 3, NoResponse = 4, Dropout = 5, Disputed = 6 }
+
+// P120 Visiting Faculty Marketplace
+
+public enum FacultyVettingStatus { ReadyToDeploy = 1, PendingDocuments = 2, Ineligible = 3, UnderReview = 4 }
+public enum FacultyContractStatus { Draft = 1, FacultySigned = 2, DepartmentApproved = 3, HrFinalized = 4, Active = 5, Completed = 6, Terminated = 7 }
+public enum FacultyRehireStatus { Recommended = 1, Conditional = 2, NotRecommended = 3 }
+public enum SpecializationAlignment { ExactMatch = 1, AdjacentField = 2, RelatedField = 3, General = 4 }
+public enum FacultyPoolHealth { Adequate = 1, ShortageWarning = 2, CriticalShortage = 3 }
+
+// P121 Accreditation Readiness Score
+
+public enum CriterionScore { FullyMet = 1, SubstantiallyMet = 2, PartiallyMet = 3, MinimallyMet = 4, NotMet = 5 }
+public enum ReadinessStatus { Excellent = 1, Good = 2, Satisfactory = 3, NeedsImprovement = 4, CriticalRisk = 5 }
+public enum GapEffort { QuickWin = 1, ShortTerm = 2, MediumTerm = 3, LongTerm = 4 }
+public enum MetricTrend { Improving = 1, Stable = 2, Declining = 3, Volatile = 4 }
+public enum EvidenceFreshness { Current = 1, ApproachingStale = 2, Stale = 3, Expired = 4 }
+
+// P122 Student Achievement Gamification
+
+public enum BadgeCategory { Academic = 1, Engagement = 2, Lifecycle = 3, Community = 4, Leadership = 5 }
+public enum AwardTier { Bronze = 1, Silver = 2, Gold = 3, Platinum = 4, Diamond = 5 }
+public enum LeaderboardScope { Class = 1, Department = 2, Program = 3, Institution = 4 }
+public enum DeansListStatus { Nominated = 1, Verified = 2, Published = 3, Revoked = 4 }
+
+// P123 Mental Health Ticketing
+
+public enum TicketSeverity { Routine = 1, Urgent = 2, Crisis = 3 }
+public enum ConcernType { AcademicStress = 1, RelationshipIssues = 2, FamilyPressure = 3, FinancialStress = 4, GriefLoss = 5, Anxiety = 6, Depression = 7, SubstanceUse = 8, EatingConcerns = 9, IdentityBelonging = 10, Harassment = 11, SelfHarm = 12, SuicidalIdeation = 13, Other = 14 }
+public enum CrisisLevel { None = 0, Implicit = 1, Explicit = 2, Immediate = 3 }
+public enum MandatoryReportTrigger { ImminentSelfHarm = 1, ImminentHarmToOthers = 2, ChildSafeguarding = 3, AbuseDisclosure = 4 }
+public enum AnonymizationLevel { FullyAnonymous = 1, PseudonymousToCounselor = 2, Identified = 3 }
+public enum TicketResolution { Resolved = 1, Referred = 2, LostContact = 3, CrisisEscalated = 4 }
+
+// P124 Foreign Student Visa & MORA
+
+public enum VisaType { StudentVisa = 1, MoraVisa = 2, NocCategoryA = 3, NocCategoryB = 4 }
+public enum MoraStatus { Registered = 1, Pending = 2, Lapsed = 3, Exempted = 4 }
+public enum ComplianceLevel { FullyCompliant = 1, ActionRequired = 2, NonCompliant = 3, Critical = 4 }
+public enum ExpiryUrgency { NinetyDays = 1, SixtyDays = 2, ThirtyDays = 3, FourteenDays = 4, SevenDays = 5, Expired = 6 }
+public enum RenewalStatus { Submitted = 1, Processing = 2, Approved = 3, Rejected = 4 }
+public enum ComplianceBreachResolution { Resolved = 1, Deported = 2, VoluntarilyDeparted = 3, Regularized = 4 }
+
+// P125 Voice Assistant
+
+public enum VoiceIntentType { QueryResults = 1, QueryOutstandingFees = 2, QueryTimetable = 3, QueryAttendance = 4, RequestDocument = 5, GuidedProcess = 6, InitiateLeave = 7, ScheduleAppointment = 8, QueryClassList = 9, InitiateAttendance = 10, QueryGraduationStatus = 11, QueryPaymentStatus = 12, GeneralInquiry = 13 }
+public enum VoiceLanguage { Urdu = 1, RomanUrdu = 2, English = 3, CodeSwitched = 4 }
+public enum SpeechConfidence { High = 1, Medium = 2, Low = 3, Unintelligible = 4 }
+public enum FallbackReason { AsrFailure = 1, IntentUnclassified = 2, UserRequestedHuman = 3, EmotionalDistress = 4, SeriousComplaint = 5 }
+
+// P126 Board Portal
+
+public enum AlertCategory { Financial = 1, Academic = 2, Hr = 3, Compliance = 4, Reputational = 5 }
+public enum StrategicGoalStatus { OnTrack = 1, AtRisk = 2, OffTrack = 3, Completed = 4 }
+public enum InstitutionHealthGrade { A = 1, B = 2, C = 3, D = 4, F = 5 }
+
+// P127 Student Elections
+
+public enum ElectionStatus { Setup = 1, NominationsOpen = 2, Campaigning = 3, VotingOpen = 4, ResultsAnnounced = 5, Closed = 6, Cancelled = 7 }
+public enum ElectionType { StudentUnion = 1, ClassRep = 2, SocietyHead = 3, SportsCaptain = 4 }
+public enum VotingMethod { Online = 1, Physical = 2, Hybrid = 3 }
+public enum NominationStatus { Submitted = 1, Verified = 2, ObjectionPeriod = 3, Published = 4, Rejected = 5 }
+public enum BallotStatus { Issued = 1, Cast = 2, Spoiled = 3, Disputed = 4 }
+public enum CountResultStatus { Preliminary = 1, Verified = 2, Certified = 3, Contested = 4 }
+
+// Course Catalog Ingestion
+
+public enum IngestionJobStatus { Received = 1, Classifying = 2, Extracting = 3, Validating = 4, Reviewing = 5, Inserting = 6, Completed = 7, CompletedWithWarnings = 8, Failed = 9 }
+public enum CourseRecordStatus { Active = 1, Removed = 2, Proposed = 3 }
+public enum CatalogPublishStatus { Draft = 1, Published = 2, Archived = 3 }
+
+// LMS & Class Generation
+
+public enum ClassGenerationStatus { Draft = 1, Active = 2, PendingFaculty = 3, PendingLms = 4, LmsProvisioned = 5, Cancelled = 6 }
+public enum LmsProvisionStatus { Pending = 1, Provisioned = 2, Failed = 3, Synced = 4 }
+public enum LmsProvider { GoogleClassroom = 1, MicrosoftTeams = 2, Moodle = 3, Custom = 4 }
+public enum DirectoryProvider { GoogleWorkspace = 1, AzureAd = 2, Ldap = 3, Local = 4, Custom = 5 }
+public enum MoodleCoexistenceMode { ProvisionOnly = 1, BidirectionalSync = 2, ReadonlyImport = 3, SsoOnly = 4 }
+public enum StudentDistributionStrategy { Alphabetical = 1, Random = 2, Balanced = 3, Manual = 4, Existing = 5 }
+public enum FacultyDistributionRule { PrimarySecondary = 1, SplitSections = 2, SharedAll = 3, Manual = 4 }
+public enum RosterSyncStatus { Synced = 1, OutOfSync = 2, ConflictDetected = 3, Failed = 4 }
+
+// OPTIONAL-26 Cafeteria Management
+
+public enum MealPlanType { Daily = 1, Weekly = 2, Monthly = 3, Semester = 4 }
+public enum FoodOrderStatus { Placed = 1, Preparing = 2, Ready = 3, Delivered = 4, Cancelled = 5, Refunded = 6 }
+public enum VendorPerformance { Excellent = 1, Satisfactory = 2, NeedsImprovement = 3, Warning = 4, ContractAtRisk = 5 }
+public enum InventoryAlertType { LowStock = 1, ExpiringSoon = 2, Expired = 3, ReorderPoint = 4 }
+public enum MenuItemCategory { MainCourse = 1, Side = 2, Beverage = 3, Snack = 4, Dessert = 5, Combo = 6 }
+
+// Personality Mode
+
+public enum VoiceRegister { Informational = 1, Instructional = 2, Celebratory = 3, CriticalError = 4 }
+public enum UXMoment { Idle = 1, Loading = 2, Success = 3, Warning = 4, Error = 5, EmptyState = 6, Onboarding = 7, Celebration = 8 }
+public enum CopyStakes { Low = 1, Medium = 2, High = 3, Irreversible = 4 }
+
+// Chart System
+
+public enum ChartType { Line = 1, Area = 2, Bar = 3, Donut = 4, Treemap = 5, Scatter = 6, Histogram = 7, Heatmap = 8, Waterfall = 9, Gauge = 10, Gantt = 11, Bullet = 12 }
+public enum InsightType { Trend = 1, Comparison = 2, PartToWhole = 3, Anomaly = 4, Forecast = 5 }
+public enum ZoomLevel { Day = 1, Week = 2, Month = 3, Quarter = 4, Year = 5 }

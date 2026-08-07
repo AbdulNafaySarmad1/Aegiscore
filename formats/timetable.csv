@@ -1,0 +1,7 @@
+CourseCode,Section,FacultyId,Room,Day,StartTime,EndTime,Semester,AcademicYear,BatchId
+CS-101,A,FAC-2022-0078,CS-Lab-01,Monday,09:00,10:30,Fall,2024-2025,Fall2024
+CS-101,B,FAC-2022-0078,CS-Lab-01,Wednesday,09:00,10:30,Fall,2024-2025,Fall2024
+CS-201,A,FAC-2018-0034,Room-204,Tuesday,11:00,12:30,Fall,2024-2025,Fall2024
+CS-201,A,FAC-2022-0078,Room-204,Thursday,11:00,13:00,Fall,2024-2025,Fall2024
+CS-305,A,FAC-2015-0001,Room-305,Monday,14:00,15:30,Fall,2024-2025,Fall2023
+CS-410,A,FAC-2015-0001,Project-Lab,Tuesday,14:00,17:00,Fall,2024-2025,Fall2021

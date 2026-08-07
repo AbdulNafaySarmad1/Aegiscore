@@ -1,0 +1,8 @@
+ProgramCode,SemesterSequence,FeeType,Amount,Currency,DueDate,IsMandatory,LateFeePercentage,LateFeeAfterDays,Description
+BSCS,1,TuitionFee,85000,PKR,2024-09-15,true,5,7,Standard tuition fee for first semester.
+BSCS,1,AdmissionFee,25000,PKR,2024-09-15,true,0,0,One-time non-refundable admission processing fee.
+BSCS,1,LabFee,10000,PKR,2024-09-15,true,5,7,Computer lab and equipment usage fee.
+BSCS,1,LibraryFee,5000,PKR,2024-09-15,true,5,7,Library access and digital resources subscription.
+BSCS,3,TuitionFee,90000,PKR,2025-01-15,true,5,7,Standard tuition fee for third semester.
+BSCS,3,LabFee,12000,PKR,2025-01-15,true,5,7,Advanced lab equipment usage for data structures.
+BSCS,1,SportsFee,3000,PKR,2024-09-15,false,0,0,Optional sports facility and gymnasium membership.

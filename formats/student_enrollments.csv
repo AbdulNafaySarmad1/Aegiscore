@@ -1,0 +1,5 @@
+StudentId,CourseCode,Semester,AcademicYear,EnrollmentDate,Status
+STU-2024-0001,CS-101,Fall,2024-2025,2024-09-01,Active
+STU-2024-0001,CS-201,Fall,2024-2025,2024-09-01,Active
+STU-2024-0002,CS-101,Fall,2024-2025,2024-09-02,Active
+STU-2023-0100,CS-305,Fall,2024-2025,2024-09-03,Active

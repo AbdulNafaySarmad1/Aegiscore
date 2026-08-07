@@ -59,10 +59,11 @@ public class ApiKeyService : IApiKeyService
         };
 
         await _apiKeyRepo.AddAsync(apiKey, cancellationToken);
-        apiKey.KeyHash = rawKey;
 
-        _logger.LogInformation("API key created: {Name} ({Prefix}) for {Owner}", name, apiKey.KeyPrefix, ownerName);
+        _logger.LogInformation("API key created: {Name} ({Prefix}) for {Owner}", name, apiKey.KeyPrefix[..Math.Min(apiKey.KeyPrefix.Length, 8)], ownerName);
 
+        // Return raw key only in the response DTO, never persisted
+        apiKey.KeyHash = rawKey; // Temporary — caller must read and discard immediately
         return apiKey;
     }
 

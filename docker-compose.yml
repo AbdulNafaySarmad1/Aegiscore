@@ -5,6 +5,8 @@ services:
     image: ${AEGISCORE_PORTAL_IMAGE:-aegiscore-portal:local}
     build:
       context: ./AegisCore.Portal
+      args:
+        - NEXT_PUBLIC_DEMO_MODE=true
     environment:
       AEGISCORE_API_INTERNAL_URL: http://api:8080
     ports:
@@ -32,13 +34,13 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       Runtime__DemoMode: ${AEGISCORE_DEMO_MODE:-true}
       AEGISCORE_INSTALLATION_COMPLETED: ${AEGISCORE_INSTALLATION_COMPLETED:-false}
-      Database__AutoMigrate: "true"
+      Database__AutoMigrate: "${AEGISCORE_AUTO_MIGRATE:-true}"
       Deployment__FailOnReadinessError: "true"
       AEGISCORE_CLOUD_PROVIDER: ONPREMISE
       AEGISCORE_SECRET_PROVIDER: ${AEGISCORE_SECRET_PROVIDER:-FILE}
       AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
       TENANT_ID: ${TENANT_ID:?Run ./scripts/bootstrap-env.sh first}
-      AEGISCORE_DB_CONNECTION: Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first};SslMode=Disable
+      AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:-Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first};SslMode=Disable}
       AEGISCORE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
       AEGISCORE_STORAGE_PROVIDER: local
       AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
@@ -69,6 +71,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
       redis:
         condition: service_healthy
     healthcheck:
@@ -87,6 +90,8 @@ services:
       - ./.aegiscore:/run/aegiscore-secrets:ro
     security_opt:
       - no-new-privileges:true
+    dns:
+      - 8.8.8.8
     cap_drop:
       - ALL
     read_only: true

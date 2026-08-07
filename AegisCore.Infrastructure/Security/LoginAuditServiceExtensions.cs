@@ -13,6 +13,7 @@ public static class LoginAuditServiceExtensions
         services.TryAddScoped<ILoginAuditRecordRepository, LoginAuditRecordRepository>();
         services.TryAddScoped<IGeoIpService, GeoIpService>();
         services.TryAddScoped<ILoginAuditService, LoginAuditService>();
+        services.TryAddSingleton<IBruteForceProtectionService, BruteForceProtectionService>();
         return services;
     }
 }

@@ -42,6 +42,11 @@ public class User
 
     public DateTime? DeactivatedAt { get; set; }
 
+    [MaxLength(500)]
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiry { get; set; }
+
     public Guid TenantId { get; set; }
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

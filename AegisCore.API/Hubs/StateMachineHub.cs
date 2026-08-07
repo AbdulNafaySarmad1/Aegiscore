@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AegisCore.API.Hubs;
 
+[Authorize]
 public class StateMachineHub : Hub
 {
     public async Task Subscribe(string machineKey)

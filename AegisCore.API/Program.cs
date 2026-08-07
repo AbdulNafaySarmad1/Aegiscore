@@ -1,9 +1,14 @@
+using AegisCore.API.Logging;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Prometheus;
 using Serilog;
 using AegisCore.API.Background;
 using AegisCore.API.Extensions;
 using AegisCore.API.Hubs;
 using AegisCore.API.Finance;
 using AegisCore.API.Middleware;
+using Casbin;
+using Casbin.Persist;
 using AegisCore.Application;
 using AegisCore.Application.Maintenance;
 using AegisCore.Application.ResearchLabs;
@@ -45,16 +50,35 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxConcurrentConnections = 1000;
+    options.Limits.MaxConcurrentUpgradedConnections = 100;
+    options.Limits.MaxRequestBodySize = 52_428_800;
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(15);
+    options.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(120);
+    options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
+    options.Limits.MinResponseDataRate = new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
+    options.AddServerHeader = false;
+});
+
 var demoMode = builder.Configuration.GetValue<bool>("Runtime:DemoMode");
 if (demoMode && builder.Environment.IsProduction())
 {
     throw new InvalidOperationException(
-        "Runtime:DemoMode is forbidden in Production. Configure a real identity provider and license.");
+        "AegisCore cannot start: Runtime:DemoMode is enabled in a Production environment. "
+        + "Set AEGISCORE_DEMO_MODE=false for production use.");
 }
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
-    .WriteTo.Console()
+    .Destructure.With<SensitiveDataDestructuringPolicy>()
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
+    .Enrich.WithProperty("Version", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0")
+    .WriteTo.Console(builder.Environment.IsProduction()
+        ? new Serilog.Formatting.Json.JsonFormatter()
+        : new Serilog.Formatting.Display.MessageTemplateTextFormatter("{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}", null))
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -147,19 +171,23 @@ else
     app.UseSerilogRequestLogging();
     app.UseMiddleware<RequestLoggingMiddleware>();
     app.UseMiddleware<RateLimitingMiddleware>();
+    app.UseMiddleware<RateLimitAuthMiddleware>();
     app.UseMiddleware<AuthenticatedOriginPullsMiddleware>();
+    app.UseMiddleware<DemoExpiryMiddleware>();
     app.UseMiddleware<HybridPqcTransportMiddleware>();
     app.UseMiddleware<SessionBindingMiddleware>();
 
     app.UseCors("CloudflarePages");
     app.UseAuthentication();
     app.UseMiddleware<DemoIdentityMiddleware>();
+    app.UseMiddleware<GlobalRateLimitMiddleware>();
     app.UseMiddleware<LicenseLockoutMiddleware>();
     app.UseMiddleware<TenantContextMiddleware>();
     app.UseAuthorization();
 
     app.UseMiddleware<TurnstileMiddleware>();
     app.UseMiddleware<AbacMiddleware>();
+    app.UseMiddleware<CasbinAuthorizationMiddleware>();
 
     app.MapGet("/health", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
@@ -176,6 +204,58 @@ else
             statusCode: StatusCodes.Status503ServiceUnavailable);
     }).AllowAnonymous();
     app.MapHealthChecks("/health/detail").RequireAuthorization();
+
+    app.MapGet("/health/deep", async (AegisDbContext db, IConnectionMultiplexer redis, IConfiguration config, CancellationToken ct) =>
+    {
+        var report = new System.Dynamic.ExpandoObject() as IDictionary<string, object?>;
+        report["timestamp"] = DateTime.UtcNow.ToString("O");
+        report["environment"] = app.Environment.EnvironmentName;
+        report["version"] = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0";
+
+        try { await db.Database.ExecuteSqlRawAsync("SELECT 1", ct); report["postgres"] = "healthy"; }
+        catch (Exception ex) { report["postgres"] = $"unhealthy: {ex.Message}"; }
+
+        try { await redis.GetDatabase().PingAsync(); report["redis"] = "healthy"; }
+        catch (Exception ex) { report["redis"] = $"unhealthy: {ex.Message}"; }
+
+        try
+        {
+            var process = System.Diagnostics.Process.GetCurrentProcess();
+            report["memory_mb"] = process.WorkingSet64 / 1_048_576;
+            report["thread_count"] = process.Threads.Count;
+        }
+        catch (Exception ex) { report["resources"] = $"error: {ex.Message}"; }
+
+        try
+        {
+            var drives = System.IO.DriveInfo.GetDrives();
+            report["disk"] = drives.Where(d => d.IsReady).Select(d => new
+            {
+                name = d.Name,
+                total_gb = Math.Round(d.TotalSize / 1_073_741_824.0, 1),
+                free_gb = Math.Round(d.AvailableFreeSpace / 1_073_741_824.0, 1),
+                free_pct = Math.Round((double)d.AvailableFreeSpace / d.TotalSize * 100, 1)
+            });
+        }
+        catch (Exception ex) { report["disk"] = $"error: {ex.Message}"; }
+
+        try
+        {
+            var health = config.GetValue<bool>("Runtime:DemoMode");
+            var licenseOk = true;
+            report["demo_mode"] = health;
+            report["license"] = licenseOk ? "valid" : "expired";
+        }
+        catch { report["license"] = "unknown"; }
+
+        return Results.Ok(report);
+    }).RequireAuthorization();
+
+    app.UseHttpMetrics(options =>
+    {
+        options.AddCustomLabel("tenant", context => context.User.FindFirst("tenant_id")?.Value ?? "anonymous");
+    });
+    app.MapMetrics().AllowAnonymous();
     app.MapGet("/api/session", (HttpContext context) => Results.Ok(new
     {
         userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,

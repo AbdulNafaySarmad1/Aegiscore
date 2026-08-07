@@ -1,0 +1,199 @@
+name: AegisCore CI/CD
+
+on:
+  push:
+    branches: [main, release/*]
+    paths-ignore: ['docs/**', '*.md', 'manuals/**']
+  pull_request:
+    branches: [main]
+    paths-ignore: ['docs/**', '*.md', 'manuals/**']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: ghcr.io/nocturnesystems/aegiscore-api
+  IMAGE_NAME_PORTAL: ghcr.io/nocturnesystems/aegiscore-portal
+
+jobs:
+  # ──── PR VALIDATION ──────────────────────────────────
+  validate:
+    name: Validate (Tests + Security)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '${{ env.DOTNET_VERSION }}' }
+
+      - name: Restore
+        run: dotnet restore AegisCore.API/AegisCore.API.csproj
+
+      - name: Run tests with coverage
+        run: >
+          dotnet test AegisCore.Tests/AegisCore.Tests.csproj
+          --configuration Release
+          --collect:"XPlat Code Coverage"
+          --results-directory ./TestResults
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Report test coverage
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: .NET Tests
+          path: '**/TestResults/*.trx'
+          reporter: dotnet-trx
+
+      - name: Run security scan
+        run: |
+          dotnet tool install --global security-scan || true
+          security-scan AegisCore.slnx --severity High,Critical || exit 1
+
+      - name: Check code formatting
+        run: |
+          dotnet format AegisCore.API/AegisCore.API.csproj --verify-no-changes --verbosity diagnostic
+
+  # ──── MAIN BRANCH BUILD + DEPLOY ─────────────────────
+  build-and-deploy:
+    name: Build, Scan, Deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Build & Test ──────────────────────────
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '${{ env.DOTNET_VERSION }}' }
+
+      - name: Restore
+        run: dotnet restore AegisCore.API/AegisCore.API.csproj
+
+      - name: Run all tests
+        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --configuration Release --no-restore
+
+      # ── Build Docker image ────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME_API }}
+          tags: |
+            type=sha,prefix=,format=short
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ── Security scan image ──────────────────
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME_API }}:${{ steps.meta.outputs.version }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      # ── Push to registry ─────────────────────
+      - name: Push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ── Deploy staging ───────────────────────
+      - name: Deploy to staging
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/aegiscore-staging
+            docker compose -f docker-compose.prod.yml pull api
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans api
+            sleep 30
+            curl -fsS http://localhost:8080/health/ready || exit 1
+
+      # ── Smoke tests on staging ────────────────
+      - name: Smoke test staging
+        run: |
+          curl -fsS ${{ secrets.STAGING_URL }}/health/ready || exit 1
+          curl -fsS ${{ secrets.STAGING_URL }}/api/wizard/demo-status || exit 1
+
+      # ── Blue-Green Deploy to Production ──────
+      - name: Blue-Green deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            /opt/aegiscore/deploy/scripts/deploy.sh blue-green
+
+      # ── Smoke test production ────────────────
+      - name: Smoke test production
+        run: |
+          sleep 10
+          curl -fsS ${{ secrets.PRODUCTION_URL }}/health/ready || (
+            echo "PRODUCTION SMOKE FAILED — ROLLING BACK"
+            ssh deploy@${{ secrets.PRODUCTION_HOST }} '/opt/aegiscore/deploy/scripts/rollback.sh'
+            exit 1
+          )
+          echo "Deployment successful"
+
+  # ──── SCHEDULED BACKUP ──────────────────────────────
+  backup:
+    name: Database Backup
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run backup
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: /opt/aegiscore/deploy/scripts/backup.sh

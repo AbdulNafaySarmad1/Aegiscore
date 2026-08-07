@@ -1,0 +1,64 @@
+# iOS App Store Deployment
+# Required GitHub Secrets:
+#   APP_STORE_CONNECT_API_KEY      — App Store Connect API key (JSON)
+#   APP_STORE_CONNECT_ISSUER_ID    — App Store Connect issuer ID
+#   APP_STORE_CONNECT_KEY_ID       — App Store Connect private key ID
+#   MATCH_PASSWORD                 — Fastlane Match encryption password
+#   FASTLANE_APPLE_ID              — Apple ID for Fastlane authentication
+#   FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD — App-specific password for Fastlane
+name: iOS Deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+
+      - name: Resolve Swift dependencies
+        working-directory: ios
+        run: swift package resolve
+
+      - name: Build iOS app (archive)
+        working-directory: ios
+        run: |
+          xcodebuild archive \
+            -scheme AegisCoreIOS \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath build/AegisCore.xcarchive \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Export IPA
+        working-directory: ios
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/AegisCore.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist exportOptions.plist \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aegiscore-ios
+          path: ios/build/AegisCore.ipa
+
+      - name: Setup Fastlane
+        run: gem install fastlane -NV
+
+      - name: Deploy to TestFlight
+        run: |
+          fastlane pilot upload \
+            --ipa ios/build/AegisCore.ipa \
+            --app_identifier pk.edu.aegiscore.mobile \
+            --api_key_path <(echo "$APP_STORE_CONNECT_API_KEY")
+        env:
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}

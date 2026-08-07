@@ -56,8 +56,8 @@ function render(){
   $("screen").innerHTML=views[step](); if(step===2)loadTemplates(); if(step===5)loadPermissions(); if(step===6)loadReview();
 }
 function university(){return `<h1>University information</h1><p class="sub">Identity, licensing, public domain, and the first administrator.</p>
-  <div class="grid"><label>Full university name<input id="uniName" placeholder="Sir Syed University of Engineering & Technology"></label><label>Short name<input id="uniShort" placeholder="SSUET"></label>
-  <label>Website domain<input id="domain" placeholder="ssuet.edu.pk"></label><label>License key<input id="license" placeholder="AE-XXXX-XXXX-XXXX"></label>
+  <div class="grid"><label>Full university name<input id="uniName" placeholder="e.g., Institute of Business Management"></label><label>Short name<input id="uniShort" placeholder="e.g., IOBM"></label>
+  <label>Website domain<input id="domain" placeholder="e.g., iobm.edu.pk"></label><label>License key<input id="license" placeholder="AE-XXXX-XXXX-XXXX"></label>
   <label>Administrator name<input id="adminName" placeholder="System Administrator"></label><label>Administrator email<input id="adminEmail" type="email" placeholder="admin@university.edu.pk"></label>
   <label>Administrator password<input id="adminPassword" type="password" autocomplete="new-password"></label><label>Confirm password<input id="adminConfirm" type="password" autocomplete="new-password"></label></div>
   <button class="primary" onclick="saveUniversity()">Validate & save</button><div id="result"></div>${nav(false)}`}

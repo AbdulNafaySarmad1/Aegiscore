@@ -1,12 +1,14 @@
 using AegisCore.Application.ApiGateway;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/developer/keys")]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class ApiKeysController : ControllerBase
 {
     private readonly IApiKeyService _apiKeyService;
@@ -69,6 +71,7 @@ public class ApiKeysController : ControllerBase
 
 [ApiController]
 [Route("api/developer/webhooks")]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class WebhooksController : ControllerBase
 {
     private readonly IWebhookSubscriptionRepository _webhookRepo;

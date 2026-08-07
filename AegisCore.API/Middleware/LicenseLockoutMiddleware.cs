@@ -10,7 +10,7 @@ public sealed class LicenseLockoutMiddleware(RequestDelegate next)
         IConfiguration configuration,
         IHostEnvironment environment)
     {
-        if (!environment.IsProduction() && configuration.GetValue<bool>("Runtime:DemoMode"))
+        if (configuration.GetValue<bool>("Runtime:DemoMode"))
         {
             await next(context);
             return;

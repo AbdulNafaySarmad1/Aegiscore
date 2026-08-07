@@ -67,6 +67,38 @@ public static class ExtendedPlatformServiceExtensions
         services.TryAddScoped<IZeroTrustService, ZeroTrustService>();
         services.TryAddScoped<IHardcodingAuditService, HardcodingAuditService>();
 
+        // P111-P127 Extended Platform Services
+        services.TryAddScoped<IGradeAppealService, GradeAppealService>();
+        services.TryAddScoped<IGradeDistributionService, GradeDistributionService>();
+        services.TryAddScoped<IPlagiarismDetectionService, PlagiarismDetectionService>();
+        services.TryAddScoped<IPlagiarismApiService, PlagiarismApiService>();
+        services.TryAddScoped<IConvocationService, ConvocationService>();
+        services.TryAddScoped<ISemesterFreezeService, SemesterFreezeService>();
+        services.TryAddScoped<IProctoringService, ProctoringService>();
+        services.TryAddScoped<IPrerequisiteConflictService, PrerequisiteConflictService>();
+        services.TryAddScoped<IDefaulterPredictionService, DefaulterPredictionService>();
+        services.TryAddScoped<IVisitingFacultyService, VisitingFacultyService>();
+        services.TryAddScoped<IReadinessMeterService, ReadinessMeterService>();
+        services.TryAddScoped<IAchievementService, AchievementService>();
+        services.TryAddScoped<IMentalHealthService, MentalHealthService>();
+        services.TryAddScoped<IForeignStudentService, ForeignStudentService>();
+        services.TryAddScoped<IVoiceAssistantService, VoiceAssistantService>();
+        services.TryAddScoped<IBoardPortalService, BoardPortalService>();
+        services.TryAddScoped<IElectionService, ElectionService>();
+        services.TryAddScoped<ICatalogIngestionService, CatalogIngestionService>();
+        services.TryAddScoped<IClassGenerationService, ClassGenerationService>();
+
+        // Cafeteria + Cross-cutting
+        services.TryAddScoped<ICafeteriaService, CafeteriaService>();
+        services.TryAddScoped<IPersonalityModeService, PersonalityModeService>();
+        services.TryAddScoped<IChartService, ChartService>();
+        services.TryAddScoped<IOcrIntegrationService, OcrIntegrationService>();
+
+        // Improved engines
+        services.TryAddScoped<IPlagiarismEngineService, PlagiarismEngineService>();
+        services.TryAddScoped<IProctoringIntegrationService, ProctoringIntegrationService>();
+        services.TryAddScoped<IDefaulterMlEngineService, DefaulterMlEngineService>();
+
         return services;
     }
 }

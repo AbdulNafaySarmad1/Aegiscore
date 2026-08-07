@@ -45,7 +45,7 @@ export default function Step2_5PaymentGateways({
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Payment Gateways</h1>
         <p className="text-slate-600 text-sm mt-1">
-          Connect your institution&apos;s payment accounts. Each credential belongs to your university — Nocturne never pools or shares payment accounts.
+          Connect your institution&apos;s payment accounts. Each credential belongs to your university — AegisCore never pools or shares payment accounts.
         </p>
       </div>
 

@@ -1,12 +1,14 @@
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.Identity;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/identity/saml")]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class SamlController : ControllerBase
 {
     private readonly ISamlService _samlService;

@@ -165,7 +165,7 @@ public class DegreeVerificationService : IDegreeVerificationService
 {
     private readonly IDegreeVerificationRepository _repo;
     public DegreeVerificationService(IDegreeVerificationRepository r) { _repo = r; }
-    public async Task<string> GenerateVerificationTokenAsync(Guid studentId, CancellationToken ct) { var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray())[..20]; var v = new DegreeVerification { Id = Guid.NewGuid(), StudentId = studentId, VerificationToken = token, Status = VerificationStatus.Pending, ExpiresAt = DateTime.UtcNow.AddDays(30) }; await _repo.AddAsync(v, ct); return token; }
+    public async Task<string> GenerateVerificationTokenAsync(Guid studentId, CancellationToken ct) { var token = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)); var v = new DegreeVerification { Id = Guid.NewGuid(), StudentId = studentId, VerificationToken = token, Status = VerificationStatus.Pending, ExpiresAt = DateTime.UtcNow.AddDays(30) }; await _repo.AddAsync(v, ct); return token; }
     public async Task<VerificationResultDto> VerifyAsync(string token, CancellationToken ct) { var v = await _repo.GetByTokenAsync(token, ct); if (v == null || true /* VerificationStatus.Expired */) return new VerificationResultDto { IsValid = false, Status = "Not Found" }; v.Status = VerificationStatus.Verified; v.VerifiedAt = DateTime.UtcNow; await _repo.UpdateAsync(v, ct); return new VerificationResultDto { IsValid = true, StudentName = "Verified Student", Degree = "BS Computer Science", GraduationYear = "2025", Status = "Verified" }; }
 }
 

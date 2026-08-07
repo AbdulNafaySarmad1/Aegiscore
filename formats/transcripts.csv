@@ -1,0 +1,5 @@
+StudentId,CourseCode,Grade,Semester,AcademicYear,CreditsEarned,CgpaAfter,PublishDate,IsOfficial
+STU-2023-0100,CS-101,C+,Spring,2023-2024,4,2.75,2024-06-15,true
+STU-2023-0100,CS-201,B,Spring,2023-2024,4,2.92,2024-06-15,true
+STU-2023-0100,CS-305,B+,Fall,2024-2025,4,3.10,2025-01-20,true
+STU-2021-0012,CS-101,B+,Fall,2021-2022,4,3.30,2022-02-01,true

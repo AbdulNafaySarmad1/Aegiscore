@@ -1371,6 +1371,40 @@ public class AegisDbContext : DbContext
     public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
 
     /// <summary>
+    /// External database connections.
+    /// </summary>
+    public DbSet<ExternalDbConnection> ExternalDbConnections => Set<ExternalDbConnection>();
+
+    /// <summary>
+    /// Data import jobs.
+    /// </summary>
+    public DbSet<DataImportJob> DataImportJobs => Set<DataImportJob>();
+
+    /// <summary>
+    /// Field mapping templates.
+    /// </summary>
+    public DbSet<FieldMappingTemplate> FieldMappingTemplates => Set<FieldMappingTemplate>();
+
+    // Replication Management
+    public DbSet<ReplicationScalingConfig> ReplicationScalingConfigs => Set<ReplicationScalingConfig>();
+    public DbSet<ReplicaHealthLog> ReplicaHealthLogs => Set<ReplicaHealthLog>();
+    public DbSet<ReplicationScaleEvent> ReplicationScaleEvents => Set<ReplicationScaleEvent>();
+    public DbSet<ReplicationLagAlert> ReplicationLagAlerts => Set<ReplicationLagAlert>();
+
+    // Sync-Lag (pend write correction window)
+    public DbSet<SyncLagConfig> SyncLagConfigs => Set<SyncLagConfig>();
+    public DbSet<SyncLagEntry> SyncLagEntries => Set<SyncLagEntry>();
+
+    // Tiered Document Vault (R2 PQC storage)
+    public DbSet<DocumentTier> DocumentTiers => Set<DocumentTier>();
+    public DbSet<DocumentVaultEntry> DocumentVaultEntries => Set<DocumentVaultEntry>();
+    public DbSet<DocumentAccessLog> DocumentAccessLogs => Set<DocumentAccessLog>();
+    public DbSet<DocumentRetentionPolicy> DocumentRetentionPolicies => Set<DocumentRetentionPolicy>();
+
+    // Profile Pictures
+    public DbSet<ProfilePictureRecord> ProfilePictureRecords => Set<ProfilePictureRecord>();
+
+    /// <summary>
     /// Export logs.
     /// </summary>
     public DbSet<ExportLog> ExportLogs => Set<ExportLog>();
@@ -1576,6 +1610,134 @@ public class AegisDbContext : DbContext
     /// </summary>
     public DbSet<HardcodingFinding> HardcodingFindings => Set<HardcodingFinding>();
 
+    // P111 Grade Appeals
+    public DbSet<GradeAppeal> GradeAppeals => Set<GradeAppeal>();
+    public DbSet<AppealEvidence> AppealEvidence => Set<AppealEvidence>();
+    public DbSet<AppealCommitteeBrief> AppealCommitteeBriefs => Set<AppealCommitteeBrief>();
+
+    // P112 Grade Distribution Analysis
+    public DbSet<GradeDistribution> GradeDistributions => Set<GradeDistribution>();
+    public DbSet<DistributionAnomalyAlert> DistributionAnomalyAlerts => Set<DistributionAnomalyAlert>();
+
+    // P113 Plagiarism Detection
+    public DbSet<PlagiarismScan> PlagiarismScans => Set<PlagiarismScan>();
+
+    // P114 Plagiarism API Integration
+    public DbSet<PlagiarismApiSubmission> PlagiarismApiSubmissions => Set<PlagiarismApiSubmission>();
+
+    // P115 Convocation Management
+    public DbSet<Convocation> Convocations => Set<Convocation>();
+    public DbSet<ConvocationEligibility> ConvocationEligibilities => Set<ConvocationEligibility>();
+    public DbSet<DegreeCertificate> DegreeCertificates => Set<DegreeCertificate>();
+    public DbSet<ConvocationAttendance> ConvocationAttendances => Set<ConvocationAttendance>();
+
+    // P116 Semester Freeze & Deferral
+    public DbSet<SemesterFreeze> SemesterFreezes => Set<SemesterFreeze>();
+    public DbSet<FreezeDocument> FreezeDocuments => Set<FreezeDocument>();
+
+    // P117 Online Exam Proctoring
+    public DbSet<ProctoringSession> ProctoringSessions => Set<ProctoringSession>();
+    public DbSet<StudentProctoringRecord> StudentProctoringRecords => Set<StudentProctoringRecord>();
+    public DbSet<ProctorEvent> ProctorEvents => Set<ProctorEvent>();
+
+    // P118 Prerequisite Conflict Detection
+    public DbSet<PrerequisiteConflict> PrerequisiteConflicts => Set<PrerequisiteConflict>();
+    public DbSet<ChangeImpactSimulation> ChangeImpactSimulations => Set<ChangeImpactSimulation>();
+
+    // P119 Fee Defaulter Prediction (extends P103)
+    public DbSet<DefaulterRiskScore> DefaulterRiskScores => Set<DefaulterRiskScore>();
+    public DbSet<DefaulterIntervention> DefaulterInterventions => Set<DefaulterIntervention>();
+    public DbSet<CashFlowForecast> CashFlowForecasts => Set<CashFlowForecast>();
+
+    // P120 Visiting Faculty Marketplace
+    public DbSet<VisitingFacultyProfile> VisitingFacultyProfiles => Set<VisitingFacultyProfile>();
+    public DbSet<FacultySlotMatch> FacultySlotMatches => Set<FacultySlotMatch>();
+    public DbSet<VisitingFacultyContract> VisitingFacultyContracts => Set<VisitingFacultyContract>();
+
+    // P121 Accreditation Readiness Score
+    public DbSet<ReadinessScore> ReadinessScores => Set<ReadinessScore>();
+    public DbSet<ReadinessGap> ReadinessGaps => Set<ReadinessGap>();
+    public DbSet<ReadinessAlert> ReadinessAlerts => Set<ReadinessAlert>();
+    public DbSet<EvidenceFreshnessLog> EvidenceFreshnessLogs => Set<EvidenceFreshnessLog>();
+
+    // P122 Student Achievement Gamification
+    public DbSet<AchievementBadge> AchievementBadges => Set<AchievementBadge>();
+    public DbSet<StudentBadge> StudentBadges => Set<StudentBadge>();
+    public DbSet<DeansListEntry> DeansListEntries => Set<DeansListEntry>();
+    public DbSet<LeaderboardEntry> LeaderboardEntries => Set<LeaderboardEntry>();
+    public DbSet<AchievementRoadmap> AchievementRoadmaps => Set<AchievementRoadmap>();
+
+    // P123 Mental Health Ticketing
+    public DbSet<MentalHealthTicket> MentalHealthTickets => Set<MentalHealthTicket>();
+    public DbSet<MandatoryReport> MandatoryReports => Set<MandatoryReport>();
+    public DbSet<WellnessCheckIn> WellnessCheckIns => Set<WellnessCheckIn>();
+    public DbSet<CounselorProfile> CounselorProfiles => Set<CounselorProfile>();
+
+    // P124 Foreign Student Visa & MORA
+    public DbSet<ForeignStudentRegistry> ForeignStudentRegistries => Set<ForeignStudentRegistry>();
+    public DbSet<VisaDocument> VisaDocuments => Set<VisaDocument>();
+    public DbSet<VisaExpiryAlert> VisaExpiryAlerts => Set<VisaExpiryAlert>();
+    public DbSet<VisaRenewal> VisaRenewals => Set<VisaRenewal>();
+    public DbSet<ComplianceBreach> ComplianceBreaches => Set<ComplianceBreach>();
+    public DbSet<MoraSubmission> MoraSubmissions => Set<MoraSubmission>();
+
+    // P125 Voice Assistant (NidaBot)
+    public DbSet<VoiceSession> VoiceSessions => Set<VoiceSession>();
+
+    // P126 Board Portal (BoardView)
+    public DbSet<ExecutiveDashboard> ExecutiveDashboards => Set<ExecutiveDashboard>();
+    public DbSet<BoardMeetingPack> BoardMeetingPacks => Set<BoardMeetingPack>();
+    public DbSet<BoardAlert> BoardAlerts => Set<BoardAlert>();
+    public DbSet<StrategicPlanGoal> StrategicPlanGoals => Set<StrategicPlanGoal>();
+    public DbSet<BenchmarkComparison> BenchmarkComparisons => Set<BenchmarkComparison>();
+
+    // P127 Student Elections
+    public DbSet<Election> Elections => Set<Election>();
+    public DbSet<CandidateNomination> CandidateNominations => Set<CandidateNomination>();
+    public DbSet<VoterToken> VoterTokens => Set<VoterToken>();
+    public DbSet<EncryptedBallot> EncryptedBallots => Set<EncryptedBallot>();
+    public DbSet<ElectionResult> ElectionResults => Set<ElectionResult>();
+
+    // Course Catalog Ingestion
+    public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
+    public DbSet<CatalogCourseRecord> CatalogCourseRecords => Set<CatalogCourseRecord>();
+    public DbSet<CatalogVersion> CatalogVersions => Set<CatalogVersion>();
+    public DbSet<DegreeTree> DegreeTrees => Set<DegreeTree>();
+    public DbSet<ElectiveSlot> ElectiveSlots => Set<ElectiveSlot>();
+    public DbSet<CourseOffering> CourseOfferings => Set<CourseOffering>();
+    public DbSet<CourseGradePolicy> CourseGradePolicies => Set<CourseGradePolicy>();
+    public DbSet<CourseEquivalency> CourseEquivalencies => Set<CourseEquivalency>();
+
+    // LMS & Class Generation
+    public DbSet<ClassGenerationJob> ClassGenerationJobs => Set<ClassGenerationJob>();
+    public DbSet<Class> Classes => Set<Class>();
+    public DbSet<StudentSectionEnrollment> StudentSectionEnrollments => Set<StudentSectionEnrollment>();
+    public DbSet<LmsProvision> LmsProvisions => Set<LmsProvision>();
+    public DbSet<LmsRosterSyncLog> LmsRosterSyncLogs => Set<LmsRosterSyncLog>();
+    public DbSet<LmsConfiguration> LmsConfigurations => Set<LmsConfiguration>();
+    public DbSet<DirectorySyncLog> DirectorySyncLogs => Set<DirectorySyncLog>();
+
+    // OPTIONAL-26 Cafeteria Management (FoodCore)
+    public DbSet<CafeteriaUnit> CafeteriaUnits => Set<CafeteriaUnit>();
+    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
+    public DbSet<MealPlan> MealPlans => Set<MealPlan>();
+    public DbSet<FoodOrder> FoodOrders => Set<FoodOrder>();
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<InventoryAlert> InventoryAlerts => Set<InventoryAlert>();
+    public DbSet<VendorScorecard> VendorScorecards => Set<VendorScorecard>();
+    public DbSet<DemandForecast> DemandForecasts => Set<DemandForecast>();
+    public DbSet<WasteLog> WasteLogs => Set<WasteLog>();
+
+    // Cross-cutting: Personality Mode
+    public DbSet<PersonalityConfig> PersonalityConfigs => Set<PersonalityConfig>();
+
+    // Cross-cutting: Chart System
+    public DbSet<ChartConfiguration> ChartConfigurations => Set<ChartConfiguration>();
+    public DbSet<InsightChip> InsightChips => Set<InsightChip>();
+
+    // Cross-cutting: OCR
+    public DbSet<OcrProviderConfig> OcrProviderConfigs => Set<OcrProviderConfig>();
+
     // P-J Login Audit
     /// <summary>
     /// Login audit records.
@@ -1736,9 +1898,7 @@ public class AegisDbContext : DbContext
     public DbSet<PaymentPlanArrangement> PaymentPlanArrangements => Set<PaymentPlanArrangement>();
     public DbSet<PaymentPlanInstallment> PaymentPlanInstallments => Set<PaymentPlanInstallment>();
     public DbSet<InterventionRecord> InterventionRecords => Set<InterventionRecord>();
-    public DbSet<CashFlowForecast> CashFlowForecasts => Set<CashFlowForecast>();
     public DbSet<EthicalAuditLog> EthicalAuditLogs => Set<EthicalAuditLog>();
-    public DbSet<VisitingFacultyProfile> VisitingFacultyProfiles => Set<VisitingFacultyProfile>();
     public DbSet<TeachingSlot> TeachingSlots => Set<TeachingSlot>();
     public DbSet<SlotCandidateMatch> SlotCandidateMatches => Set<SlotCandidateMatch>();
     public DbSet<FacultyEngagement> FacultyEngagements => Set<FacultyEngagement>();
@@ -1753,41 +1913,24 @@ public class AegisDbContext : DbContext
     public DbSet<BoardDecision> BoardDecisions => Set<BoardDecision>();
     public DbSet<StrategicGoal> StrategicGoals => Set<StrategicGoal>();
     public DbSet<InstitutionBenchmark> InstitutionBenchmarks => Set<InstitutionBenchmark>();
-    public DbSet<BoardAlert> BoardAlerts => Set<BoardAlert>();
     public DbSet<BoardResolution> BoardResolutions => Set<BoardResolution>();
-    public DbSet<VoiceSession> VoiceSessions => Set<VoiceSession>();
     public DbSet<VoiceIntent> VoiceIntents => Set<VoiceIntent>();
     public DbSet<EscalationLog> EscalationLogs => Set<EscalationLog>();
     public DbSet<BadgeDefinition> BadgeDefinitions => Set<BadgeDefinition>();
     public DbSet<BadgeAward> BadgeAwards => Set<BadgeAward>();
-    public DbSet<DeansListEntry> DeansListEntries => Set<DeansListEntry>();
-    public DbSet<LeaderboardEntry> LeaderboardEntries => Set<LeaderboardEntry>();
-    public DbSet<AchievementRoadmap> AchievementRoadmaps => Set<AchievementRoadmap>();
-    public DbSet<MentalHealthTicket> MentalHealthTickets => Set<MentalHealthTicket>();
-    public DbSet<CounselorProfile> CounselorProfiles => Set<CounselorProfile>();
     public DbSet<CounselingCaseNote> CounselingCaseNotes => Set<CounselingCaseNote>();
     public DbSet<MandatoryReportLog> MandatoryReportLogs => Set<MandatoryReportLog>();
-    public DbSet<WellnessCheckIn> WellnessCheckIns => Set<WellnessCheckIn>();
     public DbSet<ForeignStudentRecord> ForeignStudentRecords => Set<ForeignStudentRecord>();
     public DbSet<DocumentExpiryTracker> DocumentExpiryTrackers => Set<DocumentExpiryTracker>();
-    public DbSet<MoraSubmission> MoraSubmissions => Set<MoraSubmission>();
     public DbSet<EnrollmentLetter> EnrollmentLetters => Set<EnrollmentLetter>();
-    public DbSet<ComplianceBreach> ComplianceBreaches => Set<ComplianceBreach>();
     public DbSet<VisaRenewalWorkflow> VisaRenewalWorkflows => Set<VisaRenewalWorkflow>();
-    public DbSet<Election> Elections => Set<Election>();
     public DbSet<ElectionPosition> ElectionPositions => Set<ElectionPosition>();
     public DbSet<ElectionCandidate> ElectionCandidates => Set<ElectionCandidate>();
-    public DbSet<VoterToken> VoterTokens => Set<VoterToken>();
     public DbSet<Ballot> Ballots => Set<Ballot>();
-    public DbSet<ElectionResult> ElectionResults => Set<ElectionResult>();
-    public DbSet<CafeteriaUnit> CafeteriaUnits => Set<CafeteriaUnit>();
-    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
-    public DbSet<MealPlan> MealPlans => Set<MealPlan>();
     public DbSet<PreOrder> PreOrders => Set<PreOrder>();
     public DbSet<CafeteriaTransaction> CafeteriaTransactions => Set<CafeteriaTransaction>();
     public DbSet<VendorPerformanceScore> VendorPerformanceScores => Set<VendorPerformanceScore>();
     public DbSet<CafeteriaInventory> CafeteriaInventory => Set<CafeteriaInventory>();
-    public DbSet<WasteLog> WasteLogs => Set<WasteLog>();
     public DbSet<FleetVehicle> FleetVehicles => Set<FleetVehicle>();
     public DbSet<TransportRegistration> TransportRegistrations => Set<TransportRegistration>();
     public DbSet<BoardingLog> BoardingLogs => Set<BoardingLog>();

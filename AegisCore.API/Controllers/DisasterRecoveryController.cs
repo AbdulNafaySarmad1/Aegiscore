@@ -2,12 +2,14 @@ using AegisCore.Application.Backup;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/admin/dr")]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class DisasterRecoveryController : ControllerBase
 {
     private readonly IBackupConfigurationRepository _configRepo;

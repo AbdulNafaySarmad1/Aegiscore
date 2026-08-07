@@ -95,6 +95,7 @@ public static class SeedExtensions
         services.TryAddTransient<ISeedRunner, AcademicCalendarSeeder>();
         services.TryAddTransient<ISeedRunner, FeeStructureSeeder>();
         services.TryAddTransient<ISeedRunner, TranslationSeeder>();
+        services.TryAddTransient<ISeedRunner, DemoDataSeeder>();
         services.TryAddTransient<SeedOrchestrator>();
         return services;
     }

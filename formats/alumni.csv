@@ -1,0 +1,4 @@
+StudentId,GraduationYear,CurrentEmployer,JobTitle,Industry,LinkedInUrl,Email,Phone,IsContactable,GraduationCgpa
+STU-2021-0012,2024,Arbisoft,Software Engineer,Information Technology,https://linkedin.com/in/ali-hassan-dev,ali.hassan@personal.com,03455678901,true,3.62
+STU-2020-0008,2023,Thermosoft,Data Analyst,Software & Analytics,https://linkedin.com/in/zainab-naqvi,zainab.naqvi@outlook.com,03001237890,true,3.85
+STU-2019-0045,2022,NetSol Technologies,Product Manager,FinTech,https://linkedin.com/in/hammad-rauf,hammad.rauf@gmail.com,03117894567,false,3.41

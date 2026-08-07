@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getPortalLocale } from "@/i18n/server";
 import { portalMessages } from "@/i18n/messages";
+import { PersonalityLayoutWrapper } from "@/components/personality-layout-wrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
     default: "AegisCore",
-    template: "%s · AegisCore"
+    template: "%s \u00b7 AegisCore"
   },
   description: "The university operating system by AegisCore",
   manifest: "/manifest.webmanifest"
@@ -24,7 +25,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = await getPortalLocale();
   return (
     <html lang={locale} dir={locale === "ar-AE" ? "rtl" : "ltr"}>
-      <body><NextIntlClientProvider locale={locale} messages={portalMessages[locale]}>{children}</NextIntlClientProvider></body>
+      <body><NextIntlClientProvider locale={locale} messages={portalMessages[locale]}><PersonalityLayoutWrapper>{children}</PersonalityLayoutWrapper></NextIntlClientProvider></body>
     </html>
   );
 }

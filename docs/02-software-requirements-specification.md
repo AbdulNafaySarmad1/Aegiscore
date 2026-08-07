@@ -19,7 +19,7 @@
 
 ### 1.1 Purpose
 
-This Software Requirements Specification (SRS) defines the complete functional and non-functional requirements for AegisCore, a multi-tenant, cloud-native university ERP platform developed by Apex Systems (Pvt. Ltd.) for Pakistani public universities. This document serves as the authoritative reference for all stakeholders — developers, testers, system administrators, and institutional users — to understand what the system must do and under what constraints it must operate.
+This Software Requirements Specification (SRS) defines the complete functional and non-functional requirements for AegisCore, a multi-tenant, cloud-native university ERP platform developed by Nocturne Systems (Pvt. Ltd.) for Pakistani public universities. This document serves as the authoritative reference for all stakeholders — developers, testers, system administrators, and institutional users — to understand what the system must do and under what constraints it must operate.
 
 ### 1.2 Scope
 

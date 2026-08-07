@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace AegisCore.Tests;
@@ -12,7 +13,7 @@ namespace AegisCore.Tests;
 public sealed class OperationalRuntimeTests
 {
     [Fact]
-    public async Task DemoIdentity_IsAdministrative_AndTenantScoped_OutsideProduction()
+    public async Task DemoIdentity_IsAdministrative_AndTenantScoped()
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -26,7 +27,7 @@ public sealed class OperationalRuntimeTests
         var context = new DefaultHttpContext();
         var middleware = new DemoIdentityMiddleware(_ => Task.CompletedTask);
 
-        await middleware.InvokeAsync(context, configuration, environment.Object);
+        await middleware.InvokeAsync(context, configuration, environment.Object, Mock.Of<ILogger<DemoIdentityMiddleware>>());
 
         Assert.True(context.User.Identity?.IsAuthenticated);
         Assert.True(context.User.IsInRole("SuperAdmin"));
@@ -36,7 +37,7 @@ public sealed class OperationalRuntimeTests
     }
 
     [Fact]
-    public async Task DemoIdentity_IsNeverInjectedInProduction()
+    public async Task DemoIdentity_IsNotInjectedInProduction()
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?> { ["Runtime:DemoMode"] = "true" })
@@ -46,7 +47,23 @@ public sealed class OperationalRuntimeTests
         var context = new DefaultHttpContext();
         var middleware = new DemoIdentityMiddleware(_ => Task.CompletedTask);
 
-        await middleware.InvokeAsync(context, configuration, environment.Object);
+        await middleware.InvokeAsync(context, configuration, environment.Object, Mock.Of<ILogger<DemoIdentityMiddleware>>());
+
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, context.Response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DemoIdentity_IsNotInjectedWhenDemoModeDisabled()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Runtime:DemoMode"] = "false" })
+            .Build();
+        var environment = new Mock<IHostEnvironment>();
+        environment.SetupGet(x => x.EnvironmentName).Returns(Environments.Development);
+        var context = new DefaultHttpContext();
+        var middleware = new DemoIdentityMiddleware(_ => Task.CompletedTask);
+
+        await middleware.InvokeAsync(context, configuration, environment.Object, Mock.Of<ILogger<DemoIdentityMiddleware>>());
 
         Assert.NotEqual(true, context.User.Identity?.IsAuthenticated);
     }

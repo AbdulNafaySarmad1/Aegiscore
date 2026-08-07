@@ -1,0 +1,5 @@
+StudentId,CourseCode,Date,Status,MarkedBy,Remarks
+STU-2024-0001,CS-101,2024-09-02,Present,FAC-2022-0078,
+STU-2024-0001,CS-101,2024-09-04,Late,FAC-2022-0078,Arrived 15 minutes after class start.
+STU-2024-0002,CS-101,2024-09-09,Absent,FAC-2022-0078,No prior notice submitted.
+STU-2023-0100,CS-305,2024-09-02,Excused,FAC-2015-0001,Medical certificate submitted via portal.

@@ -2,12 +2,14 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.DigitalTwin;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/digital-twin")]
+[Authorize]
 public class DigitalTwinController : ControllerBase
 {
     private readonly IDigitalTwinService _twinService;

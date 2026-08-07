@@ -15,6 +15,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/admissions")]
+[Authorize]
 public sealed class S2AdmissionsController(
     AegisDbContext db,
     IStorageProvider storage,

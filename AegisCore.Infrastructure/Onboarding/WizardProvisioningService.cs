@@ -22,8 +22,6 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         var licenseMode = Required(licenseStep, "mode").ToLowerInvariant();
         if (licenseMode is not ("demo" or "paid")) throw new InvalidOperationException("License mode is invalid.");
 
-        var ownsTransaction = db.Database.CurrentTransaction is null;
-        await using var transaction = ownsTransaction ? await db.Database.BeginTransactionAsync(ct) : null;
         var tenant = await db.Tenants.SingleOrDefaultAsync(x => x.Id == tenantId, ct);
         if (tenant is null)
         {
@@ -42,7 +40,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
             db.TenantFinanceConfigurations.Add(financeConfiguration);
         }
         financeConfiguration.PrimaryStandard = standard;
-        financeConfiguration.FiscalYearStartMonth = finance["fiscalYearStartMonth"]?.GetValue<int?>() is { } financeMonth && financeMonth is >= 1 and <= 12 ? financeMonth : 1;
+        financeConfiguration.FiscalYearStartMonth = IntOrNull(finance, "fiscalYearStartMonth") is { } financeMonth && financeMonth is >= 1 and <= 12 ? financeMonth : 1;
         financeConfiguration.FiscalYearLabel = Required(finance, "fiscalYear");
         financeConfiguration.BaseCurrency = baseCurrency;
         financeConfiguration.AdditionalCurrenciesJson = finance["additionalCurrencies"]?.ToJsonString() ?? "[]";
@@ -98,13 +96,13 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         var fiscalLabel = Required(finance, "fiscalYear");
         if (!await db.FiscalYears.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Name == fiscalLabel, ct))
         {
-            var fiscalStartMonth = finance["fiscalYearStartMonth"]?.GetValue<int?>() is { } configuredMonth && configuredMonth is >= 1 and <= 12 ? configuredMonth : 1;
+            var fiscalStartMonth = IntOrNull(finance, "fiscalYearStartMonth") is { } configuredMonth && configuredMonth is >= 1 and <= 12 ? configuredMonth : 1;
             var fiscalStartYear = DateTime.UtcNow.Month >= fiscalStartMonth ? DateTime.UtcNow.Year : DateTime.UtcNow.Year - 1;
             db.FiscalYears.Add(new FiscalYear
             {
                 Id = Guid.NewGuid(), TenantId = tenantId, Name = fiscalLabel,
-                StartDate = new DateTime(fiscalStartYear, fiscalStartMonth, 1),
-                EndDate = new DateTime(fiscalStartYear + 1, fiscalStartMonth, 1).AddDays(-1), IsClosed = false
+                StartDate = new DateTime(fiscalStartYear, fiscalStartMonth, 1, 0, 0, 0, DateTimeKind.Utc),
+                EndDate = new DateTime(fiscalStartYear + 1, fiscalStartMonth, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(-1), IsClosed = false
             });
         }
 
@@ -131,7 +129,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
             if (await db.DegreePrograms.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Code == code, ct)) continue;
             var department = departments.Values.FirstOrDefault();
             if (department is null) throw new InvalidOperationException("At least one department is required.");
-            var program = new DegreeProgram { Id = Guid.NewGuid(), TenantId = tenantId, Name = name, Code = code, DegreeType = item?["degreeLevel"]?.GetValue<string>() ?? "Bachelor", DurationYears = Math.Max(1, (item?["duration"]?.GetValue<int?>() ?? 8) / 2), MinCreditHours = item?["creditHours"]?.GetValue<int?>() ?? 120, DepartmentId = department.Id };
+            var program = new DegreeProgram { Id = Guid.NewGuid(), TenantId = tenantId, Name = name, Code = code, DegreeType = item?["degreeLevel"]?.GetValue<string>() ?? "Bachelor", DurationYears = Math.Max(1, (IntOrNull(item?["duration"]) ?? 8) / 2), MinCreditHours = IntOrNull(item?["creditHours"]) ?? 120, DepartmentId = department.Id };
             db.DegreePrograms.Add(program); programs.Add(program);
         }
 
@@ -163,9 +161,25 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
             await db.SaveChangesAsync(ct);
         }
         await pqc.SignAsync(tenantId, "voucher-approval", ReadOnlyMemory<byte>.Empty, archival: false, ct);
-        if (transaction is not null) await transaction.CommitAsync(ct);
         await accounting.GetContextAsync(tenantId, ct);
     }
 
     private static string Required(JsonObject value, string fieldName) => value[fieldName]?.GetValue<string>()?.Trim() is { Length: > 0 } result ? result : throw new InvalidOperationException($"Required wizard field '{fieldName}' is missing.");
+
+    private static int? IntOrNull(JsonObject value, string fieldName)
+    {
+        var node = value[fieldName];
+        if (node is null) return null;
+        if (node.GetValueKind() == System.Text.Json.JsonValueKind.Number) return node.GetValue<int>();
+        if (node.GetValueKind() == System.Text.Json.JsonValueKind.String && int.TryParse(node.GetValue<string>(), out var n)) return n;
+        return null;
+    }
+
+    private static int? IntOrNull(JsonNode? node)
+    {
+        if (node is null) return null;
+        if (node.GetValueKind() == System.Text.Json.JsonValueKind.Number) return node.GetValue<int>();
+        if (node.GetValueKind() == System.Text.Json.JsonValueKind.String && int.TryParse(node.GetValue<string>(), out var n)) return n;
+        return null;
+    }
 }

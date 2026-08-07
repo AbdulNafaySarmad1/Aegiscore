@@ -117,6 +117,26 @@ public sealed class FinanceTests
     }
 
     [Fact]
+    public async Task Demo_Gateway_Configuration_Uses_Sandbox_Secrets()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options;
+        await using var db = new AegisDbContext(options);
+        await db.Database.EnsureCreatedAsync();
+        var secrets = new Mock<ISecretService>();
+        secrets.Setup(x => x.SetSecretAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        secrets.Setup(x => x.SecretExistsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var service = new WizardGatewayService(db, secrets.Object);
+        using var payload = JsonDocument.Parse("{\"ENV\":\"sandbox\"}");
+
+        var result = await service.ConfigureAsync(Guid.NewGuid(), "raast", payload.RootElement, CancellationToken.None, demoMode: true);
+
+        Assert.True(result.Success);
+        Assert.Equal("ok", result.HealthStatus);
+    }
+
+    [Fact]
     public async Task Accounting_Context_Is_Driven_By_Tenant_Configuration()
     {
         await using var connection = new SqliteConnection("DataSource=:memory:");

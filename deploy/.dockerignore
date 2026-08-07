@@ -1,0 +1,79 @@
+# ─── AegisCore Production .dockerignore ───
+.git/
+.agents/
+.codex/
+.vs/
+.vscode/
+**/.vs/
+**/.vscode/
+
+# Build artifacts
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.next/
+**/out/
+**/TestResults/
+**/test-results/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pfx
+*.pem
+*.crt
+appsettings.Development.json
+appsettings.*.json
+!.env.example
+
+# Test & coverage
+coverage/
+**/coverage/
+graphify-out/
+
+# Platform & mobile (excluded from API build)
+AegisCore.Portal/
+AegisCore.Mobile/
+AegisCore.Native/
+AegisCore.Setup/
+AegisCore.Web/
+AegisCore.Tests/
+AegisCore.PluginCli/
+AegisCore.PluginSdk/
+AegisCore.LedgerVerifier/
+aegiscore-frontend/
+aegiscore-mobile/
+aegiscore-android/
+aegiscore-mobile-app/
+aegiscore-backend/
+apps/
+building-blocks/
+modules/
+sample-plugins/
+
+# Documentation
+docs/
+manuals/
+md/
+*.md
+!*.md
+
+# Media & misc
+*.log
+*.mp4
+*.iso
+*.zip
+*.tar.gz
+wizard.html
+server.py
+.aegiscore/
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+deploy/
+docker/
