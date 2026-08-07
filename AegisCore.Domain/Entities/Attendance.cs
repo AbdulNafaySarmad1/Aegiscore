@@ -20,7 +20,12 @@ public class Attendance
 
     // Calculated property (not mapped)
     [NotMapped]
-    public double Percentage => CalculatePercentage();
+    public double Percentage { get; set; } = 0.0;
+
+    public void UpdatePercentage(int totalSessions, int presentSessions)
+    {
+        Percentage = totalSessions > 0 ? Math.Round((double)presentSessions / totalSessions * 100.0, 2) : 0.0;
+    }
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
@@ -33,10 +38,4 @@ public class Attendance
 
     [ForeignKey(nameof(FacultyId))]
     public virtual Faculty Faculty { get; init; } = null!;
-
-    private double CalculatePercentage()
-    {
-        // Placeholder – real calculation would need total sessions context
-        return Status == AttendanceStatus.Present ? 100.0 : 0.0;
-    }
 }

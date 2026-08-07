@@ -9,9 +9,11 @@ export function PersonalityLayoutWrapper({ children }: { children: React.ReactNo
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    apiGet<Session>("/api/session")
-      .then(s => setUserId(s.userId))
-      .catch(() => setUserId(null));
+    try {
+      const raw = localStorage.getItem("aegiscore_demo_session");
+      if (raw) { const acc = JSON.parse(raw); setUserId(acc.email); }
+      else { setUserId(null); }
+    } catch { setUserId(null); }
   }, []);
 
   return (

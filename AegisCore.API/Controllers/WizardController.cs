@@ -8,8 +8,10 @@ using AegisCore.Application.DataImport;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Domain.Entities;
 using AegisCore.Application.Onboarding;
+using Microsoft.EntityFrameworkCore;
 using AegisCore.Infrastructure.Installation;
 using AegisCore.Infrastructure.Onboarding;
+using AegisCore.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -112,17 +114,20 @@ public sealed class WizardController(
         {
             return UnprocessableEntity(new { success = false, error = ex.Message });
         }
+        catch (DbUpdateException)
+        {
+            return UnprocessableEntity(new { success = false, error = "Could not save administrator accounts. Ensure every email is unique and passwords are at least 12 characters." });
+        }
     }
 
     [HttpPost("gateways/{slug}/configure")]
     public async Task<IActionResult> ConfigureGateway(string slug, [FromBody] JsonElement request, CancellationToken ct)
     {
         var session = await sessions.GetOrCreateAsync(TenantId(), HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
-        if (!string.Equals(session.LicenseMode, "paid", StringComparison.OrdinalIgnoreCase))
-            return UnprocessableEntity(new { success = false, error = "Payment gateways are disabled in demo mode." });
         try
         {
-            var result = await gateways.ConfigureAsync(TenantId(), slug, request, ct);
+            var demoMode = !string.Equals(session.LicenseMode, "paid", StringComparison.OrdinalIgnoreCase);
+            var result = await gateways.ConfigureAsync(TenantId(), slug, request, ct, demoMode: demoMode);
             await sessions.MarkGatewayConfiguredAsync(TenantId(), session.Id, result.GatewaySlug, ct);
             return Ok(result);
         }
@@ -144,24 +149,21 @@ public sealed class WizardController(
         if (type is not ("logo" or "background"))
             return BadRequest(new { error = "Type must be 'logo' or 'background'." });
 
+        var contentDisposition = Request.Headers.ContentDisposition.ToString();
+        if (UploadValidationService.HasDirectoryTraversal(contentDisposition))
+            return BadRequest(new { error = "Invalid file upload." });
+
         using var ms = new MemoryStream();
         await Request.Body.CopyToAsync(ms, ct);
         ms.Position = 0;
 
-        if (ms.Length < 1024 || ms.Length > 10 * 1024 * 1024)
-            return BadRequest(new { error = "File must be between 1KB and 10MB." });
+        var validator = new UploadValidationService();
+        var validationResult = validator.ValidateMagicBytes(ms, "png", "jpeg");
+        if (!validationResult.IsValid)
+            return BadRequest(new { error = validationResult.ErrorMessage });
 
-        // Validate it's an actual image
-        var header = new byte[4];
-        ms.Read(header, 0, 4);
-        ms.Position = 0;
-        var isPng = header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47;
-        var isJpeg = header[0] == 0xFF && header[1] == 0xD8;
-        if (!isPng && !isJpeg)
-            return BadRequest(new { error = "Only PNG and JPEG images are accepted." });
-
-        var contentType = isPng ? "image/png" : "image/jpeg";
-        var ext = isPng ? "png" : "jpg";
+        var contentType = validationResult.DetectedContentType!;
+        var ext = validationResult.DetectedExtension!;
 
         var storage = HttpContext.RequestServices.GetRequiredService<IStorageService>();
         var bucket = configuration["STORAGE_BUCKET"] ?? configuration["R2:BucketName"] ?? "aegiscore";
@@ -231,12 +233,17 @@ public sealed class WizardController(
 
     [AllowAnonymous]
     [HttpGet("demo-status")]
-    public IActionResult DemoStatus()
+    public async Task<IActionResult> DemoStatus()
     {
         var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
         if (!isDemo) return Ok(new { isDemo = false });
 
         var expiry = configuration["Runtime:DemoExpiryUtc"];
+        if (string.IsNullOrWhiteSpace(expiry))
+        {
+            try { expiry = await secrets.GetSecretAsync("Runtime__DemoExpiryUtc"); }
+            catch { /* secret not set yet — no demo expiry configured */ }
+        }
         TimeSpan? remaining = null;
         if (DateTime.TryParse(expiry, out var exp))
             remaining = exp - DateTime.UtcNow;
@@ -294,8 +301,8 @@ public sealed class WizardController(
                     }
 
                     var query = request.DbType == "PostgreSQL"
-                        ? $"SELECT * FROM \"{table}\" LIMIT 1000"
-                        : $"SELECT * FROM [{table}]";
+                        ? $"SELECT * FROM \"{table.Replace("\"", "\"\"")}\" LIMIT 1000"
+                        : $"SELECT * FROM [{table.Replace("]", "]]")}]";
 
                     var job = await dataImport.StartImportAsync(conn.Id, entityType, query, fieldMappings, null, ct);
                     importResults.Add(new { table, entityType, job.Id, job.Status, job.TotalRows, job.SuccessRows, job.ErrorRows, job.SkippedRows });
@@ -319,7 +326,7 @@ public sealed class WizardController(
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = $"Import pipeline failed: {ex.Message}" });
+            return UnprocessableEntity(new { success = false, error = $"Import pipeline failed: {ex.Message}" });
         }
     }
 
@@ -374,6 +381,22 @@ public sealed class WizardController(
             return UnprocessableEntity(new { success = false, error = ex.Message });
         }
         await installation.MarkAsInstalledAsync(ct);
+
+        var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
+        if (isDemo)
+        {
+            var existingExpiry = configuration["Runtime:DemoExpiryUtc"];
+            if (string.IsNullOrWhiteSpace(existingExpiry))
+            {
+                var expiryDays = 60;
+                var expiry = DateTime.UtcNow.AddDays(expiryDays).ToString("O");
+                var hmacKey = configuration["AEGISCORE_ENCRYPTION_KEY"] ?? await secrets.GetSecretAsync("AEGISCORE_ENCRYPTION_KEY", ct);
+                var signature = DemoExpiryMiddleware.SignExpiry(expiry, hmacKey);
+                await secrets.SetSecretAsync("Runtime__DemoExpiryUtc", expiry, ct);
+                await secrets.SetSecretAsync("Runtime__DemoExpirySignature", signature, ct);
+            }
+        }
+
         return Ok(new { success = true, tenantId, dashboardUrl = "/", adminEmail = request.ConfirmedBy });
     }
 

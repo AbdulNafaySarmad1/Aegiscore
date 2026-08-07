@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
@@ -34,13 +35,29 @@ public class GeoIpService : IGeoIpService
 
     public async Task<GeoIpResult?> LookupAsync(string ipAddress, CancellationToken cancellationToken = default)
     {
-        await Task.CompletedTask;
         if (string.IsNullOrEmpty(ipAddress)) return null;
         if (!IPAddress.TryParse(ipAddress, out var ip)) return null;
         if (IPAddress.IsLoopback(ip) || ip.IsPrivate()) return new GeoIpResult("Local", "Campus");
+
+        try
+        {
+            using var http = new HttpClient();
+            http.Timeout = TimeSpan.FromSeconds(3);
+            var response = await http.GetFromJsonAsync<GeoIpApiResponse>(
+                $"https://ipapi.co/{ipAddress}/json/", cancellationToken);
+            if (response?.CountryName is not null)
+                return new GeoIpResult(response.CountryName, response.City ?? "Unknown");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GeoIP lookup failed for {Ip}, using fallback", ipAddress);
+        }
+
         _logger.LogDebug("GeoIP lookup for {Ip}", ipAddress);
-        return new GeoIpResult("Pakistan", "Karachi");
+        return new GeoIpResult("Unknown", "Unknown");
     }
+
+    private sealed record GeoIpApiResponse(string? CountryName, string? City);
 }
 
 public class LoginAuditService : ILoginAuditService

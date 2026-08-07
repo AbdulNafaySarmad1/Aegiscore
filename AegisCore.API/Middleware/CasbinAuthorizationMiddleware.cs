@@ -29,14 +29,39 @@ public class CasbinAuthorizationMiddleware
     /// <param name="context">The HTTP context.</param>
     public async Task InvokeAsync(HttpContext context)
     {
-        var subject = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+        var roles = context.User?.FindAll(ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList() ?? [];
+
+        if (roles.Contains("SuperAdmin"))
+        {
+            await _next(context);
+            return;
+        }
+
         var obj = context.Request.Path.Value ?? "/";
         var action = context.Request.Method;
 
         using var scope = _serviceProvider.CreateScope();
         var enforcer = scope.ServiceProvider.GetRequiredService<IEnforcer>();
 
-        var allowed = await enforcer.EnforceAsync(subject, obj, action);
+        var allowed = false;
+
+        if (roles.Count > 0)
+        {
+            foreach (var role in roles)
+            {
+                if (await enforcer.EnforceAsync(role, obj, action))
+                {
+                    allowed = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            allowed = await enforcer.EnforceAsync("anonymous", obj, action);
+        }
 
         if (!allowed)
         {

@@ -27,4 +27,24 @@ public interface IJwtTokenService
     /// <param name="token">The JWT token.</param>
     /// <returns>The claims principal if valid; otherwise null.</returns>
     ClaimsPrincipal? ValidateToken(string token);
+
+    /// <summary>
+    /// Generates a new refresh token family and stores it in Redis.
+    /// </summary>
+    /// <param name="userId">The user identifier.</param>
+    /// <returns>The generated family identifier.</returns>
+    Task<Guid> GenerateRefreshTokenFamilyAsync(Guid userId);
+
+    /// <summary>
+    /// Marks a refresh token family as invalid in Redis.
+    /// </summary>
+    /// <param name="familyId">The family identifier.</param>
+    Task InvalidateRefreshTokenFamilyAsync(Guid familyId);
+
+    /// <summary>
+    /// Checks whether a refresh token family is still valid.
+    /// </summary>
+    /// <param name="familyId">The family identifier.</param>
+    /// <returns>True if the family is valid; otherwise false.</returns>
+    Task<bool> IsRefreshTokenFamilyValidAsync(Guid familyId);
 }

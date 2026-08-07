@@ -102,8 +102,8 @@ a{{color:#3B82F6;text-decoration:none}}a:hover{{text-decoration:underline}}
 <h1>Demo Period Has Ended</h1>
 <p>This AegisCore demo instance expired on:</p>
 <div class='time'>{time}</div>
-<p>To continue using AegisCore, please contact Nocturne Systems for a production license.</p>
-<p style='margin-top:1rem'><a href='mailto:sales@nocturnesystems.pk'>sales@nocturnesystems.pk</a></p>
+<p>To continue using AegisCore, please contact AegisCore Support for a production license.</p>
+<p style='margin-top:1rem'><a href='mailto:sales@aegiscore.pk'>sales@aegiscore.pk</a></p>
 </div></body></html>";
     }
 

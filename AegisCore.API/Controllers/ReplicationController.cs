@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/admin/replication")]
-[Authorize]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class ReplicationController : ControllerBase
 {
     private readonly IReplicaManagerService _svc;

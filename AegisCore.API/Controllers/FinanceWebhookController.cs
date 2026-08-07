@@ -3,9 +3,9 @@ using System.Text;
 using System.Text.Json;
 using AegisCore.Application.Finance;
 using AegisCore.Contracts.Abstractions.Cloud;
+using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Security.Pqc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -13,14 +13,14 @@ using StackExchange.Redis;
 namespace AegisCore.API.Controllers;
 
 [ApiController]
-[AllowAnonymous]
 [Route("api/webhooks")]
 public sealed class FinanceWebhookController(
     AegisDbContext db,
     ISecretService secrets,
     IConnectionMultiplexer redis,
     IFinanceModuleService finance,
-    IPqcSignatureService pqc) : ControllerBase
+    IPqcSignatureService pqc,
+    IConfiguration configuration) : ControllerBase
 {
     [HttpPost("{tenantId:guid}/{gatewaySlug}")]
     [RequestSizeLimit(1_048_576)]
@@ -29,17 +29,37 @@ public sealed class FinanceWebhookController(
         if (tenantId == Guid.Empty || string.IsNullOrWhiteSpace(gatewaySlug)) return Ok(new { accepted = true });
         var gateway = gatewaySlug.Trim().ToLowerInvariant();
         if (gateway.Length > 40 || gateway.Any(c => !(char.IsAsciiLetterOrDigit(c) || c == '-'))) return Ok(new { accepted = true });
+
+        var sharedSecret = configuration["Webhooks:SharedSecret"];
+        if (!string.IsNullOrWhiteSpace(sharedSecret))
+        {
+            var supplied = Request.Headers["X-Webhook-Shared-Secret"].ToString();
+            if (string.IsNullOrWhiteSpace(supplied)) return Ok(new { accepted = true });
+            var expected = HMACSHA256.HashData(Encoding.UTF8.GetBytes(sharedSecret), Encoding.UTF8.GetBytes($"{tenantId:D}/{gateway}"));
+            byte[] actual;
+            try { actual = Convert.FromHexString(supplied); }
+            catch (FormatException)
+            {
+                try { actual = Convert.FromBase64String(supplied); }
+                catch (FormatException) { return Ok(new { accepted = true }); }
+            }
+            if (!CryptographicOperations.FixedTimeEquals(expected, actual)) return Ok(new { accepted = true });
+        }
+
+        var tenant = await db.Tenants.AsNoTracking().SingleOrDefaultAsync(x => x.Id == tenantId, ct);
+        if (tenant is null || !tenant.IsActive) return Ok(new { accepted = true });
+
         await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
-        var configuration = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
+        var gatewayConfig = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.GatewaySlug == gateway && x.IsActive, ct);
-        if (configuration is null || !string.Equals(configuration.SecretNamespace, $"/tenants/{tenantId:D}/gateways/{gateway}", StringComparison.Ordinal)) return Ok(new { accepted = true });
+        if (gatewayConfig is null || !string.Equals(gatewayConfig.SecretNamespace, $"/tenants/{tenantId:D}/gateways/{gateway}", StringComparison.Ordinal)) return Ok(new { accepted = true });
 
         using var reader = new StreamReader(Request.Body, Encoding.UTF8, leaveOpen: false);
         var raw = await reader.ReadToEndAsync(ct);
         var signature = Request.Headers["X-Gateway-Signature"].ToString();
-        if (raw.Length == 0 || !await IsValidSignatureAsync(configuration.SecretNamespace, raw, signature, ct)) return Ok(new { accepted = true });
-        if (configuration.Environment.Equals("production", StringComparison.OrdinalIgnoreCase)
-            && !await IsValidPqcSignatureAsync(configuration.SecretNamespace, raw, Request.Headers["X-Gateway-PQC-Signature"].ToString(), ct))
+        if (raw.Length == 0 || !await IsValidSignatureAsync(gatewayConfig.SecretNamespace, raw, signature, ct)) return Ok(new { accepted = true });
+        if (gatewayConfig.Environment.Equals("production", StringComparison.OrdinalIgnoreCase)
+            && !await IsValidPqcSignatureAsync(gatewayConfig.SecretNamespace, raw, Request.Headers["X-Gateway-PQC-Signature"].ToString(), ct))
             return Ok(new { accepted = true });
 
         GatewayEnvelope envelope;
@@ -54,7 +74,7 @@ public sealed class FinanceWebhookController(
         {
             await finance.RecordGatewayPaymentAsync(tenantId, gateway, new RecordGatewayPaymentCommand(
                 envelope.FeeDemandId, envelope.FeeInstallmentId, envelope.Amount, envelope.Currency,
-                envelope.WebhookId, envelope.ExternalReference, envelope.SanitizedJson, configuration.Environment == "sandbox"), ct);
+                envelope.WebhookId, envelope.ExternalReference, envelope.SanitizedJson, gatewayConfig.Environment == "sandbox"), ct);
         }
         catch (Exception)
         {

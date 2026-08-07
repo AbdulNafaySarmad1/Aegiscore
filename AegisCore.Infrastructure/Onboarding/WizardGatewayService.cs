@@ -29,7 +29,7 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
         ["swift-mt103"] = ["BIC", "SIGNING_KEY_ID"]
     };
 
-    public async Task<GatewayConfigurationResult> ConfigureAsync(Guid tenantId, string slug, JsonElement payload, CancellationToken ct, Guid configuredByUserId = default)
+    public async Task<GatewayConfigurationResult> ConfigureAsync(Guid tenantId, string slug, JsonElement payload, CancellationToken ct, Guid configuredByUserId = default, bool demoMode = false)
     {
         var normalized = NormalizeSlug(slug);
         if (!RequiredFields.TryGetValue(normalized, out var required)) throw new InvalidOperationException("Unsupported payment gateway.");
@@ -48,13 +48,23 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
             fields[key] = value;
         }
 
-        var missing = required.Where(name => !fields.ContainsKey(name)).ToList();
-        if (missing.Count > 0) throw new InvalidOperationException($"Required gateway fields are missing: {string.Join(", ", missing)}.");
         if (!fields.TryGetValue("ENV", out var environment))
             throw new InvalidOperationException("Gateway environment must be selected explicitly.");
         environment = environment.Trim().ToLowerInvariant();
         if (environment is not ("sandbox" or "production"))
             throw new ArgumentException("Gateway environment is invalid.");
+        if (demoMode && environment != "sandbox")
+            throw new ArgumentException("Demo mode only supports sandbox gateway configuration.");
+        if (demoMode)
+        {
+            foreach (var field in required)
+                fields.TryAdd(field, $"demo-{normalized}-{field.ToLowerInvariant()}");
+            fields["ENV"] = "sandbox";
+            environment = "sandbox";
+        }
+
+        var missing = required.Where(name => !fields.ContainsKey(name)).ToList();
+        if (missing.Count > 0) throw new InvalidOperationException($"Required gateway fields are missing: {string.Join(", ", missing)}.");
         if (environment == "production")
         {
             if (!fields.TryGetValue("PQC_ALGORITHM", out var algorithm) || !string.Equals(algorithm.Trim(), "ML-DSA-65", StringComparison.Ordinal))

@@ -101,8 +101,10 @@ public class DataImportService : IDataImportService
         {
             if (conn.DbType != "PostgreSQL") { job.Status = "Failed"; job.ErrorLogJson = JsonSerializer.Serialize(new[] { $"Unsupported source DB type: {conn.DbType}. Currently only PostgreSQL sources are supported for import." }); await _db.SaveChangesAsync(ct); return job; }
 
+            if (!IsQuerySafe(sourceQuery)) { job.Status = "Failed"; job.ErrorLogJson = JsonSerializer.Serialize(new[] { "Source query contains prohibited SQL keywords." }); await _db.SaveChangesAsync(ct); return job; }
+
             using var dbConn = CreateDbConnection(conn); await dbConn.OpenAsync(ct);
-            using var cmd = dbConn.CreateCommand(); cmd.CommandText = sourceQuery;
+            using var cmd = dbConn.CreateCommand(); cmd.CommandText = sourceQuery; cmd.CommandTimeout = 30;
             using var reader = await cmd.ExecuteReaderAsync(ct);
             var rowIndex = 0; var batchRows = 0;
             while (await reader.ReadAsync(ct))
@@ -231,5 +233,20 @@ public class DataImportService : IDataImportService
             catch (Exception ex) { _logger.LogWarning(ex, "Failed to seed built-in field mapping templates"); }
             _templatesSeeded = true;
         }
+    }
+
+    private static readonly string[] _dangerousKeywords = { "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE", "EXEC", "EXECUTE", "--", ";", "UNION", "COPY", "TRUNCATE" };
+
+    private static bool IsQuerySafe(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return false;
+        var upper = query.ToUpperInvariant();
+        var trimmed = upper.TrimStart();
+        if (!trimmed.StartsWith("SELECT") && !trimmed.StartsWith("WITH")) return false;
+        foreach (var kw in _dangerousKeywords)
+        {
+            if (upper.Contains(kw)) return false;
+        }
+        return true;
     }
 }

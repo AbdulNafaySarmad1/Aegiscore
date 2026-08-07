@@ -12,7 +12,9 @@ RUN npm run build
 FROM node:22-alpine AS runtime
 LABEL org.opencontainers.image.title="AegisCore Portal" \
       org.opencontainers.image.description="AegisCore University ERP portal"
+ARG NEXT_PUBLIC_DEMO_MODE=false
 ENV NODE_ENV=production \
+    NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE \
     PORT=8080 \
     HOSTNAME=0.0.0.0
 WORKDIR /app

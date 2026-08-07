@@ -13,8 +13,10 @@ public sealed class TenantSessionInterceptor(IHttpContextAccessor httpContextAcc
         var value = itemTenant is { } tenantFromContext && tenantFromContext != Guid.Empty
             ? tenantFromContext.ToString()
             : httpContextAccessor.HttpContext?.User.FindFirst("tenant_id")?.Value
-            ?? httpContextAccessor.HttpContext?.User.FindFirst("tid")?.Value
-            ?? configuration["TENANT_ID"];
+                ?? httpContextAccessor.HttpContext?.User.FindFirst("tid")?.Value
+                ?? httpContextAccessor.HttpContext?.User.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid")?.Value
+                ?? configuration["TENANT_ID"];
+
         var tenant = Guid.TryParse(value, out var tenantId) && tenantId != Guid.Empty ? tenantId.ToString() : string.Empty;
 
         await using var command = connection.CreateCommand();

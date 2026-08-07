@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AegisCore.Application.ProfilePictures;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,8 +12,19 @@ public class ProfilePictureController : ControllerBase
     public ProfilePictureController(IProfilePictureService svc) => _svc = svc;
 
     [HttpPost("upload"), RequestSizeLimit(5 * 1024 * 1024)]
-    public async Task<IActionResult> Upload([FromQuery] Guid userId, [FromQuery] Guid tenantId, CancellationToken ct)
+    public async Task<IActionResult> Upload(CancellationToken ct)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value ?? User.FindFirst("tid")?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId)
+            || !Guid.TryParse(tenantIdClaim, out var tenantId)
+            || userId == Guid.Empty
+            || tenantId == Guid.Empty)
+        {
+            return Unauthorized(new { error = "missing_or_invalid_identity" });
+        }
+
         using var ms = new MemoryStream();
         await Request.Body.CopyToAsync(ms, ct);
         ms.Position = 0;

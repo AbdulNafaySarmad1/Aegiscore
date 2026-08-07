@@ -121,12 +121,14 @@ public static class InfrastructureServiceExtensions
         services.AddConfigCenter(configuration);
         services.AddIdentityGovernance(configuration);
         services.AddAbacAuthorization();
+        services.AddCasbinAuthorization();
         services.AddApiGateway(configuration);
         services.AddDegreeAudit(configuration);
         services.AddEnterpriseSearch(configuration);
         services.AddDigitalTwin(configuration);
         services.AddOnboardingWizard();
         services.AddAiPlatform(configuration);
+        services.AddScoped<AzureDocumentIntelligenceService>();
         services.AddMicrosoftEcosystem(configuration);
         services.AddStudentLifecycle();
         services.AddAssetInventory();

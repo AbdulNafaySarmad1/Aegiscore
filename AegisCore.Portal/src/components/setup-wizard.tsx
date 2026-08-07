@@ -319,9 +319,9 @@ export function SetupWizard() {
           {step === 0 && (
             <form className="setup-form" onSubmit={saveInstitution}>
               <FormSection title="University identity" description="This identity appears across portals, documents, and official communication.">
-                <Field label="Full university name" required><input required value={institution.name} onChange={e => setInstitution({ ...institution, name: e.target.value })} placeholder="Sir Syed University of Engineering & Technology" /></Field>
-                <Field label="Short name" required><input required value={institution.shortName} onChange={e => setInstitution({ ...institution, shortName: e.target.value })} placeholder="SSUET" /></Field>
-                <Field label="University domain" hint="We will prepare erp.yourdomain.edu.pk" required><input required value={institution.domain} onChange={e => setInstitution({ ...institution, domain: e.target.value })} placeholder="ssuet.edu.pk" /></Field>
+                <Field label="Full university name" required><input required value={institution.name} onChange={e => setInstitution({ ...institution, name: e.target.value })} placeholder="e.g., Institute of Business Management" /></Field>
+                <Field label="Short name" required><input required value={institution.shortName} onChange={e => setInstitution({ ...institution, shortName: e.target.value })} placeholder="e.g., IOBM" /></Field>
+                <Field label="University domain" hint="We will prepare erp.yourdomain.edu.pk" required><input required value={institution.domain} onChange={e => setInstitution({ ...institution, domain: e.target.value })} placeholder="e.g., iobm.edu.pk" /></Field>
                 <Field label="AegisCore license key" required><div className="input-with-icon"><KeyRound /><input required value={institution.licenseKey} onChange={e => setInstitution({ ...institution, licenseKey: e.target.value })} placeholder="AE-XXXX-XXXX-XXXX" /></div></Field>
               </FormSection>
               <FormSection title="First administrator" description="Create the accountable owner for this university installation.">

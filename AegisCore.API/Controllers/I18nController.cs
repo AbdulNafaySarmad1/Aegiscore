@@ -2,6 +2,7 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.I18n;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
@@ -75,6 +76,7 @@ public class I18nController : ControllerBase
 
 [ApiController]
 [Route("api/country-packs")]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class CountryPackController : ControllerBase
 {
     private readonly ICountryPackService _packService;

@@ -16,12 +16,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       ? init.headers
       : { "Content-Type": "application/json", ...init?.headers }
   });
-
   const contentType = response.headers.get("content-type") ?? "";
   const payload = contentType.includes("json")
     ? await response.json()
     : await response.text();
-
   if (!response.ok) {
     const body = payload as {
       error?: string | { userMessage?: string };
@@ -37,21 +35,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       `Request failed (${response.status})`;
     throw new ApiError(message, response.status, payload);
   }
-
   return payload as T;
 }
 
 export function apiGet<T>(path: string, signal?: AbortSignal) {
   return request<T>(path, { signal });
 }
-
 export function apiPost<T>(path: string, body?: unknown) {
   return request<T>(path, {
     method: "POST",
     body: body instanceof FormData ? body : JSON.stringify(body ?? {})
   });
 }
-
 export function apiPut<T>(path: string, body?: unknown) {
   return request<T>(path, {
     method: "PUT",

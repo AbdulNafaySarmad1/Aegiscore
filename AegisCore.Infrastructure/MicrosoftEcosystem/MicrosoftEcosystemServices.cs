@@ -4,6 +4,7 @@ using AegisCore.Application.MicrosoftEcosystem;
 using AegisCore.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace AegisCore.Infrastructure.MicrosoftEcosystem;
 
@@ -113,11 +114,22 @@ public class PowerBiEmbeddingService : IPowerBiEmbeddingService
 {
     private readonly AegisDbContext _db;
     private readonly IConfiguration _config;
+    private readonly ILogger<PowerBiEmbeddingService> _logger;
 
-    public PowerBiEmbeddingService(AegisDbContext db, IConfiguration config)
+    private static readonly IAsyncPolicy AzureAdPolicy = Policy
+        .WrapAsync(
+            Policy.Handle<Exception>()
+                .AdvancedCircuitBreakerAsync(1.0, TimeSpan.FromSeconds(30), 5, TimeSpan.FromSeconds(60)),
+            Policy.Handle<Exception>()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 1))),
+            Policy.TimeoutAsync(TimeSpan.FromSeconds(10))
+        );
+
+    public PowerBiEmbeddingService(AegisDbContext db, IConfiguration config, ILogger<PowerBiEmbeddingService> logger)
     {
         _db = db;
         _config = config;
+        _logger = logger;
     }
 
     public async Task<PowerBiEmbedConfig> GetEmbedConfigAsync(Guid userId, string role, CancellationToken ct = default)
@@ -127,11 +139,63 @@ public class PowerBiEmbeddingService : IPowerBiEmbeddingService
         var normalizedRole = role.Trim().ToLowerInvariant();
         if (!PowerBiRoles.Allowed.Contains(normalizedRole)) throw new ArgumentException("Unsupported Power BI role.", nameof(role));
         var report = await _db.PowerBiReports.AsNoTracking().FirstAsync(r => r.TargetRole.ToLower() == normalizedRole, ct);
-        var token = _config["PowerBi:EmbedToken"];
-        if (string.IsNullOrWhiteSpace(token)) throw new InvalidOperationException("Power BI embed token is not configured.");
         if (!Uri.TryCreate(report.EmbedUrl, UriKind.Absolute, out var embedUri) || embedUri.Scheme != Uri.UriSchemeHttps)
             throw new InvalidOperationException("Power BI report EmbedUrl must use HTTPS.");
         var minutes = int.TryParse(_config["PowerBi:TokenMinutes"], out var m) && m is >= 1 and <= 60 ? m : 30;
-        return new PowerBiEmbedConfig(report.PowerBiReportId, report.PowerBiWorkspaceId, report.EmbedUrl, token, DateTimeOffset.UtcNow.AddMinutes(minutes));
+
+        try
+        {
+            var staticToken = _config["PowerBi:EmbedToken"];
+            if (!string.IsNullOrWhiteSpace(staticToken) && !staticToken.StartsWith("${", StringComparison.Ordinal))
+            {
+                return new PowerBiEmbedConfig(report.PowerBiReportId, report.PowerBiWorkspaceId, report.EmbedUrl, staticToken, DateTimeOffset.UtcNow.AddMinutes(minutes));
+            }
+        }
+        catch { }
+
+        try
+        {
+            var tenantId = _config["Azure:TenantId"] ?? _config["AZURE_TENANT_ID"];
+            var clientId = _config["Azure:ClientId"] ?? _config["AZURE_CLIENT_ID"];
+            var clientSecret = _config["Azure:ClientSecret"] ?? _config["AZURE_CLIENT_SECRET"];
+            var authority = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
+
+            if (string.IsNullOrWhiteSpace(tenantId) || string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+                throw new InvalidOperationException("Azure AD credentials are not configured for Power BI token acquisition.");
+
+            AzureAdTokenResponse? tokenResponse = null;
+            await AzureAdPolicy.ExecuteAsync(async innerCt =>
+            {
+                using var http = new HttpClient();
+                using var body = new FormUrlEncodedContent([
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("client_id", clientId),
+                    new KeyValuePair<string, string>("client_secret", clientSecret),
+                    new KeyValuePair<string, string>("scope", "https://analysis.windows.net/powerbi/api/.default")
+                ]);
+
+                var response = await http.PostAsync(authority, body, innerCt);
+                response.EnsureSuccessStatusCode();
+                var tr = await response.Content.ReadFromJsonAsync<AzureAdTokenResponse>(cancellationToken: innerCt);
+                if (tr?.AccessToken is null)
+                    throw new InvalidOperationException("Failed to acquire Azure AD token for Power BI.");
+                tokenResponse = tr;
+            }, ct);
+
+            if (tokenResponse?.AccessToken is null)
+                throw new InvalidOperationException("Failed to acquire Azure AD token for Power BI.");
+
+            return new PowerBiEmbedConfig(report.PowerBiReportId, report.PowerBiWorkspaceId, report.EmbedUrl, tokenResponse.AccessToken, DateTimeOffset.UtcNow.AddMinutes(minutes));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Power BI Azure AD token acquisition failed, falling back to static config if available.");
+            var fallbackToken = _config["PowerBi:EmbedToken"];
+            if (!string.IsNullOrWhiteSpace(fallbackToken) && !fallbackToken.StartsWith("${", StringComparison.Ordinal))
+                return new PowerBiEmbedConfig(report.PowerBiReportId, report.PowerBiWorkspaceId, report.EmbedUrl, fallbackToken, DateTimeOffset.UtcNow.AddMinutes(minutes));
+            throw new InvalidOperationException("Power BI embed token is not available. Configure Azure:TenantId, Azure:ClientId, and Azure:ClientSecret or PowerBi:EmbedToken.", ex);
+        }
     }
+
+    private sealed record AzureAdTokenResponse(string AccessToken, string TokenType, int ExpiresIn);
 }

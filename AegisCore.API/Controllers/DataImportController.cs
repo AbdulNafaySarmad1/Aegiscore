@@ -16,7 +16,22 @@ namespace AegisCore.API.Controllers;
 
 [HttpGet("connections/{id:guid}/tables/{table}/columns")] public async Task<IActionResult> DiscoverColumns(Guid id, string table, [FromQuery] string? schema, CancellationToken ct) { var cols = await _s.DiscoverColumnsAsync(id, table, schema, ct); return Ok(new { connectionId = id, table, schema, total = cols.Count, columns = cols }); }
 
-[HttpPost("jobs")] public async Task<IActionResult> StartImport([FromBody] StartImportRequest req, CancellationToken ct) { var mappings = JsonSerializer.Deserialize<Dictionary<string, string>>(req.FieldMappingsJson ?? "{}") ?? new(); var job = await _s.StartImportAsync(req.ConnectionId, req.EntityType, req.SourceQuery, mappings, req.TriggeredByUserId, ct); return Ok(job); }
+[HttpPost("jobs")] public async Task<IActionResult> StartImport([FromBody] StartImportRequest req, CancellationToken ct) { if (!IsQuerySafe(req.SourceQuery)) return BadRequest(new { error = "SourceQuery contains prohibited SQL keywords or patterns. Only SELECT and WITH (CTE) queries are allowed." }); var mappings = JsonSerializer.Deserialize<Dictionary<string, string>>(req.FieldMappingsJson ?? "{}") ?? new(); var job = await _s.StartImportAsync(req.ConnectionId, req.EntityType, req.SourceQuery, mappings, req.TriggeredByUserId, ct); return Ok(job); }
+
+        private static readonly string[] _dangerousKeywords = { "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE", "EXEC", "EXECUTE", "--", ";", "UNION", "COPY", "TRUNCATE" };
+
+        private static bool IsQuerySafe(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return false;
+            var upper = query.ToUpperInvariant();
+            var trimmed = upper.TrimStart();
+            if (!trimmed.StartsWith("SELECT") && !trimmed.StartsWith("WITH")) return false;
+            foreach (var kw in _dangerousKeywords)
+            {
+                if (upper.Contains(kw)) return false;
+            }
+            return true;
+        }
 
 [HttpGet("jobs/{id:guid}")] public async Task<IActionResult> JobStatus(Guid id, CancellationToken ct) => Ok(await _s.GetJobStatusAsync(id, ct));
 

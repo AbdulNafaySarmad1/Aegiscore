@@ -1,0 +1,231 @@
+AegisCore Department Stack and Capability Inventory
+
+Scope:
+- This file describes the department-facing capabilities and the technical stack
+  patterns that appear in the repository.
+- It is grounded in the current codebase. Where the repository exposes a control
+  mechanism but not a fixed capacity number, that is stated plainly.
+
+1. Admissions
+- Stack: ASP.NET Core API, EF Core, PostgreSQL, object storage, regex-based input
+  validation, file upload handling, role-based authorization.
+- Key endpoints: `/api/admissions`, `/api/admissions-crm`.
+- Capabilities:
+  - Enquiry capture and admission lead tracking.
+  - Application submission and verification.
+  - Merit list generation.
+  - Seat allocation and IBCC/equivalence handling.
+  - Document upload and verification.
+  - Admission workflow status management.
+- Under load:
+  - Writes are tenant-scoped and persisted through the central PostgreSQL
+    database.
+  - Document uploads are streamed to storage rather than held entirely in memory.
+  - Large uploads are guarded by file-size limits and signature checks.
+  - There is no hardcoded admission-specific replica count in the repository.
+
+2. Academics
+- Stack: ASP.NET Core API, EF Core, PostgreSQL, Next.js workspace pages, domain
+  services for grading, attendance, degree audit, curriculum, and registration.
+- Key surfaces: examinations, classes, grade appeals, grade distributions,
+  prerequisite conflicts, convocations, freezes, catalog ingestion, readiness.
+- Capabilities:
+  - Enrollment and class management.
+  - Attendance capture and reporting.
+  - Marks entry and result publication.
+  - Degree audit and graduation readiness.
+  - Grade appeals and moderation workflows.
+  - Plagiarism and assessment review.
+  - Curriculum and catalog ingestion.
+- Under load:
+  - Attendance and academic reports are query-based and aggregated server-side.
+  - Enrollment and grading flows depend on central DB writes; no per-department
+    replica fan-out is hardcoded.
+  - Read-path acceleration is supported by the broader replica framework, with
+    lag thresholds and health checks.
+
+3. Finance
+- Stack: ASP.NET Core API, PostgreSQL, Redis, Serilog, Casbin, PQC signing,
+  SHA-256/SHA-512 hashes, optional cloud secret stores.
+- Key surfaces: finance dashboard, department finance, payment gateways, audit,
+  student finance, voucher verification, payroll settlement.
+- Capabilities:
+  - Fee ledgers, demands, collections, and overdue tracking.
+  - Department budgets and approvals.
+  - Voucher verification and audit sealing.
+  - Payment gateway configuration.
+  - Cash flow forecasting and default-risk analytics.
+  - Payroll and settlement file generation.
+- Under load:
+  - Financial artifacts are hashed and signed before persistence.
+  - Approval queues and audit logs are stored as discrete records.
+  - Read replicas are tracked via replica health services; lag can be measured
+    and replicas can be promoted, but the code does not fix a 10-replica target.
+
+4. Audit / Compliance
+- Stack: ASP.NET Core API, PostgreSQL, PQC signatures, SHA-256 hashes, signed
+  evidence packages, role-based access.
+- Key surfaces: audit dashboard, finance audit, evidence export, control runs.
+- Capabilities:
+  - Control evaluation and audit dashboards.
+  - Evidence package generation.
+  - External auditor access with time-limited tokens.
+  - Segregation-of-duties rule management.
+  - Signed control artifacts and hash verification.
+- Under load:
+  - Audit runs are append-oriented and hash-backed.
+  - Evidence packages are generated as immutable artifacts.
+  - The system uses explicit control/status records rather than in-memory audit
+    state.
+
+5. Student Support and Welfare
+- Stack: Next.js workspace pages, ASP.NET Core APIs, PostgreSQL, queue-backed
+  ticketing patterns, role-scoped access.
+- Key surfaces: mental health, student support, anonymous ticketing.
+- Capabilities:
+  - Counselor queue management.
+  - Anonymous reporting.
+  - Crisis ticket escalation.
+  - Mandatory reporting workflows.
+- Under load:
+  - Ticket queues are persisted and ordered; the UI shows queue status rather
+    than assuming instantaneous handling.
+  - Escalation states are explicit so urgent cases can bypass normal ordering.
+
+6. Transport
+- Stack: Next.js portal, ASP.NET Core API, QR-driven workflows, role-scoped UI.
+- Key surfaces: transport dashboard, boarding logs, fee summary.
+- Capabilities:
+  - Route management.
+  - Vehicle and driver assignment.
+  - Student boarding logging.
+  - Compliance alerting.
+  - Fee summary visibility.
+- Under load:
+  - Boarding actions are event-like writes.
+  - Status data is summarized server-side for display.
+
+7. Cafeteria
+- Stack: Next.js portal, ASP.NET Core API, forecasting and scoring services.
+- Capabilities:
+  - Menu management.
+  - Cashless/payment-linked ordering workflows.
+  - Demand forecasting.
+  - Vendor scorecards.
+- Under load:
+  - Menu and scorecard data are normalized into server-side objects.
+  - Forecasting is computed separately from the interaction surface.
+
+8. Placement / Career Services
+- Stack: Next.js portal, ASP.NET Core API, analytics and recommendation flows.
+- Capabilities:
+  - Partner company management.
+  - Student readiness assessment.
+  - Active placement tracking.
+  - Risk lookup and interventions.
+  - Placement analytics and stipend summaries.
+- Under load:
+  - Readiness checks and interventions are API calls, not local UI state.
+  - Placement summaries are aggregated and rendered in the portal.
+
+9. Board / Governance
+- Stack: Next.js portal, ASP.NET Core API, dashboards, pack generation, charts.
+- Capabilities:
+  - Strategic dashboards.
+  - Board meeting pack generation.
+  - Benchmark comparisons.
+  - Alert feeds and KPIs.
+- Under load:
+  - Board packs are generated as backend artifacts.
+  - Dashboard data is summarized for read efficiency.
+
+10. Document Vault
+- Stack: ASP.NET Core API, S3-compatible storage, SHA-512 hashes, PQC
+  signatures, retention tiers.
+- Capabilities:
+  - Tiered document retention.
+  - Upload, download, verification, and locking.
+  - PQC-backed verification state.
+  - Audit logs for access and tamper detection.
+- Under load:
+  - Uploads are streamed.
+  - Documents are validated by hash and verification status before release.
+  - Retention policies are tier-based and enforced in storage workflows.
+
+11. Elections
+- Stack: ASP.NET Core services, PostgreSQL, PQC signing, encrypted ballot flows.
+- Capabilities:
+  - Election creation.
+  - Candidate nomination.
+  - Voter token issuance.
+  - Encrypted ballot capture.
+  - Result tallying and certification.
+- Under load:
+  - Ballots are stored as encrypted payloads.
+  - Tally and certification are backend operations rather than client-side math.
+
+12. Proctoring / Integrity
+- Stack: ASP.NET Core API, image processing, signal-derived feature checks,
+  plagiarism engines, document and assessment metadata.
+- Capabilities:
+  - Face analysis and lockdown validation.
+  - Multi-face detection.
+  - Gaze estimation.
+  - Plagiarism scoring and collusion detection.
+- Under load:
+  - Media submissions are size-limited.
+  - Analysis results are returned as compact identifiers and scores.
+
+13. Replication / Sync Lag / Reliability
+- Stack: PostgreSQL, replica health services, sync-lag state tracking,
+  promotion workflows, health checks.
+- Capabilities:
+  - Replica registration and monitoring.
+  - Replica lag checks.
+  - Promotion of replicas when needed.
+  - Write/commit lag tracking for controlled propagation.
+  - Centralized lag thresholds and alerts.
+- Under load:
+  - The code tracks replica lag seconds and compares them to configured
+    thresholds.
+  - A sync-lag service records writes, grace periods, pending entries, and
+    commits.
+  - This is the correct place to describe "time to commit to central DB."
+  - The repository does not specify a fixed maximum of 10 replicas.
+
+14. Imports / Setup / Onboarding
+- Stack: Next.js portal, CSV/template import flows, setup wizard services,
+  validation and provisioning logic.
+- Capabilities:
+  - Import templates and guided onboarding.
+  - Domain-specific bootstrap data.
+  - Setup validation.
+- Under load:
+  - Imports are file-driven and staged.
+  - Validation happens before commit into core records.
+
+15. Foreign Students / Voice / Misc Platform Services
+- Stack: Next.js portal, ASP.NET Core API, shared platform services.
+- Capabilities:
+  - Foreign student workflows.
+  - Voice assistant surfaces.
+  - Shared notifications, feature flags, and queueing.
+- Under load:
+  - These features are routed through the same authorization and tenant model
+    as the rest of the platform.
+
+Cross-cutting technical stack used across departments:
+- Frontend: Next.js 16, React 19, TypeScript, next-intl, lucide-react,
+  framer-motion, recharts.
+- Backend: .NET 10, ASP.NET Core, EF Core 10, PostgreSQL.
+- Security: JWT, RSA signing, Argon2id passwords, AES-256-GCM backup
+  encryption, PQC signatures, Casbin authorization.
+- Storage: PostgreSQL, S3-compatible object storage, Redis, secrets managers.
+- Observability / ops: logging, health checks, replica monitoring, rate limiting.
+
+Important accuracy note:
+- I did not find a SHAP implementation in the repository.
+- If you need a department-by-department list that includes only implemented
+  services, this file is that list.
+- If you want a speculative future-state document, that would need to be marked
+  as such so it is not confused with current system behavior.

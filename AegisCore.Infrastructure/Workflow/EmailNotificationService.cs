@@ -6,6 +6,7 @@ using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace AegisCore.Infrastructure.Workflow;
 
@@ -15,6 +16,13 @@ public class EmailNotificationService : INotificationService
     private readonly INotificationRecordRepository _notificationRepo;
     private readonly TenantConfigService _tenantConfig;
     private readonly ILogger<EmailNotificationService> _logger;
+
+    private static readonly IAsyncPolicy NotificationPolicy = Policy
+        .WrapAsync(
+            Policy.Handle<Exception>()
+                .WaitAndRetryAsync(2, _ => TimeSpan.FromSeconds(2)),
+            Policy.TimeoutAsync(TimeSpan.FromSeconds(15))
+        );
 
     public EmailNotificationService(
         IConfiguration configuration,
@@ -56,7 +64,9 @@ public class EmailNotificationService : INotificationService
             };
             message.To.Add(to);
 
-            await client.SendMailAsync(message, cancellationToken);
+            await NotificationPolicy.ExecuteAsync(
+                async innerCt => await client.SendMailAsync(message, innerCt),
+                cancellationToken);
             _logger.LogInformation("Email sent to {Recipient}: {Subject}", to, subject);
         }
         catch (Exception ex)
@@ -66,16 +76,108 @@ public class EmailNotificationService : INotificationService
         }
     }
 
-    public Task SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
+    public async Task SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
     {
-        _logger.LogWarning("SMS sending not configured. Message to {Phone}: {Message}", phoneNumber, message);
-        return Task.CompletedTask;
+        var twilioSid = _configuration["Twilio:AccountSid"];
+        var twilioToken = _configuration["Twilio:AuthToken"];
+        var twilioFrom = _configuration["Twilio:FromNumber"];
+
+        if (string.IsNullOrWhiteSpace(twilioSid) || string.IsNullOrWhiteSpace(twilioToken) || string.IsNullOrWhiteSpace(twilioFrom))
+        {
+            _logger.LogWarning("SMS not configured — Twilio credentials missing. Message to {Phone}: {Message}", phoneNumber, message);
+            return;
+        }
+
+        try
+        {
+            var auth = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($"{twilioSid}:{twilioToken}"));
+
+            var requestUrl = $"https://api.twilio.com/2010-04-01/Accounts/{twilioSid}/Messages.json";
+
+            await NotificationPolicy.ExecuteAsync(async innerCt =>
+            {
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
+
+                using var content = new System.Net.Http.FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["To"] = phoneNumber,
+                    ["From"] = twilioFrom,
+                    ["Body"] = message
+                });
+
+                var response = await http.PostAsync(requestUrl, content, innerCt);
+                response.EnsureSuccessStatusCode();
+            }, cancellationToken);
+            _logger.LogInformation("SMS sent to {Phone}", phoneNumber);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send SMS to {Phone}", phoneNumber);
+            throw;
+        }
     }
 
-    public Task SendInAppAsync(Guid userId, string title, string message, CancellationToken cancellationToken = default)
+    public async Task SendInAppAsync(Guid userId, string title, string message, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("In-app notification to {UserId}: {Title} - {Message}", userId, title, message);
-        return Task.CompletedTask;
+        try
+        {
+            var notification = new NotificationRecord
+            {
+                Id = Guid.NewGuid(),
+                Recipient = userId.ToString(),
+                Subject = title,
+                Body = message,
+                Channel = NotificationChannel.InApp,
+                Status = NotificationStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _notificationRepo.AddAsync(notification, cancellationToken);
+            _logger.LogInformation("In-app notification created for {UserId}: {Title}", userId, title);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create in-app notification for {UserId}", userId);
+        }
+    }
+
+    public async Task SendWhatsAppAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
+    {
+        var whatsappToken = _configuration["WhatsApp:AccessToken"];
+        var whatsappPhoneId = _configuration["WhatsApp:PhoneNumberId"];
+
+        if (string.IsNullOrWhiteSpace(whatsappToken) || string.IsNullOrWhiteSpace(whatsappPhoneId))
+        {
+            _logger.LogWarning("WhatsApp not configured. Message to {Phone}: {Message}", phoneNumber, message);
+            return;
+        }
+
+        try
+        {
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", whatsappToken);
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                messaging_product = "whatsapp",
+                to = phoneNumber,
+                type = "text",
+                text = new { body = message }
+            });
+
+            var response = await http.PostAsync(
+                $"https://graph.facebook.com/v18.0/{whatsappPhoneId}/messages",
+                new StringContent(payload, System.Text.Encoding.UTF8, "application/json"),
+                cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+            _logger.LogInformation("WhatsApp message sent to {Phone}", phoneNumber);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send WhatsApp message to {Phone}", phoneNumber);
+            throw;
+        }
     }
 
     public async Task<NotificationRecord> SendAsync(NotificationRecord record, CancellationToken cancellationToken = default)
@@ -91,6 +193,9 @@ public class EmailNotificationService : INotificationService
                     await SendSmsAsync(record.Recipient, record.Body, cancellationToken);
                     break;
                 case NotificationChannel.InApp:
+                    break;
+                case NotificationChannel.WhatsApp:
+                    await SendWhatsAppAsync(record.Recipient, record.Body, cancellationToken);
                     break;
             }
 

@@ -100,18 +100,58 @@
 
     private void TestDatabase()
     {
-        DatabaseResult = new ConnectionTestResult(true, "Connection details accepted. Runtime migration validation occurs during deployment.");
-        Next();
+        if (string.IsNullOrWhiteSpace(DatabaseConnectionString))
+        {
+            DatabaseResult = new ConnectionTestResult(false, "Connection string is required.");
+            return;
+        }
+        ConnectionTestResult? result = null;
+        try
+        {
+            using var conn = new Npgsql.NpgsqlConnection(DatabaseConnectionString);
+            conn.Open();
+            result = new ConnectionTestResult(true, "PostgreSQL connection succeeded.");
+        }
+        catch (Exception ex)
+        {
+            result = new ConnectionTestResult(false, $"Connection failed: {ex.Message}");
+        }
+        DatabaseResult = new ConnectionTestResult(result.Success, result.Message);
+        if (DatabaseResult.Success) Next();
     }
 
     private void TestRedis()
     {
-        RedisResult = new ConnectionTestResult(true, "Connection details accepted. Runtime cache validation occurs during deployment.");
-        Next();
+        if (string.IsNullOrWhiteSpace(RedisConnectionString))
+        {
+            RedisResult = new ConnectionTestResult(false, "Redis connection string is required.");
+            return;
+        }
+        try
+        {
+            var muxer = StackExchange.Redis.ConnectionMultiplexer.Connect(RedisConnectionString);
+            muxer.GetDatabase().Ping();
+            RedisResult = new ConnectionTestResult(true, "Redis connection succeeded.");
+            Next();
+        }
+        catch (Exception ex)
+        {
+            RedisResult = new ConnectionTestResult(false, $"Connection failed: {ex.Message}");
+        }
     }
 
     private void ValidateLicense()
     {
+        if (string.IsNullOrWhiteSpace(LicenseKey))
+        {
+            LicenseResult = new ValidationResult(false, "License key is required.");
+            return;
+        }
+        if (LicenseKey.Length < 16)
+        {
+            LicenseResult = new ValidationResult(false, "License key appears too short.");
+            return;
+        }
         LicenseResult = new ValidationResult(true, "License key captured for server-side validation.");
         Next();
     }

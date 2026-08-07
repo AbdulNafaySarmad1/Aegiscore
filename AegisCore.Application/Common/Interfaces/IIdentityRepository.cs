@@ -24,6 +24,7 @@ public interface IPermissionRepository : IRepository<Permission>
     Task<IReadOnlyList<Permission>> GetByModuleAsync(string module, CancellationToken cancellationToken = default);
     Task<Permission?> GetByResourceAndActionAsync(string resource, string action, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Permission>> GetByRoleAsync(Guid roleId, CancellationToken cancellationToken = default);
+    Task<Dictionary<Guid, List<Guid>>> GetByRolesAsync(List<Guid> roleIds, CancellationToken cancellationToken = default);
 }
 
 public interface IUserRoleRepository : IRepository<UserRole>

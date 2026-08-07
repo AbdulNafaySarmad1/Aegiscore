@@ -1,0 +1,2701 @@
+{
+  "config": {
+    "argv": [
+      "/usr/local/bin/node",
+      "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/playwright.config.ts",
+    "rootDir": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-report/results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "aegiscore.spec.ts",
+      "file": "aegiscore.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Critical Path",
+          "file": "aegiscore.spec.ts",
+          "line": 20,
+          "column": 6,
+          "specs": [
+            {
+              "title": "1 - App loads with no INVALID_KEY or ENOTFOUND errors",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 524,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:32:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 32
+                        },
+                        "snippet": "  30 |     });\n  31 |\n> 32 |     await page.goto(\"/\");\n     |                ^\n  33 |     await waitForLoad(page);\n  34 |\n  35 |     if (errors.length > 0) {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 32
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  30 |     });\n  31 |\n> 32 |     await page.goto(\"/\");\n     |                ^\n  33 |     await waitForLoad(page);\n  34 |\n  35 |     if (errors.length > 0) {\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:32:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:30.324Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 32
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 567,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:32:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 32
+                        },
+                        "snippet": "  30 |     });\n  31 |\n> 32 |     await page.goto(\"/\");\n     |                ^\n  33 |     await waitForLoad(page);\n  34 |\n  35 |     if (errors.length > 0) {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 32
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  30 |     });\n  31 |\n> 32 |     await page.goto(\"/\");\n     |                ^\n  33 |     await waitForLoad(page);\n  34 |\n  35 |     if (errors.length > 0) {\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:32:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:31.898Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-1--66451-LID-KEY-or-ENOTFOUND-errors-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 32
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-48efaca8b4d9f77d26a4",
+              "file": "aegiscore.spec.ts",
+              "line": 21,
+              "column": 7
+            },
+            {
+              "title": "2 - No unhandled React error boundaries triggered",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 390,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:45:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 45
+                        },
+                        "snippet": "  43 |     page.on(\"pageerror\", (err) => reactErrors.push(err.message));\n  44 |\n> 45 |     await page.goto(\"/\");\n     |                ^\n  46 |     await waitForLoad(page);\n  47 |\n  48 |     expect(reactErrors).toHaveLength(0);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 45
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  43 |     page.on(\"pageerror\", (err) => reactErrors.push(err.message));\n  44 |\n> 45 |     await page.goto(\"/\");\n     |                ^\n  46 |     await waitForLoad(page);\n  47 |\n  48 |     expect(reactErrors).toHaveLength(0);\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:45:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:33.769Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-2--5263e--error-boundaries-triggered/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-2--5263e--error-boundaries-triggered/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 45
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 455,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:45:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 45
+                        },
+                        "snippet": "  43 |     page.on(\"pageerror\", (err) => reactErrors.push(err.message));\n  44 |\n> 45 |     await page.goto(\"/\");\n     |                ^\n  46 |     await waitForLoad(page);\n  47 |\n  48 |     expect(reactErrors).toHaveLength(0);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 45
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  43 |     page.on(\"pageerror\", (err) => reactErrors.push(err.message));\n  44 |\n> 45 |     await page.goto(\"/\");\n     |                ^\n  46 |     await waitForLoad(page);\n  47 |\n  48 |     expect(reactErrors).toHaveLength(0);\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:45:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:35.002Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-2--5263e--error-boundaries-triggered-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-2--5263e--error-boundaries-triggered-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-2--5263e--error-boundaries-triggered-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-2--5263e--error-boundaries-triggered-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 45
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-a5dc07edb9de9b94b427",
+              "file": "aegiscore.spec.ts",
+              "line": 41,
+              "column": 7
+            },
+            {
+              "title": "3 - Page title is not empty or undefined",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 453,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:52:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 52
+                        },
+                        "snippet": "  50 |\n  51 |   test(\"3 - Page title is not empty or undefined\", async ({ page }) => {\n> 52 |     await page.goto(\"/\");\n     |                ^\n  53 |     const title = await page.title();\n  54 |     expect(title).toBeTruthy();\n  55 |     expect(title).not.toContain(\"undefined\");"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 52
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  50 |\n  51 |   test(\"3 - Page title is not empty or undefined\", async ({ page }) => {\n> 52 |     await page.goto(\"/\");\n     |                ^\n  53 |     const title = await page.title();\n  54 |     expect(title).toBeTruthy();\n  55 |     expect(title).not.toContain(\"undefined\");\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:52:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:36.355Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 52
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 445,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:52:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 52
+                        },
+                        "snippet": "  50 |\n  51 |   test(\"3 - Page title is not empty or undefined\", async ({ page }) => {\n> 52 |     await page.goto(\"/\");\n     |                ^\n  53 |     const title = await page.title();\n  54 |     expect(title).toBeTruthy();\n  55 |     expect(title).not.toContain(\"undefined\");"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 52
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  50 |\n  51 |   test(\"3 - Page title is not empty or undefined\", async ({ page }) => {\n> 52 |     await page.goto(\"/\");\n     |                ^\n  53 |     const title = await page.title();\n  54 |     expect(title).toBeTruthy();\n  55 |     expect(title).not.toContain(\"undefined\");\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:52:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:37.731Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-3--53e26-e-is-not-empty-or-undefined-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 52
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-eea615b9826c3719cbc7",
+              "file": "aegiscore.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "4 - Login page renders with content visible",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 392,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:60:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 60
+                        },
+                        "snippet": "  58 |\n  59 |   test(\"4 - Login page renders with content visible\", async ({ page }) => {\n> 60 |     await page.goto(\"/login\");\n     |                ^\n  61 |     await waitForLoad(page);\n  62 |\n  63 |     // The login page has a \"Sign in\" heading and a \"Continue to workspace\" link"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 60
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n\n  58 |\n  59 |   test(\"4 - Login page renders with content visible\", async ({ page }) => {\n> 60 |     await page.goto(\"/login\");\n     |                ^\n  61 |     await waitForLoad(page);\n  62 |\n  63 |     // The login page has a \"Sign in\" heading and a \"Continue to workspace\" link\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:60:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:39.058Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-4--2778d-enders-with-content-visible/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-4--2778d-enders-with-content-visible/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 60
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 456,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:60:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 60
+                        },
+                        "snippet": "  58 |\n  59 |   test(\"4 - Login page renders with content visible\", async ({ page }) => {\n> 60 |     await page.goto(\"/login\");\n     |                ^\n  61 |     await waitForLoad(page);\n  62 |\n  63 |     // The login page has a \"Sign in\" heading and a \"Continue to workspace\" link"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 60
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n\n  58 |\n  59 |   test(\"4 - Login page renders with content visible\", async ({ page }) => {\n> 60 |     await page.goto(\"/login\");\n     |                ^\n  61 |     await waitForLoad(page);\n  62 |\n  63 |     // The login page has a \"Sign in\" heading and a \"Continue to workspace\" link\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:60:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:40.330Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-4--2778d-enders-with-content-visible-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-4--2778d-enders-with-content-visible-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-4--2778d-enders-with-content-visible-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-4--2778d-enders-with-content-visible-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 60
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-14aa05bfce2888e474d2",
+              "file": "aegiscore.spec.ts",
+              "line": 59,
+              "column": 7
+            },
+            {
+              "title": "5 - Login button is clickable and navigates home",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 392,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:72:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 72
+                        },
+                        "snippet": "  70 |\n  71 |   test(\"5 - Login button is clickable and navigates home\", async ({ page }) => {\n> 72 |     await page.goto(\"/login\");\n     |                ^\n  73 |     await waitForLoad(page);\n  74 |\n  75 |     const btn = page.getByRole(\"link\", { name: /continue to workspace/i });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 72
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n\n  70 |\n  71 |   test(\"5 - Login button is clickable and navigates home\", async ({ page }) => {\n> 72 |     await page.goto(\"/login\");\n     |                ^\n  73 |     await waitForLoad(page);\n  74 |\n  75 |     const btn = page.getByRole(\"link\", { name: /continue to workspace/i });\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:72:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:41.795Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-5--9676a-lickable-and-navigates-home/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-5--9676a-lickable-and-navigates-home/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 72
+                      }
+                    },
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 590,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:72:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 72
+                        },
+                        "snippet": "  70 |\n  71 |   test(\"5 - Login button is clickable and navigates home\", async ({ page }) => {\n> 72 |     await page.goto(\"/login\");\n     |                ^\n  73 |     await waitForLoad(page);\n  74 |\n  75 |     const btn = page.getByRole(\"link\", { name: /continue to workspace/i });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 72
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"load\"\u001b[22m\n\n\n  70 |\n  71 |   test(\"5 - Login button is clickable and navigates home\", async ({ page }) => {\n> 72 |     await page.goto(\"/login\");\n     |                ^\n  73 |     await waitForLoad(page);\n  74 |\n  75 |     const btn = page.getByRole(\"link\", { name: /continue to workspace/i });\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:72:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:43.147Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-5--9676a-lickable-and-navigates-home-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-5--9676a-lickable-and-navigates-home-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-5--9676a-lickable-and-navigates-home-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-5--9676a-lickable-and-navigates-home-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 72
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-e66fc41d988c86512a96",
+              "file": "aegiscore.spec.ts",
+              "line": 71,
+              "column": 7
+            },
+            {
+              "title": "6 - Dashboard loads without blank screen",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 437,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:86:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 86
+                        },
+                        "snippet": "  84 |\n  85 |   test(\"6 - Dashboard loads without blank screen\", async ({ page }) => {\n> 86 |     await page.goto(\"/\");\n     |                ^\n  87 |     await waitForLoad(page);\n  88 |\n  89 |     // Should NOT see the loading pulse forever — it should resolve"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 86
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  84 |\n  85 |   test(\"6 - Dashboard loads without blank screen\", async ({ page }) => {\n> 86 |     await page.goto(\"/\");\n     |                ^\n  87 |     await waitForLoad(page);\n  88 |\n  89 |     // Should NOT see the loading pulse forever — it should resolve\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:86:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:44.725Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 86
+                      }
+                    },
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 447,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:86:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 86
+                        },
+                        "snippet": "  84 |\n  85 |   test(\"6 - Dashboard loads without blank screen\", async ({ page }) => {\n> 86 |     await page.goto(\"/\");\n     |                ^\n  87 |     await waitForLoad(page);\n  88 |\n  89 |     // Should NOT see the loading pulse forever — it should resolve"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 86
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  84 |\n  85 |   test(\"6 - Dashboard loads without blank screen\", async ({ page }) => {\n> 86 |     await page.goto(\"/\");\n     |                ^\n  87 |     await waitForLoad(page);\n  88 |\n  89 |     // Should NOT see the loading pulse forever — it should resolve\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:86:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:46.178Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-6--de6a1--loads-without-blank-screen-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 86
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-e8286494c7712cb70b21",
+              "file": "aegiscore.spec.ts",
+              "line": 85,
+              "column": 7
+            },
+            {
+              "title": "7 - Sidebar renders with navigation items",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 361,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:99:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 99
+                        },
+                        "snippet": "   97 |\n   98 |   test(\"7 - Sidebar renders with navigation items\", async ({ page }) => {\n>  99 |     await page.goto(\"/\");\n      |                ^\n  100 |     await waitForLoad(page);\n  101 |\n  102 |     // Wait for the session to load"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 99
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n   97 |\n   98 |   test(\"7 - Sidebar renders with navigation items\", async ({ page }) => {\n>  99 |     await page.goto(\"/\");\n      |                ^\n  100 |     await waitForLoad(page);\n  101 |\n  102 |     // Wait for the session to load\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:99:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:47.502Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-7--508f7-nders-with-navigation-items/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-7--508f7-nders-with-navigation-items/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 99
+                      }
+                    },
+                    {
+                      "workerIndex": 13,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 507,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:99:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 99
+                        },
+                        "snippet": "   97 |\n   98 |   test(\"7 - Sidebar renders with navigation items\", async ({ page }) => {\n>  99 |     await page.goto(\"/\");\n      |                ^\n  100 |     await waitForLoad(page);\n  101 |\n  102 |     // Wait for the session to load"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 99
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n   97 |\n   98 |   test(\"7 - Sidebar renders with navigation items\", async ({ page }) => {\n>  99 |     await page.goto(\"/\");\n      |                ^\n  100 |     await waitForLoad(page);\n  101 |\n  102 |     // Wait for the session to load\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:99:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:48.737Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-7--508f7-nders-with-navigation-items-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-7--508f7-nders-with-navigation-items-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-7--508f7-nders-with-navigation-items-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-7--508f7-nders-with-navigation-items-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 99
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-1534e405d89fc5916925",
+              "file": "aegiscore.spec.ts",
+              "line": 98,
+              "column": 7
+            },
+            {
+              "title": "8 - Student role does NOT see Finance or HR menu items",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "line": 126,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 432,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:50.169Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "line": 126,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-ac9fb345749f652adf9d",
+              "file": "aegiscore.spec.ts",
+              "line": 121,
+              "column": 7
+            },
+            {
+              "title": "9 - VC role sees all top-level menu categories",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 369,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:149:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 149
+                        },
+                        "snippet": "  147 |   test(\"9 - VC role sees all top-level menu categories\", async ({ page }) => {\n  148 |     // Demo mode auto-injects SuperAdmin/VC\n> 149 |     await page.goto(\"/\");\n      |                ^\n  150 |     await waitForLoad(page);\n  151 |     await page.waitForTimeout(3000);\n  152 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 149
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  147 |   test(\"9 - VC role sees all top-level menu categories\", async ({ page }) => {\n  148 |     // Demo mode auto-injects SuperAdmin/VC\n> 149 |     await page.goto(\"/\");\n      |                ^\n  150 |     await waitForLoad(page);\n  151 |     await page.waitForTimeout(3000);\n  152 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:149:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:50.905Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-9--35f20-l-top-level-menu-categories/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-9--35f20-l-top-level-menu-categories/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 149
+                      }
+                    },
+                    {
+                      "workerIndex": 15,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 456,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:149:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 149
+                        },
+                        "snippet": "  147 |   test(\"9 - VC role sees all top-level menu categories\", async ({ page }) => {\n  148 |     // Demo mode auto-injects SuperAdmin/VC\n> 149 |     await page.goto(\"/\");\n      |                ^\n  150 |     await waitForLoad(page);\n  151 |     await page.waitForTimeout(3000);\n  152 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 149
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  147 |   test(\"9 - VC role sees all top-level menu categories\", async ({ page }) => {\n  148 |     // Demo mode auto-injects SuperAdmin/VC\n> 149 |     await page.goto(\"/\");\n      |                ^\n  150 |     await waitForLoad(page);\n  151 |     await page.waitForTimeout(3000);\n  152 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:149:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:51.898Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-9--35f20-l-top-level-menu-categories-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-9--35f20-l-top-level-menu-categories-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-9--35f20-l-top-level-menu-categories-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Critical-Path-9--35f20-l-top-level-menu-categories-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 149
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-4f1aea02c2eb85b7bf16",
+              "file": "aegiscore.spec.ts",
+              "line": 147,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Performance",
+          "file": "aegiscore.spec.ts",
+          "line": 163,
+          "column": 6,
+          "specs": [
+            {
+              "title": "10 - Initial page load under 3 seconds",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 469,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:166:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 166
+                        },
+                        "snippet": "  164 |   test(\"10 - Initial page load under 3 seconds\", async ({ page }) => {\n  165 |     const start = Date.now();\n> 166 |     await page.goto(\"/\");\n      |                ^\n  167 |     await waitForLoad(page);\n  168 |     const loadTime = Date.now() - start;\n  169 |     console.log(`  Load time: ${loadTime}ms`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 166
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  164 |   test(\"10 - Initial page load under 3 seconds\", async ({ page }) => {\n  165 |     const start = Date.now();\n> 166 |     await page.goto(\"/\");\n      |                ^\n  167 |     await waitForLoad(page);\n  168 |     const loadTime = Date.now() - start;\n  169 |     console.log(`  Load time: ${loadTime}ms`);\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:166:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:53.340Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 166
+                      }
+                    },
+                    {
+                      "workerIndex": 17,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 479,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:166:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 166
+                        },
+                        "snippet": "  164 |   test(\"10 - Initial page load under 3 seconds\", async ({ page }) => {\n  165 |     const start = Date.now();\n> 166 |     await page.goto(\"/\");\n      |                ^\n  167 |     await waitForLoad(page);\n  168 |     const loadTime = Date.now() - start;\n  169 |     console.log(`  Load time: ${loadTime}ms`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 166
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  164 |   test(\"10 - Initial page load under 3 seconds\", async ({ page }) => {\n  165 |     const start = Date.now();\n> 166 |     await page.goto(\"/\");\n      |                ^\n  167 |     await waitForLoad(page);\n  168 |     const loadTime = Date.now() - start;\n  169 |     console.log(`  Load time: ${loadTime}ms`);\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:166:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:54.802Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-10---Initial-page-load-under-3-seconds-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 166
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-8c4203d9ef5b77bf2762",
+              "file": "aegiscore.spec.ts",
+              "line": 164,
+              "column": 7
+            },
+            {
+              "title": "11 - No major layout shift on dashboard load",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 18,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 455,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:174:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 174
+                        },
+                        "snippet": "  172 |\n  173 |   test(\"11 - No major layout shift on dashboard load\", async ({ page }) => {\n> 174 |     await page.goto(\"/\");\n      |                ^\n  175 |     await waitForLoad(page);\n  176 |     await page.waitForTimeout(2000);\n  177 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 174
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  172 |\n  173 |   test(\"11 - No major layout shift on dashboard load\", async ({ page }) => {\n> 174 |     await page.goto(\"/\");\n      |                ^\n  175 |     await waitForLoad(page);\n  176 |     await page.waitForTimeout(2000);\n  177 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:174:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:56.222Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 174
+                      }
+                    },
+                    {
+                      "workerIndex": 19,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 452,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:174:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 174
+                        },
+                        "snippet": "  172 |\n  173 |   test(\"11 - No major layout shift on dashboard load\", async ({ page }) => {\n> 174 |     await page.goto(\"/\");\n      |                ^\n  175 |     await waitForLoad(page);\n  176 |     await page.waitForTimeout(2000);\n  177 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 174
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  172 |\n  173 |   test(\"11 - No major layout shift on dashboard load\", async ({ page }) => {\n> 174 |     await page.goto(\"/\");\n      |                ^\n  175 |     await waitForLoad(page);\n  176 |     await page.waitForTimeout(2000);\n  177 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:174:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:43:57.666Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-11---fac0d-out-shift-on-dashboard-load-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 174
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-f36dd40fa380aa1945f5",
+              "file": "aegiscore.spec.ts",
+              "line": 173,
+              "column": 7
+            },
+            {
+              "title": "12 - All images have alt attributes",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 20,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 442,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:186:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 186
+                        },
+                        "snippet": "  184 |\n  185 |   test(\"12 - All images have alt attributes\", async ({ page }) => {\n> 186 |     await page.goto(\"/\");\n      |                ^\n  187 |     await waitForLoad(page);\n  188 |\n  189 |     const images = page.locator(\"img\");"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 186
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  184 |\n  185 |   test(\"12 - All images have alt attributes\", async ({ page }) => {\n> 186 |     await page.goto(\"/\");\n      |                ^\n  187 |     await waitForLoad(page);\n  188 |\n  189 |     const images = page.locator(\"img\");\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:186:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:43:59.028Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 186
+                      }
+                    },
+                    {
+                      "workerIndex": 21,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 570,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:186:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 186
+                        },
+                        "snippet": "  184 |\n  185 |   test(\"12 - All images have alt attributes\", async ({ page }) => {\n> 186 |     await page.goto(\"/\");\n      |                ^\n  187 |     await waitForLoad(page);\n  188 |\n  189 |     const images = page.locator(\"img\");"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 186
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  184 |\n  185 |   test(\"12 - All images have alt attributes\", async ({ page }) => {\n> 186 |     await page.goto(\"/\");\n      |                ^\n  187 |     await waitForLoad(page);\n  188 |\n  189 |     const images = page.locator(\"img\");\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:186:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:00.420Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Performance-12---All-images-have-alt-attributes-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 186
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-5da259fade5cb79ec61c",
+              "file": "aegiscore.spec.ts",
+              "line": 185,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "UI Integrity",
+          "file": "aegiscore.spec.ts",
+          "line": 204,
+          "column": 6,
+          "specs": [
+            {
+              "title": "13 - No broken links in sidebar navigation",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 22,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 465,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:206:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 206
+                        },
+                        "snippet": "  204 | test.describe(\"UI Integrity\", () => {\n  205 |   test(\"13 - No broken links in sidebar navigation\", async ({ page }) => {\n> 206 |     await page.goto(\"/\");\n      |                ^\n  207 |     await waitForLoad(page);\n  208 |     await page.waitForTimeout(3000);\n  209 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 206
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  204 | test.describe(\"UI Integrity\", () => {\n  205 |   test(\"13 - No broken links in sidebar navigation\", async ({ page }) => {\n> 206 |     await page.goto(\"/\");\n      |                ^\n  207 |     await waitForLoad(page);\n  208 |     await page.waitForTimeout(3000);\n  209 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:206:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:01.983Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-13--2a960-links-in-sidebar-navigation/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-13--2a960-links-in-sidebar-navigation/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 206
+                      }
+                    },
+                    {
+                      "workerIndex": 23,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 542,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:206:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 206
+                        },
+                        "snippet": "  204 | test.describe(\"UI Integrity\", () => {\n  205 |   test(\"13 - No broken links in sidebar navigation\", async ({ page }) => {\n> 206 |     await page.goto(\"/\");\n      |                ^\n  207 |     await waitForLoad(page);\n  208 |     await page.waitForTimeout(3000);\n  209 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 206
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  204 | test.describe(\"UI Integrity\", () => {\n  205 |   test(\"13 - No broken links in sidebar navigation\", async ({ page }) => {\n> 206 |     await page.goto(\"/\");\n      |                ^\n  207 |     await waitForLoad(page);\n  208 |     await page.waitForTimeout(3000);\n  209 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:206:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:03.430Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-13--2a960-links-in-sidebar-navigation-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-13--2a960-links-in-sidebar-navigation-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-13--2a960-links-in-sidebar-navigation-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-13--2a960-links-in-sidebar-navigation-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 206
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-bf0755ebe63b82315199",
+              "file": "aegiscore.spec.ts",
+              "line": 205,
+              "column": 7
+            },
+            {
+              "title": "14 - Text is visible — no white-on-white",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 24,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 499,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:227:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 227
+                        },
+                        "snippet": "  225 |\n  226 |   test(\"14 - Text is visible — no white-on-white\", async ({ page }) => {\n> 227 |     await page.goto(\"/\");\n      |                ^\n  228 |     await waitForLoad(page);\n  229 |\n  230 |     // Check that the body has visible text color and background"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 227
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  225 |\n  226 |   test(\"14 - Text is visible — no white-on-white\", async ({ page }) => {\n> 227 |     await page.goto(\"/\");\n      |                ^\n  228 |     await waitForLoad(page);\n  229 |\n  230 |     // Check that the body has visible text color and background\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:227:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:04.959Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 227
+                      }
+                    },
+                    {
+                      "workerIndex": 25,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 484,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:227:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 227
+                        },
+                        "snippet": "  225 |\n  226 |   test(\"14 - Text is visible — no white-on-white\", async ({ page }) => {\n> 227 |     await page.goto(\"/\");\n      |                ^\n  228 |     await waitForLoad(page);\n  229 |\n  230 |     // Check that the body has visible text color and background"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 227
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  225 |\n  226 |   test(\"14 - Text is visible — no white-on-white\", async ({ page }) => {\n> 227 |     await page.goto(\"/\");\n      |                ^\n  228 |     await waitForLoad(page);\n  229 |\n  230 |     // Check that the body has visible text color and background\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:227:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:06.411Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-14--14d92-visible-—-no-white-on-white-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 227
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-43fc6511f9f5ceecba00",
+              "file": "aegiscore.spec.ts",
+              "line": 226,
+              "column": 7
+            },
+            {
+              "title": "15 - Mobile viewport — sidebar collapses, hamburger appears",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 26,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 497,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:245:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 245
+                        },
+                        "snippet": "  243 |   test(\"15 - Mobile viewport — sidebar collapses, hamburger appears\", async ({ page }) => {\n  244 |     await page.setViewportSize({ width: 375, height: 812 });\n> 245 |     await page.goto(\"/\");\n      |                ^\n  246 |     await waitForLoad(page);\n  247 |     await page.waitForTimeout(2000);\n  248 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 245
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  243 |   test(\"15 - Mobile viewport — sidebar collapses, hamburger appears\", async ({ page }) => {\n  244 |     await page.setViewportSize({ width: 375, height: 812 });\n> 245 |     await page.goto(\"/\");\n      |                ^\n  246 |     await waitForLoad(page);\n  247 |     await page.waitForTimeout(2000);\n  248 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:245:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:07.936Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 245
+                      }
+                    },
+                    {
+                      "workerIndex": 27,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 522,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:245:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 245
+                        },
+                        "snippet": "  243 |   test(\"15 - Mobile viewport — sidebar collapses, hamburger appears\", async ({ page }) => {\n  244 |     await page.setViewportSize({ width: 375, height: 812 });\n> 245 |     await page.goto(\"/\");\n      |                ^\n  246 |     await waitForLoad(page);\n  247 |     await page.waitForTimeout(2000);\n  248 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 245
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  243 |   test(\"15 - Mobile viewport — sidebar collapses, hamburger appears\", async ({ page }) => {\n  244 |     await page.setViewportSize({ width: 375, height: 812 });\n> 245 |     await page.goto(\"/\");\n      |                ^\n  246 |     await waitForLoad(page);\n  247 |     await page.waitForTimeout(2000);\n  248 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:245:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:09.387Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-15--98ed9-collapses-hamburger-appears-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 245
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-f43fe176814b6cc2f06a",
+              "file": "aegiscore.spec.ts",
+              "line": 243,
+              "column": 7
+            },
+            {
+              "title": "16 - No placeholder text like TODO or LOREM IPSUM visible",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 28,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 514,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:264:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 264
+                        },
+                        "snippet": "  262 |\n  263 |   test(\"16 - No placeholder text like TODO or LOREM IPSUM visible\", async ({ page }) => {\n> 264 |     await page.goto(\"/\");\n      |                ^\n  265 |     await waitForLoad(page);\n  266 |\n  267 |     const body = await page.textContent();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 264
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  262 |\n  263 |   test(\"16 - No placeholder text like TODO or LOREM IPSUM visible\", async ({ page }) => {\n> 264 |     await page.goto(\"/\");\n      |                ^\n  265 |     await waitForLoad(page);\n  266 |\n  267 |     const body = await page.textContent();\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:264:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:10.915Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 264
+                      }
+                    },
+                    {
+                      "workerIndex": 29,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 487,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:264:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 264
+                        },
+                        "snippet": "  262 |\n  263 |   test(\"16 - No placeholder text like TODO or LOREM IPSUM visible\", async ({ page }) => {\n> 264 |     await page.goto(\"/\");\n      |                ^\n  265 |     await waitForLoad(page);\n  266 |\n  267 |     const body = await page.textContent();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 264
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  262 |\n  263 |   test(\"16 - No placeholder text like TODO or LOREM IPSUM visible\", async ({ page }) => {\n> 264 |     await page.goto(\"/\");\n      |                ^\n  265 |     await waitForLoad(page);\n  266 |\n  267 |     const body = await page.textContent();\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:264:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:12.494Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-16--49705-TODO-or-LOREM-IPSUM-visible-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 264
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-d0bf9564c407403318b9",
+              "file": "aegiscore.spec.ts",
+              "line": 263,
+              "column": 7
+            },
+            {
+              "title": "17 - KPI cards show values, not error strings",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 30,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 499,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:275:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 275
+                        },
+                        "snippet": "  273 |\n  274 |   test(\"17 - KPI cards show values, not error strings\", async ({ page }) => {\n> 275 |     await page.goto(\"/\");\n      |                ^\n  276 |     await waitForLoad(page);\n  277 |     await page.waitForTimeout(3000);\n  278 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 275
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  273 |\n  274 |   test(\"17 - KPI cards show values, not error strings\", async ({ page }) => {\n> 275 |     await page.goto(\"/\");\n      |                ^\n  276 |     await waitForLoad(page);\n  277 |     await page.waitForTimeout(3000);\n  278 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:275:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:13.966Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 275
+                      }
+                    },
+                    {
+                      "workerIndex": 31,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 516,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:275:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 275
+                        },
+                        "snippet": "  273 |\n  274 |   test(\"17 - KPI cards show values, not error strings\", async ({ page }) => {\n> 275 |     await page.goto(\"/\");\n      |                ^\n  276 |     await waitForLoad(page);\n  277 |     await page.waitForTimeout(3000);\n  278 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 275
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  273 |\n  274 |   test(\"17 - KPI cards show values, not error strings\", async ({ page }) => {\n> 275 |     await page.goto(\"/\");\n      |                ^\n  276 |     await waitForLoad(page);\n  277 |     await page.waitForTimeout(3000);\n  278 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:275:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:15.466Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-17--40353-ow-values-not-error-strings-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 275
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-f55f2de40b6d2f93856b",
+              "file": "aegiscore.spec.ts",
+              "line": 274,
+              "column": 7
+            },
+            {
+              "title": "18 - No unthemed raw text when loading",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 32,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 517,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:297:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 297
+                        },
+                        "snippet": "  295 |\n  296 |   test(\"18 - No unthemed raw text when loading\", async ({ page }) => {\n> 297 |     await page.goto(\"/\");\n      |                ^\n  298 |     // The launch screen should have class-based styling, not just raw text\n  299 |     const loading = page.locator(\".launch-screen, .launch-pulse\");\n  300 |     const exists = await loading.count();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 297
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  295 |\n  296 |   test(\"18 - No unthemed raw text when loading\", async ({ page }) => {\n> 297 |     await page.goto(\"/\");\n      |                ^\n  298 |     // The launch screen should have class-based styling, not just raw text\n  299 |     const loading = page.locator(\".launch-screen, .launch-pulse\");\n  300 |     const exists = await loading.count();\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:297:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:16.948Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 297
+                      }
+                    },
+                    {
+                      "workerIndex": 33,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 523,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:297:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 297
+                        },
+                        "snippet": "  295 |\n  296 |   test(\"18 - No unthemed raw text when loading\", async ({ page }) => {\n> 297 |     await page.goto(\"/\");\n      |                ^\n  298 |     // The launch screen should have class-based styling, not just raw text\n  299 |     const loading = page.locator(\".launch-screen, .launch-pulse\");\n  300 |     const exists = await loading.count();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 297
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  295 |\n  296 |   test(\"18 - No unthemed raw text when loading\", async ({ page }) => {\n> 297 |     await page.goto(\"/\");\n      |                ^\n  298 |     // The launch screen should have class-based styling, not just raw text\n  299 |     const loading = page.locator(\".launch-screen, .launch-pulse\");\n  300 |     const exists = await loading.count();\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:297:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:18.476Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-UI-Integrity-18--0b70b-hemed-raw-text-when-loading-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 297
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-19a4590ecff6e7053875",
+              "file": "aegiscore.spec.ts",
+              "line": 296,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Error Handling",
+          "file": "aegiscore.spec.ts",
+          "line": 310,
+          "column": 6,
+          "specs": [
+            {
+              "title": "22 - Non-existent route shows proper 404 page",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 34,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 460,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/this-route-does-not-exist-404-test\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/this-route-does-not-exist-404-test\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/this-route-does-not-exist-404-test\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/this-route-does-not-exist-404-test\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:312:33",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 33,
+                          "line": 312
+                        },
+                        "snippet": "  310 | test.describe(\"Error Handling\", () => {\n  311 |   test(\"22 - Non-existent route shows proper 404 page\", async ({ page }) => {\n> 312 |     const response = await page.goto(\"/this-route-does-not-exist-404-test\");\n      |                                 ^\n  313 |     expect(response?.status()).toBe(404);\n  314 |\n  315 |     const body = await page.textContent();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 33,
+                            "line": 312
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/this-route-does-not-exist-404-test\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/this-route-does-not-exist-404-test\", waiting until \"load\"\u001b[22m\n\n\n  310 | test.describe(\"Error Handling\", () => {\n  311 |   test(\"22 - Non-existent route shows proper 404 page\", async ({ page }) => {\n> 312 |     const response = await page.goto(\"/this-route-does-not-exist-404-test\");\n      |                                 ^\n  313 |     expect(response?.status()).toBe(404);\n  314 |\n  315 |     const body = await page.textContent();\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:312:33"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:20.048Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 33,
+                        "line": 312
+                      }
+                    },
+                    {
+                      "workerIndex": 35,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 524,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/this-route-does-not-exist-404-test\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/this-route-does-not-exist-404-test\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/this-route-does-not-exist-404-test\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/this-route-does-not-exist-404-test\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:312:33",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 33,
+                          "line": 312
+                        },
+                        "snippet": "  310 | test.describe(\"Error Handling\", () => {\n  311 |   test(\"22 - Non-existent route shows proper 404 page\", async ({ page }) => {\n> 312 |     const response = await page.goto(\"/this-route-does-not-exist-404-test\");\n      |                                 ^\n  313 |     expect(response?.status()).toBe(404);\n  314 |\n  315 |     const body = await page.textContent();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 33,
+                            "line": 312
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/this-route-does-not-exist-404-test\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/this-route-does-not-exist-404-test\", waiting until \"load\"\u001b[22m\n\n\n  310 | test.describe(\"Error Handling\", () => {\n  311 |   test(\"22 - Non-existent route shows proper 404 page\", async ({ page }) => {\n> 312 |     const response = await page.goto(\"/this-route-does-not-exist-404-test\");\n      |                                 ^\n  313 |     expect(response?.status()).toBe(404);\n  314 |\n  315 |     const body = await page.textContent();\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:312:33"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:21.609Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-d4d92-route-shows-proper-404-page-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 33,
+                        "line": 312
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-2ce901b6b90300b4955c",
+              "file": "aegiscore.spec.ts",
+              "line": 311,
+              "column": 7
+            },
+            {
+              "title": "23 - API failure shows error state, not infinite loader",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 36,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 587,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:324:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 324
+                        },
+                        "snippet": "  322 |     await page.route(\"**/api/**\", (route) => route.abort());\n  323 |\n> 324 |     await page.goto(\"/\");\n      |                ^\n  325 |     await waitForLoad(page);\n  326 |     await page.waitForTimeout(3000);\n  327 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 324
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  322 |     await page.route(\"**/api/**\", (route) => route.abort());\n  323 |\n> 324 |     await page.goto(\"/\");\n      |                ^\n  325 |     await waitForLoad(page);\n  326 |     await page.waitForTimeout(3000);\n  327 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:324:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:23.079Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 324
+                      }
+                    },
+                    {
+                      "workerIndex": 37,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 619,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:324:16",
+                        "location": {
+                          "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                          "column": 16,
+                          "line": 324
+                        },
+                        "snippet": "  322 |     await page.route(\"**/api/**\", (route) => route.abort());\n  323 |\n> 324 |     await page.goto(\"/\");\n      |                ^\n  325 |     await waitForLoad(page);\n  326 |     await page.waitForTimeout(3000);\n  327 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                            "column": 16,
+                            "line": 324
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n  322 |     await page.route(\"**/api/**\", (route) => route.abort());\n  323 |\n> 324 |     await page.goto(\"/\");\n      |                ^\n  325 |     await waitForLoad(page);\n  326 |     await page.waitForTimeout(3000);\n  327 |\n    at /home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts:324:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-08-05T17:44:24.630Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/test-results/aegiscore-Error-Handling-2-1315f-r-state-not-infinite-loader-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/abdul-nafay-sarmad/Music/Aegiscore/Aegiscore/AegisCore.Portal/tests/aegiscore.spec.ts",
+                        "column": 16,
+                        "line": 324
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-28e390bf0fee5becf75b",
+              "file": "aegiscore.spec.ts",
+              "line": 320,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Session",
+          "file": "aegiscore.spec.ts",
+          "line": 337,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Session API returns valid data",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 38,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 46,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "  Session API unreachable — skipping\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-05T17:44:26.387Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "ea9ec70d8baf9a86f008-b8d2caf094a7db18695f",
+              "file": "aegiscore.spec.ts",
+              "line": 338,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-08-05T17:43:29.685Z",
+    "duration": 56848.024000000005,
+    "expected": 1,
+    "skipped": 1,
+    "unexpected": 19,
+    "flaky": 0
+  }
+}

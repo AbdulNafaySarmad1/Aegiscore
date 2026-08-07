@@ -1,10 +1,12 @@
 using AegisCore.Application.DocumentVault;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/document-vault")]
+[Authorize]
 public class DocumentVaultController : ControllerBase
 {
     private readonly IDocumentVaultService _svc;

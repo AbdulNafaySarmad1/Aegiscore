@@ -83,6 +83,18 @@ public class PermissionRepository : Repository<Permission>, IPermissionRepositor
             .Where(p => p.RolePermissions.Any(rp => rp.RoleId == roleId))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<Dictionary<Guid, List<Guid>>> GetByRolesAsync(List<Guid> roleIds, CancellationToken cancellationToken = default)
+    {
+        var mappings = await _context.Set<RolePermission>()
+            .Where(rp => roleIds.Contains(rp.RoleId))
+            .Select(rp => new { rp.RoleId, rp.PermissionId })
+            .ToListAsync(cancellationToken);
+
+        return mappings
+            .GroupBy(m => m.RoleId)
+            .ToDictionary(g => g.Key, g => g.Select(m => m.PermissionId).ToList());
+    }
 }
 
 public class UserRoleRepository : Repository<UserRole>, IUserRoleRepository

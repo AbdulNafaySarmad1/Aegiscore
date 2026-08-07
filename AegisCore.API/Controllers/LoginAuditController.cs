@@ -2,11 +2,13 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/security")]
+[Authorize(Roles = "Admin,SuperAdmin")]
 public class LoginAuditController : ControllerBase
 {
     private readonly ILoginAuditRecordRepository _repo;

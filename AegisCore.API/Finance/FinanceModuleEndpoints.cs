@@ -19,7 +19,7 @@ using QRCoder;
 
 namespace AegisCore.API.Finance;
 
-public static class FinanceModuleEndpoints
+public static partial class FinanceModuleEndpoints
 {
     public static IEndpointRouteBuilder MapFinanceModuleEndpoints(this IEndpointRouteBuilder endpoints)
     {

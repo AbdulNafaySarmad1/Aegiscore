@@ -10,6 +10,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/identity")]
+[Authorize]
 public class IdentityController : ControllerBase
 {
     private readonly IUserRepository _userRepo;
@@ -35,6 +36,7 @@ public class IdentityController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("users")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
@@ -97,6 +99,7 @@ public class IdentityController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("users/{id:guid}/deactivate")]
     public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken cancellationToken)
     {
@@ -104,6 +107,7 @@ public class IdentityController : ControllerBase
         return Ok(new { message = "User deactivated." });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("users/{id:guid}/suspend")]
     public async Task<IActionResult> SuspendUser(Guid id, CancellationToken cancellationToken)
     {
@@ -123,6 +127,7 @@ public class IdentityController : ControllerBase
         return Ok(new { total = response.Count(), roles = response });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("roles")]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request, CancellationToken cancellationToken)
     {
@@ -143,6 +148,7 @@ public class IdentityController : ControllerBase
         return Ok(new RoleDto { Id = role.Id, Name = role.Name, Description = role.Description });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("users/assign-role")]
     public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequest request, CancellationToken cancellationToken)
     {
@@ -150,6 +156,7 @@ public class IdentityController : ControllerBase
         return Ok(new { message = "Role assigned." });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("users/remove-role")]
     public async Task<IActionResult> RemoveRole([FromBody] AssignRoleRequest request, CancellationToken cancellationToken)
     {
@@ -180,13 +187,14 @@ public class IdentityController : ControllerBase
         var roles = await _roleRepo.GetAllAsync(cancellationToken);
         var permissions = await _permissionRepo.GetAllAsync(cancellationToken);
 
+        var roleIds = roles.Select(r => r.Id).ToList();
+        var allRolePermissions = await _permissionRepo.GetByRolesAsync(roleIds, cancellationToken);
+
         var matrix = new PermissionMatrixDto
         {
             Roles = roles.Select(r => new RoleDto { Id = r.Id, Name = r.Name, Description = r.Description, IsSystem = r.IsSystem }).ToList(),
             Permissions = permissions.Select(p => new PermissionDto { Id = p.Id, Name = p.Name, Resource = p.Resource, Action = p.Action, Module = p.Module }).ToList(),
-            RolePermissions = roles.ToDictionary(
-                r => r.Id,
-                r => _permissionRepo.GetByRoleAsync(r.Id, cancellationToken).Result.Select(p => p.Id).ToList())
+            RolePermissions = allRolePermissions
         };
 
         return Ok(matrix);

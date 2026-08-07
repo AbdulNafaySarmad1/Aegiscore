@@ -1,12 +1,14 @@
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.ConfigCenter;
 using AegisCore.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/config")]
+[Authorize]
 public class ConfigCenterController : ControllerBase
 {
     private readonly IConfigurationCenterService _configService;
@@ -20,6 +22,7 @@ public class ConfigCenterController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
     public async Task<IActionResult> SetConfig([FromBody] SetConfigRequest request, CancellationToken cancellationToken)
     {
@@ -64,6 +67,7 @@ public class ConfigCenterController : ControllerBase
         return Ok(diff);
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("{entryId:guid}/rollback")]
     public async Task<IActionResult> Rollback(Guid entryId, [FromBody] RollbackRequest request, CancellationToken cancellationToken)
     {

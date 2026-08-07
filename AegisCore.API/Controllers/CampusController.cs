@@ -2,12 +2,14 @@ using AegisCore.Application.Campus;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/campus")]
+[Authorize]
 public class CampusController : ControllerBase
 {
     private readonly ICampusService _campusService;
@@ -27,6 +29,7 @@ public class CampusController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
     public async Task<IActionResult> RegisterCampus([FromBody] CreateCampusRequest request, CancellationToken cancellationToken)
     {
@@ -58,6 +61,7 @@ public class CampusController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateCampus(Guid id, [FromBody] UpdateCampusRequest request, CancellationToken cancellationToken)
     {
@@ -97,6 +101,7 @@ public class CampusController : ControllerBase
 
 [ApiController]
 [Route("api/campus/transfer")]
+[Authorize]
 public class TransferController : ControllerBase
 {
     private readonly ICampusService _campusService;
@@ -113,6 +118,7 @@ public class TransferController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
     public async Task<IActionResult> InitiateTransfer([FromBody] InitiateTransferRequest request, CancellationToken cancellationToken)
     {
@@ -136,6 +142,7 @@ public class TransferController : ControllerBase
         return Ok(new { total = response.Count(), transfers = response });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("{id:guid}/approve-source")]
     public async Task<IActionResult> ApproveSource(Guid id, [FromBody] ApproveTransferRequest request, CancellationToken cancellationToken)
     {
@@ -143,6 +150,7 @@ public class TransferController : ControllerBase
         return Ok(new { message = "Source campus approved." });
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost("{id:guid}/approve-dest")]
     public async Task<IActionResult> ApproveDest(Guid id, [FromBody] ApproveTransferRequest request, CancellationToken cancellationToken)
     {
