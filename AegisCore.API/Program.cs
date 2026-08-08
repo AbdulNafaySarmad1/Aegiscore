@@ -256,15 +256,35 @@ else
         options.AddCustomLabel("tenant", context => context.User.FindFirst("tenant_id")?.Value ?? "anonymous");
     });
     app.MapMetrics().AllowAnonymous();
-    app.MapGet("/api/session", (HttpContext context) => Results.Ok(new
+    app.MapGet("/api/session", async (HttpContext context, AegisDbContext db, CancellationToken ct) =>
     {
-        userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-        tenantId = context.User.FindFirst("tenant_id")?.Value ?? context.User.FindFirst("tid")?.Value,
-        studentId = context.User.FindFirst("student_id")?.Value,
-        departmentId = context.User.FindFirst("department_id")?.Value,
-        name = context.User.Identity?.Name ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "AegisCore user",
-        roles = context.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().Order().ToArray()
-    })).RequireAuthorization();
+        var userIdText = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? context.User.FindFirst("sub")?.Value;
+        var permissions = Array.Empty<string>();
+        if (Guid.TryParse(userIdText, out var userId))
+        {
+            var now = DateTime.UtcNow;
+            permissions = await db.UserRoles
+                .AsNoTracking()
+                .Where(ur => ur.UserId == userId && (ur.ExpiresAt == null || ur.ExpiresAt > now))
+                .SelectMany(ur => ur.Role.RolePermissions)
+                .Select(rp => rp.Permission.Module + ":" + rp.Permission.Resource + ":" + rp.Permission.Action)
+                .Distinct()
+                .Order()
+                .ToArrayAsync(ct);
+        }
+
+        return Results.Ok(new
+        {
+            userId = userIdText,
+            tenantId = context.User.FindFirst("tenant_id")?.Value ?? context.User.FindFirst("tid")?.Value,
+            studentId = context.User.FindFirst("student_id")?.Value,
+            departmentId = context.User.FindFirst("department_id")?.Value,
+            name = context.User.Identity?.Name ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "AegisCore user",
+            roles = context.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().Order().ToArray(),
+            permissions
+        });
+    }).RequireAuthorization();
 
     app.MapHub<StateMachineHub>("/hubs/statemachine");
     app.MapHub<NotificationHub>("/hubs/notifications");

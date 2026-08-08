@@ -60,7 +60,8 @@ public class VoterToken : ITenantScoped
     public Guid ElectionId { get; set; }
     public Guid StudentId { get; set; }
     [Required, MaxLength(200)] public string TokenHash { get; set; } = string.Empty;
-    public bool HasVoted { get; set; }
+    [NotMapped] public string? Token { get; set; }
+    [ConcurrencyCheck] public bool HasVoted { get; set; }
     public DateTimeOffset? VotedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public Guid TenantId { get; set; }
@@ -86,6 +87,10 @@ public class ElectionResult : ITenantScoped
     public Guid CandidateId { get; set; }
     public int VoteCount { get; set; }
     public bool IsElected { get; set; }
+    [NotMapped] public string? PositionName { get; set; }
+    [NotMapped] public Guid WinnerId { get; set; }
+    [NotMapped] public double VotePercentage { get; set; }
+    [NotMapped] public CountResultStatus Status { get; set; } = CountResultStatus.Preliminary;
     public DateTimeOffset CalculatedAt { get; set; } = DateTimeOffset.UtcNow;
     public Guid TenantId { get; set; }
 }

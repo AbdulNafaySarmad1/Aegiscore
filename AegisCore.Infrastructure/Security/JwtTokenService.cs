@@ -18,6 +18,8 @@ public class JwtTokenService : IJwtTokenService
     private readonly SecurityKey _signingKey;
     private readonly SecurityKey _validationKey;
     private readonly string _algorithm;
+    private readonly string _issuer;
+    private readonly string _audience;
     private readonly IConnectionMultiplexer _redis;
     private const string RefreshFamilyKeyPrefix = "aegiscore:auth:refresh:family:";
     private static readonly TimeSpan FamilyTtl = TimeSpan.FromDays(14);
@@ -30,6 +32,8 @@ public class JwtTokenService : IJwtTokenService
     public JwtTokenService(IConfiguration configuration, IConnectionMultiplexer redis)
     {
         _redis = redis;
+        _issuer = ValidConfigurationValue(configuration["Jwt:Issuer"]) ?? "https://aegiscore.pk";
+        _audience = ValidConfigurationValue(configuration["Auth:Audience"]) ?? "aegiscore-api";
         var privateKeyPem = configuration["Jwt:PrivateKey"];
         var publicKeyPem = configuration["Jwt:PublicKey"];
         if (!string.IsNullOrWhiteSpace(privateKeyPem) && !privateKeyPem.StartsWith("${", StringComparison.Ordinal) &&
@@ -66,11 +70,14 @@ public class JwtTokenService : IJwtTokenService
             new(ClaimTypes.Email, user.Email),
             new("tenant_id", user.TenantId.ToString())
         };
-        claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
+        var now = DateTime.UtcNow;
+        claims.AddRange(user.UserRoles
+            .Where(ur => ur.ExpiresAt == null || ur.ExpiresAt > now)
+            .Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
 
         var token = new JwtSecurityToken(
-            issuer: "https://aegiscore.pk",
-            audience: "aegiscore-api",
+            issuer: _issuer,
+            audience: _audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: credentials
@@ -97,9 +104,9 @@ public class JwtTokenService : IJwtTokenService
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = _validationKey,
             ValidateIssuer = true,
-            ValidIssuer = "https://aegiscore.pk",
+            ValidIssuer = _issuer,
             ValidateAudience = true,
-            ValidAudience = "aegiscore-api",
+            ValidAudience = _audience,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
             ValidAlgorithms = [_algorithm]
@@ -149,5 +156,12 @@ public class JwtTokenService : IJwtTokenService
         if (!data.HasValue) return false;
         using var doc = JsonDocument.Parse(data.ToString());
         return doc.RootElement.GetProperty("valid").GetBoolean();
+    }
+
+    private static string? ValidConfigurationValue(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) || value.StartsWith("${", StringComparison.Ordinal)
+            ? null
+            : value;
     }
 }

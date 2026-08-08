@@ -9,7 +9,6 @@ public class DemoDataSeeder : ISeedRunner
 {
     public int Order => 6;
     private readonly IRepository<AchievementBadge> _badgeRepo;
-    private readonly IRepository<DeansListEntry> _deansRepo;
     private readonly IRepository<MenuItem> _menuRepo;
     private readonly IRepository<CafeteriaUnit> _unitRepo;
     private readonly IRepository<DefaulterRiskScore> _riskRepo;
@@ -22,7 +21,6 @@ public class DemoDataSeeder : ISeedRunner
 
     public DemoDataSeeder(
         IRepository<AchievementBadge> badgeRepo,
-        IRepository<DeansListEntry> deansRepo,
         IRepository<MenuItem> menuRepo,
         IRepository<CafeteriaUnit> unitRepo,
         IRepository<DefaulterRiskScore> riskRepo,
@@ -33,7 +31,7 @@ public class DemoDataSeeder : ISeedRunner
         IRepository<GradeAppeal> appealRepo,
         ILogger<DemoDataSeeder> logger)
     {
-        _badgeRepo = badgeRepo; _deansRepo = deansRepo; _menuRepo = menuRepo;
+        _badgeRepo = badgeRepo; _menuRepo = menuRepo;
         _unitRepo = unitRepo; _riskRepo = riskRepo; _readinessRepo = readinessRepo;
         _alertRepo = alertRepo; _goalRepo = goalRepo; _facultyRepo = facultyRepo;
         _appealRepo = appealRepo; _logger = logger;
@@ -53,25 +51,16 @@ public class DemoDataSeeder : ISeedRunner
         foreach (var b in badges) await _badgeRepo.AddAsync(b, ct);
         _logger.LogInformation("Seeded {Count} achievement badges", badges.Length);
 
-        // Dean's List entries
-        var deans = new[] {
-            new DeansListEntry { Id = Guid.NewGuid(), StudentId = Guid.Parse("00000000-0000-0000-0000-000000000001"), Semester = "Fall 2025", Cgpa = 3.92, Status = DeansListStatus.Published, QualifiedAt = DateTime.UtcNow.AddDays(-60), VerifiedAt = DateTime.UtcNow.AddDays(-55), TenantId = tenantId },
-            new DeansListEntry { Id = Guid.NewGuid(), StudentId = Guid.Parse("00000000-0000-0000-0000-000000000002"), Semester = "Fall 2025", Cgpa = 3.78, Status = DeansListStatus.Published, QualifiedAt = DateTime.UtcNow.AddDays(-60), VerifiedAt = DateTime.UtcNow.AddDays(-55), TenantId = tenantId },
-            new DeansListEntry { Id = Guid.NewGuid(), StudentId = Guid.Parse("00000000-0000-0000-0000-000000000003"), Semester = "Spring 2026", Cgpa = 3.65, Status = DeansListStatus.Nominated, QualifiedAt = DateTime.UtcNow.AddDays(-20), TenantId = tenantId },
-        };
-        foreach (var d in deans) await _deansRepo.AddAsync(d, ct);
-        _logger.LogInformation("Seeded {Count} Dean's List entries", deans.Length);
-
         // Cafeteria units and menu items
         var unit = new CafeteriaUnit { Id = Guid.NewGuid(), Name = "Main Cafeteria", Location = "Building A, Ground Floor", Capacity = 200, OperatingHours = "07:00-18:00", TenantId = tenantId };
         await _unitRepo.AddAsync(unit, ct);
         var menuItems = new[] {
-            new MenuItem { Id = Guid.NewGuid(), Name = "Chicken Biryani", Category = MenuItemCategory.MainCourse, Price = 250m, Calories = 650, IsHalal = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
-            new MenuItem { Id = Guid.NewGuid(), Name = "Daal Chawal", Category = MenuItemCategory.MainCourse, Price = 150m, Calories = 450, IsHalal = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
-            new MenuItem { Id = Guid.NewGuid(), Name = "Shawarma", Category = MenuItemCategory.MainCourse, Price = 200m, Calories = 520, IsHalal = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
-            new MenuItem { Id = Guid.NewGuid(), Name = "Samosa (2 pcs)", Category = MenuItemCategory.Snack, Price = 60m, Calories = 180, IsHalal = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
-            new MenuItem { Id = Guid.NewGuid(), Name = "Mango Lassi", Category = MenuItemCategory.Beverage, Price = 100m, Calories = 220, IsHalal = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
-            new MenuItem { Id = Guid.NewGuid(), Name = "Gulab Jamun", Category = MenuItemCategory.Dessert, Price = 80m, Calories = 300, IsHalal = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
+            new MenuItem { Id = Guid.NewGuid(), ItemName = "Chicken Biryani", Category = "meal", Price = 250m, Calories = 650, IsHalalCertified = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
+            new MenuItem { Id = Guid.NewGuid(), ItemName = "Daal Chawal", Category = "meal", Price = 150m, Calories = 450, IsHalalCertified = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
+            new MenuItem { Id = Guid.NewGuid(), ItemName = "Shawarma", Category = "meal", Price = 200m, Calories = 520, IsHalalCertified = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
+            new MenuItem { Id = Guid.NewGuid(), ItemName = "Samosa (2 pcs)", Category = "snack", Price = 60m, Calories = 180, IsHalalCertified = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
+            new MenuItem { Id = Guid.NewGuid(), ItemName = "Mango Lassi", Category = "beverage", Price = 100m, Calories = 220, IsHalalCertified = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
+            new MenuItem { Id = Guid.NewGuid(), ItemName = "Gulab Jamun", Category = "dessert", Price = 80m, Calories = 300, IsHalalCertified = true, CafeteriaUnitId = unit.Id, TenantId = tenantId },
         };
         foreach (var m in menuItems) await _menuRepo.AddAsync(m, ct);
         _logger.LogInformation("Seeded cafeteria unit and {Count} menu items", menuItems.Length);
@@ -93,9 +82,9 @@ public class DemoDataSeeder : ISeedRunner
 
         // Board alerts
         var alerts = new[] {
-            new BoardAlert { Id = Guid.NewGuid(), Category = AlertCategory.Financial, Title = "Fee collection below 80% target", Description = "Q2 collections at 72% of semester demand. Review payment plans.", RecommendedAction = "Activate defaulter intervention pipeline", ResponsibleOfficer = "CFO", TenantId = tenantId },
-            new BoardAlert { Id = Guid.NewGuid(), Category = AlertCategory.Academic, Title = "CGPA decline in Engineering", Description = "Average CGPA dropped 0.3 points semester-over-semester.", RecommendedAction = "Investigate assessment difficulty and faculty changes", ResponsibleOfficer = "Dean of Engineering", TenantId = tenantId },
-            new BoardAlert { Id = Guid.NewGuid(), Category = AlertCategory.Compliance, Title = "HEC visit scheduled in 120 days", Description = "Readiness score at 78.5% — below 85% target.", RecommendedAction = "Close 3 priority gaps before audit", ResponsibleOfficer = "Registrar", TenantId = tenantId },
+            new BoardAlert { Id = Guid.NewGuid(), Severity = "warning", Category = "financial", Message = "Fee collection below 80% target: Q2 collections at 72% of semester demand. Review payment plans.", RecommendedAction = "Activate defaulter intervention pipeline", ResponsibleOfficer = "CFO", TenantId = tenantId },
+            new BoardAlert { Id = Guid.NewGuid(), Severity = "warning", Category = "academic", Message = "CGPA decline in Engineering: average CGPA dropped 0.3 points semester-over-semester.", RecommendedAction = "Investigate assessment difficulty and faculty changes", ResponsibleOfficer = "Dean of Engineering", TenantId = tenantId },
+            new BoardAlert { Id = Guid.NewGuid(), Severity = "warning", Category = "compliance", Message = "HEC visit scheduled in 120 days: readiness score at 78.5%, below the 85% target.", RecommendedAction = "Close 3 priority gaps before audit", ResponsibleOfficer = "Registrar", TenantId = tenantId },
         };
         foreach (var a in alerts) await _alertRepo.AddAsync(a, ct);
         _logger.LogInformation("Seeded {Count} board alerts", alerts.Length);
@@ -112,8 +101,8 @@ public class DemoDataSeeder : ISeedRunner
 
         // Visiting faculty
         var faculty = new[] {
-            new VisitingFacultyProfile { Id = Guid.NewGuid(), FullName = "Dr. Ahmed Khan", CNIC = "35202-1234567-1", Email = "ahmed.khan@example.com", HighestQualification = "PhD Computer Science", University = "LUMS", YearsOfExperience = 12, VettingStatus = FacultyVettingStatus.ReadyToDeploy, HECEligible = true, ExpectedCompensation = 85000m, TenantId = tenantId },
-            new VisitingFacultyProfile { Id = Guid.NewGuid(), FullName = "Ms. Fatima Shah", CNIC = "35202-7654321-2", Email = "fatima.shah@example.com", HighestQualification = "MS Data Science", University = "NUST", YearsOfExperience = 6, VettingStatus = FacultyVettingStatus.ReadyToDeploy, HECEligible = true, ExpectedCompensation = 60000m, TenantId = tenantId },
+            new VisitingFacultyProfile { Id = Guid.NewGuid(), FirstName = "Ahmed", LastName = "Khan", Cnic = "35202-1234567-1", Email = "ahmed.khan@example.com", HighestQualification = "PhD Computer Science", Institution = "LUMS", YearsOfTeachingExperience = 12, ProfileStatus = "ready_to_deploy", HecEligibilityStatus = "eligible", TenantId = tenantId },
+            new VisitingFacultyProfile { Id = Guid.NewGuid(), FirstName = "Fatima", LastName = "Shah", Cnic = "35202-7654321-2", Email = "fatima.shah@example.com", HighestQualification = "MS Data Science", Institution = "NUST", YearsOfTeachingExperience = 6, ProfileStatus = "ready_to_deploy", HecEligibilityStatus = "eligible", TenantId = tenantId },
         };
         foreach (var f in faculty) await _facultyRepo.AddAsync(f, ct);
         _logger.LogInformation("Seeded {Count} visiting faculty profiles", faculty.Length);

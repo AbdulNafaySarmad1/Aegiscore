@@ -13,6 +13,7 @@ using DomainRole = AegisCore.Domain.Entities.Role;
 using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Platform;
 using AegisCore.Infrastructure.Repositories;
+using AegisCore.Infrastructure.Security;
 using Casbin;
 using Casbin.Model;
 using Microsoft.AspNetCore.Authentication;
@@ -229,6 +230,12 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
         redisDb.Setup(x => x.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
             .ReturnsAsync((RedisKey k, CommandFlags _) =>
                 store.TryGetValue(k, out var v) ? v : RedisValue.Null);
+        redisDb.Setup(x => x.StringGetDeleteAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+            .ReturnsAsync((RedisKey k, CommandFlags _) =>
+            {
+                if (!store.Remove(k, out var value)) return RedisValue.Null;
+                return value;
+            });
         redisDb.Setup(x => x.KeyDeleteAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
             .Callback<RedisKey, CommandFlags>((k, _) => store.Remove(k))
             .ReturnsAsync(true);
@@ -257,9 +264,13 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
         var loginBody = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(
             System.Text.Json.JsonSerializer.Serialize(loginOk.Value));
         Assert.Equal("refresh-token-1", loginBody.GetProperty("refreshToken").GetString());
+        var loginCookies = controller.Response.Headers.SetCookie.ToString();
+        Assert.Contains("aegiscore_access_token=access-token-abc", loginCookies, StringComparison.Ordinal);
+        Assert.Contains("aegiscore_refresh_token=refresh-token-1", loginCookies, StringComparison.Ordinal);
+        Assert.Contains("httponly", loginCookies, StringComparison.OrdinalIgnoreCase);
 
-        var refreshResult = await controller.Refresh(
-            new AuthController.RefreshRequest("refresh-token-1"), CancellationToken.None);
+        controller.Request.Headers.Cookie = "aegiscore_refresh_token=refresh-token-1";
+        var refreshResult = await controller.Refresh(null, CancellationToken.None);
         var refreshOk = Assert.IsType<OkObjectResult>(refreshResult);
         var refreshBody = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(
             System.Text.Json.JsonSerializer.Serialize(refreshOk.Value));
@@ -272,6 +283,103 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
         var staleResult = await controller.Refresh(
             new AuthController.RefreshRequest("refresh-token-1"), CancellationToken.None);
         Assert.IsType<UnauthorizedObjectResult>(staleResult);
+    }
+
+    [Fact]
+    public async Task Casbin_AuthenticatedRequests_AreAllowedWithoutRolePolicies()
+    {
+        var services = new ServiceCollection();
+        services.AddCasbinAuthorization();
+        var provider = services.BuildServiceProvider();
+        var called = false;
+        var middleware = new CasbinAuthorizationMiddleware(_ =>
+        {
+            called = true;
+            return Task.CompletedTask;
+        }, provider);
+        var context = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                [new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString("D"))],
+                "test")),
+            RequestServices = provider
+        };
+        context.Request.Method = "GET";
+        context.Request.Path = "/api/session";
+
+        await middleware.InvokeAsync(context);
+
+        Assert.True(called);
+        Assert.NotEqual(StatusCodes.Status403Forbidden, context.Response.StatusCode);
+    }
+
+    [Fact]
+    public async Task EndpointRoleAuthorization_DeniesBeforeAuthenticatedCasbinPass()
+    {
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
+        builder.WebHost.UseTestServer();
+        builder.Services.AddAuthentication("test")
+            .AddScheme<AuthenticationSchemeOptions, TenantIsolationAuthHandler>("test", _ => { });
+        builder.Services.AddAuthorization();
+        builder.Services.AddCasbinAuthorization();
+        var app = builder.Build();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseMiddleware<CasbinAuthorizationMiddleware>();
+        app.MapGet("/api/admin-only", () => Results.Ok())
+            .RequireAuthorization(policy => policy.RequireRole("Admin"));
+        await app.StartAsync();
+
+        using var response = await app.GetTestClient().GetAsync("/api/admin-only");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        await app.DisposeAsync();
+    }
+
+    [Fact]
+    public void JwtAccessToken_ExcludesExpiredRoles()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AEGISCORE_JWT_SECRET"] = "test-secret-at-least-thirty-two-bytes-long",
+                ["Jwt:Issuer"] = "https://issuer.test",
+                ["Auth:Audience"] = "test-audience"
+            })
+            .Build();
+        var redis = new Mock<IConnectionMultiplexer>();
+        var service = new JwtTokenService(config, redis.Object);
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            TenantId = Guid.NewGuid(),
+            Username = "student",
+            Email = "student@test.test",
+            UserRoles =
+            [
+                new UserRole
+                {
+                    Role = new DomainRole { Name = "Student" },
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+                },
+                new UserRole
+                {
+                    Role = new DomainRole { Name = "Admin" },
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(-5)
+                }
+            ]
+        };
+
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler()
+            .ReadJwtToken(service.GenerateAccessToken(user));
+        var roles = jwt.Claims
+            .Where(claim => claim.Type == ClaimTypes.Role)
+            .Select(claim => claim.Value)
+            .ToArray();
+
+        Assert.Equal("https://issuer.test", jwt.Issuer);
+        Assert.Contains("test-audience", jwt.Audiences);
+        Assert.Equal("Student", Assert.Single(roles));
     }
 
     // 7 ─ SQL injection — data import rejects dangerous keywords

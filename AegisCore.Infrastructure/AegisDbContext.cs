@@ -16,6 +16,20 @@ public class AegisDbContext : DbContext
     private readonly IHttpContextAccessor? _httpContextAccessor;
     public Guid CurrentTenantId => _httpContextAccessor?.HttpContext?.Items["TenantId"] as Guid? ?? Guid.Empty;
 
+    public Guid GetRequiredTenantId()
+    {
+        var tenantId = CurrentTenantId;
+        return tenantId != Guid.Empty
+            ? tenantId
+            : throw new UnauthorizedAccessException("A valid tenant context is required.");
+    }
+
+    public void EnsureCurrentTenant(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty || tenantId != GetRequiredTenantId())
+            throw new UnauthorizedAccessException("The requested tenant does not match the authenticated tenant.");
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="AegisDbContext"/> class.
     /// </summary>

@@ -54,7 +54,8 @@ public sealed record VoterTokenDto(
 
 public sealed record CastBallotRequest(
     Guid ElectionId,
-    List<BallotChoice> Choices);
+    List<BallotChoice> Choices,
+    string VoterToken);
 
 public sealed record BallotChoice(
     Guid PositionId,

@@ -20,6 +20,8 @@ public sealed class AuthController(
     IBruteForceProtectionService bruteForce,
     IConnectionMultiplexer redis) : ControllerBase
 {
+    internal const string AccessTokenCookieName = "aegiscore_access_token";
+    internal const string RefreshTokenCookieName = "aegiscore_refresh_token";
     private const string RefreshTokenKeyPrefix = "aegiscore:auth:refresh:token:";
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(7);
 
@@ -72,21 +74,23 @@ public sealed class AuthController(
         user.RefreshTokenExpiry = expiresAt;
         await db.SaveChangesAsync(ct);
 
+        WriteAuthCookies(accessToken, refreshToken, expiresAt);
         return Ok(new { accessToken, refreshToken, tokenType = "Bearer", expiresIn = 900 });
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshRequest request, CancellationToken ct)
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest? request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.RefreshToken))
+        var refreshToken = ResolveRefreshToken(request);
+        if (string.IsNullOrWhiteSpace(refreshToken))
             return Unauthorized(new { error = "Refresh token is required." });
 
         var tenantId = ResolveTenantId();
         if (tenantId == Guid.Empty) return Unauthorized(new { error = "Invalid credentials." });
 
         var db2 = redis.GetDatabase();
-        var tokenKey = $"{RefreshTokenKeyPrefix}{request.RefreshToken}";
-        var tokenJson = await db2.StringGetAsync(tokenKey);
+        var tokenKey = $"{RefreshTokenKeyPrefix}{refreshToken}";
+        var tokenJson = await db2.StringGetDeleteAsync(tokenKey);
 
         if (!tokenJson.HasValue)
             return Unauthorized(new { error = "Token revoked or reused" });
@@ -98,12 +102,10 @@ public sealed class AuthController(
 
         if (!await tokens.IsRefreshTokenFamilyValidAsync(familyId))
         {
-            await db2.KeyDeleteAsync(tokenKey);
             return Unauthorized(new { error = "Token revoked or reused" });
         }
 
         await tokens.InvalidateRefreshTokenFamilyAsync(familyId);
-        await db2.KeyDeleteAsync(tokenKey);
 
         var user = await db.Users.IgnoreQueryFilters()
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
@@ -130,18 +132,21 @@ public sealed class AuthController(
         user.LastLoginAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
+        WriteAuthCookies(accessToken, newRefreshToken, expiresAt);
         return Ok(new { accessToken, refreshToken = newRefreshToken, tokenType = "Bearer", expiresIn = 900 });
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] RefreshRequest request, CancellationToken ct)
+    public async Task<IActionResult> Logout([FromBody] RefreshRequest? request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.RefreshToken))
-            return BadRequest(new { error = "Refresh token is required." });
+        var refreshToken = ResolveRefreshToken(request);
+        ClearAuthCookies();
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            return Ok(new { message = "Logged out." });
 
         var db2 = redis.GetDatabase();
-        var tokenKey = $"{RefreshTokenKeyPrefix}{request.RefreshToken}";
-        var tokenJson = await db2.StringGetAsync(tokenKey);
+        var tokenKey = $"{RefreshTokenKeyPrefix}{refreshToken}";
+        var tokenJson = await db2.StringGetDeleteAsync(tokenKey);
 
         if (!tokenJson.HasValue)
             return Ok(new { message = "Logged out." });
@@ -150,9 +155,48 @@ public sealed class AuthController(
         var familyId = Guid.Parse(doc.RootElement.GetProperty("family_id").GetString()!);
 
         await tokens.InvalidateRefreshTokenFamilyAsync(familyId);
-        await db2.KeyDeleteAsync(tokenKey);
 
         return Ok(new { message = "Logged out." });
+    }
+
+    private string? ResolveRefreshToken(RefreshRequest? request)
+    {
+        return !string.IsNullOrWhiteSpace(request?.RefreshToken)
+            ? request.RefreshToken
+            : Request.Cookies[RefreshTokenCookieName];
+    }
+
+    private void WriteAuthCookies(string accessToken, string refreshToken, DateTime refreshExpiresAt)
+    {
+        var secure = Request.IsHttps || string.Equals(
+            configuration["ASPNETCORE_ENVIRONMENT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+            "Production",
+            StringComparison.OrdinalIgnoreCase);
+
+        Response.Cookies.Append(AccessTokenCookieName, accessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = secure,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            Expires = DateTimeOffset.UtcNow.AddMinutes(15),
+            IsEssential = true
+        });
+        Response.Cookies.Append(RefreshTokenCookieName, refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = secure,
+            SameSite = SameSiteMode.Lax,
+            Path = "/api/auth",
+            Expires = refreshExpiresAt,
+            IsEssential = true
+        });
+    }
+
+    private void ClearAuthCookies()
+    {
+        Response.Cookies.Delete(AccessTokenCookieName, new CookieOptions { Path = "/" });
+        Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions { Path = "/api/auth" });
     }
 
     private Guid ResolveTenantId()
@@ -161,5 +205,5 @@ public sealed class AuthController(
     }
 
     public sealed record LoginRequest(string Email, string Password);
-    public sealed record RefreshRequest(string RefreshToken);
+    public sealed record RefreshRequest(string? RefreshToken);
 }

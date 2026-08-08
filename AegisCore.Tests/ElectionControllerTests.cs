@@ -20,7 +20,7 @@ public sealed class ElectionControllerTests
     [Fact]
     public async Task Create_ValidElection_ReturnsOkWithElection()
     {
-        var election = new Election { Id = Guid.NewGuid(), Title = "Student Council Elections 2025", AcademicYear = "2025", Type = ElectionType.StudentUnion };
+        var election = new Election { Id = Guid.NewGuid(), Title = "Student Council Elections 2025", ElectionType = "student_union", VotingMethod = "online" };
         _service.Setup(s => s.CreateElectionAsync(It.IsAny<Election>(), It.IsAny<CancellationToken>())).ReturnsAsync(election);
 
         var result = await _controller.Create(election, CancellationToken.None);

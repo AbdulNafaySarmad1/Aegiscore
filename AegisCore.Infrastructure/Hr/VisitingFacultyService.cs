@@ -9,8 +9,9 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 {
     public async Task<IReadOnlyList<SlotMatchDto>> MatchFacultyToSlotsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var slots = await db.Set<TeachingSlot>().IgnoreQueryFilters().Where(s => s.TenantId == tenantId && s.Status == "open").ToListAsync(ct);
-        var faculty = await db.Set<VisitingFacultyProfile>().IgnoreQueryFilters().Where(f => f.TenantId == tenantId && f.ProfileStatus == "ready_to_deploy").ToListAsync(ct);
+        db.EnsureCurrentTenant(tenantId);
+        var slots = await db.Set<TeachingSlot>().Where(s => s.Status == "open").ToListAsync(ct);
+        var faculty = await db.Set<VisitingFacultyProfile>().Where(f => f.ProfileStatus == "ready_to_deploy").ToListAsync(ct);
         var results = new List<SlotMatchDto>();
         foreach (var slot in slots)
         {
@@ -38,7 +39,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyProfileDto> VetFacultyProfileAsync(Guid profileId, CancellationToken ct = default)
     {
-        var profile = await db.Set<VisitingFacultyProfile>().FindAsync([profileId], ct)
+        var profile = await db.Set<VisitingFacultyProfile>().SingleOrDefaultAsync(p => p.Id == profileId, ct)
             ?? throw new InvalidOperationException("Profile not found.");
         profile.ProfileStatus = profile.DocumentsVerified && profile.ReferencesChecked ? "ready_to_deploy" : "pending_documents";
         await db.SaveChangesAsync(ct);
@@ -47,7 +48,9 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyEngagementDto> CreateEngagementAsync(Guid slotId, Guid profileId, CancellationToken ct = default)
     {
-        var slot = await db.Set<TeachingSlot>().FindAsync([slotId], ct) ?? throw new InvalidOperationException("Teaching slot not found.");
+        var slot = await db.Set<TeachingSlot>().SingleOrDefaultAsync(s => s.Id == slotId, ct) ?? throw new InvalidOperationException("Teaching slot not found.");
+        var profileExists = await db.Set<VisitingFacultyProfile>().AnyAsync(p => p.Id == profileId, ct);
+        if (!profileExists) throw new InvalidOperationException("Faculty profile not found.");
         var engagement = new FacultyEngagement
         {
             Id = Guid.NewGuid(), TeachingSlotId = slotId, FacultyProfileId = profileId,
@@ -63,7 +66,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyPerformanceDto> RatePerformanceAsync(Guid engagementId, CancellationToken ct = default)
     {
-        var engagement = await db.Set<FacultyEngagement>().FindAsync([engagementId], ct) ?? throw new InvalidOperationException("Engagement not found.");
+        var engagement = await db.Set<FacultyEngagement>().SingleOrDefaultAsync(e => e.Id == engagementId, ct) ?? throw new InvalidOperationException("Engagement not found.");
         var rating = new FacultyPerformanceRating
         {
             Id = Guid.NewGuid(), EngagementId = engagementId, AttendanceScore = 85, StudentFeedbackScore = 80,
@@ -77,7 +80,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyCompensationDto> ProcessCompensationAsync(Guid engagementId, CancellationToken ct = default)
     {
-        var engagement = await db.Set<FacultyEngagement>().FindAsync([engagementId], ct) ?? throw new InvalidOperationException("Engagement not found.");
+        var engagement = await db.Set<FacultyEngagement>().SingleOrDefaultAsync(e => e.Id == engagementId, ct) ?? throw new InvalidOperationException("Engagement not found.");
         var tax = engagement.TotalCompensation * 0.1m;
         var net = engagement.TotalCompensation - tax;
         var comp = new FacultyCompensation
@@ -93,8 +96,9 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<PoolAnalyticsDto> GetPoolAnalyticsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var faculty = await db.Set<VisitingFacultyProfile>().IgnoreQueryFilters().Where(f => f.TenantId == tenantId).ToListAsync(ct);
-        var slots = await db.Set<TeachingSlot>().IgnoreQueryFilters().Where(s => s.TenantId == tenantId).ToListAsync(ct);
+        db.EnsureCurrentTenant(tenantId);
+        var faculty = await db.Set<VisitingFacultyProfile>().ToListAsync(ct);
+        var slots = await db.Set<TeachingSlot>().ToListAsync(ct);
         var specs = faculty.Where(f => !string.IsNullOrWhiteSpace(f.SpecializationsCsv)).SelectMany(f => f.SpecializationsCsv!.Split(',')).GroupBy(s => s.Trim()).ToDictionary(g => g.Key, g => g.Count());
         return new PoolAnalyticsDto(faculty.Count, faculty.Count(f => f.ProfileStatus == "ready_to_deploy"), faculty.Count(f => f.ProfileStatus == "pending_documents"), specs, slots.Count(s => s.Status == "open"), slots.Count(s => s.Status == "filled"), 5.2m, 15000m, 0.78m, specs.Where(kv => kv.Value < 3).Select(kv => kv.Key).ToList());
     }

@@ -149,7 +149,8 @@ public class IdentityService : IIdentityService
         var userRoles = await _userRoleRepo.GetByUserAsync(userId, cancellationToken);
 
         var permissions = new HashSet<Permission>();
-        foreach (var userRole in userRoles)
+        var now = DateTime.UtcNow;
+        foreach (var userRole in userRoles.Where(ur => ur.ExpiresAt == null || ur.ExpiresAt > now))
         {
             if (userRole.Role?.RolePermissions == null) continue;
             foreach (var rp in userRole.Role.RolePermissions)
@@ -166,7 +167,8 @@ public class IdentityService : IIdentityService
     {
         var userRoles = await _userRoleRepo.GetByUserAsync(userId, cancellationToken);
 
-        foreach (var userRole in userRoles)
+        var now = DateTime.UtcNow;
+        foreach (var userRole in userRoles.Where(ur => ur.ExpiresAt == null || ur.ExpiresAt > now))
         {
             if (userRole.Role?.RolePermissions == null) continue;
             foreach (var rp in userRole.Role.RolePermissions)

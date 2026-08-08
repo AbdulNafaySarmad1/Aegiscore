@@ -19,7 +19,11 @@ public static class CampusModuleEndpoints
             Results.Ok(await service.IssueVoterTokenAsync(electionId, studentId, ct)));
 
         group.MapPost("/{electionId:guid}/ballot", async (Guid electionId, CastBallotRequest request, IElectionService service, CancellationToken ct) =>
-            Results.Ok(await service.CastBallotAsync(request, ct)));
+        {
+            if (request.ElectionId != electionId)
+                return Results.BadRequest(new { error = "election_id_mismatch" });
+            return Results.Ok(await service.CastBallotAsync(request, ct));
+        });
 
         group.MapGet("/{electionId:guid}/results", async (Guid electionId, IElectionService service, CancellationToken ct) =>
             Results.Ok(await service.ComputeResultsAsync(electionId, ct)));

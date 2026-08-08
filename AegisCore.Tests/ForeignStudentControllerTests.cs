@@ -54,10 +54,11 @@ public sealed class ForeignStudentControllerTests
     [Fact]
     public async Task MoraSubmit_ValidSemester_ReturnsSubmission()
     {
-        var submission = new MoraSubmission { Id = Guid.NewGuid(), Semester = "2025S", StudentCount = 150, IsSubmitted = true };
-        _service.Setup(s => s.SubmitToMoraAsync("2025S", It.IsAny<CancellationToken>())).ReturnsAsync(submission);
+        var semesterId = Guid.NewGuid();
+        var submission = new MoraSubmission { Id = Guid.NewGuid(), SemesterId = semesterId, SubmissionType = "enrollment", Status = "submitted" };
+        _service.Setup(s => s.SubmitToMoraAsync(semesterId.ToString(), It.IsAny<CancellationToken>())).ReturnsAsync(submission);
 
-        var result = await _controller.MoraSubmit("2025S", CancellationToken.None);
+        var result = await _controller.MoraSubmit(semesterId.ToString(), CancellationToken.None);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(submission, ok.Value);
@@ -80,7 +81,7 @@ public sealed class ForeignStudentControllerTests
     public async Task ReportBreach_ValidInput_ReturnsBreach()
     {
         var registryId = Guid.NewGuid();
-        var breach = new ComplianceBreach { Id = Guid.NewGuid(), RegistryId = registryId, Description = "Visa expired without renewal" };
+        var breach = new ComplianceBreach { Id = Guid.NewGuid(), ForeignStudentRecordId = registryId, BreachType = "visa_expired", Description = "Visa expired without renewal" };
         _service.Setup(s => s.ReportBreachAsync(registryId, "Visa expired without renewal", It.IsAny<CancellationToken>())).ReturnsAsync(breach);
 
         var result = await _controller.ReportBreach(registryId, "Visa expired without renewal", CancellationToken.None);

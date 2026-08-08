@@ -16,6 +16,7 @@ using AegisCore.Infrastructure.Payments.Raast;
 using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure.Cloud.R2;
 using AegisCore.Infrastructure.Cloud;
+using AegisCore.API.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -154,9 +155,12 @@ public static class AuthenticationServicesExtensions
     {
         var authority = configuration["Auth:Authority"];
         var audience = configuration["Auth:Audience"];
+        var issuer = configuration["Jwt:Issuer"];
         if (string.IsNullOrWhiteSpace(audience) || audience.StartsWith("${", StringComparison.Ordinal)) audience = "aegiscore-api";
+        if (string.IsNullOrWhiteSpace(issuer) || issuer.StartsWith("${", StringComparison.Ordinal)) issuer = "https://aegiscore.pk";
         services.AddAuthentication().AddJwtBearer(options =>
         {
+            ConfigureBrowserAndSignalRTokens(options);
             options.Audience = audience;
             if (Uri.TryCreate(authority, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps && !authority!.StartsWith("${", StringComparison.Ordinal))
             {
@@ -187,7 +191,7 @@ public static class AuthenticationServicesExtensions
                 publicKey.ImportFromPem(publicKeyPem.ToCharArray());
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true, ValidIssuer = "https://aegiscore.pk", ValidateAudience = true, ValidAudience = audience,
+                    ValidateIssuer = true, ValidIssuer = issuer, ValidateAudience = true, ValidAudience = audience,
                     ValidateLifetime = true, ValidateIssuerSigningKey = true, IssuerSigningKey = new RsaSecurityKey(publicKey),
                     ClockSkew = TimeSpan.FromMinutes(2), ValidAlgorithms = [SecurityAlgorithms.RsaSha256]
                 };
@@ -195,7 +199,7 @@ public static class AuthenticationServicesExtensions
             }
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = false, ValidateAudience = true, ValidAudience = audience, ValidateLifetime = true,
+                ValidateIssuer = true, ValidIssuer = issuer, ValidateAudience = true, ValidAudience = audience, ValidateLifetime = true,
                 ValidateIssuerSigningKey = true, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
                 ClockSkew = TimeSpan.FromMinutes(2), ValidAlgorithms = [SecurityAlgorithms.HmacSha256]
             };
@@ -206,6 +210,29 @@ public static class AuthenticationServicesExtensions
         services.AddSingleton<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         services.AddSingleton<IFinanceRealtimePublisher, SignalRFinanceRealtimePublisher>();
         return services;
+    }
+
+    private static void ConfigureBrowserAndSignalRTokens(JwtBearerOptions options)
+    {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Headers.ContainsKey("Authorization")) return Task.CompletedTask;
+
+                var queryToken = context.Request.Query["access_token"].ToString();
+                if (!string.IsNullOrWhiteSpace(queryToken) && context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = queryToken;
+                    return Task.CompletedTask;
+                }
+
+                if (context.Request.Cookies.TryGetValue(AuthController.AccessTokenCookieName, out var cookieToken))
+                    context.Token = cookieToken;
+
+                return Task.CompletedTask;
+            }
+        };
     }
 
 }

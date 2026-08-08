@@ -47,7 +47,7 @@ public class CasbinAuthorizationMiddleware
 
         var allowed = false;
 
-        if (roles.Count > 0)
+        if (context.User?.Identity?.IsAuthenticated == true)
         {
             foreach (var role in roles)
             {
@@ -57,6 +57,9 @@ public class CasbinAuthorizationMiddleware
                     break;
                 }
             }
+
+            if (!allowed)
+                allowed = await enforcer.EnforceAsync("authenticated", obj, action);
         }
         else
         {

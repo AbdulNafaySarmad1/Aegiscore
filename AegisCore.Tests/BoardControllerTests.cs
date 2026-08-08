@@ -45,7 +45,7 @@ public sealed class BoardControllerTests
     [Fact]
     public async Task Alerts_HasAlerts_ReturnsAlerts()
     {
-        var alerts = new List<BoardAlert> { new() { Id = Guid.NewGuid(), Title = "Accreditation deadline approaching", Category = AlertCategory.Financial }, new() { Id = Guid.NewGuid(), Title = "Budget variance detected", Category = AlertCategory.Compliance } };
+        var alerts = new List<BoardAlert> { new() { Id = Guid.NewGuid(), Message = "Accreditation deadline approaching", Category = "financial" }, new() { Id = Guid.NewGuid(), Message = "Budget variance detected", Category = "compliance" } };
         _service.Setup(s => s.GetAlertsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(alerts);
 
         var result = await _controller.Alerts(CancellationToken.None);

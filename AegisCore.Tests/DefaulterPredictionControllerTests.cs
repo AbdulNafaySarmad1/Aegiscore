@@ -90,10 +90,11 @@ public sealed class DefaulterPredictionControllerTests
     [Fact]
     public async Task Forecast_ValidSemester_ReturnsForecast()
     {
-        var forecast = new CashFlowForecast { Id = Guid.NewGuid(), Semester = "2025S", ExpectedCollection = 500000m, ProjectedShortfall = 25000m };
-        _service.Setup(s => s.GenerateForecastAsync("2025S", It.IsAny<CancellationToken>())).ReturnsAsync(forecast);
+        var semesterId = Guid.NewGuid();
+        var forecast = new CashFlowForecast { Id = Guid.NewGuid(), SemesterId = semesterId, ExpectedCollection = 500000m, ProjectedShortfall = 25000m };
+        _service.Setup(s => s.GenerateForecastAsync(semesterId.ToString(), It.IsAny<CancellationToken>())).ReturnsAsync(forecast);
 
-        var result = await _controller.Forecast("2025S", CancellationToken.None);
+        var result = await _controller.Forecast(semesterId.ToString(), CancellationToken.None);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(forecast, ok.Value);
