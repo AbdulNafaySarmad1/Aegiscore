@@ -83,10 +83,11 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/student/*", "/attendance", "/mental-health",
       "/elections", "/cafeteria", "/placement", "/achievements",
-      "/examinations", "/voice",
+      "/examinations", "/voice", "/telemetry",
     ],
     dashboardModules: [
       { id: "dashboard", label: "My Dashboard", icon: "LayoutDashboard", route: "/student/dashboard", color: "blue", description: "Your academic overview and shortcuts.", priority: 1, domain: "academic", badge: "HOME" },
+      { id: "telemetry", label: "Performance", icon: "Gauge", route: "/telemetry", color: "blue", description: "Academic sectors, trends, personal bests, and privacy-safe cohort comparisons.", priority: 2, domain: "academic", badge: "LIVE" },
       { id: "attendance", label: "Attendance", icon: "ClipboardCheck", route: "/attendance", color: "blue", description: "Per-course attendance records and percentage.", priority: 2, domain: "academic" },
       { id: "examinations", label: "Examinations", icon: "GraduationCap", route: "/examinations", color: "blue", description: "Exam schedules and published results.", priority: 3, domain: "academic" },
       { id: "transcript", label: "Transcript", icon: "FileText", route: "/student/transcript", color: "blue", description: "Official transcript view and request.", priority: 4, domain: "academic" },
@@ -137,11 +138,12 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/examinations", "/grade-distributions", "/freezes",
       "/grade-appeals", "/prerequisite-conflicts", "/proctoring",
-      "/convocations",
+      "/convocations", "/analytics", "/telemetry",
     ],
     dashboardModules: [
       { id: "exam-schedule", label: "Exam Schedule", icon: "CalendarDays", route: "/examinations", color: "blue", description: "Schedule, seating plans, and invigilation.", priority: 1, domain: "academic", badge: "ACTIVE" },
       { id: "grade-dist", label: "Grade Distribution", icon: "FileSearch", route: "/grade-distributions", color: "blue", description: "Statistical analysis of grade patterns.", priority: 2, domain: "academic" },
+      { id: "model-analytics", label: "Model Analytics", icon: "Activity", route: "/analytics", color: "violet", description: "Model quality and global explanation snapshots.", priority: 3, domain: "compliance" },
       { id: "freezes", label: "Freezes", icon: "CalendarDays", route: "/freezes", color: "amber", description: "Semester freeze and deferral management.", priority: 3, domain: "academic" },
       { id: "appeals", label: "Grade Appeals", icon: "Scale", route: "/grade-appeals", color: "amber", description: "Student appeals, evidence review, committee decisions.", priority: 4, domain: "compliance" },
       { id: "prereqs", label: "Prerequisite Conflicts", icon: "FileSearch", route: "/prerequisite-conflicts", color: "amber", description: "Students enrolled without meeting prerequisites.", priority: 5, domain: "compliance" },
@@ -163,10 +165,11 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/examinations", "/foreign-students", "/convocations",
       "/catalog", "/classes", "/prerequisite-conflicts", "/data-import",
-      "/readiness", "/achievements",
+      "/readiness", "/achievements", "/analytics", "/telemetry",
     ],
     dashboardModules: [
       { id: "enrollment", label: "Enrollment Overview", icon: "BookOpenCheck", route: "/classes", color: "blue", description: "Current enrollment stats, sections, and capacity.", priority: 1, domain: "academic", badge: "LIVE" },
+      { id: "model-analytics", label: "Model Analytics", icon: "Activity", route: "/analytics", color: "violet", description: "Model quality snapshots and admissions decision explanations.", priority: 8, domain: "compliance" },
       { id: "foreign", label: "Foreign Students", icon: "UserRound", route: "/foreign-students", color: "blue", description: "Visa tracking, immigration, and international student records.", priority: 2, domain: "academic" },
       { id: "convocations", label: "Convocations", icon: "GraduationCap", route: "/convocations", color: "violet", description: "Graduation ceremony planning.", priority: 3, domain: "operations" },
       { id: "catalog", label: "Catalog Ingestion", icon: "FileText", route: "/catalog", color: "blue", description: "Course catalog import and management.", priority: 4, domain: "academic" },
@@ -264,10 +267,11 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/classes", "/examinations", "/grade-distributions",
       "/grade-appeals", "/prerequisite-conflicts",
-      "/readiness", "/visiting-faculty",
+      "/readiness", "/visiting-faculty", "/analytics", "/telemetry",
     ],
     dashboardModules: [
       { id: "dept-overview", label: "Department Overview", icon: "Building2", route: "/classes", color: "blue", description: "All departments, programmes, and faculty under your faculty.", priority: 1, domain: "academic" },
+      { id: "model-analytics", label: "Model Analytics", icon: "Activity", route: "/analytics", color: "violet", description: "Model quality and global explanation snapshots.", priority: 5, domain: "compliance" },
       { id: "grade-dist", label: "Grade Distribution", icon: "FileSearch", route: "/grade-distributions", color: "blue", description: "Faculty-wide grade analysis and anomalies.", priority: 2, domain: "academic" },
       { id: "appeals", label: "Grade Appeals", icon: "Scale", route: "/grade-appeals", color: "amber", description: "Appeal pipeline and committee review.", priority: 3, domain: "compliance" },
       { id: "readiness", label: "Accreditation Readiness", icon: "ShieldCheck", route: "/readiness", color: "green", description: "Programme accreditation status.", priority: 4, domain: "compliance" },
@@ -286,9 +290,11 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/classes", "/examinations", "/grade-distributions",
       "/grade-appeals", "/visiting-faculty", "/attendance",
+      "/analytics", "/telemetry",
     ],
     dashboardModules: [
       { id: "dept-classes", label: "Department Classes", icon: "BookOpenCheck", route: "/classes", color: "blue", description: "Active courses, sections, and enrollment in your department.", priority: 1, domain: "academic" },
+      { id: "model-analytics", label: "Model Analytics", icon: "Activity", route: "/analytics", color: "violet", description: "Model quality and global explanation snapshots.", priority: 5, domain: "compliance" },
       { id: "grades", label: "Grade Submission", icon: "ClipboardCheck", route: "/examinations", color: "blue", description: "Faculty grade submissions and moderation status.", priority: 2, domain: "academic" },
       { id: "attendance", label: "Attendance Overview", icon: "CalendarDays", route: "/attendance", color: "blue", description: "Department-wide attendance summary.", priority: 3, domain: "academic" },
       { id: "visiting", label: "Visiting Faculty", icon: "UserRound", route: "/visiting-faculty", color: "amber", description: "Request and manage visiting lecturers.", priority: 4, domain: "operations" },
@@ -318,6 +324,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "achievements", label: "Achievements", icon: "GraduationCap", route: "/achievements", color: "violet", description: "Student achievement tracking.", priority: 10, domain: "welfare" },
       { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health monitoring.", priority: 11, domain: "operations" },
       { id: "data-import", label: "Data Import", icon: "FileSearch", route: "/data-import", color: "amber", description: "Bulk data import management.", priority: 12, domain: "operations" },
+      { id: "model-analytics", label: "Model Analytics", icon: "Activity", route: "/analytics", color: "violet", description: "Model quality and global explanation snapshots; decision transparency.", priority: 13, domain: "compliance" },
     ],
     kpis: [
       { id: "collection", label: "Fee Collection Rate %", value: "--", format: "percentage", icon: "CreditCard", iconColor: "green", metric: "collectionRate" },
@@ -347,6 +354,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "mental-health", label: "Mental Health", icon: "ShieldCheck", route: "/mental-health", color: "violet", description: "Crisis monitoring and counselor load.", priority: 10, domain: "welfare" },
       { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health and performance.", priority: 11, domain: "operations" },
       { id: "transport", label: "Transport", icon: "Briefcase", route: "/transport", color: "amber", description: "Fleet status and route management.", priority: 12, domain: "operations" },
+      { id: "model-analytics", label: "Model Analytics", icon: "Activity", route: "/analytics", color: "violet", description: "Model quality and global explanation snapshots.", priority: 13, domain: "compliance" },
     ],
     kpis: [
       { id: "collection", label: "Fee Collection Rate %", value: "--", format: "percentage", icon: "CreditCard", iconColor: "green", metric: "collectionRate" },

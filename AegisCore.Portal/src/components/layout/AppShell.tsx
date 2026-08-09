@@ -10,8 +10,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BookOpenCheck, Briefcase, Building2, CalendarDays, ChevronDown, ChevronLeft,
-  ChevronRight, CircleHelp, ClipboardCheck, CreditCard, FileSearch, FileText,
+  Activity, BookOpenCheck, Briefcase, Building2, CalendarDays, ChevronDown, ChevronLeft,
+  ChevronRight, CircleHelp, ClipboardCheck, CreditCard, FileSearch, FileText, Gauge,
   GraduationCap, Landmark, LayoutDashboard, LogOut, Menu, Moon, Scale, Search,
   Settings, ShieldCheck, Sun, UserRound, Utensils, Vote, X, Bell, Accessibility,
 } from "lucide-react";
@@ -39,6 +39,7 @@ const iconMap: Record<string, typeof LayoutDashboard> = {
   LayoutDashboard, Landmark, FileText, CreditCard, BookOpenCheck, GraduationCap,
   ClipboardCheck, CalendarDays, ShieldCheck, Building2, Scale, FileSearch,
   Briefcase, UserRound, Vote, Utensils, Settings, CircleHelp, Search, LogOut,
+  Gauge, Activity,
 };
 function Icon({ name }: { name: string }) { const C = iconMap[name] ?? CircleHelp; return <C size={20} />; }
 

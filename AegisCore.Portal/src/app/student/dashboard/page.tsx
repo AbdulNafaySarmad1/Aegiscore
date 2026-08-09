@@ -12,11 +12,12 @@ import { AppShell } from "@/components/layout/AppShell";
 import { useSession } from "@/components/session-provider";
 import { getGreeting } from "@/lib/roles";
 import {
-  CalendarDays, ClipboardCheck, CreditCard, FileText, GraduationCap,
+  CalendarDays, ClipboardCheck, CreditCard, FileText, Gauge, GraduationCap,
   ShieldCheck, Trophy, Utensils, Vote,
 } from "lucide-react";
 
 const shortcuts = [
+  { href: "/telemetry", icon: Gauge, label: "Performance", desc: "Academic sectors, trends, and personal bests.", color: "blue" },
   { href: "/attendance", icon: ClipboardCheck, label: "Attendance", desc: "Per-course presence records.", color: "blue" },
   { href: "/examinations", icon: GraduationCap, label: "Examinations", desc: "Schedules and published results.", color: "blue" },
   { href: "/student/transcript", icon: FileText, label: "Transcript", desc: "Official record and requests.", color: "blue" },
