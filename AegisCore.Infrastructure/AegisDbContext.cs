@@ -1951,6 +1951,12 @@ public class AegisDbContext : DbContext
     public DbSet<TransportIncident> TransportIncidents => Set<TransportIncident>();
     public DbSet<TransportInspection> TransportInspections => Set<TransportInspection>();
 
+    public DbSet<AnalyticsDecisionSnapshot> AnalyticsDecisionSnapshots => Set<AnalyticsDecisionSnapshot>();
+    public DbSet<AnalyticsStudentTelemetrySnapshot> AnalyticsStudentTelemetrySnapshots => Set<AnalyticsStudentTelemetrySnapshot>();
+    public DbSet<AnalyticsModelPredictionSnapshot> AnalyticsModelPredictionSnapshots => Set<AnalyticsModelPredictionSnapshot>();
+    public DbSet<AnalyticsModelQualitySnapshot> AnalyticsModelQualitySnapshots => Set<AnalyticsModelQualitySnapshot>();
+    public DbSet<AnalyticsGlobalExplanationSnapshot> AnalyticsGlobalExplanationSnapshots => Set<AnalyticsGlobalExplanationSnapshot>();
+
     /// <summary>
     /// Configures the model that was discovered by convention from the entity types
     /// exposed in <see cref="DbSet{TEntity}"/> properties on your derived context.
@@ -3440,6 +3446,55 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.TenantId);
         });
+
+        modelBuilder.Entity<AnalyticsDecisionSnapshot>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ExplanationType, e.SubjectId, e.InputHash }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.SubjectType, e.SubjectId, e.CalculatedAt });
+        });
+
+        modelBuilder.Entity<AnalyticsStudentTelemetrySnapshot>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.CourseId, e.FreshnessAt });
+            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Period, e.InputHash });
+        });
+
+        modelBuilder.Entity<AnalyticsModelPredictionSnapshot>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.SubjectType, e.SubjectId, e.PredictionTimestamp });
+            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.ModelVersion, e.PredictionTimestamp });
+        });
+
+        modelBuilder.Entity<AnalyticsModelQualitySnapshot>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.ModelVersion, e.EvaluationDataHash }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.EvaluationTimestamp });
+        });
+
+        modelBuilder.Entity<AnalyticsGlobalExplanationSnapshot>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.ModelVersion, e.PopulationHash }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.CalculatedAt });
+        });
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        EnsureAnalyticsSnapshotsAreAppendOnly();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        EnsureAnalyticsSnapshotsAreAppendOnly();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void EnsureAnalyticsSnapshotsAreAppendOnly()
+    {
+        if (ChangeTracker.Entries<IImmutableAnalyticsSnapshot>()
+            .Any(entry => entry.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Analytics explanation evidence is append-only and cannot be updated or deleted.");
     }
 
     private static PolicyConfig SeedPolicy(string id, string module, string policyName, string policyValue, string valueType, string description)
