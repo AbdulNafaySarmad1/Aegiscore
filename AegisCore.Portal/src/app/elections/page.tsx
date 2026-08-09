@@ -23,7 +23,7 @@ type Candidate = {
 };
 
 type ElectionResult = {
-  position: string; winnerName: string; winnerId: string;
+  id?: string; position: string; winnerName: string; winnerId: string;
   voteCount: number; percentage: number; certified: boolean;
 };
 
@@ -55,6 +55,7 @@ export default function ElectionsPage() {
   const [nomPosition, setNomPosition] = useState("");
   const [nominating, setNominating] = useState(false);
 
+  const [tokenElectionId, setTokenElectionId] = useState("");
   const [tokenStudentId, setTokenStudentId] = useState("");
   const [issuedToken, setIssuedToken] = useState<string | null>(null);
   const [issuing, setIssuing] = useState(false);
@@ -103,12 +104,9 @@ export default function ElectionsPage() {
     e.preventDefault();
     setNominating(true); setMessage(null);
     try {
-      await apiPost("/api/elections/nominate", { electionId: nomElectionId, studentId: nomStudentId, position: nomPosition });
+      await apiPost(`/api/elections/${nomElectionId}/nominate/${encodeURIComponent(nomStudentId)}?position=${encodeURIComponent(nomPosition)}`);
       setMessage("success: Candidate nominated");
       setNomStudentId(""); setNomPosition("");
-      const ctrl = new AbortController();
-      const c = await apiGet<Candidate[]>("/api/elections/candidates", ctrl.signal);
-      setCandidates(c);
     } catch { setMessage("error: Nomination failed"); }
     finally { setNominating(false); }
   }
@@ -117,9 +115,11 @@ export default function ElectionsPage() {
     e.preventDefault();
     setIssuing(true); setMessage(null); setIssuedToken(null);
     try {
-      const resp = await apiPost<{ token: string }>("/api/elections/issue-token", { studentId: tokenStudentId });
-      setIssuedToken(resp.token);
-      setMessage("success: Token issued successfully");
+      // v2 contract: the response's tokenHash field carries the one-time
+      // plaintext bearer token; it cannot be recovered after issuance.
+      const resp = await apiPost<{ tokenHash: string }>(`/api/campus/v2/elections/${tokenElectionId}/token/${encodeURIComponent(tokenStudentId)}`);
+      setIssuedToken(resp.tokenHash);
+      setMessage("success: Token issued — copy it now, it is shown only once");
     } catch { setMessage("error: Token issuance failed"); }
     finally { setIssuing(false); }
   }
@@ -128,7 +128,7 @@ export default function ElectionsPage() {
     e.preventDefault();
     setCasting(true); setMessage(null);
     try {
-      await apiPost("/api/elections/cast-vote", { electionId: voteElectionId, token: voteToken, voteData });
+      await apiPost(`/api/elections/${voteElectionId}/vote?voterToken=${encodeURIComponent(voteToken)}`, voteData);
       setMessage("success: Vote cast successfully");
       setVoteToken(""); setVoteData("");
     } catch { setMessage("error: Vote casting failed"); }
@@ -139,17 +139,18 @@ export default function ElectionsPage() {
     if (!tallyElectionId) return;
     setTallying(true); setMessage(null);
     try {
-      const r = await apiPost<ElectionResult[]>(`/api/elections/${tallyElectionId}/tally`);
-      setResults(r);
+      // Legacy tally returns only persisted results and may be empty.
+      const r = await apiPost<{ total: number; results: ElectionResult[] }>(`/api/elections/${tallyElectionId}/tally`);
+      setResults(Array.isArray(r.results) ? r.results : []);
       setMessage("success: Results tallied");
     } catch { setMessage("error: Tally failed"); }
     finally { setTallying(false); }
   }
 
-  async function certifyResult(position: string) {
+  async function certifyResult(resultId: string, position: string) {
     setCertifyingId(position);
     try {
-      await apiPost(`/api/elections/certify`, { position });
+      await apiPost(`/api/elections/results/${resultId}/certify`);
       setMessage("success: Result certified");
       setResults(prev => prev.map(r => r.position === position ? { ...r, certified: true } : r));
     } catch { setMessage("error: Certification failed"); }
@@ -262,17 +263,24 @@ export default function ElectionsPage() {
             <div style={{ padding: 18 }}>
               <form onSubmit={issueToken} style={{ display: "grid", gap: 12 }}>
                 <label style={labelS}>
-                  Student ID <b style={{ color: "var(--red)" }}>*</b>
-                  <input placeholder="e.g. STU-2024-001" value={tokenStudentId} onChange={e => setTokenStudentId(e.target.value)} style={inputS} required />
+                  Election <b style={{ color: "var(--red)" }}>*</b>
+                  <select value={tokenElectionId} onChange={e => setTokenElectionId(e.target.value)} style={inputS} required>
+                    <option value="">Select election...</option>
+                    {elections.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
+                  </select>
                 </label>
-                <button type="submit" disabled={issuing}
-                  style={{ padding: "0.7rem", background: "var(--green)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: issuing ? 0.6 : 1 }}>
+                <label style={labelS}>
+                  Student ID <b style={{ color: "var(--red)" }}>*</b>
+                  <input placeholder="Student record GUID" value={tokenStudentId} onChange={e => setTokenStudentId(e.target.value)} style={inputS} required />
+                </label>
+                <button type="submit" disabled={issuing || !tokenElectionId}
+                  style={{ padding: "0.7rem", background: "var(--green)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: issuing || !tokenElectionId ? 0.6 : 1 }}>
                   {issuing ? "Issuing..." : "Issue Token"}
                 </button>
               </form>
               {issuedToken && (
-                <div style={{ marginTop: 12, padding: 12, borderRadius: 8, border: "1px solid #aaddc9", background: "var(--green-soft)" }}>
-                  <small style={{ color: "var(--green)", fontSize: 9, fontWeight: 700, display: "block", marginBottom: 4 }}>ISSUED TOKEN</small>
+                <div style={{ marginTop: 12, padding: 12, borderRadius: 8, border: "1px solid var(--amber)", background: "var(--amber-soft)" }}>
+                  <small style={{ color: "var(--amber)", fontSize: 9, fontWeight: 700, display: "block", marginBottom: 4 }}>ONE-TIME VOTING TOKEN — SHOWN ONLY ONCE</small>
                   <code style={{ font: "11px ui-monospace, monospace", color: "var(--ink)", wordBreak: "break-all" }}>{issuedToken}</code>
                 </div>
               )}
@@ -381,8 +389,8 @@ export default function ElectionsPage() {
                       <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: r.certified ? "var(--green-soft)" : "var(--amber-soft)", color: r.certified ? "var(--green)" : "var(--amber)" }}>{r.certified ? "Certified" : "Pending"}</span>
                     </td>
                     <td style={{ padding: "10px 14px" }}>
-                      {!r.certified && (
-                        <button onClick={() => certifyResult(r.position)} disabled={certifyingId === r.position}
+                      {!r.certified && r.id && (
+                        <button onClick={() => certifyResult(r.id!, r.position)} disabled={certifyingId === r.position}
                           style={{ padding: "4px 10px", border: "1px solid #aaddc9", borderRadius: 6, color: "var(--green)", background: "var(--green-soft)", cursor: "pointer", fontSize: 10, fontWeight: 700 }}>Certify</button>
                       )}
                     </td>

@@ -5,37 +5,31 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, CheckCircle2, FileSearch, FileText, FolderOpen, Scale, Send, Upload } from "lucide-react";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
 
-type AppealStatus = "Pending" | "UnderReview" | "Resolved" | "Rejected";
+type AppealStatus = "Submitted" | "UnderReview" | "FacultyResponseReceived" | "CommitteeReview" | "Upheld" | "PartiallyUpheld" | "Dismissed" | "Deferred" | "Appealed";
 type Appeal = {
   id: string;
   studentId: string;
-  studentName: string;
   courseId: string;
-  courseName: string;
   semester: string;
   submittedGrade: string;
-  appealGrounds: string;
+  appealGrounds: string | null;
   status: AppealStatus;
-  filedAt: string;
-  committeeNotes: string | null;
+  submissionDate: string;
+  committeeDecision: string | null;
 };
 type CommitteeBrief = {
   appealId: string;
-  classification: string;
-  recommendation: string;
-  evidenceStrength: "Strong" | "Moderate" | "Weak";
+  briefContent: string | null;
+  recommendedOptions: string | null;
   generatedAt: string;
 };
 
 function statusBadge(status: AppealStatus) {
-  const color =
-    status === "Resolved" ? "var(--green)" :
-    status === "Rejected" ? "var(--red)" :
-    status === "UnderReview" ? "var(--amber)" : "var(--muted)";
-  const bg =
-    status === "Resolved" ? "var(--green-soft)" :
-    status === "Rejected" ? "var(--red-soft)" :
-    status === "UnderReview" ? "var(--amber-soft)" : "var(--surface-soft)";
+  const upheld = status === "Upheld" || status === "PartiallyUpheld";
+  const dismissed = status === "Dismissed";
+  const active = status === "UnderReview" || status === "CommitteeReview" || status === "FacultyResponseReceived";
+  const color = upheld ? "var(--green)" : dismissed ? "var(--red)" : active ? "var(--amber)" : "var(--muted)";
+  const bg = upheld ? "var(--green-soft)" : dismissed ? "var(--red-soft)" : active ? "var(--amber-soft)" : "var(--surface-soft)";
   return <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, background: bg, color, fontSize: 10, fontWeight: 700 }}>{status}</span>;
 }
 
@@ -62,16 +56,16 @@ export default function GradeAppealsPage() {
 
   useEffect(() => {
     const ctrl = new AbortController();
-    apiGet<Appeal[]>("/api/grade-appeals", ctrl.signal)
-      .then(d => { if (!ctrl.signal.aborted) { setAppeals(d); setError(null); } })
+    apiGet<{ total: number; appeals: Appeal[] }>("/api/grade-appeals/pending", ctrl.signal)
+      .then(d => { if (!ctrl.signal.aborted) { setAppeals(Array.isArray(d.appeals) ? d.appeals : []); setError(null); } })
       .catch(() => { if (!ctrl.signal.aborted) setError("Failed to load appeals"); })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
     return () => ctrl.abort();
   }, []);
 
   const refreshAppeals = () => {
-    apiGet<Appeal[]>("/api/grade-appeals")
-      .then(d => { setAppeals(d); setError(null); })
+    apiGet<{ total: number; appeals: Appeal[] }>("/api/grade-appeals/pending")
+      .then(d => { setAppeals(Array.isArray(d.appeals) ? d.appeals : []); setError(null); })
       .catch(() => setError("Failed to load appeals"));
   };
 
@@ -104,20 +98,20 @@ export default function GradeAppealsPage() {
   async function generateBrief(id: string) {
     setGeneratingBrief(true); setBrief(null);
     try {
-      const result = await apiPost<CommitteeBrief>(`/api/grade-appeals/${id}/brief`);
+      const result = await apiPost<CommitteeBrief>(`/api/grade-appeals/${id}/committee-brief`);
       setBrief(result);
     } catch { setBrief(null); }
     finally { setGeneratingBrief(false); }
   }
 
-  async function processDecision(id: string) {
+  async function processDecision(id: string, decision: "Upheld" | "Dismissed") {
     setProcessingId(id);
-    try { await apiPost(`/api/grade-appeals/${id}/process`); refreshAppeals(); } catch { /* ignore */ }
+    try { await apiPost(`/api/grade-appeals/${id}/decision?decision=${decision}`); refreshAppeals(); } catch { /* ignore */ }
     finally { setProcessingId(null); }
   }
 
-  const resolved = appeals.filter(a => a.status === "Resolved").length;
-  const rejectionRate = appeals.length > 0 ? Math.round((appeals.filter(a => a.status === "Rejected").length / appeals.length) * 100) : 0;
+  const resolved = appeals.filter(a => a.status === "Upheld" || a.status === "PartiallyUpheld").length;
+  const rejectionRate = appeals.length > 0 ? Math.round((appeals.filter(a => a.status === "Dismissed").length / appeals.length) * 100) : 0;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -142,11 +136,11 @@ export default function GradeAppealsPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
               <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
                 Student ID
-                <input placeholder="e.g. STU-2024-001" value={studentId} onChange={e => setStudentId(e.target.value)} style={inputS} required />
+                <input placeholder="Student record GUID" value={studentId} onChange={e => setStudentId(e.target.value)} style={inputS} required />
               </label>
               <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
                 Course ID
-                <input placeholder="e.g. CS-401" value={courseId} onChange={e => setCourseId(e.target.value)} style={inputS} required />
+                <input placeholder="Course GUID" value={courseId} onChange={e => setCourseId(e.target.value)} style={inputS} required />
               </label>
               <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
                 Semester
@@ -190,12 +184,8 @@ export default function GradeAppealsPage() {
             <div className="surface" style={{ padding: 18 }}>
               <h3 style={{ margin: "0 0 10px", fontSize: 13, color: "var(--ink)", display: "flex", alignItems: "center", gap: 8 }}><FileSearch style={{ width: 16 }} /> Committee Brief</h3>
               <div style={{ display: "grid", gap: 8, fontSize: 11 }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "var(--muted)" }}>Classification</span><strong>{brief.classification}</strong></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "var(--muted)" }}>Recommendation</span><strong style={{ color: "var(--green)" }}>{brief.recommendation}</strong></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--muted)" }}>Evidence</span>
-                  <span style={{ padding: "2px 7px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: brief.evidenceStrength === "Strong" ? "var(--green-soft)" : brief.evidenceStrength === "Moderate" ? "var(--amber-soft)" : "var(--red-soft)", color: brief.evidenceStrength === "Strong" ? "var(--green)" : brief.evidenceStrength === "Moderate" ? "var(--amber)" : "var(--red)" }}>{brief.evidenceStrength}</span>
-                </div>
+                {brief.briefContent && <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{brief.briefContent}</p>}
+                {brief.recommendedOptions && <div style={{ display: "grid", gap: 4 }}><span style={{ color: "var(--muted)" }}>Recommended options</span><strong style={{ color: "var(--green)" }}>{brief.recommendedOptions}</strong></div>}
                 <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "var(--muted)" }}>Generated</span><span>{new Date(brief.generatedAt).toLocaleString()}</span></div>
               </div>
             </div>
@@ -229,18 +219,19 @@ export default function GradeAppealsPage() {
                 {appeals.map(a => (
                   <tr key={a.id} style={{ borderBottom: "1px solid var(--line)" }}>
                     <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace", color: "var(--muted)" }}>{a.id.slice(0, 8)}...</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{a.studentName}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11 }}>{a.courseName}</td>
+                    <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace" }} title={a.studentId}>{a.studentId.slice(0, 8)}…</td>
+                    <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace" }} title={a.courseId}>{a.courseId.slice(0, 8)}…</td>
                     <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{a.semester}</td>
                     <td style={{ padding: "10px 14px", fontSize: 12, fontWeight: 700 }}>{a.submittedGrade}</td>
                     <td style={{ padding: "10px 14px" }}>{statusBadge(a.status)}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.appealGrounds}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", whiteSpace: "nowrap" }}>{new Date(a.filedAt).toLocaleDateString()}</td>
+                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.appealGrounds ?? "—"}</td>
+                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", whiteSpace: "nowrap" }}>{new Date(a.submissionDate).toLocaleDateString()}</td>
                     <td style={{ padding: "10px 14px" }}>
                       <div style={{ display: "flex", gap: 6 }}>
                         <button onClick={() => classifyGrounds(a.id)} disabled={processingId === a.id} style={actionBtnS} title="Classify Grounds"><FileSearch style={{ width: 13 }} /></button>
                         <button onClick={() => generateBrief(a.id)} disabled={generatingBrief} style={actionBtnS} title="Generate Brief"><FileText style={{ width: 13 }} /></button>
-                        <button onClick={() => processDecision(a.id)} disabled={processingId === a.id || a.status === "Resolved"} style={{ ...actionBtnS, color: a.status === "Resolved" ? "var(--muted)" : "var(--green)" }} title="Process Decision"><CheckCircle2 style={{ width: 13 }} /></button>
+                        <button onClick={() => processDecision(a.id, "Upheld")} disabled={processingId === a.id || a.status === "Upheld" || a.status === "Dismissed"} style={{ ...actionBtnS, color: "var(--green)" }} title="Uphold appeal"><CheckCircle2 style={{ width: 13 }} /></button>
+                        <button onClick={() => processDecision(a.id, "Dismissed")} disabled={processingId === a.id || a.status === "Upheld" || a.status === "Dismissed"} style={{ ...actionBtnS, color: "var(--red)" }} title="Dismiss appeal"><AlertCircle style={{ width: 13 }} /></button>
                       </div>
                     </td>
                   </tr>

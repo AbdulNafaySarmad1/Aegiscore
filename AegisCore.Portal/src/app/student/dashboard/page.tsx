@@ -1,103 +1,86 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
-import { apiGet } from "@/lib/api-client";
-import { BookOpenCheck, CalendarDays, ClipboardCheck, CreditCard, FileText, GraduationCap, TrendingUp } from "lucide-react";
+// ─── Student Dashboard ───
+// Student-prioritized landing. No fabricated academic metrics: student-self
+// grade/attendance/finance endpoints require an authoritative studentId that
+// the session model does not yet provide (docs/FRONTEND_API_HANDOFF.md).
+// Until then this page is an honest workspace hub, not a wall of "--".
 
-type StudentGrades = { courses: { courseTitle: string; percentage: number; totalSessions: number; presentSessions: number }[] };
-type Attendance = { courses: { courseTitle: string; percentage: number }[] };
-type FeeStatus = { feeFunnel: { demanded: number; collected: number; overdue: number; open: number; paid: number } };
-type Enrollments = { enrollments: { courseName: string; status: string }[] };
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { AppShell } from "@/components/layout/AppShell";
+import { useSession } from "@/components/session-provider";
+import { getGreeting } from "@/lib/roles";
+import {
+  CalendarDays, ClipboardCheck, CreditCard, FileText, GraduationCap,
+  ShieldCheck, Trophy, Utensils, Vote,
+} from "lucide-react";
+
+const shortcuts = [
+  { href: "/attendance", icon: ClipboardCheck, label: "Attendance", desc: "Per-course presence records.", color: "blue" },
+  { href: "/examinations", icon: GraduationCap, label: "Examinations", desc: "Schedules and published results.", color: "blue" },
+  { href: "/student/transcript", icon: FileText, label: "Transcript", desc: "Official record and requests.", color: "blue" },
+  { href: "/student/finance", icon: CreditCard, label: "Fees", desc: "Dues, challans, and receipts.", color: "green", dynamicStudentFinance: true },
+  { href: "/achievements", icon: Trophy, label: "Achievements", desc: "Badges and Dean's List.", color: "violet" },
+  { href: "/elections", icon: Vote, label: "Elections", desc: "Student council voting.", color: "violet" },
+  { href: "/cafeteria", icon: Utensils, label: "Cafeteria", desc: "Menus and meal orders.", color: "amber" },
+  { href: "/mental-health", icon: ShieldCheck, label: "Wellbeing", desc: "Confidential support, anonymously.", color: "violet" },
+] as const;
 
 export default function StudentDashboard() {
-  const [grades, setGrades] = useState<StudentGrades | null>(null);
-  const [attendance, setAttendance] = useState<Attendance | null>(null);
-  const [fees, setFees] = useState<FeeStatus | null>(null);
-  const [enrollments, setEnrollments] = useState<Enrollments | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.allSettled([
-      apiGet<StudentGrades>("/api/examination/grades/student?summary").catch(() => null),
-      apiGet<Attendance>("/api/attendance/report/student").catch(() => null),
-      apiGet<FeeStatus>("/api/student/finance").catch(() => null),
-      apiGet<Enrollments>("/api/student/enrollments").catch(() => null),
-    ]).then(([g, a, f, e]) => {
-      if (g.status === "fulfilled") setGrades(g.value);
-      if (a.status === "fulfilled") setAttendance(a.value);
-      if (f.status === "fulfilled") setFees(f.value);
-      if (e.status === "fulfilled") setEnrollments(e.value);
-      setLoading(false);
-    });
-  }, []);
-
-  const kpis = [
-    { label: "CGPA", value: grades?.courses?.length ? "3.67" : "--", icon: GraduationCap, color: "blue" },
-    { label: "Attendance %", value: attendance?.courses?.[0] ? `${Math.round(attendance.courses.reduce((s,c)=>s+c.percentage,0)/attendance.courses.length)}%` : "--", icon: ClipboardCheck, color: "green" },
-    { label: "Credits Done", value: "87/130", icon: BookOpenCheck, color: "blue" },
-    { label: "Fee Status", value: (fees?.feeFunnel?.overdue ?? 0) > 0 ? "Overdue" : "Current", icon: CreditCard, color: (fees?.feeFunnel?.overdue ?? 0) > 0 ? "amber" : "green" },
-  ];
+  const { session } = useSession();
+  const { greeting } = getGreeting(session?.name ?? "Student");
 
   return (
     <AppShell>
       <div className="content-page">
-        <motion.div className="hero-greeting" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-          <h1>My Dashboard</h1>
-          <p>Your academic overview at a glance</p>
+        <motion.div className="hero-greeting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+          <h1>{greeting}</h1>
+          <p>Your student workspace</p>
+          <div className="hero-time">
+            <CalendarDays size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: 6 }} />
+            {new Date().toLocaleDateString("en-PK", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </div>
         </motion.div>
 
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
-          {kpis.map((kpi, i) => (
-            <motion.article key={i} className="kpi-card" whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <div className={`kpi-card-icon kpi-accent ${kpi.color}`}><kpi.icon size={18} /></div>
-              <span className="kpi-label">{kpi.label}</span>
-              <strong className="kpi-number">{loading ? "--" : kpi.value}</strong>
-            </motion.article>
-          ))}
+        <div className="module-grid">
+          {shortcuts.map((s, i) => {
+            const needsStudentId = "dynamicStudentFinance" in s && s.dynamicStudentFinance;
+            const disabled = needsStudentId && !session?.studentId;
+            const href = needsStudentId ? `/student/finance/${session?.studentId}` : s.href;
+            return (
+              <motion.article
+                key={s.href}
+                className="module-card"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i, 8) * .03, duration: 0.2 }}
+                style={disabled ? { opacity: 0.6 } : undefined}
+              >
+                <div className="module-card-body">
+                  <div className="module-card-icon" style={{ color: `var(--domain-${s.color === "blue" ? "academic" : s.color === "green" ? "finance" : s.color === "amber" ? "operations" : "welfare"})`, background: "var(--surface-muted)" }}>
+                    <s.icon size={20} />
+                  </div>
+                  <strong>{s.label}</strong>
+                  <p>{s.desc}</p>
+                  {disabled ? (
+                    <span className="kpi-unavailable-note">Available once your student record is linked</span>
+                  ) : (
+                    <Link href={href} className="module-card-link">Open →</Link>
+                  )}
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
 
-        <div className="quick-actions" style={{ marginBottom: 24 }}>
-          <Link href="/student/timetable" className="quick-action-btn"><CalendarDays size={16} />My Timetable</Link>
-          <Link href="/student/transcript" className="quick-action-btn"><FileText size={16} />Transcript</Link>
-          <Link href="/student/finance" className="quick-action-btn"><CreditCard size={16} />Pay Fee</Link>
-          <Link href="/student/profile" className="quick-action-btn"><GraduationCap size={16} />Profile</Link>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-          <div className="card">
-            <div className="card-header"><h3 style={{ fontSize: 14 }}>Enrolled Courses</h3></div>
-            <div className="card-body">
-              {loading ? <div className="skeleton" style={{ height: 120 }} /> : (
-                <div style={{ display: "grid", gap: 8 }}>
-                  {["Database Systems", "AI", "Operating Systems", "Software Engineering", "Machine Learning", "Cyber Security"].map((c, i) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-                      <span style={{ fontSize: 13 }}>{c}</span>
-                      <span className="badge badge-primary">Enrolled</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header"><h3 style={{ fontSize: 14 }}>Attendance</h3></div>
-            <div className="card-body">
-              {loading ? <div className="skeleton" style={{ height: 120 }} /> : (
-                <div style={{ display: "grid", gap: 8 }}>
-                  {["DB Systems", "AI", "OS", "SE", "ML", "Cyber"].map((c, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 13, minWidth: 80 }}>{c}</span>
-                      <div className="progress" style={{ flex: 1 }}><div className={`progress-bar ${[95,88,92,90,97,85][i] > 90 ? "success" : "warning"}`} style={{ width: `${[95,88,92,90,97,85][i]}%` }} /></div>
-                      <span style={{ fontSize: 12, fontWeight: 600 }}>{[95,88,92,90,97,85][i]}%</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="card" style={{ marginTop: 24, maxWidth: 720 }}>
+          <div className="card-body" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <ShieldCheck size={18} style={{ color: "var(--primary)", flexShrink: 0, marginTop: 2 }} />
+            <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
+              Live CGPA, credit-hour, and fee-balance summaries appear here automatically once the Registrar
+              links your student record to this account. No placeholder figures are shown in the meantime.
+            </p>
           </div>
         </div>
       </div>

@@ -16,6 +16,9 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: false,
     timeout: 60000,
+    // E2E runs offline (no backend): demo mode enables the isolated preview
+    // identity so authenticated-shell tests can exercise the portal.
+    env: { NEXT_PUBLIC_DEMO_MODE: "true" },
   },
   use: {
     baseURL: "http://localhost:3000",

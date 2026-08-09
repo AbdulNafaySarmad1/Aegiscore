@@ -1,42 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { AppShell } from "@/components/layout/AppShell";
-import { apiGet } from "@/lib/api-client";
-import { UserRound, GraduationCap, CreditCard, Mail, Phone, MapPin, CalendarDays, BookOpenCheck } from "lucide-react";
+// ─── Student Profile ───
+// Renders only verified session identity (GET /api/session).
+// Academic records (CGPA, program, fee balance) are intentionally absent:
+// the backend identity model does not yet expose an authoritative
+// user-to-student link (docs/FRONTEND_API_HANDOFF.md §Session).
 
-type Session = { userId: string; tenantId: string; studentId: string | null; departmentId: string | null; name: string; roles: string[] };
+import { AppShell } from "@/components/layout/AppShell";
+import { useSession } from "@/components/session-provider";
+import { BadgeCheck, Building2, CreditCard, Fingerprint, Mail, ShieldCheck, UserRound } from "lucide-react";
 
 export default function StudentProfile() {
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => { try {
-      const raw = localStorage.getItem("aegiscore_demo_session");
-      if (raw) {
-        const acc = JSON.parse(raw);
-        setSession({
-          userId: acc.email,
-          tenantId: "iobm-demo-tenant",
-          studentId: acc.role === "Student" ? "STU-2024-001" : null,
-          departmentId: "CS-DEPT-001",
-          name: acc.name,
-          roles: [acc.role],
-        });
-      } else { window.location.href = "/login"; }
-    } catch { window.location.href = "/login"; } }, []);
+  const { session, isDemo, signOut } = useSession();
 
   const fields = [
-    { label: "Full Name", value: session?.name ?? "--", icon: UserRound },
-    { label: "Student ID", value: session?.studentId?.slice(0, 8) ?? "IoBM-2024-0178", icon: GraduationCap },
-    { label: "Program", value: "BS Computer Science", icon: BookOpenCheck },
-    { label: "Current Semester", value: "5th", icon: CalendarDays },
-    { label: "CGPA", value: "3.67 / 4.0", icon: GraduationCap },
-    { label: "Credit Hours", value: "87 / 130 Completed", icon: BookOpenCheck },
-    { label: "Fee Status", value: "PKR 48,500 Outstanding — Due Sep 30", icon: CreditCard },
-    { label: "Contact", value: "Koenigsegg$One1", icon: Mail },
-    { label: "Guardian", value: "Mr. Hassan Ali — +92 300 1234567", icon: Phone },
-    { label: "Address", value: "A-12, Block 3, Gulshan-e-Iqbal, Karachi", icon: MapPin },
+    { label: "Full Name", value: session?.name ?? "—", icon: UserRound },
+    { label: "Email", value: session?.userId ?? "—", icon: Mail },
+    { label: "Roles", value: session?.roles.length ? session.roles.join(", ") : "—", icon: BadgeCheck },
+    { label: "Student Record", value: session?.studentId ?? "Not linked to this account", icon: CreditCard },
+    { label: "Campus Tenant", value: session?.tenantId ?? "—", icon: Building2 },
+    { label: "Session", value: isDemo ? "Demo preview identity" : "Secure cookie session", icon: ShieldCheck },
   ];
 
   return (
@@ -44,34 +27,33 @@ export default function StudentProfile() {
       <div className="content-page">
         <div className="page-header">
           <div>
-            <div className="page-header-breadcrumb"><span>Student</span><span>/</span><span>Profile</span></div>
-            <h1>Student Profile</h1>
-            <p>Your complete academic record.</p>
+            <h1>My Profile</h1>
+            <p>Your account identity as verified by the university directory.</p>
           </div>
         </div>
 
-        <div className="card" style={{ maxWidth: 680 }}>
+        <div className="card" style={{ maxWidth: 720 }}>
           <div className="card-header">
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 56, height: 56, borderRadius: 12, background: "var(--primary)", color: "#fff", display: "grid", placeItems: "center", fontSize: 22, fontWeight: 700 }}>
-                {(session?.name?.[0] ?? "A").toUpperCase()}
-              </div>
-              <div>
-                <h3 style={{ margin: 0 }}>{session?.name ?? "Student"}</h3>
-                <span className="badge badge-primary" style={{ marginTop: 4 }}>Student</span>
-              </div>
-            </div>
+            <h3 style={{ fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+              <Fingerprint size={16} /> Account Details
+            </h3>
           </div>
           <div className="card-body" style={{ display: "grid", gap: 0 }}>
-            {fields.map((f, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", borderBottom: i < fields.length - 1 ? "1px solid var(--border)" : "none" }}>
-                <f.icon size={18} style={{ color: "var(--muted)", flexShrink: 0 }} />
-                <div>
-                  <span style={{ fontSize: 11, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".5px" }}>{f.label}</span>
-                  <strong style={{ display: "block", fontSize: 14 }}>{f.value}</strong>
-                </div>
+            {fields.map(f => (
+              <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+                <f.icon size={16} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                <span style={{ fontSize: 13, color: "var(--muted)", minWidth: 140 }}>{f.label}</span>
+                <span style={{ fontSize: 14, fontWeight: 500, wordBreak: "break-all" }}>{f.value}</span>
               </div>
             ))}
+          </div>
+          <div className="card-footer" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
+              Academic records, fee balances, and results appear once your student record is linked by the Registrar.
+            </p>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => void signOut()}>
+              Sign out
+            </button>
           </div>
         </div>
       </div>

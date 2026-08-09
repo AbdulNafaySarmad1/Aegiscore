@@ -217,13 +217,15 @@ const ms = {
   nchart: enNchart
 };
 
-function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
-  const result = { ...target };
+function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...target };
   for (const key of Object.keys(source)) {
-    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key]) && typeof result[key] === "object" && !Array.isArray(result[key])) {
-      result[key] = deepMerge(result[key], source[key]);
+    const s = source[key];
+    const r = result[key];
+    if (s && typeof s === "object" && !Array.isArray(s) && r && typeof r === "object" && !Array.isArray(r)) {
+      result[key] = deepMerge(r as Record<string, unknown>, s as Record<string, unknown>);
     } else {
-      result[key] = source[key];
+      result[key] = s;
     }
   }
   return result;

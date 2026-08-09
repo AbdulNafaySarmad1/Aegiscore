@@ -1,33 +1,46 @@
 "use client";
 
+// ─── Grade Entry ───
+// Faculty mark-entry workflow. The faculty course-list feed and the
+// mark-submission route are not yet exposed by the backend
+// (docs/FRONTEND_BACKEND_BLOCKERS.md); the page degrades to deliberate
+// states rather than a dead form.
+
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
-import { apiGet, apiPost, apiPut } from "@/lib/api-client";
-import { ClipboardCheck, FileText } from "lucide-react";
+import { apiGet, apiPut, isApiError } from "@/lib/api-client";
+import { useSession } from "@/components/session-provider";
+import { EmptyState, ErrorState, LoadingState } from "@/components/async/states";
+import { ClipboardCheck } from "lucide-react";
 
 type Course = { id: string; title: string; code: string };
 type Scheme = { id: string; components: { id: string; name: string; totalMarks: number; weightPercentage: number }[] };
 type Student = { enrollmentId: string; studentId: string; name: string; universityId: string };
-type MarksEntry = { courseId: string; studentId: string; assessmentComponentId: string; obtainedMarks: number; enteredBy: string };
 
 export default function GradeEntry() {
+  const { session } = useSession();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [coursesState, setCoursesState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [scheme, setScheme] = useState<Scheme | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [marks, setMarks] = useState<Record<string, Record<string, number>>>({});
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
-  useEffect(() => { apiGet<Course[]>("/api/courses/my").then(setCourses).catch(()=>{}).finally(()=>setLoading(false)); }, []);
+  useEffect(() => {
+    const ctrl = new AbortController();
+    apiGet<Course[]>("/api/courses/my", ctrl.signal)
+      .then(c => { setCourses(Array.isArray(c) ? c : []); setCoursesState("ready"); })
+      .catch(() => setCoursesState("unavailable"));
+    return () => ctrl.abort();
+  }, []);
 
   useEffect(() => {
     if (!selectedCourse) return;
     Promise.all([
       apiGet<Scheme>(`/api/examination/schemes/${selectedCourse}`).catch(() => null),
-      apiGet<{students: Student[]}>(`/api/attendance/roster/${selectedCourse}`).catch(() => null),
+      apiGet<{ students: Student[] }>(`/api/attendance/roster/${selectedCourse}`).catch(() => null),
     ]).then(([s, r]) => {
       setScheme(s);
       setStudents(r?.students ?? []);
@@ -35,7 +48,7 @@ export default function GradeEntry() {
       for (const st of r?.students ?? []) {
         initial[st.enrollmentId] = {};
         for (const c of s?.components ?? []) {
-          initial[st.enrollmentId][c.id] = 0;
+          initial[st.enrollmentId]![c.id] = 0;
         }
       }
       setMarks(initial);
@@ -45,13 +58,13 @@ export default function GradeEntry() {
   const setMark = (enrollmentId: string, componentId: string, value: number) => {
     setMarks(prev => ({
       ...prev,
-      [enrollmentId]: { ...prev[enrollmentId], [componentId]: Math.max(0, Math.min(value, scheme?.components.find(c=>c.id===componentId)?.totalMarks ?? 100)) }
+      [enrollmentId]: { ...prev[enrollmentId], [componentId]: Math.max(0, Math.min(value, scheme?.components.find(c => c.id === componentId)?.totalMarks ?? 100)) }
     }));
   };
 
   const submitAll = async () => {
-    if (!selectedCourse) return;
-    setSaving(true); setMessage("");
+    if (!selectedCourse || !session) return;
+    setSaving(true); setMessage(null);
     try {
       for (const enrollmentId of Object.keys(marks)) {
         for (const componentId of Object.keys(marks[enrollmentId] ?? {})) {
@@ -60,13 +73,13 @@ export default function GradeEntry() {
             studentId: students.find(s => s.enrollmentId === enrollmentId)?.studentId ?? "",
             assessmentComponentId: componentId,
             obtainedMarks: marks[enrollmentId]?.[componentId] ?? 0,
-            enteredBy: "00000000-0000-0000-0000-000000000000",
+            enteredBy: session.userId,
           });
         }
       }
-      setMessage("All marks submitted successfully.");
+      setMessage({ kind: "success", text: "All marks submitted successfully." });
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Failed to submit marks.");
+      setMessage({ kind: "error", text: isApiError(e) ? e.message : "Failed to submit marks." });
     } finally { setSaving(false); }
   };
 
@@ -81,16 +94,39 @@ export default function GradeEntry() {
           </div>
         </div>
 
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-body">
-            {loading ? <div className="skeleton" style={{ height: 40 }} /> : (
-              <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14 }}>
-                <option value="">Select a course...</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
-              </select>
-            )}
+        {coursesState === "loading" && <LoadingState lines={3} label="Loading your courses" />}
+
+        {coursesState === "unavailable" && (
+          <>
+            <ErrorState title="Course list unavailable" error={null} />
+            <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 8 }}>
+              Grade entry requires the faculty course-feed endpoint, which is not yet exposed by the
+              backend. This is tracked in <code>docs/FRONTEND_BACKEND_BLOCKERS.md</code>.
+            </p>
+          </>
+        )}
+
+        {coursesState === "ready" && courses.length === 0 && (
+          <EmptyState
+            icon={ClipboardCheck}
+            title="No assigned courses"
+            description="No course assignments were returned for your account. Contact your department if this looks wrong."
+          />
+        )}
+
+        {coursesState === "ready" && courses.length > 0 && (
+          <div className="card" style={{ marginBottom: 16 }}>
+            <div className="card-body">
+              <label className="field-label" style={{ display: "grid", gap: 6, fontSize: 13, fontWeight: 500 }}>
+                Course
+                <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}>
+                  <option value="">Select a course…</option>
+                  {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
+                </select>
+              </label>
+            </div>
           </div>
-        </div>
+        )}
 
         {scheme && students.length > 0 && (
           <>
@@ -125,6 +161,7 @@ export default function GradeEntry() {
                             type="number"
                             min={0}
                             max={c.totalMarks}
+                            aria-label={`${s.name} — ${c.name}`}
                             value={marks[s.enrollmentId]?.[c.id] ?? 0}
                             onChange={e => setMark(s.enrollmentId, c.id, parseInt(e.target.value) || 0)}
                             style={{ width: 70, textAlign: "center", minHeight: 36, borderRadius: 6, border: "1px solid var(--border)", padding: "2px 8px", fontSize: 13 }}
@@ -139,14 +176,14 @@ export default function GradeEntry() {
             </div>
 
             <button className="btn btn-primary btn-lg" style={{ width: "100%", marginTop: 16 }} onClick={submitAll} disabled={saving}>
-              {saving ? <span className="btn-loading">Saving...</span> : "Submit All Marks"}
+              {saving ? "Saving…" : "Submit All Marks"}
             </button>
           </>
         )}
 
         {message && (
-          <div className={message.includes("success") ? "error-state" : "error-state"} style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
-            <ClipboardCheck size={20} /><p>{message}</p>
+          <div className="error-state" role={message.kind === "error" ? "alert" : "status"} style={message.kind === "success" ? { marginTop: 12, background: "var(--success-soft)", borderColor: "var(--success)", color: "var(--success)" } : { marginTop: 12 }}>
+            <ClipboardCheck size={18} /><p>{message.text}</p>
           </div>
         )}
       </div>

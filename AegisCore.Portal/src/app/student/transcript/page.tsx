@@ -1,50 +1,57 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { AppShell } from "@/components/layout/AppShell";
-import { apiPost } from "@/lib/api-client";
-import { FileText, Download, CheckCircle } from "lucide-react";
+// ─── Transcript ───
+// No fabricated grades: the semester grade feed requires an authoritative
+// studentId that the session model does not yet provide
+// (docs/FRONTEND_API_HANDOFF.md). What IS real and wired here:
+//   - POST /api/examination/transcripts/{studentId}/request (when linked)
+//   - GET  /api/examination/transcripts/verify/{hash} (public verification)
 
-const semesters = [
-  { sem: "Fall 2024", grades: [
-    { course: "Programming Fundamentals", grade: "A", credits: 3 },
-    { course: "Calculus", grade: "B+", credits: 3 },
-    { course: "English Composition", grade: "A-", credits: 3 },
-    { course: "Islamic Studies", grade: "A", credits: 2 },
-    { course: "Intro to CS", grade: "A-", credits: 3 },
-  ], sgpa: 3.71 },
-  { sem: "Spring 2025", grades: [
-    { course: "Data Structures", grade: "A-", credits: 3 },
-    { course: "Discrete Math", grade: "B+", credits: 3 },
-    { course: "Digital Logic", grade: "A", credits: 3 },
-    { course: "Pakistan Studies", grade: "B", credits: 2 },
-    { course: "OOP", grade: "A", credits: 3 },
-  ], sgpa: 3.55 },
-  { sem: "Fall 2025 (Current)", grades: [
-    { course: "Database Systems", grade: "--", credits: 3 },
-    { course: "AI", grade: "--", credits: 3 },
-    { course: "Operating Systems", grade: "--", credits: 3 },
-    { course: "Software Engineering", grade: "--", credits: 3 },
-    { course: "ML", grade: "--", credits: 3 },
-    { course: "Cyber Security", grade: "--", credits: 3 },
-  ], sgpa: null },
-];
+import { useState } from "react";
+import { AppShell } from "@/components/layout/AppShell";
+import { apiGet, apiPost, isApiError } from "@/lib/api-client";
+import { useSession } from "@/components/session-provider";
+import { EmptyState } from "@/components/async/states";
+import { FileText, Download, CheckCircle, ShieldCheck, XCircle } from "lucide-react";
 
 export default function TranscriptPage() {
+  const { session } = useSession();
   const [requested, setRequested] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [requesting, setRequesting] = useState(false);
+  const [requestError, setRequestError] = useState("");
+
+  const [hash, setHash] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<boolean | null>(null);
 
   const requestTranscript = async () => {
-    setDownloading(true);
+    if (!session?.studentId) return;
+    setRequesting(true); setRequestError("");
     try {
-      await apiPost("/api/examination/transcripts/00000000-0000-0000-0000-000000000008/request", { requestedBy: "000", reason: "Print" });
+      await apiPost(`/api/examination/transcripts/${encodeURIComponent(session.studentId)}/request`, {
+        requestedBy: session.userId,
+        reason: "Student portal request",
+      });
       setRequested(true);
-    } catch {} finally { setDownloading(false); }
+    } catch (e) {
+      setRequestError(isApiError(e) ? e.message : "The request could not be submitted.");
+    } finally {
+      setRequesting(false);
+    }
   };
 
-  const totalCredits = semesters.reduce((s, sem) => s + sem.grades.reduce((c, g) => c + g.credits, 0), 0);
-  const cgpa = 3.67;
+  const verify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!hash.trim()) return;
+    setVerifying(true); setVerifyResult(null);
+    try {
+      setVerifyResult(await apiGet<boolean>(`/api/examination/transcripts/verify/${encodeURIComponent(hash.trim())}`));
+    } catch {
+      setVerifyResult(false);
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   return (
     <AppShell>
@@ -53,45 +60,59 @@ export default function TranscriptPage() {
           <div>
             <div className="page-header-breadcrumb"><span>Student</span><span>/</span><span>Transcript</span></div>
             <h1>Transcript</h1>
-            <p>Official academic transcript — CGPA: {cgpa.toFixed(2)} | Credits: {totalCredits}</p>
+            <p>Official academic record requests and verification.</p>
           </div>
-          <button className="btn btn-primary" onClick={requestTranscript} disabled={downloading || requested}>
-            {requested ? <><CheckCircle size={16} />Requested</> : <><Download size={16} />Request Official Copy</>}
-          </button>
+          {session?.studentId && (
+            <button className="btn btn-primary" onClick={requestTranscript} disabled={requesting || requested}>
+              {requested ? <><CheckCircle size={16} />Requested</> : <><Download size={16} />{requesting ? "Submitting…" : "Request Official Copy"}</>}
+            </button>
+          )}
         </div>
 
-        {semesters.map((sem, idx) => (
-          <motion.div key={idx} className="card" style={{ marginBottom: 16 }} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.08 }}>
-            <div className="card-header">
-              <h3 style={{ fontSize: 14 }}>{sem.sem}</h3>
-              {sem.sgpa && <span className="badge badge-success">SGPA: {sem.sgpa.toFixed(2)}</span>}
-            </div>
-            <div className="card-body" style={{ padding: 0 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "var(--surface-muted)" }}>
-                    <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, color: "var(--muted)", textTransform: "uppercase" }}>Course</th>
-                    <th style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, color: "var(--muted)" }}>Credits</th>
-                    <th style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, color: "var(--muted)" }}>Grade</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sem.grades.map((g, i) => (
-                    <tr key={i} style={{ borderBottom: i < sem.grades.length - 1 ? "1px solid var(--border)" : "none" }}>
-                      <td style={{ padding: "12px 16px", fontSize: 13 }}>{g.course}</td>
-                      <td style={{ padding: "12px 16px", textAlign: "center", fontSize: 13 }}>{g.credits}</td>
-                      <td style={{ padding: "12px 16px", textAlign: "center" }}>
-                        <span className={`badge ${g.grade === "A" || g.grade === "A-" ? "badge-success" : g.grade === "B+" || g.grade === "B" ? "badge-primary" : g.grade === "--" ? "badge-neutral" : "badge-warning"}`}>
-                          {g.grade}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        ))}
+        {requestError && <div className="error-state" role="alert" style={{ marginBottom: 16 }}><XCircle size={18} /><p>{requestError}</p></div>}
+        {requested && <div className="form-notice info" role="status" style={{ marginBottom: 16 }}>Your transcript request was submitted. The Registrar&rsquo;s office will process it.</div>}
+
+        {!session?.studentId ? (
+          <EmptyState
+            icon={FileText}
+            title="Academic record not linked"
+            description="Your semester grades and transcript appear here once the Registrar links your student record to this account. No placeholder records are shown."
+          />
+        ) : (
+          <EmptyState
+            icon={FileText}
+            title="No published transcript yet"
+            description="Your transcript will appear here once semester results are published by the Examination office."
+          />
+        )}
+
+        <div className="card" style={{ maxWidth: 720, marginTop: 8 }}>
+          <div className="card-header">
+            <h3 style={{ fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+              <ShieldCheck size={16} /> Verify a Transcript
+            </h3>
+          </div>
+          <div className="card-body">
+            <form onSubmit={verify} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <label className="sr-only" htmlFor="verify-hash">Transcript verification hash</label>
+              <input
+                id="verify-hash"
+                value={hash}
+                onChange={e => { setHash(e.target.value); setVerifyResult(null); }}
+                placeholder="Paste the verification hash printed on the transcript"
+                style={{ flex: 1, minWidth: 240 }}
+              />
+              <button type="submit" className="btn btn-secondary" disabled={verifying || !hash.trim()}>
+                {verifying ? "Verifying…" : "Verify"}
+              </button>
+            </form>
+            {verifyResult !== null && (
+              <p role="status" style={{ marginTop: 12, fontSize: 13, display: "flex", alignItems: "center", gap: 6, color: verifyResult ? "var(--success)" : "var(--danger)" }}>
+                {verifyResult ? <><CheckCircle size={16} /> This transcript hash is authentic.</> : <><XCircle size={16} /> This hash could not be verified.</>}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </AppShell>
   );

@@ -106,7 +106,7 @@ export default function AchievementsPage() {
     setProcessingDeans(true); setMessage(null);
     try {
       await apiPost("/api/achievements/deans-list/process", { semester: deansSemester });
-      setMessage("success: Dean's List processed");
+      setMessage("success: Dean&rsquo;s List processed");
       setDeansSemester("");
       refresh();
     } catch { setMessage("error: Processing failed"); }
@@ -136,7 +136,7 @@ export default function AchievementsPage() {
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Student Engagement</p>
           <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("achievements") ?? "Student Achievement Gamification"}</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badge catalog, achievement detection, Dean's List, leaderboards, and roadmap</span>
+          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badge catalog, achievement detection, Dean&rsquo;s List, leaderboards, and roadmap</span>
         </div>
       </header>
 
@@ -158,7 +158,7 @@ export default function AchievementsPage() {
           <small style={{ color: "var(--muted)" }}>across all students</small>
         </article>
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Dean's List</span>
+          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Dean&rsquo;s List</span>
           <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--amber)" }}>{deansEntries.length}</strong>
           <small style={{ color: "var(--muted)" }}>honored students</small>
         </article>
@@ -193,14 +193,14 @@ export default function AchievementsPage() {
         </div>
 
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Dean's List Processing</h2><p>Process end-of-semester honors</p></div><Crown /></div>
+          <div className="surface-heading"><div><h2>Dean&rsquo;s List Processing</h2><p>Process end-of-semester honors</p></div><Crown /></div>
           <form onSubmit={processDeansList} style={{ display: "grid", gap: 12, padding: 18 }}>
             <label style={labelS}>
               Semester <b style={{ color: "var(--red)" }}>*</b>
               <input placeholder="e.g. Fall 2025" value={deansSemester} onChange={e => setDeansSemester(e.target.value)} style={inputS} required />
             </label>
             <button type="submit" disabled={processingDeans} style={{ padding: "0.7rem", background: "var(--amber)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: processingDeans ? 0.6 : 1 }}>
-              {processingDeans ? "Processing..." : <><Crown style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Process Dean's List</>}
+              {processingDeans ? "Processing..." : <><Crown style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Process Dean&rsquo;s List</>}
             </button>
           </form>
         </div>
@@ -312,12 +312,12 @@ export default function AchievementsPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Dean's List & Honors Roll</h2><p>{deansEntries.length} entries</p></div><Crown /></div>
+        <div className="surface-heading"><div><h2>Dean&rsquo;s List & Honors Roll</h2><p>{deansEntries.length} entries</p></div><Crown /></div>
         {deansEntries.length === 0 ? (
           <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <Crown style={{ width: 28 }} />
-            <strong>No Dean's List entries</strong>
-            <span>Process a semester to generate the Dean's List</span>
+            <strong>No Dean&rsquo;s List entries</strong>
+            <span>Process a semester to generate the Dean&rsquo;s List</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>
@@ -337,7 +337,7 @@ export default function AchievementsPage() {
                     <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{d.semester}</td>
                     <td style={{ padding: "10px 14px" }}>
                       <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: d.entryType === "DeansList" ? "var(--amber-soft)" : "var(--green-soft)", color: d.entryType === "DeansList" ? "var(--amber)" : "var(--green)" }}>
-                        {d.entryType === "DeansList" ? "Dean's List" : "Honors Roll"}
+                        {d.entryType === "DeansList" ? "Dean&rsquo;s List" : "Honors Roll"}
                       </span>
                     </td>
                     <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)" }}>{new Date(d.processedAt).toLocaleDateString()}</td>

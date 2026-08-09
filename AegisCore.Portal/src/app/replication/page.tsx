@@ -42,10 +42,10 @@ export default function ReplicationPage() {
       apiGet<{ alerts: Alert[] }>("/api/admin/replication/alerts").catch(() => ({ alerts: [] })),
     ]);
     setDash(d); setConfig(c); setEvents(Array.isArray(e) ? e : []);
-    setAlerts(Array.isArray(a) ? [] : "alerts" in (a||{}) ? (a as any).alerts : []);
+    setAlerts(a && Array.isArray(a.alerts) ? a.alerts : []);
   }
 
-  useEffect(() => { const ctrl = new AbortController(); refresh(); return () => ctrl.abort(); }, []);
+  useEffect(() => { const ctrl = new AbortController(); queueMicrotask(() => { if (!ctrl.signal.aborted) void refresh(); }); return () => ctrl.abort(); }, []);
 
   async function doPost(path: string) { try { await apiPost(path); setMsg("Done"); refresh(); } catch { setMsg("Failed"); } }
 

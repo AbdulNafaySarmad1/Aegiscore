@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost, apiPut } from "@/lib/api-client";
+import { useSession } from "@/components/session-provider";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
 import { Archive, Download, FileText, Lock, Shield, ShieldCheck, Upload, CheckCircle } from "lucide-react";
 
@@ -24,6 +25,7 @@ function fmtBytes(bytes: number): string {
 
 export default function DocumentVaultPage() {
   const t = usePersonalityTranslations("academic");
+  const { session } = useSession();
   const [dash, setDash] = useState<Dashboard | null>(null);
   const [msg, setMsg] = useState("");
   const [upload, setUpload] = useState({ file: null as File | null, category: "General" });
@@ -32,13 +34,19 @@ export default function DocumentVaultPage() {
     const d = await apiGet<Dashboard>("/api/document-vault/dashboard").catch(() => null);
     setDash(d);
   }
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { queueMicrotask(() => void refresh()); }, []);
 
   async function handleUpload() {
-    if (!upload.file) return;
-    const form = new FormData(); form.append("file", upload.file);
+    if (!upload.file || !session) return;
     try {
-      const resp = await fetch(`/api/document-vault/upload?fileName=${upload.file.name}&contentType=${upload.file.type}&category=${upload.category}&uploadedByUserId=00000000-0000-0000-0000-000000000000&uploadedByRole=Admin`, { method: "POST", body: upload.file });
+      const params = new URLSearchParams({
+        fileName: upload.file.name,
+        contentType: upload.file.type,
+        category: upload.category,
+        uploadedByUserId: session.userId,
+        uploadedByRole: session.roles[0] ?? "User",
+      });
+      const resp = await fetch(`/api/document-vault/upload?${params}`, { method: "POST", credentials: "include", body: upload.file });
       const data = await resp.json();
       setMsg(`Uploaded → Tier ${data.tier} (${data.retentionYears}yr lock), PQC: ${data.pqcVerified ? "✓" : "✗"}`);
       setUpload({ file: null, category: "General" }); refresh();

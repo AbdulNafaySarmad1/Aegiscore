@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost, apiPut } from "@/lib/api-client";
+import { useSession } from "@/components/session-provider";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
 import { AlertTriangle, CheckCircle, Clock, Edit3, Lock, RotateCcw, Send, Settings, X } from "lucide-react";
 
@@ -21,6 +22,8 @@ const badge = (s: string) => ({
 
 export default function SyncLagPage() {
   const t = usePersonalityTranslations("academic");
+  const { session } = useSession();
+  const actorId = session?.userId ?? "";
   const [dash, setDash] = useState<Dashboard | null>(null);
   const [config, setConfig] = useState<SyncConfig | null>(null);
   const [msg, setMsg] = useState("");
@@ -34,16 +37,16 @@ export default function SyncLagPage() {
     ]);
     setDash(d); setConfig(c);
   }
-  useEffect(() => { refresh(); const i = setInterval(refresh, 10000); return () => clearInterval(i); }, []);
+  useEffect(() => { queueMicrotask(() => void refresh()); const i = setInterval(() => void refresh(), 10000); return () => clearInterval(i); }, []);
 
   async function correct(id: string) {
     const c = corrections[id];
     if (!c?.value) return;
-    try { await apiPost(`/api/admin/sync-lag/entries/${id}/correct?correctedValue=${c.value}&reason=${c.reason || "Manual correction"}&correctedByUserId=00000000-0000-0000-0000-000000000000`); setMsg("Corrected — will sync to central DB"); setCorrections(prev => { const n = { ...prev }; delete n[id]; return n; }); refresh(); } catch { setMsg("Correction failed"); }
+    try { await apiPost(`/api/admin/sync-lag/entries/${id}/correct?correctedValue=${encodeURIComponent(c.value)}&reason=${encodeURIComponent(c.reason || "Manual correction")}&correctedByUserId=${encodeURIComponent(actorId)}`); setMsg("Corrected — will sync to central DB"); setCorrections(prev => { const n = { ...prev }; delete n[id]; return n; }); refresh(); } catch { setMsg("Correction failed"); }
   }
 
   async function revert(id: string) {
-    try { await apiPost(`/api/admin/sync-lag/entries/${id}/revert?revertedByUserId=00000000-0000-0000-0000-000000000000`); setMsg("Reverted"); refresh(); } catch { setMsg("Revert failed"); }
+    try { await apiPost(`/api/admin/sync-lag/entries/${id}/revert?revertedByUserId=${encodeURIComponent(actorId)}`); setMsg("Reverted"); refresh(); } catch { setMsg("Revert failed"); }
   }
 
   async function saveConfig() {

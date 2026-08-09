@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Eye, EyeOff, Shield, Users, TrendingUp, GraduationCap } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, Landmark, Scale, ShieldCheck, TrendingUp, UserRound, Users } from "lucide-react";
+import { isApiError } from "@/lib/api-client";
+import { isDemoMode, login, writeDemoSession, type DemoAccount } from "@/lib/session";
+import { useSession } from "@/components/session-provider";
+import { Spinner } from "@/components/async/states";
 
 const testimonials = [
   { quote: "Finally, an ERP that doesn't require a manual. Just works.", author: "Faculty Member", icon: Users },
@@ -11,45 +14,77 @@ const testimonials = [
   { quote: "The VC dashboard showed me things I never had visibility into.", author: "University Administrator", icon: TrendingUp },
 ];
 
-const demoAccounts = [
-  { email: "student@iobm.demo", password: "Koenigsegg$One1", label: "Student", icon: "🎓", desc: "Ali Hassan" },
-  { email: "faculty@iobm.demo", password: "Pagani$Huayra3", label: "Faculty", icon: "👨‍🏫", desc: "Dr. Imran" },
-  { email: "finance@iobm.demo", password: "Porsche$GT3RS", label: "Finance", icon: "💰", desc: "Khalid Hussain" },
-  { email: "registrar@iobm.demo", password: "Ferrari$Roma22", label: "Registrar", icon: "📋", desc: "Dr. Sana" },
-  { email: "vc@iobm.demo", password: "Lambo$Aventador1", label: "Vice Chancellor", icon: "👑", desc: "Prof. Waseem" },
+type DemoCard = DemoAccount & { password: string; icon: typeof GraduationCap };
+
+const demoAccounts: DemoCard[] = [
+  { email: "student@iobm.demo", password: "Koenigsegg$One1", label: "Student", icon: GraduationCap, desc: "Ali Hassan" },
+  { email: "faculty@iobm.demo", password: "Pagani$Huayra3", label: "Faculty", icon: UserRound, desc: "Dr. Imran" },
+  { email: "finance@iobm.demo", password: "Porsche$GT3RS", label: "Finance", icon: Landmark, desc: "Khalid Hussain" },
+  { email: "registrar@iobm.demo", password: "Ferrari$Roma22", label: "Registrar", icon: Scale, desc: "Dr. Sana" },
+  { email: "vc@iobm.demo", password: "Lambo$Aventador1", label: "VC", icon: ShieldCheck, desc: "Prof. Waseem — Vice Chancellor" },
 ];
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
-  const [showDemo, setShowDemo] = useState(false);
-  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const account = demoAccounts.find(a => a.email === email && a.password === password);
-    if (account) {
-      localStorage.setItem("aegiscore_demo_session", JSON.stringify(account));
-      router.push("/");
-    } else {
-      setError("Invalid email or password. Use the demo cards below.");
-    }
-  };
-
-  const fillDemo = (acc: typeof demoAccounts[0]) => {
-    localStorage.setItem("aegiscore_demo_session", JSON.stringify(acc));
-    router.push("/");
-  };
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  const { status, reload } = useSession();
 
   useEffect(() => {
     const interval = setInterval(() => setTestimonialIdx(i => (i + 1) % testimonials.length), 5000);
     return () => clearInterval(interval);
   }, []);
 
+  // Already signed in → leave the login page.
+  useEffect(() => {
+    if (status === "authenticated") router.replace("/");
+  }, [status, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy) return;
+    setError("");
+    setBusy(true);
+    try {
+      // Real backend login: sets HttpOnly cookies; tokens stay out of JS.
+      await login(email.trim(), password);
+      await reload();
+      router.replace("/");
+    } catch (err) {
+      if (isApiError(err)) {
+        if (err.status === 401) setError("Invalid email or password.");
+        else if (err.isRateLimited) setError("Too many attempts. Please wait and try again.");
+        else setError(err.message);
+      } else {
+        setError("The portal cannot reach the authentication service.");
+      }
+      setBusy(false);
+    }
+  };
+
+  // Demo cards authenticate against the real backend in demo deployments;
+  // the localStorage demo identity is only an offline preview fallback.
+  const fillDemo = async (acc: DemoCard) => {
+    if (busy) return;
+    setEmail(acc.email);
+    setPassword(acc.password);
+    setError("");
+    setBusy(true);
+    try {
+      await login(acc.email, acc.password);
+      await reload();
+      router.replace("/");
+    } catch {
+      // Backend unavailable (offline preview): fall back to the isolated demo identity.
+      writeDemoSession(acc);
+      await reload();
+      router.replace("/");
+    }
+  };
 
   const T = testimonials[testimonialIdx]!;
   const TI = T.icon;
@@ -105,42 +140,40 @@ export default function LoginPage() {
           <form className="login-form" onSubmit={handleSubmit}>
             <label className="field-label">
               University email
-              <input type="email" placeholder="you@iobm.edu.pk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
+              <input type="email" placeholder="you@iobm.edu.pk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} disabled={busy} />
             </label>
             <label className="field-label">
               Password
               <div className="password-field">
-                <input type={showPassword ? "text" : "password"} placeholder="Enter your password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} />
+                <input type={showPassword ? "text" : "password"} placeholder="Enter your password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} disabled={busy} />
                 <button type="button" className="password-toggle" onClick={() => setShowPassword(v => !v)} aria-label="Toggle password visibility">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </label>
 
-            <div className="login-options">
-              <label className="checkbox-row"><input type="checkbox" /><span>Remember me</span></label>
-              <a href="#" style={{ fontSize: 13, color: "var(--primary)" }}>Forgot password?</a>
-            </div>
-
-            {error && <p style={{color:"var(--danger)",fontSize:13,textAlign:"center",margin:0}}>{error}</p>}
-            <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%" }}>
-              Sign in
+            {error && <p className="login-error" role="alert">{error}</p>}
+            <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%" }} disabled={busy}>
+              {busy ? <Spinner size={16} /> : "Sign in"}
             </button>
           </form>
 
-          {isDemo && (
+          {isDemoMode && (
             <div className="login-demo-section">
               <div className="divider-row"><span>Demo Access — IoBM Pilot</span></div>
               <div className="demo-role-grid">
-                {demoAccounts.map(a => (
-                  <button key={a.email} className="demo-role-card" onClick={() => fillDemo(a)}>
-                    <span className="demo-role-icon">{a.icon}</span>
-                    <div>
-                      <strong>{a.label}</strong>
-                      <small>{a.desc}</small>
-                    </div>
-                  </button>
-                ))}
+                {demoAccounts.map(a => {
+                  const CardIcon = a.icon;
+                  return (
+                    <button key={a.email} type="button" className="demo-role-card" onClick={() => void fillDemo(a)} disabled={busy}>
+                      <CardIcon size={18} className="demo-role-icon" />
+                      <div>
+                        <strong>{a.label}</strong>
+                        <small>{a.desc}</small>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -175,13 +208,11 @@ export default function LoginPage() {
         .password-field{position:relative}
         .password-field input{padding-right:48px}
         .password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;color:var(--muted);min-height:0;padding:4px}
-        .login-options{display:flex;justify-content:space-between;align-items:center}
-        .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer}
-        .checkbox-row input{min-height:0;width:16px;height:16px;accent-color:var(--primary)}
+        .login-error{margin:0;padding:10px 12px;border:1px solid var(--danger-soft);border-radius:8px;background:var(--danger-soft);color:var(--danger);font-size:13px;text-align:center}
         .divider-row{display:flex;align-items:center;gap:12px;margin:20px 0 12px}.divider-row::before,.divider-row::after{content:"";flex:1;height:1px;background:var(--border)}.divider-row span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
         .demo-role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-        .demo-role-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-muted);cursor:pointer;transition:all .15s}.demo-role-card:hover{background:var(--primary-soft);border-color:var(--primary)}
-        .demo-role-icon{font-size:20px}
+        .demo-role-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-muted);cursor:pointer;transition:border-color .15s,background .15s;text-align:left}.demo-role-card:hover{background:var(--primary-soft);border-color:var(--primary)}.demo-role-card:disabled{opacity:.5;cursor:not-allowed}
+        .demo-role-icon{color:var(--primary);flex-shrink:0}
         .demo-role-card strong{font-size:11px;display:block}.demo-role-card small{font-size:10px;color:var(--muted)}
         .login-footer{margin-top:24px;text-align:center;font-size:11px;color:var(--subtle)}
         @media(max-width:768px){.login-page{grid-template-columns:1fr}.login-visual{display:none}.login-form-panel{padding:32px 20px}}
