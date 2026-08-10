@@ -2,9 +2,7 @@
 import { useMessages, useTranslations } from "next-intl";
 import { usePersonalityMode } from "@/lib/personality-context";
 
-type MessageValues = Record<string, string | number | Date>;
-
-function interpolate(text: string, values?: MessageValues): string {
+function interpolate(text: string, values?: Record<string, any>): string {
   if (!values) return text;
   return text.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? `{${key}}`));
 }
@@ -14,14 +12,13 @@ export function usePersonalityTranslations(namespace: string) {
   const messages = useMessages();
   const { resolvedKey } = usePersonalityMode();
 
-  return function tp(key: string, values?: MessageValues): string {
+  return function tp(key: string, values?: Record<string, any>): string {
     const lookupKey = resolvedKey(key);
     if (lookupKey !== key) {
-      const nsMsgs = (messages as Record<string, unknown>)?.[namespace] as Record<string, unknown> | undefined;
+      const nsMsgs = (messages as Record<string, any>)?.[namespace] as Record<string, any> | undefined;
       const val = nsMsgs?.[lookupKey];
       if (typeof val === "string") return interpolate(val, values);
     }
-    // Dynamic keys cannot satisfy next-intl's literal-key typing.
-    return t(key as never, values as never);
+    return t(key as any, values as any);
   };
 }

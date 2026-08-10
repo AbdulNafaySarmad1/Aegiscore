@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useRoles, isStudentOnly } from "@/lib/use-roles";
+import { AppShell } from "@/components/layout/AppShell";
 import {
   AlertCircle, Award, CheckCircle2, Crown, Medal, Search,
   Send, Shield, Swords, Target, Trophy, Users
@@ -45,6 +47,8 @@ const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--mut
 
 export default function AchievementsPage() {
   const t = usePersonalityTranslations("academic");
+  const roles = useRoles();
+  const studentOnly = isStudentOnly(roles);
 
   const [badges, setBadges] = useState<Badge[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -64,6 +68,7 @@ export default function AchievementsPage() {
   const [leaderboardScope, setLeaderboardScope] = useState("all");
 
   useEffect(() => {
+    if (studentOnly) { setLoading(false); return; }
     const ctrl = new AbortController();
     Promise.all([
       apiGet<Badge[]>("/api/achievements/badges", ctrl.signal).catch(() => [] as Badge[]),
@@ -75,9 +80,10 @@ export default function AchievementsPage() {
       setError(null); setLoading(false);
     }).catch(() => { setError("Failed to load achievements data"); setLoading(false); });
     return () => { ctrl.abort(); };
-  }, []);
+  }, [studentOnly]);
 
   const refresh = () => {
+    if (studentOnly) return;
     Promise.all([
       apiGet<Badge[]>("/api/achievements/badges").catch(() => [] as Badge[]),
       apiGet<Achievement[]>("/api/achievements/recent").catch(() => [] as Achievement[]),
@@ -106,37 +112,59 @@ export default function AchievementsPage() {
     setProcessingDeans(true); setMessage(null);
     try {
       await apiPost("/api/achievements/deans-list/process", { semester: deansSemester });
-      setMessage("success: Dean&rsquo;s List processed");
+      setMessage("success: Dean's List processed");
       setDeansSemester("");
       refresh();
     } catch { setMessage("error: Processing failed"); }
     finally { setProcessingDeans(false); }
   }
 
-  if (loading) return (
+  if (loading && !studentOnly) return (
+    <AppShell>
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", gap: 16, color: "var(--muted)" }}>
       <div style={{ width: 40, height: 4, borderRadius: 99, overflow: "hidden", background: "var(--line)" }}>
         <div style={{ width: "50%", height: "100%", borderRadius: "inherit", background: "var(--blue-500)", animation: "launch 1s ease-in-out infinite alternate" }} />
       </div>
       Loading achievements dashboard...
     </main>
+    </AppShell>
+  );
+
+  if (studentOnly) return (
+    <AppShell>
+      <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
+        <header style={{ marginBottom: 28 }}>
+          <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Student Engagement</p>
+          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>Achievements</h1>
+          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badges, Dean's List, leaderboard, and your earned achievements.</span>
+        </header>
+        <div style={{ padding: "30px 0", textAlign: "center", color: "var(--muted)" }}>
+          <Trophy style={{ width: 40, opacity: 0.3 }} />
+          <p style={{ marginTop: 12, fontSize: 14 }}>Achievements will appear here as you earn badges.</p>
+          <p style={{ marginTop: 4, fontSize: 12 }}>Check back after completing qualifying activities.</p>
+        </div>
+      </main>
+    </AppShell>
   );
 
   if (error) return (
+    <AppShell>
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
       <AlertCircle style={{ width: 32 }} />
       <strong>{error}</strong>
       <button onClick={refresh} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
     </main>
+    </AppShell>
   );
 
   return (
+    <AppShell>
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Student Engagement</p>
           <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("achievements") ?? "Student Achievement Gamification"}</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badge catalog, achievement detection, Dean&rsquo;s List, leaderboards, and roadmap</span>
+          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badge catalog, achievement detection, Dean's List, leaderboards, and roadmap</span>
         </div>
       </header>
 
@@ -158,7 +186,7 @@ export default function AchievementsPage() {
           <small style={{ color: "var(--muted)" }}>across all students</small>
         </article>
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Dean&rsquo;s List</span>
+          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Dean's List</span>
           <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--amber)" }}>{deansEntries.length}</strong>
           <small style={{ color: "var(--muted)" }}>honored students</small>
         </article>
@@ -172,6 +200,7 @@ export default function AchievementsPage() {
       </div>
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.8fr)", gap: 18, marginBottom: 18 }}>
+        {!studentOnly && (
         <div className="surface" style={{ overflow: "hidden" }}>
           <div className="surface-heading"><div><h2>Achievement Detection</h2><p>Trigger detection rules for a student</p></div><Search /></div>
           <form onSubmit={triggerDetection} style={{ display: "grid", gap: 12, padding: 18 }}>
@@ -191,19 +220,22 @@ export default function AchievementsPage() {
             )}
           </form>
         </div>
+        )}
 
+        {!studentOnly && (
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Dean&rsquo;s List Processing</h2><p>Process end-of-semester honors</p></div><Crown /></div>
+          <div className="surface-heading"><div><h2>Dean's List Processing</h2><p>Process end-of-semester honors</p></div><Crown /></div>
           <form onSubmit={processDeansList} style={{ display: "grid", gap: 12, padding: 18 }}>
             <label style={labelS}>
               Semester <b style={{ color: "var(--red)" }}>*</b>
               <input placeholder="e.g. Fall 2025" value={deansSemester} onChange={e => setDeansSemester(e.target.value)} style={inputS} required />
             </label>
             <button type="submit" disabled={processingDeans} style={{ padding: "0.7rem", background: "var(--amber)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: processingDeans ? 0.6 : 1 }}>
-              {processingDeans ? "Processing..." : <><Crown style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Process Dean&rsquo;s List</>}
+              {processingDeans ? "Processing..." : <><Crown style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Process Dean's List</>}
             </button>
           </form>
         </div>
+        )}
       </section>
 
       <section className="surface" style={{ overflow: "hidden", marginBottom: 18 }}>
@@ -312,12 +344,12 @@ export default function AchievementsPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Dean&rsquo;s List & Honors Roll</h2><p>{deansEntries.length} entries</p></div><Crown /></div>
+        <div className="surface-heading"><div><h2>Dean's List & Honors Roll</h2><p>{deansEntries.length} entries</p></div><Crown /></div>
         {deansEntries.length === 0 ? (
           <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <Crown style={{ width: 28 }} />
-            <strong>No Dean&rsquo;s List entries</strong>
-            <span>Process a semester to generate the Dean&rsquo;s List</span>
+            <strong>No Dean's List entries</strong>
+            <span>Process a semester to generate the Dean's List</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>
@@ -337,7 +369,7 @@ export default function AchievementsPage() {
                     <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{d.semester}</td>
                     <td style={{ padding: "10px 14px" }}>
                       <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: d.entryType === "DeansList" ? "var(--amber-soft)" : "var(--green-soft)", color: d.entryType === "DeansList" ? "var(--amber)" : "var(--green)" }}>
-                        {d.entryType === "DeansList" ? "Dean&rsquo;s List" : "Honors Roll"}
+                        {d.entryType === "DeansList" ? "Dean's List" : "Honors Roll"}
                       </span>
                     </td>
                     <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)" }}>{new Date(d.processedAt).toLocaleDateString()}</td>
@@ -349,5 +381,6 @@ export default function AchievementsPage() {
         )}
       </section>
     </main>
+    </AppShell>
   );
 }

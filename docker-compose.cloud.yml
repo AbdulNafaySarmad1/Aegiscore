@@ -1,32 +1,29 @@
 # -------------------------------------------------------------------
-# docker-compose.cloud.yml — AegisCore CLOUD override
+# AegisCore CLOUD demo override
 #
-# Used in CLOUD mode where Postgres and Redis are managed externally
-# (e.g. AWS RDS / Azure Database / GCP Cloud SQL / ElastiCache).
-#
-# This file overrides the base docker-compose.yml to:
-#   - Remove postgres and redis services (they are managed)
-#   - Use pre-built images for api and portal
-#   - Set DEPLOYMENT_MODE=cloud on both services
-#
-# Usage:
-#   docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d
+# PostgreSQL -> Supabase
+# Redis      -> local Docker
+# API/Portal -> locally built images
 # -------------------------------------------------------------------
 
 services:
+
   api:
-    image: ${AEGISCORE_API_IMAGE:-ghcr.io/abdulnafaysarmad1/aegiscore-api}:${IMAGE_TAG:-latest}
-    build: !reset null
     environment:
       DEPLOYMENT_MODE: cloud
-      AEGISCORE_DB_CONNECTION: ${DATABASE_URL:?DATABASE_URL must be set in .env for cloud mode}
-      AEGISCORE_REDIS_CONNECTION: ${REDIS_URL:?REDIS_URL must be set in .env for cloud mode}
-    depends_on:
-      postgres:
-        condition: null
-      redis:
-        condition: null
+      AEGISCORE_FRONTEND_URL: ${AEGISCORE_FRONTEND_URL}
+      Runtime__DemoMode: "true"
+      Demo__SeedGoldenUniverse: "false"
+      Demo__AllowExplicitExternalSeed: "false"
+      AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:?AEGISCORE_DB_CONNECTION must be set}
+      AEGISCORE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+
+    # Completely remove inherited postgres/redis dependencies.
+    # Redis is started explicitly before API.
+    depends_on: !reset {}
+
     restart: always
+
     logging:
       driver: json-file
       options:
@@ -34,16 +31,40 @@ services:
         max-file: "3"
 
   portal:
-    image: ${AEGISCORE_PORTAL_IMAGE:-ghcr.io/abdulnafaysarmad1/aegiscore-portal}:${IMAGE_TAG:-latest}
-    build: !reset null
     environment:
       DEPLOYMENT_MODE: cloud
+
     restart: always
+
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
 
+  # PostgreSQL is external (Supabase)
   postgres: !reset null
-  redis: !reset null
+
+  # Redis is local for the demo
+  redis:
+    image: redis:7-alpine
+
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+      - --appendonly
+      - "no"
+
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "$${REDIS_PASSWORD}" ping 2>/dev/null | grep -q PONG
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    restart: unless-stopped

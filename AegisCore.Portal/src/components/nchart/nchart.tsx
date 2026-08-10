@@ -106,7 +106,7 @@ export function NChart({
 
   const exportAsPNG = useCallback(() => {
     const svg = document.querySelector(".nchart-svg-root");
-    if (!svg) return; // no chart rendered yet — nothing to export
+    if (!svg) return alert(t("nchart.exportUnavailable"));
     const clone = svg.cloneNode(true) as SVGSVGElement;
     const data = new XMLSerializer().serializeToString(clone);
     const canvas = document.createElement("canvas");

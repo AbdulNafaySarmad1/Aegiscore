@@ -8,27 +8,18 @@ public class StateMachineHub : Hub
 {
     public async Task Subscribe(string machineKey)
     {
-        var group = GetTenantGroup(machineKey);
-        await Groups.AddToGroupAsync(Context.ConnectionId, group);
+        await Groups.AddToGroupAsync(Context.ConnectionId, machineKey);
         await Clients.Caller.SendAsync("Subscribed", machineKey);
     }
 
     public async Task Unsubscribe(string machineKey)
     {
-        var group = GetTenantGroup(machineKey);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, group);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, machineKey);
         await Clients.Caller.SendAsync("Unsubscribed", machineKey);
     }
 
-    private string GetTenantGroup(string machineKey)
+    public async Task NotifyTransition(string machineKey, string state)
     {
-        if (string.IsNullOrWhiteSpace(machineKey) || machineKey.Length > 200)
-            throw new HubException("Machine key is invalid.");
-
-        var tenant = Context.User?.FindFirst("tenant_id")?.Value ?? Context.User?.FindFirst("tid")?.Value;
-        if (!Guid.TryParse(tenant, out var tenantId) || tenantId == Guid.Empty)
-            throw new HubException("Tenant context is required.");
-
-        return $"statemachine-{tenantId:D}:{machineKey}";
+        await Clients.Group(machineKey).SendAsync("Transition", machineKey, state);
     }
 }

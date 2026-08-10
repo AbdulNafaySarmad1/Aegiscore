@@ -9,8 +9,7 @@ public sealed class GamificationService(AegisDbContext db, ILogger<GamificationS
 {
     public async Task<IReadOnlyList<AchievementDetectedDto>> DetectAchievementsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        db.EnsureCurrentTenant(tenantId);
-        var badges = await db.Set<BadgeDefinition>().Where(b => b.IsActive).ToListAsync(ct);
+        var badges = await db.Set<BadgeDefinition>().IgnoreQueryFilters().Where(b => b.TenantId == tenantId && b.IsActive).ToListAsync(ct);
         var results = new List<AchievementDetectedDto>();
         foreach (var badge in badges)
         {
@@ -21,7 +20,7 @@ public sealed class GamificationService(AegisDbContext db, ILogger<GamificationS
 
     public async Task<BadgeAwardDto> IssueBadgeAsync(Guid badgeDefinitionId, Guid studentId, CancellationToken ct = default)
     {
-        var badge = await db.Set<BadgeDefinition>().SingleOrDefaultAsync(b => b.Id == badgeDefinitionId, ct) ?? throw new InvalidOperationException("Badge not found.");
+        var badge = await db.Set<BadgeDefinition>().FindAsync([badgeDefinitionId], ct) ?? throw new InvalidOperationException("Badge not found.");
         var award = new BadgeAward
         {
             Id = Guid.NewGuid(), BadgeDefinitionId = badgeDefinitionId, StudentId = studentId,
@@ -35,7 +34,7 @@ public sealed class GamificationService(AegisDbContext db, ILogger<GamificationS
 
     public async Task<IReadOnlyList<DeansListEntryDto>> ProcessDeansListAsync(Guid semesterId, CancellationToken ct = default)
     {
-        var entries = await db.Set<DeansListEntry>().Where(e => e.SemesterId == semesterId && e.Status == "pending_verification").ToListAsync(ct);
+        var entries = await db.Set<DeansListEntry>().IgnoreQueryFilters().Where(e => e.Status == "pending_verification").ToListAsync(ct);
         foreach (var entry in entries)
         {
             entry.Status = "confirmed";
@@ -47,24 +46,22 @@ public sealed class GamificationService(AegisDbContext db, ILogger<GamificationS
 
     public async Task<LeaderboardDto> GenerateLeaderboardAsync(string scope, Guid tenantId, CancellationToken ct = default)
     {
-        db.EnsureCurrentTenant(tenantId);
-        var entries = await db.Set<LeaderboardEntry>().Where(l => l.Scope == scope && !l.IsOptedOut).OrderBy(l => l.Rank).Take(100).ToListAsync(ct);
+        var entries = await db.Set<LeaderboardEntry>().IgnoreQueryFilters().Where(l => l.TenantId == tenantId && l.Scope == scope).OrderBy(l => l.Rank).Take(100).ToListAsync(ct);
         var rows = entries.Select(e => new LeaderboardRowDto(e.Rank, e.StudentId, e.IsAnonymized ? null : $"Student-{e.StudentId.ToString()[..8]}", e.Score, e.IsAnonymized)).ToList();
         return new LeaderboardDto(scope, "cgpa", Guid.Empty, rows, rows.Count);
     }
 
     public async Task<AchievementRoadmapDto> GetStudentRoadmapAsync(Guid studentId, CancellationToken ct = default)
     {
-        var roadmaps = await db.Set<AchievementRoadmap>().Where(r => r.StudentId == studentId).ToListAsync(ct);
+        var roadmaps = await db.Set<AchievementRoadmap>().IgnoreQueryFilters().Where(r => r.StudentId == studentId).ToListAsync(ct);
         var nextBadges = roadmaps.Select(r => new NextBadgeDto(r.NextMilestone ?? "Next Badge", r.ProgressPercent, "Complete required actions to earn")).ToList();
         return new AchievementRoadmapDto(studentId, nextBadges, []);
     }
 
     public async Task<GamificationAnalyticsDto> GetAnalyticsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        db.EnsureCurrentTenant(tenantId);
-        var awards = await db.Set<BadgeAward>().ToListAsync(ct);
-        var deansList = await db.Set<DeansListEntry>().ToListAsync(ct);
+        var awards = await db.Set<BadgeAward>().IgnoreQueryFilters().Where(a => a.TenantId == tenantId).ToListAsync(ct);
+        var deansList = await db.Set<DeansListEntry>().IgnoreQueryFilters().Where(e => e.TenantId == tenantId).ToListAsync(ct);
         return new GamificationAnalyticsDto(awards.Count, awards.Select(a => a.StudentId).Distinct().Count(), 0, deansList.Count(e => e.Status == "confirmed"), 0, []);
     }
 }

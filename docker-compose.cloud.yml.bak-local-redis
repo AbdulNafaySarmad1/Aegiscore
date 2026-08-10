@@ -1,0 +1,46 @@
+# -------------------------------------------------------------------
+# AegisCore CLOUD override
+#
+# External services:
+#   PostgreSQL -> Supabase
+#   Redis      -> Redis Cloud
+#
+# Application containers are built from the CURRENT checked-out source.
+# -------------------------------------------------------------------
+
+services:
+
+  api:
+    environment:
+      DEPLOYMENT_MODE: cloud
+
+      # Use the Npgsql-formatted connection string directly.
+      AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:?AEGISCORE_DB_CONNECTION must be set}
+
+      # StackExchange.Redis-compatible TLS configuration.
+      AEGISCORE_REDIS_CONNECTION: ${AEGISCORE_REDIS_CONNECTION:?AEGISCORE_REDIS_CONNECTION must be set}
+
+    depends_on: !reset {}
+
+    restart: always
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  portal:
+    environment:
+      DEPLOYMENT_MODE: cloud
+
+    restart: always
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres: !reset null
+  redis: !reset null

@@ -16,20 +16,6 @@ public class AegisDbContext : DbContext
     private readonly IHttpContextAccessor? _httpContextAccessor;
     public Guid CurrentTenantId => _httpContextAccessor?.HttpContext?.Items["TenantId"] as Guid? ?? Guid.Empty;
 
-    public Guid GetRequiredTenantId()
-    {
-        var tenantId = CurrentTenantId;
-        return tenantId != Guid.Empty
-            ? tenantId
-            : throw new UnauthorizedAccessException("A valid tenant context is required.");
-    }
-
-    public void EnsureCurrentTenant(Guid tenantId)
-    {
-        if (tenantId == Guid.Empty || tenantId != GetRequiredTenantId())
-            throw new UnauthorizedAccessException("The requested tenant does not match the authenticated tenant.");
-    }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="AegisDbContext"/> class.
     /// </summary>
@@ -1951,12 +1937,6 @@ public class AegisDbContext : DbContext
     public DbSet<TransportIncident> TransportIncidents => Set<TransportIncident>();
     public DbSet<TransportInspection> TransportInspections => Set<TransportInspection>();
 
-    public DbSet<AnalyticsDecisionSnapshot> AnalyticsDecisionSnapshots => Set<AnalyticsDecisionSnapshot>();
-    public DbSet<AnalyticsStudentTelemetrySnapshot> AnalyticsStudentTelemetrySnapshots => Set<AnalyticsStudentTelemetrySnapshot>();
-    public DbSet<AnalyticsModelPredictionSnapshot> AnalyticsModelPredictionSnapshots => Set<AnalyticsModelPredictionSnapshot>();
-    public DbSet<AnalyticsModelQualitySnapshot> AnalyticsModelQualitySnapshots => Set<AnalyticsModelQualitySnapshot>();
-    public DbSet<AnalyticsGlobalExplanationSnapshot> AnalyticsGlobalExplanationSnapshots => Set<AnalyticsGlobalExplanationSnapshot>();
-
     /// <summary>
     /// Configures the model that was discovered by convention from the entity types
     /// exposed in <see cref="DbSet{TEntity}"/> properties on your derived context.
@@ -2920,29 +2900,6 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
         });
 
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasIndex(e => e.StudentId).IsUnique().HasFilter("\"StudentId\" IS NOT NULL");
-            entity.HasOne(e => e.Student)
-                .WithOne()
-                .HasForeignKey<User>(e => e.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-            entity.HasIndex(e => e.StaffDepartmentId);
-            entity.HasOne(e => e.StaffDepartment)
-                .WithMany()
-                .HasForeignKey(e => e.StaffDepartmentId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<AdmissionApplication>(entity =>
-        {
-            entity.HasIndex(e => e.ApplicantUserId);
-            entity.HasOne(e => e.ApplicantUser)
-                .WithMany()
-                .HasForeignKey(e => e.ApplicantUserId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
         modelBuilder.Entity<PolicyConfig>().HasData(
             SeedPolicy("11111111-1111-1111-1111-111111111101", "admissions", "merit_change_max_percent", "5", "int", "maximum % a dept head can change merit unilaterally"),
             SeedPolicy("11111111-1111-1111-1111-111111111102", "admissions", "merit_override_requires_vc", "true", "bool", "VC approval required for merit overrides"),
@@ -3469,55 +3426,6 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.TenantId);
         });
-
-        modelBuilder.Entity<AnalyticsDecisionSnapshot>(entity =>
-        {
-            entity.HasIndex(e => new { e.TenantId, e.ExplanationType, e.SubjectId, e.InputHash }).IsUnique();
-            entity.HasIndex(e => new { e.TenantId, e.SubjectType, e.SubjectId, e.CalculatedAt });
-        });
-
-        modelBuilder.Entity<AnalyticsStudentTelemetrySnapshot>(entity =>
-        {
-            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.CourseId, e.FreshnessAt });
-            entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Period, e.InputHash });
-        });
-
-        modelBuilder.Entity<AnalyticsModelPredictionSnapshot>(entity =>
-        {
-            entity.HasIndex(e => new { e.TenantId, e.SubjectType, e.SubjectId, e.PredictionTimestamp });
-            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.ModelVersion, e.PredictionTimestamp });
-        });
-
-        modelBuilder.Entity<AnalyticsModelQualitySnapshot>(entity =>
-        {
-            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.ModelVersion, e.EvaluationDataHash }).IsUnique();
-            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.EvaluationTimestamp });
-        });
-
-        modelBuilder.Entity<AnalyticsGlobalExplanationSnapshot>(entity =>
-        {
-            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.ModelVersion, e.PopulationHash }).IsUnique();
-            entity.HasIndex(e => new { e.TenantId, e.ModelName, e.CalculatedAt });
-        });
-    }
-
-    public override int SaveChanges(bool acceptAllChangesOnSuccess)
-    {
-        EnsureAnalyticsSnapshotsAreAppendOnly();
-        return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
-
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-    {
-        EnsureAnalyticsSnapshotsAreAppendOnly();
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-    }
-
-    private void EnsureAnalyticsSnapshotsAreAppendOnly()
-    {
-        if (ChangeTracker.Entries<IImmutableAnalyticsSnapshot>()
-            .Any(entry => entry.State is EntityState.Modified or EntityState.Deleted))
-            throw new InvalidOperationException("Analytics explanation evidence is append-only and cannot be updated or deleted.");
     }
 
     private static PolicyConfig SeedPolicy(string id, string module, string policyName, string policyValue, string valueType, string description)

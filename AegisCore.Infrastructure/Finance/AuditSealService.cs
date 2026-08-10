@@ -90,7 +90,7 @@ public sealed class FinanceAuditSealWorker(
             var service = scope.ServiceProvider.GetRequiredService<FinanceAuditSealService>();
             foreach (var tenantId in tenantIds.Where(x => x != Guid.Empty))
             {
-                await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId.ToString("D")}, false)", ct);
+                await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
                 await service.SealTenantAsync(tenantId, DateTime.UtcNow, ct);
             }
         }

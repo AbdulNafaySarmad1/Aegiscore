@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, AlertTriangle, Ban, CheckCircle2, Clock, EyeOff, HeartPulse, LifeBuoy, Loader2, Send, ShieldOff, ThermometerSun } from "lucide-react";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useRoles, isStudentOnly } from "@/lib/use-roles";
+import { AppShell } from "@/components/layout/AppShell";
 
 type Severity = "Low" | "Moderate" | "High" | "Critical";
 type ConcernType = "Academic Stress" | "Personal" | "Financial" | "Bullying" | "Other";
@@ -42,6 +44,9 @@ const inputS: React.CSSProperties = { padding: "0.55rem 0.7rem", borderRadius: 8
 
 export default function MentalHealthPage() {
   const t = usePersonalityTranslations("academic");
+  const roles = useRoles();
+  const studentOnly = isStudentOnly(roles);
+
   const [queue, setQueue] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,15 +61,18 @@ export default function MentalHealthPage() {
   const [triggerResult, setTriggerResult] = useState<string | null>(null);
 
   useEffect(() => {
+    if (roles.length === 0) return;
+    if (studentOnly) { setLoading(false); setError(null); return; }
     const ctrl = new AbortController();
     apiGet<Ticket[]>("/api/mental-health/counselor/queue", ctrl.signal)
       .then(d => { if (!ctrl.signal.aborted) { setQueue(d); setError(null); } })
       .catch(() => { if (!ctrl.signal.aborted) setError("Failed to load counselor queue"); })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
     return () => ctrl.abort();
-  }, []);
+  }, [studentOnly]);
 
   const refreshQueue = () => {
+    if (studentOnly) return;
     apiGet<Ticket[]>("/api/mental-health/counselor/queue")
       .then(d => { setQueue(d); setError(null); })
       .catch(() => setError("Failed to load counselor queue"));
@@ -74,7 +82,7 @@ export default function MentalHealthPage() {
     e.preventDefault();
     setSubmitting(true); setSubmitMsg(null);
     try {
-      await apiPost("/api/mental-health/tickets", { concernType, severity, description });
+      await apiPost("/api/student/v2/mental-health/tickets", { concernType, severity, description });
       setSubmitMsg("success: Ticket submitted anonymously");
       setDescription("");
       refreshQueue();
@@ -96,10 +104,11 @@ export default function MentalHealthPage() {
   const crisisCount = queue.filter(t => t.isCrisis).length;
   const openCount = queue.filter(t => t.status === "Open").length;
 
-  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingMentalHealth")}</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (loading) return <AppShell><main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingMentalHealth")}</main></AppShell>;
+  if (error) return <AppShell><main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main></AppShell>;
 
   return (
+    <AppShell>
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
       <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
         <div>
@@ -109,6 +118,7 @@ export default function MentalHealthPage() {
         </div>
       </header>
 
+      {!studentOnly && (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 14, marginBottom: 18 }}>
         <div style={{ padding: 20, borderRadius: 14, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "var(--shadow)" }}>
           <span style={{ color: "var(--muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>Active Queue</span>
@@ -131,8 +141,9 @@ export default function MentalHealthPage() {
           <small style={{ color: "var(--muted)" }}>Requiring escalation</small>
         </div>
       </div>
+      )}
 
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.2fr) minmax(360px, 0.7fr)", gap: 18, marginBottom: 18 }}>
+      <section style={{ display: "grid", gridTemplateColumns: studentOnly ? "1fr" : "minmax(0, 1.2fr) minmax(360px, 0.7fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
           <div className="surface-heading"><div><h2>{t("anonymousTicket")}</h2><p>Students can submit confidential mental health concerns</p></div><EyeOff /></div>
           <form onSubmit={submitTicket} style={{ display: "grid", gap: 12, padding: 18 }}>
@@ -171,6 +182,7 @@ export default function MentalHealthPage() {
           </form>
         </div>
 
+        {!studentOnly && (
         <div className="surface" style={{ overflow: "hidden" }}>
           <div className="surface-heading"><div><h2>{t("mandatoryReportPanel")}</h2><p>Trigger mandatory reports for crisis tickets</p></div><ShieldOff /></div>
           <div style={{ padding: 18, maxHeight: 280, overflow: "auto" }}>
@@ -202,8 +214,10 @@ export default function MentalHealthPage() {
           </div>
           {triggerResult && <div style={{ padding: "10px 18px", borderTop: "1px solid var(--line)", fontSize: 11, color: triggerResult.includes("Failed") ? "var(--red)" : "var(--green)" }}>{triggerResult}</div>}
         </div>
+        )}
       </section>
 
+      {!studentOnly && (
       <section className="surface" style={{ overflow: "hidden" }}>
         <div className="surface-heading"><div><h2>{t("counselorQueue")}</h2><p>{queue.length} tickets — {crisisCount} require crisis intervention</p></div><HeartPulse /></div>
         {queue.length === 0 ? (
@@ -248,6 +262,8 @@ export default function MentalHealthPage() {
           </div>
         )}
       </section>
+      )}
     </main>
+    </AppShell>
   );
 }

@@ -49,15 +49,5 @@ public class User
 
     public Guid TenantId { get; set; }
 
-    public Guid? StudentId { get; set; }
-
-    [ForeignKey(nameof(StudentId))]
-    public Student? Student { get; set; }
-
-    public Guid? StaffDepartmentId { get; set; }
-
-    [ForeignKey(nameof(StaffDepartmentId))]
-    public Department? StaffDepartment { get; set; }
-
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

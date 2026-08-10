@@ -7,7 +7,6 @@ namespace AegisCore.Domain.Entities;
 public class AdmissionApplication
 {
     [Key] public Guid Id { get; set; }
-    public Guid? ApplicantUserId { get; set; }
     public Guid? EnquiryLeadId { get; set; }
     [Required, MaxLength(200)] public string StudentName { get; set; } = string.Empty;
     [Required, MaxLength(200)] public string Email { get; set; } = string.Empty;
@@ -25,7 +24,6 @@ public class AdmissionApplication
     public DateTimeOffset SubmittedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public User? ApplicantUser { get; set; }
     public ICollection<ApplicationDocument> Documents { get; set; } = [];
 }
 

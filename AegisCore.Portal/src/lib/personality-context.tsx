@@ -18,17 +18,10 @@ const PersonalityContext = createContext<PersonalityContextValue>({
 
 export function PersonalityModeProvider({ children, userId }: { children: React.ReactNode; userId: string | null }) {
   const [isActive, setIsActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(() => userId != null);
-
-  // Keep loading state in step with the identity without sync setState in effects.
-  const [prevUserId, setPrevUserId] = useState(userId);
-  if (prevUserId !== userId) {
-    setPrevUserId(userId);
-    setIsLoading(userId != null);
-  }
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) { setIsLoading(false); return; }
     const ctrl = new AbortController();
     apiGet<{ isActive: boolean }>(`/api/personality/users/${userId}/active`, ctrl.signal)
       .then(r => setIsActive(r.isActive))

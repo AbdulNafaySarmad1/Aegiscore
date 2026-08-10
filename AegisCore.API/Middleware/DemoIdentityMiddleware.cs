@@ -1,7 +1,10 @@
+using System.Security.Claims;
+
 namespace AegisCore.API.Middleware;
 
 /// <summary>
-/// Fails closed if the retired automatic administrator identity is configured.
+/// Supplies a deterministic administrator identity when Runtime:DemoMode is enabled.
+/// Controlled by the AEGISCORE_DEMO_MODE environment variable.
 /// </summary>
 public sealed class DemoIdentityMiddleware(RequestDelegate next)
 {
@@ -9,30 +12,40 @@ public sealed class DemoIdentityMiddleware(RequestDelegate next)
     {
         if (configuration.GetValue<bool>("Runtime:DemoMode"))
         {
-            if (!environment.IsDevelopment())
+            if (environment.IsProduction())
             {
-                logger.LogCritical("Runtime:DemoMode is enabled outside Development - refusing to inject demo identity");
+                logger.LogCritical("Runtime:DemoMode is enabled in Production environment - refusing to inject demo identity");
                 context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
                 await context.Response.WriteAsJsonAsync(new
                 {
                     error = "configuration_error",
-                    message = "Demo mode is permitted only in an isolated Development environment."
+                    message = "Demo mode is not permitted in production environments."
                 }, context.RequestAborted);
                 return;
             }
 
-        }
-
-        if (configuration.GetValue<bool>("Runtime:InjectDemoIdentity"))
-        {
-            logger.LogCritical("Legacy automatic demo identity injection is disabled");
-            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-            await context.Response.WriteAsJsonAsync(new
+            if (context.User.Identity?.IsAuthenticated != true)
             {
-                error = "configuration_error",
-                message = "Automatic demo identity injection is disabled. Use a seeded demo account."
-            }, context.RequestAborted);
-            return;
+                var tenantId = configuration["TENANT_ID"]
+                    ?? configuration["AEGISCORE_TENANT_ID"]
+                    ?? "11111111-1111-1111-1111-111111111111";
+                var userId = configuration["Runtime:DemoUserId"]
+                    ?? "22222222-2222-2222-2222-222222222222";
+
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId),
+                    new Claim(ClaimTypes.Name, "AegisCore Demo Administrator"),
+                    new Claim(ClaimTypes.Email, "demo-admin@aegiscore.local"),
+                    new Claim(ClaimTypes.Role, "SuperAdmin"),
+                    new Claim(ClaimTypes.Role, "VC"),
+                    new Claim("tenant_id", tenantId),
+                    new Claim("permission", "*"),
+                    new Claim("module", "*")
+                };
+
+                context.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "AegisCoreDemo"));
+            }
         }
 
         await next(context);

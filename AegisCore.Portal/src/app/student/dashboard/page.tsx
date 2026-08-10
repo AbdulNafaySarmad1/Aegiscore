@@ -1,87 +1,106 @@
 "use client";
 
-// ─── Student Dashboard ───
-// Student-prioritized landing. No fabricated academic metrics: student-self
-// grade/attendance/finance endpoints require an authoritative studentId that
-// the session model does not yet provide (docs/FRONTEND_API_HANDOFF.md).
-// Until then this page is an honest workspace hub, not a wall of "--".
-
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { useSession } from "@/components/session-provider";
-import { getGreeting } from "@/lib/roles";
-import {
-  CalendarDays, ClipboardCheck, CreditCard, FileText, Gauge, GraduationCap,
-  ShieldCheck, Trophy, Utensils, Vote,
-} from "lucide-react";
+import { apiGet } from "@/lib/api-client";
+import { BookOpenCheck, CalendarDays, ClipboardCheck, CreditCard, FileText, GraduationCap } from "lucide-react";
 
-const shortcuts = [
-  { href: "/telemetry", icon: Gauge, label: "Performance", desc: "Academic sectors, trends, and personal bests.", color: "blue" },
-  { href: "/attendance", icon: ClipboardCheck, label: "Attendance", desc: "Per-course presence records.", color: "blue" },
-  { href: "/examinations", icon: GraduationCap, label: "Examinations", desc: "Schedules and published results.", color: "blue" },
-  { href: "/student/transcript", icon: FileText, label: "Transcript", desc: "Official record and requests.", color: "blue" },
-  { href: "/student/finance", icon: CreditCard, label: "Fees", desc: "Dues, challans, and receipts.", color: "green", dynamicStudentFinance: true },
-  { href: "/achievements", icon: Trophy, label: "Achievements", desc: "Badges and Dean's List.", color: "violet" },
-  { href: "/elections", icon: Vote, label: "Elections", desc: "Student council voting.", color: "violet" },
-  { href: "/cafeteria", icon: Utensils, label: "Cafeteria", desc: "Menus and meal orders.", color: "amber" },
-  { href: "/mental-health", icon: ShieldCheck, label: "Wellbeing", desc: "Confidential support, anonymously.", color: "violet" },
-] as const;
+type Profile = { studentId: string; name: string; program: string; currentSemester: string; cgpa: string; creditsCompleted: string; totalCredits: string };
+type AttendanceData = { courses: { courseTitle: string; percentage: number }[] };
+type FinanceData = { demands: { totalAmount: number; paidAmount: number; outstandingAmount: number }[] };
 
 export default function StudentDashboard() {
-  const { session } = useSession();
-  const { greeting } = getGreeting(session?.name ?? "Student");
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [attendance, setAttendance] = useState<AttendanceData | null>(null);
+  const [finance, setFinance] = useState<FinanceData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.allSettled([
+      apiGet<Profile>("/api/student-portal/me").catch(() => null),
+      apiGet<{ courses: { courseTitle: string; percentage: number }[] }>("/api/student-portal/attendance/history").catch(() => null),
+      apiGet<{ demands: { totalAmount: number; paidAmount: number; outstandingAmount: number }[] }>("/api/student-portal/me").then(async (me) => {
+        const mid = me as unknown as Profile;
+        try { return await apiGet<{ demands: { totalAmount: number; paidAmount: number; outstandingAmount: number }[] }>(`/api/finance/v2/student-portal/${mid.studentId}`); } catch { return null; }
+      }).catch(() => null),
+    ]).then(([p, a, f]) => {
+      if (p.status === "fulfilled" && p.value) setProfile(p.value);
+      if (a.status === "fulfilled" && a.value) setAttendance(a.value);
+      if (f.status === "fulfilled" && f.value) setFinance(f.value);
+      setLoading(false);
+    });
+  }, []);
+
+  const avgAttendance = attendance?.courses?.length
+    ? Math.round(attendance.courses.reduce((s, c) => s + c.percentage, 0) / attendance.courses.length)
+    : null;
+
+  const feeOutstanding = finance?.demands?.reduce((s, d) => s + d.outstandingAmount, 0) ?? null;
+
+  const kpis = [
+    { label: "CGPA", value: profile?.cgpa ?? "--", icon: GraduationCap, color: "blue" },
+    { label: "Attendance %", value: avgAttendance !== null ? `${avgAttendance}%` : "--", icon: ClipboardCheck, color: "green" },
+    { label: "Credits", value: profile ? `${profile.creditsCompleted}/${profile.totalCredits}` : "--", icon: BookOpenCheck, color: "blue" },
+    { label: "Fee Status", value: feeOutstanding !== null ? (feeOutstanding > 0 ? "Overdue" : "Current") : "--", icon: CreditCard, color: feeOutstanding !== null && feeOutstanding > 0 ? "amber" : "green" },
+  ];
 
   return (
     <AppShell>
       <div className="content-page">
-        <motion.div className="hero-greeting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-          <h1>{greeting}</h1>
-          <p>Your student workspace</p>
-          <div className="hero-time">
-            <CalendarDays size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: 6 }} />
-            {new Date().toLocaleDateString("en-PK", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </div>
+        <motion.div className="hero-greeting" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
+          <h1>My Dashboard</h1>
+          <p>Your academic overview at a glance</p>
         </motion.div>
 
-        <div className="module-grid">
-          {shortcuts.map((s, i) => {
-            const needsStudentId = "dynamicStudentFinance" in s && s.dynamicStudentFinance;
-            const disabled = needsStudentId && !session?.studentId;
-            const href = needsStudentId ? `/student/finance/${session?.studentId}` : s.href;
-            return (
-              <motion.article
-                key={s.href}
-                className="module-card"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i, 8) * .03, duration: 0.2 }}
-                style={disabled ? { opacity: 0.6 } : undefined}
-              >
-                <div className="module-card-body">
-                  <div className="module-card-icon" style={{ color: `var(--domain-${s.color === "blue" ? "academic" : s.color === "green" ? "finance" : s.color === "amber" ? "operations" : "welfare"})`, background: "var(--surface-muted)" }}>
-                    <s.icon size={20} />
-                  </div>
-                  <strong>{s.label}</strong>
-                  <p>{s.desc}</p>
-                  {disabled ? (
-                    <span className="kpi-unavailable-note">Available once your student record is linked</span>
-                  ) : (
-                    <Link href={href} className="module-card-link">Open →</Link>
-                  )}
-                </div>
-              </motion.article>
-            );
-          })}
+        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+          {kpis.map((kpi, i) => (
+            <motion.article key={i} className="kpi-card" whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <div className={`kpi-card-icon kpi-accent ${kpi.color}`}><kpi.icon size={18} /></div>
+              <span className="kpi-label">{kpi.label}</span>
+              <strong className="kpi-number">{loading ? "--" : kpi.value}</strong>
+            </motion.article>
+          ))}
         </div>
 
-        <div className="card" style={{ marginTop: 24, maxWidth: 720 }}>
-          <div className="card-body" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <ShieldCheck size={18} style={{ color: "var(--primary)", flexShrink: 0, marginTop: 2 }} />
-            <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
-              Live CGPA, credit-hour, and fee-balance summaries appear here automatically once the Registrar
-              links your student record to this account. No placeholder figures are shown in the meantime.
-            </p>
+        <div className="quick-actions" style={{ marginBottom: 24 }}>
+          <Link href="/student/timetable" className="quick-action-btn"><CalendarDays size={16} />My Timetable</Link>
+          <Link href="/student/transcript" className="quick-action-btn"><FileText size={16} />Transcript</Link>
+          <Link href="/student/finance" className="quick-action-btn"><CreditCard size={16} />Pay Fee</Link>
+          <Link href="/student/profile" className="quick-action-btn"><GraduationCap size={16} />Profile</Link>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+          <div className="card">
+            <div className="card-header"><h3 style={{ fontSize: 14 }}>Program</h3></div>
+            <div className="card-body">
+              {loading ? <div className="skeleton" style={{ height: 80 }} /> : (
+                <div style={{ display: "grid", gap: 4 }}>
+                  <p style={{ fontSize: 15, fontWeight: 600 }}>{profile?.program ?? "N/A"}</p>
+                  <p style={{ fontSize: 13, color: "var(--muted)" }}>Semester: {profile?.currentSemester ?? "N/A"}</p>
+                  <p style={{ fontSize: 13, color: "var(--muted)" }}>{profile?.name ?? "Student"}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header"><h3 style={{ fontSize: 14 }}>Attendance</h3></div>
+            <div className="card-body">
+              {loading ? <div className="skeleton" style={{ height: 80 }} /> : (
+                <div style={{ display: "grid", gap: 8 }}>
+                  {attendance?.courses?.slice(0, 5).map((c, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 13, minWidth: 80 }}>{c.courseTitle}</span>
+                      <div className="progress" style={{ flex: 1 }}><div className={`progress-bar ${c.percentage > 85 ? "success" : c.percentage > 70 ? "warning" : "danger"}`} style={{ width: `${c.percentage}%` }} /></div>
+                      <span style={{ fontSize: 12, fontWeight: 600 }}>{c.percentage}%</span>
+                    </div>
+                  ))}
+                  {(!attendance?.courses || attendance.courses.length === 0) && <p style={{ color: "var(--muted)", fontSize: 13 }}>No records yet.</p>}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

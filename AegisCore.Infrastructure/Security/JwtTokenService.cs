@@ -18,8 +18,6 @@ public class JwtTokenService : IJwtTokenService
     private readonly SecurityKey _signingKey;
     private readonly SecurityKey _validationKey;
     private readonly string _algorithm;
-    private readonly string _issuer;
-    private readonly string _audience;
     private readonly IConnectionMultiplexer _redis;
     private const string RefreshFamilyKeyPrefix = "aegiscore:auth:refresh:family:";
     private static readonly TimeSpan FamilyTtl = TimeSpan.FromDays(14);
@@ -32,8 +30,6 @@ public class JwtTokenService : IJwtTokenService
     public JwtTokenService(IConfiguration configuration, IConnectionMultiplexer redis)
     {
         _redis = redis;
-        _issuer = ValidConfigurationValue(configuration["Jwt:Issuer"]) ?? "https://aegiscore.pk";
-        _audience = ValidConfigurationValue(configuration["Auth:Audience"]) ?? "aegiscore-api";
         var privateKeyPem = configuration["Jwt:PrivateKey"];
         var publicKeyPem = configuration["Jwt:PublicKey"];
         if (!string.IsNullOrWhiteSpace(privateKeyPem) && !privateKeyPem.StartsWith("${", StringComparison.Ordinal) &&
@@ -70,36 +66,11 @@ public class JwtTokenService : IJwtTokenService
             new(ClaimTypes.Email, user.Email),
             new("tenant_id", user.TenantId.ToString())
         };
-        var now = DateTime.UtcNow;
-        var activeRoles = user.UserRoles
-            .Where(ur => ur.ExpiresAt == null || ur.ExpiresAt > now)
-            .Select(ur => ur.Role.Name)
-            .ToArray();
-        claims.AddRange(activeRoles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-        var linkedDepartment = user.Student?.Batch?.Department;
-        if (user.StudentId is { } studentId
-            && studentId != Guid.Empty
-            && user.Student?.Id == studentId
-            && linkedDepartment is not null
-            && linkedDepartment.TenantId == user.TenantId)
-        {
-            claims.Add(new Claim("student_id", studentId.ToString()));
-            claims.Add(new Claim("department_id", linkedDepartment.Id.ToString()));
-        }
-
-        if (user.StaffDepartmentId is { } staffDepartmentId
-            && staffDepartmentId != Guid.Empty
-            && user.StaffDepartment?.Id == staffDepartmentId
-            && user.StaffDepartment.TenantId == user.TenantId
-            && activeRoles.Any(role => role is "HOD" or "Dean"))
-        {
-            claims.Add(new Claim("staff_department_id", staffDepartmentId.ToString()));
-        }
+        claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
 
         var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
+            issuer: "https://aegiscore.pk",
+            audience: "aegiscore-api",
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: credentials
@@ -126,9 +97,9 @@ public class JwtTokenService : IJwtTokenService
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = _validationKey,
             ValidateIssuer = true,
-            ValidIssuer = _issuer,
+            ValidIssuer = "https://aegiscore.pk",
             ValidateAudience = true,
-            ValidAudience = _audience,
+            ValidAudience = "aegiscore-api",
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
             ValidAlgorithms = [_algorithm]
@@ -178,12 +149,5 @@ public class JwtTokenService : IJwtTokenService
         if (!data.HasValue) return false;
         using var doc = JsonDocument.Parse(data.ToString());
         return doc.RootElement.GetProperty("valid").GetBoolean();
-    }
-
-    private static string? ValidConfigurationValue(string? value)
-    {
-        return string.IsNullOrWhiteSpace(value) || value.StartsWith("${", StringComparison.Ordinal)
-            ? null
-            : value;
     }
 }

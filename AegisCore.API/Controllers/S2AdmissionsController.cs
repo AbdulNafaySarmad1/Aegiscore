@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using AegisCore.Application.Admissions;
@@ -76,79 +75,44 @@ public sealed class S2AdmissionsController(
     }
 
     [HttpPost("applications")]
-    public async Task<ActionResult<object>> Submit([FromBody] AdmissionApplicationRequest request, CancellationToken ct)
+    public async Task<ActionResult<object>> Submit([FromBody] AdmissionApplication application, CancellationToken ct)
     {
-        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"), out var applicantUserId)
-            || applicantUserId == Guid.Empty)
-        {
-            return Unauthorized();
-        }
-
-        var tenantId = db.GetRequiredTenantId();
-        if (!await db.Users.AsNoTracking().AnyAsync(user => user.Id == applicantUserId && user.TenantId == tenantId, ct))
-        {
-            return Unauthorized();
-        }
-
-        if (request.DateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-14))
-            || request.DateOfBirth == default)
+        if (application.DateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-14))
+            || application.DateOfBirth == default)
         {
             return BadRequest("Applicant date of birth is not valid for university admission.");
         }
 
-        if (string.IsNullOrWhiteSpace(request.StudentName) || string.IsNullOrWhiteSpace(request.Email)
-            || string.IsNullOrWhiteSpace(request.Phone) || string.IsNullOrWhiteSpace(request.Cnic))
-        {
-            return BadRequest("Applicant name, email, phone, and CNIC are required.");
-        }
-
-        if (!Regex.IsMatch(request.Cnic, "^\\d{5}-\\d{7}-\\d$"))
+        if (!Regex.IsMatch(application.Cnic, "^\\d{5}-\\d{7}-\\d$"))
         {
             return BadRequest("CNIC must use the format 00000-0000000-0.");
         }
 
-        if (request.MatricPercentage is < 0 or > 100 || request.FscPercentage is < 0 or > 100 || request.EntryTestScore is < 0)
+        if (application.MatricPercentage is < 0 or > 100 || application.FscPercentage is < 0 or > 100 || application.EntryTestScore is < 0)
         {
             return BadRequest("Admission scores are invalid.");
         }
 
-        if (request.QuotaType is not ("open_merit" or "self_finance" or "hafiz" or "sports" or "pmc"))
+        if (application.QuotaType is not ("open_merit" or "self_finance" or "hafiz" or "sports" or "pmc"))
         {
             return BadRequest("Quota type is invalid.");
         }
 
-        if (!await db.DegreePrograms.AnyAsync(program => program.Id == request.ProgramId && program.TenantId == tenantId, ct))
+        if (!await db.DegreePrograms.AnyAsync(p => p.Id == application.ProgramId, ct))
         {
             return BadRequest("Program was not found.");
         }
 
-        if (await db.AdmissionApplications.IgnoreQueryFilters().AnyAsync(application => application.Cnic == request.Cnic, ct))
+        if (await db.AdmissionApplications.AnyAsync(a => a.Cnic == application.Cnic, ct))
         {
             return Conflict("An application already exists for this CNIC.");
         }
 
-        var now = DateTimeOffset.UtcNow;
-        var application = new AdmissionApplication
-        {
-            Id = Guid.NewGuid(),
-            ApplicantUserId = applicantUserId,
-            StudentName = request.StudentName.Trim(),
-            Email = request.Email.Trim(),
-            Phone = request.Phone.Trim(),
-            Cnic = request.Cnic,
-            DateOfBirth = request.DateOfBirth,
-            Gender = request.Gender?.Trim(),
-            ProgramId = request.ProgramId,
-            QuotaType = request.QuotaType,
-            MatricPercentage = request.MatricPercentage,
-            FscPercentage = request.FscPercentage,
-            EntryTestScore = request.EntryTestScore,
-            IbccEquivalenceApplied = request.IbccEquivalenceApplied,
-            ApplicationStatus = "submitted",
-            SubmittedAt = now,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
+        application.Id = application.Id == Guid.Empty ? Guid.NewGuid() : application.Id;
+        application.ApplicationStatus = "submitted";
+        application.SubmittedAt = DateTimeOffset.UtcNow;
+        application.CreatedAt = DateTimeOffset.UtcNow;
+        application.UpdatedAt = DateTimeOffset.UtcNow;
         db.AdmissionApplications.Add(application);
         await db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(Get), new { id = application.Id }, new
@@ -320,16 +284,3 @@ public sealed record VerifyApplicationRequest(bool Approved, Guid ActorId, strin
 public sealed record GenerateMeritListRequest(Guid ProgramId, Guid SemesterId, string QuotaType, int RoundNumber, int TotalSeats, Guid ActorId);
 public sealed record EnquiryRequest(string Name, string? Email, string Phone, string? ProgramInterest, string Source);
 public sealed record EnquiryStatusRequest(string Status);
-public sealed record AdmissionApplicationRequest(
-    string StudentName,
-    string Email,
-    string Phone,
-    string Cnic,
-    DateOnly DateOfBirth,
-    string? Gender,
-    Guid ProgramId,
-    string QuotaType,
-    decimal? MatricPercentage,
-    decimal? FscPercentage,
-    int? EntryTestScore,
-    bool IbccEquivalenceApplied);

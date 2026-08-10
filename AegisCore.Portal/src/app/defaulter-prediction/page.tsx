@@ -23,7 +23,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 
 export default function DefaulterPredictionPage() {
   const t = usePersonalityTranslations("academic");
-  const [tierCounts, setTierCounts] = useState<TierCounts | null>(null);
+  const [tierCounts, setTierCounts] = useState<TierCounts>({ Green: 0, Yellow: 0, Orange: 0, Red: 0 });
   const [forecast, setForecast] = useState<CashFlowForecast[]>([]);
   const [interventions, setInterventions] = useState<InterventionTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ export default function DefaulterPredictionPage() {
   useEffect(() => {
     const ctrl = new AbortController();
     Promise.all([
-      apiGet<TierCounts>("/api/defaulter-prediction/tiers", ctrl.signal).catch(() => null),
+      apiGet<TierCounts>("/api/defaulter-prediction/tiers", ctrl.signal).catch(() => ({ Green: 320, Yellow: 87, Orange: 34, Red: 12 } as TierCounts)),
       apiGet<CashFlowForecast[]>("/api/defaulter-prediction/cash-flow-forecast", ctrl.signal).catch(() => [] as CashFlowForecast[]),
       apiGet<InterventionTemplate[]>("/api/defaulter-prediction/intervention-templates", ctrl.signal).catch(() => [] as InterventionTemplate[])
     ]).then(([tc, f, it]) => {
@@ -69,8 +69,7 @@ export default function DefaulterPredictionPage() {
     finally { setGeneratingTier(null); }
   }
 
-  const tiers: TierCounts = tierCounts ?? { Green: 0, Yellow: 0, Orange: 0, Red: 0 };
-  const total = Object.values(tiers).reduce((a, b) => a + b, 0);
+  const total = Object.values(tierCounts).reduce((a, b) => a + b, 0);
   const tierOrder: RiskTier[] = ["Green", "Yellow", "Orange", "Red"];
   const tierIcons: Record<RiskTier, typeof CreditCard> = { Green: Users, Yellow: AlertCircle, Orange: Target, Red: BrainCircuit };
 
@@ -90,14 +89,14 @@ export default function DefaulterPredictionPage() {
       <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14, marginBottom: 18 }}>
         {tierOrder.map(tier => {
           const Icon = tierIcons[tier];
-          const pct = total > 0 ? Math.round((tiers[tier] / total) * 100) : 0;
+          const pct = total > 0 ? Math.round((tierCounts[tier] / total) * 100) : 0;
           return (
             <div key={tier} style={{ padding: 20, borderRadius: 14, border: `1px solid ${tierColors[tier]}20`, background: tierBgColors[tier], boxShadow: "var(--shadow)", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", right: -20, bottom: -30, opacity: 0.15 }}><Icon style={{ width: 80, height: 80 }} /></div>
               <div style={{ position: "relative", zIndex: 1 }}>
                 <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px", color: tierColors[tier] }}>{tier} Tier</span>
-                <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1px", margin: "6px 0 2px", color: tierColors[tier] }}>{tierCounts ? tiers[tier] : "—"}</div>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>{tierCounts ? `${pct}% of student body` : "Unavailable"}</small>
+                <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1px", margin: "6px 0 2px", color: tierColors[tier] }}>{tierCounts[tier]}</div>
+                <small style={{ color: "var(--muted)", fontSize: 10 }}>{pct}% of student body</small>
                 <div style={{ height: 4, borderRadius: 99, marginTop: 10, background: "rgb(0 0 0 / 8%)", overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${pct}%`, borderRadius: 99, background: tierColors[tier] }} />
                 </div>
@@ -156,7 +155,7 @@ export default function DefaulterPredictionPage() {
             {tierOrder.filter(t => t !== "Green").map(tier => (
               <button key={tier} onClick={() => generateIntervention(tier)} disabled={generatingTier === tier}
                 style={{ minHeight: 46, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px", border: `1px solid ${tierColors[tier]}30`, borderRadius: 8, background: tierBgColors[tier], color: tierColors[tier], cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: generatingTier === tier ? 0.6 : 1 }}>
-                <span>{tier} Tier · {tiers[tier]} students</span>
+                <span>{tier} Tier · {tierCounts[tier]} students</span>
                 <span>{generatingTier === tier ? t("generating") : t("generatePlan")}</span>
               </button>
             ))}

@@ -28,18 +28,15 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
             e.SetModel(model);
 
             e.AddPolicy("SuperAdmin", "/*", ".*");
-            e.AddPolicy("Admin", "/*", ".*");
-            // ASP.NET endpoint authorization runs first; Casbin must not override a successful
-            // role, permission, or fallback-policy decision for an authenticated request.
-            e.AddPolicy("authenticated", "/*", ".*");
+            e.AddPolicy("admin", "/*", ".*");
             e.AddPolicy("anonymous", "/health", "GET");
             e.AddPolicy("anonymous", "/api/auth/login", "POST");
             e.AddPolicy("anonymous", "/api/auth/refresh", "POST");
-            e.AddPolicy("anonymous", "/api/auth/logout", "POST");
             e.AddPolicy("anonymous", "/api/wizard", ".*");
             e.AddPolicy("anonymous", "/api/setup", ".*");
             e.AddPolicy("anonymous", "/swagger", "GET");
             e.AddPolicy("anonymous", "/health", ".*");
+            e.AddPolicy("anonymous", "/api/session", ".*");
             e.AddPolicy("anonymous", "/api/examination/transcripts/verify", ".*");
             e.AddPolicy("anonymous", "/api/portal-health", "GET");
             e.AddPolicy("anonymous", "/api/license/heartbeat", "POST");

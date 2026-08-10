@@ -1,6 +1,5 @@
 using AegisCore.Infrastructure.AI;
 using AegisCore.Infrastructure.Admissions;
-using AegisCore.Infrastructure.Analytics;
 using AegisCore.Infrastructure.ApiGateway;
 using AegisCore.Infrastructure.AssetInventory;
 using AegisCore.Infrastructure.Backup;
@@ -147,8 +146,7 @@ public static class InfrastructureServiceExtensions
         services.AddElections();
         services.AddCafeteria();
         services.AddTransport();
-        services.AddAnalyticsIntelligence();
-        services.AddScoped<GoldenDemoSeeder>();
+        services.TryAddScoped<Deployment.Seeders.DemoSeeder>();
         return services;
     }
 

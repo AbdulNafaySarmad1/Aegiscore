@@ -36,29 +36,17 @@ public class GlobalExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            var (status, title, type) = ex switch
-            {
-                UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden", "https://tools.ietf.org/html/rfc7231#section-6.5.3"),
-                ArgumentException => (StatusCodes.Status400BadRequest, "Bad Request", "https://tools.ietf.org/html/rfc7231#section-6.5.1"),
-                _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", "https://tools.ietf.org/html/rfc7231#section-6.6.1")
-            };
-
-            if (status == StatusCodes.Status500InternalServerError)
-                _logger.LogError(ex, "Unhandled exception occurred");
-            else
-                _logger.LogWarning("Request rejected with status {StatusCode}: {ExceptionType}", status, ex.GetType().Name);
+            _logger.LogError(ex, "Unhandled exception occurred");
 
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = status;
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
             var problemDetails = new ProblemDetails
             {
-                Title = title,
-                Status = status,
-                Type = type,
-                Detail = status == StatusCodes.Status500InternalServerError
-                    ? "An unexpected error occurred. Please try again later."
-                    : "The request could not be processed."
+                Title = "Internal Server Error",
+                Status = StatusCodes.Status500InternalServerError,
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+                Detail = "An unexpected error occurred. Please try again later."
             };
 
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };

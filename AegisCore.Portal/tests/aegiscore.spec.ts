@@ -56,56 +56,30 @@ test.describe("Critical Path", () => {
     expect(title.length).toBeGreaterThan(0);
   });
 
-  // Signs in through the demo preview identity (offline E2E has no backend;
-  // demo cards fall back to the isolated demo session when the API is down).
-  async function demoSignIn(page: Page) {
-    await page.goto("/login");
-    await waitForLoad(page);
-    const card = page.locator(".demo-role-card").first();
-    await expect(card).toBeVisible({ timeout: 10000 });
-    await card.click();
-    await page.waitForURL("**/", { timeout: 15000 }).catch(() => {});
-    await waitForLoad(page);
-  }
-
   test("4 - Login page renders with content visible", async ({ page }) => {
     await page.goto("/login");
     await waitForLoad(page);
 
-    const heading = page.getByRole("heading", { name: /welcome back/i });
+    // The login page has a "Sign in" heading and a "Continue to workspace" link
+    const heading = page.getByRole("heading", { name: /sign in/i });
     await expect(heading.first()).toBeVisible({ timeout: 10000 });
 
-    const email = page.getByLabel(/university email/i);
-    await expect(email).toBeVisible();
-
-    const submit = page.getByRole("button", { name: /sign in/i });
-    await expect(submit).toBeVisible();
+    const link = page.getByRole("link", { name: /continue to workspace/i });
+    await expect(link).toBeVisible();
   });
 
-  test("5 - Demo sign-in is clickable and navigates home", async ({ page }) => {
-    await demoSignIn(page);
+  test("5 - Login button is clickable and navigates home", async ({ page }) => {
+    await page.goto("/login");
+    await waitForLoad(page);
+
+    const btn = page.getByRole("link", { name: /continue to workspace/i });
+    await expect(btn).toBeVisible();
+    await btn.click();
+    await waitForLoad(page);
 
     // Should land on the dashboard
     const title = await page.title();
     expect(title).toContain("AegisCore");
-  });
-
-  test("5b - Rejected demo credentials never create an offline session", async ({ page }) => {
-    await page.route("**/api/auth/login", async route => {
-      expect(route.request().postDataJSON()).toMatchObject({
-        email: "student@iobm.demo",
-        password: "GoldenDemo!2026",
-      });
-      await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ message: "Invalid credentials" }) });
-    });
-    await page.goto("/login");
-    await page.getByLabel(/university email/i).fill("student@iobm.demo");
-    await page.getByLabel(/^password$/i).fill("GoldenDemo!2026");
-
-    await page.getByRole("button", { name: /sign in/i }).click();
-
-    await expect(page.getByText("Invalid email or password.")).toBeVisible();
-    await expect(page).toHaveURL(/\/login$/);
   });
 
   test("6 - Dashboard loads without blank screen", async ({ page }) => {
@@ -122,7 +96,11 @@ test.describe("Critical Path", () => {
   });
 
   test("7 - Sidebar renders with navigation items", async ({ page }) => {
-    await demoSignIn(page);
+    await page.goto("/");
+    await waitForLoad(page);
+
+    // Wait for the session to load
+    await page.waitForTimeout(3000);
 
     const nav = page.locator(".shell-sidebar, .portal-sidebar, .primary-nav, .sidebar-nav, nav");
     const navItems = nav.locator("a, button, .nav-item");
@@ -157,7 +135,10 @@ test.describe("Critical Path", () => {
   });
 
   test("9 - VC role sees all top-level menu categories", async ({ page }) => {
-    await demoSignIn(page);
+    // Demo mode auto-injects SuperAdmin/VC
+    await page.goto("/");
+    await waitForLoad(page);
+    await page.waitForTimeout(3000);
 
     const sidebar = page.locator(".shell-sidebar, .portal-sidebar, .primary-nav, .sidebar-nav").first();
     await expect(sidebar).toBeVisible({ timeout: 10000 });

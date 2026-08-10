@@ -63,17 +63,11 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var demoMode = builder.Configuration.GetValue<bool>("Runtime:DemoMode");
-if (demoMode && !builder.Environment.IsDevelopment())
+if (demoMode && builder.Environment.IsProduction())
 {
     throw new InvalidOperationException(
-        "AegisCore cannot start: Runtime:DemoMode is permitted only in the Development environment. "
-        + "Set AEGISCORE_DEMO_MODE=false outside an isolated local demo.");
-}
-if (builder.Configuration.GetValue<bool>("Runtime:InjectDemoIdentity"))
-{
-    throw new InvalidOperationException(
-        "AegisCore cannot start: legacy automatic demo identity injection is disabled. "
-        + "Use the seeded demo accounts for authentication.");
+        "AegisCore cannot start: Runtime:DemoMode is enabled in a Production environment. "
+        + "Set AEGISCORE_DEMO_MODE=false for production use.");
 }
 
 Log.Logger = new LoggerConfiguration()
@@ -262,35 +256,15 @@ else
         options.AddCustomLabel("tenant", context => context.User.FindFirst("tenant_id")?.Value ?? "anonymous");
     });
     app.MapMetrics().AllowAnonymous();
-    app.MapGet("/api/session", async (HttpContext context, AegisDbContext db, CancellationToken ct) =>
+    app.MapGet("/api/session", (HttpContext context) => Results.Ok(new
     {
-        var userIdText = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-            ?? context.User.FindFirst("sub")?.Value;
-        var permissions = Array.Empty<string>();
-        if (Guid.TryParse(userIdText, out var userId))
-        {
-            var now = DateTime.UtcNow;
-            permissions = await db.UserRoles
-                .AsNoTracking()
-                .Where(ur => ur.UserId == userId && (ur.ExpiresAt == null || ur.ExpiresAt > now))
-                .SelectMany(ur => ur.Role.RolePermissions)
-                .Select(rp => rp.Permission.Module + ":" + rp.Permission.Resource + ":" + rp.Permission.Action)
-                .Distinct()
-                .Order()
-                .ToArrayAsync(ct);
-        }
-
-        return Results.Ok(new
-        {
-            userId = userIdText,
-            tenantId = context.User.FindFirst("tenant_id")?.Value ?? context.User.FindFirst("tid")?.Value,
-            studentId = context.User.FindFirst("student_id")?.Value,
-            departmentId = context.User.FindFirst("department_id")?.Value,
-            name = context.User.Identity?.Name ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "AegisCore user",
-            roles = context.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().Order().ToArray(),
-            permissions
-        });
-    }).RequireAuthorization();
+        userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+        tenantId = context.User.FindFirst("tenant_id")?.Value ?? context.User.FindFirst("tid")?.Value,
+        studentId = context.User.FindFirst("student_id")?.Value,
+        departmentId = context.User.FindFirst("department_id")?.Value,
+        name = context.User.Identity?.Name ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "AegisCore user",
+        roles = context.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().Order().ToArray()
+    })).RequireAuthorization();
 
     app.MapHub<StateMachineHub>("/hubs/statemachine");
     app.MapHub<NotificationHub>("/hubs/notifications");
@@ -313,7 +287,7 @@ else
     {
         Log.Information("Starting AegisCore API...");
         await ApplyDatabaseMigrationsAsync(app);
-        await SeedGoldenDemoAsync(app);
+        await SeedDemoDataAsync(app);
         await app.RunDeploymentReadinessCheckAsync();
         Log.Information("AegisCore API started successfully.");
         app.Run();
@@ -332,22 +306,32 @@ else
 
 static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
 {
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+
+    if (app.Configuration.GetValue("Demo:UseEnsureCreated", false))
+    {
+        Log.Warning("DEMO MODE: creating database schema directly from the current EF model.");
+        await db.Database.EnsureCreatedAsync();
+        return;
+    }
+
     if (!app.Configuration.GetValue("Database:AutoMigrate", false))
         return;
 
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
     await db.Database.MigrateAsync();
 }
 
-static async Task SeedGoldenDemoAsync(WebApplication app)
+static async Task SeedDemoDataAsync(WebApplication app)
 {
-    if (!app.Configuration.GetValue<bool>("Runtime:DemoMode")
-        || !app.Configuration.GetValue<bool>("Demo:SeedGoldenUniverse"))
+    if (!app.Configuration.GetValue<bool>("Runtime:DemoMode"))
         return;
-    if (!Guid.TryParse(app.Configuration["TENANT_ID"], out var tenantId) || tenantId == Guid.Empty)
-        throw new InvalidOperationException("TENANT_ID is required for golden demo seeding.");
+
+    var tenantIdString = app.Configuration["TENANT_ID"];
+    if (string.IsNullOrWhiteSpace(tenantIdString) || !Guid.TryParse(tenantIdString, out var tenantId) || tenantId == Guid.Empty)
+        return;
 
     using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<GoldenDemoSeeder>().SeedAsync(tenantId);
+    var seeder = scope.ServiceProvider.GetRequiredService<AegisCore.Infrastructure.Deployment.Seeders.DemoSeeder>();
+    await seeder.SeedAsync(tenantId);
 }

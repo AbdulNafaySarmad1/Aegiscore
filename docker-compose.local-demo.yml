@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aegiscore
+      POSTGRES_USER: aegiscore
+      POSTGRES_PASSWORD: aegiscore-demo-local
+    volumes:
+      - aegiscore_demo_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegiscore -d aegiscore"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - backend
+
+  api:
+    environment:
+      AEGISCORE_DB_CONNECTION: "Host=postgres;Port=5432;Database=aegiscore;Username=aegiscore;Password=aegiscore-demo-local"
+      Demo__UseEnsureCreated: "true"
+      Demo__SeedGoldenUniverse: "true"
+      Demo__AllowExplicitExternalSeed: "false"
+      Runtime__DemoMode: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  aegiscore_demo_postgres:
