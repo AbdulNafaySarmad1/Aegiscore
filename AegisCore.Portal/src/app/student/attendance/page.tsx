@@ -58,11 +58,11 @@ export default function StudentAttendance() {
     setCheckInMsg("");
     try {
       const coords = await getCurrentPosition();
-      const res = await apiPost<{ success: boolean; message: string }>(
-        "/api/student-portal/attendance/check-in",
+      const res = await apiPost<{ success: boolean; message: string; distanceMeters?: number }>(
+        "/api/student-attendance/check-in",
         { courseId, ...coords }
       );
-      setCheckInMsg(res.message);
+      setCheckInMsg(res.distanceMeters == null ? res.message : `${res.message} (${Math.round(res.distanceMeters)} m from campus reference point)`);
       await refresh();
     } catch (err) {
       setCheckInMsg(err instanceof Error ? err.message : "Check-in failed.");
@@ -82,7 +82,7 @@ export default function StudentAttendance() {
           <div>
             <div className="page-header-breadcrumb"><span>Academic</span><span>/</span><span>Attendance</span></div>
             <h1>My Attendance</h1>
-            <p>Overall: {overallPct}% · {courses.length} courses · location required for check-in</p>
+            <p>Overall: {overallPct}% · {courses.length} courses · on-campus location required for check-in</p>
           </div>
         </div>
 
@@ -97,9 +97,9 @@ export default function StudentAttendance() {
                 className="btn btn-primary btn-sm"
                 onClick={() => void handleCheckIn(c.courseId)}
                 disabled={checkingCourseId !== null}
-                title="Uses your current location to verify attendance check-in"
+                title="Uses your current location to verify that you are inside the configured campus attendance zone"
               >
-                <MapPin size={14} /> {checkingCourseId === c.courseId ? "Locating..." : "Mark Attendance"}
+                <MapPin size={14} /> {checkingCourseId === c.courseId ? "Verifying location..." : "Mark Attendance"}
               </button>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
