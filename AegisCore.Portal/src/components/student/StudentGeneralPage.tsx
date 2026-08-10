@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { apiGet } from "@/lib/api-client";
-import { BookOpenCheck, CheckCircle2, ClipboardList, FileSearch, Map, MessageSquareText } from "lucide-react";
+import { BookOpenCheck, CheckCircle2, FileSearch, Map as MapIcon, MessageSquareText } from "lucide-react";
 
 type Mode = "courses" | "workflow" | "roadmap" | "outcomes" | "survey";
 type Profile = {
@@ -77,7 +77,7 @@ function Content({ mode, profile, transcript, timetable, courses }: { mode:Mode;
   }
   if (mode === "roadmap") {
     const completed = Number(profile?.creditsCompleted ?? 0); const total = Number(profile?.totalCredits ?? 130); const progress = total ? Math.round(completed/total*100) : 0;
-    return <div style={{ display:"grid", gap:18 }}><div style={{ ...card, padding:22 }}><div style={{ display:"flex", justifyContent:"space-between", gap:20, alignItems:"end" }}><div><Map size={22}/><h2 style={{ margin:"10px 0 3px" }}>{profile?.program ?? "Degree Program"}</h2><span style={{ color:"var(--muted)" }}>Current semester: {profile?.currentSemester ?? "—"}</span></div><strong style={{ fontSize:28 }}>{progress}%</strong></div><div style={{ height:10,borderRadius:99,background:"var(--line)",marginTop:18,overflow:"hidden" }}><div style={{ width:`${Math.min(100,progress)}%`,height:"100%",background:"var(--blue-600)" }}/></div><p style={{ color:"var(--muted)", fontSize:12 }}>{completed} of {total} credits completed · CGPA {profile?.cgpa ?? transcript?.cgpa ?? "—"}</p></div></div>;
+    return <div style={{ display:"grid", gap:18 }}><div style={{ ...card, padding:22 }}><div style={{ display:"flex", justifyContent:"space-between", gap:20, alignItems:"end" }}><div><MapIcon size={22}/><h2 style={{ margin:"10px 0 3px" }}>{profile?.program ?? "Degree Program"}</h2><span style={{ color:"var(--muted)" }}>Current semester: {profile?.currentSemester ?? "—"}</span></div><strong style={{ fontSize:28 }}>{progress}%</strong></div><div style={{ height:10,borderRadius:99,background:"var(--line)",marginTop:18,overflow:"hidden" }}><div style={{ width:`${Math.min(100,progress)}%`,height:"100%",background:"var(--blue-600)" }}/></div><p style={{ color:"var(--muted)", fontSize:12 }}>{completed} of {total} credits completed · CGPA {profile?.cgpa ?? transcript?.cgpa ?? "—"}</p></div></div>;
   }
   if (mode === "survey") {
     return <div style={{ ...card, padding:32, textAlign:"center" }}><MessageSquareText size={34} style={{ opacity:.45 }}/><h2>No active surveys</h2><p style={{ color:"var(--muted)", maxWidth:560, margin:"8px auto" }}>When a course or faculty feedback survey is assigned to your account, it will appear here with its session, course, faculty, due dates and completion status.</p></div>;
