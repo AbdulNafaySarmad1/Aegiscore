@@ -23,6 +23,57 @@ public sealed class StudentAttendanceController(
 
     private Guid TenantId => Guid.TryParse(User.FindFirstValue("tenant_id"), out var id) ? id : Guid.Empty;
 
+    [HttpGet("history")]
+    public async Task<IActionResult> History(CancellationToken ct)
+    {
+        var studentId = StudentId;
+        if (studentId == Guid.Empty) return Forbid();
+
+        var enrollments = await db.Enrollments.AsNoTracking()
+            .Where(e => e.StudentId == studentId && e.EnrollmentStatus == EnrollmentStatus.Active)
+            .Include(e => e.Course)
+            .OrderBy(e => e.Course.Title)
+            .ToListAsync(ct);
+
+        if (enrollments.Count == 0)
+            return Ok(new { studentId, courses = Array.Empty<object>() });
+
+        var enrollmentIds = enrollments.Select(e => e.Id).ToArray();
+        var attendance = await db.Attendances.AsNoTracking()
+            .Where(a => enrollmentIds.Contains(a.EnrollmentId))
+            .OrderByDescending(a => a.Date)
+            .Take(1000)
+            .ToListAsync(ct);
+
+        var byEnrollment = attendance.GroupBy(a => a.EnrollmentId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var courses = enrollments.Select(enrollment =>
+        {
+            var records = byEnrollment.TryGetValue(enrollment.Id, out var found) ? found : [];
+            var total = records.Count;
+            var present = records.Count(r => r.Status == AttendanceStatus.Present);
+            var absent = records.Count(r => r.Status == AttendanceStatus.Absent);
+            return new
+            {
+                courseId = enrollment.CourseId,
+                courseTitle = enrollment.Course.Title,
+                courseCode = enrollment.Course.Code,
+                totalSessions = total,
+                presentSessions = present,
+                absentSessions = absent,
+                percentage = total > 0 ? Math.Round((double)present / total * 100.0, 2) : 0.0,
+                recent = records.OrderByDescending(r => r.Date).Take(10).Select(r => new
+                {
+                    date = r.Date.ToString("yyyy-MM-dd"),
+                    status = r.Status.ToString(),
+                }).ToArray(),
+            };
+        }).ToArray();
+
+        return Ok(new { studentId, courses });
+    }
+
     [HttpPost("check-in")]
     public async Task<IActionResult> CheckIn([FromBody] CheckInRequest request, CancellationToken ct)
     {
@@ -60,8 +111,11 @@ public sealed class StudentAttendanceController(
                 && e.EnrollmentStatus == EnrollmentStatus.Active, ct);
         if (enrollment is null) return NotFound(new { error = "No active enrollment found for this course." });
 
+        var student = await db.Students.AsNoTracking().SingleOrDefaultAsync(s => s.Id == studentId, ct);
+        if (student is null) return NotFound(new { error = "Student record not found." });
+
         var timetable = await db.Timetables.AsNoTracking()
-            .Where(t => t.CourseId == request.CourseId && t.DayOfWeek == dayOfWeek)
+            .Where(t => t.BatchId == student.BatchId && t.CourseId == request.CourseId && t.DayOfWeek == dayOfWeek)
             .OrderBy(t => t.StartTime)
             .FirstOrDefaultAsync(ct);
         if (timetable is null) return BadRequest(new { error = "No class scheduled for this course today." });
@@ -81,7 +135,7 @@ public sealed class StudentAttendanceController(
         }
 
         var existing = await db.Attendances.AsNoTracking().FirstOrDefaultAsync(a =>
-            a.EnrollmentId == enrollment.Id && a.CourseId == request.CourseId && a.Date == attendanceDate, ct);
+            a.EnrollmentId == enrollment.Id && a.Date == attendanceDate, ct);
         if (existing is not null)
             return Ok(new { success = true, message = "Already checked in today.", status = existing.Status.ToString(), distanceMeters = Math.Round(distanceMeters, 1) });
 
