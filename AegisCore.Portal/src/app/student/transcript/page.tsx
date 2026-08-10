@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { apiDownload, apiGet, apiPost } from "@/lib/api-client";
-import { FileText, Download, CheckCircle } from "lucide-react";
+import { Download, CheckCircle } from "lucide-react";
 
 type Semester = { semesterIndex: number; courses: { courseTitle: string; letterGrade: string; gradePoints: number }[]; sgpa: number };
 
 type OfficialTranscript = {
   hash: string; downloadUrl: string; verificationUrl: string;
   algorithm: string; keyId: string; signature: string; publicKey: string;
+  sha256?: string; issuedAt?: string;
 };
 
 export default function TranscriptPage() {
@@ -38,7 +39,7 @@ export default function TranscriptPage() {
     setRequesting(true);
     setError("");
     try {
-      const res = await apiPost<OfficialTranscript>("/api/student-portal/transcript/official");
+      const res = await apiPost<OfficialTranscript>("/api/student-documents/transcript/official");
       setOfficial(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate official transcript.");
@@ -85,9 +86,10 @@ export default function TranscriptPage() {
             <div className="card-header"><h3 style={{ fontSize: 14 }}>Official Transcript Generated</h3></div>
             <div className="card-body">
               <div style={{ display: "grid", gap: 8, fontSize: 13 }}>
-                <p><strong>Hash:</strong> {official.hash}</p>
+                <p><strong>Document ID:</strong> {official.hash}</p>
                 <p><strong>Algorithm:</strong> {official.algorithm}</p>
                 <p><strong>Key ID:</strong> {official.keyId}</p>
+                {official.sha256 && <p><strong>SHA-256:</strong> <code>{official.sha256}</code></p>}
                 <button
                   type="button"
                   className="btn btn-primary"
@@ -98,7 +100,7 @@ export default function TranscriptPage() {
                   <Download size={16} />
                   {downloading ? "Downloading..." : "Download Official PDF"}
                 </button>
-                <p><strong>Verify at:</strong> <code>{official.verificationUrl}</code></p>
+                <p><strong>Verify at:</strong> <a href={official.verificationUrl} target="_blank" rel="noreferrer">{official.verificationUrl}</a></p>
                 <div style={{ marginTop: 8, padding: 8, background: "var(--surface-muted)", borderRadius: 8, overflow: "auto", maxHeight: 80 }}>
                   <small style={{ fontFamily: "monospace", fontSize: 10, wordBreak: "break-all" }}>
                     SIG: {official.signature?.slice(0, 64)}...
