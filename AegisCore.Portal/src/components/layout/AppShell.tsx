@@ -25,6 +25,14 @@ const iconMap: Record<string, typeof LayoutDashboard> = {
 };
 function Icon({ name }: { name: string }) { const C = iconMap[name] ?? CircleHelp; return <C size={20} />; }
 
+const studentAcademicExtras: DashboardModule[] = [
+  { id:"student-courses", label:"My Courses", icon:"BookOpenCheck", route:"/student/courses", color:"blue", description:"Registered and completed courses, timings and status.", priority:4.1, domain:"academic" },
+  { id:"student-workflow", label:"Workflow", icon:"ClipboardCheck", route:"/student/workflow", color:"blue", description:"Academic lifecycle and request progress.", priority:4.2, domain:"academic" },
+  { id:"student-roadmap", label:"Road Map", icon:"FileSearch", route:"/student/roadmap", color:"blue", description:"Degree progress and graduation path.", priority:4.3, domain:"academic" },
+  { id:"student-outcomes", label:"PLO Attainment", icon:"FileSearch", route:"/student/outcomes", color:"blue", description:"Student CLO/PLO outcome attainment matrix.", priority:4.4, domain:"academic", badge:"OBE" },
+  { id:"student-survey", label:"Online Survey", icon:"ClipboardCheck", route:"/student/survey", color:"blue", description:"Course and faculty feedback surveys.", priority:4.5, domain:"academic" },
+];
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const nested = useContext(ShellContext);
   if (nested) return <>{children}</>;
@@ -63,7 +71,10 @@ function AppShellRoot({ children }: { children: React.ReactNode }) {
   }, []);
 
   const profile = useMemo(() => session ? getRoleProfile(session.roles) : null, [session]);
-  const modules = profile?.dashboardModules ?? [];
+  const modules = useMemo(() => {
+    const base = profile?.dashboardModules ?? [];
+    return session?.roles.includes("Student") ? [...base, ...studentAcademicExtras] : base;
+  }, [profile, session]);
   const grouped = useMemo(() => {
     const groups = new Map<string, DashboardModule[]>();
     for (const m of modules) { if (!groups.has(m.domain)) groups.set(m.domain, []); groups.get(m.domain)!.push(m); }
