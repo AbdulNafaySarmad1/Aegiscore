@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Accessibility, Bell, BookOpenCheck, Briefcase, Building2, CalendarDays,
   ChevronDown, ChevronLeft, ChevronRight, CircleHelp, ClipboardCheck, CreditCard,
-  FileSearch, FileText, GraduationCap, Landmark, LayoutDashboard, LogOut, Menu,
+  FileSearch, FileText, GraduationCap, Home, Landmark, LayoutDashboard, LogOut, Menu,
   Moon, Scale, Search, Settings, ShieldCheck, Sun, UserRound, Utensils, Vote,
 } from "lucide-react";
 import { apiGet, apiPost, clearTokens, getRefreshToken } from "@/lib/api-client";
@@ -19,13 +19,15 @@ type Session = { userId: string; tenantId: string; studentId: string | null; dep
 const ShellContext = createContext(false);
 
 const iconMap: Record<string, typeof LayoutDashboard> = {
-  LayoutDashboard, Landmark, FileText, CreditCard, BookOpenCheck, GraduationCap,
+  LayoutDashboard, Home, Landmark, FileText, CreditCard, BookOpenCheck, GraduationCap,
   ClipboardCheck, CalendarDays, ShieldCheck, Building2, Scale, FileSearch,
   Briefcase, UserRound, Vote, Utensils, Settings, CircleHelp, Search, LogOut,
 };
 function Icon({ name }: { name: string }) { const C = iconMap[name] ?? CircleHelp; return <C size={20} />; }
 
 const studentAcademicExtras: DashboardModule[] = [
+  { id:"student-home", label:"Home", icon:"Home", route:"/", color:"blue", description:"Student command center and all portal features.", priority:0.01, domain:"academic" },
+  { id:"student-profile", label:"My Profile", icon:"UserRound", route:"/student/profile", color:"blue", description:"Update your profile picture and contact details.", priority:0.02, domain:"academic" },
   { id:"student-courses", label:"My Courses", icon:"BookOpenCheck", route:"/student/courses", color:"blue", description:"Registered and completed courses, timings and status.", priority:4.1, domain:"academic" },
   { id:"student-workflow", label:"Workflow", icon:"ClipboardCheck", route:"/student/workflow", color:"blue", description:"Academic lifecycle and request progress.", priority:4.2, domain:"academic" },
   { id:"student-roadmap", label:"Road Map", icon:"FileSearch", route:"/student/roadmap", color:"blue", description:"Degree progress and graduation path.", priority:4.3, domain:"academic" },
@@ -102,11 +104,17 @@ function AppShellRoot({ children }: { children: React.ReactNode }) {
 
   if (!session) return <main className="launch-screen"><img src="/aegiscore-logo.png" alt="AegisCore" style={{ width: 48, borderRadius: 10 }} /><div className="launch-pulse" /><p style={{ color: "var(--muted)", fontSize: 14 }}>Loading your university workspace…</p></main>;
 
+  const isStudent = session.roles.includes("Student");
+
   return (
     <div className="shell">
       <style>{`
         .aegis-skip-link{position:fixed;left:12px;top:-80px;z-index:9999;padding:10px 14px;border-radius:8px;background:var(--primary);color:#fff;font-weight:700;transition:top .15s}
         .aegis-skip-link:focus{top:12px}
+        .aegis-brand{display:flex!important;align-items:center!important;gap:12px!important;padding-left:16px!important;padding-right:14px!important}
+        .aegis-brand>div{display:flex;align-items:baseline;gap:4px;min-width:0}
+        .aegis-brand strong{white-space:nowrap}
+        .aegis-brand small{white-space:nowrap;margin-left:2px}
         html[data-accessibility="true"] *:focus-visible{outline:3px solid #2563eb!important;outline-offset:3px!important}
         html[data-accessibility="true"] button,html[data-accessibility="true"] a,html[data-accessibility="true"] input,html[data-accessibility="true"] select{min-height:44px}
         html[data-accessibility="true"] .sidebar-nav a{font-weight:600}
@@ -117,12 +125,15 @@ function AppShellRoot({ children }: { children: React.ReactNode }) {
       `}</style>
       <a href="#main-content" className="aegis-skip-link">Skip to main content</a>
       <aside className={`sidebar ${collapsed ? "collapsed" : ""} ${menuOpen ? "open" : ""}`}>
-        <div className="sidebar-logo"><img src="/aegiscore-logo.png" alt="AegisCore" />{!collapsed && <div><strong>AegisCore</strong><small>University ERP</small></div>}</div>
+        <Link href="/" className="sidebar-logo aegis-brand" aria-label="AegisCore home" style={{ textDecoration:"none", color:"inherit" }}>
+          <img src="/aegiscore-logo.png" alt="AegisCore" />
+          {!collapsed && <div><strong>AegisCore</strong><small>University ERP</small></div>}
+        </Link>
         <nav className="sidebar-nav" aria-label="Primary navigation">
           {grouped.map(([domain, items]) => <div key={domain} className="sidebar-nav-group">
             {!collapsed && <div className="sidebar-nav-label" style={{ color: getDomainColor(domain) }}>{domain}</div>}
             {items.sort((a,b)=>a.priority-b.priority).map(m => {
-              const active = pathname === m.route || pathname?.startsWith(m.route + "/");
+              const active = m.route === "/" ? pathname === "/" : pathname === m.route || pathname?.startsWith(m.route + "/");
               return <Link key={m.id} href={m.route} className={active ? "active" : ""} aria-current={active ? "page" : undefined} onClick={() => setMenuOpen(false)}><Icon name={m.icon} />{!collapsed && <span>{m.label}</span>}{!collapsed && m.badge && <span className="badge badge-info" style={{ marginLeft: "auto", fontSize: 9 }}>{m.badge}</span>}</Link>;
             })}
           </div>)}
@@ -136,29 +147,15 @@ function AppShellRoot({ children }: { children: React.ReactNode }) {
       <main className="shell-main" id="main-content" tabIndex={-1}>
         <header className="topbar">
           <button className="btn btn-ghost btn-sm" onClick={() => setMenuOpen(true)} aria-label="Open navigation"><Menu size={20} /></button>
-          <span className="topbar-title">{pathname === "/" ? "Command Center" : modules.find(m => pathname?.startsWith(m.route))?.label ?? "AegisCore"}</span>
+          <span className="topbar-title">{pathname === "/" ? "Command Center" : modules.find(m => m.route !== "/" && pathname?.startsWith(m.route))?.label ?? "AegisCore"}</span>
           <div className="topbar-search"><Search size={16} /><input ref={searchRef} aria-label="Search" placeholder="Search anything… (⌘K)" /></div>
           <div className="topbar-actions">
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => setAccessibilityMode(v => !v)}
-              title={accessibilityMode ? "Disable accessibility mode" : "Enable accessibility mode"}
-              aria-label={accessibilityMode ? "Disable accessibility mode" : "Enable accessibility mode"}
-              aria-pressed={accessibilityMode}
-            >
-              <Accessibility size={18} />
-            </button>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => setDark(v => !v)}
-              title={dark ? "Use light theme" : "Use dark theme"}
-              aria-label={dark ? "Use light theme" : "Use dark theme"}
-              aria-pressed={dark}
-            >
-              {dark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setAccessibilityMode(v => !v)} title={accessibilityMode ? "Disable accessibility mode" : "Enable accessibility mode"} aria-label={accessibilityMode ? "Disable accessibility mode" : "Enable accessibility mode"} aria-pressed={accessibilityMode}><Accessibility size={18} /></button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setDark(v => !v)} title={dark ? "Use light theme" : "Use dark theme"} aria-label={dark ? "Use light theme" : "Use dark theme"} aria-pressed={dark}>{dark ? <Sun size={18} /> : <Moon size={18} />}</button>
             <div className="notification-bell" aria-label="Notifications"><Bell size={18} /></div>
-            <div className="avatar-menu"><div className="topbar-avatar">{session.name[0]?.toUpperCase()}</div><div className="avatar-menu-info"><strong>{session.name.split(" ")[0]}</strong><span>{profile?.displayName}</span></div><ChevronDown size={14} /></div>
+            <Link href={isStudent ? "/student/profile" : "/"} className="avatar-menu" title={isStudent ? "Open profile" : "Account"} style={{ textDecoration:"none", color:"inherit" }}>
+              <div className="topbar-avatar">{session.name[0]?.toUpperCase()}</div><div className="avatar-menu-info"><strong>{session.name.split(" ")[0]}</strong><span>{profile?.displayName}</span></div><ChevronDown size={14} />
+            </Link>
           </div>
         </header>
         <AnimatePresence mode="wait"><motion.div key={pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ type: "spring", stiffness: 200, damping: 22 }}>{children}</motion.div></AnimatePresence>
