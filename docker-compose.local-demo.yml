@@ -29,6 +29,10 @@ services:
       Demo__AllowExplicitExternalSeed: "false"
       Runtime__DemoMode: "true"
       Deployment__FailOnReadinessError: "false"
+      Attendance__CampusLatitude: "24.812576"
+      Attendance__CampusLongitude: "67.114831"
+      Attendance__RadiusMeters: "750"
+      Attendance__TimeZone: "Asia/Karachi"
     depends_on:
       postgres:
         condition: service_healthy
