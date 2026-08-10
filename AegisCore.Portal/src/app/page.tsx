@@ -35,11 +35,12 @@ function TrendArrow({ trend }: { trend?: string }) {
 function KpiCard({ kpi, value }: { kpi: KPIDefinition; value: string | number }) {
   const formatted = kpi.format === "currency" && Number.isFinite(Number(value)) ? `₨ ${Number(value).toLocaleString("en-PK")}`
     : kpi.format === "percentage" && value !== "--" ? `${value}%` : String(value);
+  const longValue = formatted.length > 12;
   return (
     <motion.article className="kpi-card" whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 180, damping: 20 }}>
       <div className={`kpi-card-icon kpi-accent ${kpi.iconColor}`}><Icon name={kpi.icon} /></div>
-      <span className="kpi-label">{kpi.label}</span>
-      <strong className="kpi-number">{formatted}</strong>
+      <span className="kpi-label" style={{ fontSize: 14, fontWeight: 700, letterSpacing: ".02em", lineHeight: 1.25 }}>{kpi.label}</span>
+      <strong className="kpi-number" style={{ fontSize: longValue ? 24 : 28, lineHeight: 1.12, marginTop: 8, overflowWrap: "anywhere" }}>{formatted}</strong>
       {kpi.trend && <span className="kpi-trend"><TrendArrow trend={kpi.trend} />{kpi.trendLabel}</span>}
     </motion.article>
   );
