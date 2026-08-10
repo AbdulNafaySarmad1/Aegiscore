@@ -1,0 +1,41 @@
+name: Prod Hardening CI
+
+on:
+  pull_request:
+    branches:
+      - agent/demo-integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portal:
+    name: Portal typecheck and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AegisCore.Portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: AegisCore.Portal/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
+
+  api:
+    name: API restore and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore AegisCore.API/AegisCore.API.csproj
+      - run: dotnet build AegisCore.API/AegisCore.API.csproj -c Release --no-restore -p:UseSharedCompilation=false
