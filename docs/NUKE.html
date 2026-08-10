@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NUKE — AegisCore Demo Day Console</title>
+<style>
+:root{--bg:#08111f;--panel:#0f1b2d;--panel2:#13233a;--ink:#edf4ff;--muted:#9fb0c9;--line:#243750;--blue:#4f8cff;--green:#36d399;--amber:#ffbf69;--red:#ff6b78;--violet:#a78bfa}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#07101d,#0b1524 45%,#07101d);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1180px;margin:auto;padding:28px 22px 70px}.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;align-items:stretch}.card{background:rgba(15,27,45,.96);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 16px 50px rgba(0,0,0,.18)}h1{font-size:42px;line-height:1;margin:0 0 12px}.eyebrow{color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:12px}.muted{color:var(--muted)}.status{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.pill{border:1px solid var(--line);padding:7px 10px;border-radius:999px;font-size:12px;font-weight:750}.ok{color:var(--green)}.warn{color:var(--amber)}.danger{color:var(--red)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}.full{grid-column:1/-1}h2{font-size:20px;margin:0 0 12px}h3{font-size:15px;margin:18px 0 8px}.step{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.step:last-child{border-bottom:0}.n{width:28px;height:28px;border-radius:50%;background:#1b355a;color:#9fc1ff;display:grid;place-items:center;font-size:12px;font-weight:850}.cmd{position:relative;background:#050b14;border:1px solid #1c2c40;border-radius:12px;padding:13px 44px 13px 13px;margin:8px 0;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#d8e8ff}.copy{position:absolute;right:7px;top:7px;border:1px solid #2a405d;background:#101f34;color:#d8e8ff;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:11px}.copy:hover{border-color:var(--blue)}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:#a9bdd7;font-size:11px;text-transform:uppercase;letter-spacing:.06em}code{color:#b8d4ff}.check{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.check input{margin-top:4px;width:17px;height:17px}.banner{border:1px solid #705422;background:#251d0d;padding:12px 14px;border-radius:12px;color:#ffd99a}.redbox{border:1px solid #6e2931;background:#271116;padding:12px 14px;border-radius:12px}.greenbox{border:1px solid #1f624f;background:#0c251f;padding:12px 14px;border-radius:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.route{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.route:last-child{border:0}.route a{color:#9fc1ff;text-decoration:none}.route a:hover{text-decoration:underline}.big{font-size:26px;font-weight:850}.kbd{padding:2px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:#0a1422;font-size:11px}@media(max-width:780px){.hero,.grid,.two{grid-template-columns:1fr}.full{grid-column:auto}h1{font-size:34px}}@media print{body{background:#fff;color:#111}.card{box-shadow:none;background:#fff;border-color:#ccc}.cmd{background:#f5f5f5;color:#111}.copy{display:none}.muted{color:#555}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="card">
+      <div class="eyebrow">Zero-panic operator sheet</div>
+      <h1>NUKE</h1>
+      <p class="muted">AegisCore demo-day console. This page is intentionally boring, exact, and copy-paste friendly. It does <strong>not</strong> execute destructive actions; it tells you exactly what to run when your hands are shaking five minutes before a university demo.</p>
+      <div class="status"><span class="pill ok">✓ Local Demo</span><span class="pill ok">✓ Student</span><span class="pill ok">✓ Faculty</span><span class="pill ok">✓ PQC Documents</span><span class="pill warn">HOD: provision role before demo</span></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Golden path</div>
+      <div class="big">Pull → Build → Up → Health → Login → Routes</div>
+      <p class="muted">If those six are green, stop touching the code.</p>
+      <div class="greenbox"><strong>Rule #1:</strong> never delete the Postgres volume during a demo unless you explicitly intend to reseed the entire universe.</div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card full">
+      <h2>1. The only startup sequence you should need</h2>
+      <div class="cmd">cd ~/Music/Aegiscore/Aegiscore-demo-integration
+
+git switch agent/prod-hardening
+git pull origin agent/prod-hardening
+
+docker compose \
+  --env-file .env \
+  -f docker-compose.yml \
+  -f docker-compose.cloud.yml \
+  -f docker-compose.local-demo.yml \
+  build api portal
+
+docker compose \
+  --env-file .env \
+  -f docker-compose.yml \
+  -f docker-compose.cloud.yml \
+  -f docker-compose.local-demo.yml \
+  up -d --force-recreate postgres redis api portal<button class="copy">copy</button></div>
+      <div class="cmd">docker compose \
+  --env-file .env \
+  -f docker-compose.yml \
+  -f docker-compose.cloud.yml \
+  -f docker-compose.local-demo.yml \
+  ps<button class="copy">copy</button></div>
+      <div class="banner">Expected: Postgres healthy, Redis healthy, API healthy, Portal healthy/starting then healthy. Do not continue if API is unhealthy.</div>
+    </div>
+
+    <div class="card">
+      <h2>2. Golden demo credentials</h2>
+      <table><thead><tr><th>Role</th><th>Email</th><th>Password</th></tr></thead><tbody>
+        <tr><td>Student</td><td><code>student@iobm.demo</code></td><td><code>Koenigsegg$One1</code></td></tr>
+        <tr><td>Faculty</td><td><code>faculty@iobm.demo</code></td><td><code>Pagani$Huayra3</code></td></tr>
+        <tr><td>Registrar</td><td><code>registrar@iobm.demo</code></td><td><code>Ferrari$Roma22</code></td></tr>
+        <tr><td>Exam Controller</td><td><code>exams@iobm.demo</code></td><td><code>McLaren$720S!</code></td></tr>
+        <tr><td>Finance</td><td><code>finance@iobm.demo</code></td><td><code>Porsche$GT3RS</code></td></tr>
+        <tr><td>IT Head</td><td><code>it@iobm.demo</code></td><td><code>Bugatti$Chiron9</code></td></tr>
+        <tr><td>HR</td><td><code>hr@iobm.demo</code></td><td><code>Aston$Martin77</code></td></tr>
+        <tr><td>VC / SuperAdmin</td><td><code>vc@iobm.demo</code></td><td><code>Lambo$Aventador1</code></td></tr>
+      </tbody></table>
+      <p class="muted">If a credential fails on a long-lived local DB, remember: the demo seeder skips users that already exist. The database may contain an older password hash.</p>
+    </div>
+
+    <div class="card">
+      <h2>3. Health in 30 seconds</h2>
+      <div class="cmd">curl -fsS http://127.0.0.1:8080/health || true
+curl -fsS http://127.0.0.1:8080/api/portal-health || true<button class="copy">copy</button></div>
+      <div class="cmd">docker compose \
+  --env-file .env \
+  -f docker-compose.yml \
+  -f docker-compose.cloud.yml \
+  -f docker-compose.local-demo.yml \
+  logs --since=5m api portal 2>&1 | grep -Ei 'FTL|Unhandled|Exception|error|status.?500' || true<button class="copy">copy</button></div>
+      <p class="muted">No fatal/Unhandled/500 output is what you want. Warnings are not automatically demo blockers.</p>
+    </div>
+
+    <div class="card full">
+      <h2>4. Student golden path</h2>
+      <div class="two">
+        <div>
+          <div class="route"><span>Command Center</span><a href="http://127.0.0.1:8080/" target="_blank">/</a></div>
+          <div class="route"><span>Profile</span><a href="http://127.0.0.1:8080/student/profile" target="_blank">/student/profile</a></div>
+          <div class="route"><span>Courses / Registration</span><a href="http://127.0.0.1:8080/student/courses" target="_blank">/student/courses</a></div>
+          <div class="route"><span>PLO Attainment</span><a href="http://127.0.0.1:8080/student/outcomes" target="_blank">/student/outcomes</a></div>
+        </div>
+        <div>
+          <div class="route"><span>Attendance</span><a href="http://127.0.0.1:8080/student/attendance" target="_blank">/student/attendance</a></div>
+          <div class="route"><span>Exams</span><a href="http://127.0.0.1:8080/student/examinations" target="_blank">/student/examinations</a></div>
+          <div class="route"><span>Transcript + PQC QR</span><a href="http://127.0.0.1:8080/student/transcript" target="_blank">/student/transcript</a></div>
+          <div class="route"><span>Cafeteria odds</span><a href="http://127.0.0.1:8080/cafeteria" target="_blank">/cafeteria</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card full">
+      <h2>5. Faculty golden path</h2>
+      <div class="two">
+        <div>
+          <div class="route"><span>Faculty dashboard</span><a href="http://127.0.0.1:8080/" target="_blank">/</a></div>
+          <div class="route"><span>My Classes + roster</span><a href="http://127.0.0.1:8080/classes" target="_blank">/classes</a></div>
+          <div class="route"><span>Class attendance marking</span><a href="http://127.0.0.1:8080/attendance" target="_blank">/attendance</a></div>
+        </div>
+        <div>
+          <div class="route"><span>Grade submission</span><a href="http://127.0.0.1:8080/examinations" target="_blank">/examinations</a></div>
+          <div class="route"><span>OBE / CIS / signed reports</span><a href="http://127.0.0.1:8080/obe" target="_blank">/obe</a></div>
+          <div class="route"><span>Plagiarism</span><a href="http://127.0.0.1:8080/plagiarism" target="_blank">/plagiarism</a></div>
+        </div>
+      </div>
+      <div class="greenbox" style="margin-top:12px"><strong>OBE report rule:</strong> use “Generate PQC Report”. The PDF contains a document UUID, issuer/tenant IDs, UTC timestamp, network/Geo-ID metadata, SHA-256 report digest, QR verification URL, PQC algorithm/key ID, detached signature and public key.</div>
+    </div>
+
+    <div class="card">
+      <h2>6. If the UI says 404</h2>
+      <div class="step"><span class="n">1</span><div>Confirm the source file exists on <code>agent/prod-hardening</code>.</div></div>
+      <div class="step"><span class="n">2</span><div>Rebuild the service that owns the route. API route → rebuild API. Next.js page → rebuild portal.</div></div>
+      <div class="step"><span class="n">3</span><div>Do not assume browser cache if the API itself returns 404.</div></div>
+      <div class="cmd">docker compose --env-file .env -f docker-compose.yml -f docker-compose.cloud.yml -f docker-compose.local-demo.yml build --no-cache api portal<button class="copy">copy</button></div>
+    </div>
+
+    <div class="card">
+      <h2>7. If login suddenly fails</h2>
+      <p class="muted">First verify which account is actually in Postgres. Do not delete the database.</p>
+      <div class="cmd">docker compose --env-file .env -f docker-compose.yml -f docker-compose.cloud.yml -f docker-compose.local-demo.yml exec postgres psql -U aegiscore -d aegiscore -c 'SELECT "Id","Email","FirstName","LastName" FROM "Users" ORDER BY "Email";'<button class="copy">copy</button></div>
+      <p class="muted">If the account exists, the seeder will skip it. Fix only that account/password rather than resetting everything.</p>
+    </div>
+
+    <div class="card full">
+      <h2>8. The dangerous button you should almost never press</h2>
+      <div class="redbox"><strong>THIS DESTROYS LOCAL DEMO DATA.</strong> Only use it when you explicitly want a completely clean reseed and you have enough time to rebuild/retest.</div>
+      <div class="check"><input id="danger" type="checkbox"><label for="danger">I understand that removing <code>aegiscore_aegiscore_demo_postgres</code> erases the local demo database.</label></div>
+      <div class="cmd" id="dangerCmd" style="opacity:.35;pointer-events:none">docker compose --env-file .env -f docker-compose.yml -f docker-compose.cloud.yml -f docker-compose.local-demo.yml down
+docker volume rm aegiscore_aegiscore_demo_postgres<button class="copy">copy</button></div>
+    </div>
+
+    <div class="card full">
+      <h2>9. Final “stop touching it” checklist</h2>
+      <div class="two">
+        <div>
+          <label class="check"><input type="checkbox"> All four containers healthy</label>
+          <label class="check"><input type="checkbox"> Student login works</label>
+          <label class="check"><input type="checkbox"> Faculty login works</label>
+          <label class="check"><input type="checkbox"> Student profile edits persist</label>
+          <label class="check"><input type="checkbox"> Course registration opens</label>
+          <label class="check"><input type="checkbox"> Transcript PDF + QR works</label>
+        </div>
+        <div>
+          <label class="check"><input type="checkbox"> Faculty My Classes shows assigned courses</label>
+          <label class="check"><input type="checkbox"> Faculty roster loads</label>
+          <label class="check"><input type="checkbox"> Attendance can be submitted</label>
+          <label class="check"><input type="checkbox"> Grade entry loads</label>
+          <label class="check"><input type="checkbox"> /obe loads, CIS upload works</label>
+          <label class="check"><input type="checkbox"> PQC OBE report downloads and QR verifies</label>
+        </div>
+      </div>
+      <div class="greenbox" style="margin-top:14px"><strong>When every box is checked:</strong> tag the commit, close the laptop, and demo the product. No “one tiny improvement” five minutes before the meeting.</div>
+    </div>
+  </section>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(btn=>btn.addEventListener('click',async()=>{const box=btn.parentElement;const clone=box.cloneNode(true);clone.querySelector('.copy')?.remove();await navigator.clipboard.writeText(clone.textContent.trim());const old=btn.textContent;btn.textContent='copied';setTimeout(()=>btn.textContent=old,1000)}));
+const danger=document.getElementById('danger'),dangerCmd=document.getElementById('dangerCmd');danger.addEventListener('change',()=>{dangerCmd.style.opacity=danger.checked?'1':'.35';dangerCmd.style.pointerEvents=danger.checked?'auto':'none'});
+</script>
+</body>
+</html>
