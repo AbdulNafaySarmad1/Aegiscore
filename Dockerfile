@@ -24,7 +24,12 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
-RUN apk add --no-cache icu-libs krb5-libs \
+# PdfSharpCore resolves installed system fonts at runtime. The minimal Alpine
+# ASP.NET image has none by default, so install fontconfig + DejaVu explicitly
+# for challan/transcript PDF generation instead of failing with
+# "No Fonts installed on this device!".
+RUN apk add --no-cache icu-libs krb5-libs fontconfig ttf-dejavu \
+    && fc-cache -f \
     && addgroup -S appgroup \
     && adduser -S -D -H -s /sbin/nologin -G appgroup appuser \
     && mkdir -p /app/storage /app/config \
