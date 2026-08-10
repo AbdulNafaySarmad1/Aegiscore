@@ -156,9 +156,15 @@ public sealed class StudentRegistrationController(AegisDbContext db) : Controlle
             };
             db.Enrollments.Add(enrollment);
         }
-        else
+        else if (enrollment.EnrollmentStatus != EnrollmentStatus.Active)
         {
-            enrollment.EnrollmentStatus = EnrollmentStatus.Active;
+            // EnrollmentStatus is immutable after construction in the domain model.
+            // Never mutate it here: an inactive historical enrollment must go through
+            // the university's formal re-enrollment/repeat-course workflow instead.
+            return Conflict(new
+            {
+                error = "A previous enrollment exists for this course. Use the re-enrollment/repeat-course workflow."
+            });
         }
 
         var profile = await db.StudentProfiles.SingleOrDefaultAsync(p => p.StudentId == studentId, ct);
