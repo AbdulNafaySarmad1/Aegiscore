@@ -35,6 +35,11 @@ const studentAcademicExtras: DashboardModule[] = [
   { id:"student-survey", label:"Online Survey", icon:"ClipboardCheck", route:"/student/survey", color:"blue", description:"Course and faculty feedback surveys.", priority:4.5, domain:"academic" },
 ];
 
+const staffProfileExtra: DashboardModule = {
+  id:"staff-profile", label:"My Profile", icon:"UserRound", route:"/profile", color:"blue",
+  description:"Update your display name and profile picture.", priority:0.02, domain:"academic"
+};
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const nested = useContext(ShellContext);
   if (nested) return <>{children}</>;
@@ -93,7 +98,8 @@ function AppShellRoot({ children }: { children: React.ReactNode }) {
   const profile = useMemo(() => session ? getRoleProfile(session.roles) : null, [session]);
   const modules = useMemo(() => {
     const base = profile?.dashboardModules ?? [];
-    return session?.roles.includes("Student") ? [...base, ...studentAcademicExtras] : base;
+    if (!session) return base;
+    return session.roles.includes("Student") ? [...base, ...studentAcademicExtras] : [...base, staffProfileExtra];
   }, [profile, session]);
   const grouped = useMemo(() => {
     const groups = new Map<string, DashboardModule[]>();
@@ -153,7 +159,7 @@ function AppShellRoot({ children }: { children: React.ReactNode }) {
             <button className="btn btn-ghost btn-sm" onClick={() => setAccessibilityMode(v => !v)} title={accessibilityMode ? "Disable accessibility mode" : "Enable accessibility mode"} aria-label={accessibilityMode ? "Disable accessibility mode" : "Enable accessibility mode"} aria-pressed={accessibilityMode}><Accessibility size={18} /></button>
             <button className="btn btn-ghost btn-sm" onClick={() => setDark(v => !v)} title={dark ? "Use light theme" : "Use dark theme"} aria-label={dark ? "Use light theme" : "Use dark theme"} aria-pressed={dark}>{dark ? <Sun size={18} /> : <Moon size={18} />}</button>
             <div className="notification-bell" aria-label="Notifications"><Bell size={18} /></div>
-            <Link href={isStudent ? "/student/profile" : "/"} className="avatar-menu" title={isStudent ? "Open profile" : "Account"} style={{ textDecoration:"none", color:"inherit" }}>
+            <Link href={isStudent ? "/student/profile" : "/profile"} className="avatar-menu" title="Open profile" style={{ textDecoration:"none", color:"inherit" }}>
               <div className="topbar-avatar">{session.name[0]?.toUpperCase()}</div><div className="avatar-menu-info"><strong>{session.name.split(" ")[0]}</strong><span>{profile?.displayName}</span></div><ChevronDown size={14} />
             </Link>
           </div>
