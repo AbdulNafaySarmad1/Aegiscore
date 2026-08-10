@@ -23,12 +23,31 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [avatarNonce, setAvatarNonce] = useState(0);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const loadAvatar = async (path: string) => {
+    try {
+      const token = localStorage.getItem("aegiscore_access_token");
+      const response = await fetch(path, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) { setAvatarUrl(null); return; }
+      const blob = await response.blob();
+      const next = URL.createObjectURL(blob);
+      setAvatarUrl(previous => {
+        if (previous?.startsWith("blob:")) URL.revokeObjectURL(previous);
+        return next;
+      });
+    } catch {
+      setAvatarUrl(null);
+    }
+  };
 
   const load = async () => {
     setError("");
@@ -37,12 +56,19 @@ export default function ProfilePage() {
       setProfile(p);
       setFirstName(p.firstName ?? "");
       setLastName(p.lastName ?? "");
+      await loadAvatar(p.avatarFullUrl);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to load profile.");
     }
   };
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    return () => {
+      if (avatarUrl?.startsWith("blob:")) URL.revokeObjectURL(avatarUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const save = async () => {
     setSaving(true); setMessage(""); setError("");
@@ -72,7 +98,7 @@ export default function ProfilePage() {
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error ?? `Upload failed (${response.status})`);
-      setAvatarNonce(Date.now());
+      if (profile) await loadAvatar(profile.avatarFullUrl);
       setMessage("Profile picture updated successfully.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to upload profile picture.");
@@ -103,13 +129,7 @@ export default function ProfilePage() {
             <div className="card">
               <div className="card-body" style={{ textAlign: "center" }}>
                 <div style={{ width: 132, height: 132, margin: "0 auto 14px", borderRadius: "50%", overflow: "hidden", border: "3px solid var(--border)", display: "grid", placeItems: "center", background: "var(--surface-2)" }}>
-                  <img
-                    src={`${profile.avatarFullUrl}?v=${avatarNonce}`}
-                    alt={`${profile.firstName} ${profile.lastName}`}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={e => { e.currentTarget.style.display = "none"; }}
-                  />
-                  <UserRound size={42} style={{ position: "absolute", zIndex: -1 }} />
+                  {avatarUrl ? <img src={avatarUrl} alt={`${profile.firstName} ${profile.lastName}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <UserRound size={42} />}
                 </div>
                 <h2 style={{ margin: "0 0 4px", fontSize: 20 }}>{profile.firstName} {profile.lastName}</h2>
                 <div style={{ color: "var(--muted)", fontSize: 13 }}>{profile.designation ?? profile.roles.join(", ")}</div>
