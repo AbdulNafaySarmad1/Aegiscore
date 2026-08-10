@@ -44,7 +44,7 @@ export default function StudentAttendance() {
   const [checkInMsg, setCheckInMsg] = useState("");
   const [checkingCourseId, setCheckingCourseId] = useState<string | null>(null);
 
-  const refresh = () => apiGet<{ courses: CourseAttendance[] }>("/api/student-portal/attendance/history")
+  const refresh = () => apiGet<{ courses: CourseAttendance[] }>("/api/student-attendance/history")
     .then(d => setCourses(d.courses ?? []));
 
   useEffect(() => {
