@@ -51,7 +51,7 @@ public sealed class StudentProfileMediaController(
         var identity = await ResolveIdentityAsync(ct);
         if (identity is null) return NotFound();
 
-        var bytes = new byte[avatar.Length];
+        var bytes = new byte[checked((int)avatar.Length)];
         await using (var input = avatar.OpenReadStream())
         {
             var offset = 0;
