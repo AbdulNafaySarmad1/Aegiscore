@@ -52,6 +52,14 @@ public sealed class FinanceDashboardEndpointTests
         Assert.DoesNotContain("Business", body, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task Student_Department_Claim_Cannot_Read_Department_Finance()
+    {
+        await using var host = await DashboardHost.CreateAsync();
+        using var response = await host.GetDepartmentAsync(host.TenantA, host.DepartmentA, "Student", host.DepartmentA, studentDerived: true);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     private sealed class DashboardHost(WebApplication app, SqliteConnection connection) : IAsyncDisposable
     {
         public Guid TenantA { get; } = Guid.NewGuid();
@@ -85,12 +93,18 @@ public sealed class FinanceDashboardEndpointTests
             return host;
         }
 
-        public async Task<HttpResponseMessage> GetDepartmentAsync(Guid tenantId, Guid departmentId, string role, Guid? claimedDepartment)
+        public async Task<HttpResponseMessage> GetDepartmentAsync(
+            Guid tenantId,
+            Guid departmentId,
+            string role,
+            Guid? claimedDepartment,
+            bool studentDerived = false)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/finance/v2/dashboard/department/{departmentId:D}");
             request.Headers.Add("X-Test-Tenant", tenantId.ToString("D"));
             request.Headers.Add("X-Test-Role", role);
-            if (claimedDepartment.HasValue) request.Headers.Add("X-Test-Department", claimedDepartment.Value.ToString("D"));
+            if (claimedDepartment.HasValue)
+                request.Headers.Add(studentDerived ? "X-Test-Student-Department" : "X-Test-Department", claimedDepartment.Value.ToString("D"));
             return await app.GetTestClient().SendAsync(request);
         }
 
@@ -126,7 +140,9 @@ public sealed class FinanceDashboardEndpointTests
                 new(ClaimTypes.Role, Request.Headers["X-Test-Role"].ToString())
             };
             var department = Request.Headers["X-Test-Department"].ToString();
-            if (!string.IsNullOrWhiteSpace(department)) claims.Add(new Claim("department_id", department));
+            if (!string.IsNullOrWhiteSpace(department)) claims.Add(new Claim("staff_department_id", department));
+            var studentDepartment = Request.Headers["X-Test-Student-Department"].ToString();
+            if (!string.IsNullOrWhiteSpace(studentDepartment)) claims.Add(new Claim("department_id", studentDepartment));
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name)), Scheme.Name)));
         }
     }

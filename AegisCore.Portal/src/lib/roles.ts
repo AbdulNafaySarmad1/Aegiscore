@@ -53,12 +53,15 @@ const ROLE_PRIORITY: Record<string, number> = {
   SuperAdmin: 100,
   VC: 90,
   Registrar: 80,
+  AdmissionsHead: 78,
   ExamController: 75,
+  OBECoordinator: 72,
   Finance: 70,
   "Finance Controller": 70,
   CFO: 70,
   HR: 60,
   HRManager: 60,
+  Auditor: 58,
   IT: 55,
   ITHead: 55,
   HOD: 50,
@@ -404,6 +407,49 @@ export function getRoleProfile(roles: string[]): RoleProfile {
   // Admin inherits
   if (primary === "Admin") {
     return profiles["Admin"]!;
+  }
+
+  if (primary === "AdmissionsHead") {
+    const registrar = profiles["Registrar"]!;
+    return {
+      ...registrar,
+      role: primary,
+      displayName: "Admissions Head",
+      dashboardModules: [
+        { id: "admissions-decisions", label: "Admissions Decisions", icon: "FileSearch", route: "/telemetry", color: "violet", description: "Review published merit decisions and their recorded arithmetic.", priority: 1, domain: "compliance", badge: "LIVE" },
+        ...registrar.dashboardModules,
+      ],
+      quickActions: [
+        { id: "admissions-decisions", label: "Review Decisions", icon: "FileSearch", route: "/telemetry" },
+        ...registrar.quickActions,
+      ],
+    };
+  }
+
+  if (primary === "OBECoordinator") {
+    return {
+      ...profiles["Dean"]!,
+      role: primary,
+      displayName: "OBE / QA Officer",
+      allowedRoutes: ["/obe", "/readiness"],
+      dashboardModules: [
+        { id: "obe", label: "OBE Evidence", icon: "BookOpenCheck", route: "/obe", color: "blue", description: "Review recorded CLO-to-PO mappings and outcome evidence.", priority: 1, domain: "academic", badge: "LIVE" },
+        { id: "readiness", label: "Accreditation Readiness", icon: "ShieldCheck", route: "/readiness", color: "green", description: "Review accreditation readiness and criteria.", priority: 2, domain: "compliance" },
+      ],
+      quickActions: [{ id: "obe", label: "Review OBE Evidence", icon: "BookOpenCheck", route: "/obe" }],
+    };
+  }
+
+  if (primary === "Auditor") {
+    const auditModule = profiles["IT"]!.dashboardModules.filter(module => module.id === "audit");
+    return {
+      ...profiles["IT"]!,
+      role: primary,
+      displayName: "Auditor / Compliance Officer",
+      allowedRoutes: ["/audit", "/auditor"],
+      dashboardModules: auditModule,
+      quickActions: profiles["IT"]!.quickActions.filter(action => action.id === "audit"),
+    };
   }
 
   // Map role names to profile keys

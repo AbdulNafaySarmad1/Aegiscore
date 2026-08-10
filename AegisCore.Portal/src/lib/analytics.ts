@@ -88,6 +88,42 @@ export type StudentTelemetry = {
   freshnessTimestamp: string;
 };
 
+export type StudentAnalyticsDiscovery = {
+  courses: Array<{
+    courseId: string;
+    courseCode: string | null;
+    courseTitle: string;
+    period: string;
+    freshnessTimestamp: string;
+  }>;
+  grades: Array<{
+    courseGradeId: string;
+    courseId: string;
+    courseCode: string | null;
+    courseTitle: string;
+    semesterId: string;
+    semesterName: string;
+    finalScore: number;
+    finalGrade: string;
+    publishedAt: string;
+  }>;
+  predictions: Array<{
+    predictionId: string;
+    modelName: string;
+    modelVersion: string;
+    predictionTimestamp: string;
+  }>;
+};
+
+export type AdmissionExplanationReference = {
+  applicationId: string;
+  programId: string;
+  programName: string;
+  applicationStatus: string;
+  submittedAt: string;
+  hasPublishedDecision: boolean;
+};
+
 // ─── Grade explanation ───
 
 export type GradeComponentExplanation = {
@@ -255,6 +291,21 @@ const BASE = "/api/analytics/v1";
 /** GET /students/me/telemetry — Student role; 403 until the student link exists, 404 when no snapshot. */
 export function getMyTelemetry(signal?: AbortSignal) {
   return apiGet<StudentTelemetry>(`${BASE}/students/me/telemetry`, signal);
+}
+
+/** Caller-scoped references for the linked student's telemetry and explanations. */
+export function getMyAnalyticsDiscovery(signal?: AbortSignal) {
+  return apiGet<StudentAnalyticsDiscovery>(`${BASE}/students/me/discovery`, signal);
+}
+
+/** Applications authoritatively linked to the authenticated user. */
+export function getMyAdmissionDiscovery(signal?: AbortSignal) {
+  return apiGet<AdmissionExplanationReference[]>(`${BASE}/admissions/me/discovery`, signal);
+}
+
+/** Published application references visible to authorized admissions staff. */
+export function getAdmissionsDiscovery(signal?: AbortSignal) {
+  return apiGet<AdmissionExplanationReference[]>(`${BASE}/admissions/discovery`, signal);
 }
 
 /** GET /students/me/courses/{courseId} — per-course drill-down for the owning student. */

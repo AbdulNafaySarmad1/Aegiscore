@@ -2920,6 +2920,29 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
         });
 
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasIndex(e => e.StudentId).IsUnique().HasFilter("\"StudentId\" IS NOT NULL");
+            entity.HasOne(e => e.Student)
+                .WithOne()
+                .HasForeignKey<User>(e => e.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(e => e.StaffDepartmentId);
+            entity.HasOne(e => e.StaffDepartment)
+                .WithMany()
+                .HasForeignKey(e => e.StaffDepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AdmissionApplication>(entity =>
+        {
+            entity.HasIndex(e => e.ApplicantUserId);
+            entity.HasOne(e => e.ApplicantUser)
+                .WithMany()
+                .HasForeignKey(e => e.ApplicantUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<PolicyConfig>().HasData(
             SeedPolicy("11111111-1111-1111-1111-111111111101", "admissions", "merit_change_max_percent", "5", "int", "maximum % a dept head can change merit unilaterally"),
             SeedPolicy("11111111-1111-1111-1111-111111111102", "admissions", "merit_override_requires_vc", "true", "bool", "VC approval required for merit overrides"),

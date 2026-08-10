@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Infrastructure;
@@ -21,6 +22,7 @@ public sealed class AegisDbContextFactory : IDesignTimeDbContextFactory<AegisDbC
 
         var options = new DbContextOptionsBuilder<AegisDbContext>()
             .UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(AegisDbContext).Assembly.GetName().Name))
+            .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
             .Options;
 
         return new AegisDbContext(options);

@@ -90,6 +90,24 @@ test.describe("Critical Path", () => {
     expect(title).toContain("AegisCore");
   });
 
+  test("5b - Rejected demo credentials never create an offline session", async ({ page }) => {
+    await page.route("**/api/auth/login", async route => {
+      expect(route.request().postDataJSON()).toMatchObject({
+        email: "student@iobm.demo",
+        password: "GoldenDemo!2026",
+      });
+      await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ message: "Invalid credentials" }) });
+    });
+    await page.goto("/login");
+    await page.getByLabel(/university email/i).fill("student@iobm.demo");
+    await page.getByLabel(/^password$/i).fill("GoldenDemo!2026");
+
+    await page.getByRole("button", { name: /sign in/i }).click();
+
+    await expect(page.getByText("Invalid email or password.")).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
+  });
+
   test("6 - Dashboard loads without blank screen", async ({ page }) => {
     await page.goto("/");
     await waitForLoad(page);

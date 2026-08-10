@@ -382,6 +382,126 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
         Assert.Equal("Student", Assert.Single(roles));
     }
 
+    [Fact]
+    public void JwtAccessToken_UsesOnlyAuthoritativeSameTenantStudentLink()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AEGISCORE_JWT_SECRET"] = "test-secret-at-least-thirty-two-bytes-long",
+                ["Jwt:Issuer"] = "https://issuer.test",
+                ["Auth:Audience"] = "test-audience"
+            })
+            .Build();
+        var service = new JwtTokenService(config, Mock.Of<IConnectionMultiplexer>());
+        var tenantId = Guid.NewGuid();
+        var studentId = Guid.NewGuid();
+        var departmentId = Guid.NewGuid();
+        var user = LinkedStudentUser(tenantId, studentId, departmentId);
+        user.ExternalClaimsJson = $"{{\"student_id\":\"{Guid.NewGuid()}\"}}";
+
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler()
+            .ReadJwtToken(service.GenerateAccessToken(user));
+
+        Assert.Equal(studentId.ToString(), jwt.Claims.Single(claim => claim.Type == "student_id").Value);
+        Assert.Equal(departmentId.ToString(), jwt.Claims.Single(claim => claim.Type == "department_id").Value);
+    }
+
+    [Fact]
+    public void JwtAccessToken_UnlinkedStudentFailsClosed()
+    {
+        var service = CreateJwtService();
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            TenantId = Guid.NewGuid(),
+            Username = "unlinked",
+            Email = "unlinked@test.test",
+            ExternalClaimsJson = $"{{\"student_id\":\"{Guid.NewGuid()}\"}}"
+        };
+
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler()
+            .ReadJwtToken(service.GenerateAccessToken(user));
+
+        Assert.DoesNotContain(jwt.Claims, claim => claim.Type is "student_id" or "department_id");
+    }
+
+    [Fact]
+    public void JwtAccessToken_WrongTenantStudentLinkFailsClosed()
+    {
+        var user = LinkedStudentUser(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        user.Student!.Batch.Department.TenantId = Guid.NewGuid();
+
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler()
+            .ReadJwtToken(CreateJwtService().GenerateAccessToken(user));
+
+        Assert.DoesNotContain(jwt.Claims, claim => claim.Type is "student_id" or "department_id");
+    }
+
+    [Fact]
+    public void JwtAccessToken_UsesOnlyAuthoritativeSameTenantStaffDepartmentLink()
+    {
+        var tenantId = Guid.NewGuid();
+        var departmentId = Guid.NewGuid();
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            Username = "hod",
+            Email = "hod@test.test",
+            StaffDepartmentId = departmentId,
+            StaffDepartment = new Department { Id = departmentId, Name = "Computer Science", TenantId = tenantId },
+            UserRoles = [new UserRole { Role = new DomainRole { Name = "HOD" } }]
+        };
+
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler()
+            .ReadJwtToken(CreateJwtService().GenerateAccessToken(user));
+
+        Assert.Equal(departmentId.ToString(), jwt.Claims.Single(claim => claim.Type == "staff_department_id").Value);
+    }
+
+    private static JwtTokenService CreateJwtService()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AEGISCORE_JWT_SECRET"] = "test-secret-at-least-thirty-two-bytes-long",
+                ["Jwt:Issuer"] = "https://issuer.test",
+                ["Auth:Audience"] = "test-audience"
+            })
+            .Build();
+        return new JwtTokenService(config, Mock.Of<IConnectionMultiplexer>());
+    }
+
+    private static User LinkedStudentUser(Guid tenantId, Guid studentId, Guid departmentId)
+    {
+        var department = new Department { Id = departmentId, Name = "Computer Science", TenantId = tenantId };
+        var batch = new Batch
+        {
+            Id = Guid.NewGuid(),
+            Name = "BSCS 2024",
+            DepartmentId = departmentId,
+            Department = department
+        };
+        var student = new Student
+        {
+            Id = studentId,
+            FirstName = "Golden",
+            LastName = "Student",
+            BatchId = batch.Id,
+            Batch = batch
+        };
+        return new User
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            Username = "student",
+            Email = "student@test.test",
+            StudentId = studentId,
+            Student = student
+        };
+    }
+
     // 7 ─ SQL injection — data import rejects dangerous keywords
     [Theory]
     [InlineData("DROP TABLE Students")]

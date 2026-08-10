@@ -93,6 +93,84 @@ public sealed class AnalyticsIntelligenceTests
     }
 
     [Fact]
+    public async Task ApplicantDiscoveryAndExplanation_ReturnOnlyAuthoritativeOwnerRecords()
+    {
+        await using var fixture = await AnalyticsFixture.CreateAsync();
+        var ownerId = Guid.NewGuid();
+        var applicationId = await fixture.SeedAdmissionAsync(ownerId);
+
+        var discovery = await fixture.Service.GetApplicantDiscoveryAsync(ownerId, 50);
+        var foreignDiscovery = await fixture.Service.GetApplicantDiscoveryAsync(Guid.NewGuid(), 50);
+
+        Assert.Equal(applicationId, Assert.Single(discovery).ApplicationId);
+        Assert.True(discovery[0].HasPublishedDecision);
+        Assert.Empty(foreignDiscovery);
+        Assert.NotNull(await fixture.Service.GetApplicantAdmissionExplanationAsync(applicationId, ownerId));
+        Assert.Null(await fixture.Service.GetApplicantAdmissionExplanationAsync(applicationId, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task StudentDiscovery_ReturnsOnlyOwnedPublishedRecords()
+    {
+        await using var fixture = await AnalyticsFixture.CreateAsync(minimumCohortSize: 2);
+        var seeded = await fixture.SeedGradeAsync(78.4m, "B+", 80, 96);
+
+        var discovery = await fixture.Service.GetStudentDiscoveryAsync(seeded.StudentId, 50);
+
+        Assert.Equal(seeded.GradeId, Assert.Single(discovery.Grades).CourseGradeId);
+        Assert.Empty(discovery.Predictions);
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            fixture.Service.GetStudentDiscoveryAsync(Guid.NewGuid(), 50));
+    }
+
+    [Fact]
+    public async Task StudentDiscovery_DeduplicatesCoursesBeforeApplyingLimit()
+    {
+        await using var fixture = await AnalyticsFixture.CreateAsync(minimumCohortSize: 2);
+        var seeded = await fixture.SeedGradeAsync(78.4m, "B+", 80, 96);
+        var firstCourseId = await fixture.Db.CourseGrades.Where(item => item.Id == seeded.GradeId)
+            .Select(item => item.CourseId).SingleAsync();
+        var firstCourse = await fixture.Db.Courses.SingleAsync(course => course.Id == firstCourseId);
+        var secondCourse = new Course
+        {
+            Id = Guid.NewGuid(), DepartmentId = firstCourse.DepartmentId, Code = "EX-SECOND", Title = "Second Course", CreditHours = 3
+        };
+        fixture.Db.Courses.Add(secondCourse);
+        var now = DateTimeOffset.UtcNow;
+        fixture.Db.AnalyticsStudentTelemetrySnapshots.AddRange(
+            Telemetry(fixture.TenantId, seeded.StudentId, firstCourse.Id, now, "newest"),
+            Telemetry(fixture.TenantId, seeded.StudentId, firstCourse.Id, now.AddMinutes(-1), "duplicate"),
+            Telemetry(fixture.TenantId, seeded.StudentId, secondCourse.Id, now.AddMinutes(-2), "second"));
+        await fixture.Db.SaveChangesAsync();
+
+        var discovery = await fixture.Service.GetStudentDiscoveryAsync(seeded.StudentId, 2);
+
+        Assert.Equal(2, discovery.Courses.Count);
+        Assert.Equal(new[] { firstCourse.Id, secondCourse.Id }, discovery.Courses.Select(item => item.CourseId));
+    }
+
+    [Fact]
+    public async Task ApplicantDiscovery_AppliesLimitAfterFilteringPublishedDecisions()
+    {
+        await using var fixture = await AnalyticsFixture.CreateAsync();
+        var ownerId = Guid.NewGuid();
+        var publishedId = await fixture.SeedAdmissionAsync(ownerId);
+        var programId = await fixture.Db.AdmissionApplications.Where(item => item.Id == publishedId)
+            .Select(item => item.ProgramId).SingleAsync();
+        fixture.Db.AdmissionApplications.Add(new AdmissionApplication
+        {
+            Id = Guid.NewGuid(), ApplicantUserId = ownerId, StudentName = "New Draft", Email = "draft@example.edu",
+            Phone = "3", Cnic = "00000-0000000-3", DateOfBirth = new DateOnly(2005, 1, 1), ProgramId = programId,
+            SubmittedAt = DateTimeOffset.UtcNow.AddDays(1)
+        });
+        await fixture.Db.SaveChangesAsync();
+
+        var discovery = await fixture.Service.GetApplicantDiscoveryAsync(ownerId, 1);
+
+        Assert.Equal(publishedId, Assert.Single(discovery).ApplicationId);
+    }
+
+    [Fact]
     public async Task PredictionSnapshot_RequiresGenuineModelForShapAndPreservesVersionedHistory()
     {
         await using var fixture = await AnalyticsFixture.CreateAsync();
@@ -182,13 +260,16 @@ public sealed class AnalyticsIntelligenceTests
     {
         var gradeRoles = typeof(AnalyticsController).GetMethod(nameof(AnalyticsController.GetMyGradeExplanation))!
             .GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Single().Roles;
-        var admissionRoles = typeof(AnalyticsController).GetMethod(nameof(AnalyticsController.GetAdmissionDecisionExplanation))!
+        var admissionAuthorization = typeof(AnalyticsController).GetMethod(nameof(AnalyticsController.GetAdmissionDecisionExplanation))!
+            .GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Single();
+        var admissionDiscoveryRoles = typeof(AnalyticsController).GetMethod(nameof(AnalyticsController.GetAdmissionsDiscovery))!
             .GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Single().Roles;
         var predictionRoles = typeof(AnalyticsController).GetMethod(nameof(AnalyticsController.GetPredictionExplanation))!
             .GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Single().Roles;
 
         Assert.Equal("Student", gradeRoles);
-        Assert.Equal("Admin,SuperAdmin,Registrar,AdmissionsHead", admissionRoles);
+        Assert.Null(admissionAuthorization.Roles);
+        Assert.Equal("Admin,SuperAdmin,Registrar,AdmissionsHead", admissionDiscoveryRoles);
         Assert.Equal("Student,HOD,Dean,Admin,SuperAdmin,Registrar,ExamController,VC", predictionRoles);
     }
 
@@ -249,6 +330,18 @@ public sealed class AnalyticsIntelligenceTests
         "0.47.0",
         true);
 
+    private static AnalyticsStudentTelemetrySnapshot Telemetry(
+        Guid tenantId,
+        Guid studentId,
+        Guid courseId,
+        DateTimeOffset freshness,
+        string input) => new()
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, StudentId = studentId, CourseId = courseId,
+            Period = "2026-Fall", ComparisonPopulation = "Program cohort", InputHash = input,
+            PayloadJson = "{}", DataCutoffAt = freshness, FreshnessAt = freshness
+        };
+
     private sealed class AnalyticsFixture : IAsyncDisposable
     {
         private readonly SqliteConnection _connection;
@@ -304,7 +397,9 @@ public sealed class AnalyticsIntelligenceTests
             var student = new Student { Id = Guid.NewGuid(), FirstName = "Grade", LastName = "Owner", BatchId = batch.Id, Batch = batch };
             var peer = new Student { Id = Guid.NewGuid(), FirstName = "Grade", LastName = "Peer", BatchId = batch.Id, Batch = batch };
             var course = new Course { Id = Guid.NewGuid(), Title = "Explainable Systems", Code = $"EX-{Guid.NewGuid():N}"[..20], CreditHours = 3, DepartmentId = department.Id, Department = department };
-            var semesterId = Guid.NewGuid();
+            var academicYear = new AcademicYear { Id = Guid.NewGuid(), Name = $"2026-{Guid.NewGuid():N}", StartDate = new DateOnly(2026, 1, 1), EndDate = new DateOnly(2026, 12, 31) };
+            var semester = new Semester { Id = Guid.NewGuid(), AcademicYearId = academicYear.Id, AcademicYear = academicYear, Name = "Fall 2026", Type = "fall", StartDate = new DateOnly(2026, 8, 1), EndDate = new DateOnly(2026, 12, 31) };
+            var semesterId = semester.Id;
             var scheme = new AssessmentScheme { Id = Guid.NewGuid(), CourseId = course.Id, SemesterId = semesterId };
             var first = new AssessmentComponent { Id = Guid.NewGuid(), SchemeId = scheme.Id, ComponentType = "Coursework", WeightPercentage = 50, TotalMarks = 100, OrderIndex = 1 };
             var second = new AssessmentComponent { Id = Guid.NewGuid(), SchemeId = scheme.Id, ComponentType = "Final", WeightPercentage = 50, TotalMarks = 125, OrderIndex = 2 };
@@ -323,7 +418,7 @@ public sealed class AnalyticsIntelligenceTests
             var peerGrade = new CourseGrade { Id = Guid.NewGuid(), CourseId = course.Id, SemesterId = semesterId, StudentId = peer.Id,
                 TotalMarksObtained = 180, PercentageObtained = 80m, LetterGrade = "A", GradePoints = 4m,
                 IsPassing = true, ResultStatus = "published", CalculatedAt = DateTimeOffset.UtcNow.AddDays(-1), PublishedAt = DateTimeOffset.UtcNow.AddHours(-1) };
-            Db.AddRange(department, batch, student, peer, course, scheme, scale);
+            Db.AddRange(department, batch, student, peer, course, academicYear, semester, scheme, scale);
             Db.CourseMarks.AddRange(
                 new CourseMark { Id = Guid.NewGuid(), CourseId = course.Id, StudentId = student.Id, AssessmentComponentId = first.Id, ObtainedMarks = firstMark },
                 new CourseMark { Id = Guid.NewGuid(), CourseId = course.Id, StudentId = student.Id, AssessmentComponentId = second.Id, ObtainedMarks = secondMark });
@@ -332,11 +427,14 @@ public sealed class AnalyticsIntelligenceTests
             return (grade.Id, student.Id);
         }
 
-        public async Task<Guid> SeedAdmissionAsync()
+        public async Task<Guid> SeedAdmissionAsync(Guid? applicantUserId = null)
         {
             var program = new DegreeProgram { Id = Guid.NewGuid(), Name = "BS Analytics", Code = "BSA", DepartmentId = Guid.NewGuid(), TenantId = TenantId };
             var accepted = new AdmissionApplication { Id = Guid.NewGuid(), StudentName = "Accepted", Email = "accepted@example.edu", Phone = "1", Cnic = "00000-0000000-1", DateOfBirth = new DateOnly(2005, 1, 1), ProgramId = program.Id, MatricPercentage = 82, FscPercentage = 82, EntryTestScore = 82, ApplicationStatus = "verified" };
-            var waitlisted = new AdmissionApplication { Id = Guid.NewGuid(), StudentName = "Waitlisted", Email = "wait@example.edu", Phone = "2", Cnic = "00000-0000000-2", DateOfBirth = new DateOnly(2005, 1, 1), ProgramId = program.Id, MatricPercentage = 80, FscPercentage = 80, EntryTestScore = 80, ApplicationStatus = "verified" };
+            User? applicant = null;
+            if (applicantUserId is not null)
+                applicant = new User { Id = applicantUserId.Value, TenantId = TenantId, Username = "applicant", Email = "applicant@example.edu" };
+            var waitlisted = new AdmissionApplication { Id = Guid.NewGuid(), ApplicantUserId = applicantUserId, ApplicantUser = applicant, StudentName = "Waitlisted", Email = "wait@example.edu", Phone = "2", Cnic = "00000-0000000-2", DateOfBirth = new DateOnly(2005, 1, 1), ProgramId = program.Id, MatricPercentage = 80, FscPercentage = 80, EntryTestScore = 80, ApplicationStatus = "verified" };
             var list = new MeritList { Id = Guid.NewGuid(), ProgramId = program.Id, SemesterId = Guid.NewGuid(), TotalSeats = 1, RoundNumber = 1, Status = "published", PublishedAt = DateTimeOffset.UtcNow };
             var first = new MeritListEntry { Id = Guid.NewGuid(), MeritListId = list.Id, MeritList = list, ApplicationId = accepted.Id, Application = accepted,
                 MeritRank = 1, MeritScore = 81.73m, MatricContribution = 24.6m, FscContribution = 24.6m, EntryTestContribution = 32.53m, SeatAllocated = true, AllocationStatus = "allocated" };

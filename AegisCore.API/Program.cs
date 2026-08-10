@@ -63,11 +63,17 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var demoMode = builder.Configuration.GetValue<bool>("Runtime:DemoMode");
-if (demoMode && builder.Environment.IsProduction())
+if (demoMode && !builder.Environment.IsDevelopment())
 {
     throw new InvalidOperationException(
-        "AegisCore cannot start: Runtime:DemoMode is enabled in a Production environment. "
-        + "Set AEGISCORE_DEMO_MODE=false for production use.");
+        "AegisCore cannot start: Runtime:DemoMode is permitted only in the Development environment. "
+        + "Set AEGISCORE_DEMO_MODE=false outside an isolated local demo.");
+}
+if (builder.Configuration.GetValue<bool>("Runtime:InjectDemoIdentity"))
+{
+    throw new InvalidOperationException(
+        "AegisCore cannot start: legacy automatic demo identity injection is disabled. "
+        + "Use the seeded demo accounts for authentication.");
 }
 
 Log.Logger = new LoggerConfiguration()
@@ -307,6 +313,7 @@ else
     {
         Log.Information("Starting AegisCore API...");
         await ApplyDatabaseMigrationsAsync(app);
+        await SeedGoldenDemoAsync(app);
         await app.RunDeploymentReadinessCheckAsync();
         Log.Information("AegisCore API started successfully.");
         app.Run();
@@ -331,4 +338,16 @@ static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
     await db.Database.MigrateAsync();
+}
+
+static async Task SeedGoldenDemoAsync(WebApplication app)
+{
+    if (!app.Configuration.GetValue<bool>("Runtime:DemoMode")
+        || !app.Configuration.GetValue<bool>("Demo:SeedGoldenUniverse"))
+        return;
+    if (!Guid.TryParse(app.Configuration["TENANT_ID"], out var tenantId) || tenantId == Guid.Empty)
+        throw new InvalidOperationException("TENANT_ID is required for golden demo seeding.");
+
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<GoldenDemoSeeder>().SeedAsync(tenantId);
 }

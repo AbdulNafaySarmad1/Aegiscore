@@ -2,6 +2,10 @@
 
 FROM node:22-alpine AS build
 WORKDIR /src
+ARG NEXT_PUBLIC_DEMO_MODE=false
+ARG NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW=false
+ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE \
+    NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW=$NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW
 
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,id=npm,target=/root/.npm npm ci --prefer-offline --no-audit --no-fund
@@ -13,8 +17,10 @@ FROM node:22-alpine AS runtime
 LABEL org.opencontainers.image.title="AegisCore Portal" \
       org.opencontainers.image.description="AegisCore University ERP portal"
 ARG NEXT_PUBLIC_DEMO_MODE=false
+ARG NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW=false
 ENV NODE_ENV=production \
     NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE \
+    NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW=$NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW \
     PORT=8080 \
     HOSTNAME=0.0.0.0
 WORKDIR /app

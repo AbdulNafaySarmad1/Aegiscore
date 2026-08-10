@@ -25,7 +25,7 @@ public sealed class FinancePaymentPlanWorker(IServiceScopeFactory scopeFactory, 
             var finance = scope.ServiceProvider.GetRequiredService<AegisCore.Application.Finance.IFinanceModuleService>();
             foreach (var tenantId in tenants.Where(x => x != Guid.Empty))
             {
-                await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
+                await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId.ToString("D")}, false)", ct);
                 await finance.RunPaymentPlanSweepAsync(tenantId, DateTime.UtcNow, ct);
             }
         }

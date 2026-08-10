@@ -48,7 +48,7 @@ public sealed class GradingService(AegisDbContext db, IPolicyService policies, I
         var weighted = marks.Sum(m => (decimal)m.ObtainedMarks / m.AssessmentComponent.TotalMarks * m.AssessmentComponent.WeightPercentage);
         var band = await db.GradeBands
             .OrderByDescending(g => g.PercentageFrom)
-            .FirstOrDefaultAsync(g => weighted >= g.PercentageFrom && weighted <= g.PercentageTo, ct);
+            .FirstOrDefaultAsync(g => weighted >= g.PercentageFrom && weighted < g.PercentageTo + 1m, ct);
 
         var grade = await db.CourseGrades.FirstOrDefaultAsync(g => g.CourseId == courseId && g.StudentId == studentId, ct)
             ?? new CourseGrade { Id = Guid.NewGuid(), CourseId = courseId, SemesterId = scheme.SemesterId, StudentId = studentId };

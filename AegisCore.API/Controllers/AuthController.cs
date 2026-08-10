@@ -44,6 +44,8 @@ public sealed class AuthController(
 
         var user = await db.Users.IgnoreQueryFilters()
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
+            .Include(x => x.Student!).ThenInclude(x => x.Batch).ThenInclude(x => x.Department)
+            .Include(x => x.StaffDepartment)
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Email == email, ct);
 
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active ||
@@ -109,6 +111,8 @@ public sealed class AuthController(
 
         var user = await db.Users.IgnoreQueryFilters()
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
+            .Include(x => x.Student!).ThenInclude(x => x.Batch).ThenInclude(x => x.Department)
+            .Include(x => x.StaffDepartment)
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == userId, ct);
 
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active)

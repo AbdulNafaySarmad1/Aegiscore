@@ -163,13 +163,13 @@ export default function AdmissionExplanationPage({ params }: { params: Promise<{
         <header className="page-header" style={{ padding: 0 }}>
           <div>
             <div className="page-header-breadcrumb">
-              <Link href="/analytics">Analytics</Link><span>/</span><span>Admissions decision</span>
+              <Link href="/telemetry">Decision discovery</Link><span>/</span><span>Admissions decision</span>
             </div>
             <h1>Admissions decision explanation</h1>
             <p>The recorded merit arithmetic and provenance behind this decision.</p>
           </div>
           <div className="page-header-actions">
-            <Link href="/analytics" className="btn btn-secondary btn-sm"><ArrowLeft size={14} /> Analytics</Link>
+            <Link href="/telemetry" className="btn btn-secondary btn-sm"><ArrowLeft size={14} /> Decision discovery</Link>
           </div>
         </header>
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, GraduationCap, Landmark, Scale, ShieldCheck, TrendingUp, UserRound, Users } from "lucide-react";
 import { isApiError } from "@/lib/api-client";
-import { isDemoMode, login, writeDemoSession, type DemoAccount } from "@/lib/session";
+import { isDemoMode, isDemoOfflinePreview, login, writeDemoSession, type DemoAccount } from "@/lib/session";
 import { useSession } from "@/components/session-provider";
 import { Spinner } from "@/components/async/states";
 
@@ -17,11 +17,11 @@ const testimonials = [
 type DemoCard = DemoAccount & { password: string; icon: typeof GraduationCap };
 
 const demoAccounts: DemoCard[] = [
-  { email: "student@iobm.demo", password: "Koenigsegg$One1", label: "Student", icon: GraduationCap, desc: "Ali Hassan" },
-  { email: "faculty@iobm.demo", password: "Pagani$Huayra3", label: "Faculty", icon: UserRound, desc: "Dr. Imran" },
-  { email: "finance@iobm.demo", password: "Porsche$GT3RS", label: "Finance", icon: Landmark, desc: "Khalid Hussain" },
-  { email: "registrar@iobm.demo", password: "Ferrari$Roma22", label: "Registrar", icon: Scale, desc: "Dr. Sana" },
-  { email: "vc@iobm.demo", password: "Lambo$Aventador1", label: "VC", icon: ShieldCheck, desc: "Prof. Waseem — Vice Chancellor" },
+  { email: "student@iobm.demo", password: "GoldenDemo!2026", label: "Student", icon: GraduationCap, desc: "Ali Hassan" },
+  { email: "faculty@iobm.demo", password: "GoldenDemo!2026", label: "Faculty", icon: UserRound, desc: "Dr. Imran Siddiqui" },
+  { email: "finance@iobm.demo", password: "GoldenDemo!2026", label: "Finance", icon: Landmark, desc: "Khalid Hussain" },
+  { email: "registrar@iobm.demo", password: "GoldenDemo!2026", label: "Registrar", icon: Scale, desc: "Hira Nawaz" },
+  { email: "admissions@iobm.demo", password: "GoldenDemo!2026", label: "Admissions", icon: ShieldCheck, desc: "Sana Mirza" },
 ];
 
 export default function LoginPage() {
@@ -74,15 +74,21 @@ export default function LoginPage() {
     setPassword(acc.password);
     setError("");
     setBusy(true);
+    if (isDemoOfflinePreview) {
+      writeDemoSession(acc);
+      await reload();
+      router.replace("/");
+      return;
+    }
     try {
       await login(acc.email, acc.password);
       await reload();
       router.replace("/");
-    } catch {
-      // Backend unavailable (offline preview): fall back to the isolated demo identity.
-      writeDemoSession(acc);
-      await reload();
-      router.replace("/");
+    } catch (err) {
+      setError(isApiError(err)
+        ? err.status === 401 ? "Demo credentials were rejected by the authentication service." : err.message
+        : "The portal cannot reach the authentication service.");
+      setBusy(false);
     }
   };
 

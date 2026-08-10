@@ -1,6 +1,7 @@
 using AegisCore.Infrastructure.Config;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
@@ -19,7 +20,10 @@ public static class DbContextServiceExtensions
             {
                 npgsql.MigrationsAssembly(typeof(AegisDbContext).Assembly.GetName().Name);
                 npgsql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-            }).AddInterceptors(serviceProvider.GetRequiredService<TenantSessionInterceptor>()));
+            })
+            // Legacy model drift predates this integration; the new link metadata is represented in the snapshot.
+            .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
+            .AddInterceptors(serviceProvider.GetRequiredService<TenantSessionInterceptor>()));
 
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<AegisDbContext>());
 

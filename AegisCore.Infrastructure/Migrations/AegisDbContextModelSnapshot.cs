@@ -935,6 +935,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<Guid?>("ApplicantUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Cnic")
                         .IsRequired()
                         .HasMaxLength(15)
@@ -998,6 +1001,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.HasIndex("Cnic")
                         .IsUnique();
+
+                    b.HasIndex("ApplicantUserId");
 
                     b.HasIndex("ProgramId", "QuotaType", "ApplicationStatus");
 
@@ -22777,6 +22782,12 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTime?>("RefreshTokenExpiry")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("StaffDepartmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -22789,6 +22800,12 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StaffDepartmentId");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("\"StudentId\" IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -26314,6 +26331,13 @@ namespace AegisCore.Infrastructure.Migrations
 
             modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionApplication", b =>
                 {
+                    b.HasOne("AegisCore.Domain.Entities.User", "ApplicantUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicantUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ApplicantUser");
+
                     b.Navigation("Documents");
                 });
 
@@ -26859,6 +26883,20 @@ namespace AegisCore.Infrastructure.Migrations
 
             modelBuilder.Entity("AegisCore.Domain.Entities.User", b =>
                 {
+                    b.HasOne("AegisCore.Domain.Entities.Department", "StaffDepartment")
+                        .WithMany()
+                        .HasForeignKey("StaffDepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AegisCore.Domain.Entities.Student", "Student")
+                        .WithOne()
+                        .HasForeignKey("AegisCore.Domain.Entities.User", "StudentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("StaffDepartment");
+
+                    b.Navigation("Student");
+
                     b.Navigation("UserRoles");
                 });
 

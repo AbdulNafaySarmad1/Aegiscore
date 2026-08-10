@@ -1,5 +1,8 @@
 name: aegiscore
 
+x-golden-demo-labels: &golden-demo-labels
+  com.aegiscore.golden-demo: "true"
+
 services:
   portal:
     image: ${AEGISCORE_PORTAL_IMAGE:-aegiscore-portal:local}
@@ -10,7 +13,7 @@ services:
     environment:
       AEGISCORE_API_INTERNAL_URL: http://api:8080
     ports:
-      - "${AEGISCORE_PORT:-8080}:8080"
+      - "${AEGISCORE_BIND_ADDRESS:-127.0.0.1}:${AEGISCORE_PORT:-8080}:8080"
     depends_on:
       api:
         condition: service_healthy
@@ -20,6 +23,7 @@ services:
       - backend
     security_opt:
       - no-new-privileges:true
+    labels: *golden-demo-labels
     cap_drop:
       - ALL
     read_only: true
@@ -33,6 +37,9 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       Runtime__DemoMode: ${AEGISCORE_DEMO_MODE:-true}
+      Runtime__InjectDemoIdentity: ${AEGISCORE_INJECT_DEMO_IDENTITY:-false}
+      Demo__SeedGoldenUniverse: ${AEGISCORE_SEED_GOLDEN_DEMO:-false}
+      AEGISCORE_DEMO_PASSWORD: ${AEGISCORE_DEMO_PASSWORD:-}
       AEGISCORE_INSTALLATION_COMPLETED: ${AEGISCORE_INSTALLATION_COMPLETED:-false}
       Database__AutoMigrate: "${AEGISCORE_AUTO_MIGRATE:-true}"
       Deployment__FailOnReadinessError: "true"
@@ -90,6 +97,7 @@ services:
       - ./.aegiscore:/run/aegiscore-secrets:ro
     security_opt:
       - no-new-privileges:true
+    labels: *golden-demo-labels
     dns:
       - 8.8.8.8
     cap_drop:
@@ -119,6 +127,7 @@ services:
       - ./scripts/postgres-init/010-harden-app-role.sh:/docker-entrypoint-initdb.d/010-harden-app-role.sh:ro
     security_opt:
       - no-new-privileges:true
+    labels: *golden-demo-labels
 
   redis:
     image: redis:7-alpine
@@ -137,14 +146,21 @@ services:
       - redis_data:/data
     security_opt:
       - no-new-privileges:true
+    labels: *golden-demo-labels
 
 networks:
   edge:
+    labels: *golden-demo-labels
   backend:
     internal: true
+    labels: *golden-demo-labels
 
 volumes:
   postgres_data:
+    labels: *golden-demo-labels
   redis_data:
+    labels: *golden-demo-labels
   api_storage:
+    labels: *golden-demo-labels
   api_config:
+    labels: *golden-demo-labels

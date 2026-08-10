@@ -1,5 +1,7 @@
 # Telemetry Backend Blockers
 
+> Integration status (2026-08-10): blockers 1 and 2 are resolved on `agent/demo-integration`. Blockers 3 and 4 remain deliberate, truthful product constraints rather than defects: comparison population is snapshot-defined and no trained model exists.
+
 Verified contract constraints encountered while building the academic
 telemetry / decision-transparency frontend. None of these are frontend
 defects; each item lists the evidence and the user impact. No backend

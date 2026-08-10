@@ -109,9 +109,113 @@ const telemetryFixture = {
   freshnessTimestamp: "2026-08-02T00:00:00Z",
 };
 
+const discoveryFixture = {
+  courses: [{
+    courseId: "30000000-0000-0000-0000-000000000001",
+    courseCode: "CS-201",
+    courseTitle: "Data Structures & Algorithms",
+    period: "Fall 2026",
+    freshnessTimestamp: "2026-08-02T00:00:00Z",
+  }],
+  grades: [{
+    courseGradeId: "40000000-0000-0000-0000-000000000001",
+    courseId: "30000000-0000-0000-0000-000000000001",
+    courseCode: "CS-201",
+    courseTitle: "Data Structures & Algorithms",
+    semesterId: "50000000-0000-0000-0000-000000000001",
+    semesterName: "Fall 2026",
+    finalScore: 78.4,
+    finalGrade: "B+",
+    publishedAt: "2026-08-01T00:00:00Z",
+  }],
+  predictions: [],
+};
+
 // ─── Student telemetry home ───
 
 test.describe("Student telemetry", () => {
+  test("discovers only backend-authorized course, grade, and admission references", async ({ page }) => {
+    await mockSession(page, studentSession);
+    await page.route("**/api/analytics/v1/students/me/telemetry", route =>
+      route.fulfill({ status: 200, contentType: "application/json", json: telemetryFixture })
+    );
+    await page.route("**/api/analytics/v1/students/me/discovery", route =>
+      route.fulfill({ status: 200, contentType: "application/json", json: discoveryFixture })
+    );
+    await page.route("**/api/analytics/v1/admissions/me/discovery", route =>
+      route.fulfill({ status: 200, contentType: "application/json", json: [{
+        applicationId: "60000000-0000-0000-0000-000000000001",
+        programId: "70000000-0000-0000-0000-000000000001",
+        programName: "BS Computer Science",
+        applicationStatus: "offered",
+        submittedAt: "2022-06-01T00:00:00Z",
+        hasPublishedDecision: true,
+      }] })
+    );
+
+    await page.goto("/telemetry");
+
+    await expect(page.getByRole("link", { name: /CS-201.*Data Structures/ })).toHaveAttribute(
+      "href", "/telemetry/courses/30000000-0000-0000-0000-000000000001"
+    );
+    await expect(page.getByRole("link", { name: "Why did I get B+ in CS-201?" })).toHaveAttribute(
+      "href", "/telemetry/grades/40000000-0000-0000-0000-000000000001"
+    );
+    await expect(page.getByRole("link", { name: "Explain my BS Computer Science decision" })).toHaveAttribute(
+      "href", "/telemetry/admissions/60000000-0000-0000-0000-000000000001"
+    );
+    await expect(page.getByText("No genuine model prediction snapshot is recorded for this account.")).toBeVisible();
+  });
+
+  test("shows owned admission discovery when no telemetry snapshot exists", async ({ page }) => {
+    await mockSession(page, studentSession);
+    await page.route("**/api/analytics/v1/students/me/telemetry", route =>
+      route.fulfill({ status: 404, contentType: "application/json", json: { error: "Not found" } })
+    );
+    await page.route("**/api/analytics/v1/students/me/discovery", route =>
+      route.fulfill({ status: 403, contentType: "application/json", json: { error: "Forbidden" } })
+    );
+    await page.route("**/api/analytics/v1/admissions/me/discovery", route =>
+      route.fulfill({ status: 200, contentType: "application/json", json: [{
+        applicationId: "60000000-0000-0000-0000-000000000001",
+        programId: "70000000-0000-0000-0000-000000000001",
+        programName: "BS Computer Science",
+        applicationStatus: "offered",
+        submittedAt: "2022-06-01T00:00:00Z",
+        hasPublishedDecision: true,
+      }] })
+    );
+
+    await page.goto("/telemetry");
+
+    await expect(page.getByText("No telemetry recorded yet")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("link", { name: "Explain my BS Computer Science decision" })).toBeVisible();
+  });
+
+  test("gives admissions staff navigable published decision references", async ({ page }) => {
+    await mockSession(page, adminSession);
+    await page.route("**/api/analytics/v1/students/me/discovery", route =>
+      route.fulfill({ status: 403, contentType: "application/json", json: { error: "Forbidden" } })
+    );
+    await page.route("**/api/analytics/v1/admissions/discovery", route =>
+      route.fulfill({ status: 200, contentType: "application/json", json: [{
+        applicationId: "60000000-0000-0000-0000-000000000001",
+        programId: "70000000-0000-0000-0000-000000000001",
+        programName: "BS Computer Science",
+        applicationStatus: "offered",
+        submittedAt: "2022-06-01T00:00:00Z",
+        hasPublishedDecision: true,
+      }] })
+    );
+
+    await page.goto("/telemetry");
+
+    await expect(page.getByRole("heading", { name: "Admissions Decision Discovery" })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("link", { name: "Explain BS Computer Science decision" })).toHaveAttribute(
+      "href", "/telemetry/admissions/60000000-0000-0000-0000-000000000001"
+    );
+  });
+
   test("renders backend statuses as text, keeps PersonalBest separate from absolute score", async ({ page }) => {
     await mockSession(page, studentSession);
     await page.route("**/api/analytics/v1/students/me/telemetry", route =>
@@ -473,14 +577,14 @@ test.describe("Admissions explanation", () => {
     await expect(page.getByText(/Legacy admissions records/)).toBeVisible();
   });
 
-  test("a student role is forbidden by the backend and sees the restricted state", async ({ page }) => {
+  test("an unowned application is hidden by the backend and shows the restricted state", async ({ page }) => {
     await mockSession(page, studentSession);
     await page.route(`**/api/analytics/v1/admissions/${applicationId}/decision-explanation`, route =>
-      route.fulfill({ status: 403, contentType: "application/json", json: { error: "Forbidden" } })
+      route.fulfill({ status: 404, contentType: "application/json", json: { error: "Not found" } })
     );
 
     await page.goto(`/telemetry/admissions/${applicationId}`);
-    await expect(page.getByText("Access restricted")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Decision explanation not available")).toBeVisible({ timeout: 15000 });
   });
 });
 

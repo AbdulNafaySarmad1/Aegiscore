@@ -19,6 +19,92 @@ public sealed class AnalyticsIntelligenceService(
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly int _minimumCohortSize = Math.Max(2, configuration.GetValue<int?>("Analytics:MinimumCohortSize") ?? 10);
 
+    public async Task<StudentAnalyticsDiscovery> GetStudentDiscoveryAsync(Guid studentId, int limit, CancellationToken ct = default)
+    {
+        var tenantId = db.GetRequiredTenantId();
+        limit = BoundedLimit(limit);
+        if (!await StudentDepartmentQuery(studentId, tenantId).AnyAsync(ct))
+            throw new UnauthorizedAccessException("The student is outside the authenticated tenant.");
+
+        var courseQuery =
+            from snapshot in db.AnalyticsStudentTelemetrySnapshots.AsNoTracking()
+            join course in db.Courses.AsNoTracking() on snapshot.CourseId equals (Guid?)course.Id
+            join department in db.Departments.AsNoTracking() on course.DepartmentId equals department.Id
+            where snapshot.StudentId == studentId && snapshot.CourseId != null && department.TenantId == tenantId
+            select new { course.Id, course.Code, course.Title, snapshot.Period, snapshot.FreshnessAt };
+        var courseRows = await courseQuery.ToListAsync(ct);
+        var courses = courseRows
+            .OrderByDescending(item => item.FreshnessAt)
+            .GroupBy(item => item.Id)
+            .Select(group => group.First())
+            .Take(limit)
+            .Select(item => new CourseTelemetryReference(item.Id, item.Code, item.Title, item.Period, item.FreshnessAt))
+            .ToList();
+
+        var gradeQuery =
+            from grade in db.CourseGrades.AsNoTracking()
+            join course in db.Courses.AsNoTracking() on grade.CourseId equals course.Id
+            join department in db.Departments.AsNoTracking() on course.DepartmentId equals department.Id
+            join semester in db.Semesters.AsNoTracking() on grade.SemesterId equals semester.Id
+            where grade.StudentId == studentId && grade.ResultStatus == "published" && grade.PublishedAt != null
+                && department.TenantId == tenantId
+            select new { GradeId = grade.Id, CourseId = course.Id, course.Code, course.Title, SemesterId = semester.Id,
+                SemesterName = semester.Name, grade.PercentageObtained, grade.LetterGrade, grade.PublishedAt };
+        var gradeRows = IsSqlite()
+            ? (await gradeQuery.ToListAsync(ct)).OrderByDescending(item => item.PublishedAt).Take(limit).ToList()
+            : await gradeQuery.OrderByDescending(item => item.PublishedAt).Take(limit).ToListAsync(ct);
+        var grades = gradeRows.Select(item => new GradeExplanationReference(item.GradeId, item.CourseId, item.Code,
+            item.Title, item.SemesterId, item.SemesterName, item.PercentageObtained, item.LetterGrade ?? "F", item.PublishedAt!.Value)).ToList();
+
+        var predictions = await GetPredictionDiscoveryAsync(studentId, null, false, limit, ct);
+        return new StudentAnalyticsDiscovery(courses, grades, predictions);
+    }
+
+    public Task<IReadOnlyList<AdmissionExplanationReference>> GetApplicantDiscoveryAsync(Guid userId, int limit, CancellationToken ct = default) =>
+        ReadAdmissionsDiscoveryAsync(userId, BoundedLimit(limit), ct);
+
+    public Task<IReadOnlyList<AdmissionExplanationReference>> GetAdmissionsDiscoveryAsync(int limit, CancellationToken ct = default) =>
+        ReadAdmissionsDiscoveryAsync(null, BoundedLimit(limit), ct);
+
+    public async Task<IReadOnlyList<PredictionExplanationReference>> GetPredictionDiscoveryAsync(
+        Guid? studentId,
+        Guid? departmentScopeId,
+        bool tenantWide,
+        int limit,
+        CancellationToken ct = default)
+    {
+        var tenantId = db.GetRequiredTenantId();
+        limit = BoundedLimit(limit);
+        var query = db.AnalyticsModelPredictionSnapshots.AsNoTracking()
+            .Where(item => item.ModelKind == ModelKind.GenuinePredictiveModel.ToString() && item.SubjectType == "Student");
+        if (!tenantWide)
+        {
+            if (studentId is not null)
+            {
+                query = query.Where(item => item.SubjectId == studentId);
+            }
+            else if (departmentScopeId is not null)
+            {
+                var departmentStudentIds = from student in db.Students.AsNoTracking()
+                    join batch in db.Batches.AsNoTracking() on student.BatchId equals batch.Id
+                    join department in db.Departments.AsNoTracking() on batch.DepartmentId equals department.Id
+                    where department.Id == departmentScopeId && department.TenantId == tenantId
+                    select student.Id;
+                query = query.Where(item => departmentStudentIds.Contains(item.SubjectId));
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("Prediction discovery requires an authorized subject scope.");
+            }
+        }
+
+        var rows = IsSqlite()
+            ? (await query.ToListAsync(ct)).OrderByDescending(item => item.PredictionTimestamp).Take(limit).ToList()
+            : await query.OrderByDescending(item => item.PredictionTimestamp).Take(limit).ToListAsync(ct);
+        return rows.Select(item => new PredictionExplanationReference(
+            item.Id, item.ModelName, item.ModelVersion, item.PredictionTimestamp)).ToList();
+    }
+
     public async Task<StudentTelemetry?> GetLatestTelemetryAsync(Guid studentId, Guid? courseId, CancellationToken ct = default)
     {
         db.GetRequiredTenantId();
@@ -102,7 +188,7 @@ public sealed class AnalyticsIntelligenceService(
             where scale.UniversityId == tenantId
                 && band.LetterGrade == grade.LetterGrade
                 && grade.PercentageObtained >= band.PercentageFrom
-                && grade.PercentageObtained <= band.PercentageTo
+                && grade.PercentageObtained < band.PercentageTo + 1m
             select band)
             .ToListAsync(ct);
         if (matchingBands.Count != 1)
@@ -272,6 +358,20 @@ public sealed class AnalyticsIntelligenceService(
             limitations);
         return await PersistDecisionSnapshotAsync("admission", "AdmissionApplication", application.Id, ExplanationSource.Rule,
             null, list.PublishedAt ?? list.GeneratedAt, inputHash, explanation, ct, auditId);
+    }
+
+    public async Task<AnalyticsEnvelope<AdmissionDecisionExplanation>?> GetApplicantAdmissionExplanationAsync(
+        Guid applicationId,
+        Guid userId,
+        CancellationToken ct = default)
+    {
+        var tenantId = db.GetRequiredTenantId();
+        var ownsApplication = await (
+            from application in db.AdmissionApplications.AsNoTracking()
+            join program in db.DegreePrograms.AsNoTracking() on application.ProgramId equals program.Id
+            where application.Id == applicationId && application.ApplicantUserId == userId && program.TenantId == tenantId
+            select application.Id).AnyAsync(ct);
+        return ownsApplication ? await GetAdmissionExplanationAsync(applicationId, ct) : null;
     }
 
     public async Task<AnalyticsEnvelope<PredictionExplanation>?> GetPredictionExplanationAsync(
@@ -534,6 +634,33 @@ public sealed class AnalyticsIntelligenceService(
         where student.Id == studentId && department.TenantId == tenantId
         select department.Id;
 
+    private async Task<IReadOnlyList<AdmissionExplanationReference>> ReadAdmissionsDiscoveryAsync(
+        Guid? applicantUserId,
+        int limit,
+        CancellationToken ct)
+    {
+        var tenantId = db.GetRequiredTenantId();
+        var query = from application in db.AdmissionApplications.AsNoTracking()
+            join program in db.DegreePrograms.AsNoTracking() on application.ProgramId equals program.Id
+            where program.TenantId == tenantId
+                && db.MeritListEntries.AsNoTracking().Any(entry => entry.ApplicationId == application.Id
+                    && entry.MeritList.Status == "published" && entry.MeritList.PublishedAt != null)
+            select new { Application = application, Program = program };
+        if (applicantUserId is not null)
+            query = query.Where(item => item.Application.ApplicantUserId == applicantUserId);
+
+        var rows = IsSqlite()
+            ? (await query.ToListAsync(ct)).OrderByDescending(item => item.Application.SubmittedAt).Take(limit).ToList()
+            : await query.OrderByDescending(item => item.Application.SubmittedAt).Take(limit).ToListAsync(ct);
+        return rows.Select(item => new AdmissionExplanationReference(
+                item.Application.Id,
+                item.Program.Id,
+                item.Program.Name,
+                item.Application.ApplicationStatus,
+                item.Application.SubmittedAt,
+                true)).ToList();
+    }
+
     private async Task<GradeStatisticalContext> BuildGradeContextAsync(CourseGrade grade, Guid tenantId, CancellationToken ct)
     {
         var values = await (
@@ -668,6 +795,8 @@ public sealed class AnalyticsIntelligenceService(
     }
 
     private static bool IsSha256(string value) => value.Length == 64 && value.All(Uri.IsHexDigit);
+
+    private static int BoundedLimit(int limit) => Math.Clamp(limit <= 0 ? 50 : limit, 1, 100);
 
     private bool IsSqlite() => string.Equals(db.Database.ProviderName, "Microsoft.EntityFrameworkCore.Sqlite", StringComparison.Ordinal);
 }

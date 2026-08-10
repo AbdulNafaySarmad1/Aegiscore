@@ -71,9 +71,31 @@ public class JwtTokenService : IJwtTokenService
             new("tenant_id", user.TenantId.ToString())
         };
         var now = DateTime.UtcNow;
-        claims.AddRange(user.UserRoles
+        var activeRoles = user.UserRoles
             .Where(ur => ur.ExpiresAt == null || ur.ExpiresAt > now)
-            .Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
+            .Select(ur => ur.Role.Name)
+            .ToArray();
+        claims.AddRange(activeRoles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        var linkedDepartment = user.Student?.Batch?.Department;
+        if (user.StudentId is { } studentId
+            && studentId != Guid.Empty
+            && user.Student?.Id == studentId
+            && linkedDepartment is not null
+            && linkedDepartment.TenantId == user.TenantId)
+        {
+            claims.Add(new Claim("student_id", studentId.ToString()));
+            claims.Add(new Claim("department_id", linkedDepartment.Id.ToString()));
+        }
+
+        if (user.StaffDepartmentId is { } staffDepartmentId
+            && staffDepartmentId != Guid.Empty
+            && user.StaffDepartment?.Id == staffDepartmentId
+            && user.StaffDepartment.TenantId == user.TenantId
+            && activeRoles.Any(role => role is "HOD" or "Dean"))
+        {
+            claims.Add(new Claim("staff_department_id", staffDepartmentId.ToString()));
+        }
 
         var token = new JwtSecurityToken(
             issuer: _issuer,

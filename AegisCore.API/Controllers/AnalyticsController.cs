@@ -11,6 +11,43 @@ namespace AegisCore.API.Controllers;
 public sealed class AnalyticsController(IAnalyticsIntelligenceService analytics) : ControllerBase
 {
     private static readonly string[] TenantWideRoles = ["Admin", "SuperAdmin", "Registrar", "ExamController", "VC"];
+    private static readonly string[] AdmissionsRoles = ["Admin", "SuperAdmin", "Registrar", "AdmissionsHead"];
+
+    [Authorize(Roles = "Student")]
+    [HttpGet("students/me/discovery")]
+    public async Task<ActionResult<StudentAnalyticsDiscovery>> GetMyDiscovery([FromQuery] int limit = 50, CancellationToken ct = default)
+    {
+        if (StudentId() is not { } studentId) return Forbid();
+        return Ok(await analytics.GetStudentDiscoveryAsync(studentId, limit, ct));
+    }
+
+    [HttpGet("admissions/me/discovery")]
+    public async Task<ActionResult<IReadOnlyList<AdmissionExplanationReference>>> GetMyAdmissionDiscovery(
+        [FromQuery] int limit = 50,
+        CancellationToken ct = default)
+    {
+        if (UserId() is not { } userId) return Forbid();
+        return Ok(await analytics.GetApplicantDiscoveryAsync(userId, limit, ct));
+    }
+
+    [Authorize(Roles = "Admin,SuperAdmin,Registrar,AdmissionsHead")]
+    [HttpGet("admissions/discovery")]
+    public async Task<ActionResult<IReadOnlyList<AdmissionExplanationReference>>> GetAdmissionsDiscovery(
+        [FromQuery] int limit = 50,
+        CancellationToken ct = default) => Ok(await analytics.GetAdmissionsDiscoveryAsync(limit, ct));
+
+    [Authorize(Roles = "Student,HOD,Dean,Admin,SuperAdmin,Registrar,ExamController,VC")]
+    [HttpGet("predictions/discovery")]
+    public async Task<ActionResult<IReadOnlyList<PredictionExplanationReference>>> GetPredictionDiscovery(
+        [FromQuery] int limit = 50,
+        CancellationToken ct = default)
+    {
+        var tenantWide = HasAnyRole(TenantWideRoles);
+        var studentId = User.IsInRole("Student") ? StudentId() : null;
+        var departmentId = !tenantWide && (User.IsInRole("HOD") || User.IsInRole("Dean")) ? StaffDepartmentId() : null;
+        if (!tenantWide && studentId is null && departmentId is null) return Forbid();
+        return Ok(await analytics.GetPredictionDiscoveryAsync(studentId, departmentId, tenantWide, limit, ct));
+    }
 
     [Authorize(Roles = "Student")]
     [HttpGet("students/me/telemetry")]
@@ -33,7 +70,7 @@ public sealed class AnalyticsController(IAnalyticsIntelligenceService analytics)
     public async Task<ActionResult<StudentTelemetry>> GetAuthorizedStudentTelemetry(Guid studentId, [FromQuery] Guid? courseId, CancellationToken ct)
     {
         var tenantWide = User.Claims.Any(claim => claim.Type == ClaimTypes.Role && TenantWideRoles.Contains(claim.Value, StringComparer.Ordinal));
-        var departmentId = DepartmentId();
+        var departmentId = StaffDepartmentId();
         if (!tenantWide && departmentId is null) return Forbid();
         return await analytics.GetAuthorizedTelemetryAsync(studentId, courseId, departmentId, tenantWide, ct) is { } telemetry
             ? Ok(telemetry)
@@ -50,10 +87,19 @@ public sealed class AnalyticsController(IAnalyticsIntelligenceService analytics)
             : NotFound();
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,Registrar,AdmissionsHead")]
+    [Authorize]
     [HttpGet("admissions/{applicationId:guid}/decision-explanation")]
     public async Task<ActionResult<AnalyticsEnvelope<AdmissionDecisionExplanation>>> GetAdmissionDecisionExplanation(Guid applicationId, CancellationToken ct)
-        => await analytics.GetAdmissionExplanationAsync(applicationId, ct) is { } explanation ? Ok(explanation) : NotFound();
+    {
+        AnalyticsEnvelope<AdmissionDecisionExplanation>? explanation;
+        if (HasAnyRole(AdmissionsRoles))
+            explanation = await analytics.GetAdmissionExplanationAsync(applicationId, ct);
+        else if (UserId() is { } userId)
+            explanation = await analytics.GetApplicantAdmissionExplanationAsync(applicationId, userId, ct);
+        else
+            return Forbid();
+        return explanation is not null ? Ok(explanation) : NotFound();
+    }
 
     [Authorize(Roles = "Student,HOD,Dean,Admin,SuperAdmin,Registrar,ExamController,VC")]
     [HttpGet("predictions/{predictionId:guid}/explanation")]
@@ -61,7 +107,7 @@ public sealed class AnalyticsController(IAnalyticsIntelligenceService analytics)
     {
         var tenantWide = User.Claims.Any(claim => claim.Type == ClaimTypes.Role && TenantWideRoles.Contains(claim.Value, StringComparer.Ordinal));
         var studentId = User.IsInRole("Student") ? StudentId() : null;
-        var departmentId = !tenantWide && (User.IsInRole("HOD") || User.IsInRole("Dean")) ? DepartmentId() : null;
+        var departmentId = !tenantWide && (User.IsInRole("HOD") || User.IsInRole("Dean")) ? StaffDepartmentId() : null;
         if (!tenantWide && studentId is null && departmentId is null) return Forbid();
         return await analytics.GetPredictionExplanationAsync(predictionId, studentId, departmentId, tenantWide, ct) is { } explanation
             ? Ok(explanation)
@@ -85,7 +131,11 @@ public sealed class AnalyticsController(IAnalyticsIntelligenceService analytics)
     }
 
     private Guid? StudentId() => ClaimGuid("student_id");
-    private Guid? DepartmentId() => ClaimGuid("department_id");
+    private Guid? StaffDepartmentId() => ClaimGuid("staff_department_id");
+    private Guid? UserId() => ClaimGuid(ClaimTypes.NameIdentifier) ?? ClaimGuid("sub");
+
+    private bool HasAnyRole(IEnumerable<string> roles) =>
+        User.Claims.Any(claim => claim.Type == ClaimTypes.Role && roles.Contains(claim.Value, StringComparer.Ordinal));
 
     private Guid? ClaimGuid(string type) => Guid.TryParse(User.FindFirst(type)?.Value, out var id) && id != Guid.Empty ? id : null;
 }

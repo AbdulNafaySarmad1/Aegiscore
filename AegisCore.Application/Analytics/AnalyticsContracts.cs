@@ -211,6 +211,43 @@ public sealed record StudentTelemetry(
     DateTimeOffset DataCutoffTimestamp,
     DateTimeOffset FreshnessTimestamp);
 
+public sealed record CourseTelemetryReference(
+    Guid CourseId,
+    string? CourseCode,
+    string CourseTitle,
+    string Period,
+    DateTimeOffset FreshnessTimestamp);
+
+public sealed record GradeExplanationReference(
+    Guid CourseGradeId,
+    Guid CourseId,
+    string? CourseCode,
+    string CourseTitle,
+    Guid SemesterId,
+    string SemesterName,
+    decimal FinalScore,
+    string FinalGrade,
+    DateTimeOffset PublishedAt);
+
+public sealed record PredictionExplanationReference(
+    Guid PredictionId,
+    string ModelName,
+    string ModelVersion,
+    DateTimeOffset PredictionTimestamp);
+
+public sealed record StudentAnalyticsDiscovery(
+    IReadOnlyList<CourseTelemetryReference> Courses,
+    IReadOnlyList<GradeExplanationReference> Grades,
+    IReadOnlyList<PredictionExplanationReference> Predictions);
+
+public sealed record AdmissionExplanationReference(
+    Guid ApplicationId,
+    Guid ProgramId,
+    string ProgramName,
+    string ApplicationStatus,
+    DateTimeOffset SubmittedAt,
+    bool HasPublishedDecision);
+
 public sealed record GradeComponentExplanation(
     Guid AssessmentComponentId,
     string ComponentType,
@@ -399,10 +436,15 @@ public sealed record PredictionSnapshotWrite(
 
 public interface IAnalyticsIntelligenceService
 {
+    Task<StudentAnalyticsDiscovery> GetStudentDiscoveryAsync(Guid studentId, int limit, CancellationToken ct = default);
+    Task<IReadOnlyList<AdmissionExplanationReference>> GetApplicantDiscoveryAsync(Guid userId, int limit, CancellationToken ct = default);
+    Task<IReadOnlyList<AdmissionExplanationReference>> GetAdmissionsDiscoveryAsync(int limit, CancellationToken ct = default);
+    Task<IReadOnlyList<PredictionExplanationReference>> GetPredictionDiscoveryAsync(Guid? studentId, Guid? departmentScopeId, bool tenantWide, int limit, CancellationToken ct = default);
     Task<StudentTelemetry?> GetLatestTelemetryAsync(Guid studentId, Guid? courseId, CancellationToken ct = default);
     Task<StudentTelemetry?> GetAuthorizedTelemetryAsync(Guid studentId, Guid? courseId, Guid? departmentScopeId, bool tenantWide, CancellationToken ct = default);
     Task<AnalyticsEnvelope<GradeExplanation>?> GetGradeExplanationAsync(Guid courseGradeId, Guid studentId, CancellationToken ct = default);
     Task<AnalyticsEnvelope<AdmissionDecisionExplanation>?> GetAdmissionExplanationAsync(Guid applicationId, CancellationToken ct = default);
+    Task<AnalyticsEnvelope<AdmissionDecisionExplanation>?> GetApplicantAdmissionExplanationAsync(Guid applicationId, Guid userId, CancellationToken ct = default);
     Task<AnalyticsEnvelope<PredictionExplanation>?> GetPredictionExplanationAsync(Guid predictionId, Guid? studentId, Guid? departmentScopeId, bool tenantWide, CancellationToken ct = default);
     Task<ModelQuality?> GetLatestModelQualityAsync(string modelName, string? modelVersion, CancellationToken ct = default);
     Task<GlobalModelExplanation?> GetLatestGlobalExplanationAsync(string modelName, string? modelVersion, CancellationToken ct = default);

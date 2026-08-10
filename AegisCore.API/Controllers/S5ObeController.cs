@@ -17,6 +17,30 @@ public sealed class S5ObeController(
     IOBEAttainmentService attainment,
     IHemisExportService hemis) : ControllerBase
 {
+    [HttpGet("evidence")]
+    [Authorize(Roles = "OBECoordinator,Dean,Registrar,Admin,SuperAdmin")]
+    public async Task<ActionResult<IReadOnlyList<ObeEvidenceReference>>> Evidence([FromQuery] int limit = 50, CancellationToken ct = default)
+    {
+        if (!Guid.TryParse(User.FindFirst("tenant_id")?.Value, out var tenantId) || tenantId == Guid.Empty) return Forbid();
+        limit = Math.Clamp(limit, 1, 100);
+        var rows = await (
+            from mapping in db.CLOPOMappings.AsNoTracking()
+            join clo in db.CourseLearningOutcomes.AsNoTracking() on mapping.CourseLearningOutcomeId equals clo.Id
+            join po in db.ProgramOutcomes.AsNoTracking() on mapping.ProgramOutcomeId equals po.Id
+            join course in db.Courses.AsNoTracking() on clo.CourseId equals course.Id
+            join department in db.Departments.AsNoTracking() on course.DepartmentId equals department.Id
+            join program in db.DegreePrograms.AsNoTracking() on po.ProgramId equals program.Id
+            where mapping.TenantId == tenantId && clo.TenantId == tenantId && po.TenantId == tenantId
+                && department.TenantId == tenantId && program.TenantId == tenantId
+            orderby course.Code, clo.Code, po.Code
+            select new { course.Code, CourseTitle = course.Title, ProgramName = program.Name, CloCode = clo.Code,
+                CloDescription = clo.Description, PoCode = po.Code, PoDescription = po.Description, mapping.Strength }
+        ).Take(limit).ToListAsync(ct);
+        return Ok(rows.Select(row => new ObeEvidenceReference(
+            row.Code ?? "Course", row.CourseTitle, row.ProgramName, row.CloCode, row.CloDescription,
+            row.PoCode, row.PoDescription, row.Strength.ToString())).ToArray());
+    }
+
     [HttpPost("cis/{courseId:guid}/upload")]
     public async Task<ActionResult<Guid>> UploadCis(Guid courseId, IFormFile file, [FromQuery] Guid facultyId, CancellationToken ct)
     {
@@ -74,3 +98,12 @@ public sealed class S5ObeController(
 }
 
 public sealed record CloPoMappingRequest(Guid CloId, Guid PoId, string Strength);
+public sealed record ObeEvidenceReference(
+    string CourseCode,
+    string CourseTitle,
+    string ProgramName,
+    string CloCode,
+    string CloDescription,
+    string PoCode,
+    string PoDescription,
+    string Strength);

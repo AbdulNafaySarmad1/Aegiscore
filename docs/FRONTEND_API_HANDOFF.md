@@ -73,7 +73,7 @@ The same response also sets HttpOnly cookies:
 
 - `roles` contains canonical backend role names and excludes role assignments that had expired when the access token was issued.
 - `permissions` contains active assignments only and uses `Module:Resource:Action` strings.
-- `studentId` and `departmentId` are nullable because the current identity model has no authoritative user-to-student or user-to-department relationship for local accounts.
+- `studentId` and `departmentId` are nullable. Local accounts receive them only when the persisted user-to-student relationship resolves through the student's batch and department to the same tenant; unlinked or invalid relationships remain null.
 - Seeded canonical role names are `SuperAdmin`, `VC`, `Registrar`, `Finance`, `ExamController`, `ITHead`, `HR`, `Faculty`, `Student`, `HOD`, `Admin`, and `Dean`.
 
 ## Authorization

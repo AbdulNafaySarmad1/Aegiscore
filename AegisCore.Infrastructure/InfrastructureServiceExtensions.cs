@@ -148,6 +148,7 @@ public static class InfrastructureServiceExtensions
         services.AddCafeteria();
         services.AddTransport();
         services.AddAnalyticsIntelligence();
+        services.AddScoped<GoldenDemoSeeder>();
         return services;
     }
 

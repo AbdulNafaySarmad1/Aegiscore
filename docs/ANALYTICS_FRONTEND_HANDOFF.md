@@ -5,7 +5,7 @@
 - Base namespace: `/api/analytics/v1`
 - Authentication: existing HttpOnly cookie or Bearer token flow.
 - All object identifiers are authorized server-side. A changed ID returns `404` when the caller cannot see that object.
-- Student-self routes require a non-empty `student_id` claim. The current local JWT issuer does not yet emit that claim, so these routes return `403` until an authoritative user-to-student link is available.
+- Student-self routes require a non-empty `student_id` claim. Local JWT issuance derives it only from the persisted, same-tenant `Users.StudentId` relationship and fails closed when that relationship is absent or invalid.
 - Enums in analytics DTOs serialize as their names, not numeric values.
 
 ## Explanation Types
@@ -25,13 +25,21 @@ The shared `HumanDecisionExplanation` contract supports decision/subject IDs, ru
 
 ## Endpoints
 
+### Scoped Discovery
+
+- `GET /api/analytics/v1/students/me/discovery?limit=50` returns only the linked student's telemetry-course, published-grade, and genuine stored prediction references.
+- `GET /api/analytics/v1/admissions/me/discovery?limit=50` returns only applications linked to the authenticated user.
+- `GET /api/analytics/v1/admissions/discovery?limit=50` is restricted to admissions oversight roles and remains tenant-scoped.
+- `GET /api/analytics/v1/predictions/discovery?limit=50` applies the same student, department, or tenant-wide scope as prediction explanation reads.
+- Limits are bounded to 1-100. These are navigation contracts, not unrestricted generic ID listings.
+
 ### Student Telemetry
 
 - `GET /api/analytics/v1/students/me/telemetry`
 - `GET /api/analytics/v1/students/me/courses/{courseId}`
 - `GET /api/analytics/v1/students/{studentId}/telemetry?courseId={courseId}` for `Admin`, `SuperAdmin`, `Registrar`, `ExamController`, `VC`, `HOD`, and `Dean`.
 
-The staff route is tenant-scoped. `HOD` and `Dean` also require a matching `department_id` claim. Faculty access is not exposed until an authoritative faculty-to-course assignment claim/query is available.
+The staff route is tenant-scoped. `HOD` and `Dean` also require a matching authoritative `staff_department_id` claim; the student-derived `department_id` claim is never accepted as staff scope. Faculty access is not exposed until an authoritative faculty-to-course assignment claim/query is available.
 
 `StudentTelemetry` fields:
 

@@ -129,7 +129,9 @@ public static partial class FinanceModuleEndpoints
         group.MapGet("/dashboard/department/{departmentId:guid}", async (Guid departmentId, HttpContext context, AegisDbContext db, CancellationToken ct) =>
         {
             var tenantId = Tenant(context);
-            if (!CanManageFinance(context) && DepartmentId(context) != departmentId) return Results.Forbid();
+            if (!CanManageFinance(context)
+                && (!(context.User.IsInRole("HOD") || context.User.IsInRole("Dean"))
+                    || StaffDepartmentId(context) != departmentId)) return Results.Forbid();
             var department = await db.Departments.AsNoTracking().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == departmentId, ct);
             if (department is null) return Results.NotFound();
             var costCenters = await db.CostCenters.AsNoTracking().Where(x => x.TenantId == tenantId && x.DepartmentId == departmentId).ToListAsync(ct);
@@ -1775,8 +1777,8 @@ public static partial class FinanceModuleEndpoints
     private static Guid? StudentId(HttpContext context)
         => Guid.TryParse(context.User.FindFirstValue("student_id"), out var student) && student != Guid.Empty ? student : null;
 
-    private static Guid? DepartmentId(HttpContext context)
-        => Guid.TryParse(context.User.FindFirstValue("department_id"), out var department) && department != Guid.Empty ? department : null;
+    private static Guid? StaffDepartmentId(HttpContext context)
+        => Guid.TryParse(context.User.FindFirstValue("staff_department_id"), out var department) && department != Guid.Empty ? department : null;
 
     private static bool CanManageFinance(HttpContext context)
         => context.User.IsInRole("Finance") || context.User.IsInRole("Finance Controller") || context.User.IsInRole("CFO") || context.User.IsInRole("Admin") || context.User.IsInRole("SuperAdmin");

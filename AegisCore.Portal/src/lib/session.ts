@@ -58,6 +58,7 @@ export function hasAnyPermission(session: SessionUser | null, permissions: strin
 const DEMO_KEY = "aegiscore_demo_session";
 
 export const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+export const isDemoOfflinePreview = isDemoMode && process.env.NEXT_PUBLIC_DEMO_OFFLINE_PREVIEW === "true";
 
 export type DemoAccount = { email: string; label: string; desc: string };
 
