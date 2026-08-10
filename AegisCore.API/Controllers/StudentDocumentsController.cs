@@ -193,8 +193,6 @@ public sealed class StudentDocumentsController(
         var root = StorageRoot();
         if (!Directory.Exists(root)) return null;
 
-        // Document IDs are random and tenant metadata is authoritative. Search tenant directories
-        // rather than trusting a caller-supplied tenant path.
         foreach (var metadataPath in Directory.EnumerateFiles(root, $"{documentId}.json", SearchOption.AllDirectories))
         {
             var metadata = JsonSerializer.Deserialize<TranscriptMetadata>(await System.IO.File.ReadAllTextAsync(metadataPath, ct));
@@ -368,7 +366,7 @@ public sealed class StudentDocumentsController(
         string LetterGrade,
         decimal GradePoints,
         decimal Percentage,
-        DateTime? PublishedAt);
+        DateTimeOffset? PublishedAt);
 
     private sealed record TranscriptMetadata(
         string DocumentId,
