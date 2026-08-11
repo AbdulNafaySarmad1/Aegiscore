@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "repository": "Aegiscore-demo-integration",
+    "branch": "agent/prod-hardening",
+    "generated": "2026-08-11",
+    "phase": "BEFORE-optimization baseline (Queue G)",
+    "environment": {
+      "host_cpu_cores": 8,
+      "host_memory_gib": 14,
+      "stack": "docker-compose demo: AegisCore.API(net10.0) + AegisCore.Portal(Next.js16) + PostgreSQL17-alpine + Redis7-alpine",
+      "demo_mode": true,
+      "license_middleware_active_in_demo": false,
+      "load_tool": "k6 v0.54.0",
+      "path": "k6 -> Next.js portal (localhost:8080) -> API"
+    }
+  },
+  "staged_tests": [
+    {
+      "stage": "S1",
+      "users": 10,
+      "duration_s": 120,
+      "p50_s": 0.03,
+      "p90_s": 0.91,
+      "p95_s": 1.08,
+      "avg_s": 0.26,
+      "max_s": 7.81,
+      "req_per_s": 22.4,
+      "iterations_per_s": 5.7,
+      "non_2xx_percent": 16.2
+    },
+    {
+      "stage": "S2",
+      "users": 50,
+      "duration_s": 120,
+      "p50_s": 0.12,
+      "p90_s": 5.42,
+      "p95_s": 6.11,
+      "avg_s": 1.45,
+      "max_s": 30.03,
+      "req_per_s": 30.3,
+      "iterations_per_s": 7.7,
+      "non_2xx_percent": 15.7
+    },
+    {
+      "stage": "S3",
+      "users": 100,
+      "duration_s": 120,
+      "p50_s": 0.7,
+      "p90_s": 9.4,
+      "p95_s": 11.24,
+      "avg_s": 3.03,
+      "max_s": 30.15,
+      "req_per_s": 27.5,
+      "iterations_per_s": 7.0,
+      "non_2xx_percent": 15.0
+    }
+  ],
+  "endpoint_latency_100_vus_p95_s": {
+    "login": 13.52,
+    "transcript_pdf": 30.04,
+    "obe_overview": 8.84,
+    "refresh": 5.16,
+    "finance_executive": 5.01,
+    "grade_approvals": 4.61,
+    "finance_security": 4.55,
+    "obe_attainment": 4.77,
+    "transcript": 3.95,
+    "registration": 4.01,
+    "student_finance": 1.82,
+    "student_me": 3.07,
+    "student_attendance": 2.16,
+    "license_status": 2.88,
+    "session": 1.56,
+    "attendance_roster": 1.36,
+    "faculty_courses": 1.53
+  },
+  "license_overhead_ab": {
+    "method": "identical /api/session, pre-auth token, 5 VUs, direct API, no portal",
+    "demo_no_license_ms": { "avg": 1.8, "med": 1.36, "p95": 4.05 },
+    "perf_with_license_ms": { "avg": 4.1, "med": 3.29, "p95": 8.02 },
+    "delta_ms": { "avg": 2.3, "med": 1.9, "p95": 4.0 },
+    "per_request_db": "1 x SELECT FROM LicenseStates (ToLisTAsync, no cache, no WHERE) + set_config(app.tenant_id)",
+    "query_cost_rows1": "EXPLAIN ANALYZE: 0.03ms exec / 0.9ms plan (Seq Scan)",
+    "classification": "CONFIRMED_BY_CODE - LicenseService.cs:238-242; LicenseLockoutMiddleware.cs:28",
+    "demo_note": "LicenseLockoutMiddleware SKIPPED in demo mode (Runtime__DemoMode=true)"
+  },
+  "system_resources_100_vus": {
+    "api_cpu_percent": [654, 602, 584],
+    "api_mem_gib": [6.7, 5.9, 4.9],
+    "portal_cpu_percent": [2.8, 1.9, 3.2],
+    "postgres_cpu_percent": [27, 3, 18],
+    "redis_cpu_percent": [0.7, 6.0, 0.8],
+    "pg_active_conns": [1, 1, 1],
+    "pg_xact_per_window_13s": [2414, 3405, 3805],
+    "first_saturated_resource": "API process CPU (6+/8 cores)",
+    "api_mem_post_test_gib": 6.7
+  },
+  "error_breakdown": {
+    "overall_non_2xx_percent": 15.0,
+    "finance_executive": "500 pre-existing EF LINQ translation bug (not load)",
+    "grade_entry": "404 demo has 0 AssessmentSchemes (data)",
+    "grade_template": "404 data",
+    "transcript_pdf_at_50_vus": "75% timeout (k6 30s cap) - genuine load saturation"
+  },
+  "bottlenecks_ranked": [
+    "1. API CPU saturation: Argon2 logins + EF SQL console logging + synchronous PDF/PQC (6/8 cores, plateau ~30 req/s)",
+    "2. Transcript PDF generation synchronous: 3s single-user, 30s+ at 50 VUs",
+    "3. Login path: Argon2 + GeoIP + user query, 2-8s at 50-100 VUs",
+    "4. License per-request DB read: +1 round trip/request non-demo, +2-4ms trivial endpoint",
+    "5. OBE N+1 + in-memory aggregation (under-exercised by empty demo data)",
+    "6. EF SQL logging at Information level"
+  ],
+  "measurement_limitations": [
+    "Tiny demo dataset (2 students, 7 courses, 0 OBE/CLO, 0 finance vouchers) under-represents OBE/finance/registration hot paths",
+    "k6 default 30s request timeout caps transcript_pdf (p95/p99 = timeout artifact)",
+    "dotnet-counters/trace could not attach (DOTNET_EnableDiagnostics=0); GC inferred from memory, not measured",
+    "No OpenTelemetry; /metrics exposes only HTTP histograms",
+    "pg_stat_statements not enabled (avoided Postgres restart); used pg_stat_database + EXPLAIN ANALYZE + statement logging",
+    "Tests through portal proxy + demo-mode license skipped; non-demo adds +1 DB round trip/request",
+    "Shared 8-core host: results are a lower bound for single-tenant, upper bound for resources"
+  ],
+  "verdict": {
+    "first_bottleneck": "API process CPU",
+    "p95_crud_300ms_target": "NOT MET (session 1.56s, transcript read 3.94s at 100 VUs)",
+    "error_1pct_target": "NOT MET (15% - dominated by known data errors, not load)",
+    "db_not_saturated": true,
+    "redis_not_saturated": true,
+    "recommended_queues": ["A1 license cache", "A8 EF log level / dead code", "R8 async document generation", "LB-01 login path", "G2 seeded-data profiling"]
+  },
+  "cleanup": {
+    "disposable_perf_instance": "destroyed",
+    "throwaway_db_aegiscore_perf": "dropped",
+    "pg_log_statement": "restored to none",
+    "demo_stack_healthy": true,
+    "production_code_changed": false
+  }
+}
