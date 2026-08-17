@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { apiGet, clearTokens } from "@/lib/api-client";
@@ -14,6 +14,9 @@ import {
 import type { KPIDefinition, QuickAction, DashboardModule } from "@/lib/roles";
 
 type Session = { userId: string; tenantId: string; studentId: string | null; departmentId: string | null; name: string; roles: string[] };
+type StudentMe = { studentId: string; name: string; cgpa?: string | null; creditsCompleted?: string | null };
+type AttendanceHistory = { courses: Array<{ totalSessions: number; presentSessions: number }> };
+type StudentFinance = { demands: Array<{ currency: string; outstandingAmount: number }> };
 
 const kpiIcons: Record<string, typeof LayoutDashboard> = {
   LayoutDashboard, Landmark, FileText, CreditCard, BookOpenCheck, GraduationCap,
@@ -29,23 +32,26 @@ function TrendArrow({ trend }: { trend?: string }) {
   return <Minus size={14} className="kpi-trend" />;
 }
 
-function KpiCard({ kpi, value }: { kpi: KPIDefinition; value: string }) {
-  const formatted = kpi.format === "currency" ? `₨ ${Number(value).toLocaleString("en-PK")}`
-    : kpi.format === "percentage" ? `${value}%` : String(value);
+function KpiCard({ kpi, value }: { kpi: KPIDefinition; value: string | number }) {
+  const formatted = kpi.format === "currency" && Number.isFinite(Number(value)) ? `₨ ${Number(value).toLocaleString("en-PK")}`
+    : kpi.format === "percentage" && value !== "--" ? `${value}%` : String(value);
+  const longValue = formatted.length > 12;
   return (
-    <motion.article className="kpi-card" whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 180, damping: 20 }}>
-      <div className={`kpi-card-icon kpi-accent ${kpi.iconColor}`}><Icon name={kpi.icon} /></div>
-      <span className="kpi-label">{kpi.label}</span>
-      <strong className="kpi-number">{formatted}</strong>
-      {kpi.trend && <span className="kpi-trend"><TrendArrow trend={kpi.trend} />{kpi.trendLabel}</span>}
+    <motion.article
+      className="kpi-card"
+      style={{ display:"grid", gridTemplateColumns:"40px minmax(0,1fr)", gridTemplateRows:"auto auto", columnGap:14, rowGap:5, alignItems:"center", minHeight:138, padding:"20px 22px" }}
+      whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 180, damping: 20 }}
+    >
+      <div className={`kpi-card-icon kpi-accent ${kpi.iconColor}`} style={{ gridRow:"1 / span 2", margin:0, width:40, height:40 }}><Icon name={kpi.icon} /></div>
+      <span className="kpi-label" style={{ display:"block", fontSize:14, fontWeight:700, letterSpacing:".035em", lineHeight:1.25, alignSelf:"end" }}>{kpi.label}</span>
+      <strong className="kpi-number" style={{ display:"block", fontSize:longValue ? 22 : 27, lineHeight:1.15, margin:0, alignSelf:"start", whiteSpace:longValue ? "normal" : "nowrap", overflowWrap:"anywhere" }}>{formatted}</strong>
+      {kpi.trend && <span className="kpi-trend" style={{ gridColumn:"2" }}><TrendArrow trend={kpi.trend} />{kpi.trendLabel}</span>}
     </motion.article>
   );
 }
 
 function QuickAction({ action }: { action: QuickAction }) {
-  return (
-    <Link href={action.route} className="quick-action-btn"><ActionIcon name={action.icon} />{action.label}</Link>
-  );
+  return <Link href={action.route} className="quick-action-btn"><ActionIcon name={action.icon} />{action.label}</Link>;
 }
 
 function ModuleCard({ module: m, index }: { module: DashboardModule; index: number }) {
@@ -68,47 +74,34 @@ function ModuleCard({ module: m, index }: { module: DashboardModule; index: numb
 export default function DashboardPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [kpiValues, setKpiValues] = useState<Record<string, string | number>>({});
 
   useEffect(() => {
     let cancelled = false;
-
     apiGet<Session>("/api/session")
       .then(async (s) => {
         if (cancelled) return;
-
         let resolved = s;
-
         if (s.roles.includes("Student")) {
           try {
-            const me = await apiGet<{ studentId: string; name: string }>(
-              "/api/student-portal/me"
-            );
-
-            resolved = {
-              ...s,
-              studentId: me.studentId,
-              name: me.name || s.name,
-            };
-          } catch {
-            // Session is still valid even if student profile enrichment fails.
-          }
+            const me = await apiGet<StudentMe>("/api/student-portal/me");
+            resolved = { ...s, studentId: me.studentId, name: me.name || s.name };
+            const [attendance, finance] = await Promise.all([
+              apiGet<AttendanceHistory>("/api/student-portal/attendance/history").catch(() => ({ courses: [] })),
+              apiGet<StudentFinance>(`/api/finance/v2/student-portal/${encodeURIComponent(me.studentId)}`).catch(() => ({ demands: [] })),
+            ]);
+            const totalSessions = attendance.courses.reduce((sum, course) => sum + course.totalSessions, 0);
+            const presentSessions = attendance.courses.reduce((sum, course) => sum + course.presentSessions, 0);
+            const attendancePercent = totalSessions > 0 ? Math.round((presentSessions / totalSessions) * 100) : 0;
+            const outstanding = finance.demands.reduce((sum, demand) => sum + Number(demand.outstandingAmount || 0), 0);
+            const currency = finance.demands[0]?.currency ?? "PKR";
+            if (!cancelled) setKpiValues({ cgpa: me.cgpa ?? "--", credits: me.creditsCompleted ?? "--", attendance: attendancePercent, fees: outstanding > 0 ? `${currency} ${outstanding.toLocaleString("en-PK")} due` : "Paid" });
+          } catch {}
         }
-
-        if (!cancelled) {
-          setSession(resolved);
-          setLoading(false);
-        }
+        if (!cancelled) { setSession(resolved); setLoading(false); }
       })
-      .catch(() => {
-        if (!cancelled) {
-          clearTokens();
-          window.location.href = "/login";
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
+      .catch(() => { if (!cancelled) { clearTokens(); window.location.href = "/login"; } });
+    return () => { cancelled = true; };
   }, []);
 
   if (!session) return <AppShell><div className="content-page"><div className="skeleton" style={{ height: 200 }} /></div></AppShell>;
@@ -116,57 +109,35 @@ export default function DashboardPage() {
   const profile = getRoleProfile(session.roles);
   const { greeting } = getGreeting(session.name);
   const isExecutive = ["SuperAdmin", "VC", "Admin", "Finance"].includes(profile.role);
-  const modules = profile.dashboardModules.sort((a, b) => a.priority - b.priority);
+  const modules = [...profile.dashboardModules].sort((a, b) => a.priority - b.priority);
 
   return (
     <AppShell>
       <div className="content-page">
-        {/* Hero */}
         <motion.div className="hero-greeting" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
           <h1>{greeting}</h1>
           <p>{profile.displayName} · {session.tenantId.slice(0, 8)}</p>
           <div className="hero-time">{new Date().toLocaleDateString("en-PK", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
         </motion.div>
 
-        {/* KPIs */}
         <div className="kpi-grid" style={{ marginBottom: 24 }}>
-          {profile.kpis.map(kpi => (
-            <KpiCard key={kpi.id} kpi={kpi} value={loading ? "--" : String(kpi.value)} />
-          ))}
+          {profile.kpis.map(kpi => <KpiCard key={kpi.id} kpi={kpi} value={loading ? "--" : (kpiValues[kpi.id] ?? kpi.value)} />)}
         </div>
 
-        {/* Quick Actions */}
-        {profile.quickActions.length > 0 && (
-          <div className="quick-actions" style={{ marginBottom: 28 }}>
-            {profile.quickActions.map(a => <QuickAction key={a.id} action={a} />)}
-          </div>
-        )}
+        {profile.quickActions.length > 0 && <div className="quick-actions" style={{ marginBottom: 28 }}>{profile.quickActions.map(a => <QuickAction key={a.id} action={a} />)}</div>}
 
-        {/* Module Grid */}
-        <div className="page-header" style={{ paddingTop: 0 }}>
-          <div><h2>Workspace</h2></div>
-        </div>
+        <div className="page-header" style={{ paddingTop: 0 }}><div><h2>Workspace</h2></div></div>
         <div className={`module-grid ${isExecutive ? "grid-cols-2" : ""}`} style={{ gridTemplateColumns: isExecutive ? "minmax(0,1.6fr) 320px" : undefined }}>
           <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", alignContent: "start" }}>
             {modules.slice(0, isExecutive ? 8 : 12).map((m, i) => <ModuleCard key={m.id} module={m} index={i} />)}
           </div>
-          {isExecutive && (
-            <div className="card" style={{ height: "fit-content" }}>
-              <div className="card-header"><h3 style={{ fontSize: 14 }}>Priority Alerts</h3></div>
-              <div className="card-body" style={{ display: "grid", gap: 8 }}>
-                <div className="error-state" style={{ background: "var(--warning-soft)", border: "none", color: "var(--warning)", padding: 12 }}>
-                  <ShieldCheck size={18} /><p style={{ fontSize: 12 }}>All clear — no critical escalations.</p>
-                </div>
-                {modules.filter(m => m.badge === "LIVE" || m.badge === "EXECUTIVE" || m.badge === "ACTIVE").slice(0, 4).map(m => (
-                  <Link key={m.id} href={m.route} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", textDecoration: "none", color: "inherit", fontSize: 13 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: getDomainColor(m.domain), flexShrink: 0 }} />
-                    <span>{m.label}</span>
-                    <span className="badge badge-primary" style={{ marginLeft: "auto", fontSize: 9 }}>{m.domain}</span>
-                  </Link>
-                ))}
-              </div>
+          {isExecutive && <div className="card" style={{ height: "fit-content" }}>
+            <div className="card-header"><h3 style={{ fontSize: 14 }}>Priority Alerts</h3></div>
+            <div className="card-body" style={{ display: "grid", gap: 8 }}>
+              <div className="error-state" style={{ background: "var(--warning-soft)", border: "none", color: "var(--warning)", padding: 12 }}><ShieldCheck size={18} /><p style={{ fontSize: 12 }}>All clear — no critical escalations.</p></div>
+              {modules.filter(m => m.badge === "LIVE" || m.badge === "EXECUTIVE" || m.badge === "ACTIVE").slice(0, 4).map(m => <Link key={m.id} href={m.route} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", textDecoration: "none", color: "inherit", fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: getDomainColor(m.domain), flexShrink: 0 }} /><span>{m.label}</span><span className="badge badge-primary" style={{ marginLeft: "auto", fontSize: 9 }}>{m.domain}</span></Link>)}
             </div>
-          )}
+          </div>}
         </div>
       </div>
     </AppShell>

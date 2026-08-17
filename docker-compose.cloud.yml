@@ -11,15 +11,21 @@ services:
   api:
     environment:
       DEPLOYMENT_MODE: cloud
+      ASPNETCORE_ENVIRONMENT: "Demo"
+      AEGISCORE_INSTALLATION_COMPLETED: "true"
       AEGISCORE_FRONTEND_URL: ${AEGISCORE_FRONTEND_URL}
       Runtime__DemoMode: "true"
       Demo__SeedGoldenUniverse: "false"
       Demo__AllowExplicitExternalSeed: "false"
       AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:?AEGISCORE_DB_CONNECTION must be set}
       AEGISCORE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+      Attendance__CampusLatitude: "24.812576"
+      Attendance__CampusLongitude: "67.114831"
+      Attendance__RadiusMeters: "750"
+      Attendance__TimeZone: "Asia/Karachi"
 
-    # Completely remove inherited postgres/redis dependencies.
-    # Redis is started explicitly before API.
+    # PostgreSQL is external. Redis is local and the API restart policy handles
+    # the short startup race while Redis becomes healthy.
     depends_on: !reset {}
 
     restart: always

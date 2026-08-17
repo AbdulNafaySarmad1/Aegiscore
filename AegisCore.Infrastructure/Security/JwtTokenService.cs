@@ -11,7 +11,8 @@ using StackExchange.Redis;
 namespace AegisCore.Infrastructure.Security;
 
 /// <summary>
-/// Service for generating and validating JWT tokens using RS256.
+/// Service for generating and validating JWT tokens using RS256 when an RSA keypair
+/// is configured and HS256 as a deployment-compatible fallback.
 /// </summary>
 public class JwtTokenService : IJwtTokenService
 {
@@ -22,11 +23,6 @@ public class JwtTokenService : IJwtTokenService
     private const string RefreshFamilyKeyPrefix = "aegiscore:auth:refresh:family:";
     private static readonly TimeSpan FamilyTtl = TimeSpan.FromDays(14);
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="JwtTokenService"/> class.
-    /// </summary>
-    /// <param name="configuration">The application configuration.</param>
-    /// <param name="redis">The Redis connection multiplexer.</param>
     public JwtTokenService(IConfiguration configuration, IConnectionMultiplexer redis)
     {
         _redis = redis;
@@ -52,21 +48,32 @@ public class JwtTokenService : IJwtTokenService
         _algorithm = SecurityAlgorithms.HmacSha256;
     }
 
-    /// <inheritdoc />
     public string GenerateAccessToken(User user)
     {
-        var credentials = new SigningCredentials(
-            _signingKey,
-            _algorithm
-        );
+        var credentials = new SigningCredentials(_signingKey, _algorithm);
+        var fullName = string.Join(' ', new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x))).Trim();
 
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Name, string.IsNullOrWhiteSpace(fullName) ? user.Email : fullName),
             new("tenant_id", user.TenantId.ToString())
         };
-        claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
+
+        var roleNames = user.UserRoles
+            .Where(ur => ur.Role is not null && !string.IsNullOrWhiteSpace(ur.Role.Name))
+            .Select(ur => ur.Role.Name)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        claims.AddRange(roleNames.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        // In the current domain model student users intentionally share the same UUID
+        // as their Student row. Emitting student_id makes the contract explicit and keeps
+        // portal/API authorization independent from that implementation detail.
+        if (roleNames.Contains("Student", StringComparer.Ordinal))
+            claims.Add(new Claim("student_id", user.Id.ToString()));
 
         var token = new JwtSecurityToken(
             issuer: "https://aegiscore.pk",
@@ -79,7 +86,6 @@ public class JwtTokenService : IJwtTokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    /// <inheritdoc />
     public string GenerateRefreshToken()
     {
         var randomBytes = new byte[32];
@@ -88,7 +94,6 @@ public class JwtTokenService : IJwtTokenService
         return Convert.ToBase64String(randomBytes);
     }
 
-    /// <inheritdoc />
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -108,7 +113,6 @@ public class JwtTokenService : IJwtTokenService
         return tokenHandler.ValidateToken(token, validationParameters, out _);
     }
 
-    /// <inheritdoc />
     public async Task<Guid> GenerateRefreshTokenFamilyAsync(Guid userId)
     {
         var familyId = Guid.NewGuid();
@@ -123,7 +127,6 @@ public class JwtTokenService : IJwtTokenService
         return familyId;
     }
 
-    /// <inheritdoc />
     public async Task InvalidateRefreshTokenFamilyAsync(Guid familyId)
     {
         var db = _redis.GetDatabase();
@@ -141,7 +144,6 @@ public class JwtTokenService : IJwtTokenService
         await db.StringSetAsync(key, JsonSerializer.Serialize(updated), FamilyTtl);
     }
 
-    /// <inheritdoc />
     public async Task<bool> IsRefreshTokenFamilyValidAsync(Guid familyId)
     {
         var db = _redis.GetDatabase();

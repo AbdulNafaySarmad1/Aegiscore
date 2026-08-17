@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: aegiscore
       POSTGRES_USER: aegiscore
       POSTGRES_PASSWORD: aegiscore-demo-local
+      APP_DB_USER: aegiscore
+      APP_DB_PASSWORD: aegiscore-demo-local
     volumes:
       - aegiscore_demo_postgres:/var/lib/postgresql/data
     healthcheck:
@@ -19,11 +21,18 @@ services:
 
   api:
     environment:
-      AEGISCORE_DB_CONNECTION: "Host=postgres;Port=5432;Database=aegiscore;Username=aegiscore;Password=aegiscore-demo-local"
+      ASPNETCORE_ENVIRONMENT: "Demo"
+      AEGISCORE_INSTALLATION_COMPLETED: "true"
+      AEGISCORE_DB_CONNECTION: "Host=postgres;Port=5432;Database=aegiscore;Username=aegiscore;Password=aegiscore-demo-local;SslMode=Disable"
       Demo__UseEnsureCreated: "true"
       Demo__SeedGoldenUniverse: "true"
       Demo__AllowExplicitExternalSeed: "false"
       Runtime__DemoMode: "true"
+      Deployment__FailOnReadinessError: "false"
+      Attendance__CampusLatitude: "24.812576"
+      Attendance__CampusLongitude: "67.114831"
+      Attendance__RadiusMeters: "750"
+      Attendance__TimeZone: "Asia/Karachi"
     depends_on:
       postgres:
         condition: service_healthy

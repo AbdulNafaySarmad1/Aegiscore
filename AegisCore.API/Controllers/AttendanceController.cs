@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
@@ -12,6 +13,27 @@ namespace AegisCore.API.Controllers;
 [Authorize(Roles = "Faculty,HOD,Admin,SuperAdmin")]
 public sealed class AttendanceController(AegisDbContext db) : ControllerBase
 {
+    [HttpGet("roster/{courseId:guid}")]
+    public async Task<IActionResult> Roster(Guid courseId, CancellationToken ct)
+    {
+        var students = await db.Enrollments
+            .AsNoTracking()
+            .Where(e => e.CourseId == courseId)
+            .Include(e => e.Student)
+            .OrderBy(e => e.Student.FirstName)
+            .ThenBy(e => e.Student.LastName)
+            .Select(e => new
+            {
+                enrollmentId = e.Id,
+                studentId = e.StudentId,
+                name = e.Student.FirstName + " " + e.Student.LastName,
+                universityId = e.Student.UniversityId
+            })
+            .ToListAsync(ct);
+
+        return Ok(new { courseId, students });
+    }
+
     [HttpPost("mark")]
     public async Task<IActionResult> Mark([FromBody] MarkAttendanceRequest request, CancellationToken ct)
     {
@@ -21,8 +43,11 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
         var course = await db.Courses.FindAsync([request.CourseId], ct);
         if (course is null) return NotFound(new { error = "Course not found." });
 
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var facultyId) || facultyId == Guid.Empty)
+            return Unauthorized(new { error = "Faculty identity is missing from the authenticated session." });
+
         var sessionDate = request.SessionDate.Date;
-        int created = 0, updated = 0;
+        int created = 0, alreadyMarked = 0;
 
         foreach (var entry in request.Entries)
         {
@@ -32,7 +57,7 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
 
             if (existing is not null)
             {
-                updated++;
+                alreadyMarked++;
                 continue;
             }
 
@@ -41,7 +66,7 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
                 Id = Guid.NewGuid(),
                 CourseId = request.CourseId,
                 EnrollmentId = entry.EnrollmentId,
-                FacultyId = request.MarkedByFacultyId,
+                FacultyId = facultyId,
                 Date = sessionDate,
                 Status = entry.Status,
                 CreatedAt = DateTime.UtcNow
@@ -50,7 +75,7 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
         }
 
         await db.SaveChangesAsync(ct);
-        return Ok(new { message = "Attendance recorded.", entriesCreated = created, entriesAlreadyMarked = updated });
+        return Ok(new { message = "Attendance recorded.", entriesCreated = created, entriesAlreadyMarked = alreadyMarked });
     }
 
     [HttpGet("report/course/{courseId:guid}")]

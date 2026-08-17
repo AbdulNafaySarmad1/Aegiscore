@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api-client";
 import { PersonalityModeProvider } from "@/lib/personality-context";
 
@@ -9,11 +10,16 @@ export function PersonalityLayoutWrapper({ children }: { children: React.ReactNo
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("aegiscore_demo_session");
-      if (raw) { const acc = JSON.parse(raw); setUserId(acc.email); }
-      else { setUserId(null); }
-    } catch { setUserId(null); }
+    let cancelled = false;
+    apiGet<Session>("/api/session")
+      .then(session => {
+        if (!cancelled) setUserId(session.userId);
+      })
+      .catch(() => {
+        if (!cancelled) setUserId(null);
+      });
+
+    return () => { cancelled = true; };
   }, []);
 
   return (

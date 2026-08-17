@@ -1,0 +1,215 @@
+name: Prod Hardening CI
+
+on:
+  pull_request:
+    branches:
+      - agent/demo-integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portal:
+    name: Portal typecheck and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AegisCore.Portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: AegisCore.Portal/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
+
+  api:
+    name: API restore and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore AegisCore.API/AegisCore.API.csproj
+      - run: dotnet build AegisCore.API/AegisCore.API.csproj -c Release --no-restore -p:UseSharedCompilation=false
+
+  demo-smoke:
+    name: Golden demo runtime smoke
+    needs: [portal, api]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      AEGISCORE_BIND_ADDRESS: 127.0.0.1
+      AEGISCORE_PORT: "8080"
+      TENANT_ID: 11111111-2222-4333-8444-555555555555
+      POSTGRES_DB: aegiscore
+      POSTGRES_USER: aegiscore
+      POSTGRES_PASSWORD: aegiscore-demo-local
+      POSTGRES_ADMIN_USER: aegiscore
+      POSTGRES_ADMIN_PASSWORD: aegiscore-demo-local
+      REDIS_PASSWORD: redis-demo-local-2026
+      LICENSE_HMAC_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      AEGISCORE_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      AEGISCORE_PQC_KEY_BASE64: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      AEGISCORE_JWT_SECRET: ci-only-jwt-secret-0123456789abcdef0123456789abcdef0123456789abcdef
+      GOVERNANCE_FEEDBACK_KEY_BASE64: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      AEGISCORE_DEMO_MODE: "true"
+      AEGISCORE_INSTALLATION_COMPLETED: "true"
+      AEGISCORE_AUTO_MIGRATE: "false"
+      AEGISCORE_SEED_GOLDEN_DEMO: "true"
+      AEGISCORE_REQUIRE_EDGE_PQC: "false"
+      NEXT_PUBLIC_DEMO_MODE: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose model
+        run: docker compose -f docker-compose.yml -f docker-compose.local-demo.yml config --quiet
+
+      - name: Build and start golden demo
+        run: docker compose -f docker-compose.yml -f docker-compose.local-demo.yml up -d --build
+
+      - name: Wait for portal and API
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 5 http://127.0.0.1:8080/health/live >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 4
+          done
+          if [ "$ready" != "1" ]; then
+            echo "Demo did not become healthy in time."
+            docker compose -f docker-compose.yml -f docker-compose.local-demo.yml ps
+            exit 1
+          fi
+          curl -fsS http://127.0.0.1:8080/portal-health >/dev/null
+          curl -fsS http://127.0.0.1:8080/health/live
+
+      - name: Smoke golden student journey
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="http://127.0.0.1:8080"
+
+          login=$(curl -fsS -H 'Content-Type: application/json' \
+            -d '{"email":"student@iobm.demo","password":"Koenigsegg$One1"}' \
+            "$base/api/auth/login")
+          token=$(LOGIN="$login" python3 - <<'PY'
+          import json, os
+          data=json.loads(os.environ['LOGIN'])
+          token=data.get('accessToken')
+          assert token, data
+          print(token)
+          PY
+          )
+          auth="Authorization: Bearer $token"
+
+          session=$(curl -fsS -H "$auth" "$base/api/session")
+          SESSION="$session" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['SESSION'])
+          assert 'Student' in d.get('roles', []), d
+          assert d.get('studentId'), d
+          assert d.get('name') == 'Ali Hassan', d
+          PY
+
+          profile=$(curl -fsS -H "$auth" "$base/api/student-portal/me")
+          PROFILE="$profile" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['PROFILE'])
+          assert d.get('name') == 'Ali Hassan', d
+          assert d.get('program') == 'BS Computer Science', d
+          assert d.get('universityId') == 'IoBM-2024-0178', d
+          PY
+
+          curl -fsS -X PUT -H "$auth" -H 'Content-Type: application/json' \
+            -d '{"phone":"+92 300 1234567","address":"A-12, Block 3, Gulshan-e-Iqbal, Karachi","paymentAlias":"03211234567","preferredName":"Ali Hassan"}' \
+            "$base/api/student-portal/me/profile" >/dev/null
+
+          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > /tmp/avatar.png
+          avatar=$(curl -fsS -H "$auth" -F 'avatar=@/tmp/avatar.png;type=image/png' "$base/api/student-profile-media/me/avatar")
+          AVATAR="$avatar" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['AVATAR'])
+          assert d.get('dataUrl','').startswith('data:image/png;base64,'), d
+          PY
+          curl -fsS -H "$auth" "$base/api/student-profile-media/me/avatar" | grep -q 'data:image/png;base64,'
+
+          finance=$(curl -fsS -H "$auth" "$base/api/finance/v2/student-portal/a0000000-0000-0000-0000-000000000008")
+          demand_id=$(FINANCE="$finance" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['FINANCE'])
+          assert d.get('demands'), d
+          demand=d['demands'][0]
+          assert demand['currency'] == 'PKR', demand
+          assert float(demand['outstandingAmount']) > 0, demand
+          print(demand['id'])
+          PY
+          )
+
+          curl -fsS -X POST -H "$auth" -H 'Content-Type: application/json' -d '{}' \
+            "$base/api/student-portal/finance/challan/$demand_id" -o /tmp/challan.pdf
+          test "$(head -c 4 /tmp/challan.pdf)" = '%PDF'
+
+          payment=$(curl -fsS -X POST -H "$auth" -H 'Content-Type: application/json' \
+            -d "{\"feeDemandId\":\"$demand_id\",\"feeInstallmentId\":null,\"currency\":\"PKR\",\"payerReference\":\"registered\"}" \
+            "$base/api/finance/v2/payments/raast/request-to-pay")
+          PAYMENT="$payment" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['PAYMENT'])
+          assert d.get('success') is True, d
+          assert d.get('isSandbox') is True, d
+          assert d.get('rtpRequestId'), d
+          PY
+
+          official=$(curl -fsS -X POST -H "$auth" -H 'Content-Type: application/json' -d '{}' \
+            "$base/api/student-documents/transcript/official")
+          document_id=$(OFFICIAL="$official" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['OFFICIAL'])
+          assert d.get('documentId'), d
+          assert d.get('algorithm') == 'SLH-DSA-SHA2-128s', d
+          assert d.get('signature') and d.get('publicKey') and d.get('sha256'), d
+          print(d['documentId'])
+          PY
+          )
+
+          curl -fsS -H "$auth" "$base/api/student-documents/transcript/$document_id/download" -o /tmp/transcript.pdf
+          test "$(head -c 4 /tmp/transcript.pdf)" = '%PDF'
+          verify=$(curl -fsS "$base/api/student-documents/transcript/$document_id/verify")
+          VERIFY="$verify" python3 - <<'PY'
+          import json, os
+          d=json.loads(os.environ['VERIFY'])
+          assert d.get('verified') is True, d
+          PY
+
+          status=$(curl -sS -o /tmp/attendance.json -w '%{http_code}' -X POST \
+            -H "$auth" -H 'Content-Type: application/json' \
+            -d '{"courseId":"cccc0000-0000-0000-0000-000000000001","latitude":0,"longitude":0}' \
+            "$base/api/student-attendance/check-in")
+          test "$status" = "400"
+          grep -qi 'outside the attendance zone' /tmp/attendance.json
+
+          echo "Golden student runtime journey passed."
+
+      - name: Container status
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.local-demo.yml ps
+
+      - name: Demo logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml -f docker-compose.local-demo.yml logs --no-color --tail=300
+
+      - name: Tear down demo
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.local-demo.yml down -v --remove-orphans

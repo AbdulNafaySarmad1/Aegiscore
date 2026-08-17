@@ -94,7 +94,6 @@ if (!isInstalled)
     builder.Services.AddCoreServices(builder.Configuration);
     builder.Services.AddSetupServices(builder.Configuration);
 }
-
 else
 {
     Log.Information("AegisCore starting in production mode");
@@ -170,8 +169,11 @@ else
     app.UseMiddleware<GlobalExceptionMiddleware>();
     app.UseSerilogRequestLogging();
     app.UseMiddleware<RequestLoggingMiddleware>();
-    app.UseMiddleware<RateLimitingMiddleware>();
-    app.UseMiddleware<RateLimitAuthMiddleware>();
+
+    // Traffic-level rate limiting is intentionally enforced at the Cloudflare edge.
+    // Do not add per-process/IP request throttling here: AegisCore deployments are
+    // multi-user and tenant/subdomain traffic may legitimately arrive through shared
+    // networks. Application-level authentication abuse protection remains separate.
     app.UseMiddleware<AuthenticatedOriginPullsMiddleware>();
     app.UseMiddleware<DemoExpiryMiddleware>();
     app.UseMiddleware<HybridPqcTransportMiddleware>();
@@ -180,11 +182,12 @@ else
     app.UseCors("CloudflarePages");
     app.UseAuthentication();
     app.UseMiddleware<DemoIdentityMiddleware>();
-    app.UseMiddleware<GlobalRateLimitMiddleware>();
     app.UseMiddleware<LicenseLockoutMiddleware>();
     app.UseMiddleware<TenantContextMiddleware>();
     app.UseAuthorization();
 
+    // Turnstile remains application-validated where configured; Cloudflare handles
+    // the challenge at the edge and the API verifies the supplied token as needed.
     app.UseMiddleware<TurnstileMiddleware>();
     app.UseMiddleware<AbacMiddleware>();
     app.UseMiddleware<CasbinAuthorizationMiddleware>();
@@ -302,7 +305,6 @@ else
         Log.CloseAndFlush();
     }
 }
-
 
 static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
 {
