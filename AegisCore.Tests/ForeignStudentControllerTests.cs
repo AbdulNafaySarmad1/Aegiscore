@@ -22,9 +22,7 @@ public sealed class ForeignStudentControllerTests
     {
         var registry = new ForeignStudentRegistry { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Nationality = "Nigeria", PassportNumber = "A12345678", VisaType = VisaType.StudentVisa };
         _service.Setup(s => s.RegisterStudentAsync(It.IsAny<ForeignStudentRegistry>(), It.IsAny<CancellationToken>())).ReturnsAsync(registry);
-
         var result = await _controller.Register(registry, CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(registry, ok.Value);
     }
@@ -34,9 +32,7 @@ public sealed class ForeignStudentControllerTests
     {
         var alerts = new List<VisaExpiryAlert> { new() { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), DaysRemaining = 30, Urgency = ExpiryUrgency.ThirtyDays } };
         _service.Setup(s => s.CheckExpiriesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(alerts);
-
         var result = await _controller.ExpiryAlerts(CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(ok.Value);
     }
@@ -45,20 +41,16 @@ public sealed class ForeignStudentControllerTests
     public async Task ExpiryAlerts_NoAlerts_ReturnsEmpty()
     {
         _service.Setup(s => s.CheckExpiriesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<VisaExpiryAlert>());
-
         var result = await _controller.ExpiryAlerts(CancellationToken.None);
-
         Assert.IsType<OkObjectResult>(result);
     }
 
     [Fact]
     public async Task MoraSubmit_ValidSemester_ReturnsSubmission()
     {
-        var submission = new MoraSubmission { Id = Guid.NewGuid(), Semester = "2025S", StudentCount = 150, IsSubmitted = true };
+        var submission = new MoraSubmission { Id = Guid.NewGuid(), Status = "submitted" };
         _service.Setup(s => s.SubmitToMoraAsync("2025S", It.IsAny<CancellationToken>())).ReturnsAsync(submission);
-
         var result = await _controller.MoraSubmit("2025S", CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(submission, ok.Value);
     }
@@ -69,9 +61,7 @@ public sealed class ForeignStudentControllerTests
         var registryId = Guid.NewGuid();
         var renewal = new VisaRenewal { Id = Guid.NewGuid(), RegistryId = registryId, Status = RenewalStatus.Submitted };
         _service.Setup(s => s.InitiateRenewalAsync(registryId, It.IsAny<CancellationToken>())).ReturnsAsync(renewal);
-
         var result = await _controller.InitiateRenewal(registryId, CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(renewal, ok.Value);
     }
@@ -80,11 +70,9 @@ public sealed class ForeignStudentControllerTests
     public async Task ReportBreach_ValidInput_ReturnsBreach()
     {
         var registryId = Guid.NewGuid();
-        var breach = new ComplianceBreach { Id = Guid.NewGuid(), RegistryId = registryId, Description = "Visa expired without renewal" };
+        var breach = new ComplianceBreach { Id = Guid.NewGuid(), ForeignStudentRecordId = registryId, Description = "Visa expired without renewal" };
         _service.Setup(s => s.ReportBreachAsync(registryId, "Visa expired without renewal", It.IsAny<CancellationToken>())).ReturnsAsync(breach);
-
         var result = await _controller.ReportBreach(registryId, "Visa expired without renewal", CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(breach, ok.Value);
     }
@@ -94,9 +82,7 @@ public sealed class ForeignStudentControllerTests
     {
         var students = new List<ForeignStudentRegistry> { new() { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Nationality = "India", Compliance = ComplianceLevel.FullyCompliant } };
         _service.Setup(s => s.GetComplianceReportAsync(It.IsAny<CancellationToken>())).ReturnsAsync(students);
-
         var result = await _controller.Compliance(CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(ok.Value);
     }
