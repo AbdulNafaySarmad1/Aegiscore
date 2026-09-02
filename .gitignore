@@ -25,7 +25,11 @@ AegisCore.Portal/test-results/
 *.pre-dbset-dedupe.bak
 
 # Local/generated Graphify data
-graphify-out/
+graphify-out/*
+!graphify-out/graph.json
+!graphify-out/graph.html
+!graphify-out/GRAPH_REPORT.md
+!graphify-out/manifest.json
 
 # Kubernetes secrets - use templates / external secret management
 k8s/secret.yaml
