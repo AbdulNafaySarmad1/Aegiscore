@@ -22,9 +22,7 @@ public sealed class BoardControllerTests
     {
         var dashboard = new ExecutiveDashboard { Id = Guid.NewGuid(), UserRole = "Dean", FiscalYear = "2025", CompositeRankingScore = 87.5 };
         _service.Setup(s => s.GenerateDashboardAsync("Dean", "2025", It.IsAny<CancellationToken>())).ReturnsAsync(dashboard);
-
         var result = await _controller.Dashboard("Dean", "2025", CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(dashboard, ok.Value);
     }
@@ -35,9 +33,7 @@ public sealed class BoardControllerTests
         var date = DateTime.UtcNow.AddDays(14);
         var pack = new BoardMeetingPack { Id = Guid.NewGuid(), Title = "Q3 Board Meeting", MeetingDate = date };
         _service.Setup(s => s.GenerateBoardPackAsync("Q3 Board Meeting", date, It.IsAny<CancellationToken>())).ReturnsAsync(pack);
-
         var result = await _controller.BoardPack("Q3 Board Meeting", date, CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(pack, ok.Value);
     }
@@ -45,11 +41,9 @@ public sealed class BoardControllerTests
     [Fact]
     public async Task Alerts_HasAlerts_ReturnsAlerts()
     {
-        var alerts = new List<BoardAlert> { new() { Id = Guid.NewGuid(), Title = "Accreditation deadline approaching", Category = AlertCategory.Financial }, new() { Id = Guid.NewGuid(), Title = "Budget variance detected", Category = AlertCategory.Compliance } };
+        var alerts = new List<BoardAlert> { new() { Id = Guid.NewGuid(), Message = "Accreditation item", Category = AlertCategory.Financial.ToString() }, new() { Id = Guid.NewGuid(), Message = "Budget item", Category = AlertCategory.Compliance.ToString() } };
         _service.Setup(s => s.GetAlertsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(alerts);
-
         var result = await _controller.Alerts(CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(ok.Value);
     }
@@ -58,9 +52,7 @@ public sealed class BoardControllerTests
     public async Task Alerts_NoAlerts_ReturnsEmpty()
     {
         _service.Setup(s => s.GetAlertsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<BoardAlert>());
-
         var result = await _controller.Alerts(CancellationToken.None);
-
         Assert.IsType<OkObjectResult>(result);
     }
 
@@ -69,9 +61,7 @@ public sealed class BoardControllerTests
     {
         var goals = new List<StrategicPlanGoal> { new() { Id = Guid.NewGuid(), Title = "Increase research output", CurrentValue = 65, TargetValue = 100, PercentAchieved = 65 } };
         _service.Setup(s => s.GetStrategicGoalsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(goals);
-
         var result = await _controller.StrategicGoals(CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(ok.Value);
     }
@@ -80,9 +70,7 @@ public sealed class BoardControllerTests
     public async Task StrategicGoals_NoGoals_ReturnsEmpty()
     {
         _service.Setup(s => s.GetStrategicGoalsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<StrategicPlanGoal>());
-
         var result = await _controller.StrategicGoals(CancellationToken.None);
-
         Assert.IsType<OkObjectResult>(result);
     }
 
@@ -91,9 +79,7 @@ public sealed class BoardControllerTests
     {
         var benchmarks = new List<BenchmarkComparison> { new() { Id = Guid.NewGuid(), FactorName = "Graduation Rate", InstitutionValue = 92, NationalAverage = 85, PeerAverage = 88, AcademicYear = "2025", IsAboveAverage = true } };
         _service.Setup(s => s.GetBenchmarksAsync("2025", It.IsAny<CancellationToken>())).ReturnsAsync(benchmarks);
-
         var result = await _controller.Benchmarks("2025", CancellationToken.None);
-
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(ok.Value);
     }
@@ -102,9 +88,7 @@ public sealed class BoardControllerTests
     public async Task Benchmarks_NoData_ReturnsEmpty()
     {
         _service.Setup(s => s.GetBenchmarksAsync("2025", It.IsAny<CancellationToken>())).ReturnsAsync(new List<BenchmarkComparison>());
-
         var result = await _controller.Benchmarks("2025", CancellationToken.None);
-
         Assert.IsType<OkObjectResult>(result);
     }
 }
