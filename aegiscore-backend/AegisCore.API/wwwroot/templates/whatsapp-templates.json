@@ -1,7 +1,0 @@
-[
-  {"name":"fee_reminder","language":"en","category":"UTILITY","body":"Your semester fee of {{amount}} is due on {{due_date}}. Pay here: {{payment_link}}"},
-  {"name":"attendance_alert","language":"en","category":"UTILITY","body":"Your attendance in {{course_code}} is {{attendance}}%. Minimum required: 75%."},
-  {"name":"result_published","language":"en","category":"UTILITY","body":"Results for {{semester}} are published. Your SGPA is {{sgpa}}. View: {{portal_link}}"},
-  {"name":"hall_ticket_ready","language":"en","category":"UTILITY","body":"Your hall ticket for {{course_code}} on {{exam_date}} is ready. Download: {{portal_link}}"},
-  {"name":"grievance_status_update","language":"en","category":"UTILITY","body":"Grievance #{{ticket_id}} status: {{status}}. Response: {{message}}"}
-]
