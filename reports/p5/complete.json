@@ -1,0 +1,80 @@
+{
+  "status": "complete",
+  "programWiredBeforeBuild": true,
+  "integrationTest": "AegisCore.Tests/Infrastructure/EnvironmentSubstitutionTest.cs",
+  "deadGuardCount": 0,
+  "verifiedBindings": [
+    {
+      "promptKey": "SMTP_HOST",
+      "configPath": "Email:SmtpHost",
+      "actualEnvironmentVariable": "SMTP_HOST",
+      "placeholder": "${SMTP_HOST}",
+      "promptNameMatchesRepository": true,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "SMTP_PORT",
+      "configPath": "Email:SmtpPort",
+      "actualEnvironmentVariable": "SMTP_PORT",
+      "placeholder": "${SMTP_PORT}",
+      "promptNameMatchesRepository": true,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "SMTP_FROM",
+      "configPath": "Email:FromAddress",
+      "actualEnvironmentVariable": "EMAIL_FROM_ADDRESS",
+      "placeholder": "${EMAIL_FROM_ADDRESS}",
+      "promptNameMatchesRepository": false,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "TWILIO_ACCOUNT_SID",
+      "configPath": "Twilio:AccountSid",
+      "actualEnvironmentVariable": "TWILIO_ACCOUNT_SID",
+      "placeholder": "${TWILIO_ACCOUNT_SID}",
+      "promptNameMatchesRepository": true,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "TWILIO_AUTH_TOKEN",
+      "configPath": "Twilio:AuthToken",
+      "actualEnvironmentVariable": "TWILIO_AUTH_TOKEN",
+      "placeholder": "${TWILIO_AUTH_TOKEN}",
+      "promptNameMatchesRepository": true,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "ELASTICSEARCH_URL",
+      "configPath": "Search:ElasticsearchUrl",
+      "actualEnvironmentVariable": "ELASTICSEARCH_URL",
+      "placeholder": "${ELASTICSEARCH_URL}",
+      "promptNameMatchesRepository": true,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "OLLAMA_BASE_URL",
+      "configPath": "AI:Ollama:BaseUrl",
+      "actualEnvironmentVariable": "AI_OLLAMA_BASE_URL",
+      "placeholder": "${AI_OLLAMA_BASE_URL}",
+      "promptNameMatchesRepository": false,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "OPENAI_API_KEY",
+      "configPath": "AI:OpenAI:ApiKey",
+      "actualEnvironmentVariable": "AI_OPENAI_API_KEY",
+      "placeholder": "${AI_OPENAI_API_KEY}",
+      "promptNameMatchesRepository": false,
+      "resolvesThroughEnvironmentSubstitution": true
+    },
+    {
+      "promptKey": "RAAST_ENDPOINT",
+      "configPath": "Raast:BaseUrl",
+      "actualEnvironmentVariable": "RAAST_BASE_URL",
+      "placeholder": "${RAAST_BASE_URL}",
+      "promptNameMatchesRepository": false,
+      "resolvesThroughEnvironmentSubstitution": true
+    }
+  ]
+}

@@ -14,6 +14,7 @@ using AegisCore.Application.Maintenance;
 using AegisCore.Application.ResearchLabs;
 using AegisCore.Application.Security;
 using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Configuration;
 using AegisCore.Infrastructure.Repositories;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Infrastructure.AI;
@@ -105,6 +106,8 @@ else
     builder.Services.AddAuthenticationServices(builder.Configuration);
     builder.Services.AddBackgroundWorkers(builder.Configuration);
 }
+
+builder.Configuration.AddEnvironmentSubstitution();
 
 var app = builder.Build();
 
