@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -103,8 +102,6 @@ def patch_entity(text: str, entity_name: str, add_tenant_id: bool) -> tuple[str,
 
     property_inserted = "false"
     if add_tenant_id:
-        # P3A reflection proved the public Guid TenantId property is absent.
-        # Insert it as the first class member so the change is unambiguous.
         rematch = class_pattern(entity_name).search(patched)
         if rematch is None:
             fail(f"could not re-locate {entity_name} after interface patch")
@@ -189,12 +186,10 @@ def validate_temporary_migration(content: str, expected_entities: int) -> None:
 
 
 def migration_content(migration_id: str, class_name: str, table: str, schema: str | None) -> str:
-    schema_add = f',\n                schema: "{schema}"' if schema else ""
-    schema_drop = f',\n                schema: "{schema}"' if schema else ""
+    schema_arg = f',\n                schema: "{schema}"' if schema else ""
     index_name = f'IX_{table}_TenantId'
-    schema_index = f',\n                schema: "{schema}"' if schema else ""
 
-    return f'''using Microsoft.EntityFrameworkCore.Infrastructure;\nusing Microsoft.EntityFrameworkCore.Migrations;\n\n#nullable disable\n\nnamespace AegisCore.Infrastructure.Migrations;\n\n[DbContext(typeof(AegisDbContext))]\n[Migration("{migration_id}")]\npublic partial class {class_name} : Migration\n{{\n    protected override void Up(MigrationBuilder migrationBuilder)\n    {{\n        // DATA MIGRATION REQUIRED — populate TenantId from known tenant before running this migration in production.\n        migrationBuilder.AddColumn<Guid>(\n            name: "TenantId",\n            table: "{table}"{schema_add},\n            type: "uuid",\n            nullable: false);\n\n        migrationBuilder.CreateIndex(\n            name: "{index_name}",\n            table: "{table}",\n            column: "TenantId"{schema_index});\n    }}\n\n    protected override void Down(MigrationBuilder migrationBuilder)\n    {{\n        migrationBuilder.DropIndex(\n            name: "{index_name}",\n            table: "{table}"{schema_index});\n\n        migrationBuilder.DropColumn(\n            name: "TenantId",\n            table: "{table}"{schema_drop});\n    }}\n}}\n'''
+    return f'''using Microsoft.EntityFrameworkCore.Infrastructure;\nusing Microsoft.EntityFrameworkCore.Migrations;\n\n#nullable disable\n\nnamespace AegisCore.Infrastructure.Migrations;\n\n[DbContext(typeof(AegisDbContext))]\n[Migration("{migration_id}")]\npublic partial class {class_name} : Migration\n{{\n    protected override void Up(MigrationBuilder migrationBuilder)\n    {{\n        // DATA MIGRATION REQUIRED — populate TenantId from known tenant before running this migration in production.\n        migrationBuilder.AddColumn<Guid>(\n            name: "TenantId",\n            table: "{table}"{schema_arg},\n            type: "uuid",\n            nullable: false);\n\n        migrationBuilder.CreateIndex(\n            name: "{index_name}",\n            table: "{table}",\n            column: "TenantId"{schema_arg});\n    }}\n\n    protected override void Down(MigrationBuilder migrationBuilder)\n    {{\n        migrationBuilder.DropIndex(\n            name: "{index_name}",\n            table: "{table}"{schema_arg});\n\n        migrationBuilder.DropColumn(\n            name: "TenantId",\n            table: "{table}"{schema_arg});\n    }}\n}}\n'''
 
 
 def main() -> None:
@@ -240,8 +235,6 @@ def main() -> None:
     if FORBIDDEN.read_bytes() != before_forbidden:
         fail("AegisDbContext.cs changed; P3B explicitly forbids this")
 
-    # Refresh the EF snapshot once. The generated aggregate migration is validation-only
-    # and is removed after proving the only schema drift is the 75 TenantId columns.
     before_migrations = {p.name for p in MIGRATIONS.glob("*.cs")}
     run(
         "dotnet",
@@ -257,7 +250,6 @@ def main() -> None:
         "AegisDbContext",
         "--output-dir",
         "Migrations",
-        "--no-build",
     )
 
     after_migrations = {p.name for p in MIGRATIONS.glob("*.cs")}
@@ -276,7 +268,6 @@ def main() -> None:
         table, schema = table_mapping(snapshot, entry["Namespace"], entry["EntityName"])
         mappings.append({**entry, "Table": table, "Schema": schema})
 
-    # The aggregate migration must never ship; the prompt requires one migration per entity.
     temp_main_path.unlink()
     (MIGRATIONS / temp_designer[0]).unlink()
 
@@ -311,8 +302,9 @@ def main() -> None:
         "|---|---|---:|---|---|---|",
     ]
     migration_by_entity = {item["EntityName"]: item for item in generated_migrations}
+    list2_names = {item["EntityName"] for item in list2}
     for entry in sorted(list1 + list2, key=lambda item: item["EntityName"]):
-        is_list2 = entry in list2
+        is_list2 = entry["EntityName"] in list2_names
         mig = migration_by_entity.get(entry["EntityName"])
         checklist_lines.append(
             f'| {entry["EntityName"]} | `{entry["FilePath"]}` | {"2" if is_list2 else "1"} | ✅ | '
