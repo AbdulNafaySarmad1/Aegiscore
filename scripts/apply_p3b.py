@@ -156,7 +156,13 @@ def extract_entity_block(snapshot: str, full_type_name: str) -> str:
 
 def table_mapping(snapshot: str, namespace: str, entity_name: str) -> tuple[str, str | None]:
     block = extract_entity_block(snapshot, f"{namespace}.{entity_name}")
-    match = re.search(r'b\.ToTable\("([^"]+)"(?:,\s*"([^"]+)")?\);', block)
+    # EF Core emits multiple ToTable overloads, including:
+    #   ToTable("Table")
+    #   ToTable("Table", "schema")
+    #   ToTable("Table", t => { ... constraints ... })
+    # The first argument is always the table name; only a quoted second argument
+    # is a relational schema. A lambda second argument must not be mistaken for one.
+    match = re.search(r'b\.ToTable\("([^"]+)"(?:,\s*"([^"]+)")?', block)
     if not match:
         fail(f"ToTable mapping not found for {namespace}.{entity_name}")
     return match.group(1), match.group(2)
@@ -263,8 +269,6 @@ def patch_snapshot_tenant_only(original: str, generated: str, list2: list[dict])
 
     for entry in list2:
         full_type_name = f'{entry["Namespace"]}.{entry["EntityName"]}'
-
-        # Fail closed if P3B is entangled with a pre-existing CreateTable drift.
         old_block = extract_entity_block(sanitized, full_type_name)
         new_block = extract_entity_block(generated, full_type_name)
 
@@ -342,8 +346,6 @@ def main() -> None:
     diffs: list[dict[str, str]] = []
     changed_files: set[str] = set()
 
-    # Preflight: every List-2 entity must already exist in the migration snapshot.
-    # Otherwise TenantId is entangled with unrelated CreateTable drift.
     for entry in list2:
         extract_entity_block(original_snapshot, f'{entry["Namespace"]}.{entry["EntityName"]}')
 
@@ -371,8 +373,6 @@ def main() -> None:
     if FORBIDDEN.read_bytes() != before_forbidden:
         fail("AegisDbContext.cs changed during apply_p3b.py; only the separate outlier relocation is allowed")
 
-    # Scaffold against the current model to learn the exact TenantId representation,
-    # but never commit the aggregate migration or its unrelated stale-model drift.
     temp_main, temp_designer = scaffold(TEMP_MIGRATION_NAME)
     temp_content = temp_main.read_text(encoding="utf-8")
     temp_body, initial_operations = migration_operations(temp_content)
@@ -390,9 +390,6 @@ def main() -> None:
     temp_designer.unlink()
     SNAPSHOT.write_text(sanitized_snapshot, encoding="utf-8")
 
-    # Verify the tenant delta is fully represented while pre-existing unrelated
-    # drift remains unabsorbed. EF may still report that unrelated drift; it must
-    # report zero remaining TenantId AddColumn operations.
     verify_main, verify_designer = scaffold(VERIFY_MIGRATION_NAME)
     verify_content = verify_main.read_text(encoding="utf-8")
     verify_body, verification_operations = migration_operations(verify_content)
@@ -405,8 +402,6 @@ def main() -> None:
 
     verify_main.unlink()
     verify_designer.unlink()
-    # EF verification advances the snapshot to the full current model. Restore the
-    # sanitized tenant-only snapshot so unrelated drift is not committed by P3B.
     SNAPSHOT.write_text(sanitized_snapshot, encoding="utf-8")
 
     base_time = datetime.now(timezone.utc).replace(microsecond=0)
