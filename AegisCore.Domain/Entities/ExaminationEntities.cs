@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("AssessmentSchemes")]
-public class AssessmentScheme
+public class AssessmentScheme : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CourseId { get; set; }
     public Guid SemesterId { get; set; }
@@ -15,8 +17,9 @@ public class AssessmentScheme
 }
 
 [Table("AssessmentComponents")]
-public class AssessmentComponent
+public class AssessmentComponent : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid SchemeId { get; set; }
     [Required, MaxLength(50)] public string ComponentType { get; set; } = string.Empty;
@@ -30,8 +33,9 @@ public class AssessmentComponent
 }
 
 [Table("CourseMarks")]
-public class CourseMark
+public class CourseMark : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CourseId { get; set; }
     public Guid StudentId { get; set; }
@@ -43,8 +47,9 @@ public class CourseMark
 }
 
 [Table("MarkModerations")]
-public class MarkModeration
+public class MarkModeration : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CourseId { get; set; }
     public Guid SemesterId { get; set; }
@@ -58,8 +63,9 @@ public class MarkModeration
 }
 
 [Table("GradeScales")]
-public class GradeScale
+public class GradeScale : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid UniversityId { get; set; }
     [Required, MaxLength(100)] public string Name { get; set; } = string.Empty;
@@ -68,8 +74,9 @@ public class GradeScale
 }
 
 [Table("GradeBands")]
-public class GradeBand
+public class GradeBand : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid GradeScaleId { get; set; }
     [Required, MaxLength(2)] public string LetterGrade { get; set; } = string.Empty;
@@ -81,8 +88,9 @@ public class GradeBand
 }
 
 [Table("CourseGrades")]
-public class CourseGrade
+public class CourseGrade : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CourseId { get; set; }
     public Guid SemesterId { get; set; }
@@ -98,8 +106,9 @@ public class CourseGrade
 }
 
 [Table("ExamRegistrations")]
-public class ExamRegistration
+public class ExamRegistration : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public Guid CourseId { get; set; }
@@ -113,8 +122,9 @@ public class ExamRegistration
 }
 
 [Table("Transcripts")]
-public class Transcript
+public class Transcript : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public DateTimeOffset GeneratedAt { get; set; } = DateTimeOffset.UtcNow;

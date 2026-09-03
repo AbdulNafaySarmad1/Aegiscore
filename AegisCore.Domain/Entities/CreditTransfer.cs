@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("CreditTransfers")]
-public class CreditTransfer
+public class CreditTransfer : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

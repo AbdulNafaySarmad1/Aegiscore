@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("NotificationTemplates")]
-public class NotificationTemplate
+public class NotificationTemplate : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 
@@ -39,7 +41,7 @@ public class NotificationTemplate
 }
 
 [Table("NotificationPreferences")]
-public class UserNotificationPreference
+public class UserNotificationPreference : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }
@@ -62,7 +64,7 @@ public class UserNotificationPreference
 }
 
 [Table("NotificationDeliveries")]
-public class NotificationDelivery
+public class NotificationDelivery : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

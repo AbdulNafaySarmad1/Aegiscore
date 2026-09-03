@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("FloorPlans")]
-public class FloorPlan
+public class FloorPlan : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

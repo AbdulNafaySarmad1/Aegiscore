@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("DocumentTiers")]
-public class DocumentTier
+public class DocumentTier : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [MaxLength(50)] public string Name { get; set; } = "";        // "Critical", "Important", "Standard"
@@ -21,7 +22,7 @@ public class DocumentTier
 }
 
 [Table("DocumentVaultEntries")]
-public class DocumentVaultEntry
+public class DocumentVaultEntry : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
 
@@ -67,7 +68,7 @@ public class DocumentVaultEntry
 }
 
 [Table("DocumentAccessLogs")]
-public class DocumentAccessLog
+public class DocumentAccessLog : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid DocumentId { get; set; }
@@ -83,7 +84,7 @@ public class DocumentAccessLog
 }
 
 [Table("DocumentRetentionPolicies")]
-public class DocumentRetentionPolicy
+public class DocumentRetentionPolicy : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [MaxLength(100)] public string DocumentCategory { get; set; } = ""; // Maps categories to tiers

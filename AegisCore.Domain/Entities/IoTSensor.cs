@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("IoTSensors")]
-public class IoTSensor
+public class IoTSensor : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

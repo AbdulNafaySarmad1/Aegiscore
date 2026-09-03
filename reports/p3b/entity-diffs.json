@@ -1,0 +1,3426 @@
+[
+  {
+    "entity": "AdmissionApplication",
+    "declarationBefore": "public class AdmissionApplication",
+    "declarationAfter": "public class AdmissionApplication : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ApplicationDocument",
+    "declarationBefore": "public class ApplicationDocument",
+    "declarationAfter": "public class ApplicationDocument : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "MeritList",
+    "declarationBefore": "public class MeritList",
+    "declarationAfter": "public class MeritList : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "MeritListEntry",
+    "declarationBefore": "public class MeritListEntry",
+    "declarationAfter": "public class MeritListEntry : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "SeatAllocation",
+    "declarationBefore": "public class SeatAllocation",
+    "declarationAfter": "public class SeatAllocation : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ApiKey",
+    "declarationBefore": "public class ApiKey",
+    "declarationAfter": "public class ApiKey : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ApiKey.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ApprovalRecord",
+    "declarationBefore": "public class ApprovalRecord",
+    "declarationAfter": "public class ApprovalRecord : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ApprovalRecord.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Attendance",
+    "declarationBefore": "public class Attendance",
+    "declarationAfter": "public class Attendance : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Attendance.cs",
+    "list": "2"
+  },
+  {
+    "entity": "BackupConfiguration",
+    "declarationBefore": "public class BackupConfiguration",
+    "declarationAfter": "public class BackupConfiguration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/BackupConfiguration.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BackupRecord",
+    "declarationBefore": "public class BackupRecord",
+    "declarationAfter": "public class BackupRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/BackupRecord.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Batch",
+    "declarationBefore": "public class Batch",
+    "declarationAfter": "public class Batch : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Batch.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Building",
+    "declarationBefore": "public class Building",
+    "declarationAfter": "public class Building : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Building.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DemandForecast",
+    "declarationBefore": "public class DemandForecast",
+    "declarationAfter": "public class DemandForecast : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FoodOrder",
+    "declarationBefore": "public class FoodOrder",
+    "declarationAfter": "public class FoodOrder : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "InventoryAlert",
+    "declarationBefore": "public class InventoryAlert",
+    "declarationAfter": "public class InventoryAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "InventoryItem",
+    "declarationBefore": "public class InventoryItem",
+    "declarationAfter": "public class InventoryItem : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VendorScorecard",
+    "declarationBefore": "public class VendorScorecard",
+    "declarationAfter": "public class VendorScorecard : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CalibrationRecord",
+    "declarationBefore": "public class CalibrationRecord",
+    "declarationAfter": "public class CalibrationRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CalibrationRecord.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Campus",
+    "declarationBefore": "public class Campus",
+    "declarationAfter": "public class Campus : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Campus.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CampusConfiguration",
+    "declarationBefore": "public class CampusConfiguration",
+    "declarationAfter": "public class CampusConfiguration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CampusConfiguration.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CatalogCourseRecord",
+    "declarationBefore": "public class CatalogCourseRecord",
+    "declarationAfter": "public class CatalogCourseRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CatalogVersion",
+    "declarationBefore": "public class CatalogVersion",
+    "declarationAfter": "public class CatalogVersion : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CourseEquivalency",
+    "declarationBefore": "public class CourseEquivalency",
+    "declarationAfter": "public class CourseEquivalency : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CourseGradePolicy",
+    "declarationBefore": "public class CourseGradePolicy",
+    "declarationAfter": "public class CourseGradePolicy : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CourseOffering",
+    "declarationBefore": "public class CourseOffering",
+    "declarationAfter": "public class CourseOffering : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DegreeTree",
+    "declarationBefore": "public class DegreeTree",
+    "declarationAfter": "public class DegreeTree : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ElectiveSlot",
+    "declarationBefore": "public class ElectiveSlot",
+    "declarationAfter": "public class ElectiveSlot : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "IngestionJob",
+    "declarationBefore": "public class IngestionJob",
+    "declarationAfter": "public class IngestionJob : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CheckpointScan",
+    "declarationBefore": "public class CheckpointScan",
+    "declarationAfter": "public class CheckpointScan : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CheckpointScan.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CisUpload",
+    "declarationBefore": "public class CisUpload",
+    "declarationAfter": "public class CisUpload : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CisUpload.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CloPlomapping",
+    "declarationBefore": "public class CloPlomapping",
+    "declarationAfter": "public class CloPlomapping : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CloPlomapping.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GrievanceResponse",
+    "declarationBefore": "public class GrievanceResponse",
+    "declarationAfter": "public class GrievanceResponse : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CommunicationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GrievanceTicket",
+    "declarationBefore": "public class GrievanceTicket",
+    "declarationAfter": "public class GrievanceTicket : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CommunicationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "NoticeBoardItem",
+    "declarationBefore": "public class NoticeBoardItem",
+    "declarationAfter": "public class NoticeBoardItem : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CommunicationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ConfigAuditLog",
+    "declarationBefore": "public class ConfigAuditLog",
+    "declarationAfter": "public class ConfigAuditLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ConfigAuditLog.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ConfigVersion",
+    "declarationBefore": "public class ConfigVersion",
+    "declarationAfter": "public class ConfigVersion : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ConfigVersion.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ConfigurationEntry",
+    "declarationBefore": "public class ConfigurationEntry",
+    "declarationAfter": "public class ConfigurationEntry : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ConfigurationEntry.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ConsumableRequisition",
+    "declarationBefore": "public class ConsumableRequisition",
+    "declarationAfter": "public class ConsumableRequisition : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ConsumableRequisition.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationReport",
+    "declarationBefore": "public class AccreditationReport",
+    "declarationAfter": "public class AccreditationReport : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AttainmentThreshold",
+    "declarationBefore": "public class AttainmentThreshold",
+    "declarationAfter": "public class AttainmentThreshold : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CLOAssessmentMapping",
+    "declarationBefore": "public class CLOAssessmentMapping",
+    "declarationAfter": "public class CLOAssessmentMapping : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CLOAttainment",
+    "declarationBefore": "public class CLOAttainment",
+    "declarationAfter": "public class CLOAttainment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CLOPOMapping",
+    "declarationBefore": "public class CLOPOMapping",
+    "declarationAfter": "public class CLOPOMapping : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ConferenceTravel",
+    "declarationBefore": "public class ConferenceTravel",
+    "declarationAfter": "public class ConferenceTravel : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ContinuousImprovementPlan",
+    "declarationBefore": "public class ContinuousImprovementPlan",
+    "declarationAfter": "public class ContinuousImprovementPlan : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CourseLearningOutcome",
+    "declarationBefore": "public class CourseLearningOutcome",
+    "declarationAfter": "public class CourseLearningOutcome : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EthicsProtocol",
+    "declarationBefore": "public class EthicsProtocol",
+    "declarationAfter": "public class EthicsProtocol : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GapAnalysis",
+    "declarationBefore": "public class GapAnalysis",
+    "declarationAfter": "public class GapAnalysis : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GrantExpenditure",
+    "declarationBefore": "public class GrantExpenditure",
+    "declarationAfter": "public class GrantExpenditure : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "POAttainment",
+    "declarationBefore": "public class POAttainment",
+    "declarationAfter": "public class POAttainment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PatentInventor",
+    "declarationBefore": "public class PatentInventor",
+    "declarationAfter": "public class PatentInventor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ProgramEducationalObjective",
+    "declarationBefore": "public class ProgramEducationalObjective",
+    "declarationAfter": "public class ProgramEducationalObjective : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ProgramOutcome",
+    "declarationBefore": "public class ProgramOutcome",
+    "declarationAfter": "public class ProgramOutcome : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PublicationAuthor",
+    "declarationBefore": "public class PublicationAuthor",
+    "declarationAfter": "public class PublicationAuthor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchDeliverable",
+    "declarationBefore": "public class ResearchDeliverable",
+    "declarationAfter": "public class ResearchDeliverable : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchGrant",
+    "declarationBefore": "public class ResearchGrant",
+    "declarationAfter": "public class ResearchGrant : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchMilestone",
+    "declarationBefore": "public class ResearchMilestone",
+    "declarationAfter": "public class ResearchMilestone : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchPatent",
+    "declarationBefore": "public class ResearchPatent",
+    "declarationAfter": "public class ResearchPatent : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchProject",
+    "declarationBefore": "public class ResearchProject",
+    "declarationAfter": "public class ResearchProject : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchProjectMember",
+    "declarationBefore": "public class ResearchProjectMember",
+    "declarationAfter": "public class ResearchProjectMember : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchPublication",
+    "declarationBefore": "public class ResearchPublication",
+    "declarationAfter": "public class ResearchPublication : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Rubric",
+    "declarationBefore": "public class Rubric",
+    "declarationAfter": "public class Rubric : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RubricCriterion",
+    "declarationBefore": "public class RubricCriterion",
+    "declarationAfter": "public class RubricCriterion : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "UniversityMission",
+    "declarationBefore": "public class UniversityMission",
+    "declarationAfter": "public class UniversityMission : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationAuditLog",
+    "declarationBefore": "public class AccreditationAuditLog",
+    "declarationAfter": "public class AccreditationAuditLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationBody",
+    "declarationBefore": "public class AccreditationBody",
+    "declarationAfter": "public class AccreditationBody : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationCommittee",
+    "declarationBefore": "public class AccreditationCommittee",
+    "declarationAfter": "public class AccreditationCommittee : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationCriterion",
+    "declarationBefore": "public class AccreditationCriterion",
+    "declarationAfter": "public class AccreditationCriterion : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationCriterionMapping",
+    "declarationBefore": "public class AccreditationCriterionMapping",
+    "declarationAfter": "public class AccreditationCriterionMapping : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationCycle",
+    "declarationBefore": "public class AccreditationCycle",
+    "declarationAfter": "public class AccreditationCycle : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccreditationEvidence",
+    "declarationBefore": "public class AccreditationEvidence",
+    "declarationAfter": "public class AccreditationEvidence : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ActionItem",
+    "declarationBefore": "public class ActionItem",
+    "declarationAfter": "public class ActionItem : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BookCopy",
+    "declarationBefore": "public class BookCopy",
+    "declarationAfter": "public class BookCopy : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BookIssue",
+    "declarationBefore": "public class BookIssue",
+    "declarationAfter": "public class BookIssue : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BookOrder",
+    "declarationBefore": "public class BookOrder",
+    "declarationAfter": "public class BookOrder : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BookReservation",
+    "declarationBefore": "public class BookReservation",
+    "declarationAfter": "public class BookReservation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CommitteeMeeting",
+    "declarationBefore": "public class CommitteeMeeting",
+    "declarationAfter": "public class CommitteeMeeting : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CommitteeMember",
+    "declarationBefore": "public class CommitteeMember",
+    "declarationAfter": "public class CommitteeMember : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EvidenceVersion",
+    "declarationBefore": "public class EvidenceVersion",
+    "declarationAfter": "public class EvidenceVersion : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FacultyCV",
+    "declarationBefore": "public class FacultyCV",
+    "declarationAfter": "public class FacultyCV : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FinePayment",
+    "declarationBefore": "public class FinePayment",
+    "declarationAfter": "public class FinePayment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LabInventory",
+    "declarationBefore": "public class LabInventory",
+    "declarationAfter": "public class LabInventory : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LibraryBook",
+    "declarationBefore": "public class LibraryBook",
+    "declarationAfter": "public class LibraryBook : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LibraryBudget",
+    "declarationBefore": "public class LibraryBudget",
+    "declarationAfter": "public class LibraryBudget : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LibraryMember",
+    "declarationBefore": "public class LibraryMember",
+    "declarationAfter": "public class LibraryMember : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LibraryUsage",
+    "declarationBefore": "public class LibraryUsage",
+    "declarationAfter": "public class LibraryUsage : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LibraryVendor",
+    "declarationBefore": "public class LibraryVendor",
+    "declarationAfter": "public class LibraryVendor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "OrderItem",
+    "declarationBefore": "public class OrderItem",
+    "declarationAfter": "public class OrderItem : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PreviousVisitFinding",
+    "declarationBefore": "public class PreviousVisitFinding",
+    "declarationAfter": "public class PreviousVisitFinding : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SSRReview",
+    "declarationBefore": "public class SSRReview",
+    "declarationAfter": "public class SSRReview : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SSRSection",
+    "declarationBefore": "public class SSRSection",
+    "declarationAfter": "public class SSRSection : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SelfStudyReport",
+    "declarationBefore": "public class SelfStudyReport",
+    "declarationAfter": "public class SelfStudyReport : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Asset",
+    "declarationBefore": "public class Asset",
+    "declarationAfter": "public class Asset : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AssetCategory",
+    "declarationBefore": "public class AssetCategory",
+    "declarationAfter": "public class AssetCategory : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AssetDisposal",
+    "declarationBefore": "public class AssetDisposal",
+    "declarationAfter": "public class AssetDisposal : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AssetMaintenance",
+    "declarationBefore": "public class AssetMaintenance",
+    "declarationAfter": "public class AssetMaintenance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AssetTransfer",
+    "declarationBefore": "public class AssetTransfer",
+    "declarationAfter": "public class AssetTransfer : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AssetVerification",
+    "declarationBefore": "public class AssetVerification",
+    "declarationAfter": "public class AssetVerification : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BusAttendance",
+    "declarationBefore": "public class BusAttendance",
+    "declarationAfter": "public class BusAttendance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DriverIncident",
+    "declarationBefore": "public class DriverIncident",
+    "declarationAfter": "public class DriverIncident : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DriverShift",
+    "declarationBefore": "public class DriverShift",
+    "declarationAfter": "public class DriverShift : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FuelLog",
+    "declarationBefore": "public class FuelLog",
+    "declarationAfter": "public class FuelLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GPSLocation",
+    "declarationBefore": "public class GPSLocation",
+    "declarationAfter": "public class GPSLocation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GateLog",
+    "declarationBefore": "public class GateLog",
+    "declarationAfter": "public class GateLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "HostelAllocation",
+    "declarationBefore": "public class HostelAllocation",
+    "declarationAfter": "public class HostelAllocation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "HostelBlock",
+    "declarationBefore": "public class HostelBlock",
+    "declarationAfter": "public class HostelBlock : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "HostelDiscipline",
+    "declarationBefore": "public class HostelDiscipline",
+    "declarationAfter": "public class HostelDiscipline : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "HostelFloor",
+    "declarationBefore": "public class HostelFloor",
+    "declarationAfter": "public class HostelFloor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "HostelRoom",
+    "declarationBefore": "public class HostelRoom",
+    "declarationAfter": "public class HostelRoom : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "InspectionChecklistItem",
+    "declarationBefore": "public class InspectionChecklistItem",
+    "declarationAfter": "public class InspectionChecklistItem : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MessAttendance",
+    "declarationBefore": "public class MessAttendance",
+    "declarationAfter": "public class MessAttendance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MessFeedback",
+    "declarationBefore": "public class MessFeedback",
+    "declarationAfter": "public class MessFeedback : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MessMenu",
+    "declarationBefore": "public class MessMenu",
+    "declarationAfter": "public class MessMenu : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RoomInspection",
+    "declarationBefore": "public class RoomInspection",
+    "declarationAfter": "public class RoomInspection : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RoommatePreference",
+    "declarationBefore": "public class RoommatePreference",
+    "declarationAfter": "public class RoommatePreference : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RouteStop",
+    "declarationBefore": "public class RouteStop",
+    "declarationAfter": "public class RouteStop : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TransportDriver",
+    "declarationBefore": "public class TransportDriver",
+    "declarationAfter": "public class TransportDriver : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TransportRoute",
+    "declarationBefore": "public class TransportRoute",
+    "declarationAfter": "public class TransportRoute : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TransportVehicle",
+    "declarationBefore": "public class TransportVehicle",
+    "declarationAfter": "public class TransportVehicle : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "UtilityReading",
+    "declarationBefore": "public class UtilityReading",
+    "declarationAfter": "public class UtilityReading : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VehicleMaintenance",
+    "declarationBefore": "public class VehicleMaintenance",
+    "declarationAfter": "public class VehicleMaintenance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VerificationCycle",
+    "declarationBefore": "public class VerificationCycle",
+    "declarationAfter": "public class VerificationCycle : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VisitorLog",
+    "declarationBefore": "public class VisitorLog",
+    "declarationAfter": "public class VisitorLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AdmissionLead",
+    "declarationBefore": "public class AdmissionLead",
+    "declarationAfter": "public class AdmissionLead : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AdvisorAssignment",
+    "declarationBefore": "public class AdvisorAssignment",
+    "declarationAfter": "public class AdvisorAssignment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AdvisorMeeting",
+    "declarationBefore": "public class AdvisorMeeting",
+    "declarationAfter": "public class AdvisorMeeting : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AdvisorNote",
+    "declarationBefore": "public class AdvisorNote",
+    "declarationAfter": "public class AdvisorNote : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AlertRule",
+    "declarationBefore": "public class AlertRule",
+    "declarationAfter": "public class AlertRule : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AlumniReferral",
+    "declarationBefore": "public class AlumniReferral",
+    "declarationAfter": "public class AlumniReferral : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BIReport",
+    "declarationBefore": "public class BIReport",
+    "declarationAfter": "public class BIReport : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CallLog",
+    "declarationBefore": "public class CallLog",
+    "declarationAfter": "public class CallLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CampusDrive",
+    "declarationBefore": "public class CampusDrive",
+    "declarationAfter": "public class CampusDrive : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CareerEvent",
+    "declarationBefore": "public class CareerEvent",
+    "declarationAfter": "public class CareerEvent : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CareerEventRegistration",
+    "declarationBefore": "public class CareerEventRegistration",
+    "declarationAfter": "public class CareerEventRegistration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CareerGoal",
+    "declarationBefore": "public class CareerGoal",
+    "declarationAfter": "public class CareerGoal : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ChatbotConversation",
+    "declarationBefore": "public class ChatbotConversation",
+    "declarationAfter": "public class ChatbotConversation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ChatbotMessage",
+    "declarationBefore": "public class ChatbotMessage",
+    "declarationAfter": "public class ChatbotMessage : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DWColumn",
+    "declarationBefore": "public class DWColumn",
+    "declarationAfter": "public class DWColumn : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Dashboard",
+    "declarationBefore": "public class Dashboard",
+    "declarationAfter": "public class Dashboard : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DashboardSubscription",
+    "declarationBefore": "public class DashboardSubscription",
+    "declarationAfter": "public class DashboardSubscription : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DashboardWidget",
+    "declarationBefore": "public class DashboardWidget",
+    "declarationAfter": "public class DashboardWidget : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DataExportLog",
+    "declarationBefore": "public class DataExportLog",
+    "declarationAfter": "public class DataExportLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DataWarehouseTable",
+    "declarationBefore": "public class DataWarehouseTable",
+    "declarationAfter": "public class DataWarehouseTable : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DriveRegistration",
+    "declarationBefore": "public class DriveRegistration",
+    "declarationAfter": "public class DriveRegistration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ETLJob",
+    "declarationBefore": "public class ETLJob",
+    "declarationAfter": "public class ETLJob : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Employer",
+    "declarationBefore": "public class Employer",
+    "declarationAfter": "public class Employer : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Intervention",
+    "declarationBefore": "public class Intervention",
+    "declarationAfter": "public class Intervention : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "InterviewSlot",
+    "declarationBefore": "public class InterviewSlot",
+    "declarationAfter": "public class InterviewSlot : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "JobApplication",
+    "declarationBefore": "public class JobApplication",
+    "declarationAfter": "public class JobApplication : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "JobPosting",
+    "declarationBefore": "public class JobPosting",
+    "declarationAfter": "public class JobPosting : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "KPIAlert",
+    "declarationBefore": "public class KPIAlert",
+    "declarationAfter": "public class KPIAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LeadActivity",
+    "declarationBefore": "public class LeadActivity",
+    "declarationAfter": "public class LeadActivity : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LeadTask",
+    "declarationBefore": "public class LeadTask",
+    "declarationAfter": "public class LeadTask : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MarketingCampaign",
+    "declarationBefore": "public class MarketingCampaign",
+    "declarationAfter": "public class MarketingCampaign : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MentorAssignment",
+    "declarationBefore": "public class MentorAssignment",
+    "declarationAfter": "public class MentorAssignment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MentoringSession",
+    "declarationBefore": "public class MentoringSession",
+    "declarationAfter": "public class MentoringSession : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PlacementRecord",
+    "declarationBefore": "public class PlacementRecord",
+    "declarationAfter": "public class PlacementRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReportSchedule",
+    "declarationBefore": "public class ReportSchedule",
+    "declarationAfter": "public class ReportSchedule : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SchoolVisit",
+    "declarationBefore": "public class SchoolVisit",
+    "declarationAfter": "public class SchoolVisit : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SkillGap",
+    "declarationBefore": "public class SkillGap",
+    "declarationAfter": "public class SkillGap : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentAlert",
+    "declarationBefore": "public class StudentAlert",
+    "declarationAfter": "public class StudentAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentResume",
+    "declarationBefore": "public class StudentResume",
+    "declarationAfter": "public class StudentResume : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentRiskScore",
+    "declarationBefore": "public class StudentRiskScore",
+    "declarationAfter": "public class StudentRiskScore : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentRiskTrend",
+    "declarationBefore": "public class StudentRiskTrend",
+    "declarationAfter": "public class StudentRiskTrend : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AttendanceRecord",
+    "declarationBefore": "public class AttendanceRecord",
+    "declarationAfter": "public class AttendanceRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Employee",
+    "declarationBefore": "public class Employee",
+    "declarationAfter": "public class Employee : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EmployeeContract",
+    "declarationBefore": "public class EmployeeContract",
+    "declarationAfter": "public class EmployeeContract : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EmployeeDocument",
+    "declarationBefore": "public class EmployeeDocument",
+    "declarationAfter": "public class EmployeeDocument : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FeePayment",
+    "declarationBefore": "public class FeePayment",
+    "declarationAfter": "public class FeePayment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "InterviewSchedule",
+    "declarationBefore": "public class InterviewSchedule",
+    "declarationAfter": "public class InterviewSchedule : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LeaveApplication",
+    "declarationBefore": "public class LeaveApplication",
+    "declarationAfter": "public class LeaveApplication : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PerformanceReview",
+    "declarationBefore": "public class PerformanceReview",
+    "declarationAfter": "public class PerformanceReview : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentAchievement",
+    "declarationBefore": "public class StudentAchievement",
+    "declarationAfter": "public class StudentAchievement : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentClearance",
+    "declarationBefore": "public class StudentClearance",
+    "declarationAfter": "public class StudentClearance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentCounseling",
+    "declarationBefore": "public class StudentCounseling",
+    "declarationAfter": "public class StudentCounseling : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentDiscipline",
+    "declarationBefore": "public class StudentDiscipline",
+    "declarationAfter": "public class StudentDiscipline : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentDocument",
+    "declarationBefore": "public class StudentDocument",
+    "declarationAfter": "public class StudentDocument : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentFee",
+    "declarationBefore": "public class StudentFee",
+    "declarationAfter": "public class StudentFee : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentGuardian",
+    "declarationBefore": "public class StudentGuardian",
+    "declarationAfter": "public class StudentGuardian : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentHostel",
+    "declarationBefore": "public class StudentHostel",
+    "declarationAfter": "public class StudentHostel : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentProfile",
+    "declarationBefore": "public class StudentProfile",
+    "declarationAfter": "public class StudentProfile : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentScholarship",
+    "declarationBefore": "public class StudentScholarship",
+    "declarationAfter": "public class StudentScholarship : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentTransport",
+    "declarationBefore": "public class StudentTransport",
+    "declarationAfter": "public class StudentTransport : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TrainingAssignment",
+    "declarationBefore": "public class TrainingAssignment",
+    "declarationAfter": "public class TrainingAssignment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CountryPack",
+    "declarationBefore": "public class CountryPack",
+    "declarationAfter": "public class CountryPack : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CountryPack.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Course",
+    "declarationBefore": "public class Course",
+    "declarationAfter": "public class Course : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Course.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CourseAssignment",
+    "declarationBefore": "public class CourseAssignment",
+    "declarationAfter": "public class CourseAssignment : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CourseAssignment.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CreditTransfer",
+    "declarationBefore": "public class CreditTransfer",
+    "declarationAfter": "public class CreditTransfer : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/CreditTransfer.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Currency",
+    "declarationBefore": "public class Currency",
+    "declarationAfter": "public class Currency : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Currency.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CurriculumChangeHistory",
+    "declarationBefore": "public class CurriculumChangeHistory",
+    "declarationAfter": "public class CurriculumChangeHistory : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CurriculumCourse",
+    "declarationBefore": "public class CurriculumCourse",
+    "declarationAfter": "public class CurriculumCourse : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CurriculumPrerequisite",
+    "declarationBefore": "public class CurriculumPrerequisite",
+    "declarationAfter": "public class CurriculumPrerequisite : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CurriculumVersionRecord",
+    "declarationBefore": "public class CurriculumVersionRecord",
+    "declarationAfter": "public class CurriculumVersionRecord : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "OfflineAttendanceEvent",
+    "declarationBefore": "public class OfflineAttendanceEvent",
+    "declarationAfter": "public class OfflineAttendanceEvent : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "DataImportJob",
+    "declarationBefore": "public class DataImportJob",
+    "declarationAfter": "public class DataImportJob : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DataImportEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ExternalDbConnection",
+    "declarationBefore": "public class ExternalDbConnection",
+    "declarationAfter": "public class ExternalDbConnection : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DataImportEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FieldMappingTemplate",
+    "declarationBefore": "public class FieldMappingTemplate",
+    "declarationAfter": "public class FieldMappingTemplate : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DataImportEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DecisionTable",
+    "declarationBefore": "public class DecisionTable",
+    "declarationAfter": "public class DecisionTable : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DecisionTable.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DegreeAudit",
+    "declarationBefore": "public class DegreeAudit",
+    "declarationAfter": "public class DegreeAudit : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DegreeAudit.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DegreeProgram",
+    "declarationBefore": "public class DegreeProgram",
+    "declarationAfter": "public class DegreeProgram : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DegreeProgram.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DegreeRequirement",
+    "declarationBefore": "public class DegreeRequirement",
+    "declarationAfter": "public class DegreeRequirement : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DegreeRequirement.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DocumentAccessLog",
+    "declarationBefore": "public class DocumentAccessLog",
+    "declarationAfter": "public class DocumentAccessLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DocumentRetentionPolicy",
+    "declarationBefore": "public class DocumentRetentionPolicy",
+    "declarationAfter": "public class DocumentRetentionPolicy : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DocumentTier",
+    "declarationBefore": "public class DocumentTier",
+    "declarationAfter": "public class DocumentTier : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DocumentVaultEntry",
+    "declarationBefore": "public class DocumentVaultEntry",
+    "declarationAfter": "public class DocumentVaultEntry : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EmergencyAlert",
+    "declarationBefore": "public class EmergencyAlert",
+    "declarationAfter": "public class EmergencyAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/EmergencyAlert.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EmergencyContact",
+    "declarationBefore": "public class EmergencyContact",
+    "declarationAfter": "public class EmergencyContact : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/EmergencyContact.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EnergyReading",
+    "declarationBefore": "public class EnergyReading",
+    "declarationAfter": "public class EnergyReading : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/EnergyReading.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Enrollment",
+    "declarationBefore": "public class Enrollment",
+    "declarationAfter": "public class Enrollment : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Enrollment.cs",
+    "list": "2"
+  },
+  {
+    "entity": "EquipmentBooking",
+    "declarationBefore": "public class EquipmentBooking",
+    "declarationAfter": "public class EquipmentBooking : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/EquipmentBooking.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EquipmentMaintenance",
+    "declarationBefore": "public class EquipmentMaintenance",
+    "declarationAfter": "public class EquipmentMaintenance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/EquipmentMaintenance.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EquipmentUsageLog",
+    "declarationBefore": "public class EquipmentUsageLog",
+    "declarationAfter": "public class EquipmentUsageLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/EquipmentUsageLog.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ExamSchedule",
+    "declarationBefore": "public class ExamSchedule",
+    "declarationAfter": "public class ExamSchedule : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExamSchedule.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ExamSeating",
+    "declarationBefore": "public class ExamSeating",
+    "declarationAfter": "public class ExamSeating : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExamSeating.cs",
+    "list": "2"
+  },
+  {
+    "entity": "AssessmentComponent",
+    "declarationBefore": "public class AssessmentComponent",
+    "declarationAfter": "public class AssessmentComponent : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "AssessmentScheme",
+    "declarationBefore": "public class AssessmentScheme",
+    "declarationAfter": "public class AssessmentScheme : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CourseGrade",
+    "declarationBefore": "public class CourseGrade",
+    "declarationAfter": "public class CourseGrade : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CourseMark",
+    "declarationBefore": "public class CourseMark",
+    "declarationAfter": "public class CourseMark : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ExamRegistration",
+    "declarationBefore": "public class ExamRegistration",
+    "declarationAfter": "public class ExamRegistration : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GradeBand",
+    "declarationBefore": "public class GradeBand",
+    "declarationAfter": "public class GradeBand : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GradeScale",
+    "declarationBefore": "public class GradeScale",
+    "declarationAfter": "public class GradeScale : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "MarkModeration",
+    "declarationBefore": "public class MarkModeration",
+    "declarationAfter": "public class MarkModeration : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Transcript",
+    "declarationBefore": "public class Transcript",
+    "declarationAfter": "public class Transcript : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Extension",
+    "declarationBefore": "public class Extension",
+    "declarationAfter": "public class Extension : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Extension.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ExtensionInstallation",
+    "declarationBefore": "public class ExtensionInstallation",
+    "declarationAfter": "public class ExtensionInstallation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ExtensionInstallation.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ExtensionReview",
+    "declarationBefore": "public class ExtensionReview",
+    "declarationAfter": "public class ExtensionReview : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ExtensionReview.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Faculty",
+    "declarationBefore": "public class Faculty",
+    "declarationAfter": "public class Faculty : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Faculty.cs",
+    "list": "2"
+  },
+  {
+    "entity": "FeatureFlag",
+    "declarationBefore": "public class FeatureFlag",
+    "declarationAfter": "public class FeatureFlag : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FeatureFlag.cs",
+    "list": "2"
+  },
+  {
+    "entity": "FeeComponent",
+    "declarationBefore": "public class FeeComponent",
+    "declarationAfter": "public class FeeComponent : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "FeeStructure",
+    "declarationBefore": "public class FeeStructure",
+    "declarationAfter": "public class FeeStructure : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ProcurementRequisition",
+    "declarationBefore": "public class ProcurementRequisition",
+    "declarationAfter": "public class ProcurementRequisition : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "PurchaseOrder",
+    "declarationBefore": "public class PurchaseOrder",
+    "declarationAfter": "public class PurchaseOrder : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "RequisitionLineItem",
+    "declarationBefore": "public class RequisitionLineItem",
+    "declarationAfter": "public class RequisitionLineItem : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "StudentFeeDue",
+    "declarationBefore": "public class StudentFeeDue",
+    "declarationAfter": "public class StudentFeeDue : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "StudentFeePayment",
+    "declarationBefore": "public class StudentFeePayment",
+    "declarationAfter": "public class StudentFeePayment : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Vendor",
+    "declarationBefore": "public class Vendor",
+    "declarationAfter": "public class Vendor : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "FireDrill",
+    "declarationBefore": "public class FireDrill",
+    "declarationAfter": "public class FireDrill : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/FireDrill.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FireEquipment",
+    "declarationBefore": "public class FireEquipment",
+    "declarationAfter": "public class FireEquipment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/FireEquipment.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Floor",
+    "declarationBefore": "public class Floor",
+    "declarationAfter": "public class Floor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Floor.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FloorPlan",
+    "declarationBefore": "public class FloorPlan",
+    "declarationAfter": "public class FloorPlan : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/FloorPlan.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FormDefinition",
+    "declarationBefore": "public class FormDefinition",
+    "declarationAfter": "public class FormDefinition : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/FormDefinition.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FormSubmission",
+    "declarationBefore": "public class FormSubmission",
+    "declarationAfter": "public class FormSubmission : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/FormSubmission.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AcademicHoliday",
+    "declarationBefore": "public class AcademicHoliday",
+    "declarationAfter": "public class AcademicHoliday : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FoundationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "AcademicYear",
+    "declarationBefore": "public class AcademicYear",
+    "declarationAfter": "public class AcademicYear : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FoundationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CrossDeptPermissionRequest",
+    "declarationBefore": "public class CrossDeptPermissionRequest",
+    "declarationAfter": "public class CrossDeptPermissionRequest : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FoundationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "PolicyConfig",
+    "declarationBefore": "public class PolicyConfig",
+    "declarationAfter": "public class PolicyConfig : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FoundationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Semester",
+    "declarationBefore": "public class Semester",
+    "declarationAfter": "public class Semester : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/FoundationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GateEntry",
+    "declarationBefore": "public class GateEntry",
+    "declarationAfter": "public class GateEntry : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/GateEntry.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AnonymousFeedbackSubmission",
+    "declarationBefore": "public class AnonymousFeedbackSubmission",
+    "declarationAfter": "public class AnonymousFeedbackSubmission : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "CourseReEnrollment",
+    "declarationBefore": "public class CourseReEnrollment",
+    "declarationAfter": "public class CourseReEnrollment : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GradeOverrideRequest",
+    "declarationBefore": "public class GradeOverrideRequest",
+    "declarationAfter": "public class GradeOverrideRequest : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "SectionOverrideRequest",
+    "declarationBefore": "public class SectionOverrideRequest",
+    "declarationAfter": "public class SectionOverrideRequest : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "SystemConfiguration",
+    "declarationBefore": "public class SystemConfiguration",
+    "declarationAfter": "public class SystemConfiguration : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "GuardRound",
+    "declarationBefore": "public class GuardRound",
+    "declarationAfter": "public class GuardRound : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/GuardRound.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GuardShift",
+    "declarationBefore": "public class GuardShift",
+    "declarationAfter": "public class GuardShift : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/GuardShift.cs",
+    "list": "1"
+  },
+  {
+    "entity": "IncidentEvidence",
+    "declarationBefore": "public class IncidentEvidence",
+    "declarationAfter": "public class IncidentEvidence : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/IncidentEvidence.cs",
+    "list": "1"
+  },
+  {
+    "entity": "IncidentWitness",
+    "declarationBefore": "public class IncidentWitness",
+    "declarationAfter": "public class IncidentWitness : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/IncidentWitness.cs",
+    "list": "1"
+  },
+  {
+    "entity": "IoTSensor",
+    "declarationBefore": "public class IoTSensor",
+    "declarationAfter": "public class IoTSensor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/IoTSensor.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LabBooking",
+    "declarationBefore": "public class LabBooking",
+    "declarationAfter": "public class LabBooking : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LabBooking.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LabConsumable",
+    "declarationBefore": "public class LabConsumable",
+    "declarationAfter": "public class LabConsumable : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LabConsumable.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LabEquipment",
+    "declarationBefore": "public class LabEquipment",
+    "declarationAfter": "public class LabEquipment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LabEquipment.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LabSafetyInspection",
+    "declarationBefore": "public class LabSafetyInspection",
+    "declarationAfter": "public class LabSafetyInspection : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LabSafetyInspection.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LicenseState",
+    "declarationBefore": "public class LicenseState",
+    "declarationAfter": "public class LicenseState : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/LicenseState.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Class",
+    "declarationBefore": "public class Class",
+    "declarationAfter": "public class Class : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ClassGenerationJob",
+    "declarationBefore": "public class ClassGenerationJob",
+    "declarationAfter": "public class ClassGenerationJob : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DirectorySyncLog",
+    "declarationBefore": "public class DirectorySyncLog",
+    "declarationAfter": "public class DirectorySyncLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LmsConfiguration",
+    "declarationBefore": "public class LmsConfiguration",
+    "declarationAfter": "public class LmsConfiguration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LmsProvision",
+    "declarationBefore": "public class LmsProvision",
+    "declarationAfter": "public class LmsProvision : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LmsRosterSyncLog",
+    "declarationBefore": "public class LmsRosterSyncLog",
+    "declarationAfter": "public class LmsRosterSyncLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentSectionEnrollment",
+    "declarationBefore": "public class StudentSectionEnrollment",
+    "declarationAfter": "public class StudentSectionEnrollment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LoginAuditRecord",
+    "declarationBefore": "public class LoginAuditRecord",
+    "declarationAfter": "public class LoginAuditRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LoginAuditRecord.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LostFoundItem",
+    "declarationBefore": "public class LostFoundItem",
+    "declarationAfter": "public class LostFoundItem : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/LostFoundItem.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MaintenanceContractor",
+    "declarationBefore": "public class MaintenanceContractor",
+    "declarationAfter": "public class MaintenanceContractor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/MaintenanceContractor.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MaintenanceTicket",
+    "declarationBefore": "public class MaintenanceTicket",
+    "declarationAfter": "public class MaintenanceTicket : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/MaintenanceTicket.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LmsSyncLog",
+    "declarationBefore": "public class LmsSyncLog",
+    "declarationAfter": "public class LmsSyncLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PowerBiReport",
+    "declarationBefore": "public class PowerBiReport",
+    "declarationAfter": "public class PowerBiReport : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TeamsSyncLog",
+    "declarationBefore": "public class TeamsSyncLog",
+    "declarationAfter": "public class TeamsSyncLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "NotificationDelivery",
+    "declarationBefore": "public class NotificationDelivery",
+    "declarationAfter": "public class NotificationDelivery : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/NotificationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "NotificationTemplate",
+    "declarationBefore": "public class NotificationTemplate",
+    "declarationAfter": "public class NotificationTemplate : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/NotificationEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "UserNotificationPreference",
+    "declarationBefore": "public class UserNotificationPreference",
+    "declarationAfter": "public class UserNotificationPreference : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/NotificationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "NotificationRecord",
+    "declarationBefore": "public class NotificationRecord",
+    "declarationAfter": "public class NotificationRecord : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/NotificationRecord.cs",
+    "list": "2"
+  },
+  {
+    "entity": "PayrollRun",
+    "declarationBefore": "public class PayrollRun",
+    "declarationAfter": "public class PayrollRun : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/PayrollEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Payslip",
+    "declarationBefore": "public class Payslip",
+    "declarationAfter": "public class Payslip : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/PayrollEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ChartConfiguration",
+    "declarationBefore": "public class ChartConfiguration",
+    "declarationAfter": "public class ChartConfiguration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "InsightChip",
+    "declarationBefore": "public class InsightChip",
+    "declarationAfter": "public class InsightChip : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "OcrProviderConfig",
+    "declarationBefore": "public class OcrProviderConfig",
+    "declarationAfter": "public class OcrProviderConfig : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PersonalityConfig",
+    "declarationBefore": "public class PersonalityConfig",
+    "declarationAfter": "public class PersonalityConfig : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ExportLog",
+    "declarationBefore": "public class ExportLog",
+    "declarationAfter": "public class ExportLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ImportBatch",
+    "declarationBefore": "public class ImportBatch",
+    "declarationAfter": "public class ImportBatch : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PlatformMetric",
+    "declarationBefore": "public class PlatformMetric",
+    "declarationAfter": "public class PlatformMetric : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AccessAuditLog",
+    "declarationBefore": "public class AccessAuditLog",
+    "declarationAfter": "public class AccessAuditLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CurriculumProposal",
+    "declarationBefore": "public class CurriculumProposal",
+    "declarationAfter": "public class CurriculumProposal : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DegreeVerification",
+    "declarationBefore": "public class DegreeVerification",
+    "declarationAfter": "public class DegreeVerification : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FacultyWorkload",
+    "declarationBefore": "public class FacultyWorkload",
+    "declarationAfter": "public class FacultyWorkload : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FeeDefaulterRecord",
+    "declarationBefore": "public class FeeDefaulterRecord",
+    "declarationAfter": "public class FeeDefaulterRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "HardcodingFinding",
+    "declarationBefore": "public class HardcodingFinding",
+    "declarationAfter": "public class HardcodingFinding : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MisconductCase",
+    "declarationBefore": "public class MisconductCase",
+    "declarationAfter": "public class MisconductCase : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MisconductEvidence",
+    "declarationBefore": "public class MisconductEvidence",
+    "declarationAfter": "public class MisconductEvidence : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "OfficialModule",
+    "declarationBefore": "public class OfficialModule",
+    "declarationAfter": "public class OfficialModule : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RegistrationEnrollment",
+    "declarationBefore": "public class RegistrationEnrollment",
+    "declarationAfter": "public class RegistrationEnrollment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RegistrationWindow",
+    "declarationBefore": "public class RegistrationWindow",
+    "declarationAfter": "public class RegistrationWindow : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReleaseDownload",
+    "declarationBefore": "public class ReleaseDownload",
+    "declarationAfter": "public class ReleaseDownload : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SupportTicket",
+    "declarationBefore": "public class SupportTicket",
+    "declarationAfter": "public class SupportTicket : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TunnelConfiguration",
+    "declarationBefore": "public class TunnelConfiguration",
+    "declarationAfter": "public class TunnelConfiguration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "UpdateDeployment",
+    "declarationBefore": "public class UpdateDeployment",
+    "declarationAfter": "public class UpdateDeployment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AppealCommitteeBrief",
+    "declarationBefore": "public class AppealCommitteeBrief",
+    "declarationAfter": "public class AppealCommitteeBrief : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AppealEvidence",
+    "declarationBefore": "public class AppealEvidence",
+    "declarationAfter": "public class AppealEvidence : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ChangeImpactSimulation",
+    "declarationBefore": "public class ChangeImpactSimulation",
+    "declarationAfter": "public class ChangeImpactSimulation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Convocation",
+    "declarationBefore": "public class Convocation",
+    "declarationAfter": "public class Convocation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ConvocationAttendance",
+    "declarationBefore": "public class ConvocationAttendance",
+    "declarationAfter": "public class ConvocationAttendance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ConvocationEligibility",
+    "declarationBefore": "public class ConvocationEligibility",
+    "declarationAfter": "public class ConvocationEligibility : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DefaulterIntervention",
+    "declarationBefore": "public class DefaulterIntervention",
+    "declarationAfter": "public class DefaulterIntervention : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DefaulterRiskScore",
+    "declarationBefore": "public class DefaulterRiskScore",
+    "declarationAfter": "public class DefaulterRiskScore : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DegreeCertificate",
+    "declarationBefore": "public class DegreeCertificate",
+    "declarationAfter": "public class DegreeCertificate : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DistributionAnomalyAlert",
+    "declarationBefore": "public class DistributionAnomalyAlert",
+    "declarationAfter": "public class DistributionAnomalyAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EvidenceFreshnessLog",
+    "declarationBefore": "public class EvidenceFreshnessLog",
+    "declarationAfter": "public class EvidenceFreshnessLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FacultySlotMatch",
+    "declarationBefore": "public class FacultySlotMatch",
+    "declarationAfter": "public class FacultySlotMatch : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "FreezeDocument",
+    "declarationBefore": "public class FreezeDocument",
+    "declarationAfter": "public class FreezeDocument : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GradeAppeal",
+    "declarationBefore": "public class GradeAppeal",
+    "declarationAfter": "public class GradeAppeal : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GradeDistribution",
+    "declarationBefore": "public class GradeDistribution",
+    "declarationAfter": "public class GradeDistribution : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PlagiarismApiSubmission",
+    "declarationBefore": "public class PlagiarismApiSubmission",
+    "declarationAfter": "public class PlagiarismApiSubmission : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PlagiarismScan",
+    "declarationBefore": "public class PlagiarismScan",
+    "declarationAfter": "public class PlagiarismScan : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PrerequisiteConflict",
+    "declarationBefore": "public class PrerequisiteConflict",
+    "declarationAfter": "public class PrerequisiteConflict : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ProctorEvent",
+    "declarationBefore": "public class ProctorEvent",
+    "declarationAfter": "public class ProctorEvent : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ProctoringSession",
+    "declarationBefore": "public class ProctoringSession",
+    "declarationAfter": "public class ProctoringSession : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReadinessAlert",
+    "declarationBefore": "public class ReadinessAlert",
+    "declarationAfter": "public class ReadinessAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReadinessGap",
+    "declarationBefore": "public class ReadinessGap",
+    "declarationAfter": "public class ReadinessGap : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReadinessScore",
+    "declarationBefore": "public class ReadinessScore",
+    "declarationAfter": "public class ReadinessScore : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SemesterFreeze",
+    "declarationBefore": "public class SemesterFreeze",
+    "declarationAfter": "public class SemesterFreeze : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentProctoringRecord",
+    "declarationBefore": "public class StudentProctoringRecord",
+    "declarationAfter": "public class StudentProctoringRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VisitingFacultyContract",
+    "declarationBefore": "public class VisitingFacultyContract",
+    "declarationAfter": "public class VisitingFacultyContract : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AchievementBadge",
+    "declarationBefore": "public class AchievementBadge",
+    "declarationAfter": "public class AchievementBadge : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BenchmarkComparison",
+    "declarationBefore": "public class BenchmarkComparison",
+    "declarationAfter": "public class BenchmarkComparison : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BoardMeetingPack",
+    "declarationBefore": "public class BoardMeetingPack",
+    "declarationAfter": "public class BoardMeetingPack : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "CandidateNomination",
+    "declarationBefore": "public class CandidateNomination",
+    "declarationAfter": "public class CandidateNomination : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EncryptedBallot",
+    "declarationBefore": "public class EncryptedBallot",
+    "declarationAfter": "public class EncryptedBallot : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ExecutiveDashboard",
+    "declarationBefore": "public class ExecutiveDashboard",
+    "declarationAfter": "public class ExecutiveDashboard : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ForeignStudentRegistry",
+    "declarationBefore": "public class ForeignStudentRegistry",
+    "declarationAfter": "public class ForeignStudentRegistry : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MandatoryReport",
+    "declarationBefore": "public class MandatoryReport",
+    "declarationAfter": "public class MandatoryReport : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StrategicPlanGoal",
+    "declarationBefore": "public class StrategicPlanGoal",
+    "declarationAfter": "public class StrategicPlanGoal : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentBadge",
+    "declarationBefore": "public class StudentBadge",
+    "declarationAfter": "public class StudentBadge : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VisaDocument",
+    "declarationBefore": "public class VisaDocument",
+    "declarationAfter": "public class VisaDocument : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VisaExpiryAlert",
+    "declarationBefore": "public class VisaExpiryAlert",
+    "declarationAfter": "public class VisaExpiryAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VisaRenewal",
+    "declarationBefore": "public class VisaRenewal",
+    "declarationAfter": "public class VisaRenewal : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ApiEndpoint",
+    "declarationBefore": "public class ApiEndpoint",
+    "declarationAfter": "public class ApiEndpoint : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DiagnosticFinding",
+    "declarationBefore": "public class DiagnosticFinding",
+    "declarationAfter": "public class DiagnosticFinding : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "DomainEvent",
+    "declarationBefore": "public class DomainEvent",
+    "declarationAfter": "public class DomainEvent : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "EventSchemaVersion",
+    "declarationBefore": "public class EventSchemaVersion",
+    "declarationAfter": "public class EventSchemaVersion : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "2"
+  },
+  {
+    "entity": "HealthScore",
+    "declarationBefore": "public class HealthScore",
+    "declarationAfter": "public class HealthScore : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "IntegrationIncident",
+    "declarationBefore": "public class IntegrationIncident",
+    "declarationAfter": "public class IntegrationIncident : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "IntegrationRegistration",
+    "declarationBefore": "public class IntegrationRegistration",
+    "declarationAfter": "public class IntegrationRegistration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "QueueDefinition",
+    "declarationBefore": "public class QueueDefinition",
+    "declarationAfter": "public class QueueDefinition : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "QueueJob",
+    "declarationBefore": "public class QueueJob",
+    "declarationAfter": "public class QueueJob : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ServiceDependency",
+    "declarationBefore": "public class ServiceDependency",
+    "declarationAfter": "public class ServiceDependency : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ServiceRegistration",
+    "declarationBefore": "public class ServiceRegistration",
+    "declarationAfter": "public class ServiceRegistration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SlowQuery",
+    "declarationBefore": "public class SlowQuery",
+    "declarationAfter": "public class SlowQuery : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AIFeedback",
+    "declarationBefore": "public class AIFeedback",
+    "declarationAfter": "public class AIFeedback : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AIModel",
+    "declarationBefore": "public class AIModel",
+    "declarationAfter": "public class AIModel : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AIProvider",
+    "declarationBefore": "public class AIProvider",
+    "declarationAfter": "public class AIProvider : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AITokenUsage",
+    "declarationBefore": "public class AITokenUsage",
+    "declarationAfter": "public class AITokenUsage : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "BenchmarkRun",
+    "declarationBefore": "public class BenchmarkRun",
+    "declarationAfter": "public class BenchmarkRun : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GuardrailRule",
+    "declarationBefore": "public class GuardrailRule",
+    "declarationAfter": "public class GuardrailRule : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "GuardrailViolation",
+    "declarationBefore": "public class GuardrailViolation",
+    "declarationAfter": "public class GuardrailViolation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "License",
+    "declarationBefore": "public class License",
+    "declarationAfter": "public class License : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "LicenseHeartbeat",
+    "declarationBefore": "public class LicenseHeartbeat",
+    "declarationAfter": "public class LicenseHeartbeat : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Prompt",
+    "declarationBefore": "public class Prompt",
+    "declarationAfter": "public class Prompt : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PromptABTest",
+    "declarationBefore": "public class PromptABTest",
+    "declarationAfter": "public class PromptABTest : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PromptVersion",
+    "declarationBefore": "public class PromptVersion",
+    "declarationAfter": "public class PromptVersion : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "list": "2"
+  },
+  {
+    "entity": "PluginRevenueShare",
+    "declarationBefore": "public class PluginRevenueShare",
+    "declarationAfter": "public class PluginRevenueShare : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PluginRevenueShare.cs",
+    "list": "1"
+  },
+  {
+    "entity": "PreventiveMaintenanceSchedule",
+    "declarationBefore": "public class PreventiveMaintenanceSchedule",
+    "declarationAfter": "public class PreventiveMaintenanceSchedule : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/PreventiveMaintenanceSchedule.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ProfilePictureRecord",
+    "declarationBefore": "public class ProfilePictureRecord",
+    "declarationAfter": "public class ProfilePictureRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ProfilePictureRecord.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReadReplicaConfig",
+    "declarationBefore": "public class ReadReplicaConfig",
+    "declarationAfter": "public class ReadReplicaConfig : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ReadReplicaConfig.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReplicaHealthLog",
+    "declarationBefore": "public class ReplicaHealthLog",
+    "declarationAfter": "public class ReplicaHealthLog : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReplicationLagAlert",
+    "declarationBefore": "public class ReplicationLagAlert",
+    "declarationAfter": "public class ReplicationLagAlert : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReplicationScaleEvent",
+    "declarationBefore": "public class ReplicationScaleEvent",
+    "declarationAfter": "public class ReplicationScaleEvent : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ReplicationScalingConfig",
+    "declarationBefore": "public class ReplicationScalingConfig",
+    "declarationAfter": "public class ReplicationScalingConfig : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ResearchLab",
+    "declarationBefore": "public class ResearchLab",
+    "declarationAfter": "public class ResearchLab : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/ResearchLab.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Room",
+    "declarationBefore": "public class Room",
+    "declarationAfter": "public class Room : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Room.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RoomOccupancy",
+    "declarationBefore": "public class RoomOccupancy",
+    "declarationAfter": "public class RoomOccupancy : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/RoomOccupancy.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RuleDefinition",
+    "declarationBefore": "public class RuleDefinition",
+    "declarationAfter": "public class RuleDefinition : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/RuleDefinition.cs",
+    "list": "1"
+  },
+  {
+    "entity": "RuleVersion",
+    "declarationBefore": "public class RuleVersion",
+    "declarationAfter": "public class RuleVersion : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/RuleVersion.cs",
+    "list": "2"
+  },
+  {
+    "entity": "SLADefinition",
+    "declarationBefore": "public class SLADefinition",
+    "declarationAfter": "public class SLADefinition : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SLADefinition.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SafetyChecklistItem",
+    "declarationBefore": "public class SafetyChecklistItem",
+    "declarationAfter": "public class SafetyChecklistItem : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SafetyChecklistItem.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SamlConfiguration",
+    "declarationBefore": "public class SamlConfiguration",
+    "declarationAfter": "public class SamlConfiguration : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SamlConfiguration.cs",
+    "list": "1"
+  },
+  {
+    "entity": "JobExecution",
+    "declarationBefore": "public class JobExecution",
+    "declarationAfter": "public class JobExecution : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SchedulerEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "ScheduledJob",
+    "declarationBefore": "public class ScheduledJob",
+    "declarationAfter": "public class ScheduledJob : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SchedulerEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SecurityGuard",
+    "declarationBefore": "public class SecurityGuard",
+    "declarationAfter": "public class SecurityGuard : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SecurityGuard.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SecurityIncident",
+    "declarationBefore": "public class SecurityIncident",
+    "declarationAfter": "public class SecurityIncident : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SecurityIncident.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SensorReading",
+    "declarationBefore": "public class SensorReading",
+    "declarationAfter": "public class SensorReading : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SensorReading.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AgenticGradeRun",
+    "declarationBefore": "public class AgenticGradeRun",
+    "declarationAfter": "public class AgenticGradeRun : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ExamPaperBatch",
+    "declarationBefore": "public class ExamPaperBatch",
+    "declarationAfter": "public class ExamPaperBatch : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ExamPaperScan",
+    "declarationBefore": "public class ExamPaperScan",
+    "declarationAfter": "public class ExamPaperScan : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "HumanGradeReview",
+    "declarationBefore": "public class HumanGradeReview",
+    "declarationAfter": "public class HumanGradeReview : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "PaperDestructionManifest",
+    "declarationBefore": "public class PaperDestructionManifest",
+    "declarationAfter": "public class PaperDestructionManifest : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "SsoSession",
+    "declarationBefore": "public class SsoSession",
+    "declarationAfter": "public class SsoSession : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "UniversitySsoProfile",
+    "declarationBefore": "public class UniversitySsoProfile",
+    "declarationAfter": "public class UniversitySsoProfile : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "UserSecondFactor",
+    "declarationBefore": "public class UserSecondFactor",
+    "declarationAfter": "public class UserSecondFactor : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "list": "2"
+  },
+  {
+    "entity": "Student",
+    "declarationBefore": "public class Student",
+    "declarationAfter": "public class Student : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Student.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ActivityParticipation",
+    "declarationBefore": "public class ActivityParticipation",
+    "declarationAfter": "public class ActivityParticipation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AlumniDonation",
+    "declarationBefore": "public class AlumniDonation",
+    "declarationAfter": "public class AlumniDonation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "AlumniProfile",
+    "declarationBefore": "public class AlumniProfile",
+    "declarationAfter": "public class AlumniProfile : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "MedicalVisit",
+    "declarationBefore": "public class MedicalVisit",
+    "declarationAfter": "public class MedicalVisit : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SickLeaveApplication",
+    "declarationBefore": "public class SickLeaveApplication",
+    "declarationAfter": "public class SickLeaveApplication : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SocietyMembership",
+    "declarationBefore": "public class SocietyMembership",
+    "declarationAfter": "public class SocietyMembership : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentActivity",
+    "declarationBefore": "public class StudentActivity",
+    "declarationAfter": "public class StudentActivity : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentHealthRecord",
+    "declarationBefore": "public class StudentHealthRecord",
+    "declarationAfter": "public class StudentHealthRecord : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentSociety",
+    "declarationBefore": "public class StudentSociety",
+    "declarationAfter": "public class StudentSociety : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "StudentTransfer",
+    "declarationBefore": "public class StudentTransfer",
+    "declarationAfter": "public class StudentTransfer : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/StudentTransfer.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SyncLagConfig",
+    "declarationBefore": "public class SyncLagConfig",
+    "declarationAfter": "public class SyncLagConfig : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SyncLagEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "SyncLagEntry",
+    "declarationBefore": "public class SyncLagEntry",
+    "declarationAfter": "public class SyncLagEntry : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/SyncLagEntities.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TaxSlab",
+    "declarationBefore": "public class TaxSlab",
+    "declarationAfter": "public class TaxSlab : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/TaxSlab.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TicketComment",
+    "declarationBefore": "public class TicketComment",
+    "declarationAfter": "public class TicketComment : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/TicketComment.cs",
+    "list": "1"
+  },
+  {
+    "entity": "TicketEscalation",
+    "declarationBefore": "public class TicketEscalation",
+    "declarationAfter": "public class TicketEscalation : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/TicketEscalation.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Timetable",
+    "declarationBefore": "public class Timetable",
+    "declarationAfter": "public class Timetable : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/Timetable.cs",
+    "list": "2"
+  },
+  {
+    "entity": "TranslationKey",
+    "declarationBefore": "public class TranslationKey",
+    "declarationAfter": "public class TranslationKey : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/TranslationKey.cs",
+    "list": "2"
+  },
+  {
+    "entity": "TranslationValue",
+    "declarationBefore": "public class TranslationValue",
+    "declarationAfter": "public class TranslationValue : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/TranslationValue.cs",
+    "list": "2"
+  },
+  {
+    "entity": "User",
+    "declarationBefore": "public class User",
+    "declarationAfter": "public class User : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/User.cs",
+    "list": "1"
+  },
+  {
+    "entity": "VehiclePass",
+    "declarationBefore": "public class VehiclePass",
+    "declarationAfter": "public class VehiclePass : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/VehiclePass.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Visitor",
+    "declarationBefore": "public class Visitor",
+    "declarationAfter": "public class Visitor : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/Visitor.cs",
+    "list": "1"
+  },
+  {
+    "entity": "WebhookSubscription",
+    "declarationBefore": "public class WebhookSubscription",
+    "declarationAfter": "public class WebhookSubscription : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/WebhookSubscription.cs",
+    "list": "1"
+  },
+  {
+    "entity": "Tenant",
+    "declarationBefore": "public sealed class Tenant",
+    "declarationAfter": "public sealed class Tenant : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/WizardSession.cs",
+    "list": "2"
+  },
+  {
+    "entity": "WorkOrder",
+    "declarationBefore": "public class WorkOrder",
+    "declarationAfter": "public class WorkOrder : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/WorkOrder.cs",
+    "list": "1"
+  },
+  {
+    "entity": "WorkOrderMaterial",
+    "declarationBefore": "public class WorkOrderMaterial",
+    "declarationAfter": "public class WorkOrderMaterial : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/WorkOrderMaterial.cs",
+    "list": "1"
+  },
+  {
+    "entity": "WorkOrderTimeEntry",
+    "declarationBefore": "public class WorkOrderTimeEntry",
+    "declarationAfter": "public class WorkOrderTimeEntry : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/WorkOrderTimeEntry.cs",
+    "list": "1"
+  },
+  {
+    "entity": "WorkflowDefinition",
+    "declarationBefore": "public class WorkflowDefinition",
+    "declarationAfter": "public class WorkflowDefinition : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/WorkflowDefinition.cs",
+    "list": "1"
+  },
+  {
+    "entity": "WorkflowInstance",
+    "declarationBefore": "public class WorkflowInstance",
+    "declarationAfter": "public class WorkflowInstance : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Domain/Entities/WorkflowInstance.cs",
+    "list": "1"
+  },
+  {
+    "entity": "WorkflowStep",
+    "declarationBefore": "public class WorkflowStep",
+    "declarationAfter": "public class WorkflowStep : ITenantScoped",
+    "tenantIdInserted": "true",
+    "file": "AegisCore.Domain/Entities/WorkflowStep.cs",
+    "list": "2"
+  },
+  {
+    "entity": "ScalingEvent",
+    "declarationBefore": "public class ScalingEvent",
+    "declarationAfter": "public class ScalingEvent : ITenantScoped",
+    "tenantIdInserted": "false",
+    "file": "AegisCore.Infrastructure/ScalingEvent.cs",
+    "list": "1"
+  }
+]

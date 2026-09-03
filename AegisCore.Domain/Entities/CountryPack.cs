@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("CountryPacks")]
-public class CountryPack
+public class CountryPack : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

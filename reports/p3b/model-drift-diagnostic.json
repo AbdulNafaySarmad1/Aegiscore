@@ -1,0 +1,22 @@
+{
+  "initialOperations": [
+    "AddColumn",
+    "AlterColumn",
+    "CreateIndex",
+    "CreateTable",
+    "DropColumn",
+    "RenameColumn",
+    "UpdateData"
+  ],
+  "verificationOperations": [
+    "AddColumn",
+    "AlterColumn",
+    "CreateIndex",
+    "CreateTable",
+    "DropColumn",
+    "RenameColumn"
+  ],
+  "initialTenantAddColumns": 75,
+  "remainingTenantAddColumnsAfterSanitizedSnapshot": 0,
+  "unrelatedDriftWasNotCommitted": true
+}

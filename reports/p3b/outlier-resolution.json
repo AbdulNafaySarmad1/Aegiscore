@@ -1,0 +1,8 @@
+{
+  "entity": "ScalingEvent",
+  "originalLocation": "AegisCore.Infrastructure/AegisDbContext.cs",
+  "newLocation": "AegisCore.Infrastructure/ScalingEvent.cs",
+  "reason": "P3A found a DbSet entity declared after the DbContext class in AegisDbContext.cs. A non-partial C# class cannot be made ITenantScoped from another file, so the standalone entity declaration was relocated without changing any AegisDbContext member or model configuration.",
+  "dbContextBehaviorChanged": false,
+  "tenantIdAlreadyPresent": true
+}

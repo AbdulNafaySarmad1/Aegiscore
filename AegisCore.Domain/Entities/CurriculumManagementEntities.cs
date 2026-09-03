@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("CurriculumVersions")]
-public class CurriculumVersionRecord
+public class CurriculumVersionRecord : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid ProgramId { get; set; }
     public int VersionNumber { get; set; }
@@ -21,8 +23,9 @@ public class CurriculumVersionRecord
 }
 
 [Table("CurriculumCourses")]
-public class CurriculumCourse
+public class CurriculumCourse : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CurriculumVersionId { get; set; }
     public Guid CourseId { get; set; }
@@ -38,8 +41,9 @@ public class CurriculumCourse
 }
 
 [Table("CurriculumPrerequisites")]
-public class CurriculumPrerequisite
+public class CurriculumPrerequisite : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CurriculumVersionId { get; set; }
     public Guid CourseId { get; set; }
@@ -51,8 +55,9 @@ public class CurriculumPrerequisite
 }
 
 [Table("CurriculumChangeHistory")]
-public class CurriculumChangeHistory
+public class CurriculumChangeHistory : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CurriculumVersionId { get; set; }
     [Required, MaxLength(40)] public string ChangeType { get; set; } = string.Empty;
@@ -65,8 +70,9 @@ public class CurriculumChangeHistory
 }
 
 [Table("OfflineAttendanceEvents")]
-public class OfflineAttendanceEvent
+public class OfflineAttendanceEvent : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     [Required, MaxLength(100)] public string ClientEventId { get; set; } = string.Empty;
     public Guid CourseId { get; set; }

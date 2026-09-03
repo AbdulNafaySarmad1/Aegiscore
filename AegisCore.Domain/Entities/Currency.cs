@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("Currencies")]
-public class Currency
+public class Currency : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

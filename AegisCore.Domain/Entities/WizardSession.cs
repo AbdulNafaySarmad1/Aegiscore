@@ -2,8 +2,9 @@ using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
-public sealed class Tenant
+public sealed class Tenant : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string ShortName { get; set; } = string.Empty;

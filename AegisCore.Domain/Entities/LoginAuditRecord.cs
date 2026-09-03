@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("LoginAuditRecords")]
-public class LoginAuditRecord
+public class LoginAuditRecord : ITenantScoped
 {
     [Key] public Guid AuditId { get; set; } = Guid.NewGuid();
     public Guid TenantId { get; set; }

@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("DegreePrograms")]
-public class DegreeProgram
+public class DegreeProgram : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

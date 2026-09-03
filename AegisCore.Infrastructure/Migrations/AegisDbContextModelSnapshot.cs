@@ -455,6 +455,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SemesterId");
@@ -486,6 +489,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -994,6 +1000,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Cnic")
@@ -1155,6 +1164,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("SuggestedMarks")
                         .HasColumnType("decimal(5,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -1357,6 +1369,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(300)");
 
                     b.Property<Guid>("UniversityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -1584,6 +1599,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid?>("VerifiedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationId", "DocumentType");
@@ -1637,6 +1655,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTime>("TimeoutAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StepId");
@@ -1676,6 +1697,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("WeightPercentage")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SchemeId", "OrderIndex")
@@ -1700,6 +1724,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("SemesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -1962,6 +1989,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -2293,6 +2323,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("StartYear")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -3572,6 +3605,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("UploadDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("HumanReviewStatus");
@@ -3715,6 +3751,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -4034,6 +4073,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("VersionNumber")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -4538,6 +4580,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
@@ -4563,6 +4608,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("FacultyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -4652,6 +4700,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("TotalMarksObtained")
                         .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -4768,6 +4819,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssessmentComponentId");
@@ -4847,6 +4901,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TargetSemesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -4955,6 +5012,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("TargetDeptId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PermissionId");
@@ -5054,6 +5114,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CurriculumVersionId", "ChangedAt");
@@ -5101,6 +5164,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasComputedColumnSql("\"TheoryCreditHours\" + \"LabCreditHours\"", true);
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CurriculumVersionId", "CourseId", "Semester")
@@ -5136,6 +5202,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -5222,6 +5291,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("YearEffective")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -7023,6 +7095,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
@@ -7226,6 +7301,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("Version")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.ToTable("EventSchemaVersions");
@@ -7319,6 +7397,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExamId", "Status");
@@ -7357,6 +7438,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -7404,6 +7488,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StudentId", "CourseId")
@@ -7433,6 +7520,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<string>("Venue")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -7467,6 +7557,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -7882,6 +7975,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
@@ -8046,6 +8142,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.ToTable("FeatureFlags");
@@ -8076,6 +8175,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("OrderIndex")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -8285,6 +8387,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("TotalFee")
                         .HasColumnType("decimal(12,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -13324,6 +13429,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("PercentageTo")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GradeScaleId", "LetterGrade")
@@ -13484,6 +13592,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("UniversityId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApprovalStatus", "ApprovalThreshold");
@@ -13508,6 +13619,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<Guid>("UniversityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -13567,6 +13681,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<Guid>("TicketId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -14070,6 +14187,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -15642,6 +15762,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LockedAt");
@@ -16163,6 +16286,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("SubmittedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Status");
@@ -16498,6 +16624,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("TotalSeats")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProgramId", "SemesterId", "QuotaType", "RoundNumber")
@@ -16542,6 +16671,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<bool>("SeatAllocated")
                         .HasColumnType("boolean");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -16787,6 +16919,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExpiryDate");
@@ -16889,6 +17024,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("InstanceId");
@@ -16940,6 +17078,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("Version")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -17054,6 +17195,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("WasOfflineAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClientEventId")
@@ -17143,6 +17287,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<Guid>("WitnessedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -17320,6 +17467,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<decimal>("TotalSalary")
                         .HasColumnType("decimal(15,2)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Month")
@@ -17369,6 +17519,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("TotalDeductions")
                         .HasColumnType("decimal(12,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -17783,6 +17936,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -18215,6 +18371,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(15,2)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RequisitionNumber")
@@ -18501,6 +18660,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("VersionNumber")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.ToTable("PromptVersions");
@@ -18563,6 +18725,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("decimal(15,2)");
 
                     b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -19201,6 +19366,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(12,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -19927,6 +20095,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<int>("VersionNumber")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RuleId");
@@ -20239,6 +20410,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationId");
@@ -20288,6 +20462,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ToSectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -20497,6 +20674,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AcademicYearId");
@@ -20644,6 +20824,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TargetServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -20872,6 +21055,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExpiresAt");
@@ -20954,6 +21140,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<string>("UniversityId")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -21293,6 +21482,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<string>("WaivedReason")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Status");
@@ -21334,6 +21526,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("VerifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -22008,6 +22203,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<string>("WriteReplicaConnectionString")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ReplicationLagHours");
@@ -22142,6 +22340,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -22312,6 +22513,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("interval");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BatchId");
@@ -22384,6 +22588,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("VerificationHash")
@@ -22418,6 +22625,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -22454,6 +22664,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -22671,6 +22884,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("SsoTenantId")
                         .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -22892,6 +23108,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("VerifiedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
@@ -23066,6 +23285,9 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -24123,6 +24345,9 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 

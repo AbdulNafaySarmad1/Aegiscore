@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("TeamsSyncLogs")]
-public class TeamsSyncLog
+public class TeamsSyncLog : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid TimetableEntryId { get; set; }
@@ -18,7 +19,7 @@ public class TeamsSyncLog
 }
 
 [Table("LmsSyncLogs")]
-public class LmsSyncLog
+public class LmsSyncLog : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid CourseId { get; set; }
@@ -31,7 +32,7 @@ public class LmsSyncLog
 }
 
 [Table("PowerBiReports")]
-public class PowerBiReport
+public class PowerBiReport : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [MaxLength(200)] public string ReportName { get; set; } = string.Empty;

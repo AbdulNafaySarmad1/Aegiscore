@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("SystemConfigurations")]
-public class SystemConfiguration
+public class SystemConfiguration : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid UniversityId { get; set; }
     [Range(1, 72)] public int ReplicationLagHours { get; set; } = 12;
@@ -26,8 +28,9 @@ public class SystemConfiguration
 }
 
 [Table("GradeOverrideRequests")]
-public class GradeOverrideRequest
+public class GradeOverrideRequest : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid UniversityId { get; set; }
     public Guid StudentId { get; set; }
@@ -50,8 +53,9 @@ public class GradeOverrideRequest
 }
 
 [Table("SectionOverrideRequests")]
-public class SectionOverrideRequest
+public class SectionOverrideRequest : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public Guid CourseId { get; set; }
@@ -67,8 +71,9 @@ public class SectionOverrideRequest
 }
 
 [Table("AnonymousFeedbackSubmissions")]
-public class AnonymousFeedbackSubmission
+public class AnonymousFeedbackSubmission : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid UniversityId { get; set; }
     public Guid CourseId { get; set; }
@@ -81,8 +86,9 @@ public class AnonymousFeedbackSubmission
 }
 
 [Table("CourseReEnrollments")]
-public class CourseReEnrollment
+public class CourseReEnrollment : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public Guid CourseId { get; set; }

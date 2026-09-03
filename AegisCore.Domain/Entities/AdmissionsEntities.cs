@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("AdmissionApplications")]
-public class AdmissionApplication
+public class AdmissionApplication : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid? EnquiryLeadId { get; set; }
     [Required, MaxLength(200)] public string StudentName { get; set; } = string.Empty;
@@ -28,8 +30,9 @@ public class AdmissionApplication
 }
 
 [Table("ApplicationDocuments")]
-public class ApplicationDocument
+public class ApplicationDocument : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid ApplicationId { get; set; }
     [Required, MaxLength(50)] public string DocumentType { get; set; } = string.Empty;
@@ -43,8 +46,9 @@ public class ApplicationDocument
 }
 
 [Table("MeritLists")]
-public class MeritList
+public class MeritList : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid ProgramId { get; set; }
     public Guid SemesterId { get; set; }
@@ -59,8 +63,9 @@ public class MeritList
 }
 
 [Table("MeritListEntries")]
-public class MeritListEntry
+public class MeritListEntry : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid MeritListId { get; set; }
     public Guid ApplicationId { get; set; }
@@ -77,8 +82,9 @@ public class MeritListEntry
 }
 
 [Table("SeatAllocations")]
-public class SeatAllocation
+public class SeatAllocation : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid MeritListEntryId { get; set; }
     public Guid ApplicationId { get; set; }

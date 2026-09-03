@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("ReadReplicaConfigs")]
-public class ReadReplicaConfig
+public class ReadReplicaConfig : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

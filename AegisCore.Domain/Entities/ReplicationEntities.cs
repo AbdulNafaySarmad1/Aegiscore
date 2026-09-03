@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AegisCore.Domain.Common;
 
 namespace AegisCore.Domain.Entities;
 
 [Table("ReplicationScalingConfigs")]
-public class ReplicationScalingConfig
+public class ReplicationScalingConfig : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public int MinReplicas { get; set; } = 1;
@@ -26,7 +27,7 @@ public class ReplicationScalingConfig
 }
 
 [Table("ReplicaHealthLogs")]
-public class ReplicaHealthLog
+public class ReplicaHealthLog : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid ReplicaId { get; set; }
@@ -41,7 +42,7 @@ public class ReplicaHealthLog
 }
 
 [Table("ReplicationScaleEvents")]
-public class ReplicationScaleEvent
+public class ReplicationScaleEvent : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [MaxLength(20)] public string Action { get; set; } = ""; // scale-up | scale-down | failover
@@ -57,7 +58,7 @@ public class ReplicationScaleEvent
 }
 
 [Table("ReplicationLagAlerts")]
-public class ReplicationLagAlert
+public class ReplicationLagAlert : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid ReplicaId { get; set; }

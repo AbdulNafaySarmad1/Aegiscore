@@ -1,0 +1,676 @@
+{
+  "sourceReport": "reports/p3a/tenant-isolation-report.json",
+  "list1Fixed": 353,
+  "list2Fixed": 75,
+  "totalEntitiesFixed": 428,
+  "sourceFilesChanged": [
+    "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+    "AegisCore.Domain/Entities/ApiKey.cs",
+    "AegisCore.Domain/Entities/ApprovalRecord.cs",
+    "AegisCore.Domain/Entities/Attendance.cs",
+    "AegisCore.Domain/Entities/BackupConfiguration.cs",
+    "AegisCore.Domain/Entities/BackupRecord.cs",
+    "AegisCore.Domain/Entities/Batch.cs",
+    "AegisCore.Domain/Entities/Building.cs",
+    "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+    "AegisCore.Domain/Entities/CalibrationRecord.cs",
+    "AegisCore.Domain/Entities/Campus.cs",
+    "AegisCore.Domain/Entities/CampusConfiguration.cs",
+    "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+    "AegisCore.Domain/Entities/CheckpointScan.cs",
+    "AegisCore.Domain/Entities/CisUpload.cs",
+    "AegisCore.Domain/Entities/CloPlomapping.cs",
+    "AegisCore.Domain/Entities/CommunicationEntities.cs",
+    "AegisCore.Domain/Entities/ConfigAuditLog.cs",
+    "AegisCore.Domain/Entities/ConfigVersion.cs",
+    "AegisCore.Domain/Entities/ConfigurationEntry.cs",
+    "AegisCore.Domain/Entities/ConsumableRequisition.cs",
+    "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+    "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+    "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+    "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+    "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+    "AegisCore.Domain/Entities/CountryPack.cs",
+    "AegisCore.Domain/Entities/Course.cs",
+    "AegisCore.Domain/Entities/CourseAssignment.cs",
+    "AegisCore.Domain/Entities/CreditTransfer.cs",
+    "AegisCore.Domain/Entities/Currency.cs",
+    "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+    "AegisCore.Domain/Entities/DataImportEntities.cs",
+    "AegisCore.Domain/Entities/DecisionTable.cs",
+    "AegisCore.Domain/Entities/DegreeAudit.cs",
+    "AegisCore.Domain/Entities/DegreeProgram.cs",
+    "AegisCore.Domain/Entities/DegreeRequirement.cs",
+    "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+    "AegisCore.Domain/Entities/EmergencyAlert.cs",
+    "AegisCore.Domain/Entities/EmergencyContact.cs",
+    "AegisCore.Domain/Entities/EnergyReading.cs",
+    "AegisCore.Domain/Entities/Enrollment.cs",
+    "AegisCore.Domain/Entities/EquipmentBooking.cs",
+    "AegisCore.Domain/Entities/EquipmentMaintenance.cs",
+    "AegisCore.Domain/Entities/EquipmentUsageLog.cs",
+    "AegisCore.Domain/Entities/ExamSchedule.cs",
+    "AegisCore.Domain/Entities/ExamSeating.cs",
+    "AegisCore.Domain/Entities/ExaminationEntities.cs",
+    "AegisCore.Domain/Entities/Extension.cs",
+    "AegisCore.Domain/Entities/ExtensionInstallation.cs",
+    "AegisCore.Domain/Entities/ExtensionReview.cs",
+    "AegisCore.Domain/Entities/Faculty.cs",
+    "AegisCore.Domain/Entities/FeatureFlag.cs",
+    "AegisCore.Domain/Entities/FinanceEntities.cs",
+    "AegisCore.Domain/Entities/FireDrill.cs",
+    "AegisCore.Domain/Entities/FireEquipment.cs",
+    "AegisCore.Domain/Entities/Floor.cs",
+    "AegisCore.Domain/Entities/FloorPlan.cs",
+    "AegisCore.Domain/Entities/FormDefinition.cs",
+    "AegisCore.Domain/Entities/FormSubmission.cs",
+    "AegisCore.Domain/Entities/FoundationEntities.cs",
+    "AegisCore.Domain/Entities/GateEntry.cs",
+    "AegisCore.Domain/Entities/GovernanceEntities.cs",
+    "AegisCore.Domain/Entities/GuardRound.cs",
+    "AegisCore.Domain/Entities/GuardShift.cs",
+    "AegisCore.Domain/Entities/IncidentEvidence.cs",
+    "AegisCore.Domain/Entities/IncidentWitness.cs",
+    "AegisCore.Domain/Entities/IoTSensor.cs",
+    "AegisCore.Domain/Entities/LabBooking.cs",
+    "AegisCore.Domain/Entities/LabConsumable.cs",
+    "AegisCore.Domain/Entities/LabEquipment.cs",
+    "AegisCore.Domain/Entities/LabSafetyInspection.cs",
+    "AegisCore.Domain/Entities/LicenseState.cs",
+    "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+    "AegisCore.Domain/Entities/LoginAuditRecord.cs",
+    "AegisCore.Domain/Entities/LostFoundItem.cs",
+    "AegisCore.Domain/Entities/MaintenanceContractor.cs",
+    "AegisCore.Domain/Entities/MaintenanceTicket.cs",
+    "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+    "AegisCore.Domain/Entities/NotificationEntities.cs",
+    "AegisCore.Domain/Entities/NotificationRecord.cs",
+    "AegisCore.Domain/Entities/PayrollEntities.cs",
+    "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+    "AegisCore.Domain/Entities/PlatformEntities.cs",
+    "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+    "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+    "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+    "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+    "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+    "AegisCore.Domain/Entities/PluginRevenueShare.cs",
+    "AegisCore.Domain/Entities/PreventiveMaintenanceSchedule.cs",
+    "AegisCore.Domain/Entities/ProfilePictureRecord.cs",
+    "AegisCore.Domain/Entities/ReadReplicaConfig.cs",
+    "AegisCore.Domain/Entities/ReplicationEntities.cs",
+    "AegisCore.Domain/Entities/ResearchLab.cs",
+    "AegisCore.Domain/Entities/Room.cs",
+    "AegisCore.Domain/Entities/RoomOccupancy.cs",
+    "AegisCore.Domain/Entities/RuleDefinition.cs",
+    "AegisCore.Domain/Entities/RuleVersion.cs",
+    "AegisCore.Domain/Entities/SLADefinition.cs",
+    "AegisCore.Domain/Entities/SafetyChecklistItem.cs",
+    "AegisCore.Domain/Entities/SamlConfiguration.cs",
+    "AegisCore.Domain/Entities/SchedulerEntities.cs",
+    "AegisCore.Domain/Entities/SecurityGuard.cs",
+    "AegisCore.Domain/Entities/SecurityIncident.cs",
+    "AegisCore.Domain/Entities/SensorReading.cs",
+    "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+    "AegisCore.Domain/Entities/Student.cs",
+    "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+    "AegisCore.Domain/Entities/StudentTransfer.cs",
+    "AegisCore.Domain/Entities/SyncLagEntities.cs",
+    "AegisCore.Domain/Entities/TaxSlab.cs",
+    "AegisCore.Domain/Entities/TicketComment.cs",
+    "AegisCore.Domain/Entities/TicketEscalation.cs",
+    "AegisCore.Domain/Entities/Timetable.cs",
+    "AegisCore.Domain/Entities/TranslationKey.cs",
+    "AegisCore.Domain/Entities/TranslationValue.cs",
+    "AegisCore.Domain/Entities/User.cs",
+    "AegisCore.Domain/Entities/VehiclePass.cs",
+    "AegisCore.Domain/Entities/Visitor.cs",
+    "AegisCore.Domain/Entities/WebhookSubscription.cs",
+    "AegisCore.Domain/Entities/WizardSession.cs",
+    "AegisCore.Domain/Entities/WorkOrder.cs",
+    "AegisCore.Domain/Entities/WorkOrderMaterial.cs",
+    "AegisCore.Domain/Entities/WorkOrderTimeEntry.cs",
+    "AegisCore.Domain/Entities/WorkflowDefinition.cs",
+    "AegisCore.Domain/Entities/WorkflowInstance.cs",
+    "AegisCore.Domain/Entities/WorkflowStep.cs",
+    "AegisCore.Infrastructure/ScalingEvent.cs"
+  ],
+  "migrationsGenerated": [
+    {
+      "EntityName": "AcademicHoliday",
+      "MigrationId": "20260903085235_AddTenantId_AcademicHoliday",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085235_AddTenantId_AcademicHoliday.cs",
+      "Table": "AcademicHolidays",
+      "Schema": null
+    },
+    {
+      "EntityName": "AcademicYear",
+      "MigrationId": "20260903085236_AddTenantId_AcademicYear",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085236_AddTenantId_AcademicYear.cs",
+      "Table": "AcademicYears",
+      "Schema": null
+    },
+    {
+      "EntityName": "AdmissionApplication",
+      "MigrationId": "20260903085237_AddTenantId_AdmissionApplication",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085237_AddTenantId_AdmissionApplication.cs",
+      "Table": "AdmissionApplications",
+      "Schema": null
+    },
+    {
+      "EntityName": "AgenticGradeRun",
+      "MigrationId": "20260903085238_AddTenantId_AgenticGradeRun",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085238_AddTenantId_AgenticGradeRun.cs",
+      "Table": "AgenticGradeRuns",
+      "Schema": null
+    },
+    {
+      "EntityName": "AnonymousFeedbackSubmission",
+      "MigrationId": "20260903085239_AddTenantId_AnonymousFeedbackSubmission",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085239_AddTenantId_AnonymousFeedbackSubmission.cs",
+      "Table": "AnonymousFeedbackSubmissions",
+      "Schema": null
+    },
+    {
+      "EntityName": "ApplicationDocument",
+      "MigrationId": "20260903085240_AddTenantId_ApplicationDocument",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085240_AddTenantId_ApplicationDocument.cs",
+      "Table": "ApplicationDocuments",
+      "Schema": null
+    },
+    {
+      "EntityName": "ApprovalRecord",
+      "MigrationId": "20260903085241_AddTenantId_ApprovalRecord",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085241_AddTenantId_ApprovalRecord.cs",
+      "Table": "ApprovalRecords",
+      "Schema": null
+    },
+    {
+      "EntityName": "AssessmentComponent",
+      "MigrationId": "20260903085242_AddTenantId_AssessmentComponent",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085242_AddTenantId_AssessmentComponent.cs",
+      "Table": "AssessmentComponents",
+      "Schema": null
+    },
+    {
+      "EntityName": "AssessmentScheme",
+      "MigrationId": "20260903085243_AddTenantId_AssessmentScheme",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085243_AddTenantId_AssessmentScheme.cs",
+      "Table": "AssessmentSchemes",
+      "Schema": null
+    },
+    {
+      "EntityName": "Attendance",
+      "MigrationId": "20260903085244_AddTenantId_Attendance",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085244_AddTenantId_Attendance.cs",
+      "Table": "Attendances",
+      "Schema": null
+    },
+    {
+      "EntityName": "Batch",
+      "MigrationId": "20260903085245_AddTenantId_Batch",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085245_AddTenantId_Batch.cs",
+      "Table": "Batches",
+      "Schema": null
+    },
+    {
+      "EntityName": "CisUpload",
+      "MigrationId": "20260903085246_AddTenantId_CisUpload",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085246_AddTenantId_CisUpload.cs",
+      "Table": "CisUploads",
+      "Schema": null
+    },
+    {
+      "EntityName": "CloPlomapping",
+      "MigrationId": "20260903085247_AddTenantId_CloPlomapping",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085247_AddTenantId_CloPlomapping.cs",
+      "Table": "CloPlomappings",
+      "Schema": null
+    },
+    {
+      "EntityName": "ConfigVersion",
+      "MigrationId": "20260903085248_AddTenantId_ConfigVersion",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085248_AddTenantId_ConfigVersion.cs",
+      "Table": "ConfigVersions",
+      "Schema": null
+    },
+    {
+      "EntityName": "Course",
+      "MigrationId": "20260903085249_AddTenantId_Course",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085249_AddTenantId_Course.cs",
+      "Table": "Courses",
+      "Schema": null
+    },
+    {
+      "EntityName": "CourseAssignment",
+      "MigrationId": "20260903085250_AddTenantId_CourseAssignment",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085250_AddTenantId_CourseAssignment.cs",
+      "Table": "CourseAssignments",
+      "Schema": null
+    },
+    {
+      "EntityName": "CourseGrade",
+      "MigrationId": "20260903085251_AddTenantId_CourseGrade",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085251_AddTenantId_CourseGrade.cs",
+      "Table": "CourseGrades",
+      "Schema": null
+    },
+    {
+      "EntityName": "CourseMark",
+      "MigrationId": "20260903085252_AddTenantId_CourseMark",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085252_AddTenantId_CourseMark.cs",
+      "Table": "CourseMarks",
+      "Schema": null
+    },
+    {
+      "EntityName": "CourseReEnrollment",
+      "MigrationId": "20260903085253_AddTenantId_CourseReEnrollment",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085253_AddTenantId_CourseReEnrollment.cs",
+      "Table": "CourseReEnrollments",
+      "Schema": null
+    },
+    {
+      "EntityName": "CrossDeptPermissionRequest",
+      "MigrationId": "20260903085254_AddTenantId_CrossDeptPermissionRequest",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085254_AddTenantId_CrossDeptPermissionRequest.cs",
+      "Table": "CrossDeptPermissionRequests",
+      "Schema": null
+    },
+    {
+      "EntityName": "CurriculumChangeHistory",
+      "MigrationId": "20260903085255_AddTenantId_CurriculumChangeHistory",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085255_AddTenantId_CurriculumChangeHistory.cs",
+      "Table": "CurriculumChangeHistory",
+      "Schema": null
+    },
+    {
+      "EntityName": "CurriculumCourse",
+      "MigrationId": "20260903085256_AddTenantId_CurriculumCourse",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085256_AddTenantId_CurriculumCourse.cs",
+      "Table": "CurriculumCourses",
+      "Schema": null
+    },
+    {
+      "EntityName": "CurriculumPrerequisite",
+      "MigrationId": "20260903085257_AddTenantId_CurriculumPrerequisite",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085257_AddTenantId_CurriculumPrerequisite.cs",
+      "Table": "CurriculumPrerequisites",
+      "Schema": null
+    },
+    {
+      "EntityName": "CurriculumVersionRecord",
+      "MigrationId": "20260903085258_AddTenantId_CurriculumVersionRecord",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085258_AddTenantId_CurriculumVersionRecord.cs",
+      "Table": "CurriculumVersions",
+      "Schema": null
+    },
+    {
+      "EntityName": "Enrollment",
+      "MigrationId": "20260903085259_AddTenantId_Enrollment",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085259_AddTenantId_Enrollment.cs",
+      "Table": "Enrollments",
+      "Schema": null
+    },
+    {
+      "EntityName": "EventSchemaVersion",
+      "MigrationId": "20260903085300_AddTenantId_EventSchemaVersion",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085300_AddTenantId_EventSchemaVersion.cs",
+      "Table": "EventSchemaVersions",
+      "Schema": null
+    },
+    {
+      "EntityName": "ExamPaperBatch",
+      "MigrationId": "20260903085301_AddTenantId_ExamPaperBatch",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085301_AddTenantId_ExamPaperBatch.cs",
+      "Table": "ExamPaperBatches",
+      "Schema": null
+    },
+    {
+      "EntityName": "ExamPaperScan",
+      "MigrationId": "20260903085302_AddTenantId_ExamPaperScan",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085302_AddTenantId_ExamPaperScan.cs",
+      "Table": "ExamPaperScans",
+      "Schema": null
+    },
+    {
+      "EntityName": "ExamRegistration",
+      "MigrationId": "20260903085303_AddTenantId_ExamRegistration",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085303_AddTenantId_ExamRegistration.cs",
+      "Table": "ExamRegistrations",
+      "Schema": null
+    },
+    {
+      "EntityName": "ExamSchedule",
+      "MigrationId": "20260903085304_AddTenantId_ExamSchedule",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085304_AddTenantId_ExamSchedule.cs",
+      "Table": "ExamSchedules",
+      "Schema": null
+    },
+    {
+      "EntityName": "ExamSeating",
+      "MigrationId": "20260903085305_AddTenantId_ExamSeating",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085305_AddTenantId_ExamSeating.cs",
+      "Table": "ExamSeatings",
+      "Schema": null
+    },
+    {
+      "EntityName": "Faculty",
+      "MigrationId": "20260903085306_AddTenantId_Faculty",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085306_AddTenantId_Faculty.cs",
+      "Table": "Faculties",
+      "Schema": null
+    },
+    {
+      "EntityName": "FeatureFlag",
+      "MigrationId": "20260903085307_AddTenantId_FeatureFlag",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085307_AddTenantId_FeatureFlag.cs",
+      "Table": "FeatureFlags",
+      "Schema": null
+    },
+    {
+      "EntityName": "FeeComponent",
+      "MigrationId": "20260903085308_AddTenantId_FeeComponent",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085308_AddTenantId_FeeComponent.cs",
+      "Table": "FeeComponents",
+      "Schema": null
+    },
+    {
+      "EntityName": "FeeStructure",
+      "MigrationId": "20260903085309_AddTenantId_FeeStructure",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085309_AddTenantId_FeeStructure.cs",
+      "Table": "FeeStructures",
+      "Schema": null
+    },
+    {
+      "EntityName": "GradeBand",
+      "MigrationId": "20260903085310_AddTenantId_GradeBand",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085310_AddTenantId_GradeBand.cs",
+      "Table": "GradeBands",
+      "Schema": null
+    },
+    {
+      "EntityName": "GradeOverrideRequest",
+      "MigrationId": "20260903085311_AddTenantId_GradeOverrideRequest",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085311_AddTenantId_GradeOverrideRequest.cs",
+      "Table": "GradeOverrideRequests",
+      "Schema": null
+    },
+    {
+      "EntityName": "GradeScale",
+      "MigrationId": "20260903085312_AddTenantId_GradeScale",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085312_AddTenantId_GradeScale.cs",
+      "Table": "GradeScales",
+      "Schema": null
+    },
+    {
+      "EntityName": "GrievanceResponse",
+      "MigrationId": "20260903085313_AddTenantId_GrievanceResponse",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085313_AddTenantId_GrievanceResponse.cs",
+      "Table": "GrievanceResponses",
+      "Schema": null
+    },
+    {
+      "EntityName": "HumanGradeReview",
+      "MigrationId": "20260903085314_AddTenantId_HumanGradeReview",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085314_AddTenantId_HumanGradeReview.cs",
+      "Table": "HumanGradeReviews",
+      "Schema": null
+    },
+    {
+      "EntityName": "LicenseState",
+      "MigrationId": "20260903085315_AddTenantId_LicenseState",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085315_AddTenantId_LicenseState.cs",
+      "Table": "LicenseStates",
+      "Schema": null
+    },
+    {
+      "EntityName": "MarkModeration",
+      "MigrationId": "20260903085316_AddTenantId_MarkModeration",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085316_AddTenantId_MarkModeration.cs",
+      "Table": "MarkModerations",
+      "Schema": null
+    },
+    {
+      "EntityName": "MeritList",
+      "MigrationId": "20260903085317_AddTenantId_MeritList",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085317_AddTenantId_MeritList.cs",
+      "Table": "MeritLists",
+      "Schema": null
+    },
+    {
+      "EntityName": "MeritListEntry",
+      "MigrationId": "20260903085318_AddTenantId_MeritListEntry",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085318_AddTenantId_MeritListEntry.cs",
+      "Table": "MeritListEntries",
+      "Schema": null
+    },
+    {
+      "EntityName": "NoticeBoardItem",
+      "MigrationId": "20260903085319_AddTenantId_NoticeBoardItem",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085319_AddTenantId_NoticeBoardItem.cs",
+      "Table": "NoticeBoardItems",
+      "Schema": null
+    },
+    {
+      "EntityName": "NotificationRecord",
+      "MigrationId": "20260903085320_AddTenantId_NotificationRecord",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085320_AddTenantId_NotificationRecord.cs",
+      "Table": "NotificationRecords",
+      "Schema": null
+    },
+    {
+      "EntityName": "NotificationTemplate",
+      "MigrationId": "20260903085321_AddTenantId_NotificationTemplate",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085321_AddTenantId_NotificationTemplate.cs",
+      "Table": "NotificationTemplates",
+      "Schema": null
+    },
+    {
+      "EntityName": "OfflineAttendanceEvent",
+      "MigrationId": "20260903085322_AddTenantId_OfflineAttendanceEvent",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085322_AddTenantId_OfflineAttendanceEvent.cs",
+      "Table": "OfflineAttendanceEvents",
+      "Schema": null
+    },
+    {
+      "EntityName": "PaperDestructionManifest",
+      "MigrationId": "20260903085323_AddTenantId_PaperDestructionManifest",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085323_AddTenantId_PaperDestructionManifest.cs",
+      "Table": "PaperDestructionManifests",
+      "Schema": null
+    },
+    {
+      "EntityName": "PayrollRun",
+      "MigrationId": "20260903085324_AddTenantId_PayrollRun",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085324_AddTenantId_PayrollRun.cs",
+      "Table": "PayrollRuns",
+      "Schema": null
+    },
+    {
+      "EntityName": "Payslip",
+      "MigrationId": "20260903085325_AddTenantId_Payslip",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085325_AddTenantId_Payslip.cs",
+      "Table": "Payslips",
+      "Schema": null
+    },
+    {
+      "EntityName": "PolicyConfig",
+      "MigrationId": "20260903085326_AddTenantId_PolicyConfig",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085326_AddTenantId_PolicyConfig.cs",
+      "Table": "PolicyConfigs",
+      "Schema": null
+    },
+    {
+      "EntityName": "ProcurementRequisition",
+      "MigrationId": "20260903085327_AddTenantId_ProcurementRequisition",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085327_AddTenantId_ProcurementRequisition.cs",
+      "Table": "ProcurementRequisitions",
+      "Schema": null
+    },
+    {
+      "EntityName": "PromptVersion",
+      "MigrationId": "20260903085328_AddTenantId_PromptVersion",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085328_AddTenantId_PromptVersion.cs",
+      "Table": "PromptVersions",
+      "Schema": null
+    },
+    {
+      "EntityName": "PurchaseOrder",
+      "MigrationId": "20260903085329_AddTenantId_PurchaseOrder",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085329_AddTenantId_PurchaseOrder.cs",
+      "Table": "PurchaseOrders",
+      "Schema": null
+    },
+    {
+      "EntityName": "RequisitionLineItem",
+      "MigrationId": "20260903085330_AddTenantId_RequisitionLineItem",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085330_AddTenantId_RequisitionLineItem.cs",
+      "Table": "RequisitionLineItems",
+      "Schema": null
+    },
+    {
+      "EntityName": "RuleVersion",
+      "MigrationId": "20260903085331_AddTenantId_RuleVersion",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085331_AddTenantId_RuleVersion.cs",
+      "Table": "RuleVersions",
+      "Schema": null
+    },
+    {
+      "EntityName": "SeatAllocation",
+      "MigrationId": "20260903085332_AddTenantId_SeatAllocation",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085332_AddTenantId_SeatAllocation.cs",
+      "Table": "SeatAllocations",
+      "Schema": null
+    },
+    {
+      "EntityName": "SectionOverrideRequest",
+      "MigrationId": "20260903085333_AddTenantId_SectionOverrideRequest",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085333_AddTenantId_SectionOverrideRequest.cs",
+      "Table": "SectionOverrideRequests",
+      "Schema": null
+    },
+    {
+      "EntityName": "Semester",
+      "MigrationId": "20260903085334_AddTenantId_Semester",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085334_AddTenantId_Semester.cs",
+      "Table": "Semesters",
+      "Schema": null
+    },
+    {
+      "EntityName": "ServiceDependency",
+      "MigrationId": "20260903085335_AddTenantId_ServiceDependency",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085335_AddTenantId_ServiceDependency.cs",
+      "Table": "ServiceDependencies",
+      "Schema": null
+    },
+    {
+      "EntityName": "SsoSession",
+      "MigrationId": "20260903085336_AddTenantId_SsoSession",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085336_AddTenantId_SsoSession.cs",
+      "Table": "SsoSessions",
+      "Schema": null
+    },
+    {
+      "EntityName": "Student",
+      "MigrationId": "20260903085337_AddTenantId_Student",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085337_AddTenantId_Student.cs",
+      "Table": "Students",
+      "Schema": null
+    },
+    {
+      "EntityName": "StudentFeeDue",
+      "MigrationId": "20260903085338_AddTenantId_StudentFeeDue",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085338_AddTenantId_StudentFeeDue.cs",
+      "Table": "StudentFeeDues",
+      "Schema": null
+    },
+    {
+      "EntityName": "StudentFeePayment",
+      "MigrationId": "20260903085339_AddTenantId_StudentFeePayment",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085339_AddTenantId_StudentFeePayment.cs",
+      "Table": "StudentFeePayments",
+      "Schema": null
+    },
+    {
+      "EntityName": "SystemConfiguration",
+      "MigrationId": "20260903085340_AddTenantId_SystemConfiguration",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085340_AddTenantId_SystemConfiguration.cs",
+      "Table": "SystemConfigurations",
+      "Schema": null
+    },
+    {
+      "EntityName": "Tenant",
+      "MigrationId": "20260903085341_AddTenantId_Tenant",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085341_AddTenantId_Tenant.cs",
+      "Table": "Tenants",
+      "Schema": null
+    },
+    {
+      "EntityName": "Timetable",
+      "MigrationId": "20260903085342_AddTenantId_Timetable",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085342_AddTenantId_Timetable.cs",
+      "Table": "Timetables",
+      "Schema": null
+    },
+    {
+      "EntityName": "Transcript",
+      "MigrationId": "20260903085343_AddTenantId_Transcript",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085343_AddTenantId_Transcript.cs",
+      "Table": "Transcripts",
+      "Schema": null
+    },
+    {
+      "EntityName": "TranslationKey",
+      "MigrationId": "20260903085344_AddTenantId_TranslationKey",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085344_AddTenantId_TranslationKey.cs",
+      "Table": "TranslationKeys",
+      "Schema": null
+    },
+    {
+      "EntityName": "TranslationValue",
+      "MigrationId": "20260903085345_AddTenantId_TranslationValue",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085345_AddTenantId_TranslationValue.cs",
+      "Table": "TranslationValues",
+      "Schema": null
+    },
+    {
+      "EntityName": "UniversitySsoProfile",
+      "MigrationId": "20260903085346_AddTenantId_UniversitySsoProfile",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085346_AddTenantId_UniversitySsoProfile.cs",
+      "Table": "UniversitySsoProfiles",
+      "Schema": null
+    },
+    {
+      "EntityName": "UserSecondFactor",
+      "MigrationId": "20260903085347_AddTenantId_UserSecondFactor",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085347_AddTenantId_UserSecondFactor.cs",
+      "Table": "UserSecondFactors",
+      "Schema": null
+    },
+    {
+      "EntityName": "Vendor",
+      "MigrationId": "20260903085348_AddTenantId_Vendor",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085348_AddTenantId_Vendor.cs",
+      "Table": "Vendors",
+      "Schema": null
+    },
+    {
+      "EntityName": "WorkflowStep",
+      "MigrationId": "20260903085349_AddTenantId_WorkflowStep",
+      "File": "AegisCore.Infrastructure/Migrations/20260903085349_AddTenantId_WorkflowStep.cs",
+      "Table": "WorkflowSteps",
+      "Schema": null
+    }
+  ],
+  "temporaryAggregateMigrationRemoved": true,
+  "verificationMigrationRemoved": true,
+  "remainingTenantAddColumnsAfterVerification": 0,
+  "unrelatedModelDriftAbsorbed": false,
+  "aegisDbContextUntouchedDuringApply": true,
+  "notes": [
+    "List 1: ITenantScoped added only.",
+    "List 2: TenantId + ITenantScoped added.",
+    "Each List-2 migration adds a non-nullable Guid TenantId with no default and creates a TenantId index.",
+    "Production execution requires a tenant backfill before each List-2 migration, as marked in every migration file.",
+    "Pre-existing unrelated EF model drift remains intentionally unabsorbed."
+  ]
+}
