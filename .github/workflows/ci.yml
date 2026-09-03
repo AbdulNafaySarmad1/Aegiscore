@@ -81,40 +81,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Persist P3A report to working branch
-        if: ${{ always() && github.event_name == 'push' && steps.p3b.outputs.applied != 'true' && hashFiles('reports/p3b/complete.json') == '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          JSON_REPORT="$(find . -type f -name tenant-isolation-report.json -print -quit)"
-          TXT_REPORT="$(find . -type f -name tenant-isolation-report.txt -print -quit)"
-
-          if [ -z "$JSON_REPORT" ]; then
-            echo "No tenant isolation JSON report was produced."
-            exit 0
-          fi
-
-          mkdir -p reports/p3a
-          cp "$JSON_REPORT" reports/p3a/tenant-isolation-report.json
-          if [ -n "$TXT_REPORT" ]; then
-            cp "$TXT_REPORT" reports/p3a/tenant-isolation-report.txt
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/p3a/tenant-isolation-report.json
-          if [ -f reports/p3a/tenant-isolation-report.txt ]; then
-            git add reports/p3a/tenant-isolation-report.txt
-          fi
-
-          if git diff --cached --quiet; then
-            echo "P3A report unchanged."
-            exit 0
-          fi
-
-          git commit -m "chore(P3A): persist tenant isolation report [skip ci]"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
-
   build-frontend:
     name: Build & Typecheck (Portal)
     runs-on: ubuntu-latest
