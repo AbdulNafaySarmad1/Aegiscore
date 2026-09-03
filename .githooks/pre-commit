@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "AegisCore pre-commit: verifying Release build..."
+
+dotnet build AegisCore.slnx -c Release --no-restore -v quiet
+
+echo "AegisCore pre-commit: build passed."
