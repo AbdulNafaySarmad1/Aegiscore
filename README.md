@@ -11,6 +11,26 @@ This is the AegisCore university operating platform: a Next.js 16 portal backed
 by a .NET 10/C# 14 authoritative API, PostgreSQL, Redis, background processing,
 and cloud/on-premises deployment paths.
 
+## Building
+
+The canonical solution is `AegisCore.slnx`. A Release build is the repository's
+local and CI compilation gate:
+
+```bash
+dotnet restore AegisCore.slnx
+dotnet build AegisCore.slnx -c Release
+```
+
+Enable the repository-managed pre-commit hook once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The hook runs a quiet Release build with `--no-restore` and rejects the commit
+when compilation fails. Run `dotnet restore AegisCore.slnx` first on a fresh
+clone or after dependency changes.
+
 ## Operational local/demo stack
 
 The supported local stack includes the React portal, ASP.NET Core API,
@@ -94,7 +114,7 @@ aegiscore-prompts/
     ├── S10-campus-ops.md               # Library + transport + visitor mgmt
     ├── S11-student-lifecycle.md        # Placement + alumni + activities + health
     ├── S12-asset-inventory-hec.md      # Assets + inventory + HEMIS export
-    └── S13-mobile-apps.md              # React Native offline-first apps
+    └── S13-mobile-apps.md               # React Native offline-first apps
 ```
 
 ---
