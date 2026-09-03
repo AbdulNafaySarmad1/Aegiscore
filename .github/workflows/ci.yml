@@ -46,6 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 scripts/resolve_p3b_outliers.py
           python3 scripts/apply_p3b.py
           echo "applied=true" >> "$GITHUB_OUTPUT"
 
@@ -62,7 +63,12 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add AegisCore.Domain/Entities AegisCore.Infrastructure/Migrations reports/p3b
+          git add \
+            AegisCore.Domain/Entities \
+            AegisCore.Infrastructure/AegisDbContext.cs \
+            AegisCore.Infrastructure/ScalingEvent.cs \
+            AegisCore.Infrastructure/Migrations \
+            reports/p3b
 
           if git diff --cached --quiet; then
             echo "No P3B changes to commit."
