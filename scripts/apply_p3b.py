@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 """Apply Prompt 3B tenant-isolation fixes from the authoritative P3A report.
 
-This script is intentionally deterministic and fail-closed:
-- reads reports/p3a/tenant-isolation-report.json
-- patches only entities named by P3A
-- never edits AegisDbContext.cs
-- scaffolds one temporary EF migration to refresh the model snapshot
-- rejects unrelated EF model drift
-- replaces the temporary migration with one no-default migration per List-2 entity
-- writes an auditable completion manifest/checklist
+The script is deterministic and fail-closed. It patches only entities reported by
+P3A, refuses to absorb unrelated EF model drift, writes one no-default migration
+per List-2 entity, and leaves an auditable completion manifest/checklist.
 """
 
 from __future__ import annotations
@@ -28,6 +23,7 @@ SNAPSHOT = MIGRATIONS / "AegisDbContextModelSnapshot.cs"
 FORBIDDEN = ROOT / "AegisCore.Infrastructure" / "AegisDbContext.cs"
 DOMAIN_COMMON_USING = "using AegisCore.Domain.Common;"
 TEMP_MIGRATION_NAME = "__P3B_TenantIsolationAggregate"
+VERIFY_MIGRATION_NAME = "__P3B_VerifyTenantSnapshot"
 
 
 def fail(message: str) -> None:
@@ -62,8 +58,7 @@ def ensure_common_using(text: str) -> str:
 
 
 def class_pattern(entity_name: str) -> re.Pattern[str]:
-    # Some recovered entity files place [Table(...)] and the class declaration
-    # on the same physical line, so declarations must not be anchored at ^.
+    # Some recovered files put [Table(...)] and the class declaration on one line.
     return re.compile(
         r"(?P<decl>"
         r"(?P<indent>[ \t]*)"
@@ -99,8 +94,7 @@ def patch_entity(text: str, entity_name: str, add_tenant_id: bool) -> tuple[str,
 
     new_decl = match.group("decl")[: len(match.group("decl")) - len(tail)] + new_tail_core + tail_ws
     declaration_after = new_decl.strip()
-    replacement = new_decl + match.group("brace")
-    patched = text[: match.start()] + replacement + text[match.end():]
+    patched = text[: match.start()] + new_decl + match.group("brace") + text[match.end():]
 
     property_inserted = "false"
     if add_tenant_id:
@@ -108,16 +102,13 @@ def patch_entity(text: str, entity_name: str, add_tenant_id: bool) -> tuple[str,
         if rematch is None:
             fail(f"could not re-locate {entity_name} after interface patch")
         indent = rematch.group("indent")
-        # For inline declarations after an attribute, derive indentation from the
-        # physical line instead of the one-space separator before "public".
         line_start = patched.rfind("\n", 0, rematch.start()) + 1
         physical_prefix = patched[line_start:rematch.start()]
         line_indent_match = re.match(r"[ \t]*", physical_prefix)
         if line_indent_match:
             indent = line_indent_match.group(0)
         insert_at = rematch.end("brace")
-        tenant_property = f"\n{indent}    public Guid TenantId {{ get; set; }}"
-        patched = patched[:insert_at] + tenant_property + patched[insert_at:]
+        patched = patched[:insert_at] + f"\n{indent}    public Guid TenantId {{ get; set; }}" + patched[insert_at:]
         property_inserted = "true"
 
     patched = ensure_common_using(patched)
@@ -172,11 +163,9 @@ def table_mapping(snapshot: str, namespace: str, entity_name: str) -> tuple[str,
 
 
 def extract_csharp_method_body(content: str, signature: str) -> str:
-    """Return a C# method body using balanced braces, independent of comments/formatting."""
     start = content.find(signature)
     if start < 0:
         fail(f"could not find migration method signature: {signature}")
-
     brace = content.find("{", start + len(signature))
     if brace < 0:
         fail(f"could not find opening brace for migration method: {signature}")
@@ -187,7 +176,6 @@ def extract_csharp_method_body(content: str, signature: str) -> str:
     escape = False
     for index in range(brace, len(content)):
         ch = content[index]
-
         if in_string:
             if escape:
                 escape = False
@@ -196,7 +184,6 @@ def extract_csharp_method_body(content: str, signature: str) -> str:
             elif ch == '"':
                 in_string = False
             continue
-
         if in_char:
             if escape:
                 escape = False
@@ -205,7 +192,6 @@ def extract_csharp_method_body(content: str, signature: str) -> str:
             elif ch == "'":
                 in_char = False
             continue
-
         if ch == '"':
             in_string = True
             continue
@@ -218,35 +204,123 @@ def extract_csharp_method_body(content: str, signature: str) -> str:
             depth -= 1
             if depth == 0:
                 return content[brace + 1 : index]
-
     fail(f"migration method body did not terminate: {signature}")
     raise AssertionError("unreachable")
 
 
-def validate_temporary_migration(content: str, expected_entities: int) -> None:
+def migration_operations(content: str) -> tuple[str, list[str]]:
     body = extract_csharp_method_body(
         content,
         "protected override void Up(MigrationBuilder migrationBuilder)",
     )
-
     calls = re.findall(r"migrationBuilder\.([A-Za-z0-9_]+)\s*(?:<[^>]+>)?\s*\(", body)
-    unexpected = sorted({call for call in calls if call != "AddColumn"})
-    if unexpected:
-        fail(f"unrelated model drift detected in temporary migration: {unexpected}")
+    return body, sorted(set(calls))
 
-    tenant_columns = len(re.findall(r'name:\s*"TenantId"', body))
-    if tenant_columns != expected_entities:
-        fail(
-            f"temporary migration contains {tenant_columns} TenantId columns; "
-            f"expected exactly {expected_entities}. Refusing to absorb unrelated model drift."
+
+def count_tenant_add_columns(body: str) -> int:
+    return len(
+        re.findall(
+            r'migrationBuilder\.AddColumn<[^>]+>\s*\(\s*name:\s*"TenantId"',
+            body,
+            re.DOTALL,
         )
+    )
+
+
+def tenant_property_chain(block: str, full_type_name: str) -> str:
+    marker = 'b.Property<Guid>("TenantId")'
+    pos = block.find(marker)
+    if pos < 0:
+        fail(f"new snapshot has no Guid TenantId property for {full_type_name}")
+    line_start = block.rfind("\n", 0, pos) + 1
+    semicolon = block.find(";", pos)
+    if semicolon < 0:
+        fail(f"TenantId snapshot property did not terminate for {full_type_name}")
+    return block[line_start : semicolon + 1]
+
+
+def inject_tenant_property(old_block: str, new_block: str, full_type_name: str) -> str:
+    if 'b.Property<Guid>("TenantId")' in old_block:
+        return old_block
+
+    chain = tenant_property_chain(new_block, full_type_name)
+    insertion_candidates = [
+        old_block.find("b.HasKey("),
+        old_block.find("b.HasIndex("),
+        old_block.find("b.ToTable("),
+    ]
+    positions = [pos for pos in insertion_candidates if pos >= 0]
+    if not positions:
+        fail(f"could not find safe TenantId insertion point in snapshot for {full_type_name}")
+    pos = min(positions)
+    line_start = old_block.rfind("\n", 0, pos) + 1
+    return old_block[:line_start] + chain + "\n\n" + old_block[line_start:]
+
+
+def patch_snapshot_tenant_only(original: str, generated: str, list2: list[dict]) -> tuple[str, list[dict]]:
+    sanitized = original
+    mappings: list[dict] = []
+
+    for entry in list2:
+        full_type_name = f'{entry["Namespace"]}.{entry["EntityName"]}'
+
+        # Fail closed if P3B is entangled with a pre-existing CreateTable drift.
+        old_block = extract_entity_block(sanitized, full_type_name)
+        new_block = extract_entity_block(generated, full_type_name)
+
+        old_mapping = table_mapping(original, entry["Namespace"], entry["EntityName"])
+        new_mapping = table_mapping(generated, entry["Namespace"], entry["EntityName"])
+        if old_mapping != new_mapping:
+            fail(
+                f"table mapping drift for {full_type_name}: old={old_mapping}, new={new_mapping}; "
+                "refusing to mix unrelated mapping changes into P3B"
+            )
+
+        patched_block = inject_tenant_property(old_block, new_block, full_type_name)
+        if patched_block == old_block:
+            fail(f"original snapshot already contains TenantId for List-2 entity {full_type_name}")
+        sanitized = sanitized.replace(old_block, patched_block, 1)
+
+        mappings.append({
+            **entry,
+            "Table": old_mapping[0],
+            "Schema": old_mapping[1],
+        })
+
+    return sanitized, mappings
 
 
 def migration_content(migration_id: str, class_name: str, table: str, schema: str | None) -> str:
     schema_arg = f',\n                schema: "{schema}"' if schema else ""
     index_name = f'IX_{table}_TenantId'
 
-    return f'''using Microsoft.EntityFrameworkCore.Infrastructure;\nusing Microsoft.EntityFrameworkCore.Migrations;\n\n#nullable disable\n\nnamespace AegisCore.Infrastructure.Migrations;\n\n[DbContext(typeof(AegisDbContext))]\n[Migration("{migration_id}")]\npublic partial class {class_name} : Migration\n{{\n    protected override void Up(MigrationBuilder migrationBuilder)\n    {{\n        // DATA MIGRATION REQUIRED — populate TenantId from known tenant before running this migration in production.\n        migrationBuilder.AddColumn<Guid>(\n            name: "TenantId",\n            table: "{table}"{schema_arg},\n            type: "uuid",\n            nullable: false);\n\n        migrationBuilder.CreateIndex(\n            name: "{index_name}",\n            table: "{table}",\n            column: "TenantId"{schema_arg});\n    }}\n\n    protected override void Down(MigrationBuilder migrationBuilder)\n    {{\n        migrationBuilder.DropIndex(\n            name: "{index_name}",\n            table: "{table}"{schema_arg});\n\n        migrationBuilder.DropColumn(\n            name: "TenantId",\n            table: "{table}"{schema_arg});\n    }}\n}}\n'''
+    return f'''using Microsoft.EntityFrameworkCore.Infrastructure;\nusing Microsoft.EntityFrameworkCore.Migrations;\n\n#nullable disable\n\nnamespace AegisCore.Infrastructure.Migrations;\n\n[DbContext(typeof(AegisDbContext))]\n[Migration("{migration_id}")]\npublic partial class {class_name} : Migration\n{{\n    protected override void Up(MigrationBuilder migrationBuilder)\n    {{\n        // DATA MIGRATION REQUIRED — populate TenantId from the known tenant before this migration runs in production.\n        migrationBuilder.AddColumn<Guid>(\n            name: "TenantId",\n            table: "{table}"{schema_arg},\n            type: "uuid",\n            nullable: false);\n\n        migrationBuilder.CreateIndex(\n            name: "{index_name}",\n            table: "{table}",\n            column: "TenantId"{schema_arg});\n    }}\n\n    protected override void Down(MigrationBuilder migrationBuilder)\n    {{\n        migrationBuilder.DropIndex(\n            name: "{index_name}",\n            table: "{table}"{schema_arg});\n\n        migrationBuilder.DropColumn(\n            name: "TenantId",\n            table: "{table}"{schema_arg});\n    }}\n}}\n'''
+
+
+def scaffold(name: str) -> tuple[Path, Path]:
+    before = {p.name for p in MIGRATIONS.glob("*.cs")}
+    run(
+        "dotnet",
+        "ef",
+        "migrations",
+        "add",
+        name,
+        "--project",
+        "AegisCore.Infrastructure/AegisCore.Infrastructure.csproj",
+        "--startup-project",
+        "AegisCore.API/AegisCore.API.csproj",
+        "--context",
+        "AegisDbContext",
+        "--output-dir",
+        "Migrations",
+    )
+    after = {p.name for p in MIGRATIONS.glob("*.cs")}
+    created = sorted(after - before)
+    main_files = [n for n in created if n.endswith(f"_{name}.cs") and not n.endswith(".Designer.cs")]
+    designers = [n for n in created if n.endswith(f"_{name}.Designer.cs")]
+    if len(main_files) != 1 or len(designers) != 1:
+        fail(f"expected one migration pair for {name}, got: {created}")
+    return MIGRATIONS / main_files[0], MIGRATIONS / designers[0]
 
 
 def main() -> None:
@@ -258,15 +332,20 @@ def main() -> None:
     report = json.loads(REPORT.read_text(encoding="utf-8"))
     list1 = report.get("List1HasTenantIdNoInterface", [])
     list2 = report.get("List2NoTenantId", [])
-
     if report.get("List1Count") != len(list1) or report.get("List2Count") != len(list2):
         fail("P3A report counts do not match report contents")
     if len(list1) != 353 or len(list2) != 75:
         fail(f"unexpected P3A baseline: List1={len(list1)}, List2={len(list2)}")
 
     before_forbidden = FORBIDDEN.read_bytes()
+    original_snapshot = SNAPSHOT.read_text(encoding="utf-8")
     diffs: list[dict[str, str]] = []
     changed_files: set[str] = set()
+
+    # Preflight: every List-2 entity must already exist in the migration snapshot.
+    # Otherwise TenantId is entangled with unrelated CreateTable drift.
+    for entry in list2:
+        extract_entity_block(original_snapshot, f'{entry["Namespace"]}.{entry["EntityName"]}')
 
     by_file: dict[str, list[tuple[dict, bool]]] = {}
     for entry in list1:
@@ -290,43 +369,45 @@ def main() -> None:
             changed_files.add(rel_path)
 
     if FORBIDDEN.read_bytes() != before_forbidden:
-        fail("AegisDbContext.cs changed; P3B explicitly forbids this")
+        fail("AegisDbContext.cs changed during apply_p3b.py; only the separate outlier relocation is allowed")
 
-    before_migrations = {p.name for p in MIGRATIONS.glob("*.cs")}
-    run(
-        "dotnet",
-        "ef",
-        "migrations",
-        "add",
-        TEMP_MIGRATION_NAME,
-        "--project",
-        "AegisCore.Infrastructure/AegisCore.Infrastructure.csproj",
-        "--startup-project",
-        "AegisCore.API/AegisCore.API.csproj",
-        "--context",
-        "AegisDbContext",
-        "--output-dir",
-        "Migrations",
-    )
+    # Scaffold against the current model to learn the exact TenantId representation,
+    # but never commit the aggregate migration or its unrelated stale-model drift.
+    temp_main, temp_designer = scaffold(TEMP_MIGRATION_NAME)
+    temp_content = temp_main.read_text(encoding="utf-8")
+    temp_body, initial_operations = migration_operations(temp_content)
+    tenant_adds = count_tenant_add_columns(temp_body)
+    if tenant_adds != len(list2):
+        fail(
+            f"aggregate migration contains {tenant_adds} TenantId AddColumn operations; "
+            f"expected exactly {len(list2)}"
+        )
 
-    after_migrations = {p.name for p in MIGRATIONS.glob("*.cs")}
-    created = sorted(after_migrations - before_migrations)
-    temp_main = [name for name in created if name.endswith(f"_{TEMP_MIGRATION_NAME}.cs") and not name.endswith(".Designer.cs")]
-    temp_designer = [name for name in created if name.endswith(f"_{TEMP_MIGRATION_NAME}.Designer.cs")]
-    if len(temp_main) != 1 or len(temp_designer) != 1:
-        fail(f"expected one temporary migration pair, got: {created}")
+    generated_snapshot = SNAPSHOT.read_text(encoding="utf-8")
+    sanitized_snapshot, mappings = patch_snapshot_tenant_only(original_snapshot, generated_snapshot, list2)
 
-    temp_main_path = MIGRATIONS / temp_main[0]
-    validate_temporary_migration(temp_main_path.read_text(encoding="utf-8"), len(list2))
+    temp_main.unlink()
+    temp_designer.unlink()
+    SNAPSHOT.write_text(sanitized_snapshot, encoding="utf-8")
 
-    snapshot = SNAPSHOT.read_text(encoding="utf-8")
-    mappings: list[dict[str, str | None]] = []
-    for entry in list2:
-        table, schema = table_mapping(snapshot, entry["Namespace"], entry["EntityName"])
-        mappings.append({**entry, "Table": table, "Schema": schema})
+    # Verify the tenant delta is fully represented while pre-existing unrelated
+    # drift remains unabsorbed. EF may still report that unrelated drift; it must
+    # report zero remaining TenantId AddColumn operations.
+    verify_main, verify_designer = scaffold(VERIFY_MIGRATION_NAME)
+    verify_content = verify_main.read_text(encoding="utf-8")
+    verify_body, verification_operations = migration_operations(verify_content)
+    remaining_tenant_adds = count_tenant_add_columns(verify_body)
+    if remaining_tenant_adds != 0:
+        fail(
+            f"sanitized snapshot still produces {remaining_tenant_adds} TenantId AddColumn operations; "
+            "tenant delta is not fully captured"
+        )
 
-    temp_main_path.unlink()
-    (MIGRATIONS / temp_designer[0]).unlink()
+    verify_main.unlink()
+    verify_designer.unlink()
+    # EF verification advances the snapshot to the full current model. Restore the
+    # sanitized tenant-only snapshot so unrelated drift is not committed by P3B.
+    SNAPSHOT.write_text(sanitized_snapshot, encoding="utf-8")
 
     base_time = datetime.now(timezone.utc).replace(microsecond=0)
     generated_migrations: list[dict[str, str | None]] = []
@@ -351,6 +432,19 @@ def main() -> None:
 
     P3B_DIR.mkdir(parents=True, exist_ok=True)
     (P3B_DIR / "entity-diffs.json").write_text(json.dumps(diffs, indent=2), encoding="utf-8")
+    (P3B_DIR / "model-drift-diagnostic.json").write_text(
+        json.dumps(
+            {
+                "initialOperations": initial_operations,
+                "verificationOperations": verification_operations,
+                "initialTenantAddColumns": tenant_adds,
+                "remainingTenantAddColumnsAfterSanitizedSnapshot": remaining_tenant_adds,
+                "unrelatedDriftWasNotCommitted": True,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
     checklist_lines = [
         "# P3B Tenant Isolation Completion Checklist",
@@ -377,19 +471,24 @@ def main() -> None:
         "sourceFilesChanged": sorted(changed_files),
         "migrationsGenerated": generated_migrations,
         "temporaryAggregateMigrationRemoved": True,
-        "aegisDbContextUntouched": FORBIDDEN.read_bytes() == before_forbidden,
+        "verificationMigrationRemoved": True,
+        "remainingTenantAddColumnsAfterVerification": remaining_tenant_adds,
+        "unrelatedModelDriftAbsorbed": False,
+        "aegisDbContextUntouchedDuringApply": FORBIDDEN.read_bytes() == before_forbidden,
         "notes": [
             "List 1: ITenantScoped added only.",
             "List 2: TenantId + ITenantScoped added.",
             "Each List-2 migration adds a non-nullable Guid TenantId with no default and creates a TenantId index.",
             "Production execution requires a tenant backfill before each List-2 migration, as marked in every migration file.",
+            "Pre-existing unrelated EF model drift remains intentionally unabsorbed.",
         ],
     }
     (P3B_DIR / "complete.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     print(
         f"P3B prepared successfully: {len(list1)} List-1 + {len(list2)} List-2 = "
-        f"{len(list1) + len(list2)} entities; {len(generated_migrations)} migrations."
+        f"{len(list1) + len(list2)} entities; {len(generated_migrations)} migrations; "
+        f"remaining TenantId delta={remaining_tenant_adds}."
     )
 
 
