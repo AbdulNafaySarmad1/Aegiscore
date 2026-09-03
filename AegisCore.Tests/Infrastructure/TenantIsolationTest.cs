@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AegisCore.Domain.Common;
 using AegisCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,12 @@ public sealed class TenantIsolationTest
             .OrderBy(t => t.FullName)
             .ToArray();
 
+        var compliant = entityTypes
+            .Where(t => typeof(ITenantScoped).IsAssignableFrom(t))
+            .Select(t => t.FullName ?? t.Name)
+            .OrderBy(x => x)
+            .ToArray();
+
         var missingInterface = entityTypes
             .Where(t => !typeof(ITenantScoped).IsAssignableFrom(t))
             .ToArray();
@@ -32,6 +39,18 @@ public sealed class TenantIsolationTest
             .Select(t => t.FullName ?? t.Name)
             .OrderBy(x => x)
             .ToArray();
+
+        var reportDirectory = Path.Combine(Directory.GetCurrentDirectory(), "TestResults");
+        Directory.CreateDirectory(reportDirectory);
+        File.WriteAllText(
+            Path.Combine(reportDirectory, "tenant-isolation-report.json"),
+            JsonSerializer.Serialize(new
+            {
+                TotalDbSetEntities = entityTypes.Length,
+                AlreadyCompliant = compliant,
+                List1HasTenantIdNoInterface = list1,
+                List2NoTenantId = list2
+            }, new JsonSerializerOptions { WriteIndented = true }));
 
         Assert.True(
             missingInterface.Length == 0,
