@@ -50,6 +50,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 scripts/patch_p3b_table_mapping.py
           python3 scripts/resolve_p3b_outliers.py
           python3 scripts/apply_p3b.py
           echo "applied=true" >> "$GITHUB_OUTPUT"
