@@ -25,7 +25,7 @@ jobs:
   build-backend:
     name: Build & Test (.NET)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -36,13 +36,43 @@ jobs:
       - name: Restore
         run: dotnet restore AegisCore.slnx
 
+      - name: Install EF tooling for P3B
+        if: ${{ github.event_name == 'push' && github.ref_name == 'aegiscore/p1-compile-fixes' && hashFiles('reports/p3a/tenant-isolation-report.json') != '' && hashFiles('reports/p3b/complete.json') == '' }}
+        run: dotnet tool install --global dotnet-ef --version 10.0.0
+
+      - name: Apply P3B tenant isolation
+        id: p3b
+        if: ${{ github.event_name == 'push' && github.ref_name == 'aegiscore/p1-compile-fixes' && hashFiles('reports/p3a/tenant-isolation-report.json') != '' && hashFiles('reports/p3b/complete.json') == '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/apply_p3b.py
+          echo "applied=true" >> "$GITHUB_OUTPUT"
+
       - name: Build
         run: dotnet build AegisCore.slnx -c Release --no-restore -m:1 -p:BuildInParallel=false
 
       - name: Test
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build -c Release --verbosity normal -m:1 -p:BuildInParallel=false
 
-      - name: Preserve tenant-isolation discovery report
+      - name: Commit verified P3B changes
+        if: ${{ steps.p3b.outputs.applied == 'true' && github.event_name == 'push' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add AegisCore.Domain/Entities AegisCore.Infrastructure/Migrations reports/p3b
+
+          if git diff --cached --quiet; then
+            echo "No P3B changes to commit."
+            exit 0
+          fi
+
+          git commit -m "fix(P3B): apply tenant isolation to all DbSet entities [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Preserve tenant-isolation verification report
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -52,7 +82,7 @@ jobs:
           retention-days: 7
 
       - name: Persist P3A report to working branch
-        if: always() && github.event_name == 'push'
+        if: ${{ always() && github.event_name == 'push' && steps.p3b.outputs.applied != 'true' && hashFiles('reports/p3b/complete.json') == '' }}
         shell: bash
         run: |
           set -euo pipefail
