@@ -36,14 +36,14 @@ jobs:
       - name: Restore
         run: dotnet restore AegisCore.slnx
 
-      - name: Apply P5 environment substitution fix and audit
-        id: p5
-        if: ${{ github.event_name == 'push' && github.ref_name == 'aegiscore/p1-compile-fixes' && hashFiles('reports/p3b/complete.json') != '' && hashFiles('reports/p5/complete.json') == '' }}
+      - name: Run P4 tenant query bypass audit
+        id: p4
+        if: ${{ github.event_name == 'push' && github.ref_name == 'aegiscore/p1-compile-fixes' && hashFiles('reports/p5/complete.json') != '' && hashFiles('reports/p4/audit.json') == '' }}
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/apply_p5.py
-          echo "applied=true" >> "$GITHUB_OUTPUT"
+          python3 scripts/scan_p4_tenant_queries.py
+          echo "scanned=true" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: dotnet build AegisCore.slnx -c Release --no-restore -m:1 -p:BuildInParallel=false
@@ -51,24 +51,21 @@ jobs:
       - name: Test
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build -c Release --verbosity normal -m:1 -p:BuildInParallel=false
 
-      - name: Commit verified P5 changes
-        if: ${{ steps.p5.outputs.applied == 'true' && github.event_name == 'push' }}
+      - name: Commit P4 audit
+        if: ${{ steps.p4.outputs.scanned == 'true' && github.event_name == 'push' }}
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            AegisCore.API/Program.cs \
-            AegisCore.Tests/Infrastructure/EnvironmentSubstitutionTest.cs \
-            reports/p5
+          git add reports/p4
 
           if git diff --cached --quiet; then
-            echo "No P5 changes to commit."
+            echo "No P4 audit changes to commit."
             exit 0
           fi
 
-          git commit -m "fix(P5): wire environment substitution and audit guards [skip ci]"
+          git commit -m "audit(P4): record tenant query bypass scan [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Preserve tenant-isolation verification report
