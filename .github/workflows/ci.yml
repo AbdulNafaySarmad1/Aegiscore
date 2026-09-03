@@ -42,6 +42,15 @@ jobs:
       - name: Test
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build -c Release --verbosity normal -m:1 -p:BuildInParallel=false
 
+      - name: Preserve tenant-isolation discovery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenant-isolation-report
+          path: '**/tenant-isolation-report.json'
+          if-no-files-found: warn
+          retention-days: 7
+
   build-frontend:
     name: Build & Typecheck (Portal)
     runs-on: ubuntu-latest
