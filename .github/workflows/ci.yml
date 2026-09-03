@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tenant-isolation-report
-          path: '**/tenant-isolation-report.json'
+          path: '**/tenant-isolation-report.*'
           if-no-files-found: warn
           retention-days: 7
 
@@ -56,18 +56,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          REPORT="$(find . -type f -name tenant-isolation-report.json -print -quit)"
-          if [ -z "$REPORT" ]; then
-            echo "No tenant isolation report was produced."
+          JSON_REPORT="$(find . -type f -name tenant-isolation-report.json -print -quit)"
+          TXT_REPORT="$(find . -type f -name tenant-isolation-report.txt -print -quit)"
+
+          if [ -z "$JSON_REPORT" ]; then
+            echo "No tenant isolation JSON report was produced."
             exit 0
           fi
 
           mkdir -p reports/p3a
-          cp "$REPORT" reports/p3a/tenant-isolation-report.json
+          cp "$JSON_REPORT" reports/p3a/tenant-isolation-report.json
+          if [ -n "$TXT_REPORT" ]; then
+            cp "$TXT_REPORT" reports/p3a/tenant-isolation-report.txt
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/p3a/tenant-isolation-report.json
+          if [ -f reports/p3a/tenant-isolation-report.txt ]; then
+            git add reports/p3a/tenant-isolation-report.txt
+          fi
 
           if git diff --cached --quiet; then
             echo "P3A report unchanged."
