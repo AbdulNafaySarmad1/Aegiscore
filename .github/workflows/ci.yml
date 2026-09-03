@@ -50,7 +50,34 @@ jobs:
         run: dotnet build AegisCore.slnx -c Release --no-restore -m:1 -p:BuildInParallel=false
 
       - name: Test
-        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build -c Release --verbosity normal -m:1 -p:BuildInParallel=false
+        shell: bash
+        run: |
+          set +e
+          mkdir -p TestResults/P4
+          dotnet test AegisCore.Tests/AegisCore.Tests.csproj \
+            --no-build \
+            -c Release \
+            --verbosity normal \
+            -m:1 \
+            -p:BuildInParallel=false \
+            --logger "trx;LogFileName=p4-tests.trx" \
+            --results-directory TestResults/P4
+          test_status=$?
+          if [ "$test_status" -ne 0 ]; then
+            python3 scripts/extract_p4_test_failures.py
+          fi
+          exit "$test_status"
+
+      - name: Upload P4 test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-test-diagnostics
+          path: |
+            TestResults/P4/**/*.trx
+            reports/p4/test-failures.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Commit verified P4 remediation
         if: ${{ steps.p4.outputs.verified == 'true' && github.event_name == 'push' }}
