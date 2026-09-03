@@ -1,0 +1,3008 @@
+{
+  "TotalDbSetEntities": 599,
+  "AlreadyCompliantCount": 171,
+  "List1Count": 353,
+  "List2Count": 75,
+  "GrandTotalGaps": 428,
+  "AlreadyCompliant": [
+    {
+      "EntityName": "AccreditationAuditFinding",
+      "FilePath": "AegisCore.Domain/Entities/AccreditationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationFramework",
+      "FilePath": "AegisCore.Domain/Entities/AccreditationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationScoreSnapshot",
+      "FilePath": "AegisCore.Domain/Entities/AccreditationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AchievementRoadmap",
+      "FilePath": "AegisCore.Domain/Entities/GamificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AuditFinding",
+      "FilePath": "AegisCore.Domain/Entities/AuditFinding.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AuditLog",
+      "FilePath": "AegisCore.Domain/Entities/AuditLog.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BadgeAward",
+      "FilePath": "AegisCore.Domain/Entities/GamificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BadgeDefinition",
+      "FilePath": "AegisCore.Domain/Entities/GamificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Ballot",
+      "FilePath": "AegisCore.Domain/Entities/ElectionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BoardAlert",
+      "FilePath": "AegisCore.Domain/Entities/BoardGovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BoardDecision",
+      "FilePath": "AegisCore.Domain/Entities/BoardGovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BoardingLog",
+      "FilePath": "AegisCore.Domain/Entities/TransportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BoardMeeting",
+      "FilePath": "AegisCore.Domain/Entities/BoardGovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BoardResolution",
+      "FilePath": "AegisCore.Domain/Entities/BoardGovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CafeteriaInventory",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CafeteriaTransaction",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CafeteriaUnit",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CashFlowForecast",
+      "FilePath": "AegisCore.Domain/Entities/DefaultPredictionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ChartOfAccount",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ComplianceBreach",
+      "FilePath": "AegisCore.Domain/Entities/ForeignStudentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ComplianceControl",
+      "FilePath": "AegisCore.Domain/Entities/ComplianceControl.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ComplianceFramework",
+      "FilePath": "AegisCore.Domain/Entities/ComplianceFramework.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ControlEvidence",
+      "FilePath": "AegisCore.Domain/Entities/ControlEvidence.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CorrectiveActionPlan",
+      "FilePath": "AegisCore.Domain/Entities/CorrectiveActionPlan.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CostCenter",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CounselingCaseNote",
+      "FilePath": "AegisCore.Domain/Entities/MentalHealthEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CounselorProfile",
+      "FilePath": "AegisCore.Domain/Entities/MentalHealthEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CriterionEvidence",
+      "FilePath": "AegisCore.Domain/Entities/AccreditationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DeansListEntry",
+      "FilePath": "AegisCore.Domain/Entities/GamificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DefaultRiskAssessment",
+      "FilePath": "AegisCore.Domain/Entities/DefaultPredictionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Department",
+      "FilePath": "AegisCore.Domain/Entities/Department.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DocumentExpiryTracker",
+      "FilePath": "AegisCore.Domain/Entities/ForeignStudentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Election",
+      "FilePath": "AegisCore.Domain/Entities/ElectionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ElectionCandidate",
+      "FilePath": "AegisCore.Domain/Entities/ElectionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ElectionPosition",
+      "FilePath": "AegisCore.Domain/Entities/ElectionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ElectionResult",
+      "FilePath": "AegisCore.Domain/Entities/ElectionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EnrollmentLetter",
+      "FilePath": "AegisCore.Domain/Entities/ForeignStudentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EscalationLog",
+      "FilePath": "AegisCore.Domain/Entities/VoiceAssistantEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EthicalAuditLog",
+      "FilePath": "AegisCore.Domain/Entities/DefaultPredictionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExchangeRateSnapshot",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FacultyCompensation",
+      "FilePath": "AegisCore.Domain/Entities/VisitingFacultyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FacultyEngagement",
+      "FilePath": "AegisCore.Domain/Entities/VisitingFacultyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FacultyPerformanceRating",
+      "FilePath": "AegisCore.Domain/Entities/VisitingFacultyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeeDemand",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeeInstallment",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceAccountingStandardPolicy",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceAssetAccountingEvent",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAssetAccountingEvent.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceAuditEvidencePackage",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAuditComplianceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceAuditorEngagement",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAuditComplianceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceAuditSample",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAuditComplianceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceAuditSeal",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAuditSeal.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceBankAccount",
+      "FilePath": "AegisCore.Domain/Entities/FinanceTreasuryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceBankFeedTransaction",
+      "FilePath": "AegisCore.Domain/Entities/FinanceTreasuryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceConsolidationGroup",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceConsolidationMember",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceConsolidationMemoLine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceConsolidationRun",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceControlEvaluationBatch",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAuditComplianceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceEliminationRule",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceFleetCostPosting",
+      "FilePath": "AegisCore.Domain/Entities/FinanceFleetEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceFleetProfile",
+      "FilePath": "AegisCore.Domain/Entities/FinanceFleetEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceFleetTrip",
+      "FilePath": "AegisCore.Domain/Entities/FinanceFleetEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceForeignCurrencyTransaction",
+      "FilePath": "AegisCore.Domain/Entities/FinanceForeignCurrencyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceGoodsReceipt",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceGoodsReceiptLine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceGrant",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAidEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceGratuityAssumption",
+      "FilePath": "AegisCore.Domain/Entities/FinancePayrollSettlementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceGratuityValuation",
+      "FilePath": "AegisCore.Domain/Entities/FinancePayrollSettlementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInsuranceClaim",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInsuranceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInsurancePolicy",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInsuranceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInventoryItem",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInventoryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInventoryMovement",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInventoryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInvestmentBenchmark",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInvestmentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInvestmentFund",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInvestmentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInvestmentHolding",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInvestmentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceInvestmentTransaction",
+      "FilePath": "AegisCore.Domain/Entities/FinanceInvestmentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceLedgerSignature",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceLibraryAcquisition",
+      "FilePath": "AegisCore.Domain/Entities/FinanceLibraryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceLibraryFine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceLibraryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePayment",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePaymentPlan",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePaymentPlanConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePayrollBankInstruction",
+      "FilePath": "AegisCore.Domain/Entities/FinancePayrollSettlementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePayrollPaymentFile",
+      "FilePath": "AegisCore.Domain/Entities/FinancePayrollSettlementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePayrollPosting",
+      "FilePath": "AegisCore.Domain/Entities/FinancePayrollEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePayrollPostingLine",
+      "FilePath": "AegisCore.Domain/Entities/FinancePayrollEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePettyCashCount",
+      "FilePath": "AegisCore.Domain/Entities/FinancePettyCashEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePettyCashExpense",
+      "FilePath": "AegisCore.Domain/Entities/FinancePettyCashEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePettyCashFund",
+      "FilePath": "AegisCore.Domain/Entities/FinancePettyCashEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePqcKey",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePqcKeyCeremony",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePqcKeyCeremonyApproval",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePurchaseOrder",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinancePurchaseOrderLine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceRegulatorySchema",
+      "FilePath": "AegisCore.Domain/Entities/FinanceRegulatoryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceRegulatorySubmission",
+      "FilePath": "AegisCore.Domain/Entities/FinanceRegulatoryEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceReportArtifact",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceReportingEntity",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceReportProfile",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceRestatementMemoLine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceRestatementRule",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceRestatementRun",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAccountingEngineEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceScholarshipApplication",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAidEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceScholarshipApplicationEvent",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAidEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceScholarshipAward",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAidEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceScholarshipProgram",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAidEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceSecurityDeposit",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceSecurityDepositDeduction",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceSodRule",
+      "FilePath": "AegisCore.Domain/Entities/FinanceAuditComplianceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceStandingPurchaseOrder",
+      "FilePath": "AegisCore.Domain/Entities/FinanceVendorEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceStandingPurchaseOrderSpend",
+      "FilePath": "AegisCore.Domain/Entities/FinanceVendorEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceTaxRule",
+      "FilePath": "AegisCore.Domain/Entities/FinanceTaxEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceThreeWayMatch",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceUtilityAllocation",
+      "FilePath": "AegisCore.Domain/Entities/FinanceUtilityEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceUtilityBill",
+      "FilePath": "AegisCore.Domain/Entities/FinanceUtilityEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVendor",
+      "FilePath": "AegisCore.Domain/Entities/FinanceVendorEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVendorContact",
+      "FilePath": "AegisCore.Domain/Entities/FinanceVendorEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVendorContract",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVendorDocument",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVendorInvoice",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVendorInvoiceLine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceProcurementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucher",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucherApproval",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucherApprovalRule",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucherAttachment",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucherLine",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucherReversal",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceVoucherSequence",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinanceWithholdingRecord",
+      "FilePath": "AegisCore.Domain/Entities/FinanceTaxEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FiscalPeriod",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FiscalYear",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FleetVehicle",
+      "FilePath": "AegisCore.Domain/Entities/TransportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ForeignStudentRecord",
+      "FilePath": "AegisCore.Domain/Entities/ForeignStudentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GapAnalysisItem",
+      "FilePath": "AegisCore.Domain/Entities/AccreditationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InstitutionBenchmark",
+      "FilePath": "AegisCore.Domain/Entities/BoardGovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InterventionRecord",
+      "FilePath": "AegisCore.Domain/Entities/DefaultPredictionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "JournalEntry",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "JournalEntryLine",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LeaderboardEntry",
+      "FilePath": "AegisCore.Domain/Entities/GamificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MandatoryReportLog",
+      "FilePath": "AegisCore.Domain/Entities/MentalHealthEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MealPlan",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MentalHealthTicket",
+      "FilePath": "AegisCore.Domain/Entities/MentalHealthEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MenuItem",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MoraSubmission",
+      "FilePath": "AegisCore.Domain/Entities/ForeignStudentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PaymentGatewayConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PaymentGatewayEvent",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PaymentPlanArrangement",
+      "FilePath": "AegisCore.Domain/Entities/DefaultPredictionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PaymentPlanInstallment",
+      "FilePath": "AegisCore.Domain/Entities/DefaultPredictionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Permission",
+      "FilePath": "AegisCore.Domain/Entities/Permission.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PreOrder",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Result",
+      "FilePath": "AegisCore.Domain/Entities/Result.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Role",
+      "FilePath": "AegisCore.Domain/Entities/Role.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RolePermission",
+      "FilePath": "AegisCore.Domain/Entities/RolePermission.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SlotCandidateMatch",
+      "FilePath": "AegisCore.Domain/Entities/VisitingFacultyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StrategicGoal",
+      "FilePath": "AegisCore.Domain/Entities/BoardGovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TeachingSlot",
+      "FilePath": "AegisCore.Domain/Entities/VisitingFacultyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TenantFinanceConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/FinanceModuleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TransportIncident",
+      "FilePath": "AegisCore.Domain/Entities/TransportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TransportInspection",
+      "FilePath": "AegisCore.Domain/Entities/TransportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TransportRegistration",
+      "FilePath": "AegisCore.Domain/Entities/TransportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UserRole",
+      "FilePath": "AegisCore.Domain/Entities/UserRole.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VendorPerformanceScore",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisaRenewalWorkflow",
+      "FilePath": "AegisCore.Domain/Entities/ForeignStudentEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisitingFacultyProfile",
+      "FilePath": "AegisCore.Domain/Entities/VisitingFacultyEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VoiceIntent",
+      "FilePath": "AegisCore.Domain/Entities/VoiceAssistantEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VoiceSession",
+      "FilePath": "AegisCore.Domain/Entities/VoiceAssistantEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VoterToken",
+      "FilePath": "AegisCore.Domain/Entities/ElectionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WasteLog",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WellnessCheckIn",
+      "FilePath": "AegisCore.Domain/Entities/MentalHealthEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WizardAdminCredential",
+      "FilePath": "AegisCore.Domain/Entities/WizardAdminCredential.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WizardSession",
+      "FilePath": "AegisCore.Domain/Entities/WizardSession.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    }
+  ],
+  "List1HasTenantIdNoInterface": [
+    {
+      "EntityName": "AccessAuditLog",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationAuditLog",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationBody",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationCommittee",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationCriterion",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationCriterionMapping",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationCycle",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationEvidence",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AccreditationReport",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AchievementBadge",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ActionItem",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ActivityParticipation",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AdmissionLead",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AdvisorAssignment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AdvisorMeeting",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AdvisorNote",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AIFeedback",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AIModel",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AIProvider",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AITokenUsage",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AlertRule",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AlumniDonation",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AlumniProfile",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AlumniReferral",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ApiEndpoint",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ApiKey",
+      "FilePath": "AegisCore.Domain/Entities/ApiKey.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AppealCommitteeBrief",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AppealEvidence",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Asset",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssetCategory",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssetDisposal",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssetMaintenance",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssetTransfer",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssetVerification",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AttainmentThreshold",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AttendanceRecord",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BackupConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/BackupConfiguration.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BackupRecord",
+      "FilePath": "AegisCore.Domain/Entities/BackupRecord.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BenchmarkComparison",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BenchmarkRun",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BIReport",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BoardMeetingPack",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BookCopy",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BookIssue",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BookOrder",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BookReservation",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Building",
+      "FilePath": "AegisCore.Domain/Entities/Building.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "BusAttendance",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CalibrationRecord",
+      "FilePath": "AegisCore.Domain/Entities/CalibrationRecord.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CallLog",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Campus",
+      "FilePath": "AegisCore.Domain/Entities/Campus.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CampusConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/CampusConfiguration.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CampusDrive",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CandidateNomination",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CareerEvent",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CareerEventRegistration",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CareerGoal",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CatalogCourseRecord",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CatalogVersion",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ChangeImpactSimulation",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ChartConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ChatbotConversation",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ChatbotMessage",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CheckpointScan",
+      "FilePath": "AegisCore.Domain/Entities/CheckpointScan.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Class",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ClassGenerationJob",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CLOAssessmentMapping",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CLOAttainment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CLOPOMapping",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CommitteeMeeting",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CommitteeMember",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConferenceTravel",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConfigAuditLog",
+      "FilePath": "AegisCore.Domain/Entities/ConfigAuditLog.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConfigurationEntry",
+      "FilePath": "AegisCore.Domain/Entities/ConfigurationEntry.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConsumableRequisition",
+      "FilePath": "AegisCore.Domain/Entities/ConsumableRequisition.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ContinuousImprovementPlan",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Convocation",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConvocationAttendance",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConvocationEligibility",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CountryPack",
+      "FilePath": "AegisCore.Domain/Entities/CountryPack.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseEquivalency",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseGradePolicy",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseLearningOutcome",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseOffering",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CreditTransfer",
+      "FilePath": "AegisCore.Domain/Entities/CreditTransfer.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Currency",
+      "FilePath": "AegisCore.Domain/Entities/Currency.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CurriculumProposal",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Dashboard",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DashboardSubscription",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DashboardWidget",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DataExportLog",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DataImportJob",
+      "FilePath": "AegisCore.Domain/Entities/DataImportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DataWarehouseTable",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DecisionTable",
+      "FilePath": "AegisCore.Domain/Entities/DecisionTable.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DefaulterIntervention",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DefaulterRiskScore",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DegreeAudit",
+      "FilePath": "AegisCore.Domain/Entities/DegreeAudit.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DegreeCertificate",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DegreeProgram",
+      "FilePath": "AegisCore.Domain/Entities/DegreeProgram.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DegreeRequirement",
+      "FilePath": "AegisCore.Domain/Entities/DegreeRequirement.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DegreeTree",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DegreeVerification",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DemandForecast",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DiagnosticFinding",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DirectorySyncLog",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DistributionAnomalyAlert",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DocumentAccessLog",
+      "FilePath": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DocumentRetentionPolicy",
+      "FilePath": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DocumentTier",
+      "FilePath": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DocumentVaultEntry",
+      "FilePath": "AegisCore.Domain/Entities/DocumentVaultEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DomainEvent",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DriveRegistration",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DriverIncident",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DriverShift",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "DWColumn",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ElectiveSlot",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EmergencyAlert",
+      "FilePath": "AegisCore.Domain/Entities/EmergencyAlert.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EmergencyContact",
+      "FilePath": "AegisCore.Domain/Entities/EmergencyContact.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Employee",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EmployeeContract",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EmployeeDocument",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Employer",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EncryptedBallot",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EnergyReading",
+      "FilePath": "AegisCore.Domain/Entities/EnergyReading.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EquipmentBooking",
+      "FilePath": "AegisCore.Domain/Entities/EquipmentBooking.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EquipmentMaintenance",
+      "FilePath": "AegisCore.Domain/Entities/EquipmentMaintenance.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EquipmentUsageLog",
+      "FilePath": "AegisCore.Domain/Entities/EquipmentUsageLog.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EthicsProtocol",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ETLJob",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EvidenceFreshnessLog",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EvidenceVersion",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExecutiveDashboard",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExportLog",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Extension",
+      "FilePath": "AegisCore.Domain/Entities/Extension.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExtensionInstallation",
+      "FilePath": "AegisCore.Domain/Entities/ExtensionInstallation.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExtensionReview",
+      "FilePath": "AegisCore.Domain/Entities/ExtensionReview.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExternalDbConnection",
+      "FilePath": "AegisCore.Domain/Entities/DataImportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FacultyCV",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FacultySlotMatch",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FacultyWorkload",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeeDefaulterRecord",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeePayment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FieldMappingTemplate",
+      "FilePath": "AegisCore.Domain/Entities/DataImportEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FinePayment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FireDrill",
+      "FilePath": "AegisCore.Domain/Entities/FireDrill.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FireEquipment",
+      "FilePath": "AegisCore.Domain/Entities/FireEquipment.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Floor",
+      "FilePath": "AegisCore.Domain/Entities/Floor.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FloorPlan",
+      "FilePath": "AegisCore.Domain/Entities/FloorPlan.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FoodOrder",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ForeignStudentRegistry",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FormDefinition",
+      "FilePath": "AegisCore.Domain/Entities/FormDefinition.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FormSubmission",
+      "FilePath": "AegisCore.Domain/Entities/FormSubmission.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FreezeDocument",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FuelLog",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GapAnalysis",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GateEntry",
+      "FilePath": "AegisCore.Domain/Entities/GateEntry.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GateLog",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GPSLocation",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GradeAppeal",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GradeDistribution",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GrantExpenditure",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GrievanceTicket",
+      "FilePath": "AegisCore.Domain/Entities/CommunicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GuardrailRule",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GuardrailViolation",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GuardRound",
+      "FilePath": "AegisCore.Domain/Entities/GuardRound.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GuardShift",
+      "FilePath": "AegisCore.Domain/Entities/GuardShift.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HardcodingFinding",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HealthScore",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HostelAllocation",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HostelBlock",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HostelDiscipline",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HostelFloor",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HostelRoom",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ImportBatch",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "IncidentEvidence",
+      "FilePath": "AegisCore.Domain/Entities/IncidentEvidence.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "IncidentWitness",
+      "FilePath": "AegisCore.Domain/Entities/IncidentWitness.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "IngestionJob",
+      "FilePath": "AegisCore.Domain/Entities/CatalogIngestionEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InsightChip",
+      "FilePath": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InspectionChecklistItem",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "IntegrationIncident",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "IntegrationRegistration",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Intervention",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InterviewSchedule",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InterviewSlot",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InventoryAlert",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "InventoryItem",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "IoTSensor",
+      "FilePath": "AegisCore.Domain/Entities/IoTSensor.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "JobApplication",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "JobExecution",
+      "FilePath": "AegisCore.Domain/Entities/SchedulerEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "JobPosting",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "KPIAlert",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LabBooking",
+      "FilePath": "AegisCore.Domain/Entities/LabBooking.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LabConsumable",
+      "FilePath": "AegisCore.Domain/Entities/LabConsumable.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LabEquipment",
+      "FilePath": "AegisCore.Domain/Entities/LabEquipment.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LabInventory",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LabSafetyInspection",
+      "FilePath": "AegisCore.Domain/Entities/LabSafetyInspection.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LeadActivity",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LeadTask",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LeaveApplication",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LibraryBook",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LibraryBudget",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LibraryMember",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LibraryUsage",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LibraryVendor",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "License",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LicenseHeartbeat",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LmsConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LmsProvision",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LmsRosterSyncLog",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LmsSyncLog",
+      "FilePath": "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LoginAuditRecord",
+      "FilePath": "AegisCore.Domain/Entities/LoginAuditRecord.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LostFoundItem",
+      "FilePath": "AegisCore.Domain/Entities/LostFoundItem.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MaintenanceContractor",
+      "FilePath": "AegisCore.Domain/Entities/MaintenanceContractor.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MaintenanceTicket",
+      "FilePath": "AegisCore.Domain/Entities/MaintenanceTicket.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MandatoryReport",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MarketingCampaign",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MedicalVisit",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MentorAssignment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MentoringSession",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MessAttendance",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MessFeedback",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MessMenu",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MisconductCase",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MisconductEvidence",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "NotificationDelivery",
+      "FilePath": "AegisCore.Domain/Entities/NotificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "OcrProviderConfig",
+      "FilePath": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "OfficialModule",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "OrderItem",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PatentInventor",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PerformanceReview",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PersonalityConfig",
+      "FilePath": "AegisCore.Domain/Entities/PlatformCrossCuttingEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PlacementRecord",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PlagiarismApiSubmission",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PlagiarismScan",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PlatformMetric",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PluginRevenueShare",
+      "FilePath": "AegisCore.Domain/Entities/PluginRevenueShare.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "POAttainment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PowerBiReport",
+      "FilePath": "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PrerequisiteConflict",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PreventiveMaintenanceSchedule",
+      "FilePath": "AegisCore.Domain/Entities/PreventiveMaintenanceSchedule.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PreviousVisitFinding",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ProctorEvent",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ProctoringSession",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ProfilePictureRecord",
+      "FilePath": "AegisCore.Domain/Entities/ProfilePictureRecord.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ProgramEducationalObjective",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ProgramOutcome",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Prompt",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PromptABTest",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PublicationAuthor",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "QueueDefinition",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "QueueJob",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReadinessAlert",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReadinessGap",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReadinessScore",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReadReplicaConfig",
+      "FilePath": "AegisCore.Domain/Entities/ReadReplicaConfig.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RegistrationEnrollment",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RegistrationWindow",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReleaseDownload",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReplicaHealthLog",
+      "FilePath": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReplicationLagAlert",
+      "FilePath": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReplicationScaleEvent",
+      "FilePath": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReplicationScalingConfig",
+      "FilePath": "AegisCore.Domain/Entities/ReplicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ReportSchedule",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchDeliverable",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchGrant",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchLab",
+      "FilePath": "AegisCore.Domain/Entities/ResearchLab.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchMilestone",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchPatent",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchProject",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchProjectMember",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ResearchPublication",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Room",
+      "FilePath": "AegisCore.Domain/Entities/Room.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RoomInspection",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RoommatePreference",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RoomOccupancy",
+      "FilePath": "AegisCore.Domain/Entities/RoomOccupancy.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RouteStop",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Rubric",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RubricCriterion",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RuleDefinition",
+      "FilePath": "AegisCore.Domain/Entities/RuleDefinition.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SafetyChecklistItem",
+      "FilePath": "AegisCore.Domain/Entities/SafetyChecklistItem.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SamlConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/SamlConfiguration.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ScheduledJob",
+      "FilePath": "AegisCore.Domain/Entities/SchedulerEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SchoolVisit",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SecurityGuard",
+      "FilePath": "AegisCore.Domain/Entities/SecurityGuard.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SecurityIncident",
+      "FilePath": "AegisCore.Domain/Entities/SecurityIncident.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SelfStudyReport",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SemesterFreeze",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SensorReading",
+      "FilePath": "AegisCore.Domain/Entities/SensorReading.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ServiceRegistration",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SickLeaveApplication",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SkillGap",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SLADefinition",
+      "FilePath": "AegisCore.Domain/Entities/SLADefinition.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SlowQuery",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SocietyMembership",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SSRReview",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SSRSection",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities2.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StrategicPlanGoal",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentAchievement",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentActivity",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentAlert",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentBadge",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentClearance",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentCounseling",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentDiscipline",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentDocument",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentFee",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentGuardian",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentHealthRecord",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentHostel",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentProctoringRecord",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentProfile",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentResume",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentRiskScore",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentRiskTrend",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities4.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentScholarship",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentSectionEnrollment",
+      "FilePath": "AegisCore.Domain/Entities/LmsClassGenerationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentSociety",
+      "FilePath": "AegisCore.Domain/Entities/StudentLifecycleEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentTransfer",
+      "FilePath": "AegisCore.Domain/Entities/StudentTransfer.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentTransport",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SupportTicket",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SyncLagConfig",
+      "FilePath": "AegisCore.Domain/Entities/SyncLagEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SyncLagEntry",
+      "FilePath": "AegisCore.Domain/Entities/SyncLagEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TaxSlab",
+      "FilePath": "AegisCore.Domain/Entities/TaxSlab.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TeamsSyncLog",
+      "FilePath": "AegisCore.Domain/Entities/MicrosoftEcosystemEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TicketComment",
+      "FilePath": "AegisCore.Domain/Entities/TicketComment.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TicketEscalation",
+      "FilePath": "AegisCore.Domain/Entities/TicketEscalation.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TrainingAssignment",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpFinanceHrSis.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TransportDriver",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TransportRoute",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TransportVehicle",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TunnelConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UniversityMission",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities1.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UpdateDeployment",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP100_110.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "User",
+      "FilePath": "AegisCore.Domain/Entities/User.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UserNotificationPreference",
+      "FilePath": "AegisCore.Domain/Entities/NotificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UtilityReading",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VehicleMaintenance",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VehiclePass",
+      "FilePath": "AegisCore.Domain/Entities/VehiclePass.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VendorScorecard",
+      "FilePath": "AegisCore.Domain/Entities/CafeteriaExtendedEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VerificationCycle",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisaDocument",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisaExpiryAlert",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisaRenewal",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP122_127.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisitingFacultyContract",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP111_120.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Visitor",
+      "FilePath": "AegisCore.Domain/Entities/Visitor.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "VisitorLog",
+      "FilePath": "AegisCore.Domain/Entities/CoreErpEntities3.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WebhookSubscription",
+      "FilePath": "AegisCore.Domain/Entities/WebhookSubscription.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WorkflowDefinition",
+      "FilePath": "AegisCore.Domain/Entities/WorkflowDefinition.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WorkflowInstance",
+      "FilePath": "AegisCore.Domain/Entities/WorkflowInstance.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WorkOrder",
+      "FilePath": "AegisCore.Domain/Entities/WorkOrder.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WorkOrderMaterial",
+      "FilePath": "AegisCore.Domain/Entities/WorkOrderMaterial.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WorkOrderTimeEntry",
+      "FilePath": "AegisCore.Domain/Entities/WorkOrderTimeEntry.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ScalingEvent",
+      "FilePath": "SOURCE_FILE_NOT_FOUND",
+      "Namespace": "AegisCore.Infrastructure"
+    }
+  ],
+  "List2NoTenantId": [
+    {
+      "EntityName": "AcademicHoliday",
+      "FilePath": "AegisCore.Domain/Entities/FoundationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AcademicYear",
+      "FilePath": "AegisCore.Domain/Entities/FoundationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AdmissionApplication",
+      "FilePath": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AgenticGradeRun",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AnonymousFeedbackSubmission",
+      "FilePath": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ApplicationDocument",
+      "FilePath": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ApprovalRecord",
+      "FilePath": "AegisCore.Domain/Entities/ApprovalRecord.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssessmentComponent",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "AssessmentScheme",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Attendance",
+      "FilePath": "AegisCore.Domain/Entities/Attendance.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Batch",
+      "FilePath": "AegisCore.Domain/Entities/Batch.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CisUpload",
+      "FilePath": "AegisCore.Domain/Entities/CisUpload.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CloPlomapping",
+      "FilePath": "AegisCore.Domain/Entities/CloPlomapping.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ConfigVersion",
+      "FilePath": "AegisCore.Domain/Entities/ConfigVersion.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Course",
+      "FilePath": "AegisCore.Domain/Entities/Course.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseAssignment",
+      "FilePath": "AegisCore.Domain/Entities/CourseAssignment.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseGrade",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseMark",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CourseReEnrollment",
+      "FilePath": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CrossDeptPermissionRequest",
+      "FilePath": "AegisCore.Domain/Entities/FoundationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CurriculumChangeHistory",
+      "FilePath": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CurriculumCourse",
+      "FilePath": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CurriculumPrerequisite",
+      "FilePath": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "CurriculumVersionRecord",
+      "FilePath": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Enrollment",
+      "FilePath": "AegisCore.Domain/Entities/Enrollment.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "EventSchemaVersion",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExamPaperBatch",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExamPaperScan",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExamRegistration",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExamSchedule",
+      "FilePath": "AegisCore.Domain/Entities/ExamSchedule.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ExamSeating",
+      "FilePath": "AegisCore.Domain/Entities/ExamSeating.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Faculty",
+      "FilePath": "AegisCore.Domain/Entities/Faculty.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeatureFlag",
+      "FilePath": "AegisCore.Domain/Entities/FeatureFlag.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeeComponent",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "FeeStructure",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GradeBand",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GradeOverrideRequest",
+      "FilePath": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GradeScale",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "GrievanceResponse",
+      "FilePath": "AegisCore.Domain/Entities/CommunicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "HumanGradeReview",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "LicenseState",
+      "FilePath": "AegisCore.Domain/Entities/LicenseState.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MarkModeration",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MeritList",
+      "FilePath": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "MeritListEntry",
+      "FilePath": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "NoticeBoardItem",
+      "FilePath": "AegisCore.Domain/Entities/CommunicationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "NotificationRecord",
+      "FilePath": "AegisCore.Domain/Entities/NotificationRecord.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "NotificationTemplate",
+      "FilePath": "AegisCore.Domain/Entities/NotificationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "OfflineAttendanceEvent",
+      "FilePath": "AegisCore.Domain/Entities/CurriculumManagementEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PaperDestructionManifest",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PayrollRun",
+      "FilePath": "AegisCore.Domain/Entities/PayrollEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Payslip",
+      "FilePath": "AegisCore.Domain/Entities/PayrollEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PolicyConfig",
+      "FilePath": "AegisCore.Domain/Entities/FoundationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ProcurementRequisition",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PromptVersion",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP93_98.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "PurchaseOrder",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RequisitionLineItem",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "RuleVersion",
+      "FilePath": "AegisCore.Domain/Entities/RuleVersion.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SeatAllocation",
+      "FilePath": "AegisCore.Domain/Entities/AdmissionsEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SectionOverrideRequest",
+      "FilePath": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Semester",
+      "FilePath": "AegisCore.Domain/Entities/FoundationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "ServiceDependency",
+      "FilePath": "AegisCore.Domain/Entities/PlatformEntitiesP87_92.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SsoSession",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Student",
+      "FilePath": "AegisCore.Domain/Entities/Student.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentFeeDue",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "StudentFeePayment",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "SystemConfiguration",
+      "FilePath": "AegisCore.Domain/Entities/GovernanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Tenant",
+      "FilePath": "AegisCore.Domain/Entities/WizardSession.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Timetable",
+      "FilePath": "AegisCore.Domain/Entities/Timetable.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Transcript",
+      "FilePath": "AegisCore.Domain/Entities/ExaminationEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TranslationKey",
+      "FilePath": "AegisCore.Domain/Entities/TranslationKey.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "TranslationValue",
+      "FilePath": "AegisCore.Domain/Entities/TranslationValue.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UniversitySsoProfile",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "UserSecondFactor",
+      "FilePath": "AegisCore.Domain/Entities/SsoHitlEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "Vendor",
+      "FilePath": "AegisCore.Domain/Entities/FinanceEntities.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    },
+    {
+      "EntityName": "WorkflowStep",
+      "FilePath": "AegisCore.Domain/Entities/WorkflowStep.cs",
+      "Namespace": "AegisCore.Domain.Entities"
+    }
+  ]
+}
