@@ -62,9 +62,11 @@ def ensure_common_using(text: str) -> str:
 
 
 def class_pattern(entity_name: str) -> re.Pattern[str]:
+    # Some recovered entity files place [Table(...)] and the class declaration
+    # on the same physical line, so declarations must not be anchored at ^.
     return re.compile(
         r"(?P<decl>"
-        r"(?P<indent>^[ \t]*)"
+        r"(?P<indent>[ \t]*)"
         r"(?:(?:public|internal)\s+)"
         r"(?:(?:sealed|abstract|partial)\s+)*"
         r"(?:class|record(?:\s+class)?)\s+"
@@ -72,7 +74,7 @@ def class_pattern(entity_name: str) -> re.Pattern[str]:
         + r"\b"
         r"(?P<tail>[^\{;]*?)"
         r")(?P<brace>\{)",
-        re.MULTILINE | re.DOTALL,
+        re.DOTALL,
     )
 
 
@@ -106,6 +108,13 @@ def patch_entity(text: str, entity_name: str, add_tenant_id: bool) -> tuple[str,
         if rematch is None:
             fail(f"could not re-locate {entity_name} after interface patch")
         indent = rematch.group("indent")
+        # For inline declarations after an attribute, derive indentation from the
+        # physical line instead of the one-space separator before "public".
+        line_start = patched.rfind("\n", 0, rematch.start()) + 1
+        physical_prefix = patched[line_start:rematch.start()]
+        line_indent_match = re.match(r"[ \t]*", physical_prefix)
+        if line_indent_match:
+            indent = line_indent_match.group(0)
         insert_at = rematch.end("brace")
         tenant_property = f"\n{indent}    public Guid TenantId {{ get; set; }}"
         patched = patched[:insert_at] + tenant_property + patched[insert_at:]
