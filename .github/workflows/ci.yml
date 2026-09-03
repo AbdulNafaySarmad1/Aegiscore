@@ -37,10 +37,10 @@ jobs:
         run: dotnet restore AegisCore.slnx
 
       - name: Build
-        run: dotnet build AegisCore.slnx --no-restore -m:1 -p:BuildInParallel=false --configuration Release
+        run: dotnet build AegisCore.slnx -c Release --no-restore -m:1 -p:BuildInParallel=false
 
       - name: Test
-        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release --verbosity normal -m:1 -p:BuildInParallel=false
+        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build -c Release --verbosity normal -m:1 -p:BuildInParallel=false
 
   build-frontend:
     name: Build & Typecheck (Portal)
@@ -70,7 +70,7 @@ jobs:
   docker-verify:
     name: Docker Build Check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
