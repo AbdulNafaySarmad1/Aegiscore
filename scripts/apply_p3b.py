@@ -171,15 +171,63 @@ def table_mapping(snapshot: str, namespace: str, entity_name: str) -> tuple[str,
     return match.group(1), match.group(2)
 
 
+def extract_csharp_method_body(content: str, signature: str) -> str:
+    """Return a C# method body using balanced braces, independent of comments/formatting."""
+    start = content.find(signature)
+    if start < 0:
+        fail(f"could not find migration method signature: {signature}")
+
+    brace = content.find("{", start + len(signature))
+    if brace < 0:
+        fail(f"could not find opening brace for migration method: {signature}")
+
+    depth = 0
+    in_string = False
+    in_char = False
+    escape = False
+    for index in range(brace, len(content)):
+        ch = content[index]
+
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+
+        if in_char:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == "'":
+                in_char = False
+            continue
+
+        if ch == '"':
+            in_string = True
+            continue
+        if ch == "'":
+            in_char = True
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return content[brace + 1 : index]
+
+    fail(f"migration method body did not terminate: {signature}")
+    raise AssertionError("unreachable")
+
+
 def validate_temporary_migration(content: str, expected_entities: int) -> None:
-    up_match = re.search(
-        r"protected override void Up\(MigrationBuilder migrationBuilder\)\s*\{(?P<body>.*?)\n\s*\}\s*\n\s*protected override void Down",
+    body = extract_csharp_method_body(
         content,
-        re.DOTALL,
+        "protected override void Up(MigrationBuilder migrationBuilder)",
     )
-    if not up_match:
-        fail("could not parse temporary migration Up() body")
-    body = up_match.group("body")
 
     calls = re.findall(r"migrationBuilder\.([A-Za-z0-9_]+)\s*(?:<[^>]+>)?\s*\(", body)
     unexpected = sorted({call for call in calls if call != "AddColumn"})
