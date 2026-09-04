@@ -90,7 +90,7 @@ public sealed class DefaulterPredictionControllerTests
     [Fact]
     public async Task Forecast_ValidSemester_ReturnsForecast()
     {
-        var forecast = new CashFlowForecast { Id = Guid.NewGuid(), Semester = "2025S", ExpectedCollection = 500000m, ProjectedShortfall = 25000m };
+        var forecast = new CashFlowForecast { Id = Guid.NewGuid(), ExpectedCollection = 500000m, ProjectedShortfall = 25000m };
         _service.Setup(s => s.GenerateForecastAsync("2025S", It.IsAny<CancellationToken>())).ReturnsAsync(forecast);
 
         var result = await _controller.Forecast("2025S", CancellationToken.None);

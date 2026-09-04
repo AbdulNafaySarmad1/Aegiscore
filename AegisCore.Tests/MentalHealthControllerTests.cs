@@ -20,7 +20,7 @@ public sealed class MentalHealthControllerTests
     [Fact]
     public async Task Submit_ValidTicket_ReturnsOkWithTicket()
     {
-        var ticket = new MentalHealthTicket { Id = Guid.NewGuid(), AnonymousToken = "anon-001", Severity = TicketSeverity.Routine, Description = "Feeling stressed about exams" };
+        var ticket = new MentalHealthTicket { Id = Guid.NewGuid(), AnonymousToken = "anon-001", Severity = TicketSeverity.Routine.ToString(), ConcernDescription = "Feeling stressed about exams" };
         _service.Setup(s => s.SubmitTicketAsync(It.IsAny<MentalHealthTicket>(), It.IsAny<CancellationToken>())).ReturnsAsync(ticket);
 
         var result = await _controller.Submit(ticket, CancellationToken.None);

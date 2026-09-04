@@ -58,7 +58,7 @@ public sealed class AchievementControllerTests
     [Fact]
     public async Task ProcessDeansList_ValidSemester_ReturnsEntries()
     {
-        var entries = new List<DeansListEntry> { new() { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Semester = "2025S", Cgpa = 3.9 } };
+        var entries = new List<DeansListEntry> { new() { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Cgpa = 3.9M } };
         _service.Setup(s => s.ProcessDeansListAsync("2025S", It.IsAny<CancellationToken>())).ReturnsAsync(entries);
 
         var result = await _controller.ProcessDeansList("2025S", CancellationToken.None);
@@ -70,7 +70,7 @@ public sealed class AchievementControllerTests
     [Fact]
     public async Task Leaderboard_ValidScope_ReturnsEntries()
     {
-        var entries = new List<LeaderboardEntry> { new() { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Rank = 1, Score = 4.0 } };
+        var entries = new List<LeaderboardEntry> { new() { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Rank = 1, Score = 4.0M } };
         _service.Setup(s => s.GenerateLeaderboardAsync(LeaderboardScope.Department, "CS", "2025S", It.IsAny<CancellationToken>())).ReturnsAsync(entries);
 
         var result = await _controller.Leaderboard("Department", "CS", "2025S", CancellationToken.None);
@@ -91,7 +91,7 @@ public sealed class AchievementControllerTests
     public async Task Roadmap_ExistingStudent_ReturnsRoadmap()
     {
         var studentId = Guid.NewGuid();
-        var roadmap = new AchievementRoadmap { Id = Guid.NewGuid(), StudentId = studentId, CgpaTarget = 3.8 };
+        var roadmap = new AchievementRoadmap { Id = Guid.NewGuid(), StudentId = studentId };
         _service.Setup(s => s.GenerateRoadmapAsync(studentId, It.IsAny<CancellationToken>())).ReturnsAsync(roadmap);
 
         var result = await _controller.Roadmap(studentId, CancellationToken.None);

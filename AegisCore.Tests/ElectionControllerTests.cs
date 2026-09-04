@@ -20,7 +20,7 @@ public sealed class ElectionControllerTests
     [Fact]
     public async Task Create_ValidElection_ReturnsOkWithElection()
     {
-        var election = new Election { Id = Guid.NewGuid(), Title = "Student Council Elections 2025", AcademicYear = "2025", Type = ElectionType.StudentUnion };
+        var election = new Election { Id = Guid.NewGuid(), Title = "Student Council Elections 2025", ElectionType = AegisCore.Domain.ElectionType.StudentUnion.ToString() };
         _service.Setup(s => s.CreateElectionAsync(It.IsAny<Election>(), It.IsAny<CancellationToken>())).ReturnsAsync(election);
 
         var result = await _controller.Create(election, CancellationToken.None);
@@ -48,7 +48,7 @@ public sealed class ElectionControllerTests
     {
         var electionId = Guid.NewGuid();
         var studentId = Guid.NewGuid();
-        var token = new VoterToken { Id = Guid.NewGuid(), ElectionId = electionId, StudentId = studentId, Token = "tok-secure-hash" };
+        var token = new VoterToken { Id = Guid.NewGuid(), ElectionId = electionId, StudentId = studentId, TokenHash = "tok-secure-hash" };
         _service.Setup(s => s.IssueVoterTokenAsync(electionId, studentId, It.IsAny<CancellationToken>())).ReturnsAsync(token);
 
         var result = await _controller.IssueToken(electionId, studentId, CancellationToken.None);
@@ -74,7 +74,7 @@ public sealed class ElectionControllerTests
     public async Task Tally_CompletedElection_ReturnsResults()
     {
         var electionId = Guid.NewGuid();
-        var results = new List<ElectionResult> { new() { Id = Guid.NewGuid(), ElectionId = electionId, PositionName = "President", WinnerId = Guid.NewGuid(), VoteCount = 150 } };
+        var results = new List<ElectionResult> { new() { Id = Guid.NewGuid(), ElectionId = electionId, PositionId = Guid.NewGuid(), CandidateId = Guid.NewGuid(), VoteCount = 150 } };
         _service.Setup(s => s.TallyResultsAsync(electionId, It.IsAny<CancellationToken>())).ReturnsAsync(results);
 
         var result = await _controller.Tally(electionId, CancellationToken.None);
@@ -98,7 +98,7 @@ public sealed class ElectionControllerTests
     public async Task Certify_ValidResult_ReturnsCertifiedResult()
     {
         var resultId = Guid.NewGuid();
-        var certified = new ElectionResult { Id = resultId, Status = CountResultStatus.Certified };
+        var certified = new ElectionResult { Id = resultId, IsElected = true };
         _service.Setup(s => s.CertifyResultsAsync(resultId, It.IsAny<CancellationToken>())).ReturnsAsync(certified);
 
         var result = await _controller.Certify(resultId, CancellationToken.None);
