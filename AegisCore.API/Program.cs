@@ -92,7 +92,11 @@ var isInstalled = InstallationStateService.HasPersistentMarker(builder.Configura
 
 if (!isInstalled)
 {
+    var setupToken = SetupBootstrapToken.RequireValid(builder.Configuration);
+    var setupUrl = (builder.Configuration["APP_URL"] ?? "http://localhost:3000").TrimEnd('/');
     Log.Information("AegisCore starting in installation mode - no external dependencies required");
+    Log.Warning("[AEGISCORE] Setup token: {SetupToken}", setupToken);
+    Log.Information("[AEGISCORE] Navigate to {SetupUrl}/setup to begin installation.", setupUrl);
 
     builder.Services.AddCoreServices(builder.Configuration);
     builder.Services.AddSetupServices(builder.Configuration);
@@ -143,9 +147,13 @@ app.MapGet("/health/installation", (IInstallationStateService installation) =>
 
 if (!isInstalled)
 {
-    app.UseSetupRequired();
-
+    app.UseMiddleware<GlobalExceptionMiddleware>();
+    app.UseSerilogRequestLogging();
     app.UseRouting();
+    app.UseCors("CloudflarePages");
+    app.UseSetupRequired();
+    app.UseMiddleware<SetupRateLimitMiddleware>();
+    app.UseMiddleware<SetupBootstrapTokenMiddleware>();
     app.UseAuthentication();
     app.UseAuthorization();
 

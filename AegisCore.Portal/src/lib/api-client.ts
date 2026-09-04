@@ -9,12 +9,16 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const setupToken = typeof window !== "undefined" && (path.startsWith("/api/wizard") || path.startsWith("/api/setup"))
+    ? window.sessionStorage.getItem("aegiscore_setup_token")
+    : null;
+  const headers = new Headers(init?.headers);
+  if (setupToken) headers.set("X-Setup-Token", setupToken);
+  if (!(init?.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   const response = await fetch(path, {
     credentials: "include",
     ...init,
-    headers: init?.body instanceof FormData
-      ? init.headers
-      : { "Content-Type": "application/json", ...init?.headers }
+    headers,
   });
   const contentType = response.headers.get("content-type") ?? "";
   const payload = contentType.includes("json")
@@ -52,4 +56,12 @@ export function apiPut<T>(path: string, body?: unknown) {
     method: "PUT",
     body: JSON.stringify(body ?? {})
   });
+}
+
+export function apiPostForm<T>(path: string, body: FormData) {
+  return request<T>(path, { method: "POST", body });
+}
+
+export function setSetupToken(token: string) {
+  window.sessionStorage.setItem("aegiscore_setup_token", token.trim());
 }

@@ -1,5 +1,5 @@
-import { SetupWizard } from "@/components/setup-wizard";
+import { redirect } from "next/navigation";
 
 export default function OnboardingPage() {
-  return <SetupWizard />;
+  redirect("/setup");
 }

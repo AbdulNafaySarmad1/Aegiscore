@@ -131,15 +131,14 @@ public sealed class EnhancedSetupService
 
     public IReadOnlyList<SetupPermission> SavePermissions(SavePermissionsRequest request)
     {
-        var allowedRoles = new HashSet<string>(["VC", "HOD", "Faculty", "Student"], StringComparer.OrdinalIgnoreCase);
         if (request.Permissions.Count == 0)
             throw new ArgumentException("At least one permission is required.");
-        if (request.Permissions.Any(x => !allowedRoles.Contains(x.Role) || string.IsNullOrWhiteSpace(x.Feature)))
-            throw new ArgumentException("Permissions contain an unknown role or feature.");
+        if (request.Permissions.Any(x => string.IsNullOrWhiteSpace(x.Role) || x.Role.Trim().Length > 64 || string.IsNullOrWhiteSpace(x.Feature)))
+            throw new ArgumentException("Role names must contain 1 to 64 characters and every permission needs a feature.");
 
         var permissions = request.Permissions
             .GroupBy(x => $"{x.Role.Trim().ToUpperInvariant()}::{x.Feature.Trim()}", StringComparer.OrdinalIgnoreCase)
-            .Select(x => x.Last() with { Role = NormalizeRole(x.Last().Role), Feature = x.Last().Feature.Trim() })
+            .Select(x => x.Last() with { Role = x.Last().Role.Trim(), Feature = x.Last().Feature.Trim() })
             .OrderBy(x => x.Feature)
             .ThenBy(x => x.Role)
             .ToList();
@@ -375,24 +374,17 @@ public sealed class EnhancedSetupService
     private static SetupFileValidation Invalid(string type, string message) =>
         new(type, false, 0, [message], []);
 
-    private static string NormalizeRole(string role) =>
-        role.Equals("vc", StringComparison.OrdinalIgnoreCase) ? "VC" :
-        role.Equals("hod", StringComparison.OrdinalIgnoreCase) ? "HOD" :
-        char.ToUpperInvariant(role.Trim()[0]) + role.Trim()[1..].ToLowerInvariant();
-
     private static List<SetupPermission> DefaultPermissions()
     {
-        var roles = new[] { "VC", "HOD", "Faculty", "Student" };
+        var roles = new[] { "Admin", "Faculty", "Student" };
         var features = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
-            ["View all students"] = ["VC"],
-            ["View own department"] = ["VC", "HOD"],
-            ["View own grades"] = ["VC", "HOD", "Faculty", "Student"],
-            ["Enter grades"] = ["Faculty"],
-            ["Approve overrides"] = ["VC", "HOD"],
-            ["Export data"] = ["VC", "HOD"],
-            ["View reports"] = ["VC", "HOD", "Faculty"],
-            ["Manage users"] = ["VC"]
+            ["Students.Read"] = ["Admin", "Faculty"],
+            ["Grades.Read"] = ["Admin", "Faculty", "Student"],
+            ["Grades.Write"] = ["Admin", "Faculty"],
+            ["Attendance.Read"] = ["Admin", "Faculty", "Student"],
+            ["Attendance.Write"] = ["Admin", "Faculty"],
+            ["System.Admin"] = ["Admin"]
         };
         return features.SelectMany(feature => roles.Select(role =>
             new SetupPermission(role, feature.Key, feature.Value.Contains(role)))).ToList();

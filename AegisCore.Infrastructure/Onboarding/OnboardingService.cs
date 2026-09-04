@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using AegisCore.Application.Onboarding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using StackExchange.Redis;
 
@@ -82,6 +83,25 @@ public class OnboardingService
         catch (Exception ex)
         {
             return new ConnectionTestResult(false, "Connection failed.", new WizardError("Database connection failed.", "Check all fields.", TechnicalDetail: ex.Message));
+        }
+    }
+
+    public async Task<ConnectionTestResult> MigratePostgresAsync(WizardStateDto state, CancellationToken ct = default)
+    {
+        try
+        {
+            var options = new DbContextOptionsBuilder<AegisDbContext>()
+                .UseNpgsql(state.DbConnectionString, postgres => postgres.MigrationsAssembly(typeof(AegisDbContext).Assembly.FullName))
+                .Options;
+            await using var target = new AegisDbContext(options);
+            await target.Database.MigrateAsync(ct);
+            return new ConnectionTestResult(true, "Database connected and AegisCore migrations applied.");
+        }
+        catch (Exception ex)
+        {
+            return new ConnectionTestResult(false, "Database migration failed.",
+                new WizardError("The database connected, but migrations could not be applied.",
+                    "Ensure the database user can create and alter tables.", TechnicalDetail: ex.Message));
         }
     }
 

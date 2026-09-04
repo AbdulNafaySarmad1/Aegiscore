@@ -52,8 +52,10 @@ public static class CoreServicesExtensions
                 ?? configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                 ?? [];
             var frontendOrigin = configuration["AEGISCORE_FRONTEND_URL"];
+            var applicationOrigin = configuration["APP_URL"];
             var origins = configuredOrigins
                 .Append(frontendOrigin ?? string.Empty)
+                .Append(applicationOrigin ?? string.Empty)
                 .Where(IsValidOrigin)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();

@@ -1,16 +1,19 @@
 namespace AegisCore.Tests;
 
-public sealed class SetupControllerRouteTests
+public sealed class WizardConsolidationTests
 {
     [Fact]
-    public void SetupController_Exposes_Wizard_Test_Routes_And_Does_Not_Skip_Connection_Tests()
+    public void WizardController_IsTheOnlySevenStepSetupBackend()
     {
-        var source = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "../../../../AegisCore.API/Controllers/SetupController.cs"));
+        var root = Path.Combine(AppContext.BaseDirectory, "../../../..");
+        var controllerDirectory = Path.Combine(root, "AegisCore.API/Controllers");
+        var source = File.ReadAllText(Path.Combine(controllerDirectory, "WizardController.cs"));
 
-        Assert.Contains("[HttpPost(\"step3/test-postgres\")]", source);
-        Assert.Contains("[HttpPost(\"step4/test-redis\")]", source);
-        Assert.Contains("[HttpPost(\"step7/test-smtp\")]", source);
-        Assert.DoesNotContain("connection test skipped", source);
+        Assert.Single(Directory.GetFiles(controllerDirectory, "*WizardController.cs", SearchOption.TopDirectoryOnly));
+        Assert.Contains("[HttpPost(\"step2/test\")]", source);
+        Assert.Contains("[HttpPost(\"step4/permissions\")]", source);
+        Assert.Contains("[HttpPost(\"step6/import/{fileType}/validate\")]", source);
+        Assert.Contains("if (step is < 1 or > 7)", source);
     }
 
     [Fact]

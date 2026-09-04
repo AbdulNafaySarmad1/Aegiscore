@@ -1,5 +1,5 @@
-import { SetupWizard } from "@/components/setup-wizard";
+import { redirect } from "next/navigation";
 
 export default function ImportsPage() {
-  return <SetupWizard />;
+  redirect("/setup");
 }

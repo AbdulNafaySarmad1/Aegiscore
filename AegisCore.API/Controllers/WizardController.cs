@@ -27,6 +27,7 @@ public sealed class WizardController(
     WizardGatewayService gateways,
     WizardStateService state,
     OnboardingService onboarding,
+    EnhancedSetupService enhancedSetup,
     IInstallationStateService installation,
     ISecretService secrets) : ControllerBase
 {
@@ -55,6 +56,80 @@ public sealed class WizardController(
         {
             return Conflict(new { message = ex.Message });
         }
+    }
+
+    [HttpGet("options/regions")]
+    public IActionResult Regions([FromQuery] string country)
+    {
+        var regions = configuration.GetSection($"Wizard:Regions:{country}").Get<string[]>() ?? [];
+        return Ok(new { country, regions });
+    }
+
+    [HttpPost("step2/test")]
+    public async Task<IActionResult> TestDatabase([FromBody] WizardDatabaseRequest request, CancellationToken ct)
+    {
+        var token = SetupToken();
+        var wizardState = await state.ResumeWizardAsync(token, ct);
+        wizardState.DbSslEnabled = request.SslEnabled;
+        var result = await onboarding.TestPostgresAsync(
+            wizardState, request.Host, request.Port, request.DatabaseName, request.Username, request.Password, ct);
+        if (result.Success)
+            result = await onboarding.MigratePostgresAsync(wizardState, ct);
+        await state.SaveState(token, wizardState, ct);
+        return result.Success ? Ok(result) : UnprocessableEntity(result);
+    }
+
+    [HttpGet("step4/permissions")]
+    public IActionResult GetPermissionTree() => Ok(enhancedSetup.GetPermissions());
+
+    [HttpPost("step4/permissions")]
+    public IActionResult SavePermissionTree([FromBody] SavePermissionsRequest request)
+    {
+        try { return Ok(enhancedSetup.SavePermissions(request)); }
+        catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpGet("step6/import/templates")]
+    public IActionResult ImportTemplates() => Ok(enhancedSetup.GetTemplates());
+
+    [HttpGet("step6/import/templates/all")]
+    public IActionResult AllImportTemplates()
+        => File(enhancedSetup.GenerateAllTemplates(), "application/zip", "aegiscore-import-templates.zip");
+
+    [HttpGet("step6/import/templates/{fileType}")]
+    public IActionResult ImportTemplate(string fileType)
+    {
+        try
+        {
+            return File(enhancedSetup.GenerateTemplate(fileType),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{fileType}-template.xlsx");
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+    }
+
+    [HttpPost("step6/import/{fileType}/validate")]
+    [RequestSizeLimit(25 * 1024 * 1024)]
+    public async Task<IActionResult> ValidateImport(string fileType, IFormFile file, CancellationToken ct)
+    {
+        var result = await enhancedSetup.ValidateAsync(fileType, file, ct);
+        return result.IsValid ? Ok(result) : UnprocessableEntity(result);
+    }
+
+    [HttpGet("step6/import/{fileType}/preview")]
+    public IActionResult ImportPreview(string fileType)
+    {
+        var rows = enhancedSetup.GetValidatedRows();
+        if (!rows.TryGetValue(fileType, out var source) || source.Count == 0) return NotFound();
+        return Ok(new { fileType, headers = source[0], rows = source.Skip(1).Take(25), totalRows = source.Count - 1 });
+    }
+
+    [HttpGet("step6/import/{fileType}/rejections")]
+    public async Task<IActionResult> ImportRejections(string fileType, CancellationToken ct)
+    {
+        var review = enhancedSetup.Review(await state.ResumeWizardAsync(SetupToken(), ct));
+        return review.Uploads.TryGetValue(fileType, out var upload)
+            ? Ok(new { fileType, errors = upload.Errors, warnings = upload.Warnings })
+            : NotFound();
     }
 
     [HttpPost("validate-license-key")]
@@ -113,21 +188,11 @@ public sealed class WizardController(
     public async Task<IActionResult> SaveStep(int step, [FromBody] SaveStepRequest request, CancellationToken ct)
     {
         var token = SetupToken();
-        if (step is < 0 or > 7) return BadRequest(new { success = false, error = "Invalid wizard step." });
+        if (step is < 1 or > 7) return BadRequest(new { success = false, error = "Invalid wizard step." });
         if (Encoding.UTF8.GetByteCount(request.Data.GetRawText()) > MaxStepPayloadBytes)
             return StatusCode(StatusCodes.Status413PayloadTooLarge, new { success = false, error = "Wizard step payload exceeds the 128 KiB limit." });
         if (!ValidateStep(step, request.Data, out var error)) return UnprocessableEntity(new { success = false, error });
-        if (step == 0 && request.Data.TryGetProperty("mode", out var mode) && mode.GetString() == "paid")
-        {
-            if (!HasProductionSecretProvider())
-                return UnprocessableEntity(new { success = false, error = "Live mode requires Infisical or a supported cloud secret vault." });
-            var licenseKey = request.Data.GetProperty("licenseKey").GetString() ?? string.Empty;
-            var wizardState = await state.GetOrCreateStateAsync(token, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
-            var license = await onboarding.ValidateLicenseAsync(wizardState, licenseKey, ct);
-            if (!license.IsValid) return UnprocessableEntity(new { success = false, error = license.Error?.UserMessage ?? "License validation failed." });
-            await state.SaveState(token, wizardState, ct);
-        }
-        var data = step == 3 ? SanitizeGatewayStep(request.Data) : step == 4 ? await SanitizeFinanceStep(request.Data, ct) : request.Data;
+        var data = request.Data;
         try
         {
             var session = await sessions.SaveAsync(token, request.SessionId, step, data, ct);
@@ -497,44 +562,40 @@ public sealed class WizardController(
     {
         error = "";
         bool Has(params string[] names) => names.All(name => data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(value.GetString()));
-        var mode = data.TryGetProperty("mode", out var modeValue) ? modeValue.GetString() : null;
         switch (step)
         {
-            case 0 when mode is not ("demo" or "paid"):
-                error = "Choose Demo or Licensed mode."; return false;
-            case 0 when mode == "paid" && (!data.TryGetProperty("licenseKey", out var key) || string.IsNullOrWhiteSpace(key.GetString())):
-                error = "A validated license key is required."; return false;
-            case 1 when !Has("name", "shortName", "type", "country", "city", "language", "timezone", "street", "province", "contactName", "contactEmail", "contactPhone"):
-                error = "Complete the required university and primary contact fields."; return false;
-            case 1 when !IsEmail(data, "contactEmail") || !IsE164Phone(data, "contactPhone"):
-                error = "Enter a valid contact email and E.164 phone number."; return false;
-            case 2 when !Has("academicYear", "calendarType", "semesterStart", "semesterEnd"):
-                error = "Complete the academic calendar."; return false;
-            case 2 when !HasNamedRows(data, "faculties") || !HasNamedRows(data, "departments") || !HasNamedRows(data, "programmes"):
-                error = "Add at least one faculty, department, and programme."; return false;
-            case 3 when mode != "demo" && !HasConfiguredGateway(data):
-                error = "Enable at least one configured payment gateway."; return false;
-            case 4 when !Has("standard", "fiscalYear", "baseCurrency", "rateSource"):
-                error = "Complete the finance configuration."; return false;
-            case 4 when !new[] { "IFRS", "US_GAAP", "FRS_102", "IPSAS", "AAOIFI" }.Contains(data.GetProperty("standard").GetString()?.Trim().ToUpperInvariant().Replace(' ', '_')):
-                error = "Select a supported accounting standard."; return false;
-            case 4 when !IsCurrency(data, "baseCurrency"):
-                error = "Enter a valid ISO base currency."; return false;
-            case 4 when !new[] { "ECB", "SBP", "OPEN_EXCHANGE_RATES", "MANUAL" }.Contains(data.GetProperty("rateSource").GetString()?.Trim().ToUpperInvariant().Replace(' ', '_')):
-                error = "Select a supported exchange-rate source."; return false;
-            case 4 when data.GetProperty("rateSource").GetString()?.Trim().ToUpperInvariant().Replace(' ', '_') == "OPEN_EXCHANGE_RATES" && (!data.TryGetProperty("apiKey", out var apiKey) || apiKey.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(apiKey.GetString())):
-                error = "An Open Exchange Rates API key is required."; return false;
-            case 5 when !HasFeeConfiguration(data):
-                error = "Define at least two fee heads and one programme assignment."; return false;
-            case 6 when !HasAdministratorAccounts(data):
-                error = "Create valid Super Admin and Finance Controller accounts."; return false;
-            case 7 when !data.TryGetProperty("confirmed", out var confirmed) || confirmed.ValueKind != JsonValueKind.True:
-                error = "Both legal confirmations are required."; return false;
+            case 1 when !Has("name", "shortName", "timezone", "contactName", "contactEmail"):
+                error = "Complete the university identity and primary contact fields."; return false;
+            case 1 when !IsEmail(data, "contactEmail"):
+                error = "Enter a valid contact email."; return false;
+            case 2 when !Has("host", "databaseName", "username") || !data.TryGetProperty("connectionTested", out var tested) || tested.ValueKind != JsonValueKind.True:
+                error = "Test and confirm the database connection."; return false;
+            case 3 when !Has("provider"):
+                error = "Choose an SSO provider."; return false;
+            case 4 when !HasDynamicRoles(data):
+                error = "Add at least one role and permission selection."; return false;
+            case 5 when !Has("provider", "model"):
+                error = "Choose an AI provider and model."; return false;
+            case 6 when !HasImportDecision(data):
+                error = "Upload validated data or explicitly skip data import."; return false;
+            case 7 when !data.TryGetProperty("confirmed", out var confirmed) || confirmed.ValueKind != JsonValueKind.True || !HasAdministratorAccounts(data):
+                error = "Confirm the review and configure the required administrators."; return false;
         }
         return true;
     }
 
     private static bool HasArray(JsonElement data, string name) => data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array && value.GetArrayLength() > 0;
+
+    private static bool HasDynamicRoles(JsonElement data)
+        => data.TryGetProperty("roles", out var roles) && roles.ValueKind == JsonValueKind.Array
+            && roles.EnumerateArray().Any(role => role.TryGetProperty("name", out var name)
+                && !string.IsNullOrWhiteSpace(name.GetString())
+                && role.TryGetProperty("permissions", out var permissions)
+                && permissions.ValueKind == JsonValueKind.Array);
+
+    private static bool HasImportDecision(JsonElement data)
+        => (data.TryGetProperty("skipImport", out var skipImport) && skipImport.ValueKind == JsonValueKind.True)
+            || HasArray(data, "validatedFiles");
 
     private static bool HasNamedRows(JsonElement data, string name)
         => data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array && value.EnumerateArray().Any(row =>
@@ -658,3 +719,4 @@ public sealed record ChangeWizardModeRequest(Guid SessionId, string Mode, string
 public sealed record SaveStepRequest(Guid SessionId, JsonElement Data);
 public sealed record CompleteWizardRequest(Guid SessionId, string ConfirmedBy, DateTimeOffset Timestamp);
 public sealed record DemoImportRequest(string ConnectionString, string DbType);
+public sealed record WizardDatabaseRequest(string Host, int Port, string DatabaseName, string Username, string Password, bool SslEnabled = true);

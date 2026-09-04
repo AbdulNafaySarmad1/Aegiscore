@@ -89,11 +89,12 @@ public sealed class WizardActivationTests
         {
           "step0":{"mode":"demo"},
           "step1":{"name":"Aegis University","shortName":"AEGIS","street":"1 University Road","city":"Karachi","country":"Pakistan","timezone":"Asia/Karachi","language":"English","contactName":"Admin User","contactEmail":"admin@aegiscore.test"},
-          "step2":{"departments":[{"name":"Computer Science","code":"CS"}],"programmes":[{"name":"BS Computer Science","code":"BSCS","degreeLevel":"Bachelor","duration":8,"creditHours":130}],"academicYear":"2026-2027","semesterStart":"2026-08-01","semesterEnd":"2026-12-31","calendarType":"Semester","term":"Fall 2026"},
-          "step4":{"standard":"IFRS","baseCurrency":"PKR","fiscalYear":"FY2026-27","fiscalYearStartMonth":7,"rateSource":"SBP"},
-          "step5":{"assignmentAmount":"125000"},
-          "step6":{"users":[{"name":"Admin User","email":"admin@aegiscore.test","role":"Super Admin"},{"name":"Finance User","email":"finance@aegiscore.test","role":"Finance Controller"}]},
-          "step7":{"confirmed":true}
+          "step2":{"host":"database","databaseName":"aegiscore","username":"installer","connectionTested":true},
+          "step3":{"provider":"local"},
+          "step4":{"roles":[{"name":"Admin","permissions":["System.Admin"]}]},
+          "step5":{"provider":"ollama","model":"mistral"},
+          "step6":{"skipImport":true},
+          "step7":{"confirmed":true,"users":[{"name":"Admin User","email":"admin@aegiscore.test","role":"Super Admin"},{"name":"Finance User","email":"finance@aegiscore.test","role":"Finance Controller"}]}
         }
         """;
 

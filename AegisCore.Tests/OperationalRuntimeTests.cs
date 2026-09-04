@@ -68,12 +68,10 @@ public sealed class OperationalRuntimeTests
         Assert.NotEqual(true, context.User.Identity?.IsAuthenticated);
     }
 
-    [Theory]
-    [InlineData(typeof(SetupController))]
-    [InlineData(typeof(EnhancedSetupController))]
-    public void SetupControllers_AreReachableBeforeAuthenticationIsConfigured(Type controllerType)
+    [Fact]
+    public void CanonicalWizardController_IsReachableBeforeAuthenticationIsConfigured()
     {
-        Assert.NotNull(Attribute.GetCustomAttribute(controllerType, typeof(AllowAnonymousAttribute)));
+        Assert.NotNull(Attribute.GetCustomAttribute(typeof(WizardController), typeof(AllowAnonymousAttribute)));
     }
 
     [Fact]

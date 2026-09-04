@@ -46,9 +46,10 @@ public sealed class WizardSessionService(
 
         var root = JsonNode.Parse(state.StepData)?.AsObject() ?? new JsonObject();
         var storedData = JsonNode.Parse(data.GetRawText())?.AsObject() ?? new JsonObject();
-        if (step == 6 && storedData["users"] is JsonArray users)
+        if (step == 7 && storedData["users"] is JsonArray users)
         {
             EnsureTenant(state);
+            state.AdminPassword = string.Empty;
             db.WizardAdminCredentials.RemoveRange(db.WizardAdminCredentials.IgnoreQueryFilters()
                 .Where(item => item.SessionId == sessionId && item.TenantId == state.TenantId));
             await db.SaveChangesAsync(ct);
@@ -56,6 +57,7 @@ public sealed class WizardSessionService(
             {
                 var password = user["password"]?.GetValue<string>() ?? string.Empty;
                 if (password.Length < 12) throw new InvalidOperationException("Administrator passwords must be at least 12 characters.");
+                if (string.IsNullOrEmpty(state.AdminPassword)) state.AdminPassword = password;
                 db.WizardAdminCredentials.Add(new WizardAdminCredential
                 {
                     Id = Guid.NewGuid(),
@@ -68,6 +70,9 @@ public sealed class WizardSessionService(
                 });
                 user.Remove("password");
             }
+            var firstAdministrator = users.OfType<JsonObject>().FirstOrDefault();
+            state.AdminFullName = firstAdministrator?["name"]?.GetValue<string>()?.Trim() ?? string.Empty;
+            state.AdminAccountEmail = firstAdministrator?["email"]?.GetValue<string>()?.Trim().ToLowerInvariant() ?? string.Empty;
         }
 
         root[$"step{step}"] = storedData;
@@ -142,7 +147,7 @@ public sealed class WizardSessionService(
         var root = JsonNode.Parse(state.StepData)?.AsObject() ?? new JsonObject();
         var review = root["step7"]?.AsObject();
         if (review?["confirmed"]?.GetValue<bool>() != true) throw new InvalidOperationException("Both legal confirmations are required.");
-        var users = root["step6"]?["users"]?.AsArray() ?? [];
+        var users = root["step7"]?["users"]?.AsArray() ?? [];
         var confirmedEmail = users.Select(item => item?["email"]?.GetValue<string>())
             .FirstOrDefault(email => string.Equals(email, confirmedBy, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrWhiteSpace(confirmedEmail))
@@ -150,8 +155,8 @@ public sealed class WizardSessionService(
 
         var credentials = await db.WizardAdminCredentials.IgnoreQueryFilters()
             .Where(item => item.SessionId == sessionId && item.TenantId == state.TenantId).ToListAsync(ct);
-        if (!credentials.Any(item => item.RoleName == "Super Admin") || !credentials.Any(item => item.RoleName == "Finance Controller"))
-            throw new InvalidOperationException("A Super Admin and Finance Controller are required.");
+        if (!credentials.Any(item => item.RoleName is "Admin" or "Super Admin"))
+            throw new InvalidOperationException("An administrator account is required.");
 
         foreach (var credential in credentials)
         {

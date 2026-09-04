@@ -72,6 +72,20 @@ dotnet build AegisCore.slnx -c Release
 
 The build must succeed with 0 errors before any pull request is merged.
 
+### First-run setup
+
+Generate the bootstrap token before starting an uninstalled instance:
+
+```bash
+openssl rand -hex 32
+```
+
+Set the result as `AEGISCORE_SETUP_TOKEN`, start AegisCore, and open
+`${APP_URL}/setup`. Enter the token printed in the container startup log. Every
+setup API request is bound to this token and limited to 10 attempts per minute
+per client IP. Setup mode refuses to start when the token is missing or is not
+a 32-byte hexadecimal/base64 value.
+
 ### Required GitHub status check
 
 In **Settings → Branches → Branch protection rules**, create or edit the rule
