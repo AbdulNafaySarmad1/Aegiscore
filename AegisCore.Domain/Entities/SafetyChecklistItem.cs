@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("SafetyChecklistItems")]
-public class SafetyChecklistItem
+public class SafetyChecklistItem : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

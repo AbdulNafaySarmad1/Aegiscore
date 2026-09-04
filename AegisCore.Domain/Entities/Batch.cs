@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("Batches")]
-public class Batch
+public class Batch : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; init; } = Guid.NewGuid();
 

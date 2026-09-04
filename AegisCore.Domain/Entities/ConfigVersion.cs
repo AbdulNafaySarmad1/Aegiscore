@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ConfigVersions")]
-public class ConfigVersion
+public class ConfigVersion : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 

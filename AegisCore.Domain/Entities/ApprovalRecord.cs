@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ApprovalRecords")]
-public class ApprovalRecord
+public class ApprovalRecord : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 

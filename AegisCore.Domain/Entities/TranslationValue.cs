@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("TranslationValues")]
-public class TranslationValue
+public class TranslationValue : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 

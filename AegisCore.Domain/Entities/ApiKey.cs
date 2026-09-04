@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ApiKeys")]
-public class ApiKey
+public class ApiKey : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

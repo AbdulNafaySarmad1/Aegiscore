@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("Currencies")]
-public class Currency
+public class Currency : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

@@ -39,6 +39,9 @@ jobs:
       - name: Build
         run: dotnet build AegisCore.slnx -c Release
 
+      - name: Verify tenant isolation
+        run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release --filter "FullyQualifiedName~TenantIsolationTest" --verbosity normal -m:1 -p:BuildInParallel=false
+
       - name: Test
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release --verbosity normal -m:1 -p:BuildInParallel=false
 

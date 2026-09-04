@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("AlumniProfiles")]
-public class AlumniProfile
+public class AlumniProfile : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid UserId { get; set; }
@@ -19,7 +19,7 @@ public class AlumniProfile
 }
 
 [Table("AlumniDonations")]
-public class AlumniDonation
+public class AlumniDonation : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid AlumniProfileId { get; set; }
@@ -34,7 +34,7 @@ public class AlumniDonation
 }
 
 [Table("StudentSocieties")]
-public class StudentSociety
+public class StudentSociety : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [MaxLength(200)] public string SocietyName { get; set; } = string.Empty;
@@ -48,7 +48,7 @@ public class StudentSociety
 }
 
 [Table("SocietyMemberships")]
-public class SocietyMembership
+public class SocietyMembership : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid SocietyId { get; set; }
@@ -60,7 +60,7 @@ public class SocietyMembership
 }
 
 [Table("StudentActivities")]
-public class StudentActivity
+public class StudentActivity : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     [MaxLength(200)] public string ActivityName { get; set; } = string.Empty;
@@ -77,7 +77,7 @@ public class StudentActivity
 }
 
 [Table("ActivityParticipations")]
-public class ActivityParticipation
+public class ActivityParticipation : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid ActivityId { get; set; }
@@ -90,7 +90,7 @@ public class ActivityParticipation
 }
 
 [Table("StudentHealthRecords")]
-public class StudentHealthRecord
+public class StudentHealthRecord : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
@@ -105,7 +105,7 @@ public class StudentHealthRecord
 }
 
 [Table("MedicalVisits")]
-public class MedicalVisit
+public class MedicalVisit : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
@@ -120,7 +120,7 @@ public class MedicalVisit
 }
 
 [Table("SickLeaveApplications")]
-public class SickLeaveApplication
+public class SickLeaveApplication : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }

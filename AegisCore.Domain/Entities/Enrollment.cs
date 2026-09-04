@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("Enrollments")]
-public class Enrollment
+public class Enrollment : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; init; } = Guid.NewGuid();
 

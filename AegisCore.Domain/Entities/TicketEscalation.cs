@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("TicketEscalations")]
-public class TicketEscalation
+public class TicketEscalation : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

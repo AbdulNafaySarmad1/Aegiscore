@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("SensorReadings")]
-public class SensorReading
+public class SensorReading : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

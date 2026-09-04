@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("LostFoundItems")]
-public class LostFoundItem
+public class LostFoundItem : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

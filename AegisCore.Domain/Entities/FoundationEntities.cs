@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("PolicyConfigs")]
-public class PolicyConfig
+public class PolicyConfig : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 
@@ -31,8 +32,9 @@ public class PolicyConfig
 }
 
 [Table("AcademicYears")]
-public class AcademicYear
+public class AcademicYear : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 
@@ -47,8 +49,9 @@ public class AcademicYear
 }
 
 [Table("Semesters")]
-public class Semester
+public class Semester : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 
@@ -77,8 +80,9 @@ public class Semester
 }
 
 [Table("AcademicHolidays")]
-public class AcademicHoliday
+public class AcademicHoliday : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 
@@ -99,8 +103,9 @@ public class AcademicHoliday
 }
 
 [Table("CrossDeptPermissionRequests")]
-public class CrossDeptPermissionRequest
+public class CrossDeptPermissionRequest : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key]
     public Guid Id { get; set; }
 

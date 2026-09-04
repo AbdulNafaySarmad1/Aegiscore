@@ -5,8 +5,9 @@ using AegisCore.Domain.Common;
 namespace AegisCore.Domain.Entities;
 
 [Table("FeeStructures")]
-public class FeeStructure
+public class FeeStructure : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid AcademicYearId { get; set; }
     public Guid ProgramId { get; set; }
@@ -18,8 +19,9 @@ public class FeeStructure
 }
 
 [Table("FeeComponents")]
-public class FeeComponent
+public class FeeComponent : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid FeeStructureId { get; set; }
     [Required, MaxLength(100)] public string ComponentName { get; set; } = string.Empty;
@@ -31,8 +33,9 @@ public class FeeComponent
 }
 
 [Table("StudentFeeDues")]
-public class StudentFeeDue
+public class StudentFeeDue : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public Guid SemesterId { get; set; }
@@ -48,8 +51,9 @@ public class StudentFeeDue
 }
 
 [Table("StudentFeePayments")]
-public class StudentFeePayment
+public class StudentFeePayment : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid FeeDueId { get; set; }
     [Required, MaxLength(50)] public string PaymentMethod { get; set; } = string.Empty;
@@ -74,8 +78,9 @@ public class CostCenter : ITenantScoped
 }
 
 [Table("ProcurementRequisitions")]
-public class ProcurementRequisition
+public class ProcurementRequisition : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     [Required, MaxLength(50)] public string RequisitionNumber { get; set; } = string.Empty;
     public Guid RequestingDepartmentId { get; set; }
@@ -89,8 +94,9 @@ public class ProcurementRequisition
 }
 
 [Table("RequisitionLineItems")]
-public class RequisitionLineItem
+public class RequisitionLineItem : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid RequisitionId { get; set; }
     [MaxLength(100)] public string? ItemCode { get; set; }
@@ -103,8 +109,9 @@ public class RequisitionLineItem
 }
 
 [Table("Vendors")]
-public class Vendor
+public class Vendor : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     [Required, MaxLength(200)] public string VendorName { get; set; } = string.Empty;
     [MaxLength(15)] public string? VendorCnic { get; set; }
@@ -118,8 +125,9 @@ public class Vendor
 }
 
 [Table("PurchaseOrders")]
-public class PurchaseOrder
+public class PurchaseOrder : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     [Required, MaxLength(50)] public string PoNumber { get; set; } = string.Empty;
     public Guid RequisitionId { get; set; }

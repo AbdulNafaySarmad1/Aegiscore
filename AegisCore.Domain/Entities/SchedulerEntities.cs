@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ScheduledJobs")]
-public class ScheduledJob
+public class ScheduledJob : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }
@@ -47,7 +47,7 @@ public class ScheduledJob
 }
 
 [Table("JobExecutions")]
-public class JobExecution
+public class JobExecution : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("Extensions")]
-public class Extension
+public class Extension : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

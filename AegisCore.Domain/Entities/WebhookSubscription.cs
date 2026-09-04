@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("WebhookSubscriptions")]
-public class WebhookSubscription
+public class WebhookSubscription : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("WorkflowDefinitions")]
-public class WorkflowDefinition
+public class WorkflowDefinition : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("SLADefinitions")]
-public class SLADefinition
+public class SLADefinition : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

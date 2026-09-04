@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("FormDefinitions")]
-public class FormDefinition
+public class FormDefinition : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

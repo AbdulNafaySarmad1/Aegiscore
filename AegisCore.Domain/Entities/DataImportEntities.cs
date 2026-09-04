@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ExternalDbConnections")]
-public class ExternalDbConnection
+public class ExternalDbConnection : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }
@@ -33,7 +33,7 @@ public class ExternalDbConnection
 }
 
 [Table("DataImportJobs")]
-public class DataImportJob
+public class DataImportJob : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }
@@ -73,7 +73,7 @@ public class DataImportJob
 }
 
 [Table("FieldMappingTemplates")]
-public class FieldMappingTemplate
+public class FieldMappingTemplate : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

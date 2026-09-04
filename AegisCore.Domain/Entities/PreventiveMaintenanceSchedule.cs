@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("PreventiveMaintenanceSchedules")]
-public class PreventiveMaintenanceSchedule
+public class PreventiveMaintenanceSchedule : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

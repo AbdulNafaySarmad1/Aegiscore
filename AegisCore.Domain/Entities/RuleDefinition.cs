@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("RuleDefinitions")]
-public class RuleDefinition
+public class RuleDefinition : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

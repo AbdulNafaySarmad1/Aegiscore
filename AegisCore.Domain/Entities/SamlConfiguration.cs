@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("SamlConfigurations")]
-public class SamlConfiguration
+public class SamlConfiguration : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

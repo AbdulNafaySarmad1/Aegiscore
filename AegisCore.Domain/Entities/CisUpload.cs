@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("CisUploads")]
-public class CisUpload
+public class CisUpload : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid CourseId { get; set; }
     public Guid FacultyId { get; set; }

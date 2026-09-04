@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("SyncLagConfigs")]
-public class SyncLagConfig
+public class SyncLagConfig : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public int DefaultGracePeriodSeconds { get; set; } = 300; // 5 min default, IT sets any value
@@ -19,7 +19,7 @@ public class SyncLagConfig
 }
 
 [Table("SyncLagEntries")]
-public class SyncLagEntry
+public class SyncLagEntry : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
 

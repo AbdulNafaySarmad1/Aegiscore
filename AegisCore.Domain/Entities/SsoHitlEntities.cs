@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("UniversitySsoProfiles")]
-public class UniversitySsoProfile
+public class UniversitySsoProfile : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     [Required, MaxLength(20)] public string Code { get; set; } = string.Empty;
     [Required, MaxLength(200)] public string Name { get; set; } = string.Empty;
@@ -23,8 +24,9 @@ public class UniversitySsoProfile
 }
 
 [Table("UserSecondFactors")]
-public class UserSecondFactor
+public class UserSecondFactor : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid UserId { get; set; }
     [Required, MaxLength(20)] public string Method { get; set; } = "authenticator";
@@ -36,8 +38,9 @@ public class UserSecondFactor
 }
 
 [Table("SsoSessions")]
-public class SsoSession
+public class SsoSession : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid UserId { get; set; }
     [Required, MaxLength(20)] public string Provider { get; set; } = "aegiscore";
@@ -54,8 +57,9 @@ public class SsoSession
 }
 
 [Table("ExamPaperBatches")]
-public class ExamPaperBatch
+public class ExamPaperBatch : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid ExamId { get; set; }
     public int PaperCount { get; set; }
@@ -65,8 +69,9 @@ public class ExamPaperBatch
 }
 
 [Table("ExamPaperScans")]
-public class ExamPaperScan
+public class ExamPaperScan : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid BatchId { get; set; }
     public Guid StudentId { get; set; }
@@ -79,8 +84,9 @@ public class ExamPaperScan
 }
 
 [Table("AgenticGradeRuns")]
-public class AgenticGradeRun
+public class AgenticGradeRun : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid ScanId { get; set; }
     [Column(TypeName = "decimal(5,2)")] public decimal SuggestedMarks { get; set; }
@@ -91,8 +97,9 @@ public class AgenticGradeRun
 }
 
 [Table("HumanGradeReviews")]
-public class HumanGradeReview
+public class HumanGradeReview : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid GradeRunId { get; set; }
     public Guid? ReviewedBy { get; set; }
@@ -104,8 +111,9 @@ public class HumanGradeReview
 }
 
 [Table("PaperDestructionManifests")]
-public class PaperDestructionManifest
+public class PaperDestructionManifest : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid BatchId { get; set; }
     public int PaperCount { get; set; }

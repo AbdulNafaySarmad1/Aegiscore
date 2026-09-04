@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("SecurityGuards")]
-public class SecurityGuard
+public class SecurityGuard : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("PluginRevenueShares")]
-public class PluginRevenueShare
+public class PluginRevenueShare : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

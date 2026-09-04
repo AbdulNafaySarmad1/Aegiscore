@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("PayrollRuns")]
-public class PayrollRun
+public class PayrollRun : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public DateOnly Month { get; set; }
     [Required, MaxLength(20)] public string Status { get; set; } = "draft";
@@ -17,8 +18,9 @@ public class PayrollRun
 }
 
 [Table("Payslips")]
-public class Payslip
+public class Payslip : ITenantScoped
 {
+    public Guid TenantId { get; set; }
     [Key] public Guid Id { get; set; }
     public Guid PayrollRunId { get; set; }
     public Guid EmployeeId { get; set; }

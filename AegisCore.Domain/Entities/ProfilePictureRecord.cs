@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ProfilePictureRecords")]
-public class ProfilePictureRecord
+public class ProfilePictureRecord : ITenantScoped
 {
     [Key] public Guid Id { get; set; }
     public Guid UserId { get; set; }

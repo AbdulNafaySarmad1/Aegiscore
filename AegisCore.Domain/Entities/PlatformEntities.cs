@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("ImportBatches")]
-public class ImportBatch
+public class ImportBatch : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }
@@ -44,7 +44,7 @@ public class ImportBatch
 }
 
 [Table("ExportLogs")]
-public class ExportLog
+public class ExportLog : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }
@@ -75,7 +75,7 @@ public class ExportLog
 }
 
 [Table("PlatformMetrics")]
-public class PlatformMetric
+public class PlatformMetric : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AegisCore.Domain.Entities;
 
 [Table("CalibrationRecords")]
-public class CalibrationRecord
+public class CalibrationRecord : ITenantScoped
 {
     [Key]
     public Guid Id { get; set; }

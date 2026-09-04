@@ -3445,7 +3445,7 @@ public class AegisDbContext : DbContext
 /// <summary>
 /// Represents a scaling event in the system.
 /// </summary>
-public class ScalingEvent
+public class ScalingEvent : ITenantScoped
 {
     /// <summary>
     /// Unique identifier.
