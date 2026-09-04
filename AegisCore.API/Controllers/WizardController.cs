@@ -36,15 +36,35 @@ public sealed class WizardController(
     [HttpGet("session")]
     public async Task<IActionResult> GetSession(CancellationToken ct)
     {
-        var session = await sessions.GetOrCreateAsync(TenantId(), HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+        var session = await sessions.GetOrCreateAsync(SetupToken(), HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
         return Ok(ToResponse(session));
+    }
+
+    [HttpGet("resume")]
+    public async Task<IActionResult> Resume(CancellationToken ct)
+    {
+        try
+        {
+            return Ok(ToResponse(await state.ResumeWizardAsync(SetupToken(), ct)));
+        }
+        catch (WizardSessionNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (WizardSessionCompletedException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     [HttpPost("validate-license-key")]
     public async Task<IActionResult> ValidateLicense([FromBody] ValidateLicenseRequest request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.LicenseKey)) return BadRequest(new { valid = false, error = "License key is required." });
-        var result = await onboarding.ValidateLicenseAsync(state, request.LicenseKey, ct);
+        var token = SetupToken();
+        var wizardState = await state.GetOrCreateStateAsync(token, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+        var result = await onboarding.ValidateLicenseAsync(wizardState, request.LicenseKey, ct);
+        await state.SaveState(token, wizardState, ct);
         return Ok(new { valid = result.IsValid, universityName = result.License?.IssuedTo, validUntil = result.License?.ExpiresAt, error = result.Error?.UserMessage });
     }
 
@@ -55,9 +75,9 @@ public sealed class WizardController(
         if (mode is not ("demo" or "paid" or "live"))
             return UnprocessableEntity(new { success = false, error = "Mode must be demo or live." });
 
-        var tenantId = TenantId();
-        var session = await sessions.GetOrCreateAsync(tenantId, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
-        if (session.Id != request.SessionId)
+        var token = SetupToken();
+        var session = await sessions.GetOrCreateAsync(token, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+        if (session.SessionId != request.SessionId)
             return UnprocessableEntity(new { success = false, error = "Wizard session was not found." });
 
         var normalizedMode = mode == "live" ? "paid" : mode;
@@ -67,15 +87,19 @@ public sealed class WizardController(
                 return UnprocessableEntity(new { success = false, error = "Live mode requires Infisical or a supported cloud secret vault." });
             if (string.IsNullOrWhiteSpace(request.LicenseKey))
                 return UnprocessableEntity(new { success = false, error = "A valid license key is required for live mode." });
-            var license = await onboarding.ValidateLicenseAsync(state, request.LicenseKey, ct);
+            var license = await onboarding.ValidateLicenseAsync(session, request.LicenseKey, ct);
             if (!license.IsValid)
                 return UnprocessableEntity(new { success = false, error = license.Error?.UserMessage ?? "License validation failed." });
+            await state.SaveState(token, session, ct);
         }
 
         if (normalizedMode == "demo")
-            await gateways.DisableLiveConfigurationAsync(tenantId, ct);
+        {
+            if (session.TenantId != Guid.Empty)
+                await gateways.DisableLiveConfigurationAsync(session.TenantId, ct);
+        }
 
-        var changed = await sessions.ChangeModeAsync(tenantId, request.SessionId, normalizedMode, request.LicenseKey, ct);
+        var changed = await sessions.ChangeModeAsync(token, request.SessionId, normalizedMode, request.LicenseKey, ct);
         return Ok(new
         {
             success = true,
@@ -88,6 +112,7 @@ public sealed class WizardController(
     [HttpPost("step/{step:int}/save")]
     public async Task<IActionResult> SaveStep(int step, [FromBody] SaveStepRequest request, CancellationToken ct)
     {
+        var token = SetupToken();
         if (step is < 0 or > 7) return BadRequest(new { success = false, error = "Invalid wizard step." });
         if (Encoding.UTF8.GetByteCount(request.Data.GetRawText()) > MaxStepPayloadBytes)
             return StatusCode(StatusCodes.Status413PayloadTooLarge, new { success = false, error = "Wizard step payload exceeds the 128 KiB limit." });
@@ -97,14 +122,16 @@ public sealed class WizardController(
             if (!HasProductionSecretProvider())
                 return UnprocessableEntity(new { success = false, error = "Live mode requires Infisical or a supported cloud secret vault." });
             var licenseKey = request.Data.GetProperty("licenseKey").GetString() ?? string.Empty;
-            var license = await onboarding.ValidateLicenseAsync(state, licenseKey, ct);
+            var wizardState = await state.GetOrCreateStateAsync(token, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+            var license = await onboarding.ValidateLicenseAsync(wizardState, licenseKey, ct);
             if (!license.IsValid) return UnprocessableEntity(new { success = false, error = license.Error?.UserMessage ?? "License validation failed." });
+            await state.SaveState(token, wizardState, ct);
         }
         var data = step == 3 ? SanitizeGatewayStep(request.Data) : step == 4 ? await SanitizeFinanceStep(request.Data, ct) : request.Data;
         try
         {
-            var session = await sessions.SaveAsync(TenantId(), request.SessionId, step, data, ct);
-            return Ok(new { success = true, nextStep = Math.Min(session.CurrentStep, 7), sessionId = session.Id });
+            var session = await sessions.SaveAsync(token, request.SessionId, step, data, ct);
+            return Ok(new { success = true, nextStep = Math.Min(session.CurrentStep, 7), sessionId = session.SessionId });
         }
         catch (KeyNotFoundException)
         {
@@ -123,12 +150,14 @@ public sealed class WizardController(
     [HttpPost("gateways/{slug}/configure")]
     public async Task<IActionResult> ConfigureGateway(string slug, [FromBody] JsonElement request, CancellationToken ct)
     {
-        var session = await sessions.GetOrCreateAsync(TenantId(), HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+        var token = SetupToken();
+        var session = await sessions.GetOrCreateAsync(token, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
         try
         {
+            if (session.TenantId == Guid.Empty) throw new InvalidOperationException("Complete wizard Step 1 before configuring gateways.");
             var demoMode = !string.Equals(session.LicenseMode, "paid", StringComparison.OrdinalIgnoreCase);
-            var result = await gateways.ConfigureAsync(TenantId(), slug, request, ct, demoMode: demoMode);
-            await sessions.MarkGatewayConfiguredAsync(TenantId(), session.Id, result.GatewaySlug, ct);
+            var result = await gateways.ConfigureAsync(session.TenantId, slug, request, ct, demoMode: demoMode);
+            await sessions.MarkGatewayConfiguredAsync(token, session.SessionId, result.GatewaySlug, ct);
             return Ok(result);
         }
         catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
@@ -138,7 +167,12 @@ public sealed class WizardController(
     [HttpPost("gateways/{slug}/health-check")]
     public async Task<IActionResult> GatewayHealthCheck(string slug, CancellationToken ct)
     {
-        try { return Ok(await gateways.HealthCheckAsync(TenantId(), slug, ct)); }
+        try
+        {
+            var wizardState = await state.ResumeWizardAsync(SetupToken(), ct);
+            if (wizardState.TenantId == Guid.Empty) throw new InvalidOperationException("Complete wizard Step 1 before checking gateways.");
+            return Ok(await gateways.HealthCheckAsync(wizardState.TenantId, slug, ct));
+        }
         catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
         catch (InvalidOperationException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
     }
@@ -269,12 +303,14 @@ public sealed class WizardController(
         if (request.DbType is not ("PostgreSQL" or "MySQL" or "MSSQL" or "Oracle"))
             return BadRequest(new { error = "Unsupported database type. Use PostgreSQL, MySQL, MSSQL, or Oracle." });
 
+        var wizardState = await state.ResumeWizardAsync(SetupToken(), ct);
+        if (wizardState.TenantId == Guid.Empty) return UnprocessableEntity(new { error = "Complete wizard Step 1 before importing data." });
         var conn = new ExternalDbConnection
         {
             Name = $"Demo import — {DateTime.UtcNow:yyyy-MM-dd HH:mm}",
             DbType = request.DbType,
             ConnectionString = request.ConnectionString,
-            TenantId = TenantId()
+            TenantId = wizardState.TenantId
         };
 
         try
@@ -371,43 +407,45 @@ public sealed class WizardController(
     [HttpPost("complete")]
     public async Task<IActionResult> Complete([FromBody] CompleteWizardRequest request, CancellationToken ct)
     {
-        var tenantId = TenantId();
         try
         {
-            await activation.ActivateAsync(tenantId, request.SessionId, request.ConfirmedBy, ct);
+            var completed = await activation.ActivateAsync(SetupToken(), request.SessionId, request.ConfirmedBy, ct);
+            await installation.MarkAsInstalledAsync(ct);
+
+            var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
+            if (isDemo)
+            {
+                var existingExpiry = configuration["Runtime:DemoExpiryUtc"];
+                if (string.IsNullOrWhiteSpace(existingExpiry))
+                {
+                    var expiryDays = 60;
+                    var expiry = DateTime.UtcNow.AddDays(expiryDays).ToString("O");
+                    var hmacKey = configuration["AEGISCORE_ENCRYPTION_KEY"] ?? await secrets.GetSecretAsync("AEGISCORE_ENCRYPTION_KEY", ct);
+                    var signature = DemoExpiryMiddleware.SignExpiry(expiry, hmacKey);
+                    await secrets.SetSecretAsync("Runtime__DemoExpiryUtc", expiry, ct);
+                    await secrets.SetSecretAsync("Runtime__DemoExpirySignature", signature, ct);
+                }
+            }
+
+            return Ok(new { success = true, tenantId = completed.TenantId, dashboardUrl = "/", adminEmail = request.ConfirmedBy });
         }
         catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
         {
             return UnprocessableEntity(new { success = false, error = ex.Message });
         }
-        await installation.MarkAsInstalledAsync(ct);
-
-        var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
-        if (isDemo)
-        {
-            var existingExpiry = configuration["Runtime:DemoExpiryUtc"];
-            if (string.IsNullOrWhiteSpace(existingExpiry))
-            {
-                var expiryDays = 60;
-                var expiry = DateTime.UtcNow.AddDays(expiryDays).ToString("O");
-                var hmacKey = configuration["AEGISCORE_ENCRYPTION_KEY"] ?? await secrets.GetSecretAsync("AEGISCORE_ENCRYPTION_KEY", ct);
-                var signature = DemoExpiryMiddleware.SignExpiry(expiry, hmacKey);
-                await secrets.SetSecretAsync("Runtime__DemoExpiryUtc", expiry, ct);
-                await secrets.SetSecretAsync("Runtime__DemoExpirySignature", signature, ct);
-            }
-        }
-
-        return Ok(new { success = true, tenantId, dashboardUrl = "/", adminEmail = request.ConfirmedBy });
     }
 
-    private Guid TenantId() => Guid.TryParse(configuration["TENANT_ID"], out var configured) ? configured : state.TenantId;
+    private string SetupToken()
+        => Request.Headers["X-Setup-Token"].FirstOrDefault()
+            ?? configuration["AEGISCORE_SETUP_TOKEN"]
+            ?? throw new InvalidOperationException("AEGISCORE_SETUP_TOKEN is required.");
 
     private bool HasProductionSecretProvider()
         => (configuration["AEGISCORE_SECRET_PROVIDER"] ?? "INFISICAL").Trim().ToUpperInvariant() is "INFISICAL" or "AZURE" or "AWS" or "GCP";
 
-    private static object ToResponse(AegisCore.Domain.Entities.WizardSession session) => new
+    private static object ToResponse(WizardStateDto session) => new
     {
-        sessionId = session.Id, currentStep = Math.Min(session.CurrentStep, 7), licenseMode = session.LicenseMode,
+        sessionId = session.SessionId, tenantId = session.TenantId == Guid.Empty ? (Guid?)null : session.TenantId, currentStep = Math.Min(session.CurrentStep, 7), licenseMode = session.LicenseMode,
         completedAt = session.CompletedAt, data = PublicStepData(session.StepData)
     };
 
@@ -446,7 +484,9 @@ public sealed class WizardController(
         var rateSource = data.TryGetProperty("rateSource", out var source) && source.ValueKind == JsonValueKind.String ? source.GetString()?.Trim().ToUpperInvariant() : string.Empty;
         if (rateSource == "OPEN_EXCHANGE_RATES" && data.TryGetProperty("apiKey", out var apiKey) && apiKey.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(apiKey.GetString()))
         {
-            var secretName = $"/tenants/{TenantId():D}/finance/exchange-rates/OER_API_KEY";
+            var wizardState = await state.ResumeWizardAsync(SetupToken(), ct);
+            if (wizardState.TenantId == Guid.Empty) throw new InvalidOperationException("Complete wizard Step 1 before finance configuration.");
+            var secretName = $"/tenants/{wizardState.TenantId:D}/finance/exchange-rates/OER_API_KEY";
             await secrets.SetSecretAsync(secretName, apiKey.GetString()!, ct);
             output["rateApiKeySecretName"] = secretName;
         }

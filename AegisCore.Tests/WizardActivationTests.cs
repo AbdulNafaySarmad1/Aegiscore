@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Application.Onboarding;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
@@ -22,13 +22,12 @@ public sealed class WizardActivationTests
         await connection.OpenAsync();
         await using var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options);
         await db.Database.EnsureCreatedAsync();
-        var tenantId = Guid.NewGuid();
-        var session = new WizardSession { Id = Guid.NewGuid(), TenantId = tenantId };
-        db.WizardSessions.Add(session);
-        await db.SaveChangesAsync();
-        var service = new WizardSessionService(db, Mock.Of<IPasswordHashingService>());
+        const string token = "mode-selection-test-token-with-at-least-32-bytes";
+        var states = WizardTestState.Create(db);
+        var session = await states.GetOrCreateStateAsync(token);
+        var service = new WizardSessionService(db, Mock.Of<IPasswordHashingService>(), states);
 
-        var changed = await service.ChangeModeAsync(tenantId, session.Id, "live", "AE-LICENSE", CancellationToken.None);
+        var changed = await service.ChangeModeAsync(token, session.SessionId, "live", "AE-LICENSE", CancellationToken.None);
 
         Assert.Equal(1, changed.CurrentStep);
         Assert.Equal("paid", changed.LicenseMode);
@@ -46,29 +45,32 @@ public sealed class WizardActivationTests
         accessor.HttpContext.Items["TenantId"] = tenantId;
         await using var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options, accessor);
         await db.Database.EnsureCreatedAsync();
-        var session = new WizardSession
+        const string token = "activation-test-token-with-at-least-32-bytes";
+        var secrets = new TestSecretService();
+        var states = WizardTestState.Create(db, secrets);
+        var session = new WizardStateDto
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, CurrentStep = 8, LicenseMode = "demo", StepData = CompleteStepData
+            SessionId = Guid.NewGuid(), TenantId = tenantId, CurrentStep = 8, LicenseMode = "demo", StepData = CompleteStepData
         };
-        db.WizardSessions.Add(session);
+        await states.SaveState(token, session);
         db.WizardAdminCredentials.AddRange(
             Credential(session, tenantId, "admin@aegiscore.test", "Super Admin"),
             Credential(session, tenantId, "finance@aegiscore.test", "Finance Controller"));
         await db.SaveChangesAsync();
         var passwords = new Mock<IPasswordHashingService>();
-        var sessions = new WizardSessionService(db, passwords.Object);
+        var sessions = new WizardSessionService(db, passwords.Object, states);
         var queue = new PqcSigningQueue();
         await queue.StartAsync(CancellationToken.None);
         try
         {
-            var signer = new PqcSignatureService(new MemorySecretService(), db, queue);
+            var signer = new PqcSignatureService(secrets, db, queue);
             var activation = new WizardActivationService(db, sessions, new WizardProvisioningService(db, signer, new AccountingStandardsEngine(db)));
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => activation.ActivateAsync(tenantId, session.Id, "attacker@invalid.test", CancellationToken.None));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => activation.ActivateAsync(token, session.SessionId, "attacker@invalid.test", CancellationToken.None));
             Assert.False(await db.Tenants.AnyAsync());
             Assert.Null((await db.WizardSessions.IgnoreQueryFilters().SingleAsync()).CompletedAt);
 
-            await activation.ActivateAsync(tenantId, session.Id, "admin@aegiscore.test", CancellationToken.None);
+            await activation.ActivateAsync(token, session.SessionId, "admin@aegiscore.test", CancellationToken.None);
 
             var tenant = await db.Tenants.SingleAsync();
             Assert.Equal("AEGIS", tenant.ShortName);
@@ -80,8 +82,8 @@ public sealed class WizardActivationTests
         finally { await queue.StopAsync(CancellationToken.None); }
     }
 
-    private static WizardAdminCredential Credential(WizardSession session, Guid tenantId, string email, string role)
-        => new() { Id = Guid.NewGuid(), SessionId = session.Id, TenantId = tenantId, FullName = role, Email = email, RoleName = role, PasswordHash = "argon2id-test-hash" };
+    private static WizardAdminCredential Credential(WizardStateDto session, Guid tenantId, string email, string role)
+        => new() { Id = Guid.NewGuid(), SessionId = session.SessionId, TenantId = tenantId, FullName = role, Email = email, RoleName = role, PasswordHash = "argon2id-test-hash" };
 
     private const string CompleteStepData = """
         {
@@ -95,12 +97,4 @@ public sealed class WizardActivationTests
         }
         """;
 
-    private sealed class MemorySecretService : ISecretService
-    {
-        private readonly ConcurrentDictionary<string, string> _values = new(StringComparer.Ordinal);
-        public Task<string> GetSecretAsync(string secretName, CancellationToken cancellationToken = default) => Task.FromResult(_values[secretName]);
-        public Task SetSecretAsync(string secretName, string value, CancellationToken cancellationToken = default) { _values[secretName] = value; return Task.CompletedTask; }
-        public Task DeleteSecretAsync(string secretName, CancellationToken cancellationToken = default) { _values.TryRemove(secretName, out _); return Task.CompletedTask; }
-        public Task<bool> SecretExistsAsync(string secretName, CancellationToken cancellationToken = default) => Task.FromResult(_values.ContainsKey(secretName));
-    }
 }

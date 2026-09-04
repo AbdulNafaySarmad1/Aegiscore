@@ -132,10 +132,10 @@
     "semantic_hash": "4bbd464ec006a7b05b98ca37a53505c0"
   },
   "AegisCore.API/Controllers/EnhancedSetupController.cs": {
-    "mtime": 1788459723.3276012,
-    "seen": 1788461387.417962,
-    "ast_hash": "dfad02faa2f88d6f80a5ca4f2eff90ac",
-    "semantic_hash": "dfad02faa2f88d6f80a5ca4f2eff90ac"
+    "mtime": 1788522818.3814511,
+    "seen": 1788523668.2275252,
+    "ast_hash": "163ec75a4fe29ab7e918ecf5c8da629d",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/ExtendedPlatformControllers.cs": {
     "mtime": 1788459723.3276012,
@@ -288,10 +288,10 @@
     "semantic_hash": "62a2ecc29be12e08f1bbf2f4fc5e7271"
   },
   "AegisCore.API/Controllers/SetupController.cs": {
-    "mtime": 1788459723.3306012,
-    "seen": 1788461387.4180086,
-    "ast_hash": "8e28868b4765a28f210aac3cb5fe4177",
-    "semantic_hash": "8e28868b4765a28f210aac3cb5fe4177"
+    "mtime": 1788522818.3804512,
+    "seen": 1788523668.2286534,
+    "ast_hash": "5214dcc535d3d28fddb501b343190b76",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/SsoHitlController.cs": {
     "mtime": 1788459723.3306012,
@@ -324,10 +324,10 @@
     "semantic_hash": "88230d4728130552b99c1441f0bc965a"
   },
   "AegisCore.API/Controllers/WizardController.cs": {
-    "mtime": 1788459723.3306012,
-    "seen": 1788461387.4180193,
-    "ast_hash": "8a3d4ccba547dfa691eb8e37c2d4fe5b",
-    "semantic_hash": "8a3d4ccba547dfa691eb8e37c2d4fe5b"
+    "mtime": 1788523128.8304124,
+    "seen": 1788523668.228871,
+    "ast_hash": "b183a0cfe417d81be1f3118d071948b2",
+    "semantic_hash": ""
   },
   "AegisCore.API/Extensions/ApiServicesExtensions.cs": {
     "mtime": 1788459723.3306012,
@@ -336,10 +336,10 @@
     "semantic_hash": "e0b55495609734986303a1c72ac0ba52"
   },
   "AegisCore.API/Extensions/ProductionServicesExtensions.cs": {
-    "mtime": 1788521233.5763776,
-    "seen": 1788522095.9788706,
-    "ast_hash": "623da600b1b4cc65fc45c5aef02de6c4",
-    "semantic_hash": "623da600b1b4cc65fc45c5aef02de6c4"
+    "mtime": 1788522656.1348984,
+    "seen": 1788523668.2289176,
+    "ast_hash": "ddb8eff9a019b4c34e982f4a066a3fa3",
+    "semantic_hash": ""
   },
   "AegisCore.API/Finance/CampusModuleEndpoints.cs": {
     "mtime": 1788459723.3316011,
@@ -1254,10 +1254,10 @@
     "semantic_hash": "f9cea204a55619b7dd4ad0a40bcba3bc"
   },
   "AegisCore.Application/Onboarding/WizardStateService.cs": {
-    "mtime": 1788459723.3464267,
-    "seen": 1788461387.4183025,
-    "ast_hash": "6697a9113d2fc904f5ba68d803a912c8",
-    "semantic_hash": "6697a9113d2fc904f5ba68d803a912c8"
+    "mtime": 1788522453.1589704,
+    "seen": 1788523668.2362232,
+    "ast_hash": "288c341cb70574224e86b389e33d884f",
+    "semantic_hash": ""
   },
   "AegisCore.Application/Platform/ExtendedPlatformServices.cs": {
     "mtime": 1788459723.3466012,
@@ -2748,10 +2748,10 @@
     "semantic_hash": "455b54fc2efb39244cd85f55989b60cf"
   },
   "AegisCore.Domain/Entities/WizardSession.cs": {
-    "mtime": 1788506092.488997,
-    "seen": 1788507080.7412326,
-    "ast_hash": "fcc9d687629deb3bc9a4cc7f697529a9",
-    "semantic_hash": "fcc9d687629deb3bc9a4cc7f697529a9"
+    "mtime": 1788522493.2463503,
+    "seen": 1788523668.247146,
+    "ast_hash": "22140e3652197eea1609127da0c97d94",
+    "semantic_hash": ""
   },
   "AegisCore.Domain/Entities/WorkOrder.cs": {
     "mtime": 1788506091.6709893,
@@ -2892,10 +2892,10 @@
     "semantic_hash": "59a6501cc9241f6b2a46a2d6e9a0409b"
   },
   "AegisCore.Infrastructure/AegisDbContext.cs": {
-    "mtime": 1788506091.343986,
-    "seen": 1788507080.7425175,
-    "ast_hash": "897bcb4f10dc307dfff3b7f4c4c01e91",
-    "semantic_hash": "897bcb4f10dc307dfff3b7f4c4c01e91"
+    "mtime": 1788522522.4866283,
+    "seen": 1788523668.2481346,
+    "ast_hash": "f2941bc380aad911d4030ad65f6e2b77",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/AegisDbContextFactory.cs": {
     "mtime": 1788520988.496084,
@@ -4068,10 +4068,10 @@
     "semantic_hash": "92eeac4b0082bff663a8275ddae46966"
   },
   "AegisCore.Infrastructure/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1788506751.6932375,
-    "seen": 1788507080.7603667,
-    "ast_hash": "2f02e7ae77382cd55751844a473f4042",
-    "semantic_hash": "2f02e7ae77382cd55751844a473f4042"
+    "mtime": 1788522569.5050747,
+    "seen": 1788523668.260112,
+    "ast_hash": "26631f295809bee19a92213e3ed08008",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Obe/ObeServices.cs": {
     "mtime": 1788459723.407602,
@@ -4080,22 +4080,22 @@
     "semantic_hash": "c6e966d04302c33e4b58a77eef1d1b3a"
   },
   "AegisCore.Infrastructure/Onboarding/EnhancedSetupService.cs": {
-    "mtime": 1788459723.407602,
-    "seen": 1788461387.4191961,
-    "ast_hash": "fe4a2c5c448aeeec6c583c617b295382",
-    "semantic_hash": "fe4a2c5c448aeeec6c583c617b295382"
+    "mtime": 1788522656.1318984,
+    "seen": 1788523668.2601635,
+    "ast_hash": "8a843f53a07a41164d096aa0c1c6289d",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Onboarding/OnboardingService.cs": {
-    "mtime": 1788520988.498084,
-    "seen": 1788522096.0396538,
-    "ast_hash": "99103d6c8580f586c4bcd76da988c2db",
-    "semantic_hash": "99103d6c8580f586c4bcd76da988c2db"
+    "mtime": 1788522656.1308982,
+    "seen": 1788523668.2601657,
+    "ast_hash": "a1f8b67641be0299f003011a4b0281f5",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Onboarding/OnboardingServiceExtensions.cs": {
-    "mtime": 1788459723.407936,
-    "seen": 1788461387.4191995,
-    "ast_hash": "79938df2da10a8243ea69c0286a80141",
-    "semantic_hash": "79938df2da10a8243ea69c0286a80141"
+    "mtime": 1788522656.1348984,
+    "seen": 1788523668.2601676,
+    "ast_hash": "55f0cfb92ebe5bccb1aa2c7d54b1b7ef",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Onboarding/SetupImportService.cs": {
     "mtime": 1788459723.407936,
@@ -4104,10 +4104,10 @@
     "semantic_hash": "696403830aeff3e62396b77d24168cc8"
   },
   "AegisCore.Infrastructure/Onboarding/WizardActivationService.cs": {
-    "mtime": 1788459723.407936,
-    "seen": 1788461387.419203,
-    "ast_hash": "8d805ce8a61650d77e5afcdcba49ad34",
-    "semantic_hash": "8d805ce8a61650d77e5afcdcba49ad34"
+    "mtime": 1788522673.639065,
+    "seen": 1788523668.2602174,
+    "ast_hash": "0d6f1881f30af1ba6f97e0dd88b52eb1",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Onboarding/WizardGatewayService.cs": {
     "mtime": 1788507957.383687,
@@ -4122,10 +4122,10 @@
     "semantic_hash": "d2e4f085efa096fdb934899ac8000585"
   },
   "AegisCore.Infrastructure/Onboarding/WizardSessionService.cs": {
-    "mtime": 1788507957.490688,
-    "seen": 1788520698.8148406,
-    "ast_hash": "d1db80fe7aeb3158083222c68add3f06",
-    "semantic_hash": "d1db80fe7aeb3158083222c68add3f06"
+    "mtime": 1788522635.9047062,
+    "seen": 1788523668.2604396,
+    "ast_hash": "1c5dfbe5ac18e4030777793d18a1dffd",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Payments/Raast/RaastApiClient.cs": {
     "mtime": 1788459723.408408,
@@ -5946,10 +5946,10 @@
     "semantic_hash": "f73fe7da6aa11cb46ae937458bb174c5"
   },
   "AegisCore.Tests/SecurityHardeningTests.cs": {
-    "mtime": 1788459723.4366024,
-    "seen": 1788461387.419926,
-    "ast_hash": "34b4c409eb6b4f81aa126bdb6a249ee6",
-    "semantic_hash": "34b4c409eb6b4f81aa126bdb6a249ee6"
+    "mtime": 1788523222.0012925,
+    "seen": 1788523668.2752721,
+    "ast_hash": "dee0048ad8310a6f7a67ffb833bfc2ba",
+    "semantic_hash": ""
   },
   "AegisCore.Tests/SemesterFreezeControllerTests.cs": {
     "mtime": 1788459723.4366024,
@@ -5982,10 +5982,10 @@
     "semantic_hash": "96df72696d1fc572e38050ec8999a3bd"
   },
   "AegisCore.Tests/WizardActivationTests.cs": {
-    "mtime": 1788520285.6593974,
-    "seen": 1788520698.8444107,
-    "ast_hash": "ae025b4155afe816ba923febaddcd2c6",
-    "semantic_hash": "ae025b4155afe816ba923febaddcd2c6"
+    "mtime": 1788523222.0002925,
+    "seen": 1788523668.2754724,
+    "ast_hash": "ccf4b06f0fb05d2e79a4e3ca6d7dd3f1",
+    "semantic_hash": ""
   },
   "AegisCore.Web/AegisCore.Web.csproj": {
     "mtime": 1788459723.4376023,
@@ -7126,5 +7126,1091 @@
     "seen": 1788522096.0665057,
     "ast_hash": "08551d9f6ca4b048a7ca5c2aba80d4c1",
     "semantic_hash": "08551d9f6ca4b048a7ca5c2aba80d4c1"
+  },
+  "AegisCore.Infrastructure/Migrations/20260904120000_PersistWizardState.cs": {
+    "mtime": 1788522522.4876282,
+    "seen": 1788523668.260109,
+    "ast_hash": "38ccf8c29c9fa2e9b6cccb7140fef9f5",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Onboarding/EfWizardStateStore.cs": {
+    "mtime": 1788522493.2453504,
+    "seen": 1788523668.2601612,
+    "ast_hash": "4528196198cbb0496cb350bf77fb9133",
+    "semantic_hash": ""
+  },
+  "AegisCore.Tests/TestWizardStateSupport.cs": {
+    "mtime": 1788523222.0002925,
+    "seen": 1788523668.2754693,
+    "ast_hash": "ca31c5139d196e1acdf7634c5bdf43d1",
+    "semantic_hash": ""
+  },
+  "AegisCore.Tests/WizardStatePersistenceTests.cs": {
+    "mtime": 1788523266.210715,
+    "seen": 1788523668.2754757,
+    "ast_hash": "26d0d2a7830135b79f981ad156fa7df5",
+    "semantic_hash": ""
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1788507146.9229715,
+    "seen": 1788523668.2809029,
+    "ast_hash": "f521b2e16a001f2b641636df967b9099",
+    "semantic_hash": ""
+  },
+  ".github/workflows/deploy-cloud.yml": {
+    "mtime": 1788459723.3194108,
+    "seen": 1788523668.280906,
+    "ast_hash": "eda99111f0312eaa5d2b539ba0dd2b9b",
+    "semantic_hash": ""
+  },
+  ".github/workflows/deploy.yml": {
+    "mtime": 1788459723.3194108,
+    "seen": 1788523668.280908,
+    "ast_hash": "653b7c4a3566970ee24e11203ca21bba",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1788459723.3194108,
+    "seen": 1788523668.2809095,
+    "ast_hash": "cfe4b55946c223f5c39ab322b1023b74",
+    "semantic_hash": ""
+  },
+  ".serena/memories/memory_maintenance.md": {
+    "mtime": 1788459723.3197312,
+    "seen": 1788523668.280912,
+    "ast_hash": "5a2422d8355cb91f16402415a54e3c66",
+    "semantic_hash": ""
+  },
+  ".serena/project.yml": {
+    "mtime": 1788459723.3197312,
+    "seen": 1788523668.2809136,
+    "ast_hash": "ffec900b9de1362665905f7b2c0c7086",
+    "semantic_hash": ""
+  },
+  "AEGISCORE.md": {
+    "mtime": 1788459723.3197312,
+    "seen": 1788523668.2809157,
+    "ast_hash": "be133080df4b4eea3de94cf90c5e58b9",
+    "semantic_hash": ""
+  },
+  "AEGISCORE_BACKEND_SCAN.txt": {
+    "mtime": 1788459723.325601,
+    "seen": 1788523668.2809174,
+    "ast_hash": "e28dbd3e516560bcdcb87793f52eb46c",
+    "semantic_hash": ""
+  },
+  "AegisCore.API/wwwroot/setup/index.html": {
+    "mtime": 1788459723.3387756,
+    "seen": 1788523668.2809196,
+    "ast_hash": "001671ea662f9ccd711f066c7c8e5ddb",
+    "semantic_hash": ""
+  },
+  "AegisCore.Mobile/README.md": {
+    "mtime": 1788459723.4130177,
+    "seen": 1788523668.2809217,
+    "ast_hash": "8a6aa3a004e06a3bc8fbc15580e4296a",
+    "semantic_hash": ""
+  },
+  "AegisCore.Native/docs/docker-mobile-architecture.md": {
+    "mtime": 1788459723.4183767,
+    "seen": 1788523668.2809231,
+    "ast_hash": "b6f54c02710c1973695d4a70be86b8fb",
+    "semantic_hash": ""
+  },
+  "AegisCore.PluginCli/README.md": {
+    "mtime": 1788459723.41879,
+    "seen": 1788523668.280925,
+    "ast_hash": "5041a731c61b6c9a4e481c2af1cd1507",
+    "semantic_hash": ""
+  },
+  "AegisCore.PluginSdk/README.md": {
+    "mtime": 1788459723.4188974,
+    "seen": 1788523668.280927,
+    "ast_hash": "25bd834cb8f852ac1cc613c62f2dfbd6",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/ACCESSIBILITY.md": {
+    "mtime": 1788459723.41899,
+    "seen": 1788523668.2809286,
+    "ast_hash": "6c72e506fe4d0f1a81d1f02973675bec",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/AEGISCORE_CAPABILITIES.md": {
+    "mtime": 1788459723.41899,
+    "seen": 1788523668.2809303,
+    "ast_hash": "6e4165c6a43a3c1d58f1e25bc73868d5",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/DEPARTMENT_STACK_AND_CAPABILITIES.txt": {
+    "mtime": 1788459723.41899,
+    "seen": 1788523668.280932,
+    "ast_hash": "5559c6152b7d4119e30c92c4e25adc3c",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/README.md": {
+    "mtime": 1788459723.41899,
+    "seen": 1788523668.2809336,
+    "ast_hash": "6fa964115b0b7601fb58e2d901f6e4c1",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/TECHNICAL_SPEC_SHEET.md": {
+    "mtime": 1788459723.41899,
+    "seen": 1788523668.2809348,
+    "ast_hash": "364502c38604b049930fa7c59d7fb568",
+    "semantic_hash": ""
+  },
+  "AegisCore.Web/wwwroot/index.html": {
+    "mtime": 1788459723.43793,
+    "seen": 1788523668.2809367,
+    "ast_hash": "f578b5666765cbe9d946fe2e7768f7bc",
+    "semantic_hash": ""
+  },
+  "DOCKER_OPTIMIZATION.md": {
+    "mtime": 1788459723.43793,
+    "seen": 1788523668.2809384,
+    "ast_hash": "288a3f24370dc42581c12b427539b382",
+    "semantic_hash": ""
+  },
+  "FILE_TREE.md": {
+    "mtime": 1788459723.4386022,
+    "seen": 1788523668.2809403,
+    "ast_hash": "c134f45605350b06726cf4859c0e7053",
+    "semantic_hash": ""
+  },
+  "FRONTEND_CODEBASE_REPORT.txt": {
+    "mtime": 1788459723.4536023,
+    "seen": 1788523668.280942,
+    "ast_hash": "8b70eb2c73e142da658774958947d048",
+    "semantic_hash": ""
+  },
+  "INDEX.md": {
+    "mtime": 1788459723.4536023,
+    "seen": 1788523668.2809436,
+    "ast_hash": "003d91ddc8ee8213e7bbe13b7f481396",
+    "semantic_hash": ""
+  },
+  "README-DEPLOY.md": {
+    "mtime": 1788521233.5793777,
+    "seen": 1788523668.280945,
+    "ast_hash": "ed4d3bdcc9dda8fa62c9a87441812212",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1788504023.7213707,
+    "seen": 1788523668.280947,
+    "ast_hash": "546846cd3cf479432dbae528e5f8c373",
+    "semantic_hash": ""
+  },
+  "aegiscore-android/.github/workflows/android-build.yml": {
+    "mtime": 1788459723.4550242,
+    "seen": 1788523668.2809486,
+    "ast_hash": "7361f372e6ad0dd004f1181fe2892bcf",
+    "semantic_hash": ""
+  },
+  "aegiscore-android/.github/workflows/android-deploy.yml": {
+    "mtime": 1788459723.4551053,
+    "seen": 1788523668.2809503,
+    "ast_hash": "c948bc42f2847ac7edaa8d962e7ac0f1",
+    "semantic_hash": ""
+  },
+  "aegiscore-android/CONTRIBUTING.md": {
+    "mtime": 1788459723.4551053,
+    "seen": 1788523668.2809517,
+    "ast_hash": "1679d9fd08776e20d131adbdf4ae364b",
+    "semantic_hash": ""
+  },
+  "aegiscore-android/README.md": {
+    "mtime": 1788459723.4551053,
+    "seen": 1788523668.2809532,
+    "ast_hash": "744469e1ae8e65f1993d1f4f1d68b0b9",
+    "semantic_hash": ""
+  },
+  "aegiscore-frontend/ACCESSIBILITY.md": {
+    "mtime": 1788459723.4840555,
+    "seen": 1788523668.2809548,
+    "ast_hash": "6c72e506fe4d0f1a81d1f02973675bec",
+    "semantic_hash": ""
+  },
+  "aegiscore-frontend/README.md": {
+    "mtime": 1788459723.4840555,
+    "seen": 1788523668.2809565,
+    "ast_hash": "d469c42c0316b19a86a569741bff4b36",
+    "semantic_hash": ""
+  },
+  "aegiscore-frontend/index.html": {
+    "mtime": 1788459723.4842174,
+    "seen": 1788523668.2809577,
+    "ast_hash": "d90fc7114520fd780be0fa1f032892bf",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/.github/workflows/android-build.yml": {
+    "mtime": 1788459723.4872043,
+    "seen": 1788523668.2809598,
+    "ast_hash": "0616dda31b7019232d97824bd05e6ae7",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/.github/workflows/android-deploy.yml": {
+    "mtime": 1788459723.487264,
+    "seen": 1788523668.2809613,
+    "ast_hash": "d55f520524cf349cd57cdb2cb0e0b573",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/.github/workflows/ios-deploy.yml": {
+    "mtime": 1788459723.487264,
+    "seen": 1788523668.2809632,
+    "ast_hash": "966ecc42b309c054e7b3cc078b234730",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/README.md": {
+    "mtime": 1788459723.487264,
+    "seen": 1788523668.2809646,
+    "ast_hash": "7494651530f3e1da82e67ca2f760c6b1",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/android/CONTRIBUTING.md": {
+    "mtime": 1788459723.487264,
+    "seen": 1788523668.2809663,
+    "ast_hash": "1679d9fd08776e20d131adbdf4ae364b",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/android/README.md": {
+    "mtime": 1788459723.487405,
+    "seen": 1788523668.280968,
+    "ast_hash": "744469e1ae8e65f1993d1f4f1d68b0b9",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/docs/docker-mobile-architecture.md": {
+    "mtime": 1788459723.4878073,
+    "seen": 1788523668.2809694,
+    "ast_hash": "b6f54c02710c1973695d4a70be86b8fb",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/docs/mobile-manual.html": {
+    "mtime": 1788459723.4879446,
+    "seen": 1788523668.2809713,
+    "ast_hash": "87c788216a387ccbd39e296d1e1eef25",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/docs/specification.md": {
+    "mtime": 1788459723.4879446,
+    "seen": 1788523668.2809727,
+    "ast_hash": "d4d50e65d9551aeaea30ccbc1da23c83",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/react-native/README.md": {
+    "mtime": 1788459723.4884882,
+    "seen": 1788523668.2809744,
+    "ast_hash": "8a6aa3a004e06a3bc8fbc15580e4296a",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile/README.md": {
+    "mtime": 1788459723.4945445,
+    "seen": 1788523668.2809758,
+    "ast_hash": "1ace6ba949339e46a5faf42aa1d6866c",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile/react-native/README.md": {
+    "mtime": 1788459723.495264,
+    "seen": 1788523668.2809777,
+    "ast_hash": "8a6aa3a004e06a3bc8fbc15580e4296a",
+    "semantic_hash": ""
+  },
+  "apps/README.md": {
+    "mtime": 1788459723.500603,
+    "seen": 1788523668.2809794,
+    "ast_hash": "86ade1fdc38e1a98646fab23376d76d8",
+    "semantic_hash": ""
+  },
+  "building-blocks/README.md": {
+    "mtime": 1788459723.500603,
+    "seen": 1788523668.2809815,
+    "ast_hash": "67d4a4326bd2d79da52b777e902835df",
+    "semantic_hash": ""
+  },
+  "deploy/config/alerts.yml": {
+    "mtime": 1788459723.5014286,
+    "seen": 1788523668.2809832,
+    "ast_hash": "2a00825dd090d99f12cd8e00d8b3f2ea",
+    "semantic_hash": ""
+  },
+  "deploy/config/prometheus.yml": {
+    "mtime": 1788459723.5014286,
+    "seen": 1788523668.280986,
+    "ast_hash": "a2cd800807350595c95cdb091c1b6c67",
+    "semantic_hash": ""
+  },
+  "deploy/docker-compose.prod.yml": {
+    "mtime": 1788521129.0694206,
+    "seen": 1788523668.2809877,
+    "ast_hash": "337d5e7de7b89fbee1d74f6190bb93ac",
+    "semantic_hash": ""
+  },
+  "deploy/github/workflows/ci-cd.yml": {
+    "mtime": 1788459723.5016038,
+    "seen": 1788523668.2809894,
+    "ast_hash": "61c1f94579127d518fd2b434086920c5",
+    "semantic_hash": ""
+  },
+  "deploy/runbooks/app-crash.md": {
+    "mtime": 1788459723.5016038,
+    "seen": 1788523668.2809918,
+    "ast_hash": "0d4c3d52ce952cda40917b6f85a489ac",
+    "semantic_hash": ""
+  },
+  "deploy/runbooks/db-failure.md": {
+    "mtime": 1788459723.5017505,
+    "seen": 1788523668.280993,
+    "ast_hash": "4b92eabe601c65ddc144f6b0b5440400",
+    "semantic_hash": ""
+  },
+  "deploy/runbooks/ddos-attack.md": {
+    "mtime": 1788459723.5017505,
+    "seen": 1788523668.280995,
+    "ast_hash": "bb58a6572579c99a64a32daece6404e5",
+    "semantic_hash": ""
+  },
+  "deploy/runbooks/full-recovery.md": {
+    "mtime": 1788459723.5017505,
+    "seen": 1788523668.280997,
+    "ast_hash": "f135c4a0da4bc1ddc5e7f09627ccb6c6",
+    "semantic_hash": ""
+  },
+  "docker-compose.cloud.yml": {
+    "mtime": 1788459723.5019712,
+    "seen": 1788523668.2809987,
+    "ast_hash": "77ff243caf0f1a6c3a92080dbd83319e",
+    "semantic_hash": ""
+  },
+  "docker-compose.hybrid.yml": {
+    "mtime": 1788459723.5019712,
+    "seen": 1788523668.2810004,
+    "ast_hash": "85c4866a757451f7e0831fcd8c41450b",
+    "semantic_hash": ""
+  },
+  "docker-compose.prod.yml": {
+    "mtime": 1788504345.9104488,
+    "seen": 1788523668.2810023,
+    "ast_hash": "95011c3c149c32449b8972bdc3b83309",
+    "semantic_hash": ""
+  },
+  "docker-compose.uni.yml": {
+    "mtime": 1788521129.0714207,
+    "seen": 1788523668.2810037,
+    "ast_hash": "ada5eee1e65550b1480265cc91282e6e",
+    "semantic_hash": ""
+  },
+  "docker-compose.yml": {
+    "mtime": 1788521129.0684206,
+    "seen": 1788523668.2810051,
+    "ast_hash": "e8425fe00dab8d0ff5b8e81c24e78081",
+    "semantic_hash": ""
+  },
+  "docs/01-vision-document.md": {
+    "mtime": 1788459723.5022342,
+    "seen": 1788523668.2810063,
+    "ast_hash": "0463176b84331681572392f6192cd487",
+    "semantic_hash": ""
+  },
+  "docs/02-software-requirements-specification.md": {
+    "mtime": 1788459723.502472,
+    "seen": 1788523668.2810087,
+    "ast_hash": "fa1319b6f7b49152afdb83c96e0af79b",
+    "semantic_hash": ""
+  },
+  "docs/03-software-architecture-document.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810109,
+    "ast_hash": "1283c97d75f15ae184c782a069566cd5",
+    "semantic_hash": ""
+  },
+  "docs/04-database-design-document.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810128,
+    "ast_hash": "fa056a8d4fbf3cfe78f641741437ffc8",
+    "semantic_hash": ""
+  },
+  "docs/05-api-specification.yaml": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810144,
+    "ast_hash": "f450b4edcbca6a0d687979d1ddc047d3",
+    "semantic_hash": ""
+  },
+  "docs/06-security-architecture-document.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810163,
+    "ast_hash": "35621df90b288e0b2cc9aa7c26f870fb",
+    "semantic_hash": ""
+  },
+  "docs/07-deployment-guide.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810183,
+    "ast_hash": "91f8a968b2acdb4e2f55dc70a6749529",
+    "semantic_hash": ""
+  },
+  "docs/08-administrator-guide.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810206,
+    "ast_hash": "093d1466cf5155f6437671f1083d279c",
+    "semantic_hash": ""
+  },
+  "docs/09-user-manual.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810218,
+    "ast_hash": "55a1c5e91e301812c1c485bd8236e8c5",
+    "semantic_hash": ""
+  },
+  "docs/10-test-plan.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810237,
+    "ast_hash": "3f3a2274f6c146ad6e0fa7087b5542ca",
+    "semantic_hash": ""
+  },
+  "docs/11-test-report.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810252,
+    "ast_hash": "64a23e546658e106bab05bf73d802474",
+    "semantic_hash": ""
+  },
+  "docs/12-performance-report.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810268,
+    "ast_hash": "2912042033cb3f97164ed1e88d59a800",
+    "semantic_hash": ""
+  },
+  "docs/13-quality-evaluation-report.md": {
+    "mtime": 1788459723.5026028,
+    "seen": 1788523668.2810287,
+    "ast_hash": "e22c8e20adf4d9fff143e2b613dff47b",
+    "semantic_hash": ""
+  },
+  "docs/14-risk-assessment.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.281031,
+    "ast_hash": "d97bf52db10d1713979a25baaa7ee8ae",
+    "semantic_hash": ""
+  },
+  "docs/15-operations-maintenance-guide.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810333,
+    "ast_hash": "520e015c4463a509e68eb7cd34828255",
+    "semantic_hash": ""
+  },
+  "docs/16-release-notes-changelog.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810345,
+    "ast_hash": "c19344eb1c57e5d315e7617ed30f61b4",
+    "semantic_hash": ""
+  },
+  "docs/17-cloud-agnosticism-report.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810361,
+    "ast_hash": "71794612b985c256eeffd3b3b7350416",
+    "semantic_hash": ""
+  },
+  "docs/18-university-pitch-cloud-concerns.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810378,
+    "ast_hash": "dc1f968937a8c99432d7831b15806738",
+    "semantic_hash": ""
+  },
+  "docs/19-deployment-runbook.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.28104,
+    "ast_hash": "3d0a33a45f5a268587a923facf66a2df",
+    "semantic_hash": ""
+  },
+  "docs/20-competitive-analysis.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810416,
+    "ast_hash": "b987f19d93894f1899ef428425c54f37",
+    "semantic_hash": ""
+  },
+  "docs/21-positioning-memo.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810435,
+    "ast_hash": "2c72a2fe988fc51bae7d38d335279594",
+    "semantic_hash": ""
+  },
+  "docs/22-pitch-deck.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.281045,
+    "ast_hash": "e97e2892ee806c10ff75f5374e1c7a82",
+    "semantic_hash": ""
+  },
+  "docs/23-go-to-market-and-outreach.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810464,
+    "ast_hash": "1e7d3058e21555615e908427fb3d1927",
+    "semantic_hash": ""
+  },
+  "docs/24-plugin-ecosystem.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810478,
+    "ast_hash": "2f2d397e1e88963d05cff98624e16938",
+    "semantic_hash": ""
+  },
+  "docs/25-build-completion-evidence.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810504,
+    "ast_hash": "8be6bed252b4076f94b17b76c87a57a5",
+    "semantic_hash": ""
+  },
+  "docs/26-repository-split-report.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.281052,
+    "ast_hash": "ef8032b1d5e2df4b3c7306fa72ed92aa",
+    "semantic_hash": ""
+  },
+  "docs/27-git-cleanup-audit.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.281054,
+    "ast_hash": "a624dce067c7125063c0f41bb6ecd6bd",
+    "semantic_hash": ""
+  },
+  "docs/28-android-cleanup-report.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810557,
+    "ast_hash": "ade6f0a6d4cc38e2ab54e66f4f6b4203",
+    "semantic_hash": ""
+  },
+  "docs/29-test-and-edge-case-report.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810571,
+    "ast_hash": "f00463afcbe0e3e44294e06872864a50",
+    "semantic_hash": ""
+  },
+  "docs/30-prompts-1-to-7-implementation-report.md": {
+    "mtime": 1788459723.503603,
+    "seen": 1788523668.2810588,
+    "ast_hash": "6a578befd4fb62d07ff93f53fe958039",
+    "semantic_hash": ""
+  },
+  "docs/CODEBASE_KNOWLEDGE.md": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.2810605,
+    "ast_hash": "e530c6d8867279fe066b5e999fac0088",
+    "semantic_hash": ""
+  },
+  "docs/DEPENDENCY_AUDIT.md": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.281062,
+    "ast_hash": "93f4f31ba769d301a3517b7a2e7f104a",
+    "semantic_hash": ""
+  },
+  "docs/ROLE_CAPABILITIES.md": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.2810633,
+    "ast_hash": "6abac63cbe7c41b40f86ffc372f97719",
+    "semantic_hash": ""
+  },
+  "docs/accessibility.html": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.2810657,
+    "ast_hash": "650740cafdd9b024a48317719208cd8c",
+    "semantic_hash": ""
+  },
+  "docs/architecture/0001-modular-monolith.md": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.2810674,
+    "ast_hash": "438f0fa5ab4201ade2fd9f6b3ef9c823",
+    "semantic_hash": ""
+  },
+  "docs/dcr-runbook.md": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.281069,
+    "ast_hash": "d5a198c427eaa053fcce334b290b950b",
+    "semantic_hash": ""
+  },
+  "docs/deploy-playbook.html": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.2810702,
+    "ast_hash": "daee04d1c4b3ef4e083dbdafe821d9ba",
+    "semantic_hash": ""
+  },
+  "docs/deployment/P3A_TENANT_ENTITY_AUDIT.md": {
+    "mtime": 1788505740.6976604,
+    "seen": 1788523668.2810721,
+    "ast_hash": "754a9833563f0116cd29ecc13e7a8bc3",
+    "semantic_hash": ""
+  },
+  "docs/deployment/P3B_TENANT_ISOLATION_COMPLETION.md": {
+    "mtime": 1788507207.2225423,
+    "seen": 1788523668.2810736,
+    "ast_hash": "bd8e2be800263ce4d7ed00fca211e849",
+    "semantic_hash": ""
+  },
+  "docs/deployment/P4_TENANT_QUERY_AUDIT.md": {
+    "mtime": 1788520193.3255286,
+    "seen": 1788523668.2810752,
+    "ast_hash": "fc2fe89158def7112f528571da7bcd0c",
+    "semantic_hash": ""
+  },
+  "docs/deployment/P5_ENVIRONMENT_SUBSTITUTION.md": {
+    "mtime": 1788521233.5773776,
+    "seen": 1788523668.2810771,
+    "ast_hash": "6d157bc8714860234a3de878b3c41785",
+    "semantic_hash": ""
+  },
+  "docs/deployment/P6_ENVIRONMENT_REGISTRY.md": {
+    "mtime": 1788521741.3582218,
+    "seen": 1788523668.2810793,
+    "ast_hash": "eeea0ed0879ddddc1327ee46ad4b7d34",
+    "semantic_hash": ""
+  },
+  "docs/deployment/P7_WIZARD_STATE_PERSISTENCE.md": {
+    "mtime": 1788523348.3905075,
+    "seen": 1788523668.2810812,
+    "ast_hash": "22de2d85bb6c40cf17fab885bcb237f8",
+    "semantic_hash": ""
+  },
+  "docs/deployment/README.md": {
+    "mtime": 1788459723.504603,
+    "seen": 1788523668.2810829,
+    "ast_hash": "193d2cbceec0f433a5c6cade97588a91",
+    "semantic_hash": ""
+  },
+  "docs/deployment/aws.md": {
+    "mtime": 1788459723.5056028,
+    "seen": 1788523668.2810843,
+    "ast_hash": "8582431c9310d53196f46db143deac6f",
+    "semantic_hash": ""
+  },
+  "docs/deployment/azure.md": {
+    "mtime": 1788459723.5056028,
+    "seen": 1788523668.281086,
+    "ast_hash": "2bb20c86f707f24d5addbd8ef117fe3d",
+    "semantic_hash": ""
+  },
+  "docs/deployment/gcp.md": {
+    "mtime": 1788459723.5056028,
+    "seen": 1788523668.2810876,
+    "ast_hash": "c675ff5f43129ba8c9bb27f9ccb110ca",
+    "semantic_hash": ""
+  },
+  "docs/deployment/vps.md": {
+    "mtime": 1788459723.5056028,
+    "seen": 1788523668.2810893,
+    "ast_hash": "9496732860e61b80e7528f7cc95a6f40",
+    "semantic_hash": ""
+  },
+  "docs/manual.html": {
+    "mtime": 1788459723.506603,
+    "seen": 1788523668.2810907,
+    "ast_hash": "237a8b19f9c2c8e4be4f377127d15be3",
+    "semantic_hash": ""
+  },
+  "docs/mobile-manual.html": {
+    "mtime": 1788459723.507603,
+    "seen": 1788523668.2810926,
+    "ast_hash": "87c788216a387ccbd39e296d1e1eef25",
+    "semantic_hash": ""
+  },
+  "formats/README.txt": {
+    "mtime": 1788459723.507603,
+    "seen": 1788523668.281094,
+    "ast_hash": "c12e928e6c06704fd316e9edb8676519",
+    "semantic_hash": ""
+  },
+  "k8s/api-deployment.yaml": {
+    "mtime": 1788459723.6496043,
+    "seen": 1788523668.2810955,
+    "ast_hash": "5572c4601dc03e46e96bfd888a527920",
+    "semantic_hash": ""
+  },
+  "k8s/api-hpa.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2810967,
+    "ast_hash": "62e7c4989aaa93b90718862c2ddfd40a",
+    "semantic_hash": ""
+  },
+  "k8s/api-pdb.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2810981,
+    "ast_hash": "b5ebfc7ab141d07de43d237ea2b866ed",
+    "semantic_hash": ""
+  },
+  "k8s/api-service.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811,
+    "ast_hash": "14dea92804b2065aed77118bdc37c031",
+    "semantic_hash": ""
+  },
+  "k8s/configmap.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.281102,
+    "ast_hash": "492b754fb47fc7bc3c8292a39a60b96c",
+    "semantic_hash": ""
+  },
+  "k8s/data-protection-pvc.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811034,
+    "ast_hash": "a264ce1b723dd201538e825294c83762",
+    "semantic_hash": ""
+  },
+  "k8s/ingress.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.281105,
+    "ast_hash": "5b5845091ce1a0940fdd6a872fb5ee8d",
+    "semantic_hash": ""
+  },
+  "k8s/namespace.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811067,
+    "ast_hash": "97040580382d15e345dd25c5d7a32f17",
+    "semantic_hash": ""
+  },
+  "k8s/network-policy.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811081,
+    "ast_hash": "8dd77694622a36e4e7affd2dcf727fa9",
+    "semantic_hash": ""
+  },
+  "k8s/portal-deployment.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.28111,
+    "ast_hash": "4ab08cac4abaa9364859c5b6a39f66e7",
+    "semantic_hash": ""
+  },
+  "k8s/portal-service.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811112,
+    "ast_hash": "109371e6ab9ac0993d68ab0189c2eeb8",
+    "semantic_hash": ""
+  },
+  "k8s/postgres-init-configmap.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811134,
+    "ast_hash": "d9ab927b31d86766bc2103d6f4b963a1",
+    "semantic_hash": ""
+  },
+  "k8s/postgres-service.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811148,
+    "ast_hash": "3c29f6f5c94db359c756a65aa9f02c05",
+    "semantic_hash": ""
+  },
+  "k8s/postgres-statefulset.yaml": {
+    "mtime": 1788459723.6502914,
+    "seen": 1788523668.2811167,
+    "ast_hash": "2ac35221604bc11d465babb4965a4bdf",
+    "semantic_hash": ""
+  },
+  "k8s/redis-deployment.yaml": {
+    "mtime": 1788459723.6506045,
+    "seen": 1788523668.2811182,
+    "ast_hash": "36f8b65d3852c8e7007be732c2074890",
+    "semantic_hash": ""
+  },
+  "k8s/redis-service.yaml": {
+    "mtime": 1788459723.6506045,
+    "seen": 1788523668.28112,
+    "ast_hash": "8a9a4b781373ec08fa0c23c4ead7d49e",
+    "semantic_hash": ""
+  },
+  "manuals/1-backend-installation.html": {
+    "mtime": 1788459723.6506045,
+    "seen": 1788523668.2811215,
+    "ast_hash": "a886f0657a306af476495c7069c3c8e9",
+    "semantic_hash": ""
+  },
+  "manuals/2-frontend-setup.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811232,
+    "ast_hash": "93f294ffc05bff08877019af780c7469",
+    "semantic_hash": ""
+  },
+  "manuals/3-mobile-setup.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811246,
+    "ast_hash": "cc11859717ec186fb91b81f6669a6655",
+    "semantic_hash": ""
+  },
+  "manuals/4-docker-deployment.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811258,
+    "ast_hash": "f0899afc1408bd2217761e84b0a877a7",
+    "semantic_hash": ""
+  },
+  "manuals/5-kubernetes-deployment.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811277,
+    "ast_hash": "4bd79b36c7e4a13c42acc21aa3246bc1",
+    "semantic_hash": ""
+  },
+  "manuals/6-database-setup.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811291,
+    "ast_hash": "9ad5c1e4b14cb615221e335dff6df20c",
+    "semantic_hash": ""
+  },
+  "manuals/7-troubleshooting-guide.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811308,
+    "ast_hash": "ca993a34341413972e74f828f369ad46",
+    "semantic_hash": ""
+  },
+  "manuals/8-contributing-guide.html": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811322,
+    "ast_hash": "c36db2c8cc51acfbf949be1321373090",
+    "semantic_hash": ""
+  },
+  "md/1.md": {
+    "mtime": 1788459723.650789,
+    "seen": 1788523668.2811341,
+    "ast_hash": "051d5f5b0fd555e38a69b7b677df46f7",
+    "semantic_hash": ""
+  },
+  "md/2.md": {
+    "mtime": 1788459723.651139,
+    "seen": 1788523668.2811356,
+    "ast_hash": "debd8e459cf75e80afb65d717e01dba7",
+    "semantic_hash": ""
+  },
+  "md/3.md": {
+    "mtime": 1788459723.651139,
+    "seen": 1788523668.2811372,
+    "ast_hash": "40efec0919648baabc1eaa2109deac65",
+    "semantic_hash": ""
+  },
+  "md/4.md": {
+    "mtime": 1788459723.651139,
+    "seen": 1788523668.281139,
+    "ast_hash": "5936d80923e90deedb0c9e3adfe721fd",
+    "semantic_hash": ""
+  },
+  "md/5.md": {
+    "mtime": 1788459723.651139,
+    "seen": 1788523668.2811406,
+    "ast_hash": "8305533bb344a9cd0c16f6db30ed1990",
+    "semantic_hash": ""
+  },
+  "md/6.md": {
+    "mtime": 1788459723.651139,
+    "seen": 1788523668.2811418,
+    "ast_hash": "54434439e8ce1f7f87fbc399b4978d54",
+    "semantic_hash": ""
+  },
+  "md/7.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811432,
+    "ast_hash": "8c73667e56eb2aa7ee103914bf210959",
+    "semantic_hash": ""
+  },
+  "md/S1.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.281145,
+    "ast_hash": "29a618cc2bedbd43ab156da2fc7463b4",
+    "semantic_hash": ""
+  },
+  "md/S10-campus-ops.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811465,
+    "ast_hash": "c1aed8d3ad4a74a2222a8ca41a042129",
+    "semantic_hash": ""
+  },
+  "md/S11-student-lifecycle.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.281148,
+    "ast_hash": "ec6589a7e18f3b8c31b9370e01e5dff1",
+    "semantic_hash": ""
+  },
+  "md/S12-asset-inventory-hec.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811491,
+    "ast_hash": "ee7abb8c01b52ef4821b5e200117b65c",
+    "semantic_hash": ""
+  },
+  "md/S13-mobile-apps.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811508,
+    "ast_hash": "d4d50e65d9551aeaea30ccbc1da23c83",
+    "semantic_hash": ""
+  },
+  "md/S2.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811525,
+    "ast_hash": "a0cc0081ce98164ecdaccdb9ceb34c95",
+    "semantic_hash": ""
+  },
+  "md/S3.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811546,
+    "ast_hash": "389af62493d9c18d8246afa316f1fcfe",
+    "semantic_hash": ""
+  },
+  "md/S4.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811558,
+    "ast_hash": "77ced096493761e581124505f626384d",
+    "semantic_hash": ""
+  },
+  "md/S5.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811575,
+    "ast_hash": "6711ec925540aac34e26a5fcd3bf51a4",
+    "semantic_hash": ""
+  },
+  "md/S6-microsoft-ecosystem.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.281159,
+    "ast_hash": "33e3afc68c23b1359d575d0b9692484b",
+    "semantic_hash": ""
+  },
+  "md/S7-finance.md": {
+    "mtime": 1788459723.6516044,
+    "seen": 1788523668.2811606,
+    "ast_hash": "f058b55c01d9ab9f83c0d030bf8d2be8",
+    "semantic_hash": ""
+  },
+  "md/S8-portals.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.281162,
+    "ast_hash": "ab096878453ba278f4240963925ea74c",
+    "semantic_hash": ""
+  },
+  "md/S9-communications.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.2811642,
+    "ast_hash": "d69c1de82fcb10877a46e2bccb6bdb3d",
+    "semantic_hash": ""
+  },
+  "md/U1-codebase-understanding.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.2811656,
+    "ast_hash": "2aff983b59f8695a9dee0ca94edeba29",
+    "semantic_hash": ""
+  },
+  "md/U10-governance-overrides-feedback.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.2811668,
+    "ast_hash": "124ae0f8e5bec5cf3fb7d12081c967ec",
+    "semantic_hash": ""
+  },
+  "md/U11-course-trees-workload-offline.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.2811687,
+    "ast_hash": "78af314532a45da81b594cf8e240d9e3",
+    "semantic_hash": ""
+  },
+  "md/U12-deployment-distribution.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.28117,
+    "ast_hash": "434bd750a9321183c6f9742c7bf42d38",
+    "semantic_hash": ""
+  },
+  "md/U13-native-mobile-docker-integration.md": {
+    "mtime": 1788459723.6526043,
+    "seen": 1788523668.2811716,
+    "ast_hash": "b16467b8749fe68dc3a93085190d3349",
+    "semantic_hash": ""
+  },
+  "md/U14-multitenant-sso-hitl-exams.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.2811728,
+    "ast_hash": "b0e89349a7636751132168b99506e2ac",
+    "semantic_hash": ""
+  },
+  "md/U2-patch.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.2811742,
+    "ast_hash": "8598b438288a8d8688d3dc3af45bfa0e",
+    "semantic_hash": ""
+  },
+  "md/U3-cleanup.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.281176,
+    "ast_hash": "2cfb54e27bfcdc5d4c67e556aea30e9a",
+    "semantic_hash": ""
+  },
+  "md/U4-docker-build-validator.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.2811778,
+    "ast_hash": "8b5405bcfbfd588117efb6acee6205ee",
+    "semantic_hash": ""
+  },
+  "md/U5-onboarding-wizard.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.2811794,
+    "ast_hash": "91d5d080b5739ed0e7129aa5fdc7fd9b",
+    "semantic_hash": ""
+  },
+  "md/U6-license-engine.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.2811818,
+    "ast_hash": "c5f1c508993dd1f67914efae44374b59",
+    "semantic_hash": ""
+  },
+  "md/U7-cloud-agnosticism.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.281183,
+    "ast_hash": "dfaecf71da13e74c8cdc664d95c3d85e",
+    "semantic_hash": ""
+  },
+  "md/U8-competitive-analysis.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.281185,
+    "ast_hash": "92842ad2e69acc074b7ff3a95bcb09f4",
+    "semantic_hash": ""
+  },
+  "md/U9-community-plugins.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.2811866,
+    "ast_hash": "4f1f548deba555548306d4625682c3e8",
+    "semantic_hash": ""
+  },
+  "modules/README.md": {
+    "mtime": 1788459723.6536045,
+    "seen": 1788523668.281188,
+    "ast_hash": "a1f530a982fb1e411ab3216e6ec539bf",
+    "semantic_hash": ""
+  },
+  "sample-plugins/fee-reconciliation/README.md": {
+    "mtime": 1788459723.6545684,
+    "seen": 1788523668.28119,
+    "ast_hash": "7c749c5d424562c503f31651f9f5208e",
+    "semantic_hash": ""
+  },
+  "scripts/demo-data-manifest.md": {
+    "mtime": 1788459723.6547976,
+    "seen": 1788523668.2811918,
+    "ast_hash": "a726de3bde282a11951eee81bedfb983",
+    "semantic_hash": ""
+  },
+  "tests/README.md": {
+    "mtime": 1788459723.6547976,
+    "seen": 1788523668.2811937,
+    "ast_hash": "29f57eb39ac0fa74a7f1b98e843bff64",
+    "semantic_hash": ""
+  },
+  "tests/reports/latest.md": {
+    "mtime": 1788459723.6551719,
+    "seen": 1788523668.2811959,
+    "ast_hash": "840aaf999bf4650d8b7fd5597c9157aa",
+    "semantic_hash": ""
+  },
+  "wizard.html": {
+    "mtime": 1788459723.6551719,
+    "seen": 1788523668.281197,
+    "ast_hash": "4ff6115d3f112855552924a6d7edf480",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/public/aegiscore-logo.png": {
+    "mtime": 1788459723.423602,
+    "seen": 1788523668.281231,
+    "ast_hash": "55c13125fa0509300520e0cf0b2cddfe",
+    "semantic_hash": ""
+  },
+  "aegiscore-mobile-app/react-native/assets/icon.png": {
+    "mtime": 1788459723.4926028,
+    "seen": 1788523668.281232,
+    "ast_hash": "55c13125fa0509300520e0cf0b2cddfe",
+    "semantic_hash": ""
+  },
+  "aegiscorelogo.png": {
+    "mtime": 1788459723.500603,
+    "seen": 1788523668.281234,
+    "ast_hash": "55c13125fa0509300520e0cf0b2cddfe",
+    "semantic_hash": ""
   }
 }

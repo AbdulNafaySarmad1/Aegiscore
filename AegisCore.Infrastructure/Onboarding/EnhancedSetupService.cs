@@ -232,7 +232,7 @@ public sealed class EnhancedSetupService
             return _state.Rows.ToDictionary(x => x.Key, x => (IReadOnlyList<string[]>)x.Value.ToArray(), StringComparer.OrdinalIgnoreCase);
     }
 
-    public SetupReview Review(WizardStateService wizard)
+    public SetupReview Review(WizardStateDto wizard)
     {
         SetupHierarchy? hierarchy;
         Dictionary<string, SetupFileValidation> uploads;

@@ -32,18 +32,22 @@ public class SetupController : ControllerBase
     }
 
     [HttpGet("status")]
-    public IActionResult GetStatus() => Ok(new
+    public async Task<IActionResult> GetStatus(CancellationToken ct)
     {
-        isInstalled = _installationState.IsInstalled(),
-        currentStep = DetermineNextStep(),
-        review = _enhanced.Review(_state)
-    });
+        var state = await LoadAsync(ct);
+        return Ok(new
+        {
+            isInstalled = _installationState.IsInstalled(),
+            currentStep = DetermineNextStep(state),
+            review = _enhanced.Review(state)
+        });
+    }
 
-    private int DetermineNextStep()
+    private int DetermineNextStep(WizardStateDto state)
     {
-        if (_state.License is null) return 1;
-        if (string.IsNullOrEmpty(_state.DbHost) || string.IsNullOrEmpty(_state.RedisHost)) return 2;
-        var review = _enhanced.Review(_state);
+        if (state.License is null) return 1;
+        if (string.IsNullOrEmpty(state.DbHost) || string.IsNullOrEmpty(state.RedisHost)) return 2;
+        var review = _enhanced.Review(state);
         if (review.Hierarchy is null) return 4;
         if (!review.Checks.First(x => x.Name == "Required master data valid").Passed) return 5;
         if (!review.Checks.First(x => x.Name == "RBAC configured").Passed) return 6;
@@ -52,14 +56,22 @@ public class SetupController : ControllerBase
 
     [HttpPost("step1/license")]
     [HttpPost("step1/validate-license")]
-    public async Task<IActionResult> ValidateLicense([FromBody] LicenseKeyRequest request, CancellationToken ct) =>
-        Ok(await _service.ValidateLicenseAsync(_state, request.LicenseKey, ct));
+    public async Task<IActionResult> ValidateLicense([FromBody] LicenseKeyRequest request, CancellationToken ct)
+    {
+        await LoadAsync(ct);
+        var state = await _state.InitializeTenantAtStepOneAsync(SetupToken(), ct);
+        var result = await _service.ValidateLicenseAsync(state, request.LicenseKey, ct);
+        await _state.SaveState(SetupToken(), state, ct);
+        return Ok(result);
+    }
 
     [HttpPost("step2/deployment-type")]
-    public IActionResult SetDeploymentType([FromBody] DeploymentTypeRequest request)
+    public async Task<IActionResult> SetDeploymentType([FromBody] DeploymentTypeRequest request, CancellationToken ct)
     {
-        _state.FileStorageProvider = request.FileStorageProvider;
-        _state.SecretsProvider = request.SecretsProvider;
+        var state = await LoadAsync(ct);
+        state.FileStorageProvider = request.FileStorageProvider;
+        state.SecretsProvider = request.SecretsProvider;
+        await _state.SaveState(SetupToken(), state, ct);
         return Ok(new { success = true });
     }
 
@@ -67,91 +79,127 @@ public class SetupController : ControllerBase
     [HttpPost("step3/test-postgres")]
     public async Task<IActionResult> ConfigureDatabase([FromBody] DatabaseConfigRequest request, CancellationToken ct)
     {
-        _state.DbSslEnabled = request.SslEnabled;
-        return Ok(await _service.TestPostgresAsync(_state, request.Host, request.Port, request.DatabaseName, request.Username, request.Password, ct));
+        var state = await LoadAsync(ct);
+        state.DbSslEnabled = request.SslEnabled;
+        var result = await _service.TestPostgresAsync(state, request.Host, request.Port, request.DatabaseName, request.Username, request.Password, ct);
+        await _state.SaveState(SetupToken(), state, ct);
+        return Ok(result);
     }
 
     [HttpPost("step4/redis")]
     [HttpPost("step4/test-redis")]
     public async Task<IActionResult> ConfigureRedis([FromBody] RedisConfigRequest request, CancellationToken ct)
     {
-        _state.RedisTlsEnabled = request.TlsEnabled;
-        return Ok(await _service.TestRedisAsync(_state, request.Host, request.Port, request.Password, ct));
+        var state = await LoadAsync(ct);
+        state.RedisTlsEnabled = request.TlsEnabled;
+        var result = await _service.TestRedisAsync(state, request.Host, request.Port, request.Password, ct);
+        await _state.SaveState(SetupToken(), state, ct);
+        return Ok(result);
     }
 
     [HttpPost("step5/license-info")]
     public async Task<IActionResult> ConfigureLicense([FromBody] LicenseInfoRequest request, CancellationToken ct)
     {
-        _state.UniversityFullName = request.InstitutionName.Trim();
-        _state.UniversityShortName = request.Organization.Trim();
-        _state.AdminEmail = request.AdministratorEmail.Trim();
-        var result = await _service.ValidateLicenseAsync(_state, request.LicenseKey, ct);
-        _state.License = result.License;
+        var state = await LoadAsync(ct);
+        state.UniversityFullName = request.InstitutionName.Trim();
+        state.UniversityShortName = request.Organization.Trim();
+        state.AdminEmail = request.AdministratorEmail.Trim();
+        var result = await _service.ValidateLicenseAsync(state, request.LicenseKey, ct);
+        state.License = result.License;
+        await _state.SaveState(SetupToken(), state, ct);
         return Ok(result);
     }
 
     [HttpPost("step6/administrator")]
-    public IActionResult CreateAdministrator([FromBody] AdministratorRequest request)
+    public async Task<IActionResult> CreateAdministrator([FromBody] AdministratorRequest request, CancellationToken ct)
     {
         if (request.Password.Length < 12)
             return BadRequest(new { error = "Administrator password must be at least 12 characters." });
         if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
             return BadRequest(new { error = "Administrator passwords do not match." });
-        _state.AdminFullName = request.FullName.Trim();
-        _state.AdminAccountEmail = request.Email.Trim();
-        _state.AdminPassword = request.Password;
+        var state = await LoadAsync(ct);
+        state.AdminFullName = request.FullName.Trim();
+        state.AdminAccountEmail = request.Email.Trim();
+        state.AdminPassword = request.Password;
+        await _state.SaveState(SetupToken(), state, ct);
         return Ok(new { success = true, message = "Administrator account is queued for creation during installation." });
     }
 
     [HttpPost("step7/smtp")]
     [HttpPost("step7/test-smtp")]
-    public async Task<IActionResult> ConfigureSmtp([FromBody] SmtpConfigRequest request, CancellationToken ct) =>
-        Ok(await _service.TestSmtpAsync(_state, request.Host, request.Port, request.Username, request.Password, request.FromAddress, request.FromName, ct));
+    public async Task<IActionResult> ConfigureSmtp([FromBody] SmtpConfigRequest request, CancellationToken ct)
+    {
+        var state = await LoadAsync(ct);
+        var result = await _service.TestSmtpAsync(state, request.Host, request.Port, request.Username, request.Password, request.FromAddress, request.FromName, ct);
+        await _state.SaveState(SetupToken(), state, ct);
+        return Ok(result);
+    }
 
     [HttpPost("step8/storage")]
-    public IActionResult ConfigureStorage([FromBody] StorageConfigRequest request)
+    public async Task<IActionResult> ConfigureStorage([FromBody] StorageConfigRequest request, CancellationToken ct)
     {
+        var state = await LoadAsync(ct);
         if (request.Provider.Equals("MinIO", StringComparison.OrdinalIgnoreCase))
         {
-            _state.FileStorageProvider = FileStorageProvider.MinIO;
-            _state.MinioEndpoint = request.MinioEndpoint;
-            _state.MinioAccessKey = request.MinioAccessKey;
-            _state.MinioSecretKey = request.MinioSecretKey;
-            _state.MinioBucketName = request.MinioBucketName;
+            state.FileStorageProvider = FileStorageProvider.MinIO;
+            state.MinioEndpoint = request.MinioEndpoint;
+            state.MinioAccessKey = request.MinioAccessKey;
+            state.MinioSecretKey = request.MinioSecretKey;
+            state.MinioBucketName = request.MinioBucketName;
         }
+        await _state.SaveState(SetupToken(), state, ct);
         return Ok(new { success = true });
     }
 
     [HttpPost("step9/domain")]
     [HttpPost("step9/provision-domain")]
-    public IActionResult ConfigureDomain([FromBody] DomainConfigRequest request)
+    public async Task<IActionResult> ConfigureDomain([FromBody] DomainConfigRequest request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Domain))
             return BadRequest(new { error = "University domain is required." });
-        var result = _service.ProvisionDomain(_state, request.Domain.Trim());
-        return Ok(new { result.ErpUrl, instructions = _service.GenerateDnsInstructions(_state) });
+        var state = await LoadAsync(ct);
+        var result = _service.ProvisionDomain(state, request.Domain.Trim());
+        await _state.SaveState(SetupToken(), state, ct);
+        return Ok(new { result.ErpUrl, instructions = _service.GenerateDnsInstructions(state) });
     }
 
     [HttpGet("step9/check-dns")]
-    public async Task<IActionResult> CheckDns(CancellationToken ct) =>
-        Ok(await _service.CheckDnsPropagationAsync(_state, ct));
+    public async Task<IActionResult> CheckDns(CancellationToken ct)
+    {
+        var state = await LoadAsync(ct);
+        return Ok(await _service.CheckDnsPropagationAsync(state, ct));
+    }
 
     [HttpPost("step10/install")]
     [HttpPost("step11/go-live")]
     public async Task<IActionResult> Install([FromBody] InstallRequest? request, CancellationToken ct)
     {
-        var enhancedReview = _enhanced.Review(_state);
+        var state = await LoadAsync(ct);
+        var enhancedReview = _enhanced.Review(state);
         if (!enhancedReview.Ready)
             return UnprocessableEntity(new { success = false, error = "Enhanced setup checks are incomplete.", review = enhancedReview });
 
-        var import = await _imports.CommitAsync(_state.TenantId, _state.AdminFullName, _state.AdminAccountEmail, _state.AdminPassword, _enhanced.GetValidatedRows(), ct);
+        var import = await _imports.CommitAsync(state.TenantId, state.AdminFullName, state.AdminAccountEmail, state.AdminPassword, _enhanced.GetValidatedRows(), ct);
         if (!import.Success)
             return UnprocessableEntity(new { success = false, error = new WizardError("Initial data import failed.", string.Join(" ", import.RejectedRows)) });
 
-        var result = await _service.GoLiveAsync(_state, ct);
+        var result = await _service.GoLiveAsync(state, ct);
+        if (result.Success)
+        {
+            state.CompletedAt = DateTimeOffset.UtcNow;
+            await _state.SaveState(SetupToken(), state, ct);
+        }
         if (result.Success) await _installationState.MarkAsInstalledAsync(ct);
         return result.Success ? Ok(result) : UnprocessableEntity(result);
     }
+
+    private Task<WizardStateDto> LoadAsync(CancellationToken ct)
+        => _state.GetOrCreateStateAsync(SetupToken(), HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+
+    private string SetupToken()
+        => Request.Headers["X-Setup-Token"].FirstOrDefault()
+            ?? HttpContext.RequestServices.GetRequiredService<IConfiguration>()["AEGISCORE_SETUP_TOKEN"]
+            ?? throw new InvalidOperationException("AEGISCORE_SETUP_TOKEN is required.");
 }
 
 public record LicenseKeyRequest(string LicenseKey);

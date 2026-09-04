@@ -11,6 +11,7 @@ using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Domain.Entities;
 using DomainRole = AegisCore.Domain.Entities.Role;
 using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Onboarding;
 using AegisCore.Infrastructure.Platform;
 using AegisCore.Infrastructure.Repositories;
 using Casbin;
@@ -158,11 +159,11 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
         await using var db = new AegisDbContext(options);
         await db.Database.EnsureCreatedAsync();
 
-        var tenantId = Guid.NewGuid();
-        var session = new WizardSession
+        const string token = "wizard-flow-test-token-with-at-least-32-bytes";
+        var states = WizardTestState.Create(db);
+        var session = new WizardStateDto
         {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
+            SessionId = Guid.NewGuid(),
             CurrentStep = 1,
             LicenseMode = "demo",
             StepData = """
@@ -172,15 +173,14 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
             }
             """
         };
-        db.WizardSessions.Add(session);
-        await db.SaveChangesAsync();
+        await states.SaveState(token, session);
 
         var passwords = new Mock<IPasswordHashingService>();
         passwords.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
         passwords.Setup(x => x.HashPassword(It.IsAny<string>())).Returns("hashed-password");
-        var sessionService = new AegisCore.Infrastructure.Onboarding.WizardSessionService(db, passwords.Object);
+        var sessionService = new WizardSessionService(db, passwords.Object, states);
 
-        var changed = await sessionService.ChangeModeAsync(tenantId, session.Id, "demo", null, CancellationToken.None);
+        var changed = await sessionService.ChangeModeAsync(token, session.SessionId, "demo", null, CancellationToken.None);
 
         Assert.NotNull(changed);
         Assert.True(changed.CurrentStep >= 1);
@@ -623,7 +623,9 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
             builder.Services.AddSingleton(Mock.Of<ISecretService>());
             builder.Services.AddSingleton(Mock.Of<IStorageService>());
             builder.Services.AddSingleton(Mock.Of<AegisCore.Infrastructure.Installation.IInstallationStateService>());
-            builder.Services.AddSingleton(new WizardStateService());
+            builder.Services.AddDataProtection();
+            builder.Services.AddSingleton<IWizardStateStore>(Mock.Of<IWizardStateStore>());
+            builder.Services.AddScoped<WizardStateService>();
             builder.Services.AddScoped<AegisCore.Infrastructure.Onboarding.WizardSessionService>();
             builder.Services.AddScoped<AegisCore.Infrastructure.Onboarding.WizardActivationService>();
             builder.Services.AddScoped<AegisCore.Infrastructure.Onboarding.WizardGatewayService>();

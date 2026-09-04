@@ -125,7 +125,8 @@ public static class SetupServicesExtensions
         services.AddPqcSigningQueue();
         services.AddScoped<IPqcSignatureService, PqcSignatureService>();
         services.AddScoped<IAccountingStandardsEngine, AccountingStandardsEngine>();
-        services.AddSingleton<WizardStateService>();
+        services.AddScoped<IWizardStateStore, EfWizardStateStore>();
+        services.AddScoped<WizardStateService>();
         services.AddSingleton<OnboardingService>();
         services.AddSingleton<EnhancedSetupService>();
         services.AddScoped<WizardSessionService>();

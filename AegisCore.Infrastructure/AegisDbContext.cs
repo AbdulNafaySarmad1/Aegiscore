@@ -2154,6 +2154,9 @@ public class AegisDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => new { e.TenantId, e.CompletedAt });
+            entity.HasIndex(e => e.BootstrapTokenHash).IsUnique().HasFilter("\"BootstrapTokenHash\" <> ''");
+            entity.Property(e => e.BootstrapTokenHash).HasMaxLength(64).IsRequired();
+            entity.Property(e => e.Payload).HasColumnType("text").IsRequired();
             entity.Property(e => e.LicenseMode).HasMaxLength(10).IsRequired();
             entity.Property(e => e.LicenseKey).HasMaxLength(50);
             entity.Property(e => e.StepData).HasColumnType("jsonb").IsRequired();

@@ -66,13 +66,14 @@ public sealed class EnhancedSetupController : ControllerBase
     });
 
     [HttpGet("uploads/{fileType}/rejections")]
-    public IActionResult Rejections(string fileType) => BeforeInstall(() =>
+    public async Task<IActionResult> Rejections(string fileType, CancellationToken ct)
     {
-        var review = _service.Review(_wizard);
+        if (_installation.IsInstalled()) return NotFound();
+        var review = _service.Review(await _wizard.ResumeWizardAsync(SetupToken(), ct));
         return review.Uploads.TryGetValue(fileType, out var upload)
             ? Ok(new { fileType, errors = upload.Errors, warnings = upload.Warnings })
             : NotFound();
-    });
+    }
 
     [HttpGet("permissions")]
     public IActionResult Permissions() => BeforeInstall(() => Ok(_service.GetPermissions()));
@@ -85,7 +86,16 @@ public sealed class EnhancedSetupController : ControllerBase
     });
 
     [HttpGet("review")]
-    public IActionResult Review() => BeforeInstall(() => Ok(_service.Review(_wizard)));
+    public async Task<IActionResult> Review(CancellationToken ct)
+    {
+        if (_installation.IsInstalled()) return NotFound();
+        return Ok(_service.Review(await _wizard.ResumeWizardAsync(SetupToken(), ct)));
+    }
+
+    private string SetupToken()
+        => Request.Headers["X-Setup-Token"].FirstOrDefault()
+            ?? HttpContext.RequestServices.GetRequiredService<IConfiguration>()["AEGISCORE_SETUP_TOKEN"]
+            ?? throw new InvalidOperationException("AEGISCORE_SETUP_TOKEN is required.");
 
     private IActionResult BeforeInstall(Func<IActionResult> action) =>
         _installation.IsInstalled() ? NotFound() : action();

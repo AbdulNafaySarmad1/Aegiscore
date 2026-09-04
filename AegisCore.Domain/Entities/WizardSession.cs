@@ -22,6 +22,8 @@ public sealed class WizardSession : ITenantScoped
     public string LicenseMode { get; set; } = "demo";
     public string? LicenseKey { get; set; }
     public string StepData { get; set; } = "{}";
+    public string BootstrapTokenHash { get; set; } = string.Empty;
+    public string Payload { get; set; } = string.Empty;
     public DateTimeOffset StartedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? CompletedAt { get; set; }
     public string? CreatedByIp { get; set; }

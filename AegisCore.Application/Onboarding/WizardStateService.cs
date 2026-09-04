@@ -1,3 +1,7 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json.Serialization;
+
 namespace AegisCore.Application.Onboarding;
 
 public enum FileStorageProvider { AzureBlob, AwsS3, GcpGcs, MinIO }
@@ -18,11 +22,18 @@ public record GoLiveCheck(string Name, bool Passed, string Detail);
 public record DomainProvisioningResult(string ErpUrl, DnsRecord CnameRecord);
 public record DnsRecord(string Type, string Name, string Value, string Ttl);
 
-public class WizardStateService
+public sealed class WizardStateDto
 {
-    public Guid TenantId { get; set; } = Guid.NewGuid();
-    public LicenseDto? License { get; set; }
+    public Guid SessionId { get; set; }
+    public Guid TenantId { get; set; }
+    public int CurrentStep { get; set; }
+    public string LicenseMode { get; set; } = "demo";
+    public string StepData { get; set; } = "{}";
+    public DateTimeOffset StartedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? CompletedAt { get; set; }
+    public string? CreatedByIp { get; set; }
 
+    public LicenseDto? License { get; set; }
     public string LicenseKey { get; set; } = string.Empty;
     public string UniversityFullName { get; set; } = string.Empty;
     public string UniversityShortName { get; set; } = string.Empty;
@@ -63,16 +74,107 @@ public class WizardStateService
     public string? CloudflareTunnelId { get; set; }
     public string? CloudflareTunnelToken { get; set; }
     public string? CloudflareCnameTarget { get; set; }
-    public string ErpSubdomain => $"erp.{UniversityDomain}";
-    public string ErpUrl => $"https://erp.{UniversityDomain}";
 
     public string AdminFullName { get; set; } = string.Empty;
     public string AdminAccountEmail { get; set; } = string.Empty;
     public string AdminPassword { get; set; } = string.Empty;
 
+    [JsonIgnore]
+    public string ErpSubdomain => $"erp.{UniversityDomain}";
+
+    [JsonIgnore]
+    public string ErpUrl => $"https://erp.{UniversityDomain}";
+
+    [JsonIgnore]
     public string DbConnectionString =>
         $"Host={DbHost};Port={DbPort};Database={DbName};Username={DbUsername};Password={DbPassword};SslMode={(DbSslEnabled ? "Require" : "Disable")}";
 
+    [JsonIgnore]
     public string RedisConnectionString =>
         $"{RedisHost}:{RedisPort}{(string.IsNullOrEmpty(RedisPassword) ? "" : $",password={RedisPassword}")}{(RedisTlsEnabled ? ",ssl=true" : "")}";
+}
+
+public interface IWizardStateStore
+{
+    Task<WizardStateDto?> LoadAsync(string bootstrapTokenHash, CancellationToken ct = default);
+    Task SaveAsync(string bootstrapTokenHash, WizardStateDto state, CancellationToken ct = default);
+}
+
+public sealed class WizardSessionNotFoundException()
+    : KeyNotFoundException("Setup session not found. Start a new installation.");
+
+public sealed class WizardSessionCompletedException()
+    : InvalidOperationException("This installation is already complete.");
+
+public sealed class WizardStateService(IWizardStateStore store)
+{
+    public async Task<WizardStateDto> GetOrCreateStateAsync(string token, string? createdByIp = null, CancellationToken ct = default)
+    {
+        var tokenHash = HashToken(token);
+        var existing = await store.LoadAsync(tokenHash, ct);
+        if (existing is not null) return existing;
+
+        var state = new WizardStateDto
+        {
+            SessionId = Guid.NewGuid(),
+            CreatedByIp = createdByIp,
+            StartedAt = DateTimeOffset.UtcNow
+        };
+        await store.SaveAsync(tokenHash, state, ct);
+        return state;
+    }
+
+    public async Task<WizardStateDto> LoadState(string token, CancellationToken ct = default)
+        => await store.LoadAsync(HashToken(token), ct) ?? throw new WizardSessionNotFoundException();
+
+    public async Task SaveState(string token, WizardStateDto state, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        var tokenHash = HashToken(token);
+        var existing = await store.LoadAsync(tokenHash, ct);
+        if (existing is not null)
+        {
+            state.SessionId = existing.SessionId;
+            if (existing.TenantId != Guid.Empty)
+            {
+                if (state.TenantId != Guid.Empty && state.TenantId != existing.TenantId)
+                    throw new InvalidOperationException("The setup session tenant cannot be changed.");
+                state.TenantId = existing.TenantId;
+            }
+            state.StartedAt = existing.StartedAt;
+            state.CreatedByIp ??= existing.CreatedByIp;
+        }
+        else
+        {
+            state.SessionId = state.SessionId == Guid.Empty ? Guid.NewGuid() : state.SessionId;
+            state.StartedAt = state.StartedAt == default ? DateTimeOffset.UtcNow : state.StartedAt;
+        }
+
+        await store.SaveAsync(tokenHash, state, ct);
+    }
+
+    public async Task<WizardStateDto> InitializeTenantAtStepOneAsync(string token, CancellationToken ct = default)
+    {
+        var state = await LoadState(token, ct);
+        if (state.CompletedAt is not null) throw new WizardSessionCompletedException();
+        if (state.TenantId == Guid.Empty)
+        {
+            state.TenantId = Guid.NewGuid();
+            await SaveState(token, state, ct);
+        }
+        return state;
+    }
+
+    public async Task<WizardStateDto> ResumeWizardAsync(string token, CancellationToken ct = default)
+    {
+        var state = await LoadState(token, ct);
+        if (state.CompletedAt is not null) throw new WizardSessionCompletedException();
+        return state;
+    }
+
+    public static string HashToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("A setup bootstrap token is required.", nameof(token));
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token.Trim())));
+    }
 }

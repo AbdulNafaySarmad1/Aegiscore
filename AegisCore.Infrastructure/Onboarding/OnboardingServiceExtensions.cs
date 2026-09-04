@@ -9,7 +9,8 @@ public static class OnboardingServiceExtensions
 {
     public static IServiceCollection AddOnboardingWizard(this IServiceCollection services)
     {
-        services.TryAddSingleton<WizardStateService>();
+        services.TryAddScoped<IWizardStateStore, EfWizardStateStore>();
+        services.TryAddScoped<WizardStateService>();
         services.TryAddSingleton<OnboardingService>();
         services.TryAddScoped<SetupImportService>();
         return services;
