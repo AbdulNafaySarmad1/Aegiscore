@@ -12,7 +12,7 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
     {
         RequireTenant(tenantId);
         await EnsureCatalogAsync(tenantId, ct);
-        var config = await db.TenantFinanceConfigurations.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
+        var config = await db.TenantFinanceConfigurations.SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
             ?? throw new InvalidOperationException("Tenant finance configuration is required.");
         var policy = await PolicyAsync(tenantId, config.PrimaryStandard, ct);
         return new AccountingStandardContext(Normalize(config.PrimaryStandard), ParsePolicy(policy.ValueJson));
@@ -25,9 +25,9 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
         var currency = command.FunctionalCurrency.Trim().ToUpperInvariant();
         if (code.Length is < 2 or > 30 || string.IsNullOrWhiteSpace(command.Name) || currency.Length != 3)
             throw new ArgumentException("Reporting entity fields are invalid.");
-        if (command.ParentEntityId.HasValue && !await db.FinanceReportingEntities.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Id == command.ParentEntityId, ct))
+        if (command.ParentEntityId.HasValue && !await db.FinanceReportingEntities.AnyAsync(x => x.TenantId == tenantId && x.Id == command.ParentEntityId, ct))
             throw new ArgumentException("Parent reporting entity does not exist.");
-        if (await db.FinanceReportingEntities.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Code == code, ct))
+        if (await db.FinanceReportingEntities.AnyAsync(x => x.TenantId == tenantId && x.Code == code, ct))
             throw new InvalidOperationException("Reporting entity code already exists.");
         var entity = new FinanceReportingEntity { Id = Guid.NewGuid(), TenantId = tenantId, Code = code, Name = command.Name.Trim(), FunctionalCurrency = currency, ParentEntityId = command.ParentEntityId };
         db.FinanceReportingEntities.Add(entity);
@@ -45,7 +45,7 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
         await PolicyAsync(tenantId, target, ct);
         if (source == target || command.SourceAccountId == command.TargetAccountId || command.Factor == 0m || string.IsNullOrWhiteSpace(command.Rationale))
             throw new ArgumentException("Restatement rule is invalid.");
-        var accountCount = await db.ChartOfAccounts.IgnoreQueryFilters().CountAsync(x => x.TenantId == tenantId && (x.Id == command.SourceAccountId || x.Id == command.TargetAccountId), ct);
+        var accountCount = await db.ChartOfAccounts.CountAsync(x => x.TenantId == tenantId && (x.Id == command.SourceAccountId || x.Id == command.TargetAccountId), ct);
         if (accountCount != 2) throw new ArgumentException("Restatement accounts must belong to the tenant.");
         var rule = new FinanceRestatementRule { Id = Guid.NewGuid(), TenantId = tenantId, SourceStandard = source, TargetStandard = target, SourceAccountId = command.SourceAccountId, TargetAccountId = command.TargetAccountId, Factor = command.Factor, Rationale = command.Rationale.Trim() };
         db.FinanceRestatementRules.Add(rule);
@@ -62,10 +62,10 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
         var target = Normalize(command.TargetStandard);
         await PolicyAsync(tenantId, source, ct);
         await PolicyAsync(tenantId, target, ct);
-        var rules = await db.FinanceRestatementRules.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.SourceStandard == source && x.TargetStandard == target && x.IsActive).ToListAsync(ct);
+        var rules = await db.FinanceRestatementRules.Where(x => x.TenantId == tenantId && x.SourceStandard == source && x.TargetStandard == target && x.IsActive).ToListAsync(ct);
         var sourceIds = rules.Select(x => x.SourceAccountId).Distinct().ToArray();
-        var balances = await (from line in db.JournalEntryLines.IgnoreQueryFilters()
-                              join entry in db.JournalEntries.IgnoreQueryFilters() on line.JournalEntryId equals entry.Id
+        var balances = await (from line in db.JournalEntryLines
+                              join entry in db.JournalEntries on line.JournalEntryId equals entry.Id
                               where line.TenantId == tenantId && entry.TenantId == tenantId && entry.IsPosted && !entry.IsSandbox && entry.EntryDate >= command.PeriodFrom.ToUniversalTime() && entry.EntryDate <= command.PeriodTo.ToUniversalTime() && sourceIds.Contains(line.ChartOfAccountId)
                               group line by line.ChartOfAccountId into grouped
                               select new { AccountId = grouped.Key, Balance = grouped.Sum(x => x.Debit - x.Credit) }).ToDictionaryAsync(x => x.AccountId, x => x.Balance, ct);
@@ -87,7 +87,7 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
     {
         RequireTenant(tenantId);
         await EnsureCatalogAsync(tenantId, ct);
-        var config = await db.TenantFinanceConfigurations.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
+        var config = await db.TenantFinanceConfigurations.SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
             ?? throw new InvalidOperationException("Tenant finance configuration is required.");
         var source = Normalize(config.PrimaryStandard);
         var target = Normalize(command.TargetStandard);
@@ -108,7 +108,7 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
         var memberIds = command.ReportingEntityIds.Distinct().ToArray();
         var currency = command.PresentationCurrency.Trim().ToUpperInvariant();
         if (string.IsNullOrWhiteSpace(command.Name) || currency.Length != 3 || memberIds.Length == 0) throw new ArgumentException("Consolidation group fields are invalid.");
-        if (await db.FinanceReportingEntities.IgnoreQueryFilters().CountAsync(x => x.TenantId == tenantId && x.IsActive && memberIds.Contains(x.Id), ct) != memberIds.Length)
+        if (await db.FinanceReportingEntities.CountAsync(x => x.TenantId == tenantId && x.IsActive && memberIds.Contains(x.Id), ct) != memberIds.Length)
             throw new ArgumentException("Every consolidation member must be an active tenant reporting entity.");
         var group = new FinanceConsolidationGroup { Id = Guid.NewGuid(), TenantId = tenantId, Name = command.Name.Trim(), PresentationCurrency = currency, Members = memberIds.Select(id => new FinanceConsolidationMember { Id = Guid.NewGuid(), TenantId = tenantId, ReportingEntityId = id, EffectiveFrom = DateTime.UtcNow }).ToList() };
         db.FinanceConsolidationGroups.Add(group);
@@ -119,9 +119,9 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
     public async Task<FinanceEliminationRule> CreateEliminationRuleAsync(Guid tenantId, CreateEliminationRuleCommand command, CancellationToken ct)
     {
         RequireTenant(tenantId);
-        if (string.IsNullOrWhiteSpace(command.Description) || !await db.FinanceConsolidationGroups.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Id == command.ConsolidationGroupId, ct))
+        if (string.IsNullOrWhiteSpace(command.Description) || !await db.FinanceConsolidationGroups.AnyAsync(x => x.TenantId == tenantId && x.Id == command.ConsolidationGroupId, ct))
             throw new ArgumentException("Elimination rule is invalid.");
-        var accountCount = await db.ChartOfAccounts.IgnoreQueryFilters().CountAsync(x => x.TenantId == tenantId && (x.Id == command.SourceAccountId || x.Id == command.CounterpartAccountId), ct);
+        var accountCount = await db.ChartOfAccounts.CountAsync(x => x.TenantId == tenantId && (x.Id == command.SourceAccountId || x.Id == command.CounterpartAccountId), ct);
         if (accountCount != (command.SourceAccountId == command.CounterpartAccountId ? 1 : 2)) throw new ArgumentException("Elimination accounts must belong to the tenant.");
         var rule = new FinanceEliminationRule { Id = Guid.NewGuid(), TenantId = tenantId, ConsolidationGroupId = command.ConsolidationGroupId, SourceAccountId = command.SourceAccountId, CounterpartAccountId = command.CounterpartAccountId, Description = command.Description.Trim() };
         db.FinanceEliminationRules.Add(rule);
@@ -133,12 +133,12 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.PeriodFrom == default || command.PeriodTo < command.PeriodFrom) throw new ArgumentException("Consolidation period and actor are required.");
-        var members = await db.FinanceConsolidationMembers.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.ConsolidationGroupId == command.ConsolidationGroupId && x.EffectiveFrom <= command.PeriodTo && (!x.EffectiveTo.HasValue || x.EffectiveTo >= command.PeriodFrom)).Select(x => x.ReportingEntityId).ToListAsync(ct);
+        var members = await db.FinanceConsolidationMembers.Where(x => x.TenantId == tenantId && x.ConsolidationGroupId == command.ConsolidationGroupId && x.EffectiveFrom <= command.PeriodTo && (!x.EffectiveTo.HasValue || x.EffectiveTo >= command.PeriodFrom)).Select(x => x.ReportingEntityId).ToListAsync(ct);
         if (members.Count == 0) throw new InvalidOperationException("Consolidation group has no effective members.");
-        var rules = await db.FinanceEliminationRules.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.ConsolidationGroupId == command.ConsolidationGroupId && x.IsActive).ToListAsync(ct);
+        var rules = await db.FinanceEliminationRules.Where(x => x.TenantId == tenantId && x.ConsolidationGroupId == command.ConsolidationGroupId && x.IsActive).ToListAsync(ct);
         var eliminationAccounts = rules.SelectMany(x => new[] { x.SourceAccountId, x.CounterpartAccountId }).ToHashSet();
-        var lines = await (from line in db.JournalEntryLines.IgnoreQueryFilters()
-                           join entry in db.JournalEntries.IgnoreQueryFilters() on line.JournalEntryId equals entry.Id
+        var lines = await (from line in db.JournalEntryLines
+                           join entry in db.JournalEntries on line.JournalEntryId equals entry.Id
                            where line.TenantId == tenantId && entry.TenantId == tenantId && entry.IsPosted && !entry.IsSandbox && entry.EntryDate >= command.PeriodFrom.ToUniversalTime() && entry.EntryDate <= command.PeriodTo.ToUniversalTime() && line.ReportingEntityId.HasValue && members.Contains(line.ReportingEntityId.Value)
                            select new { line.ChartOfAccountId, line.ReportingEntityId, line.CounterpartyReportingEntityId, line.Debit, line.Credit }).ToListAsync(ct);
         var run = new FinanceConsolidationRun { Id = Guid.NewGuid(), TenantId = tenantId, ConsolidationGroupId = command.ConsolidationGroupId, PeriodFrom = command.PeriodFrom.ToUniversalTime(), PeriodTo = command.PeriodTo.ToUniversalTime(), CreatedByUserId = actorId };
@@ -157,7 +157,7 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
 
     private async Task EnsureCatalogAsync(Guid tenantId, CancellationToken ct)
     {
-        if (await db.FinanceAccountingStandardPolicies.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId, ct)) return;
+        if (await db.FinanceAccountingStandardPolicies.AnyAsync(x => x.TenantId == tenantId, ct)) return;
         var assembly = typeof(AccountingStandardsEngine).Assembly;
         var resource = assembly.GetManifestResourceNames().Single(x => x.EndsWith("accounting-standards.json", StringComparison.Ordinal));
         await using var stream = assembly.GetManifestResourceStream(resource) ?? throw new InvalidOperationException("Accounting standards catalog is unavailable.");
@@ -168,7 +168,7 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
     }
 
     private async Task<FinanceAccountingStandardPolicy> PolicyAsync(Guid tenantId, string standard, CancellationToken ct)
-        => await db.FinanceAccountingStandardPolicies.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.StandardCode == Normalize(standard) && x.PolicyCode == "profile" && !x.EffectiveTo.HasValue, ct)
+        => await db.FinanceAccountingStandardPolicies.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.StandardCode == Normalize(standard) && x.PolicyCode == "profile" && !x.EffectiveTo.HasValue, ct)
            ?? throw new ArgumentException("Accounting standard is not configured for this tenant.");
 
     private static IReadOnlyDictionary<string, string> ParsePolicy(string json)

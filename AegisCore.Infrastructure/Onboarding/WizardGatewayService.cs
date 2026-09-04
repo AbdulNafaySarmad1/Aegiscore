@@ -79,6 +79,7 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
         foreach (var field in fields)
             await secrets.SetSecretAsync($"{secretNamespace}/{field.Key}", field.Value, ct);
 
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var configuration = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.GatewaySlug == normalized, ct);
         if (configuration is null)
@@ -103,6 +104,7 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
     {
         var normalized = NormalizeSlug(slug);
         if (!RequiredFields.TryGetValue(normalized, out var required)) throw new InvalidOperationException("Unsupported payment gateway.");
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var configuration = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.GatewaySlug == normalized, ct)
             ?? throw new InvalidOperationException("Gateway is not configured.");
@@ -133,6 +135,7 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
 
     public async Task DisableLiveConfigurationAsync(Guid tenantId, CancellationToken ct)
     {
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var configurations = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .Where(x => x.TenantId == tenantId)
             .ToListAsync(ct);

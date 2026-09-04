@@ -61,7 +61,7 @@ public sealed class PqcSignatureService : IPqcSignatureService
         if (_db is not null)
         {
             var keyId = KeyId(key.PublicKey);
-            var registry = await _db.FinancePqcKeys.IgnoreQueryFilters().SingleAsync(x => x.TenantId == tenantId && x.Purpose == normalizedPurpose && x.KeyId == keyId, ct);
+            var registry = await _db.FinancePqcKeys.SingleAsync(x => x.TenantId == tenantId && x.Purpose == normalizedPurpose && x.KeyId == keyId, ct);
             registry.LastUsedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync(ct);
         }
@@ -94,13 +94,13 @@ public sealed class PqcSignatureService : IPqcSignatureService
         var algorithm = archival ? "slh-dsa-sha2-128s" : "ml-dsa-65";
         if (_db is not null)
         {
-            var active = await _db.FinancePqcKeys.IgnoreQueryFilters()
+            var active = await _db.FinancePqcKeys
                 .Where(x => x.TenantId == tenantId && x.Purpose == purpose && x.IsActive && x.ExpiresAt > DateTime.UtcNow)
                 .OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct);
             if (active is not null && await _secrets.SecretExistsAsync($"{active.SecretNamespace}/PRIVATE_KEY", ct) && await _secrets.SecretExistsAsync($"{active.SecretNamespace}/PUBLIC_KEY", ct))
                 return new KeyMaterial(DecodePrivate(archival, await _secrets.GetSecretAsync($"{active.SecretNamespace}/PRIVATE_KEY", ct)), Convert.FromBase64String(await _secrets.GetSecretAsync($"{active.SecretNamespace}/PUBLIC_KEY", ct)));
 
-            if (await _db.FinancePqcKeys.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Purpose == purpose, ct))
+            if (await _db.FinancePqcKeys.AnyAsync(x => x.TenantId == tenantId && x.Purpose == purpose, ct))
                 throw new InvalidOperationException("The signing key is expired or unavailable; an approved key ceremony is required.");
 
             var pair = await Task.Run(() => Generate(archival), ct);
@@ -129,7 +129,7 @@ public sealed class PqcSignatureService : IPqcSignatureService
         var prefix = $"/tenants/{tenantId:D}/pqc/{purpose}/{algorithm}/{keyId}";
         await _secrets.SetSecretAsync($"{prefix}/PRIVATE_KEY", EncodePrivate(archival, pair.PrivateKey), ct);
         await _secrets.SetSecretAsync($"{prefix}/PUBLIC_KEY", Convert.ToBase64String(pair.PublicKey), ct);
-        var existing = await _db!.FinancePqcKeys.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.Purpose == purpose && x.IsActive).ToListAsync(ct);
+        var existing = await _db!.FinancePqcKeys.Where(x => x.TenantId == tenantId && x.Purpose == purpose && x.IsActive).ToListAsync(ct);
         foreach (var old in existing) old.IsActive = false;
         _db.FinancePqcKeys.Add(new FinancePqcKey
         {

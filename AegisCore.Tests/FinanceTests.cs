@@ -7,6 +7,7 @@ using AegisCore.Infrastructure.Onboarding;
 using AegisCore.Contracts.Abstractions.Cloud;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.Tests;
@@ -142,9 +143,11 @@ public sealed class FinanceTests
         await using var connection = new SqliteConnection("DataSource=:memory:");
         await connection.OpenAsync();
         var options = new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options;
-        await using var db = new AegisDbContext(options);
-        await db.Database.EnsureCreatedAsync();
         var tenantId = Guid.NewGuid();
+        var accessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext() };
+        accessor.HttpContext.Items["TenantId"] = tenantId;
+        await using var db = new AegisDbContext(options, accessor);
+        await db.Database.EnsureCreatedAsync();
         db.TenantFinanceConfigurations.Add(new TenantFinanceConfiguration { Id = Guid.NewGuid(), TenantId = tenantId, PrimaryStandard = "US_GAAP", FiscalYearLabel = "FY26" });
         await db.SaveChangesAsync();
 
@@ -160,9 +163,11 @@ public sealed class FinanceTests
         await using var connection = new SqliteConnection("DataSource=:memory:");
         await connection.OpenAsync();
         var options = new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options;
-        await using var db = new AegisDbContext(options);
-        await db.Database.EnsureCreatedAsync();
         var tenantId = Guid.NewGuid();
+        var accessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext() };
+        accessor.HttpContext.Items["TenantId"] = tenantId;
+        await using var db = new AegisDbContext(options, accessor);
+        await db.Database.EnsureCreatedAsync();
         var sourceAccount = new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = "1500", AccountName = "Development asset", AccountType = AccountType.Asset };
         var targetAccount = new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = "6500", AccountName = "Development expense", AccountType = AccountType.Expense };
         db.TenantFinanceConfigurations.Add(new TenantFinanceConfiguration { Id = Guid.NewGuid(), TenantId = tenantId, PrimaryStandard = "IFRS", FiscalYearLabel = "FY26" });

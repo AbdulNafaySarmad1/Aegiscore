@@ -1,4 +1,5 @@
 using AegisCore.Infrastructure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,10 +22,14 @@ public sealed class FinancePaymentPlanWorker(IServiceScopeFactory scopeFactory, 
         {
             await using var scope = scopeFactory.CreateAsyncScope();
             var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+            // Intentional cross-tenant discovery: only tenant IDs are enumerated; each sweep is bound to one tenant below.
             var tenants = await db.FinancePaymentPlans.IgnoreQueryFilters().Select(x => x.TenantId).Distinct().ToListAsync(ct);
             var finance = scope.ServiceProvider.GetRequiredService<AegisCore.Application.Finance.IFinanceModuleService>();
+            var tenantContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             foreach (var tenantId in tenants.Where(x => x != Guid.Empty))
             {
+                tenantContext.HttpContext = new DefaultHttpContext();
+                tenantContext.HttpContext.Items["TenantId"] = tenantId;
                 await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
                 await finance.RunPaymentPlanSweepAsync(tenantId, DateTime.UtcNow, ct);
             }

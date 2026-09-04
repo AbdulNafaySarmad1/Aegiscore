@@ -29,7 +29,7 @@ public sealed class FinanceRegulatoryReportService(AegisDbContext db, IFinanceMo
         if (!Formats.Contains(format)) throw new ArgumentException("Regulatory schema format is unsupported.");
         XmlConvert.VerifyName(Required(command.RootElement, 100, "Root element"));
         ValidateDefinition(command.DefinitionJson);
-        var active = await db.FinanceRegulatorySchemas.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.Code == code && x.IsActive).ToListAsync(ct);
+        var active = await db.FinanceRegulatorySchemas.Where(x => x.TenantId == tenantId && x.Code == code && x.IsActive).ToListAsync(ct);
         active.ForEach(x => x.IsActive = false);
         var schema = new FinanceRegulatorySchema { Id = Guid.NewGuid(), TenantId = tenantId, Code = code, Jurisdiction = Required(command.Jurisdiction, 30, "Jurisdiction").ToUpperInvariant(), Version = Required(command.Version, 30, "Version"), Format = format, RootElement = command.RootElement.Trim(), NamespaceUri = Optional(command.NamespaceUri, 500), DefinitionJson = CanonicalJson(command.DefinitionJson) };
         db.FinanceRegulatorySchemas.Add(schema);
@@ -42,7 +42,7 @@ public sealed class FinanceRegulatoryReportService(AegisDbContext db, IFinanceMo
         if (actorId == Guid.Empty || command.From == default || command.To <= command.From) throw new ArgumentException("Report period and actor are required.");
         await SeedAsync(tenantId, ct);
         var normalized = Required(code, 30, "Schema code").ToUpperInvariant();
-        var schema = await db.FinanceRegulatorySchemas.IgnoreQueryFilters().AsNoTracking().Where(x => x.TenantId == tenantId && x.Code == normalized && x.IsActive).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct)
+        var schema = await db.FinanceRegulatorySchemas.AsNoTracking().Where(x => x.TenantId == tenantId && x.Code == normalized && x.IsActive).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct)
             ?? throw new InvalidOperationException("Active regulatory schema was not found.");
         var dataset = await DatasetAsync(tenantId, command.From.ToUniversalTime(), command.To.ToUniversalTime(), ct);
         var definition = JsonSerializer.Deserialize<SchemaDefinition>(schema.DefinitionJson, JsonOptions()) ?? throw new InvalidOperationException("Regulatory schema definition is invalid.");
@@ -210,7 +210,7 @@ public sealed class FinanceRegulatoryReportService(AegisDbContext db, IFinanceMo
 
     private async Task SeedAsync(Guid tenantId, CancellationToken ct)
     {
-        if (await db.FinanceRegulatorySchemas.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId, ct)) return;
+        if (await db.FinanceRegulatorySchemas.AnyAsync(x => x.TenantId == tenantId, ct)) return;
         await using var stream = Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.EndsWith("regulatory-schemas.json", StringComparison.Ordinal)).Select(Assembly.GetExecutingAssembly().GetManifestResourceStream).FirstOrDefault() ?? throw new InvalidOperationException("Embedded regulatory schemas are missing.");
         var templates = await JsonSerializer.DeserializeAsync<List<SchemaTemplate>>(stream, JsonOptions(), ct) ?? throw new InvalidOperationException("Embedded regulatory schemas are invalid.");
         foreach (var template in templates)

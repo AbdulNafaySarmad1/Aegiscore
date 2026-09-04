@@ -49,6 +49,7 @@ public sealed class DemoSeeder
 
         foreach (var (firstName, lastName, email, password, roleName, program, semester, cgpa, desc) in DemoAccounts)
         {
+            // Intentional setup bypass: demo seeding runs without an HTTP tenant context and is constrained by the explicit tenant ID.
             var existing = await _db.Users.IgnoreQueryFilters()
                 .AnyAsync(u => u.TenantId == tenantId && u.Email == email, ct);
             if (existing)
@@ -73,6 +74,7 @@ public sealed class DemoSeeder
             };
             _db.Users.Add(user);
 
+            // Intentional setup bypass: demo seeding runs without an HTTP tenant context and is constrained by the explicit tenant ID.
             var role = await _db.Roles.IgnoreQueryFilters()
                 .FirstOrDefaultAsync(r => r.TenantId == tenantId && r.Name == roleName, ct);
             if (role is null)

@@ -50,7 +50,7 @@ public sealed class VoiceAssistantService(AegisDbContext db, ILogger<VoiceAssist
 
     public async Task<IReadOnlyList<VoiceIntentDto>> GetActiveIntentsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var intents = await db.Set<VoiceIntent>().IgnoreQueryFilters().Where(i => i.TenantId == tenantId && i.IsActive).ToListAsync(ct);
+        var intents = await db.Set<VoiceIntent>().Where(i => i.TenantId == tenantId && i.IsActive).ToListAsync(ct);
         return intents.Select(i => new VoiceIntentDto(i.Id, i.IntentName, i.UrduTriggerPhrases, i.EnglishTriggerPhrases, i.PermittedRole)).ToList();
     }
 
@@ -88,7 +88,7 @@ public sealed class VoiceAssistantService(AegisDbContext db, ILogger<VoiceAssist
 
     private async Task<Guid> GetTenantIdAsync(CancellationToken ct)
     {
-        var first = await db.Set<VoiceSession>().IgnoreQueryFilters().Select(s => s.TenantId).FirstOrDefaultAsync(ct);
+        var first = await db.Set<VoiceSession>().Select(s => s.TenantId).FirstOrDefaultAsync(ct);
         return first != Guid.Empty ? first : Guid.NewGuid();
     }
 }

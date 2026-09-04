@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AegisCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -97,12 +98,16 @@ public sealed class PqcKeyRotationWorker(IServiceScopeFactory scopes, IConfigura
                 var validForHours = configuration.GetValue("Pqc:Rotation:ValidForHours", 168);
                 var custodianRole = configuration["Pqc:Rotation:CustodianRole"]
                     ?? throw new InvalidOperationException("Pqc:Rotation:CustodianRole is required.");
+                // Intentional cross-tenant discovery: expiring key purpose/TenantId pairs are enumerated, then each rotation is tenant-bound.
                 var due = await db.FinancePqcKeys.IgnoreQueryFilters().AsNoTracking()
                     .Where(x => x.IsActive && x.ExpiresAt <= DateTime.UtcNow.AddDays(x.Algorithm == "slh-dsa-sha2-128s" ? archivalLeadDays : signingLeadDays))
                     .Select(x => new { x.TenantId, x.Purpose, x.Algorithm }).Distinct().ToListAsync(stoppingToken);
                 foreach (var key in due)
                 {
-                    var custodianId = await db.UserRoles.IgnoreQueryFilters().AsNoTracking()
+                    var tenantContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+                    tenantContext.HttpContext = new DefaultHttpContext();
+                    tenantContext.HttpContext.Items["TenantId"] = key.TenantId;
+                    var custodianId = await db.UserRoles.AsNoTracking()
                         .Where(x => x.TenantId == key.TenantId && x.Role.Name == custodianRole && (x.ExpiresAt == null || x.ExpiresAt > DateTime.UtcNow))
                         .OrderBy(x => x.AssignedAt).Select(x => x.UserId).FirstOrDefaultAsync(stoppingToken);
                     if (custodianId == Guid.Empty)

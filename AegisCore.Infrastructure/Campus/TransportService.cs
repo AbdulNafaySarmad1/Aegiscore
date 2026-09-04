@@ -9,7 +9,7 @@ public sealed class TransportService(AegisDbContext db, ILogger<TransportService
 {
     public async Task<IReadOnlyList<RouteDto>> GetRoutesAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var routes = await db.Set<TransportRoute>().IgnoreQueryFilters().Where(r => r.TenantId == tenantId).Include(r => r.Stops).ToListAsync(ct);
+        var routes = await db.Set<TransportRoute>().Where(r => r.TenantId == tenantId).Include(r => r.Stops).ToListAsync(ct);
         return routes.Select(r => new RouteDto(r.Id, r.Name, Guid.Empty, Guid.Empty, 15000m, 2000m, true,
             r.Stops.OrderBy(s => s.Sequence).Select(s => new RouteStopDto(s.Id, s.StopName, s.Sequence, s.EstimatedTime, null, null)).ToList())).ToList();
     }
@@ -49,7 +49,7 @@ public sealed class TransportService(AegisDbContext db, ILogger<TransportService
 
     public async Task<IReadOnlyList<ComplianceAlertDto>> GetComplianceAlertsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var vehicles = await db.Set<FleetVehicle>().IgnoreQueryFilters().Where(v => v.TenantId == tenantId).ToListAsync(ct);
+        var vehicles = await db.Set<FleetVehicle>().Where(v => v.TenantId == tenantId).ToListAsync(ct);
         var alerts = new List<ComplianceAlertDto>();
         foreach (var v in vehicles)
         {
@@ -61,8 +61,8 @@ public sealed class TransportService(AegisDbContext db, ILogger<TransportService
 
     public async Task<TransportAnalyticsDto> GetAnalyticsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var vehicles = await db.Set<FleetVehicle>().IgnoreQueryFilters().Where(v => v.TenantId == tenantId).ToListAsync(ct);
-        var routes = await db.Set<TransportRoute>().IgnoreQueryFilters().Where(r => r.TenantId == tenantId).ToListAsync(ct);
+        var vehicles = await db.Set<FleetVehicle>().Where(v => v.TenantId == tenantId).ToListAsync(ct);
+        var routes = await db.Set<TransportRoute>().Where(r => r.TenantId == tenantId).ToListAsync(ct);
         return new TransportAnalyticsDto(vehicles.Count, vehicles.Count(v => !v.IsGrounded), vehicles.Count(v => v.IsGrounded), 0, 0, 75m, 12000m, routes.Select(r => new RouteUtilizationDto(r.Id, r.Name, 40, 30, 75m)).ToList());
     }
 

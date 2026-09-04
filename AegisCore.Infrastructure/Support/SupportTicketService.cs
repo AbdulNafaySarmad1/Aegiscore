@@ -233,7 +233,7 @@ public sealed class SupportTicketService
                    t.ai_response, t.ai_confidence, t.customer_rating, t.customer_feedback, t.human_response,
                    t.created_at, t.resolved_at
               FROM support_escalations e
-              JOIN support_tickets t ON t.id = e.ticket_id
+              JOIN support_tickets t ON t.id = e.ticket_id AND t.tenant_id = e.tenant_id
              WHERE e.tenant_id = @tenant AND e.status = 'pending'
              ORDER BY e.created_at ASC;
             """;
@@ -265,7 +265,7 @@ public sealed class SupportTicketService
 
         const string select = """
             SELECT e.ticket_id, t.category, t.description
-              FROM support_escalations e JOIN support_tickets t ON t.id = e.ticket_id
+              FROM support_escalations e JOIN support_tickets t ON t.id = e.ticket_id AND t.tenant_id = e.tenant_id
              WHERE e.id = @id AND e.tenant_id = @tenant AND e.status = 'pending'
              FOR UPDATE;
             """;

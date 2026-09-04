@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Security.Pqc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,12 +36,12 @@ public sealed class FinanceAuditSealService(AegisDbContext db, IPqcSignatureServ
 {
     public async Task<FinanceAuditSeal?> SealTenantAsync(Guid tenantId, DateTime now, CancellationToken ct)
     {
-        var previous = await db.FinanceAuditSeals.IgnoreQueryFilters()
+        var previous = await db.FinanceAuditSeals
             .Where(x => x.TenantId == tenantId)
             .OrderByDescending(x => x.SealedAt)
             .FirstOrDefaultAsync(ct);
         var start = previous?.PeriodEnd ?? DateTime.UnixEpoch;
-        var events = await db.AuditLogs.IgnoreQueryFilters()
+        var events = await db.AuditLogs
             .Where(x => x.TenantId == tenantId && x.Timestamp > start && x.Timestamp <= now)
             .OrderBy(x => x.Timestamp).ThenBy(x => x.Id)
             .ToListAsync(ct);
@@ -86,10 +87,14 @@ public sealed class FinanceAuditSealWorker(
         {
             await using var scope = scopeFactory.CreateAsyncScope();
             var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+            // Intentional cross-tenant discovery: this background worker enumerates tenant IDs only, then binds every operation to one tenant.
             var tenantIds = await db.AuditLogs.IgnoreQueryFilters().Select(x => x.TenantId).Distinct().ToListAsync(ct);
             var service = scope.ServiceProvider.GetRequiredService<FinanceAuditSealService>();
+            var tenantContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             foreach (var tenantId in tenantIds.Where(x => x != Guid.Empty))
             {
+                tenantContext.HttpContext = new DefaultHttpContext();
+                tenantContext.HttpContext.Items["TenantId"] = tenantId;
                 await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
                 await service.SealTenantAsync(tenantId, DateTime.UtcNow, ct);
             }
@@ -112,11 +117,11 @@ public sealed class FinanceLedgerIntegrityService(AegisDbContext db, IPqcSignatu
 
     public async Task<FinanceLedgerIntegrityResult> VerifyDetailedAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var entries = await db.JournalEntries.IgnoreQueryFilters().AsNoTracking()
+        var entries = await db.JournalEntries.AsNoTracking()
             .Where(x => x.TenantId == tenantId && x.IsPosted)
             .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
             .Select(x => new { x.Id, x.EntryNumber, x.PreviousHash, x.CanonicalPayload, x.EntryHash }).ToListAsync(ct);
-        var signatures = await db.FinanceLedgerSignatures.IgnoreQueryFilters().AsNoTracking()
+        var signatures = await db.FinanceLedgerSignatures.AsNoTracking()
             .Where(x => x.TenantId == tenantId).ToDictionaryAsync(x => x.JournalEntryId, ct);
         byte[] previous = new byte[32];
         var failures = new List<FinanceLedgerIntegrityFailure>();
@@ -160,11 +165,15 @@ public sealed class FinanceLedgerSignatureWorker(IServiceScopeFactory scopes, IL
                 await using var scope = scopes.CreateAsyncScope();
                 var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
                 var signer = scope.ServiceProvider.GetRequiredService<IPqcSignatureService>();
+                var tenantContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+                // Intentional cross-tenant discovery: the worker reads unsignatured entry IDs and TenantIds, then binds before signing.
                 var pending = await db.JournalEntries.IgnoreQueryFilters().AsNoTracking()
                     .Where(x => x.IsPosted && x.EntryHash != null && !db.FinanceLedgerSignatures.IgnoreQueryFilters().Any(s => s.JournalEntryId == x.Id))
                     .OrderBy(x => x.CreatedAt).Take(100).Select(x => new { x.Id, x.TenantId, x.EntryHash }).ToListAsync(stoppingToken);
                 foreach (var entry in pending)
                 {
+                    tenantContext.HttpContext = new DefaultHttpContext();
+                    tenantContext.HttpContext.Items["TenantId"] = entry.TenantId;
                     await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {entry.TenantId:D}, false)", stoppingToken);
                     var signed = await signer.SignAsync(entry.TenantId, "ledger-archive", entry.EntryHash!, archival: true, stoppingToken);
                     db.FinanceLedgerSignatures.Add(new FinanceLedgerSignature

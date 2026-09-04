@@ -25,7 +25,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         var tenant = await db.Tenants.SingleOrDefaultAsync(x => x.Id == tenantId, ct);
         if (tenant is null)
         {
-            tenant = new Tenant { Id = tenantId, CreatedAt = DateTimeOffset.UtcNow };
+            tenant = new Tenant { Id = tenantId, TenantId = tenantId, CreatedAt = DateTimeOffset.UtcNow };
             db.Tenants.Add(tenant);
         }
         tenant.Name = Required(university, "name");
@@ -33,6 +33,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         tenant.LicenseMode = licenseMode;
         tenant.IsActive = true;
         tenant.ActivatedAt ??= DateTimeOffset.UtcNow;
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var financeConfiguration = await db.TenantFinanceConfigurations.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct);
         if (financeConfiguration is null)
         {
@@ -48,6 +49,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         financeConfiguration.RateApiKeySecretName = finance["rateApiKeySecretName"]?.GetValue<string>();
         financeConfiguration.TaxSettingsJson = finance["tax"]?.ToJsonString() ?? "{}";
         financeConfiguration.UpdatedAt = DateTime.UtcNow;
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var campus = await db.Campuses.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.IsMain, ct);
         if (campus is null)
         {
@@ -73,6 +75,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
             var name = item?["name"]?.GetValue<string>()?.Trim();
             if (string.IsNullOrWhiteSpace(name)) continue;
             var code = item?["code"]?.GetValue<string>()?.Trim().ToUpperInvariant() ?? name[..Math.Min(8, name.Length)].ToUpperInvariant();
+            // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
             var department = await db.Departments.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && (x.Code == code || x.Name == name), ct);
             if (department is null)
             {
@@ -88,12 +91,13 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         {
             var start = DateOnly.Parse(Required(academic, "semesterStart"));
             var end = DateOnly.Parse(Required(academic, "semesterEnd"));
-            year = new AcademicYear { Id = Guid.NewGuid(), Name = academicYearName, StartDate = start, EndDate = end, IsCurrent = true };
+            year = new AcademicYear { Id = Guid.NewGuid(), TenantId = tenantId, Name = academicYearName, StartDate = start, EndDate = end, IsCurrent = true };
             db.AcademicYears.Add(year);
-            db.Semesters.Add(new Semester { Id = Guid.NewGuid(), AcademicYearId = year.Id, Name = academic["term"]?.GetValue<string>() ?? "Current term", Type = academic["calendarType"]?.GetValue<string>() ?? "Semester", StartDate = start, EndDate = end, IsCurrent = true, Status = "active" });
+            db.Semesters.Add(new Semester { Id = Guid.NewGuid(), TenantId = tenantId, AcademicYearId = year.Id, Name = academic["term"]?.GetValue<string>() ?? "Current term", Type = academic["calendarType"]?.GetValue<string>() ?? "Semester", StartDate = start, EndDate = end, IsCurrent = true, Status = "active" });
         }
 
         var fiscalLabel = Required(finance, "fiscalYear");
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         if (!await db.FiscalYears.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Name == fiscalLabel, ct))
         {
             var fiscalStartMonth = IntOrNull(finance, "fiscalYearStartMonth") is { } configuredMonth && configuredMonth is >= 1 and <= 12 ? configuredMonth : 1;
@@ -117,6 +121,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
             ("5000", "Operating expenses", AccountType.Expense, "OPERATING")
         };
         foreach (var account in accounts)
+            // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
             if (!await db.ChartOfAccounts.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.AccountCode == account.Code, ct))
                 db.ChartOfAccounts.Add(new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = account.Code, AccountName = account.Name, AccountType = account.Type, CashFlowCategory = account.CashFlowCategory, IsActive = true });
 
@@ -126,6 +131,7 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
             var name = item?["name"]?.GetValue<string>()?.Trim();
             if (string.IsNullOrWhiteSpace(name)) continue;
             var code = item?["code"]?.GetValue<string>()?.Trim().ToUpperInvariant() ?? name[..Math.Min(12, name.Length)].ToUpperInvariant();
+            // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
             if (await db.DegreePrograms.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Code == code, ct)) continue;
             var department = departments.Values.FirstOrDefault();
             if (department is null) throw new InvalidOperationException("At least one department is required.");
@@ -137,11 +143,12 @@ public sealed class WizardProvisioningService(AegisDbContext db, IPqcSignatureSe
         foreach (var program in programs)
         {
             if (amount <= 0) continue;
-            var structure = new FeeStructure { Id = Guid.NewGuid(), AcademicYearId = year.Id, ProgramId = program.Id, Semester = 1, FeeType = "default", TotalFee = amount };
-            structure.Components.Add(new FeeComponent { Id = Guid.NewGuid(), FeeStructureId = structure.Id, ComponentName = "Configured fee", Amount = amount, IsMandatory = true, OrderIndex = 1 });
+            var structure = new FeeStructure { Id = Guid.NewGuid(), TenantId = tenantId, AcademicYearId = year.Id, ProgramId = program.Id, Semester = 1, FeeType = "default", TotalFee = amount };
+            structure.Components.Add(new FeeComponent { Id = Guid.NewGuid(), TenantId = tenantId, FeeStructureId = structure.Id, ComponentName = "Configured fee", Amount = amount, IsMandatory = true, OrderIndex = 1 });
             db.FeeStructures.Add(structure);
         }
         await db.SaveChangesAsync(ct);
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var license = await db.Licenses.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct);
         if (license is null)
         {

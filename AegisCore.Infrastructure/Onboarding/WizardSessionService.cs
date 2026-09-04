@@ -15,6 +15,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
 
     public async Task<WizardSession> GetOrCreateAsync(Guid tenantId, string? ip, CancellationToken ct)
     {
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var session = await db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.CompletedAt == null, ct);
         if (session is not null) return session;
@@ -26,6 +27,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
     }
 
     public Task<WizardSession?> FindAsync(Guid tenantId, Guid sessionId, CancellationToken ct)
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         => db.WizardSessions.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId, ct);
 
     public async Task<WizardSession> SaveAsync(Guid tenantId, Guid sessionId, int step, JsonElement data, CancellationToken ct)
@@ -33,6 +35,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
         if (step is < 0 or > 7) throw new ArgumentOutOfRangeException(nameof(step));
         if (Encoding.UTF8.GetByteCount(data.GetRawText()) > MaxStepPayloadBytes)
             throw new InvalidOperationException("Wizard step payload exceeds the 128 KiB limit.");
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var session = await db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
             ?? throw new KeyNotFoundException("Wizard session was not found.");
@@ -77,6 +80,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
             "paid" or "live" => "paid",
             _ => throw new ArgumentException("Mode must be demo or live.", nameof(mode))
         };
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var session = await db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
             ?? throw new KeyNotFoundException("Wizard session was not found.");
@@ -111,6 +115,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
 
     public async Task MarkGatewayConfiguredAsync(Guid tenantId, Guid sessionId, string gatewaySlug, CancellationToken ct)
     {
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var session = await db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
             ?? throw new KeyNotFoundException("Wizard session was not found.");
@@ -126,6 +131,7 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
 
     public async Task<WizardSession> CompleteAsync(Guid tenantId, Guid sessionId, string confirmedBy, CancellationToken ct)
     {
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var session = await db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.Id == sessionId && x.TenantId == tenantId && x.CompletedAt == null, ct)
             ?? throw new KeyNotFoundException("Wizard session was not found.");
@@ -136,12 +142,14 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
         var users = root["step6"]?["users"]?.AsArray() ?? [];
         var confirmedEmail = users.Select(x => x?["email"]?.GetValue<string>()).FirstOrDefault(x => string.Equals(x, confirmedBy, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrWhiteSpace(confirmedEmail)) throw new InvalidOperationException("The activating administrator must be one of the configured administrators.");
+        // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
         var credentials = await db.WizardAdminCredentials.IgnoreQueryFilters()
             .Where(x => x.SessionId == sessionId && x.TenantId == tenantId).ToListAsync(ct);
         if (!credentials.Any(x => x.RoleName == "Super Admin") || !credentials.Any(x => x.RoleName == "Finance Controller"))
             throw new InvalidOperationException("A Super Admin and Finance Controller are required.");
         foreach (var credential in credentials)
         {
+            // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
             var user = await db.Users.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Email == credential.Email, ct);
             if (user is null)
             {
@@ -150,12 +158,14 @@ public sealed class WizardSessionService(AegisDbContext db, IPasswordHashingServ
                 db.Users.Add(user);
             }
             user.PasswordHash = credential.PasswordHash;
+            // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
             var role = await db.Roles.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Name == credential.RoleName, ct);
             if (role is null)
             {
                 role = new Role { Id = Guid.NewGuid(), TenantId = tenantId, Name = credential.RoleName, IsSystem = true, Description = "Created by the AegisCore setup wizard." };
                 db.Roles.Add(role);
             }
+            // Intentional setup bypass: install mode has no authenticated tenant context; the query is constrained by the bootstrap session or explicit tenant predicate.
             if (!await db.UserRoles.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.UserId == user.Id && x.RoleId == role.Id, ct))
                 db.UserRoles.Add(new UserRole { Id = Guid.NewGuid(), TenantId = tenantId, UserId = user.Id, RoleId = role.Id, AssignedByUserId = user.Id });
         }

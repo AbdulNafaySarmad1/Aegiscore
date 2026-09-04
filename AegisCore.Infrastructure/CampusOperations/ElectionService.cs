@@ -32,13 +32,13 @@ public sealed class ElectionService(AegisDbContext db, ILogger<ElectionService> 
 
     public async Task<IReadOnlyList<CandidateDto>> GetVerifiedCandidatesAsync(Guid electionId, CancellationToken ct = default)
     {
-        var candidates = await db.Set<ElectionCandidate>().IgnoreQueryFilters().Where(c => c.ElectionId == electionId).ToListAsync(ct);
+        var candidates = await db.Set<ElectionCandidate>().Where(c => c.ElectionId == electionId).ToListAsync(ct);
         return candidates.Select(c => new CandidateDto(c.Id, c.StudentId, $"Student-{c.StudentId.ToString()[..8]}", c.PositionId, "Position", c.EndorsementCount, c.EligibilityVerified, c.NominationStatus)).ToList();
     }
 
     public async Task<VoterTokenDto> IssueVoterTokenAsync(Guid electionId, Guid studentId, CancellationToken ct = default)
     {
-        var existing = await db.Set<VoterToken>().IgnoreQueryFilters().FirstOrDefaultAsync(t => t.ElectionId == electionId && t.StudentId == studentId, ct);
+        var existing = await db.Set<VoterToken>().FirstOrDefaultAsync(t => t.ElectionId == electionId && t.StudentId == studentId, ct);
         if (existing is not null && existing.HasVoted) throw new InvalidOperationException("Student has already voted.");
         if (existing is not null) return new VoterTokenDto(existing.Id, existing.TokenHash, existing.HasVoted);
         var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes($"{electionId}{studentId}{Guid.NewGuid()}")));
@@ -67,9 +67,9 @@ public sealed class ElectionService(AegisDbContext db, ILogger<ElectionService> 
 
     public async Task<IReadOnlyList<ElectionResultDto>> ComputeResultsAsync(Guid electionId, CancellationToken ct = default)
     {
-        var ballots = await db.Set<Ballot>().IgnoreQueryFilters().Where(b => b.ElectionId == electionId).ToListAsync(ct);
-        var positions = await db.Set<ElectionPosition>().IgnoreQueryFilters().Where(p => p.ElectionId == electionId).ToListAsync(ct);
-        var candidates = await db.Set<ElectionCandidate>().IgnoreQueryFilters().Where(c => c.ElectionId == electionId).ToListAsync(ct);
+        var ballots = await db.Set<Ballot>().Where(b => b.ElectionId == electionId).ToListAsync(ct);
+        var positions = await db.Set<ElectionPosition>().Where(p => p.ElectionId == electionId).ToListAsync(ct);
+        var candidates = await db.Set<ElectionCandidate>().Where(c => c.ElectionId == electionId).ToListAsync(ct);
         var results = new List<ElectionResultDto>();
         foreach (var position in positions)
         {
@@ -86,14 +86,14 @@ public sealed class ElectionService(AegisDbContext db, ILogger<ElectionService> 
 
     public async Task<ElectionParticipationDto> GetParticipationStatsAsync(Guid electionId, CancellationToken ct = default)
     {
-        var eligible = await db.Set<VoterToken>().IgnoreQueryFilters().Where(t => t.ElectionId == electionId).CountAsync(ct);
-        var voted = await db.Set<VoterToken>().IgnoreQueryFilters().Where(t => t.ElectionId == electionId && t.HasVoted).CountAsync(ct);
+        var eligible = await db.Set<VoterToken>().Where(t => t.ElectionId == electionId).CountAsync(ct);
+        var voted = await db.Set<VoterToken>().Where(t => t.ElectionId == electionId && t.HasVoted).CountAsync(ct);
         return new ElectionParticipationDto(electionId, eligible, voted, eligible > 0 ? Math.Round(voted * 100m / eligible, 2) : 0m);
     }
 
     private async Task<Guid> GetTenantIdAsync(CancellationToken ct)
     {
-        var first = await db.Set<Election>().IgnoreQueryFilters().Select(e => e.TenantId).FirstOrDefaultAsync(ct);
+        var first = await db.Set<Election>().Select(e => e.TenantId).FirstOrDefaultAsync(ct);
         return first != Guid.Empty ? first : Guid.NewGuid();
     }
 }

@@ -10,7 +10,7 @@ public sealed class CafeteriaService(AegisDbContext db, ILogger<CafeteriaService
     public async Task<DailyMenuDto> GetDailyMenuAsync(Guid cafeteriaUnitId, CancellationToken ct = default)
     {
         var unit = await db.Set<CafeteriaUnit>().FindAsync([cafeteriaUnitId], ct) ?? throw new InvalidOperationException("Cafeteria unit not found.");
-        var items = await db.Set<MenuItem>().IgnoreQueryFilters().Where(m => m.CafeteriaUnitId == cafeteriaUnitId && m.IsAvailable).ToListAsync(ct);
+        var items = await db.Set<MenuItem>().Where(m => m.CafeteriaUnitId == cafeteriaUnitId && m.IsAvailable).ToListAsync(ct);
         return new DailyMenuDto(cafeteriaUnitId, unit.Name, items.Select(i => new MenuItemDto(i.Id, i.ItemName, i.Category, i.Price, i.Calories, i.AllergensCsv, i.IsAvailable)).ToList());
     }
 
@@ -50,27 +50,27 @@ public sealed class CafeteriaService(AegisDbContext db, ILogger<CafeteriaService
 
     public async Task<DemandForecastDto> GetDemandForecastAsync(Guid cafeteriaUnitId, CancellationToken ct = default)
     {
-        var items = await db.Set<MenuItem>().IgnoreQueryFilters().Where(m => m.CafeteriaUnitId == cafeteriaUnitId && m.IsAvailable).ToListAsync(ct);
+        var items = await db.Set<MenuItem>().Where(m => m.CafeteriaUnitId == cafeteriaUnitId && m.IsAvailable).ToListAsync(ct);
         var demands = items.Select(i => new ItemDemandDto(i.Id, i.ItemName, 100 + (i.Category == "meal" ? 50 : 30), 120 + (i.Category == "meal" ? 60 : 40))).ToList();
         return new DemandForecastDto(cafeteriaUnitId, DateTimeOffset.UtcNow, demands);
     }
 
     public async Task<VendorScorecardDto> GetVendorPerformanceAsync(Guid vendorId, CancellationToken ct = default)
     {
-        var score = await db.Set<VendorPerformanceScore>().IgnoreQueryFilters().FirstOrDefaultAsync(s => s.VendorId == vendorId, ct);
+        var score = await db.Set<VendorPerformanceScore>().FirstOrDefaultAsync(s => s.VendorId == vendorId, ct);
         if (score is not null) return new VendorScorecardDto(score.VendorId, score.CafeteriaUnitId, score.HygieneScore, score.MenuAdherenceScore, score.ComplaintsScore, score.OverallRating, score.EvaluatedAt);
         return new VendorScorecardDto(vendorId, Guid.Empty, 85m, 90m, 80m, "satisfactory", DateTimeOffset.UtcNow);
     }
 
     public async Task<CafeteriaAnalyticsDto> GetAnalyticsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var transactions = await db.Set<CafeteriaTransaction>().IgnoreQueryFilters().Where(t => t.TenantId == tenantId && t.TransactionDate >= DateTimeOffset.UtcNow.Date).ToListAsync(ct);
+        var transactions = await db.Set<CafeteriaTransaction>().Where(t => t.TenantId == tenantId && t.TransactionDate >= DateTimeOffset.UtcNow.Date).ToListAsync(ct);
         return new CafeteriaAnalyticsDto(transactions.Sum(t => t.Amount), "Biryani", "Salad", "1:00 PM", transactions.Any() ? transactions.Average(t => t.Amount) : 0m, 5.2m, 4.3m);
     }
 
     public async Task<InventoryAlertDto> GetInventoryAlertsAsync(Guid cafeteriaUnitId, CancellationToken ct = default)
     {
-        var inventory = await db.Set<CafeteriaInventory>().IgnoreQueryFilters().Where(i => i.CafeteriaUnitId == cafeteriaUnitId && i.QuantityOnHand <= i.ReorderPoint).ToListAsync(ct);
+        var inventory = await db.Set<CafeteriaInventory>().Where(i => i.CafeteriaUnitId == cafeteriaUnitId && i.QuantityOnHand <= i.ReorderPoint).ToListAsync(ct);
         var first = inventory.FirstOrDefault();
         if (first is not null) return new InventoryAlertDto(first.Id, first.IngredientName, first.QuantityOnHand, first.ReorderPoint, true);
         return new InventoryAlertDto(Guid.Empty, "No alerts", 0m, 0m, false);
@@ -78,7 +78,7 @@ public sealed class CafeteriaService(AegisDbContext db, ILogger<CafeteriaService
 
     private async Task<Guid> GetTenantIdAsync(CancellationToken ct)
     {
-        var first = await db.Set<CafeteriaUnit>().IgnoreQueryFilters().Select(c => c.TenantId).FirstOrDefaultAsync(ct);
+        var first = await db.Set<CafeteriaUnit>().Select(c => c.TenantId).FirstOrDefaultAsync(ct);
         return first != Guid.Empty ? first : Guid.NewGuid();
     }
 }

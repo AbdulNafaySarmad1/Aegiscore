@@ -38,10 +38,10 @@ public sealed class FinanceTreasuryService(AegisDbContext db, IFinanceModuleServ
         if (tenantId == Guid.Empty || actorId == Guid.Empty || command.OffsetAccountId == Guid.Empty || string.IsNullOrWhiteSpace(command.Description) || command.Description.Length > 500)
             throw new ArgumentException("Bank adjustment fields are invalid.");
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var feed = await db.FinanceBankFeedTransactions.IgnoreQueryFilters().Include(x => x.BankAccount).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == feedId, ct)
+        var feed = await db.FinanceBankFeedTransactions.Include(x => x.BankAccount).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == feedId, ct)
             ?? throw new InvalidOperationException("Bank feed transaction was not found.");
         if (feed.Status != "UNMATCHED") throw new InvalidOperationException("Only unmatched bank feed transactions may be posted.");
-        if (!await db.ChartOfAccounts.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Id == command.OffsetAccountId, ct)) throw new InvalidOperationException("Offset account was not found.");
+        if (!await db.ChartOfAccounts.AnyAsync(x => x.TenantId == tenantId && x.Id == command.OffsetAccountId, ct)) throw new InvalidOperationException("Offset account was not found.");
         var amount = Math.Abs(feed.Amount);
         if (amount == 0m) throw new InvalidOperationException("A zero bank movement cannot be posted.");
         var bankDebit = feed.Amount > 0m ? amount : 0m;
@@ -70,7 +70,7 @@ public sealed class FinanceTreasuryService(AegisDbContext db, IFinanceModuleServ
         var name = Required(command.Name, 80, "Benchmark name");
         var source = Required(command.Source, 100, "Benchmark source");
         if (tenantId == Guid.Empty || command.ObservationDate == default || command.AnnualReturnPercent is < -100m or > 1000m) throw new ArgumentException("Benchmark fields are invalid.");
-        var row = await db.FinanceInvestmentBenchmarks.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Name == name && x.ObservationDate == command.ObservationDate, ct);
+        var row = await db.FinanceInvestmentBenchmarks.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Name == name && x.ObservationDate == command.ObservationDate, ct);
         if (row is null)
         {
             row = new FinanceInvestmentBenchmark { Id = Guid.NewGuid(), TenantId = tenantId, Name = name, ObservationDate = command.ObservationDate, AnnualReturnPercent = command.AnnualReturnPercent, Source = source };

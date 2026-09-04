@@ -79,7 +79,7 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
     public async Task<VerificationCycle> CreateVerificationCycleAsync(Guid tenantId, CreateAssetVerificationCycleCommand command, CancellationToken ct)
     {
         if (tenantId == Guid.Empty || string.IsNullOrWhiteSpace(command.Name) || command.Name.Length > 200 || command.EndDate <= command.StartDate) throw new ArgumentException("Verification cycle fields are invalid.");
-        var assetIds = await db.Assets.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.Status != AssetStatus.Disposed && x.Status != AssetStatus.WrittenOff).Select(x => x.Id).ToArrayAsync(ct);
+        var assetIds = await db.Assets.Where(x => x.TenantId == tenantId && x.Status != AssetStatus.Disposed && x.Status != AssetStatus.WrittenOff).Select(x => x.Id).ToArrayAsync(ct);
         var cycle = new VerificationCycle
         {
             Id = Guid.NewGuid(), TenantId = tenantId, Name = command.Name.Trim(), StartDate = command.StartDate, EndDate = command.EndDate,
@@ -94,7 +94,7 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
     public async Task<AssetVerification> VerifyAsync(Guid tenantId, Guid actorId, Guid cycleId, Guid assetId, VerifyFinanceAssetCommand command, CancellationToken ct)
     {
         if (actorId == Guid.Empty || !Enum.TryParse<VerificationStatus>(command.Status, true, out var status) || status == VerificationStatus.Pending) throw new ArgumentException("Verification status or actor is invalid.");
-        var verification = await db.AssetVerifications.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.VerificationCycleId == cycleId && x.AssetId == assetId, ct)
+        var verification = await db.AssetVerifications.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.VerificationCycleId == cycleId && x.AssetId == assetId, ct)
             ?? throw new InvalidOperationException("Asset verification assignment was not found.");
         if (verification.Status != VerificationStatus.Pending) throw new InvalidOperationException("Asset has already been verified in this cycle.");
         verification.Status = status;
@@ -119,12 +119,12 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
     }
 
     private async Task<Asset> AssetAsync(Guid tenantId, Guid id, CancellationToken ct)
-        => await db.Assets.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == id && x.Status != AssetStatus.Disposed && x.Status != AssetStatus.WrittenOff, ct)
+        => await db.Assets.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == id && x.Status != AssetStatus.Disposed && x.Status != AssetStatus.WrittenOff, ct)
            ?? throw new InvalidOperationException("Active asset was not found.");
 
     private async Task<ChartOfAccount> AccountAsync(Guid tenantId, string code, string name, AccountType type, CancellationToken ct)
     {
-        var account = await db.ChartOfAccounts.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.AccountCode == code, ct);
+        var account = await db.ChartOfAccounts.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.AccountCode == code, ct);
         if (account is not null) return account;
         account = new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = code, AccountName = name, AccountType = type };
         db.ChartOfAccounts.Add(account);

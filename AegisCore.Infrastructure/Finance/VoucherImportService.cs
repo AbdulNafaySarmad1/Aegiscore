@@ -25,7 +25,7 @@ public sealed class VoucherImportService(AegisDbContext db, IFinanceModuleServic
         };
         if (rows.Count is 0 or > 20_000) throw new ArgumentException("Voucher import must contain between 1 and 20,000 lines.");
         var codes = rows.Select(x => Required(x, "account_code")).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-        var accounts = await db.ChartOfAccounts.IgnoreQueryFilters().AsNoTracking()
+        var accounts = await db.ChartOfAccounts.AsNoTracking()
             .Where(x => x.TenantId == tenantId && codes.Contains(x.AccountCode)).ToDictionaryAsync(x => x.AccountCode, StringComparer.OrdinalIgnoreCase, ct);
         var errors = new List<string>();
         var ids = new List<Guid>();

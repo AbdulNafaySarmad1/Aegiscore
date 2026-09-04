@@ -7,6 +7,7 @@ using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure.Onboarding;
 using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -40,9 +41,11 @@ public sealed class WizardActivationTests
     {
         await using var connection = new SqliteConnection("DataSource=:memory:");
         await connection.OpenAsync();
-        await using var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options);
-        await db.Database.EnsureCreatedAsync();
         var tenantId = Guid.NewGuid();
+        var accessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext() };
+        accessor.HttpContext.Items["TenantId"] = tenantId;
+        await using var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options, accessor);
+        await db.Database.EnsureCreatedAsync();
         var session = new WizardSession
         {
             Id = Guid.NewGuid(), TenantId = tenantId, CurrentStep = 8, LicenseMode = "demo", StepData = CompleteStepData

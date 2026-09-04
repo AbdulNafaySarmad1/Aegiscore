@@ -9,15 +9,15 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 {
     public async Task<DefaultRiskAssessmentDto> AssessStudentRiskAsync(Guid studentId, Guid semesterId, CancellationToken ct = default)
     {
-        var payments = await db.StudentFeePayments.IgnoreQueryFilters()
+        var payments = await db.StudentFeePayments
             .Where(p => p.FeeDueId != Guid.Empty)
             .ToListAsync(ct);
 
-        var feeDues = await db.StudentFeeDues.IgnoreQueryFilters()
+        var feeDues = await db.StudentFeeDues
             .Where(d => d.StudentId == studentId && d.SemesterId == semesterId)
             .ToListAsync(ct);
 
-        var scholarships = await db.StudentScholarships.IgnoreQueryFilters()
+        var scholarships = await db.StudentScholarships
             .Where(s => s.StudentId == studentId)
             .ToListAsync(ct);
 
@@ -32,7 +32,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
         var score = ComputeDefaultProbability(totalOutstanding, daysLateAvg, scholarshipCoverage);
         var riskTier = DetermineRiskTier(score);
 
-        var existing = await db.Set<DefaultRiskAssessment>().IgnoreQueryFilters()
+        var existing = await db.Set<DefaultRiskAssessment>()
             .FirstOrDefaultAsync(r => r.StudentId == studentId && r.SemesterId == semesterId, ct);
 
         if (existing is not null)
@@ -56,7 +56,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
                 AverageDaysLate = daysLateAvg, MaxDaysLate = daysLateMax,
                 PartialPaymentCount = feeDues.Count(d => d.PaidAmount > 0 && d.PaidAmount < d.TotalDue),
                 PaymentTrendScore = 0.5m, ScholarshipCoveragePercent = scholarshipCoverage,
-                IsHostelStudent = await db.StudentHostels.IgnoreQueryFilters().AnyAsync(h => h.StudentId == studentId, ct),
+                IsHostelStudent = await db.StudentHostels.AnyAsync(h => h.StudentId == studentId, ct),
                 TenantId = await GetTenantIdAsync(ct)
             };
             db.Set<DefaultRiskAssessment>().Add(existing);
@@ -68,7 +68,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
     public async Task<IReadOnlyList<DefaultRiskAssessmentDto>> AssessAllStudentsAsync(Guid semesterId, CancellationToken ct = default)
     {
-        var feeDues = await db.StudentFeeDues.IgnoreQueryFilters()
+        var feeDues = await db.StudentFeeDues
             .Where(d => d.SemesterId == semesterId)
             .GroupBy(d => d.StudentId)
             .ToListAsync(ct);
@@ -112,7 +112,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
     public async Task<CashFlowForecastDto> GenerateCashFlowForecastAsync(Guid semesterId, CancellationToken ct = default)
     {
-        var riskAssessments = await db.Set<DefaultRiskAssessment>().IgnoreQueryFilters()
+        var riskAssessments = await db.Set<DefaultRiskAssessment>()
             .Where(r => r.SemesterId == semesterId).ToListAsync(ct);
 
         var totalExpected = 0m;
@@ -143,7 +143,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
     public async Task<TieredAlertDto> GetDefaultAlertQueueAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var assessments = await db.Set<DefaultRiskAssessment>().IgnoreQueryFilters()
+        var assessments = await db.Set<DefaultRiskAssessment>()
             .Where(r => r.TenantId == tenantId).OrderByDescending(r => r.DefaultProbabilityScore).Take(2000).ToListAsync(ct);
 
         return new TieredAlertDto(
@@ -155,7 +155,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
     public async Task<IReadOnlyList<InterventionOutcomeDto>> GetInterventionOutcomesAsync(Guid semesterId, CancellationToken ct = default)
     {
-        var interventions = await db.Set<InterventionRecord>().IgnoreQueryFilters()
+        var interventions = await db.Set<InterventionRecord>()
             .Where(i => i.SemesterId == semesterId).ToListAsync(ct);
         return interventions.Select(i => new InterventionOutcomeDto(i.Id, i.StudentId, i.RiskTier, i.InterventionType, i.WasSuccessful, i.OutcomeAt, i.OutcomeNotes)).ToList();
     }
@@ -175,7 +175,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
     private async Task<Guid> GetTenantIdAsync(CancellationToken ct)
     {
-        var first = await db.Set<DefaultRiskAssessment>().IgnoreQueryFilters().Select(r => r.TenantId).FirstOrDefaultAsync(ct);
+        var first = await db.Set<DefaultRiskAssessment>().Select(r => r.TenantId).FirstOrDefaultAsync(ct);
         return first != Guid.Empty ? first : Guid.NewGuid();
     }
 }

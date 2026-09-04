@@ -11,11 +11,11 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
     {
         var framework = await db.Set<AccreditationFramework>().FindAsync([frameworkId], ct)
             ?? throw new InvalidOperationException("Framework not found.");
-        var criteria = await db.Set<ReadinessCriterion>().IgnoreQueryFilters()
+        var criteria = await db.Set<ReadinessCriterion>()
             .Where(c => c.FrameworkId == frameworkId).ToListAsync(ct);
         foreach (var criterion in criteria)
         {
-            var evidence = await db.Set<CriterionEvidence>().IgnoreQueryFilters()
+            var evidence = await db.Set<CriterionEvidence>()
                 .Where(e => e.CriterionId == criterion.Id && !e.IsStale).AnyAsync(ct);
             criterion.ComplianceStatus = evidence ? "fully_met" : "not_met";
             criterion.Score = evidence ? 1.0m : 0.0m;
@@ -36,7 +36,7 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
 
     public async Task<IReadOnlyList<FrameworkScoreDto>> GetAllFrameworkScoresAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var frameworks = await db.Set<AccreditationFramework>().IgnoreQueryFilters().Where(f => f.TenantId == tenantId).ToListAsync(ct);
+        var frameworks = await db.Set<AccreditationFramework>().Where(f => f.TenantId == tenantId).ToListAsync(ct);
         var results = new List<FrameworkScoreDto>();
         foreach (var fw in frameworks) results.Add(await ComputeFrameworkScoreAsync(fw.Id, ct));
         return results;
@@ -44,7 +44,7 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
 
     public async Task<GapAnalysisDto> GetGapAnalysisAsync(Guid frameworkId, CancellationToken ct = default)
     {
-        var criteria = await db.Set<ReadinessCriterion>().IgnoreQueryFilters().Where(c => c.FrameworkId == frameworkId && c.ComplianceStatus != "fully_met").ToListAsync(ct);
+        var criteria = await db.Set<ReadinessCriterion>().Where(c => c.FrameworkId == frameworkId && c.ComplianceStatus != "fully_met").ToListAsync(ct);
         var gaps = criteria.Select(c =>
         {
             var gap = new GapItemDto(c.Id, c.CriterionCode, $"Evidence missing or insufficient for {c.CriterionCode}", "Upload supporting documents", null, "medium_term", c.Weight * 5m, criteria.IndexOf(c) + 1);
@@ -63,7 +63,7 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
 
     public async Task<PriorFindingsTrackerDto> GetPriorFindingsTrackerAsync(Guid frameworkId, CancellationToken ct = default)
     {
-        var findings = await db.Set<AccreditationAuditFinding>().IgnoreQueryFilters().Where(f => f.FrameworkId == frameworkId).ToListAsync(ct);
+        var findings = await db.Set<AccreditationAuditFinding>().Where(f => f.FrameworkId == frameworkId).ToListAsync(ct);
         return new PriorFindingsTrackerDto(frameworkId, findings.Count, findings.Count(f => f.CorrectiveStatus == "completed"), findings.Count(f => f.CorrectiveStatus == "in_progress"), findings.Count(f => f.IsOverdue), findings.Where(f => f.IsOverdue).Select(f => new FindingDto(f.Id, f.FindingType, f.CorrectiveStatus, f.DeadlineAt, true, f.ResponsibleOwner)).ToList());
     }
 
@@ -77,7 +77,7 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
 
     public async Task<IReadOnlyList<StaleEvidenceDto>> CheckEvidenceStalenessAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var stale = await db.Set<CriterionEvidence>().IgnoreQueryFilters().Where(e => e.ExpiryDate.HasValue && e.ExpiryDate.Value < DateTimeOffset.UtcNow && !e.IsStale).ToListAsync(ct);
+        var stale = await db.Set<CriterionEvidence>().Where(e => e.ExpiryDate.HasValue && e.ExpiryDate.Value < DateTimeOffset.UtcNow && !e.IsStale).ToListAsync(ct);
         foreach (var s in stale) s.IsStale = true;
         await db.SaveChangesAsync(ct);
         return stale.Select(s => new StaleEvidenceDto(s.Id, s.EvidenceTitle, s.CriterionId, string.Empty, (int)((DateTimeOffset.UtcNow - (s.EvidenceDate)).TotalDays), s.EvidenceDate, null)).ToList();

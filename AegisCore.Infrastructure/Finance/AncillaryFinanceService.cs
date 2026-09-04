@@ -16,7 +16,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
             throw new ArgumentException("Library acquisition fields are invalid.");
         var amount = command.IsDonation ? command.FairValue : command.Cost;
         if (amount <= 0m) throw new ArgumentException("Library acquisition value must be positive.");
-        var config = await db.TenantFinanceConfigurations.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct);
+        var config = await db.TenantFinanceConfigurations.AsNoTracking().SingleOrDefaultAsync(x => x.TenantId == tenantId, ct);
         var threshold = config?.LibraryCapitalizationThreshold ?? 5000m;
         var physicalCapitalized = resourceType == "PHYSICAL" && command.Cost >= threshold && command.UsefulLifeMonths > 12;
         var prepaid = resourceType == "DIGITAL" && command.SubscriptionEndsAt is not null;
@@ -41,7 +41,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     {
         if (actorId == Guid.Empty || command.ThroughDate == default) throw new ArgumentException("Amortization date and actor are required.");
         var through = command.ThroughDate.ToUniversalTime();
-        var rows = await db.FinanceLibraryAcquisitions.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.Status == "ACTIVE" && (x.AccountingTreatment == "CAPITALIZED" || x.AccountingTreatment == "PREPAID") && x.AcquiredAt <= through).ToListAsync(ct);
+        var rows = await db.FinanceLibraryAcquisitions.Where(x => x.TenantId == tenantId && x.Status == "ACTIVE" && (x.AccountingTreatment == "CAPITALIZED" || x.AccountingTreatment == "PREPAID") && x.AcquiredAt <= through).ToListAsync(ct);
         var expense = await AccountAsync(tenantId, "6321", "Library depreciation and amortization", AccountType.Expense, ct);
         var accumulated = await AccountAsync(tenantId, "1595", "Accumulated library depreciation and amortization", AccountType.Asset, ct);
         var posted = 0;
@@ -58,7 +58,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
             if (charge <= 0m) continue;
             var period = $"{through:yyyyMM}";
             var number = $"LIB-AM-{row.Id:N}-{period}";
-            if (await db.JournalEntries.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.EntryNumber == number, ct)) continue;
+            if (await db.JournalEntries.AnyAsync(x => x.TenantId == tenantId && x.EntryNumber == number, ct)) continue;
             db.JournalEntries.Add(Journal(tenantId, actorId, number, $"Library amortization: {row.Title}", charge, expense.Id, accumulated.Id));
             row.AccumulatedAmortization = target;
             posted++;
@@ -69,7 +69,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
 
     public async Task<FinanceLibraryFine> CreateLibraryFineAsync(Guid tenantId, CreateFinanceLibraryFineCommand command, CancellationToken ct)
     {
-        if (command.StudentId == Guid.Empty || command.Amount <= 0m || !await db.StudentProfiles.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.StudentId == command.StudentId, ct))
+        if (command.StudentId == Guid.Empty || command.Amount <= 0m || !await db.StudentProfiles.AnyAsync(x => x.TenantId == tenantId && x.StudentId == command.StudentId, ct))
             throw new ArgumentException("Tenant student and a positive fine amount are required.");
         var fine = new FinanceLibraryFine { Id = Guid.NewGuid(), TenantId = tenantId, StudentId = command.StudentId, LibraryBookId = command.LibraryBookId, FineType = Required(command.FineType, 30, "Fine type").ToUpperInvariant(), Amount = decimal.Round(command.Amount, 4, MidpointRounding.AwayFromZero), Currency = Currency(command.Currency), Description = Required(command.Description, 500, "Description") };
         db.FinanceLibraryFines.Add(fine);
@@ -80,7 +80,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     public async Task<int> PostOpenLibraryFinesAsync(Guid tenantId, Guid actorId, CancellationToken ct)
     {
         if (actorId == Guid.Empty) throw new ArgumentException("Posting actor is required.");
-        var fines = await db.FinanceLibraryFines.IgnoreQueryFilters().Where(x => x.TenantId == tenantId && x.Status == "OPEN" && x.JournalEntryId == null).ToListAsync(ct);
+        var fines = await db.FinanceLibraryFines.Where(x => x.TenantId == tenantId && x.Status == "OPEN" && x.JournalEntryId == null).ToListAsync(ct);
         if (fines.Count == 0) return 0;
         var receivable = await AccountAsync(tenantId, "1100", "Student fee receivable", AccountType.Asset, ct);
         var income = await AccountAsync(tenantId, "4320", "Library fine income", AccountType.Revenue, ct);
@@ -99,9 +99,9 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     {
         if (actorId == Guid.Empty || command.VehicleId == Guid.Empty || command.CostCenterId == Guid.Empty || command.AcquisitionCost <= 0m || command.UsefulLifeYears <= 0 || command.ServiceIntervalDays <= 0 || command.ServiceIntervalKm <= 0m || command.OpeningOdometer < 0m || command.ModelYear is < 1900 or > 2200)
             throw new ArgumentException("Fleet profile fields are invalid.");
-        var vehicle = await db.TransportVehicles.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct) ?? throw new InvalidOperationException("Tenant vehicle was not found.");
-        if (await db.FinanceFleetProfiles.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == command.VehicleId, ct)) throw new InvalidOperationException("Vehicle already has a finance profile.");
-        var category = await db.AssetCategories.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Code == "VEH");
+        var vehicle = await db.TransportVehicles.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct) ?? throw new InvalidOperationException("Tenant vehicle was not found.");
+        if (await db.FinanceFleetProfiles.AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == command.VehicleId, ct)) throw new InvalidOperationException("Vehicle already has a finance profile.");
+        var category = await db.AssetCategories.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Code == "VEH");
         if (category is null)
         {
             category = new AssetCategory { Id = Guid.NewGuid(), TenantId = tenantId, Name = "Vehicles", Code = "VEH" };
@@ -121,7 +121,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     public async Task<VehicleMaintenance> ScheduleMaintenanceAsync(Guid tenantId, Guid vehicleId, ScheduleFleetMaintenanceCommand command, CancellationToken ct)
     {
         if (command.ScheduledDate == default || command.ScheduledDate < DateTime.UtcNow.AddDays(-1)) throw new ArgumentException("Maintenance date is invalid.");
-        if (!await db.FinanceFleetProfiles.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status == "IN_SERVICE", ct)) throw new InvalidOperationException("Active fleet profile was not found.");
+        if (!await db.FinanceFleetProfiles.AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status == "IN_SERVICE", ct)) throw new InvalidOperationException("Active fleet profile was not found.");
         var row = new VehicleMaintenance { Id = Guid.NewGuid(), TenantId = tenantId, TransportVehicleId = vehicleId, Status = VehicleMaintenanceStatus.Reported, Description = Required(command.Description, 500, "Description"), ScheduledDate = command.ScheduledDate.ToUniversalTime() };
         db.VehicleMaintenances.Add(row);
         await db.SaveChangesAsync(ct);
@@ -131,13 +131,13 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     public async Task<FinanceFleetCostPosting> CompleteMaintenanceAsync(Guid tenantId, Guid actorId, Guid maintenanceId, CompleteFleetMaintenanceCommand command, CancellationToken ct)
     {
         if (command.Cost <= 0m || command.Odometer < 0m) throw new ArgumentException("Maintenance cost and odometer are invalid.");
-        var maintenance = await db.VehicleMaintenances.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == maintenanceId, ct) ?? throw new InvalidOperationException("Maintenance job was not found.");
-        var profile = await db.FinanceFleetProfiles.IgnoreQueryFilters().SingleAsync(x => x.TenantId == tenantId && x.TransportVehicleId == maintenance.TransportVehicleId, ct);
+        var maintenance = await db.VehicleMaintenances.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == maintenanceId, ct) ?? throw new InvalidOperationException("Maintenance job was not found.");
+        var profile = await db.FinanceFleetProfiles.SingleAsync(x => x.TenantId == tenantId && x.TransportVehicleId == maintenance.TransportVehicleId, ct);
         if (maintenance.Status is VehicleMaintenanceStatus.Completed or VehicleMaintenanceStatus.Cancelled || command.Odometer < profile.CurrentOdometer) throw new InvalidOperationException("Maintenance cannot be completed or odometer moved backwards.");
         FinanceFleetCostPosting posting;
         if (command.Capitalize)
         {
-            var asset = await db.Assets.IgnoreQueryFilters().SingleAsync(x => x.TenantId == tenantId && x.Id == profile.AssetId, ct);
+            var asset = await db.Assets.SingleAsync(x => x.TenantId == tenantId && x.Id == profile.AssetId, ct);
             var assetAccount = await AccountAsync(tenantId, "1510", "Vehicle assets", AccountType.Asset, ct);
             var payable = await AccountAsync(tenantId, "2105", "Fleet payable", AccountType.Liability, ct);
             var journal = Journal(tenantId, actorId, $"FLEET-OH-{maintenance.Id:N}", command.Description, command.Cost, assetAccount.Id, payable.Id);
@@ -163,10 +163,10 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
 
     public async Task<FinanceAssetAccountingEvent> DisposeFleetAsync(Guid tenantId, Guid actorId, Guid vehicleId, DisposeFinanceAssetCommand command, CancellationToken ct)
     {
-        var profile = await db.FinanceFleetProfiles.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status != "DISPOSED", ct) ?? throw new InvalidOperationException("Active fleet profile was not found.");
+        var profile = await db.FinanceFleetProfiles.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status != "DISPOSED", ct) ?? throw new InvalidOperationException("Active fleet profile was not found.");
         var result = await assets.DisposeAsync(tenantId, actorId, profile.AssetId, command, ct);
         profile.Status = "DISPOSED";
-        var vehicle = await db.TransportVehicles.IgnoreQueryFilters().SingleAsync(x => x.TenantId == tenantId && x.Id == vehicleId, ct);
+        var vehicle = await db.TransportVehicles.SingleAsync(x => x.TenantId == tenantId && x.Id == vehicleId, ct);
         vehicle.Status = VehicleStatus.Retired;
         await db.SaveChangesAsync(ct);
         return result;
@@ -174,7 +174,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
 
     private async Task<ChartOfAccount> AccountAsync(Guid tenantId, string code, string name, AccountType type, CancellationToken ct)
     {
-        var account = await db.ChartOfAccounts.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.AccountCode == code, ct);
+        var account = await db.ChartOfAccounts.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.AccountCode == code, ct);
         if (account is not null) return account;
         account = new ChartOfAccount { Id = Guid.NewGuid(), TenantId = tenantId, AccountCode = code, AccountName = name, AccountType = type };
         db.ChartOfAccounts.Add(account);

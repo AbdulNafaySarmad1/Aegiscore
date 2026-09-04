@@ -29,7 +29,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
     public async Task<CounselorAssignmentDto> RouteTicketToCounselorAsync(Guid ticketId, CancellationToken ct = default)
     {
         var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new InvalidOperationException("Ticket not found.");
-        var counselors = await db.Set<CounselorProfile>().IgnoreQueryFilters().Where(c => c.IsActive && c.CurrentCaseload < c.MaxCaseload).OrderBy(c => c.CurrentCaseload).ToListAsync(ct);
+        var counselors = await db.Set<CounselorProfile>().Where(c => c.IsActive && c.CurrentCaseload < c.MaxCaseload).OrderBy(c => c.CurrentCaseload).ToListAsync(ct);
         var assigned = counselors.FirstOrDefault() ?? throw new InvalidOperationException("No available counselors.");
         ticket.AssignedCounselorId = assigned.Id;
         ticket.AssignedAt = DateTimeOffset.UtcNow;
@@ -41,7 +41,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
 
     public async Task<IReadOnlyList<MentalHealthTicketDto>> GetCounselorQueueAsync(Guid counselorId, CancellationToken ct = default)
     {
-        var tickets = await db.Set<MentalHealthTicket>().IgnoreQueryFilters().Where(t => t.AssignedCounselorId == counselorId && t.Status != "resolved").OrderByDescending(t => t.Severity == "crisis" ? 3 : t.Severity == "urgent" ? 2 : 1).ThenBy(t => t.CreatedAt).ToListAsync(ct);
+        var tickets = await db.Set<MentalHealthTicket>().Where(t => t.AssignedCounselorId == counselorId && t.Status != "resolved").OrderByDescending(t => t.Severity == "crisis" ? 3 : t.Severity == "urgent" ? 2 : 1).ThenBy(t => t.CreatedAt).ToListAsync(ct);
         return tickets.Select(MapToDto).ToList();
     }
 
@@ -70,7 +70,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
 
     public async Task<AggregateStatsDto> GetAggregateStatsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var tickets = await db.Set<MentalHealthTicket>().IgnoreQueryFilters().Where(t => t.TenantId == tenantId).ToListAsync(ct);
+        var tickets = await db.Set<MentalHealthTicket>().Where(t => t.TenantId == tenantId).ToListAsync(ct);
         var thisMonth = tickets.Where(t => t.CreatedAt >= DateTimeOffset.UtcNow.AddMonths(-1)).ToList();
         return new AggregateStatsDto(
             thisMonth.Count, tickets.Count(t => t.Status != "resolved"), tickets.Count(t => t.Status == "resolved"),
@@ -85,7 +85,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
 
     private async Task<Guid> GetTenantIdAsync(CancellationToken ct)
     {
-        var first = await db.Set<MentalHealthTicket>().IgnoreQueryFilters().Select(t => t.TenantId).FirstOrDefaultAsync(ct);
+        var first = await db.Set<MentalHealthTicket>().Select(t => t.TenantId).FirstOrDefaultAsync(ct);
         return first != Guid.Empty ? first : Guid.NewGuid();
     }
 }

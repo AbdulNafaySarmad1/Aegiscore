@@ -2958,10 +2958,10 @@
     "semantic_hash": "b983a5ff5d0c462cfb1dff649ef40c0c"
   },
   "AegisCore.Infrastructure/Campus/CafeteriaService.cs": {
-    "mtime": 1788459723.3626082,
-    "seen": 1788461387.4188688,
-    "ast_hash": "e620de2198d762a8e35ce94206df1346",
-    "semantic_hash": "e620de2198d762a8e35ce94206df1346"
+    "mtime": 1788507898.671138,
+    "seen": 1788520698.793487,
+    "ast_hash": "28a2673fb9e9c2358931f6370406c3b6",
+    "semantic_hash": "28a2673fb9e9c2358931f6370406c3b6"
   },
   "AegisCore.Infrastructure/Campus/CampusModuleExtensions.cs": {
     "mtime": 1788459723.363022,
@@ -2988,10 +2988,10 @@
     "semantic_hash": "025dc38f85e5bdbc89070dc87908a135"
   },
   "AegisCore.Infrastructure/Campus/TransportService.cs": {
-    "mtime": 1788459723.363022,
-    "seen": 1788461387.4188764,
-    "ast_hash": "5f8266e8478cb43fc71aa8d4ea2c89ed",
-    "semantic_hash": "5f8266e8478cb43fc71aa8d4ea2c89ed"
+    "mtime": 1788507898.7281384,
+    "seen": 1788520698.7938554,
+    "ast_hash": "862e0ca252709d1eea19e72f1684a5aa",
+    "semantic_hash": "862e0ca252709d1eea19e72f1684a5aa"
   },
   "AegisCore.Infrastructure/CampusOperations/CampusOperationsModuleExtensions.cs": {
     "mtime": 1788459723.363022,
@@ -3012,10 +3012,10 @@
     "semantic_hash": "338fe4e1175a54de4c0f4b17ab40d354"
   },
   "AegisCore.Infrastructure/CampusOperations/ElectionService.cs": {
-    "mtime": 1788459723.363237,
-    "seen": 1788461387.4188836,
-    "ast_hash": "05ffa2446ef23939234b846ee30a06d9",
-    "semantic_hash": "05ffa2446ef23939234b846ee30a06d9"
+    "mtime": 1788507898.8201394,
+    "seen": 1788520698.794126,
+    "ast_hash": "3ddccc5668346ca4bd6e5ccbcea8f167",
+    "semantic_hash": "3ddccc5668346ca4bd6e5ccbcea8f167"
   },
   "AegisCore.Infrastructure/Cloud/Aws/AwsProvider.cs": {
     "mtime": 1788459723.3634,
@@ -3186,10 +3186,10 @@
     "semantic_hash": "dac857e170f1eaeb6552c5cf21757984"
   },
   "AegisCore.Infrastructure/Deployment/Seeders/DemoSeeder.cs": {
-    "mtime": 1788459723.3652346,
-    "seen": 1788461387.4189348,
-    "ast_hash": "4c4fe044600917340a102070be9c7b58",
-    "semantic_hash": "4c4fe044600917340a102070be9c7b58"
+    "mtime": 1788507942.5685506,
+    "seen": 1788520698.7965739,
+    "ast_hash": "c1c26047f05386004c231b2c7643e358",
+    "semantic_hash": "c1c26047f05386004c231b2c7643e358"
   },
   "AegisCore.Infrastructure/Deployment/SystemAlertService.cs": {
     "mtime": 1788459723.3652346,
@@ -3228,16 +3228,16 @@
     "semantic_hash": "c0dca0a58f5444715bff43762566c02e"
   },
   "AegisCore.Infrastructure/Finance/AccountingStandardsEngine.cs": {
-    "mtime": 1788459723.3658257,
-    "seen": 1788461387.4189491,
-    "ast_hash": "3777d70ea579b1c59bceb13f74191cfd",
-    "semantic_hash": "3777d70ea579b1c59bceb13f74191cfd"
+    "mtime": 1788507898.8701398,
+    "seen": 1788520698.797085,
+    "ast_hash": "eca2fa7e7270ed32581ebcb00f0257b9",
+    "semantic_hash": "eca2fa7e7270ed32581ebcb00f0257b9"
   },
   "AegisCore.Infrastructure/Finance/AncillaryFinanceService.cs": {
-    "mtime": 1788459723.3661108,
-    "seen": 1788461387.4189508,
-    "ast_hash": "7f5a4aec6597632e7856490de60548d9",
-    "semantic_hash": "7f5a4aec6597632e7856490de60548d9"
+    "mtime": 1788507898.9161403,
+    "seen": 1788520698.7970877,
+    "ast_hash": "8f62838707093433f2a8b1627446166f",
+    "semantic_hash": "8f62838707093433f2a8b1627446166f"
   },
   "AegisCore.Infrastructure/Finance/AssetDepreciationCalculator.cs": {
     "mtime": 1788459723.3661108,
@@ -3246,16 +3246,16 @@
     "semantic_hash": "5ea5e56197c1c986eedae82fb63f6649"
   },
   "AegisCore.Infrastructure/Finance/AuditSealService.cs": {
-    "mtime": 1788459723.3661108,
-    "seen": 1788461387.4189558,
-    "ast_hash": "fa0de16842c993c7e56d49bead9e2365",
-    "semantic_hash": "fa0de16842c993c7e56d49bead9e2365"
+    "mtime": 1788507935.1684825,
+    "seen": 1788520698.7971747,
+    "ast_hash": "ed4fa678072015107cddfa2dfd9d0829",
+    "semantic_hash": "ed4fa678072015107cddfa2dfd9d0829"
   },
   "AegisCore.Infrastructure/Finance/DefaultPredictionService.cs": {
-    "mtime": 1788459723.3661108,
-    "seen": 1788461387.4189575,
-    "ast_hash": "60f627ae0ab383facd7612d96bee51dd",
-    "semantic_hash": "60f627ae0ab383facd7612d96bee51dd"
+    "mtime": 1788507899.0201414,
+    "seen": 1788520698.7971768,
+    "ast_hash": "07488ecd54d0d683da605cfde7628711",
+    "semantic_hash": "07488ecd54d0d683da605cfde7628711"
   },
   "AegisCore.Infrastructure/Finance/DefaultPredictionServiceExtensions.cs": {
     "mtime": 1788459723.3661108,
@@ -3264,22 +3264,22 @@
     "semantic_hash": "927c7c8328e03e02c4c91acea570793b"
   },
   "AegisCore.Infrastructure/Finance/FinanceAssetLifecycleService.cs": {
-    "mtime": 1788459723.3661108,
-    "seen": 1788461387.418961,
-    "ast_hash": "78829a3900b4fb249ae6d2daec66949d",
-    "semantic_hash": "78829a3900b4fb249ae6d2daec66949d"
+    "mtime": 1788507899.0691419,
+    "seen": 1788520698.7972631,
+    "ast_hash": "5b534340ff04d2115782fffbd2d043a7",
+    "semantic_hash": "5b534340ff04d2115782fffbd2d043a7"
   },
   "AegisCore.Infrastructure/Finance/FinanceContinuousControlService.cs": {
-    "mtime": 1788459723.3666015,
-    "seen": 1788461387.4189632,
-    "ast_hash": "3b12c4aedf22e39e73defec0963b661f",
-    "semantic_hash": "3b12c4aedf22e39e73defec0963b661f"
+    "mtime": 1788507899.1141422,
+    "seen": 1788520698.797265,
+    "ast_hash": "d5ba21cc87f4dc01647cc60a56049713",
+    "semantic_hash": "d5ba21cc87f4dc01647cc60a56049713"
   },
   "AegisCore.Infrastructure/Finance/FinanceModuleService.cs": {
-    "mtime": 1788459723.3666015,
-    "seen": 1788461387.4189656,
-    "ast_hash": "3a426225a150fcca9c650d7dda7cb9f1",
-    "semantic_hash": "3a426225a150fcca9c650d7dda7cb9f1"
+    "mtime": 1788507899.188143,
+    "seen": 1788520698.797267,
+    "ast_hash": "9cf33f809ad7717b6ab95003227243b8",
+    "semantic_hash": "9cf33f809ad7717b6ab95003227243b8"
   },
   "AegisCore.Infrastructure/Finance/FinanceModuleServiceExtensions.cs": {
     "mtime": 1788459723.3666015,
@@ -3300,16 +3300,16 @@
     "semantic_hash": "37685514040e9414e4830c36eefee1c9"
   },
   "AegisCore.Infrastructure/Finance/FinanceRegulatoryReportService.cs": {
-    "mtime": 1788459723.3666015,
-    "seen": 1788461387.418973,
-    "ast_hash": "fc3055ab289e45be9c407fe035a4f8ee",
-    "semantic_hash": "fc3055ab289e45be9c407fe035a4f8ee"
+    "mtime": 1788507899.2741437,
+    "seen": 1788520698.79752,
+    "ast_hash": "cdea444687a82cdb1836186e85bcca2b",
+    "semantic_hash": "cdea444687a82cdb1836186e85bcca2b"
   },
   "AegisCore.Infrastructure/Finance/FinanceScholarshipService.cs": {
-    "mtime": 1788459723.3676016,
-    "seen": 1788461387.4189749,
-    "ast_hash": "f1aa6d64eed4aec4b0f91b0521a0f622",
-    "semantic_hash": "f1aa6d64eed4aec4b0f91b0521a0f622"
+    "mtime": 1788507899.3231442,
+    "seen": 1788520698.797523,
+    "ast_hash": "ac45a449a04651d146da09cb02bfdabb",
+    "semantic_hash": "ac45a449a04651d146da09cb02bfdabb"
   },
   "AegisCore.Infrastructure/Finance/FinanceServices.cs": {
     "mtime": 1788459723.3676016,
@@ -3318,10 +3318,10 @@
     "semantic_hash": "cd39ad613065a779b545157e458f8bb2"
   },
   "AegisCore.Infrastructure/Finance/FinanceTreasuryService.cs": {
-    "mtime": 1788459723.3676016,
-    "seen": 1788461387.418979,
-    "ast_hash": "89d2a06ef35ff0e5b2fad6699b4f98b0",
-    "semantic_hash": "89d2a06ef35ff0e5b2fad6699b4f98b0"
+    "mtime": 1788507899.3681448,
+    "seen": 1788520698.7976089,
+    "ast_hash": "1ec0c79de50280a726874abd6f7c498f",
+    "semantic_hash": "1ec0c79de50280a726874abd6f7c498f"
   },
   "AegisCore.Infrastructure/Finance/Gateways/PaymentGatewayAdapters.cs": {
     "mtime": 1788459723.3676016,
@@ -3342,22 +3342,22 @@
     "semantic_hash": "be8572822635b85dc86acd5b9d112125"
   },
   "AegisCore.Infrastructure/Finance/PaymentPlanWorker.cs": {
-    "mtime": 1788459723.3676016,
-    "seen": 1788461387.4189878,
-    "ast_hash": "6f59ea93852a602d40e346397b53985d",
-    "semantic_hash": "6f59ea93852a602d40e346397b53985d"
+    "mtime": 1788507935.1704826,
+    "seen": 1788520698.7978878,
+    "ast_hash": "a4a3526fd87788a21a780e52591eef32",
+    "semantic_hash": "a4a3526fd87788a21a780e52591eef32"
   },
   "AegisCore.Infrastructure/Finance/VendorSanctionsService.cs": {
-    "mtime": 1788459723.3676016,
-    "seen": 1788461387.4189897,
-    "ast_hash": "7ae6052f90a1e78106ca085d4f90d070",
-    "semantic_hash": "7ae6052f90a1e78106ca085d4f90d070"
+    "mtime": 1788507935.1704826,
+    "seen": 1788520698.7978902,
+    "ast_hash": "7a90f37ad91b7adac2df0f77be6ae780",
+    "semantic_hash": "7a90f37ad91b7adac2df0f77be6ae780"
   },
   "AegisCore.Infrastructure/Finance/VoucherImportService.cs": {
-    "mtime": 1788459723.3676016,
-    "seen": 1788461387.418991,
-    "ast_hash": "cacb680dbde33a3df49527435f5e079d",
-    "semantic_hash": "cacb680dbde33a3df49527435f5e079d"
+    "mtime": 1788507899.410145,
+    "seen": 1788520698.797894,
+    "ast_hash": "5cffa4a52ad18c8652af620abe69b05a",
+    "semantic_hash": "5cffa4a52ad18c8652af620abe69b05a"
   },
   "AegisCore.Infrastructure/Finance/accounting-standards.json": {
     "mtime": 1788459723.3676016,
@@ -3414,16 +3414,16 @@
     "semantic_hash": "cbc0ea6e4e20f78985d5d89ec7c4f5f5"
   },
   "AegisCore.Infrastructure/Governance/AccreditationService.cs": {
-    "mtime": 1788459723.3686082,
-    "seen": 1788461387.4190087,
-    "ast_hash": "f1fdf2cced028523b5e9609b312597b4",
-    "semantic_hash": "f1fdf2cced028523b5e9609b312597b4"
+    "mtime": 1788507899.508146,
+    "seen": 1788520698.7986388,
+    "ast_hash": "7f4295a5d28263f86a238a5d9942595f",
+    "semantic_hash": "7f4295a5d28263f86a238a5d9942595f"
   },
   "AegisCore.Infrastructure/Governance/BoardPortalService.cs": {
-    "mtime": 1788459723.3686082,
-    "seen": 1788461387.4190106,
-    "ast_hash": "526f1ed3e5338a886f51cea123be198a",
-    "semantic_hash": "526f1ed3e5338a886f51cea123be198a"
+    "mtime": 1788507899.5611465,
+    "seen": 1788520698.7986412,
+    "ast_hash": "030be4c2b3792a1321d0206ff56c40df",
+    "semantic_hash": "030be4c2b3792a1321d0206ff56c40df"
   },
   "AegisCore.Infrastructure/Governance/GovernanceService.cs": {
     "mtime": 1788459723.3686082,
@@ -3444,10 +3444,10 @@
     "semantic_hash": "994ab20a680c5166c5429d42a9fe122a"
   },
   "AegisCore.Infrastructure/Hr/VisitingFacultyService.cs": {
-    "mtime": 1788459723.3688745,
-    "seen": 1788461387.4190176,
-    "ast_hash": "e559e014d7bd0a7f9d3dcb426ff2fbf0",
-    "semantic_hash": "e559e014d7bd0a7f9d3dcb426ff2fbf0"
+    "mtime": 1788507899.6031468,
+    "seen": 1788520698.7988994,
+    "ast_hash": "596267d60f7ee1dde1fc441bb84975f6",
+    "semantic_hash": "596267d60f7ee1dde1fc441bb84975f6"
   },
   "AegisCore.Infrastructure/Hr/VisitingFacultyServiceExtensions.cs": {
     "mtime": 1788459723.3688745,
@@ -4110,22 +4110,22 @@
     "semantic_hash": "8d805ce8a61650d77e5afcdcba49ad34"
   },
   "AegisCore.Infrastructure/Onboarding/WizardGatewayService.cs": {
-    "mtime": 1788459723.407936,
-    "seen": 1788461387.419205,
-    "ast_hash": "04a51da8cee272bd5bbd523391eb0cea",
-    "semantic_hash": "04a51da8cee272bd5bbd523391eb0cea"
+    "mtime": 1788507957.383687,
+    "seen": 1788520698.8148367,
+    "ast_hash": "e8ad3eccb0bb2b06b97af7c3b39fe21d",
+    "semantic_hash": "e8ad3eccb0bb2b06b97af7c3b39fe21d"
   },
   "AegisCore.Infrastructure/Onboarding/WizardProvisioningService.cs": {
-    "mtime": 1788459723.407936,
-    "seen": 1788461387.4192066,
-    "ast_hash": "554cf01c85ae146a956325a444225ef8",
-    "semantic_hash": "554cf01c85ae146a956325a444225ef8"
+    "mtime": 1788520400.6745174,
+    "seen": 1788520698.8148391,
+    "ast_hash": "d2e4f085efa096fdb934899ac8000585",
+    "semantic_hash": "d2e4f085efa096fdb934899ac8000585"
   },
   "AegisCore.Infrastructure/Onboarding/WizardSessionService.cs": {
-    "mtime": 1788459723.407936,
-    "seen": 1788461387.4192083,
-    "ast_hash": "13a113a62bd50f0a8b4c06d5ae2d915e",
-    "semantic_hash": "13a113a62bd50f0a8b4c06d5ae2d915e"
+    "mtime": 1788507957.490688,
+    "seen": 1788520698.8148406,
+    "ast_hash": "d1db80fe7aeb3158083222c68add3f06",
+    "semantic_hash": "d1db80fe7aeb3158083222c68add3f06"
   },
   "AegisCore.Infrastructure/Payments/Raast/RaastApiClient.cs": {
     "mtime": 1788459723.408408,
@@ -4560,16 +4560,16 @@
     "semantic_hash": "dcb4592b9739eef23aa6e9bafc1c1a35"
   },
   "AegisCore.Infrastructure/Security/Pqc/PqcKeyCeremonyService.cs": {
-    "mtime": 1788459723.411366,
-    "seen": 1788461387.4193316,
-    "ast_hash": "de0b52086e77c06caf9169571d1c8c0d",
-    "semantic_hash": "de0b52086e77c06caf9169571d1c8c0d"
+    "mtime": 1788507935.1714826,
+    "seen": 1788520698.821149,
+    "ast_hash": "07884e8d4eed3068a9b6ab03f1ef618f",
+    "semantic_hash": "07884e8d4eed3068a9b6ab03f1ef618f"
   },
   "AegisCore.Infrastructure/Security/Pqc/PqcSignatureService.cs": {
-    "mtime": 1788459723.411366,
-    "seen": 1788461387.4193332,
-    "ast_hash": "6967e35819431e6ec23928a65061c785",
-    "semantic_hash": "6967e35819431e6ec23928a65061c785"
+    "mtime": 1788507899.9691503,
+    "seen": 1788520698.8211517,
+    "ast_hash": "11b86ddfb7d33922f852d182b20e1e66",
+    "semantic_hash": "11b86ddfb7d33922f852d182b20e1e66"
   },
   "AegisCore.Infrastructure/Security/Pqc/PqcSigningQueue.cs": {
     "mtime": 1788459723.411366,
@@ -4596,22 +4596,22 @@
     "semantic_hash": "1e2aba2cd6244c16fb7cb1a7f2e69b77"
   },
   "AegisCore.Infrastructure/StudentLifecycle/ForeignStudentService.cs": {
-    "mtime": 1788459723.4117172,
-    "seen": 1788461387.4193406,
-    "ast_hash": "2b1b47bb62584cd6843bfb9daa1ddcab",
-    "semantic_hash": "2b1b47bb62584cd6843bfb9daa1ddcab"
+    "mtime": 1788507899.7501483,
+    "seen": 1788520698.8214974,
+    "ast_hash": "e904fc2195827f23d0a83d8c5f1251f2",
+    "semantic_hash": "e904fc2195827f23d0a83d8c5f1251f2"
   },
   "AegisCore.Infrastructure/StudentLifecycle/GamificationService.cs": {
-    "mtime": 1788459723.4118593,
-    "seen": 1788461387.419342,
-    "ast_hash": "1aa779aaf25da3a6fee1053edbabf445",
-    "semantic_hash": "1aa779aaf25da3a6fee1053edbabf445"
+    "mtime": 1788507899.6871476,
+    "seen": 1788520698.8214998,
+    "ast_hash": "b731fd0f41d05659b038cfda6a9c4e3c",
+    "semantic_hash": "b731fd0f41d05659b038cfda6a9c4e3c"
   },
   "AegisCore.Infrastructure/StudentLifecycle/MentalHealthService.cs": {
-    "mtime": 1788459723.4118593,
-    "seen": 1788461387.4193437,
-    "ast_hash": "a1a4faa1b77f627e9e5532b1941242c9",
-    "semantic_hash": "a1a4faa1b77f627e9e5532b1941242c9"
+    "mtime": 1788507899.8661494,
+    "seen": 1788520698.8215022,
+    "ast_hash": "21910751bb288f45551b1062d5645da3",
+    "semantic_hash": "21910751bb288f45551b1062d5645da3"
   },
   "AegisCore.Infrastructure/StudentLifecycle/StudentLifecycleModuleExtensions.cs": {
     "mtime": 1788459723.4118593,
@@ -4632,10 +4632,10 @@
     "semantic_hash": "e472f38792783d821a2644b265595f3f"
   },
   "AegisCore.Infrastructure/StudentLifecycle/VoiceAssistantService.cs": {
-    "mtime": 1788459723.4118593,
-    "seen": 1788461387.41935,
-    "ast_hash": "675489bf27b1646925b27983bb13709b",
-    "semantic_hash": "675489bf27b1646925b27983bb13709b"
+    "mtime": 1788507899.7991488,
+    "seen": 1788520698.8217711,
+    "ast_hash": "1b71e220e232c0f386c2a271ad8d9ee7",
+    "semantic_hash": "1b71e220e232c0f386c2a271ad8d9ee7"
   },
   "AegisCore.Infrastructure/Support/SupportServiceExtensions.cs": {
     "mtime": 1788459723.4118593,
@@ -4644,10 +4644,10 @@
     "semantic_hash": "0db9382ba08ba69a367c5b4774b522f7"
   },
   "AegisCore.Infrastructure/Support/SupportTicketService.cs": {
-    "mtime": 1788459723.4121292,
-    "seen": 1788461387.4193528,
-    "ast_hash": "2233a342dfee637e680a14e9a9a7a4c0",
-    "semantic_hash": "2233a342dfee637e680a14e9a9a7a4c0"
+    "mtime": 1788507984.4969416,
+    "seen": 1788520698.821896,
+    "ast_hash": "087ea09bc26da63e2512ac9ecffd89a7",
+    "semantic_hash": "087ea09bc26da63e2512ac9ecffd89a7"
   },
   "AegisCore.Infrastructure/SyncLag/SyncLagService.cs": {
     "mtime": 1788459723.4121292,
@@ -5808,10 +5808,10 @@
     "semantic_hash": "0a6aafe2f56d91fa844dc9cb266a09b1"
   },
   "AegisCore.Tests/FinanceTests.cs": {
-    "mtime": 1788459723.4356022,
-    "seen": 1788461387.4198887,
-    "ast_hash": "869b074efba1c742c3c118cd9a1b46e7",
-    "semantic_hash": "869b074efba1c742c3c118cd9a1b46e7"
+    "mtime": 1788520285.6593974,
+    "seen": 1788520698.8417158,
+    "ast_hash": "9f5029963f800d2297f0eae10f1796b2",
+    "semantic_hash": "9f5029963f800d2297f0eae10f1796b2"
   },
   "AegisCore.Tests/ForeignStudentControllerTests.cs": {
     "mtime": 1788503738.1706924,
@@ -5982,10 +5982,10 @@
     "semantic_hash": "96df72696d1fc572e38050ec8999a3bd"
   },
   "AegisCore.Tests/WizardActivationTests.cs": {
-    "mtime": 1788459723.4376023,
-    "seen": 1788461387.4199352,
-    "ast_hash": "4f64b60fff3dace6ae7ebc3f5bc4f856",
-    "semantic_hash": "4f64b60fff3dace6ae7ebc3f5bc4f856"
+    "mtime": 1788520285.6593974,
+    "seen": 1788520698.8444107,
+    "ast_hash": "ae025b4155afe816ba923febaddcd2c6",
+    "semantic_hash": "ae025b4155afe816ba923febaddcd2c6"
   },
   "AegisCore.Web/AegisCore.Web.csproj": {
     "mtime": 1788459723.4376023,

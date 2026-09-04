@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using AegisCore.Contracts.Abstractions.Cloud;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,9 +45,13 @@ public sealed class VendorSanctionsRescreenWorker(IServiceScopeFactory scopes, I
                 await using var scope = scopes.CreateAsyncScope();
                 var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
                 var screening = scope.ServiceProvider.GetRequiredService<VendorSanctionsService>();
+                // Intentional cross-tenant discovery: only due vendor IDs and TenantIds are read, then the worker binds before screening.
                 var due = await db.FinanceVendors.IgnoreQueryFilters().AsNoTracking().Where(x => x.Status == "ACTIVE" && (x.LastSanctionsScreenedAt == null || x.LastSanctionsScreenedAt < DateTime.UtcNow.AddDays(-90))).Select(x => new { x.TenantId, x.Id }).Take(100).ToListAsync(stoppingToken);
+                var tenantContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                 foreach (var vendor in due)
                 {
+                    tenantContext.HttpContext = new DefaultHttpContext();
+                    tenantContext.HttpContext.Items["TenantId"] = vendor.TenantId;
                     await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {vendor.TenantId:D}, false)", stoppingToken);
                     await screening.ScreenAsync(vendor.TenantId, vendor.Id, stoppingToken);
                 }

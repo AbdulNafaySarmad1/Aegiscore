@@ -9,8 +9,8 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 {
     public async Task<IReadOnlyList<SlotMatchDto>> MatchFacultyToSlotsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var slots = await db.Set<TeachingSlot>().IgnoreQueryFilters().Where(s => s.TenantId == tenantId && s.Status == "open").ToListAsync(ct);
-        var faculty = await db.Set<VisitingFacultyProfile>().IgnoreQueryFilters().Where(f => f.TenantId == tenantId && f.ProfileStatus == "ready_to_deploy").ToListAsync(ct);
+        var slots = await db.Set<TeachingSlot>().Where(s => s.TenantId == tenantId && s.Status == "open").ToListAsync(ct);
+        var faculty = await db.Set<VisitingFacultyProfile>().Where(f => f.TenantId == tenantId && f.ProfileStatus == "ready_to_deploy").ToListAsync(ct);
         var results = new List<SlotMatchDto>();
         foreach (var slot in slots)
         {
@@ -93,8 +93,8 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<PoolAnalyticsDto> GetPoolAnalyticsAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var faculty = await db.Set<VisitingFacultyProfile>().IgnoreQueryFilters().Where(f => f.TenantId == tenantId).ToListAsync(ct);
-        var slots = await db.Set<TeachingSlot>().IgnoreQueryFilters().Where(s => s.TenantId == tenantId).ToListAsync(ct);
+        var faculty = await db.Set<VisitingFacultyProfile>().Where(f => f.TenantId == tenantId).ToListAsync(ct);
+        var slots = await db.Set<TeachingSlot>().Where(s => s.TenantId == tenantId).ToListAsync(ct);
         var specs = faculty.Where(f => !string.IsNullOrWhiteSpace(f.SpecializationsCsv)).SelectMany(f => f.SpecializationsCsv!.Split(',')).GroupBy(s => s.Trim()).ToDictionary(g => g.Key, g => g.Count());
         return new PoolAnalyticsDto(faculty.Count, faculty.Count(f => f.ProfileStatus == "ready_to_deploy"), faculty.Count(f => f.ProfileStatus == "pending_documents"), specs, slots.Count(s => s.Status == "open"), slots.Count(s => s.Status == "filled"), 5.2m, 15000m, 0.78m, specs.Where(kv => kv.Value < 3).Select(kv => kv.Key).ToList());
     }
