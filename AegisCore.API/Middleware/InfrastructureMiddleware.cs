@@ -256,7 +256,7 @@ public class TurnstileMiddleware
                 return;
             }
 
-            var secret = context.RequestServices.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>()["Turnstile:SecretKey"];
+            var secret = context.RequestServices.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>()["CF_TURNSTILE_SECRET_KEY"];
             if (string.IsNullOrEmpty(secret))
             {
                 await _next(context);

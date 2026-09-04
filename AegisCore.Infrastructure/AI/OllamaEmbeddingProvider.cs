@@ -18,10 +18,10 @@ public class OllamaEmbeddingProvider : IEmbeddingProvider
     public OllamaEmbeddingProvider(IConfiguration configuration, ILogger<OllamaEmbeddingProvider> logger)
     {
         _logger = logger;
-        ModelName = configuration["AI:Ollama:EmbeddingModel"] ?? DefaultTenantConfigTemplate.DefaultOllamaEmbeddingModel;
+        ModelName = configuration["AI_MODEL"] ?? DefaultTenantConfigTemplate.DefaultOllamaEmbeddingModel;
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        var baseUrl = configuration["AI:Ollama:BaseUrl"] ?? "http://localhost:11434/";
+        var baseUrl = configuration["AI_ENDPOINT"] ?? "http://localhost:11434/";
         _httpClient = new HttpClient();
         _httpClient.BaseAddress = new Uri(baseUrl);
         _httpClient.Timeout = TimeSpan.FromMinutes(2);

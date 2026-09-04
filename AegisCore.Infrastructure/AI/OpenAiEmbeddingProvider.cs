@@ -19,11 +19,11 @@ public class OpenAiEmbeddingProvider : IEmbeddingProvider
     public OpenAiEmbeddingProvider(IConfiguration configuration, ILogger<OpenAiEmbeddingProvider> logger)
     {
         _logger = logger;
-        ModelName = configuration["AI:OpenAI:EmbeddingModel"] ?? DefaultTenantConfigTemplate.DefaultEmbeddingModel;
+        ModelName = configuration["AI_MODEL"] ?? DefaultTenantConfigTemplate.DefaultEmbeddingModel;
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        var apiKey = configuration["AI:OpenAI:ApiKey"];
-        var baseUrl = configuration["AI:OpenAI:BaseUrl"] ?? "https://api.openai.com/v1/";
+        var apiKey = configuration["AI_API_KEY"];
+        var baseUrl = configuration["AI_ENDPOINT"] ?? "https://api.openai.com/v1/";
         _httpClient = new HttpClient();
         _httpClient.BaseAddress = new Uri(baseUrl);
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);

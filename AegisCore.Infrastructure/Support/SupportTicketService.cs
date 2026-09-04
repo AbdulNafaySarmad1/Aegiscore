@@ -602,8 +602,8 @@ public sealed class SupportTicketService
         var host = configuration["DB_HOST"] ?? configuration["POSTGRES_HOST"] ?? "localhost";
         var port = configuration["DB_PORT"] ?? configuration["POSTGRES_PORT"] ?? "5432";
         var database = configuration["DB_NAME"] ?? configuration["POSTGRES_DB"] ?? "aegiscore";
-        var username = configuration["DB_USERNAME"] ?? configuration["POSTGRES_USER"] ?? "aegiscore";
-        var password = configuration["DB_PASSWORD"] ?? configuration["POSTGRES_PASSWORD"] ?? "";
+        var username = configuration["DB_USER"] ?? configuration["POSTGRES_USER"] ?? "aegiscore";
+        var password = configuration["DB_PASS"] ?? configuration["POSTGRES_PASSWORD"] ?? "";
         var ssl = (configuration["DB_SSL"] ?? "Require").Equals("Disable", StringComparison.OrdinalIgnoreCase) ? "Disable" : "Require";
         return $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode={ssl}";
     }

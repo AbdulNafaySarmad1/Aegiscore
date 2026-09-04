@@ -20,7 +20,7 @@ public class LlmProviderFactory
     public ILlmProvider GetLlmProvider(Guid tenantId)
     {
         var provider = _configuration[$"AI:Tenants:{tenantId}:LlmProvider"]
-            ?? _configuration["AI:Provider"]
+            ?? _configuration["AI_PROVIDER"]
             ?? DefaultTenantConfigTemplate.DefaultAiProvider;
 
         return provider.ToLowerInvariant() switch
@@ -33,7 +33,7 @@ public class LlmProviderFactory
     public IEmbeddingProvider GetEmbeddingProvider(Guid tenantId)
     {
         var provider = _configuration[$"AI:Tenants:{tenantId}:EmbeddingProvider"]
-            ?? _configuration["AI:EmbeddingProvider"]
+            ?? _configuration["AI_PROVIDER"]
             ?? DefaultTenantConfigTemplate.DefaultAiProvider;
 
         return provider.ToLowerInvariant() switch

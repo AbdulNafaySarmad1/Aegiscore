@@ -36,8 +36,8 @@ The remaining `Assert.Contains("...${...}")` in `SetupControllerRouteTests` vali
 | `TWILIO_ACCOUNT_SID` | `Twilio:AccountSid` |
 | `TWILIO_AUTH_TOKEN` | `Twilio:AuthToken` |
 | `ELASTICSEARCH_URL` | `Search:ElasticsearchUrl` |
-| `OLLAMA_BASE_URL` | `AI:Ollama:BaseUrl` |
-| `OPENAI_API_KEY` | `AI:OpenAI:ApiKey` |
+| `AI_ENDPOINT` | `AI_ENDPOINT` |
+| `AI_API_KEY` | `AI_API_KEY` |
 | `RAAST_ENDPOINT` | `Raast:BaseUrl` |
 
 Every configuration path above is backed by a `${VAR}` placeholder in `appsettings.Production.json` and resolves through the substitution provider before service registration.

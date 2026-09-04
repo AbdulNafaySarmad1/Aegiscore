@@ -21,10 +21,10 @@ public class OllamaLlmProvider : ILlmProvider
     public OllamaLlmProvider(IConfiguration configuration, ILogger<OllamaLlmProvider> logger)
     {
         _logger = logger;
-        ModelName = configuration["AI:Ollama:Model"] ?? DefaultTenantConfigTemplate.DefaultOllamaModel;
+        ModelName = configuration["AI_MODEL"] ?? DefaultTenantConfigTemplate.DefaultOllamaModel;
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        var baseUrl = configuration["AI:Ollama:BaseUrl"] ?? "http://localhost:11434/";
+        var baseUrl = configuration["AI_ENDPOINT"] ?? "http://localhost:11434/";
         _httpClient = new HttpClient();
         _httpClient.BaseAddress = new Uri(baseUrl);
         _httpClient.Timeout = TimeSpan.FromMinutes(5);

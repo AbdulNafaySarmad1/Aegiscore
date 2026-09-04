@@ -12,25 +12,33 @@ public class DeploymentReadinessChecker
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<DeploymentReadinessChecker> _logger;
+    private readonly IEnvironmentValidator _environmentValidator;
+    private readonly IHostEnvironment _environment;
     private readonly List<ReadinessCheck> _checks = new();
 
     public bool AllPassed => _checks.All(c => c.Passed);
 
-    public DeploymentReadinessChecker(IConfiguration configuration, ILogger<DeploymentReadinessChecker> logger)
+    public DeploymentReadinessChecker(
+        IConfiguration configuration,
+        ILogger<DeploymentReadinessChecker> logger,
+        IEnvironmentValidator environmentValidator,
+        IHostEnvironment environment)
     {
         _configuration = configuration;
         _logger = logger;
+        _environmentValidator = environmentValidator;
+        _environment = environment;
     }
 
     public async Task<IReadOnlyList<ReadinessCheck>> RunAllAsync(CancellationToken ct = default)
     {
         _checks.Clear();
 
+        CheckRequiredEnvVars();
         await CheckPostgresAsync(ct);
         await CheckRedisAsync(ct);
         CheckJwtConfig();
         CheckCloudProvider();
-        CheckRequiredEnvVars();
 
         var passed = _checks.Count(c => c.Passed);
         var failed = _checks.Count(c => !c.Passed);
@@ -48,12 +56,17 @@ public class DeploymentReadinessChecker
         var name = "PostgreSQL Connectivity";
         try
         {
-            var cs = _configuration["AEGISCORE_DB_CONNECTION"]
-                ?? _configuration["POSTGRES_CONNECTION_STRING"]
-                ?? _configuration.GetConnectionString("Postgres")
-                ?? _configuration.GetConnectionString("SupabasePostgres")
-                ?? _configuration["Postgres:ConnectionString"]
-                ?? _configuration["Database:ConnectionString"];
+            var cs = new[]
+                {
+                    _configuration["AEGISCORE_DB_CONNECTION"],
+                    _configuration["POSTGRES_CONNECTION_STRING"],
+                    _configuration.GetConnectionString("Postgres"),
+                    _configuration.GetConnectionString("SupabasePostgres"),
+                    _configuration["Postgres:ConnectionString"],
+                    _configuration["Database:ConnectionString"]
+                }
+                .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
+                ?? BuildConnectionStringFromRegistry();
 
             if (string.IsNullOrEmpty(cs))
             {
@@ -152,18 +165,36 @@ public class DeploymentReadinessChecker
     private void CheckRequiredEnvVars()
     {
         var name = "Required Environment Variables";
-        var required = new[] { "ASPNETCORE_ENVIRONMENT", "AEGISCORE_CLOUD_PROVIDER" };
-        var missing = required.Where(v => string.IsNullOrEmpty(Environment.GetEnvironmentVariable(v))).ToList();
-        if (string.IsNullOrWhiteSpace(_configuration["TENANT_ID"])
-            && string.IsNullOrWhiteSpace(_configuration["AEGISCORE_TENANT_ID"]))
-        {
-            missing.Add("TENANT_ID");
-        }
+        var result = _environmentValidator.Validate();
+        var missing = result.MissingRequired.Concat(result.MissingConditional).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
 
-        if (missing.Count == 0)
-            _checks.Add(new ReadinessCheck(name, true, "All required variables present."));
+        if (result.IsValid)
+            _checks.Add(new ReadinessCheck(name, true, $"All {EnvironmentValidator.Registry.Count} registered variables satisfy their requirements."));
         else
-            _checks.Add(new ReadinessCheck(name, false, $"Missing: {string.Join(", ", missing)}"));
+            _checks.Add(new ReadinessCheck(name, false,
+                $"Missing: {string.Join(", ", missing)}. Invalid: {string.Join(" ", result.Errors)}"));
+
+        foreach (var variable in missing)
+            _logger.LogCritical("STARTUP BLOCKED: Required environment variable {Name} is not set. Set it before starting AegisCore.", variable);
+        foreach (var error in result.Errors)
+            _logger.LogCritical("STARTUP BLOCKED: {Error}", error);
+
+        if (!result.IsValid && FailOnReadinessError())
+            throw new ApplicationException("STARTUP BLOCKED: Required environment configuration is missing or invalid.");
+    }
+
+    private bool FailOnReadinessError()
+        => _configuration.GetValue<bool?>("Deployment:FailOnReadinessError") ?? _environment.IsProduction();
+
+    private string? BuildConnectionStringFromRegistry()
+    {
+        var host = _configuration["DB_HOST"];
+        var port = _configuration["DB_PORT"];
+        var database = _configuration["DB_NAME"];
+        var user = _configuration["DB_USER"];
+        var password = _configuration["DB_PASS"];
+        if (new[] { host, port, database, user, password }.Any(string.IsNullOrWhiteSpace)) return null;
+        return $"Host={host};Port={port};Database={database};Username={user};Password={password};SslMode=Require";
     }
 }
 
@@ -173,6 +204,7 @@ public static class DeploymentReadinessServiceExtensions
 {
     public static IServiceCollection AddDeploymentReadiness(this IServiceCollection services)
     {
+        services.AddSingleton<IEnvironmentValidator, EnvironmentValidator>();
         services.AddSingleton<DeploymentReadinessChecker>();
         return services;
     }
@@ -196,10 +228,12 @@ public static class DeploymentReadinessServiceExtensions
         if (!checker.AllPassed)
         {
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-            if (configuration.GetValue<bool>("Deployment:FailOnReadinessError"))
+            var environment = scope.ServiceProvider.GetRequiredService<IHostEnvironment>();
+            var failOnError = configuration.GetValue<bool?>("Deployment:FailOnReadinessError") ?? environment.IsProduction();
+            if (failOnError)
             {
                 logger.LogCritical("Deployment readiness check FAILED. Strict startup is enabled.");
-                throw new InvalidOperationException("Deployment readiness checks failed.");
+                throw new ApplicationException("Deployment readiness checks failed.");
             }
 
             logger.LogCritical("Deployment readiness check FAILED. Application will continue in degraded mode.");

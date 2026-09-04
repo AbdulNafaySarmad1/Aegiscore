@@ -16,6 +16,7 @@ using AegisCore.Infrastructure.Payments.Raast;
 using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure.Cloud.R2;
 using AegisCore.Infrastructure.Cloud;
+using AegisCore.Infrastructure.Deployment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -112,6 +113,7 @@ public static class SetupServicesExtensions
 {
     public static IServiceCollection AddSetupServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<IEnvironmentValidator, EnvironmentValidator>();
         services.AddAegisDbContext(configuration);
         services.AddCloudProvider(configuration);
         services.AddHttpClient("infisical", client =>

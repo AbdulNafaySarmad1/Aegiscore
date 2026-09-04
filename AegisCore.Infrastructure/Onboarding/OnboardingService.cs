@@ -223,7 +223,7 @@ public class OnboardingService
         sb.AppendLine($"DB_HOST={state.DbHost}");
         sb.AppendLine($"DB_PORT={state.DbPort}");
         sb.AppendLine($"DB_NAME={state.DbName}");
-        sb.AppendLine($"DB_USERNAME={state.DbUsername}");
+        sb.AppendLine($"DB_USER={state.DbUsername}");
         sb.AppendLine($"REDIS_HOST={state.RedisHost}");
         sb.AppendLine($"REDIS_PORT={state.RedisPort}");
         sb.AppendLine($"SMTP_HOST={state.SmtpHost}");
@@ -234,7 +234,7 @@ public class OnboardingService
         sb.AppendLine($"AEGISCORE_ERP_URL={state.ErpUrl}");
         sb.AppendLine($"CLOUDFLARE_TUNNEL_ID={state.CloudflareTunnelId ?? ""}");
         sb.AppendLine($"# Sensitive values stored in secrets provider only:");
-        sb.AppendLine($"# DB_PASSWORD, REDIS_PASSWORD, SMTP_PASSWORD, AZURE_CLIENT_SECRET");
+        sb.AppendLine($"# DB_PASS, REDIS_PASSWORD, SMTP_PASSWORD, AZURE_CLIENT_SECRET");
         return sb.ToString();
     }
 

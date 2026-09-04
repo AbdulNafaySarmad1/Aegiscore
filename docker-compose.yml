@@ -40,6 +40,11 @@ services:
       AEGISCORE_SECRET_PROVIDER: ${AEGISCORE_SECRET_PROVIDER:-FILE}
       AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
       TENANT_ID: ${TENANT_ID:?Run ./scripts/bootstrap-env.sh first}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-${POSTGRES_DB:-aegiscore}}
+      DB_USER: ${DB_USER:-${POSTGRES_USER:-aegiscore}}
+      DB_PASS: ${DB_PASS:-${POSTGRES_PASSWORD:-}}
       AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:-Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:?Run ./scripts/bootstrap-env.sh first};SslMode=Disable}
       AEGISCORE_REDIS_CONNECTION: redis:6379,password=${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}
       AEGISCORE_STORAGE_PROVIDER: local
@@ -47,6 +52,17 @@ services:
       License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.aegiscore.systems}
       License__HmacSecret: ${LICENSE_HMAC_SECRET:?Run ./scripts/bootstrap-env.sh first}
       AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:?Run ./scripts/bootstrap-env.sh first}
+      PQC_MLKEM_PUBLIC_KEY: ${PQC_MLKEM_PUBLIC_KEY:-}
+      PQC_MLKEM_PRIVATE_KEY: ${PQC_MLKEM_PRIVATE_KEY:-}
+      PQC_MLDSA_PUBLIC_KEY: ${PQC_MLDSA_PUBLIC_KEY:-}
+      PQC_MLDSA_PRIVATE_KEY: ${PQC_MLDSA_PRIVATE_KEY:-}
+      CF_TURNSTILE_SITE_KEY: ${CF_TURNSTILE_SITE_KEY:-}
+      CF_TURNSTILE_SECRET_KEY: ${CF_TURNSTILE_SECRET_KEY:-}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      APP_ENV: ${APP_ENV:-${ASPNETCORE_ENVIRONMENT:-Production}}
+      APP_SECRET: ${APP_SECRET:-}
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-900}
+      AEGISCORE_SETUP_TOKEN: ${AEGISCORE_SETUP_TOKEN:-}
       AEGISCORE_PQC_KEY_BASE64: ${AEGISCORE_PQC_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
       AEGISCORE_JWT_SECRET: ${AEGISCORE_JWT_SECRET:?Run ./scripts/bootstrap-env.sh first}
       Governance__FeedbackEncryptionKeyBase64: ${GOVERNANCE_FEEDBACK_KEY_BASE64:?Run ./scripts/bootstrap-env.sh first}
@@ -61,11 +77,10 @@ services:
       PaymentGateways__gocardless__BaseUrl: ${GOCARDLESS_BASE_URL:-https://api.gocardless.com/}
       PaymentGateways__billplz-fpx__BaseUrl: ${BILLPLZ_BASE_URL:-https://www.billplz.com/}
       PaymentGateways__duitnow-qr__BaseUrl: ${DUITNOW_BASE_URL:-}
-      AI__Provider: ${AI_PROVIDER:-ollama}
-      AI__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/}
-      AI__Ollama__Model: ${OLLAMA_MODEL:-qwen2.5:7b}
-      AI__OpenAI__ApiKey: ${OPENAI_API_KEY:-}
-      AI__OpenAI__Model: ${OPENAI_MODEL:-gpt-5-mini}
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      AI_ENDPOINT: ${AI_ENDPOINT:-http://host.docker.internal:11434/}
+      AI_MODEL: ${AI_MODEL:-qwen2.5:7b}
+      AI_API_KEY: ${AI_API_KEY:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
