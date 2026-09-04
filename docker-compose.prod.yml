@@ -1,0 +1,15 @@
+# Production image override for the canonical root deployment.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  api:
+    image: ${AEGISCORE_API_IMAGE:-ghcr.io/abdulnafaysarmad1/aegiscore-api}:${IMAGE_TAG:-latest}
+    build: !reset null
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    restart: always
+
+  portal:
+    image: ${AEGISCORE_PORTAL_IMAGE:-ghcr.io/abdulnafaysarmad1/aegiscore-portal}:${IMAGE_TAG:-latest}
+    build: !reset null
+    restart: always
