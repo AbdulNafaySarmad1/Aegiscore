@@ -37,7 +37,7 @@ jobs:
         run: dotnet restore AegisCore.slnx
 
       - name: Build
-        run: dotnet build AegisCore.slnx --no-restore -m:1 -p:BuildInParallel=false --configuration Release
+        run: dotnet build AegisCore.slnx -c Release
 
       - name: Test
         run: dotnet test AegisCore.Tests/AegisCore.Tests.csproj --no-build --configuration Release --verbosity normal -m:1 -p:BuildInParallel=false

@@ -17,6 +17,7 @@ coverage/
 .DS_Store
 
 # Generated test artifacts
+build.log
 AegisCore.Portal/playwright-report/
 AegisCore.Portal/test-results/
 

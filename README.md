@@ -56,6 +56,29 @@ is the moving integration tag for this recovery branch.
 
 ---
 
+## Development Setup
+
+Configure Git to use the repository's shared hooks once after cloning:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+### Building
+
+```bash
+dotnet build AegisCore.slnx -c Release
+```
+
+The build must succeed with 0 errors before any pull request is merged.
+
+### Required GitHub status check
+
+In **Settings → Branches → Branch protection rules**, create or edit the rule
+for `main`. Enable **Require status checks to pass before merging**, enable
+**Require branches to be up to date before merging**, and select
+`Build & Test (.NET)` as a required check. Do not allow bypassing the rule.
+
 ## Quick Start
 
 1. **Start here:** Read `INDEX.md` first
