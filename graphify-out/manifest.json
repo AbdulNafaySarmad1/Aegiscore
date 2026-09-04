@@ -336,10 +336,10 @@
     "semantic_hash": "e0b55495609734986303a1c72ac0ba52"
   },
   "AegisCore.API/Extensions/ProductionServicesExtensions.cs": {
-    "mtime": 1788459723.3313522,
-    "seen": 1788461387.4180229,
-    "ast_hash": "121dde3d0943857cdf5333b664869c27",
-    "semantic_hash": "121dde3d0943857cdf5333b664869c27"
+    "mtime": 1788507327.4476893,
+    "seen": 1788507684.0081787,
+    "ast_hash": "635e6328757872479539a658454585e8",
+    "semantic_hash": "635e6328757872479539a658454585e8"
   },
   "AegisCore.API/Finance/CampusModuleEndpoints.cs": {
     "mtime": 1788459723.3316011,
@@ -486,16 +486,16 @@
     "semantic_hash": "060a2e60a388bd241c3e274ec25e6a76"
   },
   "AegisCore.API/Program.cs": {
-    "mtime": 1788459723.3376012,
-    "seen": 1788461387.418068,
-    "ast_hash": "7040889eefee004ff02e6117de24858f",
-    "semantic_hash": "7040889eefee004ff02e6117de24858f"
+    "mtime": 1788507327.4446893,
+    "seen": 1788507684.010374,
+    "ast_hash": "63b64c7c4773ef3f083181acb44d4f3c",
+    "semantic_hash": "63b64c7c4773ef3f083181acb44d4f3c"
   },
   "AegisCore.API/appsettings.Production.json": {
-    "mtime": 1788459723.3386014,
-    "seen": 1788461387.41807,
-    "ast_hash": "f00af95f90d0a5485718b170f94242c1",
-    "semantic_hash": "f00af95f90d0a5485718b170f94242c1"
+    "mtime": 1788507601.1112833,
+    "seen": 1788507684.010377,
+    "ast_hash": "1f1872503a89a6f776b067ed7939c319",
+    "semantic_hash": "1f1872503a89a6f776b067ed7939c319"
   },
   "AegisCore.API/appsettings.json": {
     "mtime": 1788459723.3386014,
@@ -2808,10 +2808,10 @@
     "semantic_hash": "6aa61953ba513614ad60e487fee49fe5"
   },
   "AegisCore.Infrastructure/AI/AzureDocumentIntelligenceService.cs": {
-    "mtime": 1788459723.3610563,
-    "seen": 1788461387.4188256,
-    "ast_hash": "4f14fad37f02ed34103c3ea6932b0a21",
-    "semantic_hash": "4f14fad37f02ed34103c3ea6932b0a21"
+    "mtime": 1788507327.4506893,
+    "seen": 1788507684.044027,
+    "ast_hash": "bae17c3053e8fac17e6125df0511f39a",
+    "semantic_hash": "bae17c3053e8fac17e6125df0511f39a"
   },
   "AegisCore.Infrastructure/AI/DocumentAiAgent.cs": {
     "mtime": 1788459723.3610563,
@@ -3144,10 +3144,10 @@
     "semantic_hash": "250efc964a484ffbf98f856e2f809aee"
   },
   "AegisCore.Infrastructure/DbContextServiceExtensions.cs": {
-    "mtime": 1788459723.3649728,
-    "seen": 1788461387.4189224,
-    "ast_hash": "5aa66f8837c64b8e5fa8b30c243f3414",
-    "semantic_hash": "5aa66f8837c64b8e5fa8b30c243f3414"
+    "mtime": 1788507327.4496891,
+    "seen": 1788507684.0486493,
+    "ast_hash": "e208d21ca0f168498f62cc7a364270b2",
+    "semantic_hash": "e208d21ca0f168498f62cc7a364270b2"
   },
   "AegisCore.Infrastructure/DegreeAudit/DegreeAuditService.cs": {
     "mtime": 1788459723.3649728,
@@ -3168,10 +3168,10 @@
     "semantic_hash": "6dc8e388dddadb23b9d1677868792ea4"
   },
   "AegisCore.Infrastructure/Deployment/DeploymentReadinessChecker.cs": {
-    "mtime": 1788459723.3652346,
-    "seen": 1788461387.4189293,
-    "ast_hash": "8ef1e71d187ad3213a5bb1bc043478e9",
-    "semantic_hash": "8ef1e71d187ad3213a5bb1bc043478e9"
+    "mtime": 1788507327.4506893,
+    "seen": 1788507684.0489006,
+    "ast_hash": "ce27cb6b8c2bdefcd1d75d2ef7a2982d",
+    "semantic_hash": "ce27cb6b8c2bdefcd1d75d2ef7a2982d"
   },
   "AegisCore.Infrastructure/Deployment/ExtendedHealthChecks.cs": {
     "mtime": 1788459723.3652346,
@@ -3492,10 +3492,10 @@
     "semantic_hash": "280a21b303ab659d62e678d507827677"
   },
   "AegisCore.Infrastructure/InfrastructureServiceExtensions.cs": {
-    "mtime": 1788459723.3691626,
-    "seen": 1788461387.4190311,
-    "ast_hash": "73dc46abb7697fdd87eb362704472c80",
-    "semantic_hash": "73dc46abb7697fdd87eb362704472c80"
+    "mtime": 1788507327.4546893,
+    "seen": 1788507684.0534286,
+    "ast_hash": "23a5b98b89e50f2e28b05a0a95ed84e5",
+    "semantic_hash": "23a5b98b89e50f2e28b05a0a95ed84e5"
   },
   "AegisCore.Infrastructure/Installation/InstallationStateService.cs": {
     "mtime": 1788459723.3691626,
@@ -3528,10 +3528,10 @@
     "semantic_hash": "eadedb2c4ba4cca5a3a4ec4920d508c8"
   },
   "AegisCore.Infrastructure/MicrosoftEcosystem/MicrosoftEcosystemServices.cs": {
-    "mtime": 1788459723.3701234,
-    "seen": 1788461387.4190414,
-    "ast_hash": "72e6ea827348e234b31c1365c45f0354",
-    "semantic_hash": "72e6ea827348e234b31c1365c45f0354"
+    "mtime": 1788507327.4536893,
+    "seen": 1788507684.0539744,
+    "ast_hash": "e41a9fb14182af804b3ff97ca08bb8db",
+    "semantic_hash": "e41a9fb14182af804b3ff97ca08bb8db"
   },
   "AegisCore.Infrastructure/Migrations/20260726160353_V1_0_AegisCoreBaseline.Designer.cs": {
     "mtime": 1788459723.3746016,
@@ -4488,10 +4488,10 @@
     "semantic_hash": "d86903a00b917beeadbbf64eea348df8"
   },
   "AegisCore.Infrastructure/Search/SearchServiceExtensions.cs": {
-    "mtime": 1788459723.4106135,
-    "seen": 1788461387.4193137,
-    "ast_hash": "2be07f50bce895fd1b8cbae782553b2e",
-    "semantic_hash": "2be07f50bce895fd1b8cbae782553b2e"
+    "mtime": 1788507327.4546893,
+    "seen": 1788507684.0683556,
+    "ast_hash": "35be9775dec3075192c7098035e7a2f4",
+    "semantic_hash": "35be9775dec3075192c7098035e7a2f4"
   },
   "AegisCore.Infrastructure/Security/Abac/AbacPolicyService.cs": {
     "mtime": 1788459723.4107196,
@@ -4518,10 +4518,10 @@
     "semantic_hash": "d21698d4046815e4d217fa4d32dff1b3"
   },
   "AegisCore.Infrastructure/Security/JwtTokenService.cs": {
-    "mtime": 1788459723.4107196,
-    "seen": 1788461387.4193215,
-    "ast_hash": "45e7fe4b56295dceb2fe9799c06567ea",
-    "semantic_hash": "45e7fe4b56295dceb2fe9799c06567ea"
+    "mtime": 1788507327.4536893,
+    "seen": 1788507684.0686986,
+    "ast_hash": "4a07d7d1a4a744c800a8a200b28c7e1d",
+    "semantic_hash": "4a07d7d1a4a744c800a8a200b28c7e1d"
   },
   "AegisCore.Infrastructure/Security/LoginAuditService.cs": {
     "mtime": 1788459723.4107196,
@@ -6654,459 +6654,465 @@
     "semantic_hash": "fa7944e3aec8b278b8c9a81636865276"
   },
   "AegisCore.Infrastructure/Migrations/20260904000000_AddTenantId_AcademicHoliday.cs": {
-    "mtime": 1788506382.7357123,
-    "seen": 1788507080.7602284,
-    "ast_hash": "8c9f456db57ef7605c03281fa509d7ef",
-    "semantic_hash": "8c9f456db57ef7605c03281fa509d7ef"
+    "mtime": 1788507204.5005164,
+    "seen": 1788507684.0614085,
+    "ast_hash": "5517c5038ec2da149c6c036075a410a2",
+    "semantic_hash": "5517c5038ec2da149c6c036075a410a2"
   },
   "AegisCore.Infrastructure/Migrations/20260904000100_AddTenantId_AcademicYear.cs": {
-    "mtime": 1788506382.7697127,
-    "seen": 1788507080.7602315,
-    "ast_hash": "968252403debe570885ee25c809499ad",
-    "semantic_hash": "968252403debe570885ee25c809499ad"
+    "mtime": 1788507204.5415168,
+    "seen": 1788507684.0614116,
+    "ast_hash": "8ad11cd955ffbc69a105263ccf818ad8",
+    "semantic_hash": "8ad11cd955ffbc69a105263ccf818ad8"
   },
   "AegisCore.Infrastructure/Migrations/20260904000200_AddTenantId_AdmissionApplication.cs": {
-    "mtime": 1788506382.808713,
-    "seen": 1788507080.7602336,
-    "ast_hash": "dbb027254d80159b0fa41b3802e46cff",
-    "semantic_hash": "dbb027254d80159b0fa41b3802e46cff"
+    "mtime": 1788507204.5965173,
+    "seen": 1788507684.0614133,
+    "ast_hash": "13178c457fb972c12e1c67ab0c6768fc",
+    "semantic_hash": "13178c457fb972c12e1c67ab0c6768fc"
   },
   "AegisCore.Infrastructure/Migrations/20260904000300_AddTenantId_AgenticGradeRun.cs": {
-    "mtime": 1788506382.8497133,
-    "seen": 1788507080.7602363,
-    "ast_hash": "92a3797db3a8bf72b1121270ec20ffb3",
-    "semantic_hash": "92a3797db3a8bf72b1121270ec20ffb3"
+    "mtime": 1788507204.6385179,
+    "seen": 1788507684.0614157,
+    "ast_hash": "482cde060528eee66b4ff727d31d63f9",
+    "semantic_hash": "482cde060528eee66b4ff727d31d63f9"
   },
   "AegisCore.Infrastructure/Migrations/20260904000400_AddTenantId_AnonymousFeedbackSubmission.cs": {
-    "mtime": 1788506382.8927138,
-    "seen": 1788507080.7602382,
-    "ast_hash": "00272498565d72fb52448632731c0cdf",
-    "semantic_hash": "00272498565d72fb52448632731c0cdf"
+    "mtime": 1788507204.6985183,
+    "seen": 1788507684.061419,
+    "ast_hash": "73256b12e540cdf09f5ce9810cb443d4",
+    "semantic_hash": "73256b12e540cdf09f5ce9810cb443d4"
   },
   "AegisCore.Infrastructure/Migrations/20260904000500_AddTenantId_ApplicationDocument.cs": {
-    "mtime": 1788506382.9297142,
-    "seen": 1788507080.7602396,
-    "ast_hash": "eaf591599db3e4cfd5c7e164356969c3",
-    "semantic_hash": "eaf591599db3e4cfd5c7e164356969c3"
+    "mtime": 1788507204.7385187,
+    "seen": 1788507684.0614216,
+    "ast_hash": "f75f4d39b09c2e51794050cc7bdfc337",
+    "semantic_hash": "f75f4d39b09c2e51794050cc7bdfc337"
   },
   "AegisCore.Infrastructure/Migrations/20260904000600_AddTenantId_ApprovalRecord.cs": {
-    "mtime": 1788506382.9707146,
-    "seen": 1788507080.760242,
-    "ast_hash": "752209c6eb3f88c53d5e0ae7d3826535",
-    "semantic_hash": "752209c6eb3f88c53d5e0ae7d3826535"
+    "mtime": 1788507204.7785192,
+    "seen": 1788507684.0614235,
+    "ast_hash": "f5867eaca881bae083f7035170661ed7",
+    "semantic_hash": "f5867eaca881bae083f7035170661ed7"
   },
   "AegisCore.Infrastructure/Migrations/20260904000700_AddTenantId_AssessmentComponent.cs": {
-    "mtime": 1788506383.008715,
-    "seen": 1788507080.760244,
-    "ast_hash": "751339727717c6a5c8de5af5e5e0dce3",
-    "semantic_hash": "751339727717c6a5c8de5af5e5e0dce3"
+    "mtime": 1788507204.8205194,
+    "seen": 1788507684.0614254,
+    "ast_hash": "087027a0572b9f616785bac404de93ed",
+    "semantic_hash": "087027a0572b9f616785bac404de93ed"
   },
   "AegisCore.Infrastructure/Migrations/20260904000800_AddTenantId_AssessmentScheme.cs": {
-    "mtime": 1788506383.0427153,
-    "seen": 1788507080.7602456,
-    "ast_hash": "b283640de07f148ff0c1ada10a2dcee2",
-    "semantic_hash": "b283640de07f148ff0c1ada10a2dcee2"
+    "mtime": 1788507204.85952,
+    "seen": 1788507684.0614274,
+    "ast_hash": "b656ff98480eff8cab617eb2482aa0dc",
+    "semantic_hash": "b656ff98480eff8cab617eb2482aa0dc"
   },
   "AegisCore.Infrastructure/Migrations/20260904000900_AddTenantId_Attendance.cs": {
-    "mtime": 1788506383.0767155,
-    "seen": 1788507080.7602477,
-    "ast_hash": "eccbe717868fc23a2634689c78188d7f",
-    "semantic_hash": "eccbe717868fc23a2634689c78188d7f"
+    "mtime": 1788507204.9285204,
+    "seen": 1788507684.0614297,
+    "ast_hash": "bec1af461b0cd377ecc7ddf29af60179",
+    "semantic_hash": "bec1af461b0cd377ecc7ddf29af60179"
   },
   "AegisCore.Infrastructure/Migrations/20260904001000_AddTenantId_Batch.cs": {
-    "mtime": 1788506383.1067157,
-    "seen": 1788507080.7602494,
-    "ast_hash": "fd382c6d37929c9e1ba30b3265a7df02",
-    "semantic_hash": "fd382c6d37929c9e1ba30b3265a7df02"
+    "mtime": 1788507204.9695208,
+    "seen": 1788507684.0614328,
+    "ast_hash": "2c51785f94cd528ad1052e2d83171e33",
+    "semantic_hash": "2c51785f94cd528ad1052e2d83171e33"
   },
   "AegisCore.Infrastructure/Migrations/20260904001100_AddTenantId_CisUpload.cs": {
-    "mtime": 1788506383.138716,
-    "seen": 1788507080.7602508,
-    "ast_hash": "63729ffdcacd46f40a025d8d42f18780",
-    "semantic_hash": "63729ffdcacd46f40a025d8d42f18780"
+    "mtime": 1788507205.0065212,
+    "seen": 1788507684.0614352,
+    "ast_hash": "d73f32540fea05579edbb085ba5afd25",
+    "semantic_hash": "d73f32540fea05579edbb085ba5afd25"
   },
   "AegisCore.Infrastructure/Migrations/20260904001200_AddTenantId_CloPlomapping.cs": {
-    "mtime": 1788506383.1707163,
-    "seen": 1788507080.7602527,
-    "ast_hash": "caf40faad4b9548948f910f56cefad65",
-    "semantic_hash": "caf40faad4b9548948f910f56cefad65"
+    "mtime": 1788507205.0435216,
+    "seen": 1788507684.0614376,
+    "ast_hash": "a7c3cf9ac2a0f8b2faf10797395e8772",
+    "semantic_hash": "a7c3cf9ac2a0f8b2faf10797395e8772"
   },
   "AegisCore.Infrastructure/Migrations/20260904001300_AddTenantId_ConfigVersion.cs": {
-    "mtime": 1788506383.2067168,
-    "seen": 1788507080.760254,
-    "ast_hash": "ba45982ce52b538eba1a25615202d81d",
-    "semantic_hash": "ba45982ce52b538eba1a25615202d81d"
+    "mtime": 1788507205.0985222,
+    "seen": 1788507684.06144,
+    "ast_hash": "a93e9a7b8af8908cc7532ed4c10d944c",
+    "semantic_hash": "a93e9a7b8af8908cc7532ed4c10d944c"
   },
   "AegisCore.Infrastructure/Migrations/20260904001400_AddTenantId_Course.cs": {
-    "mtime": 1788506383.243717,
-    "seen": 1788507080.7602558,
-    "ast_hash": "c36371a2db7f4041b08ab4f447fee893",
-    "semantic_hash": "c36371a2db7f4041b08ab4f447fee893"
+    "mtime": 1788507205.1445227,
+    "seen": 1788507684.0614421,
+    "ast_hash": "baca58c46ccf322ab6ce21b2d031fd80",
+    "semantic_hash": "baca58c46ccf322ab6ce21b2d031fd80"
   },
   "AegisCore.Infrastructure/Migrations/20260904001500_AddTenantId_CourseAssignment.cs": {
-    "mtime": 1788506383.2787173,
-    "seen": 1788507080.7602575,
-    "ast_hash": "5547bd16c6185495ea648018483dc0de",
-    "semantic_hash": "5547bd16c6185495ea648018483dc0de"
+    "mtime": 1788507205.183523,
+    "seen": 1788507684.061444,
+    "ast_hash": "fdcbdb97d869fa00a304dfb7c14a65e1",
+    "semantic_hash": "fdcbdb97d869fa00a304dfb7c14a65e1"
   },
   "AegisCore.Infrastructure/Migrations/20260904001600_AddTenantId_CourseGrade.cs": {
-    "mtime": 1788506383.3137178,
-    "seen": 1788507080.7602594,
-    "ast_hash": "d679f9d3fc39a4fd099223dd4dd3f028",
-    "semantic_hash": "d679f9d3fc39a4fd099223dd4dd3f028"
+    "mtime": 1788507205.2245233,
+    "seen": 1788507684.0614462,
+    "ast_hash": "618e9fb26f9c394b0ff6ffdde2c87c7b",
+    "semantic_hash": "618e9fb26f9c394b0ff6ffdde2c87c7b"
   },
   "AegisCore.Infrastructure/Migrations/20260904001700_AddTenantId_CourseMark.cs": {
-    "mtime": 1788506383.3487182,
-    "seen": 1788507080.7602613,
-    "ast_hash": "74926485d8cffc65b6b55e0accf86461",
-    "semantic_hash": "74926485d8cffc65b6b55e0accf86461"
+    "mtime": 1788507205.2605236,
+    "seen": 1788507684.0614479,
+    "ast_hash": "2ecbaab8234adc45ec82e9d8a274b6fd",
+    "semantic_hash": "2ecbaab8234adc45ec82e9d8a274b6fd"
   },
   "AegisCore.Infrastructure/Migrations/20260904001800_AddTenantId_CourseReEnrollment.cs": {
-    "mtime": 1788506383.3837185,
-    "seen": 1788507080.760263,
-    "ast_hash": "41873857c06d0d89ab2eccb8a27b4ea7",
-    "semantic_hash": "41873857c06d0d89ab2eccb8a27b4ea7"
+    "mtime": 1788507205.3165243,
+    "seen": 1788507684.0614505,
+    "ast_hash": "42fc7a651c51639ab9c7bcac8857a490",
+    "semantic_hash": "42fc7a651c51639ab9c7bcac8857a490"
   },
   "AegisCore.Infrastructure/Migrations/20260904001900_AddTenantId_CrossDeptPermissionRequest.cs": {
-    "mtime": 1788506383.4197187,
-    "seen": 1788507080.7602649,
-    "ast_hash": "a9f026ad0ec96c954e50ab5ca94b8110",
-    "semantic_hash": "a9f026ad0ec96c954e50ab5ca94b8110"
+    "mtime": 1788507205.3575246,
+    "seen": 1788507684.0614524,
+    "ast_hash": "6b16c9c7bc00b5431690f81334ff1b56",
+    "semantic_hash": "6b16c9c7bc00b5431690f81334ff1b56"
   },
   "AegisCore.Infrastructure/Migrations/20260904002000_AddTenantId_CurriculumChangeHistory.cs": {
-    "mtime": 1788506383.452719,
-    "seen": 1788507080.7602665,
-    "ast_hash": "f1ec171134b13516de512d131e5b617d",
-    "semantic_hash": "f1ec171134b13516de512d131e5b617d"
+    "mtime": 1788507205.396525,
+    "seen": 1788507684.0614543,
+    "ast_hash": "0a38427325780324114634b850f46217",
+    "semantic_hash": "0a38427325780324114634b850f46217"
   },
   "AegisCore.Infrastructure/Migrations/20260904002100_AddTenantId_CurriculumCourse.cs": {
-    "mtime": 1788506383.4947195,
-    "seen": 1788507080.7602677,
-    "ast_hash": "2dd67b8e4fc6ff1ca75f41720c20f5d8",
-    "semantic_hash": "2dd67b8e4fc6ff1ca75f41720c20f5d8"
+    "mtime": 1788507205.4345253,
+    "seen": 1788507684.0614567,
+    "ast_hash": "67f46c40ab9cfe6ae96700020393b204",
+    "semantic_hash": "67f46c40ab9cfe6ae96700020393b204"
   },
   "AegisCore.Infrastructure/Migrations/20260904002200_AddTenantId_CurriculumPrerequisite.cs": {
-    "mtime": 1788506383.5337198,
-    "seen": 1788507080.7602699,
-    "ast_hash": "b017ab28029b8e57a1954338e141c87e",
-    "semantic_hash": "b017ab28029b8e57a1954338e141c87e"
+    "mtime": 1788507205.4775257,
+    "seen": 1788507684.0614595,
+    "ast_hash": "5799f6785bba6f4d084cb32939fa9a9c",
+    "semantic_hash": "5799f6785bba6f4d084cb32939fa9a9c"
   },
   "AegisCore.Infrastructure/Migrations/20260904002300_AddTenantId_CurriculumVersionRecord.cs": {
-    "mtime": 1788506383.5747201,
-    "seen": 1788507080.760271,
-    "ast_hash": "d6c9c6fc6b2b271612c1dbeefbb51578",
-    "semantic_hash": "d6c9c6fc6b2b271612c1dbeefbb51578"
+    "mtime": 1788507205.5365262,
+    "seen": 1788507684.0614612,
+    "ast_hash": "65faf8792e514d2558c424f403cf33aa",
+    "semantic_hash": "65faf8792e514d2558c424f403cf33aa"
   },
   "AegisCore.Infrastructure/Migrations/20260904002400_AddTenantId_Enrollment.cs": {
-    "mtime": 1788506383.6107204,
-    "seen": 1788507080.760273,
-    "ast_hash": "e9704cd9beb4bbe6fce339985047f07a",
-    "semantic_hash": "e9704cd9beb4bbe6fce339985047f07a"
+    "mtime": 1788507205.5755267,
+    "seen": 1788507684.0614636,
+    "ast_hash": "bb998a7421b147c9ec802ad34e07dbc2",
+    "semantic_hash": "bb998a7421b147c9ec802ad34e07dbc2"
   },
   "AegisCore.Infrastructure/Migrations/20260904002500_AddTenantId_EventSchemaVersion.cs": {
-    "mtime": 1788506383.6437209,
-    "seen": 1788507080.7602754,
-    "ast_hash": "8e088fab527e7f396494c717dfa90ccf",
-    "semantic_hash": "8e088fab527e7f396494c717dfa90ccf"
+    "mtime": 1788507205.610527,
+    "seen": 1788507684.0614653,
+    "ast_hash": "332fe539a97aa823dce2074e076e2849",
+    "semantic_hash": "332fe539a97aa823dce2074e076e2849"
   },
   "AegisCore.Infrastructure/Migrations/20260904002600_AddTenantId_ExamPaperBatch.cs": {
-    "mtime": 1788506383.676721,
-    "seen": 1788507080.7602773,
-    "ast_hash": "5fd0feb77f03f8bd76b58a29310e9a63",
-    "semantic_hash": "5fd0feb77f03f8bd76b58a29310e9a63"
+    "mtime": 1788507205.6395273,
+    "seen": 1788507684.0614676,
+    "ast_hash": "3a3eb289b848a87882e8ffb649eac716",
+    "semantic_hash": "3a3eb289b848a87882e8ffb649eac716"
   },
   "AegisCore.Infrastructure/Migrations/20260904002700_AddTenantId_ExamPaperScan.cs": {
-    "mtime": 1788506383.7227216,
-    "seen": 1788507080.7602787,
-    "ast_hash": "0d6ea5ee43f20c00ca13aae67a57cb64",
-    "semantic_hash": "0d6ea5ee43f20c00ca13aae67a57cb64"
+    "mtime": 1788507205.6675274,
+    "seen": 1788507684.0614698,
+    "ast_hash": "122334d6950f76826dabd5cf0d9e5087",
+    "semantic_hash": "122334d6950f76826dabd5cf0d9e5087"
   },
   "AegisCore.Infrastructure/Migrations/20260904002800_AddTenantId_ExamRegistration.cs": {
-    "mtime": 1788506383.757722,
-    "seen": 1788507080.7602804,
-    "ast_hash": "abadedff736e1e29a078d39a0ec11b0b",
-    "semantic_hash": "abadedff736e1e29a078d39a0ec11b0b"
+    "mtime": 1788507205.7235281,
+    "seen": 1788507684.0614722,
+    "ast_hash": "56182e13f0dc3f91049873b83da3266f",
+    "semantic_hash": "56182e13f0dc3f91049873b83da3266f"
   },
   "AegisCore.Infrastructure/Migrations/20260904002900_AddTenantId_ExamSchedule.cs": {
-    "mtime": 1788506383.7947223,
-    "seen": 1788507080.7602823,
-    "ast_hash": "fbd4f0cf07dad115e389cda301297a01",
-    "semantic_hash": "fbd4f0cf07dad115e389cda301297a01"
+    "mtime": 1788507205.7575283,
+    "seen": 1788507684.0614743,
+    "ast_hash": "fa244fc1adb1aca206d294f82b954a54",
+    "semantic_hash": "fa244fc1adb1aca206d294f82b954a54"
   },
   "AegisCore.Infrastructure/Migrations/20260904003000_AddTenantId_ExamSeating.cs": {
-    "mtime": 1788506383.8337226,
-    "seen": 1788507080.760284,
-    "ast_hash": "396444c3a4ca5732709dec460f3c2b65",
-    "semantic_hash": "396444c3a4ca5732709dec460f3c2b65"
+    "mtime": 1788507205.7885287,
+    "seen": 1788507684.0614765,
+    "ast_hash": "286f64d6a31e2612bb8a6cabee7563f7",
+    "semantic_hash": "286f64d6a31e2612bb8a6cabee7563f7"
   },
   "AegisCore.Infrastructure/Migrations/20260904003100_AddTenantId_Faculty.cs": {
-    "mtime": 1788506383.870723,
-    "seen": 1788507080.7602856,
-    "ast_hash": "627f5281b1e16eac178990d8e3264b22",
-    "semantic_hash": "627f5281b1e16eac178990d8e3264b22"
+    "mtime": 1788507205.835529,
+    "seen": 1788507684.0614781,
+    "ast_hash": "f828e4a68eb8639c54c983a369e2ad04",
+    "semantic_hash": "f828e4a68eb8639c54c983a369e2ad04"
   },
   "AegisCore.Infrastructure/Migrations/20260904003200_AddTenantId_FeatureFlag.cs": {
-    "mtime": 1788506383.9207234,
-    "seen": 1788507080.7602878,
-    "ast_hash": "4d94d2c9f827b34df2b05c39122b2a3e",
-    "semantic_hash": "4d94d2c9f827b34df2b05c39122b2a3e"
+    "mtime": 1788507205.8755295,
+    "seen": 1788507684.06148,
+    "ast_hash": "66122255d7d6720ac207a1144bf47a50",
+    "semantic_hash": "66122255d7d6720ac207a1144bf47a50"
   },
   "AegisCore.Infrastructure/Migrations/20260904003300_AddTenantId_FeeComponent.cs": {
-    "mtime": 1788506383.9677238,
-    "seen": 1788507080.7602901,
-    "ast_hash": "99e1357fa3eb2bbc959f82c673188f51",
-    "semantic_hash": "99e1357fa3eb2bbc959f82c673188f51"
+    "mtime": 1788507205.9035296,
+    "seen": 1788507684.0614822,
+    "ast_hash": "174f11926e6770304e53a65282e4ab6a",
+    "semantic_hash": "174f11926e6770304e53a65282e4ab6a"
   },
   "AegisCore.Infrastructure/Migrations/20260904003400_AddTenantId_FeeStructure.cs": {
-    "mtime": 1788506384.003724,
-    "seen": 1788507080.7602918,
-    "ast_hash": "9a4cdb432825273e77774f649ad570a5",
-    "semantic_hash": "9a4cdb432825273e77774f649ad570a5"
+    "mtime": 1788507205.93153,
+    "seen": 1788507684.0614848,
+    "ast_hash": "f8aced8969947b56b13470d9cd7980d1",
+    "semantic_hash": "f8aced8969947b56b13470d9cd7980d1"
   },
   "AegisCore.Infrastructure/Migrations/20260904003500_AddTenantId_GradeBand.cs": {
-    "mtime": 1788506384.0427246,
-    "seen": 1788507080.7602937,
-    "ast_hash": "1ec70a700ef3715c22f061f522fd788e",
-    "semantic_hash": "1ec70a700ef3715c22f061f522fd788e"
+    "mtime": 1788507205.9605303,
+    "seen": 1788507684.0614872,
+    "ast_hash": "fd5cc696e86013d127101763c3c422b2",
+    "semantic_hash": "fd5cc696e86013d127101763c3c422b2"
   },
   "AegisCore.Infrastructure/Migrations/20260904003600_AddTenantId_GradeOverrideRequest.cs": {
-    "mtime": 1788506384.0767248,
-    "seen": 1788507080.7602956,
-    "ast_hash": "dd9b01c458241d712eb5d2e7160087dd",
-    "semantic_hash": "dd9b01c458241d712eb5d2e7160087dd"
+    "mtime": 1788507205.9905305,
+    "seen": 1788507684.061489,
+    "ast_hash": "ae99577ec0c0e49cbc07099eebb22142",
+    "semantic_hash": "ae99577ec0c0e49cbc07099eebb22142"
   },
   "AegisCore.Infrastructure/Migrations/20260904003700_AddTenantId_GradeScale.cs": {
-    "mtime": 1788506384.1127253,
-    "seen": 1788507080.7602975,
-    "ast_hash": "dbe6edba53d7a742a8eb2bebb62e06ab",
-    "semantic_hash": "dbe6edba53d7a742a8eb2bebb62e06ab"
+    "mtime": 1788507206.0375311,
+    "seen": 1788507684.0614913,
+    "ast_hash": "03aa53ba1d1fd028ce3e8389a0deaea2",
+    "semantic_hash": "03aa53ba1d1fd028ce3e8389a0deaea2"
   },
   "AegisCore.Infrastructure/Migrations/20260904003800_AddTenantId_GrievanceResponse.cs": {
-    "mtime": 1788506384.1457255,
-    "seen": 1788507080.760299,
-    "ast_hash": "12342bf482ce1e7e0da67a7a08e7091d",
-    "semantic_hash": "12342bf482ce1e7e0da67a7a08e7091d"
+    "mtime": 1788507206.0895314,
+    "seen": 1788507684.0614934,
+    "ast_hash": "f9ee9cfe3f4173e5ce3958901a446e2f",
+    "semantic_hash": "f9ee9cfe3f4173e5ce3958901a446e2f"
   },
   "AegisCore.Infrastructure/Migrations/20260904003900_AddTenantId_HumanGradeReview.cs": {
-    "mtime": 1788506384.1807258,
-    "seen": 1788507080.7603006,
-    "ast_hash": "77200a3daeb16168f7d38ab14eebe67a",
-    "semantic_hash": "77200a3daeb16168f7d38ab14eebe67a"
+    "mtime": 1788507206.1175318,
+    "seen": 1788507684.0614955,
+    "ast_hash": "24e98210774f80cd04132522d5899787",
+    "semantic_hash": "24e98210774f80cd04132522d5899787"
   },
   "AegisCore.Infrastructure/Migrations/20260904004000_AddTenantId_LicenseState.cs": {
-    "mtime": 1788506384.2157261,
-    "seen": 1788507080.7603025,
-    "ast_hash": "5f70da43408c3ce9224baf1e93d86a04",
-    "semantic_hash": "5f70da43408c3ce9224baf1e93d86a04"
+    "mtime": 1788507206.1515322,
+    "seen": 1788507684.0614977,
+    "ast_hash": "82960598d5a6476a4ec783c9ca850113",
+    "semantic_hash": "82960598d5a6476a4ec783c9ca850113"
   },
   "AegisCore.Infrastructure/Migrations/20260904004100_AddTenantId_MarkModeration.cs": {
-    "mtime": 1788506384.2557266,
-    "seen": 1788507080.7603042,
-    "ast_hash": "ffee01d4a5365c9e8b1cda42790a017c",
-    "semantic_hash": "ffee01d4a5365c9e8b1cda42790a017c"
+    "mtime": 1788507206.1775324,
+    "seen": 1788507684.0614998,
+    "ast_hash": "628bcaea8088e28f94feff29b53bac02",
+    "semantic_hash": "628bcaea8088e28f94feff29b53bac02"
   },
   "AegisCore.Infrastructure/Migrations/20260904004200_AddTenantId_MeritList.cs": {
-    "mtime": 1788506384.2877269,
-    "seen": 1788507080.760306,
-    "ast_hash": "5429c91311cb07aca6c6b6adebb5f000",
-    "semantic_hash": "5429c91311cb07aca6c6b6adebb5f000"
+    "mtime": 1788507206.2105327,
+    "seen": 1788507684.061502,
+    "ast_hash": "22fdb0992e0cd49c25372c74985df5b4",
+    "semantic_hash": "22fdb0992e0cd49c25372c74985df5b4"
   },
   "AegisCore.Infrastructure/Migrations/20260904004300_AddTenantId_MeritListEntry.cs": {
-    "mtime": 1788506384.318727,
-    "seen": 1788507080.760308,
-    "ast_hash": "3dd53d417f4e25c6da185066925d01e6",
-    "semantic_hash": "3dd53d417f4e25c6da185066925d01e6"
+    "mtime": 1788507206.242533,
+    "seen": 1788507684.0615036,
+    "ast_hash": "a7ef6900560374aa7dce3249fd1d1b17",
+    "semantic_hash": "a7ef6900560374aa7dce3249fd1d1b17"
   },
   "AegisCore.Infrastructure/Migrations/20260904004400_AddTenantId_NoticeBoardItem.cs": {
-    "mtime": 1788506384.3507273,
-    "seen": 1788507080.7603095,
-    "ast_hash": "70e29279c2d4684910639f96c7cc3494",
-    "semantic_hash": "70e29279c2d4684910639f96c7cc3494"
+    "mtime": 1788507206.2715333,
+    "seen": 1788507684.0615056,
+    "ast_hash": "adfe24fb733f40b890da370303dbf306",
+    "semantic_hash": "adfe24fb733f40b890da370303dbf306"
   },
   "AegisCore.Infrastructure/Migrations/20260904004500_AddTenantId_NotificationRecord.cs": {
-    "mtime": 1788506384.3847277,
-    "seen": 1788507080.7603116,
-    "ast_hash": "50c5d647e40c5c4e2ffc552f5bef00c4",
-    "semantic_hash": "50c5d647e40c5c4e2ffc552f5bef00c4"
+    "mtime": 1788507206.2995336,
+    "seen": 1788507684.0615072,
+    "ast_hash": "55ffa8c18b7e2daa2f8e32341fca0eb5",
+    "semantic_hash": "55ffa8c18b7e2daa2f8e32341fca0eb5"
   },
   "AegisCore.Infrastructure/Migrations/20260904004600_AddTenantId_NotificationTemplate.cs": {
-    "mtime": 1788506384.413728,
-    "seen": 1788507080.7603135,
-    "ast_hash": "c0e3301f2cc64cbea80674910d97bee3",
-    "semantic_hash": "c0e3301f2cc64cbea80674910d97bee3"
+    "mtime": 1788507206.328534,
+    "seen": 1788507684.0615091,
+    "ast_hash": "f1dbc53fae95476372a8d0e0a7b74219",
+    "semantic_hash": "f1dbc53fae95476372a8d0e0a7b74219"
   },
   "AegisCore.Infrastructure/Migrations/20260904004700_AddTenantId_OfflineAttendanceEvent.cs": {
-    "mtime": 1788506384.4427283,
-    "seen": 1788507080.760316,
-    "ast_hash": "ea5568e846c5e52086027fb30ed6590e",
-    "semantic_hash": "ea5568e846c5e52086027fb30ed6590e"
+    "mtime": 1788507206.356534,
+    "seen": 1788507684.0615108,
+    "ast_hash": "435ef411121f5c979e6d4f8afd191086",
+    "semantic_hash": "435ef411121f5c979e6d4f8afd191086"
   },
   "AegisCore.Infrastructure/Migrations/20260904004800_AddTenantId_PaperDestructionManifest.cs": {
-    "mtime": 1788506384.4737284,
-    "seen": 1788507080.7603178,
-    "ast_hash": "8068dccb596a0de29c28dc40aaedf0f3",
-    "semantic_hash": "8068dccb596a0de29c28dc40aaedf0f3"
+    "mtime": 1788507206.3855343,
+    "seen": 1788507684.061513,
+    "ast_hash": "8a8ad5ed24d653e2fc022b2a04718eee",
+    "semantic_hash": "8a8ad5ed24d653e2fc022b2a04718eee"
   },
   "AegisCore.Infrastructure/Migrations/20260904004900_AddTenantId_PayrollRun.cs": {
-    "mtime": 1788506384.5047288,
-    "seen": 1788507080.7603195,
-    "ast_hash": "e505a67ab2bb75ed95d20997be3e01af",
-    "semantic_hash": "e505a67ab2bb75ed95d20997be3e01af"
+    "mtime": 1788507206.4135346,
+    "seen": 1788507684.061515,
+    "ast_hash": "94613c1ca31c1b6e6300f475527eed1d",
+    "semantic_hash": "94613c1ca31c1b6e6300f475527eed1d"
   },
   "AegisCore.Infrastructure/Migrations/20260904005000_AddTenantId_Payslip.cs": {
-    "mtime": 1788506384.537729,
-    "seen": 1788507080.7603216,
-    "ast_hash": "f9967ea0702b301f9b665f14f0e4ec8a",
-    "semantic_hash": "f9967ea0702b301f9b665f14f0e4ec8a"
+    "mtime": 1788507206.4415348,
+    "seen": 1788507684.061517,
+    "ast_hash": "0c03439ada647636f84e4c10880af68d",
+    "semantic_hash": "0c03439ada647636f84e4c10880af68d"
   },
   "AegisCore.Infrastructure/Migrations/20260904005100_AddTenantId_PolicyConfig.cs": {
-    "mtime": 1788506384.5797296,
-    "seen": 1788507080.7603235,
-    "ast_hash": "9677065042c9fc16fcdac37146764da8",
-    "semantic_hash": "9677065042c9fc16fcdac37146764da8"
+    "mtime": 1788507206.470535,
+    "seen": 1788507684.0615196,
+    "ast_hash": "8d45d47e25e29c2fc083f6067502738b",
+    "semantic_hash": "8d45d47e25e29c2fc083f6067502738b"
   },
   "AegisCore.Infrastructure/Migrations/20260904005200_AddTenantId_ProcurementRequisition.cs": {
-    "mtime": 1788506384.6117299,
-    "seen": 1788507080.7603254,
-    "ast_hash": "d7cd501cb79440355cffdfe7f0a53604",
-    "semantic_hash": "d7cd501cb79440355cffdfe7f0a53604"
+    "mtime": 1788507206.4985354,
+    "seen": 1788507684.0615213,
+    "ast_hash": "c33565caaa86d2438080f05da013ce0a",
+    "semantic_hash": "c33565caaa86d2438080f05da013ce0a"
   },
   "AegisCore.Infrastructure/Migrations/20260904005300_AddTenantId_PromptVersion.cs": {
-    "mtime": 1788506384.64473,
-    "seen": 1788507080.760327,
-    "ast_hash": "4979902918f0d4a110f6d61866815d30",
-    "semantic_hash": "4979902918f0d4a110f6d61866815d30"
+    "mtime": 1788507206.5315356,
+    "seen": 1788507684.0615232,
+    "ast_hash": "db1fe8ca6fe7404c2d442c728a28f6ba",
+    "semantic_hash": "db1fe8ca6fe7404c2d442c728a28f6ba"
   },
   "AegisCore.Infrastructure/Migrations/20260904005400_AddTenantId_PurchaseOrder.cs": {
-    "mtime": 1788506384.6767304,
-    "seen": 1788507080.7603288,
-    "ast_hash": "9f6c24809e7d475a926e77ec94c063e1",
-    "semantic_hash": "9f6c24809e7d475a926e77ec94c063e1"
+    "mtime": 1788507206.558536,
+    "seen": 1788507684.061525,
+    "ast_hash": "346e2498e5eb52d0a08960188df4cc25",
+    "semantic_hash": "346e2498e5eb52d0a08960188df4cc25"
   },
   "AegisCore.Infrastructure/Migrations/20260904005500_AddTenantId_RequisitionLineItem.cs": {
-    "mtime": 1788506384.7107308,
-    "seen": 1788507080.7603302,
-    "ast_hash": "5812c48378797786478491326509367b",
-    "semantic_hash": "5812c48378797786478491326509367b"
+    "mtime": 1788507206.5885363,
+    "seen": 1788507684.0615268,
+    "ast_hash": "aeeac5337114bd0df30388614b8d9b19",
+    "semantic_hash": "aeeac5337114bd0df30388614b8d9b19"
   },
   "AegisCore.Infrastructure/Migrations/20260904005600_AddTenantId_RuleVersion.cs": {
-    "mtime": 1788506384.744731,
-    "seen": 1788507080.760332,
-    "ast_hash": "91b094030b0871fe9625a799c01a3f31",
-    "semantic_hash": "91b094030b0871fe9625a799c01a3f31"
+    "mtime": 1788507206.6165366,
+    "seen": 1788507684.061529,
+    "ast_hash": "ad2b1563ca9c89749db31e400481da67",
+    "semantic_hash": "ad2b1563ca9c89749db31e400481da67"
   },
   "AegisCore.Infrastructure/Migrations/20260904005700_AddTenantId_SeatAllocation.cs": {
-    "mtime": 1788506384.7787313,
-    "seen": 1788507080.7603343,
-    "ast_hash": "13eab6642aaeb603bd06ea6f3d566a67",
-    "semantic_hash": "13eab6642aaeb603bd06ea6f3d566a67"
+    "mtime": 1788507206.6465368,
+    "seen": 1788507684.061531,
+    "ast_hash": "856edc42903af361d2f3155ca5ba4a37",
+    "semantic_hash": "856edc42903af361d2f3155ca5ba4a37"
   },
   "AegisCore.Infrastructure/Migrations/20260904005800_AddTenantId_SectionOverrideRequest.cs": {
-    "mtime": 1788506384.8107316,
-    "seen": 1788507080.760336,
-    "ast_hash": "cd48fc2fc73b4025d039e7c1f19afd7f",
-    "semantic_hash": "cd48fc2fc73b4025d039e7c1f19afd7f"
+    "mtime": 1788507206.6775372,
+    "seen": 1788507684.0615332,
+    "ast_hash": "19731a0103ce969de50bebd81ac1ca70",
+    "semantic_hash": "19731a0103ce969de50bebd81ac1ca70"
   },
   "AegisCore.Infrastructure/Migrations/20260904005900_AddTenantId_Semester.cs": {
-    "mtime": 1788506384.841732,
-    "seen": 1788507080.7603378,
-    "ast_hash": "e4422c6a9015dc93c05a26582bc5e98a",
-    "semantic_hash": "e4422c6a9015dc93c05a26582bc5e98a"
+    "mtime": 1788507206.7115374,
+    "seen": 1788507684.061535,
+    "ast_hash": "4f1a6e34bfeb0c6dc8aff5f4c9b6e78f",
+    "semantic_hash": "4f1a6e34bfeb0c6dc8aff5f4c9b6e78f"
   },
   "AegisCore.Infrastructure/Migrations/20260904010000_AddTenantId_ServiceDependency.cs": {
-    "mtime": 1788506384.8727322,
-    "seen": 1788507080.7603397,
-    "ast_hash": "01011b861fa5449a49fc4253b396234a",
-    "semantic_hash": "01011b861fa5449a49fc4253b396234a"
+    "mtime": 1788507206.7465377,
+    "seen": 1788507684.0615375,
+    "ast_hash": "282a669fb98b65110da650feec55ac32",
+    "semantic_hash": "282a669fb98b65110da650feec55ac32"
   },
   "AegisCore.Infrastructure/Migrations/20260904010100_AddTenantId_SsoSession.cs": {
-    "mtime": 1788506384.9057326,
-    "seen": 1788507080.7603412,
-    "ast_hash": "d870d234d6f822cb3623b2047ab4b7a2",
-    "semantic_hash": "d870d234d6f822cb3623b2047ab4b7a2"
+    "mtime": 1788507206.777538,
+    "seen": 1788507684.0615401,
+    "ast_hash": "2591d211d4819b451cf6931b2eae846d",
+    "semantic_hash": "2591d211d4819b451cf6931b2eae846d"
   },
   "AegisCore.Infrastructure/Migrations/20260904010200_AddTenantId_Student.cs": {
-    "mtime": 1788506384.9397328,
-    "seen": 1788507080.760343,
-    "ast_hash": "e0dfb472f6bc6b70edb32d5a984b4c06",
-    "semantic_hash": "e0dfb472f6bc6b70edb32d5a984b4c06"
+    "mtime": 1788507206.8065383,
+    "seen": 1788507684.061542,
+    "ast_hash": "92d8bb9c608bc6a2a2866cc3d95d7b76",
+    "semantic_hash": "92d8bb9c608bc6a2a2866cc3d95d7b76"
   },
   "AegisCore.Infrastructure/Migrations/20260904010300_AddTenantId_StudentFeeDue.cs": {
-    "mtime": 1788506384.9807332,
-    "seen": 1788507080.760345,
-    "ast_hash": "f37e64f9d983f5fcfaac8c6522d1aa14",
-    "semantic_hash": "f37e64f9d983f5fcfaac8c6522d1aa14"
+    "mtime": 1788507206.8315387,
+    "seen": 1788507684.0615442,
+    "ast_hash": "51b99ab50a1b75374decba7d62074baa",
+    "semantic_hash": "51b99ab50a1b75374decba7d62074baa"
   },
   "AegisCore.Infrastructure/Migrations/20260904010400_AddTenantId_StudentFeePayment.cs": {
-    "mtime": 1788506385.0197337,
-    "seen": 1788507080.7603467,
-    "ast_hash": "54fcb15c8beb0c63aef811236fb4036f",
-    "semantic_hash": "54fcb15c8beb0c63aef811236fb4036f"
+    "mtime": 1788507206.863539,
+    "seen": 1788507684.0615463,
+    "ast_hash": "95d117149b9a04b326a5440a4c1bd1ad",
+    "semantic_hash": "95d117149b9a04b326a5440a4c1bd1ad"
   },
   "AegisCore.Infrastructure/Migrations/20260904010500_AddTenantId_SystemConfiguration.cs": {
-    "mtime": 1788506385.063734,
-    "seen": 1788507080.760348,
-    "ast_hash": "576504650d7b2d52003b5cdd6b3a1a92",
-    "semantic_hash": "576504650d7b2d52003b5cdd6b3a1a92"
+    "mtime": 1788507206.8935392,
+    "seen": 1788507684.061548,
+    "ast_hash": "39e64adce549ae1839af0d756ed84b2f",
+    "semantic_hash": "39e64adce549ae1839af0d756ed84b2f"
   },
   "AegisCore.Infrastructure/Migrations/20260904010600_AddTenantId_Tenant.cs": {
-    "mtime": 1788506385.1007345,
-    "seen": 1788507080.7603502,
-    "ast_hash": "8339cbecec5005bb17ec319f8bbf53b6",
-    "semantic_hash": "8339cbecec5005bb17ec319f8bbf53b6"
+    "mtime": 1788507206.9195395,
+    "seen": 1788507684.06155,
+    "ast_hash": "6a8a2a9cadde23cfbe80276c7a405b91",
+    "semantic_hash": "6a8a2a9cadde23cfbe80276c7a405b91"
   },
   "AegisCore.Infrastructure/Migrations/20260904010700_AddTenantId_Timetable.cs": {
-    "mtime": 1788506385.1437347,
-    "seen": 1788507080.7603517,
-    "ast_hash": "6cec53ea8e34851f581e45cda5b696d9",
-    "semantic_hash": "6cec53ea8e34851f581e45cda5b696d9"
+    "mtime": 1788507206.9575398,
+    "seen": 1788507684.061552,
+    "ast_hash": "9296f00c1c0e4f1822b5751959264474",
+    "semantic_hash": "9296f00c1c0e4f1822b5751959264474"
   },
   "AegisCore.Infrastructure/Migrations/20260904010800_AddTenantId_Transcript.cs": {
-    "mtime": 1788506385.1887352,
-    "seen": 1788507080.7603533,
-    "ast_hash": "9eefd6498ea7cce690d31c9cce74ec7b",
-    "semantic_hash": "9eefd6498ea7cce690d31c9cce74ec7b"
+    "mtime": 1788507206.98654,
+    "seen": 1788507684.0615542,
+    "ast_hash": "d9e1d21d39d77782efec5d7c251ffbba",
+    "semantic_hash": "d9e1d21d39d77782efec5d7c251ffbba"
   },
   "AegisCore.Infrastructure/Migrations/20260904010900_AddTenantId_TranslationKey.cs": {
-    "mtime": 1788506385.2277355,
-    "seen": 1788507080.7603548,
-    "ast_hash": "091c9425671e2fce84877819b99732ee",
-    "semantic_hash": "091c9425671e2fce84877819b99732ee"
+    "mtime": 1788507207.0235405,
+    "seen": 1788507684.0615566,
+    "ast_hash": "9c2b919e5594d29255265166ba17442f",
+    "semantic_hash": "9c2b919e5594d29255265166ba17442f"
   },
   "AegisCore.Infrastructure/Migrations/20260904011000_AddTenantId_TranslationValue.cs": {
-    "mtime": 1788506385.273736,
-    "seen": 1788507080.7603567,
-    "ast_hash": "a09a93bf1f81aadddc19d611233ae6a3",
-    "semantic_hash": "a09a93bf1f81aadddc19d611233ae6a3"
+    "mtime": 1788507207.0545406,
+    "seen": 1788507684.0615585,
+    "ast_hash": "5d8904f877e34a965eef391e4a8f02df",
+    "semantic_hash": "5d8904f877e34a965eef391e4a8f02df"
   },
   "AegisCore.Infrastructure/Migrations/20260904011100_AddTenantId_UniversitySsoProfile.cs": {
-    "mtime": 1788506385.3377366,
-    "seen": 1788507080.7603583,
-    "ast_hash": "682edd5dcdada853c3298c872d044964",
-    "semantic_hash": "682edd5dcdada853c3298c872d044964"
+    "mtime": 1788507207.087541,
+    "seen": 1788507684.0615604,
+    "ast_hash": "f11fccbea7ab8b956917991468b5c575",
+    "semantic_hash": "f11fccbea7ab8b956917991468b5c575"
   },
   "AegisCore.Infrastructure/Migrations/20260904011200_AddTenantId_UserSecondFactor.cs": {
-    "mtime": 1788506385.3767369,
-    "seen": 1788507080.7603605,
-    "ast_hash": "8978ee09216e97ccbe5fd58f4e41caf4",
-    "semantic_hash": "8978ee09216e97ccbe5fd58f4e41caf4"
+    "mtime": 1788507207.1215413,
+    "seen": 1788507684.0615625,
+    "ast_hash": "42451c14decfaa5925929b6f242ef28a",
+    "semantic_hash": "42451c14decfaa5925929b6f242ef28a"
   },
   "AegisCore.Infrastructure/Migrations/20260904011300_AddTenantId_Vendor.cs": {
-    "mtime": 1788506385.4117372,
-    "seen": 1788507080.7603621,
-    "ast_hash": "651e1e620f949e29f18b119618ddba14",
-    "semantic_hash": "651e1e620f949e29f18b119618ddba14"
+    "mtime": 1788507207.1605418,
+    "seen": 1788507684.0615647,
+    "ast_hash": "a48979adbaeea2d3572c6bf6305a5aef",
+    "semantic_hash": "a48979adbaeea2d3572c6bf6305a5aef"
   },
   "AegisCore.Infrastructure/Migrations/20260904011400_AddTenantId_WorkflowStep.cs": {
-    "mtime": 1788506385.4527376,
-    "seen": 1788507080.760364,
-    "ast_hash": "a78ab21244804c3cfc17731c19436be4",
-    "semantic_hash": "a78ab21244804c3cfc17731c19436be4"
+    "mtime": 1788507207.191542,
+    "seen": 1788507684.061567,
+    "ast_hash": "4a77961747dd05acbf930a1086b88ea0",
+    "semantic_hash": "4a77961747dd05acbf930a1086b88ea0"
   },
   "AegisCore.Tests/Infrastructure/TenantIsolationTest.cs": {
     "mtime": 1788506408.795958,
     "seen": 1788507080.7889435,
     "ast_hash": "f261595b794d77ce69b4e4f2f2f32a61",
     "semantic_hash": "f261595b794d77ce69b4e4f2f2f32a61"
+  },
+  "AegisCore.Tests/Infrastructure/EnvironmentSubstitutionTest.cs": {
+    "mtime": 1788507327.4556894,
+    "seen": 1788507684.0886915,
+    "ast_hash": "9b53095c6cc7366ba53abf0be07635e3",
+    "semantic_hash": "9b53095c6cc7366ba53abf0be07635e3"
   }
 }

@@ -23,6 +23,7 @@ using AegisCore.Infrastructure.Campus;
 using AegisCore.Infrastructure.Cloud;
 using AegisCore.Infrastructure.Config;
 using AegisCore.Infrastructure.ConfigCenter;
+using AegisCore.Infrastructure.Configuration;
 using AegisCore.Infrastructure.CoreERP;
 using AegisCore.Infrastructure.DegreeAudit;
 using AegisCore.Infrastructure.Deployment;
@@ -49,6 +50,8 @@ using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddEnvironmentSubstitution();
 
 builder.WebHost.ConfigureKestrel(options =>
 {

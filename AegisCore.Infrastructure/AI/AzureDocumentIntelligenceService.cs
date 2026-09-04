@@ -24,8 +24,7 @@ public sealed class AzureDocumentIntelligenceService : IDocumentOcrService
         var endpoint = _config["Azure:DocumentIntelligenceEndpoint"];
         var apiKey = _config["Azure:DocumentIntelligenceApiKey"];
 
-        if (string.IsNullOrWhiteSpace(endpoint) || endpoint.StartsWith("${", StringComparison.Ordinal)
-            || string.IsNullOrWhiteSpace(apiKey) || apiKey.StartsWith("${", StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
         {
             _logger.LogInformation("Azure Document Intelligence not configured. Using local OCR for {FileName}.", fileName);
             return await _fallback.ExtractTextAsync(documentStream, fileName, ct);
@@ -72,8 +71,7 @@ public sealed class AzureDocumentIntelligenceService : IDocumentOcrService
         var endpoint = _config["Azure:DocumentIntelligenceEndpoint"];
         var apiKey = _config["Azure:DocumentIntelligenceApiKey"];
 
-        if (string.IsNullOrWhiteSpace(endpoint) || endpoint.StartsWith("${", StringComparison.Ordinal)
-            || string.IsNullOrWhiteSpace(apiKey) || apiKey.StartsWith("${", StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
         {
             _logger.LogInformation("Azure Document Intelligence not configured. Using local form extraction for {FileName}.", fileName);
             return await _fallback.ExtractFormFieldsAsync(documentStream, fileName, ct);

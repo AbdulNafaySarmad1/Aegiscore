@@ -32,8 +32,7 @@ public class JwtTokenService : IJwtTokenService
         _redis = redis;
         var privateKeyPem = configuration["Jwt:PrivateKey"];
         var publicKeyPem = configuration["Jwt:PublicKey"];
-        if (!string.IsNullOrWhiteSpace(privateKeyPem) && !privateKeyPem.StartsWith("${", StringComparison.Ordinal) &&
-            !string.IsNullOrWhiteSpace(publicKeyPem) && !publicKeyPem.StartsWith("${", StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(privateKeyPem) && !string.IsNullOrWhiteSpace(publicKeyPem))
         {
             var privateKey = RSA.Create();
             privateKey.ImportFromPem(privateKeyPem.ToCharArray());

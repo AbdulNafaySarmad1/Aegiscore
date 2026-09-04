@@ -149,6 +149,6 @@ public static class InfrastructureServiceExtensions
         return services;
     }
 
-    private static string? FirstConfigured(params string?[] values) => values.FirstOrDefault(value =>
-        !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal));
+    private static string? FirstConfigured(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
 }

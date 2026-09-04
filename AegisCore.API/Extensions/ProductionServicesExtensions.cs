@@ -99,7 +99,7 @@ public static class CoreServicesExtensions
 
     private static bool IsValidOrigin(string origin)
     {
-        if (string.IsNullOrWhiteSpace(origin) || origin.TrimStart().StartsWith("${", StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(origin))
             return false;
 
         return Uri.TryCreate(origin, UriKind.Absolute, out var uri)
@@ -154,11 +154,11 @@ public static class AuthenticationServicesExtensions
     {
         var authority = configuration["Auth:Authority"];
         var audience = configuration["Auth:Audience"];
-        if (string.IsNullOrWhiteSpace(audience) || audience.StartsWith("${", StringComparison.Ordinal)) audience = "aegiscore-api";
+        if (string.IsNullOrWhiteSpace(audience)) audience = "aegiscore-api";
         services.AddAuthentication().AddJwtBearer(options =>
         {
             options.Audience = audience;
-            if (Uri.TryCreate(authority, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps && !authority!.StartsWith("${", StringComparison.Ordinal))
+            if (Uri.TryCreate(authority, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
             {
                 options.Authority = authority; options.RequireHttpsMetadata = true;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -172,7 +172,7 @@ public static class AuthenticationServicesExtensions
             var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
             var isProduction = string.Equals(configuration["ASPNETCORE_ENVIRONMENT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
             var publicKeyPem = configuration["Jwt:PublicKey"];
-            if (isProduction && (string.IsNullOrWhiteSpace(publicKeyPem) || publicKeyPem.StartsWith("${", StringComparison.Ordinal)))
+            if (isProduction && string.IsNullOrWhiteSpace(publicKeyPem))
                 throw new InvalidOperationException("Production requires an RSA JWT authority or Jwt:PublicKey.");
             if (string.IsNullOrWhiteSpace(secret))
             {
@@ -181,7 +181,7 @@ public static class AuthenticationServicesExtensions
                 secret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
             }
             options.RequireHttpsMetadata = false;
-            if (!string.IsNullOrWhiteSpace(publicKeyPem) && !publicKeyPem.StartsWith("${", StringComparison.Ordinal))
+            if (!string.IsNullOrWhiteSpace(publicKeyPem))
             {
                 var publicKey = RSA.Create();
                 publicKey.ImportFromPem(publicKeyPem.ToCharArray());

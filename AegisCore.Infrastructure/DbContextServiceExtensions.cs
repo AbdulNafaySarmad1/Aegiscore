@@ -49,6 +49,5 @@ public static class DbContextServiceExtensions
         return $"Host={host};Port={port};Database={db};Username={user};Password={password};SslMode={ssl};MaxPoolSize={pool};CommandTimeout={timeout};Pooling=true;ConnectionIdleLifetime=300;ConnectionPruningInterval=10";
     }
 
-    private static bool IsConfigured(string? value) =>
-        !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal);
+    private static bool IsConfigured(string? value) => !string.IsNullOrWhiteSpace(value);
 }

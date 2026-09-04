@@ -112,7 +112,7 @@ public class DeploymentReadinessChecker
                 configuration.GetConnectionString("Redis"),
                 configuration["Redis:ConnectionString"]
             }
-            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value) && !value.TrimStart().StartsWith("${", StringComparison.Ordinal))
+            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
             ?? "localhost:6379";
     }
 

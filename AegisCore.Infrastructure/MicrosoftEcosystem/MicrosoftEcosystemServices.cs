@@ -146,7 +146,7 @@ public class PowerBiEmbeddingService : IPowerBiEmbeddingService
         try
         {
             var staticToken = _config["PowerBi:EmbedToken"];
-            if (!string.IsNullOrWhiteSpace(staticToken) && !staticToken.StartsWith("${", StringComparison.Ordinal))
+            if (!string.IsNullOrWhiteSpace(staticToken))
             {
                 return new PowerBiEmbedConfig(report.PowerBiReportId, report.PowerBiWorkspaceId, report.EmbedUrl, staticToken, DateTimeOffset.UtcNow.AddMinutes(minutes));
             }
@@ -191,7 +191,7 @@ public class PowerBiEmbeddingService : IPowerBiEmbeddingService
         {
             _logger.LogWarning(ex, "Power BI Azure AD token acquisition failed, falling back to static config if available.");
             var fallbackToken = _config["PowerBi:EmbedToken"];
-            if (!string.IsNullOrWhiteSpace(fallbackToken) && !fallbackToken.StartsWith("${", StringComparison.Ordinal))
+            if (!string.IsNullOrWhiteSpace(fallbackToken))
                 return new PowerBiEmbedConfig(report.PowerBiReportId, report.PowerBiWorkspaceId, report.EmbedUrl, fallbackToken, DateTimeOffset.UtcNow.AddMinutes(minutes));
             throw new InvalidOperationException("Power BI embed token is not available. Configure Azure:TenantId, Azure:ClientId, and Azure:ClientSecret or PowerBi:EmbedToken.", ex);
         }
