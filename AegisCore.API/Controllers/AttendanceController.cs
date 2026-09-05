@@ -54,6 +54,7 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
         return Ok(new { message = "Attendance recorded.", entriesCreated = created, entriesAlreadyMarked = updated });
     }
 
+    [AegisCore.API.Authorization.RequireFerpaAudit("Attendance", "courseId")]
     [HttpGet("report/course/{courseId:guid}")]
     public async Task<IActionResult> CourseReport(Guid courseId, [FromQuery] DateTime? from, [FromQuery] DateTime? to, CancellationToken ct)
     {
@@ -85,6 +86,7 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
         return Ok(new { courseId, start, end, report });
     }
 
+    [AegisCore.API.Authorization.RequireFerpaAudit("Attendance", "studentId")]
     [HttpGet("report/student/{studentId:guid}")]
     public async Task<IActionResult> StudentReport(Guid studentId, CancellationToken ct)
     {

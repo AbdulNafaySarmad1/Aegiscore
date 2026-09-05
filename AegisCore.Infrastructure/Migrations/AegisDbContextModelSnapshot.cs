@@ -4672,6 +4672,50 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("ConfigurationEntries");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ConsentLedger", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConsentText")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<DateTime>("ConsentedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataCategory")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("IpAddressEncrypted")
+                        .HasColumnType("bytea")
+                        .HasColumnName("IpAddress");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "RevokedAt");
+
+                    b.HasIndex("TenantId", "UserId", "DataCategory");
+
+                    b.ToTable("ConsentLedgers");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.ConsumableRequisition", b =>
                 {
                     b.Property<Guid>("Id")
@@ -8121,6 +8165,45 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("EquipmentUsageLogs");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ErasureRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DeadlineAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ErasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Status", "DeadlineAt");
+
+                    b.ToTable("ErasureRequests");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.EscalationLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -9484,6 +9567,64 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("FeeStructures");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.FerpaAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AccessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<byte[]>("IpAddressEncrypted")
+                        .HasColumnType("bytea")
+                        .HasColumnName("IpAddress");
+
+                    b.Property<bool>("Justified")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<bool>("StudentErased")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("UserErased")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserRole")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "AccessedAt");
+
+                    b.HasIndex("TenantId", "StudentId", "AccessedAt");
+
+                    b.ToTable("FerpaAuditLogs");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.FieldMappingTemplate", b =>
@@ -22766,6 +22907,11 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("DirectoryOptOut")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<int>("EnrollmentStatus")
                         .HasColumnType("integer");

@@ -106,15 +106,18 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
     }
 
     [HttpPost("grades/{courseId:guid}/{studentId:guid}/calculate")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Grade", "studentId")]
     public async Task<IActionResult> Calculate(Guid courseId, Guid studentId, CancellationToken ct)
     {
         await grading.CalculateCourseGradeAsync(courseId, studentId, ct);
         return NoContent();
     }
 
+    [AegisCore.API.Authorization.RequireFerpaAudit("Grade", "studentId")]
     [HttpGet("grades/{studentId:guid}/sgpa/{semesterId:guid}")]
     public Task<SemesterGpa> Sgpa(Guid studentId, Guid semesterId, CancellationToken ct) => grading.CalculateSGPAAsync(studentId, semesterId, ct);
 
+    [AegisCore.API.Authorization.RequireFerpaAudit("Grade", "studentId")]
     [HttpGet("grades/{studentId:guid}/cgpa")]
     public Task<decimal> Cgpa(Guid studentId, CancellationToken ct) => grading.CalculateCGPAAsync(studentId, ct);
 
@@ -130,6 +133,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
     }
 
     [AegisCore.API.Authorization.RequirePermission("Grades", "Approve")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Grade", "courseId")]
     [HttpPost("courses/{courseId:guid}/publish")]
     public async Task<IActionResult> Publish(Guid courseId, [FromBody] PublishResultsRequest request, CancellationToken ct)
     {
@@ -148,6 +152,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
         return NoContent();
     }
 
+    [AegisCore.API.Authorization.RequireFerpaAudit("Transcript", "studentId")]
     [HttpPost("transcripts/{studentId:guid}/request")]
     public async Task<ActionResult<string>> RequestTranscript(Guid studentId, [FromBody] TranscriptRequest request, CancellationToken ct)
         => Ok(await transcripts.RequestTranscriptAsync(studentId, request.RequestedBy, request.Reason, ct));

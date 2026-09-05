@@ -97,6 +97,7 @@ public class DegreeAuditController : ControllerBase
         return Ok(progress);
     }
 
+    [AegisCore.API.Authorization.RequireFerpaAudit("Grade", "studentId")]
     [HttpGet("progress/{studentId:guid}")]
     public async Task<IActionResult> GetProgress(Guid studentId, CancellationToken cancellationToken)
     {

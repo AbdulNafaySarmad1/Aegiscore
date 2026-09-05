@@ -58,16 +58,20 @@ public class SearchService : ISearchService
         {
             Query = query, Page = request.Page, PageSize = request.PageSize
         }, cancellationToken);
+        var optedOut = (await _uow.Students.FindAsync(student => student.DirectoryOptOut, cancellationToken))
+            .Select(student => student.Id.ToString())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var visibleHits = result.Hits.Where(hit => !optedOut.Contains(hit.Id)).ToList();
 
         var group = new SearchGroupResult
         {
-            Domain = "students", Label = "Students", Count = result.TotalHits,
-            Hits = result.Hits.Select(h => new SearchHitDto
+            Domain = "students", Label = "Students", Count = visibleHits.Count,
+            Hits = visibleHits.Select(h => new SearchHitDto
             {
                 Id = h.Id, Title = $"{h.FirstName} {h.LastName}",
                 Subtitle = h.UniversityId, Description = $"{h.Department} — {h.Batch}",
                 Domain = "students", EntityType = "Student",
-                Url = $"/students/{h.Id}", Score = result.Hits.Count > 0 ? 1 : 0
+                Url = $"/students/{h.Id}", Score = visibleHits.Count > 0 ? 1 : 0
             }).ToList()
         };
 
@@ -102,7 +106,12 @@ public class SearchService : ISearchService
         {
             case "student":
                 if (entity is Student s)
-                    await _studentIndex.IndexAsync(MapStudent(s), cancellationToken);
+                {
+                    if (s.DirectoryOptOut)
+                        await _studentIndex.DeleteAsync(s.Id.ToString(), cancellationToken);
+                    else
+                        await _studentIndex.IndexAsync(MapStudent(s), cancellationToken);
+                }
                 break;
             case "course":
                 if (entity is Course c)
@@ -123,7 +132,8 @@ public class SearchService : ISearchService
     public async Task RebuildAllIndicesAsync(CancellationToken cancellationToken = default)
     {
         var students = await _uow.Students.GetAllAsync(cancellationToken);
-        await _studentIndex.RebuildIndexAsync(students.Select(MapStudent), cancellationToken);
+        var directoryStudents = students.Where(student => !student.DirectoryOptOut).ToList();
+        await _studentIndex.RebuildIndexAsync(directoryStudents.Select(MapStudent), cancellationToken);
 
         var courses = await _uow.Courses.GetAllAsync(cancellationToken);
         await _courseIndex.RebuildIndexAsync(courses.Select(MapCourse), cancellationToken);
@@ -136,13 +146,13 @@ public class SearchService : ISearchService
     {
         Id = s.Id.ToString(), UniversityId = s.UniversityId ?? "", FirstName = s.FirstName,
         LastName = s.LastName, Email = "", Department = s.Batch?.Department?.Name ?? "", Batch = s.Batch?.Name ?? "",
-        Status = s.EnrollmentStatus.ToString(), CreatedAt = s.CreatedAt, TenantId = Guid.NewGuid().ToString() /* s.TenantId */
+        Status = s.EnrollmentStatus.ToString(), CreatedAt = s.CreatedAt, TenantId = s.TenantId.ToString()
     };
 
     private static SearchableCourse MapCourse(Course c) => new()
     {
         Id = c.Id.ToString(), Code = c.Code ?? "", Title = c.Title,
         Department = c.Department?.Name ?? "", CreditHours = c.CreditHours,
-        Description = c.CloMappingJson ?? "", CreatedAt = c.CreatedAt, TenantId = Guid.NewGuid().ToString() /* c.TenantId */
+        Description = c.CloMappingJson ?? "", CreatedAt = c.CreatedAt, TenantId = c.TenantId.ToString()
     };
 }

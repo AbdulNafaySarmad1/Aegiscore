@@ -49,6 +49,7 @@ public class TenantConfigService
     public string GetPaymentGateway(Guid? tenantId = null) => Resolve("payment.default_gateway", DefaultTenantConfigTemplate.DefaultPaymentGateway);
     public string GetAccreditorName(Guid? tenantId = null) => Resolve("academic.accreditor_name", DefaultTenantConfigTemplate.DefaultAccreditorName);
     public string GetIdentityDocumentName(Guid? tenantId = null) => Resolve("identity.document_name", DefaultTenantConfigTemplate.DefaultIdentityDocumentName);
+    public int GetAuditRetentionYears(Guid? tenantId = null) => ResolveInt("compliance.audit_retention_years", DefaultTenantConfigTemplate.DefaultAuditRetentionYears);
 
     private string Resolve(string key, string fallback)
     {

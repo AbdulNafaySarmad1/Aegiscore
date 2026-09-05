@@ -14,6 +14,7 @@ namespace AegisCore.API.Controllers;
 [Route("api/attendance")]
 public sealed class AttendanceGeolocationController(AegisDbContext db, IPqcCryptographyService encryption) : ControllerBase
 {
+    [AegisCore.API.Authorization.RequireFerpaAudit("Attendance", "courseId")]
     [HttpGet("roster/{courseId:guid}")]
     [AegisCore.API.Authorization.RequirePermission("Attendance", "Read")]
     public async Task<IActionResult> Roster(Guid courseId, CancellationToken ct)
@@ -149,6 +150,7 @@ public sealed class AttendanceGeolocationController(AegisDbContext db, IPqcCrypt
     }
 
     [HttpPost("{id:guid}/override")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Attendance", "id")]
     [AegisCore.API.Authorization.RequirePermission("Attendance", "Approve")]
     public async Task<IActionResult> Override(Guid id, [FromBody] AttendanceOverrideRequest request, CancellationToken ct)
     {

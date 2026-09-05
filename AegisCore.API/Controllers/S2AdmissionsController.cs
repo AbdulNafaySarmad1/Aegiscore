@@ -123,11 +123,13 @@ public sealed class S2AdmissionsController(
     }
 
     [AegisCore.API.Authorization.RequirePermission("Admissions", "Read")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Admission", "id")]
     [HttpGet("applications/{id:guid}")]
     public async Task<ActionResult<AdmissionApplication>> Get(Guid id, CancellationToken ct)
         => await db.AdmissionApplications.Include(a => a.Documents).FirstOrDefaultAsync(a => a.Id == id, ct) is { } app ? app : NotFound();
 
     [HttpPost("applications/{id:guid}/documents")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Admission", "id")]
     public async Task<ActionResult<ApplicationDocument>> UploadDocument(Guid id, IFormFile file, [FromForm] string documentType, [FromQuery] string trackingToken, CancellationToken ct)
     {
         if (!HasTrackingToken(id, trackingToken)) return NotFound();
@@ -170,6 +172,7 @@ public sealed class S2AdmissionsController(
     }
 
     [AegisCore.API.Authorization.RequirePermission("Admissions", "Approve")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Admission", "id")]
     [HttpPost("applications/{id:guid}/verify")]
     public async Task<IActionResult> Verify(Guid id, [FromBody] VerifyApplicationRequest request, CancellationToken ct)
     {
@@ -244,6 +247,7 @@ public sealed class S2AdmissionsController(
     };
 
     [HttpGet("applications/{id:guid}/track/{token}")]
+    [AegisCore.API.Authorization.RequireFerpaAudit("Admission", "id")]
     public async Task<IActionResult> Track(Guid id, string token, CancellationToken ct)
     {
         if (!HasTrackingToken(id, token))

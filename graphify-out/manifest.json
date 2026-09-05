@@ -36,9 +36,9 @@
     "semantic_hash": "c5c3d6c875ed4d5a12728330a58eee71"
   },
   "AegisCore.API/Controllers/AttendanceController.cs": {
-    "mtime": 1788613098.476828,
-    "seen": 1788631314.5121698,
-    "ast_hash": "5391f4d74c83bf6efd4e0bc730661c7b",
+    "mtime": 1788632342.5538964,
+    "seen": 1788634077.3842654,
+    "ast_hash": "c807b68423336a3f099fa41340016785",
     "semantic_hash": ""
   },
   "AegisCore.API/Controllers/AuthController.cs": {
@@ -102,10 +102,10 @@
     "semantic_hash": "9905ed23f4741eb8a768c7c26a60aff2"
   },
   "AegisCore.API/Controllers/DegreeAuditController.cs": {
-    "mtime": 1788584870.2571454,
-    "seen": 1788586302.1405396,
-    "ast_hash": "fdd2b840cf97aa16e43e9410d3710266",
-    "semantic_hash": "fdd2b840cf97aa16e43e9410d3710266"
+    "mtime": 1788632342.5549297,
+    "seen": 1788634077.3842976,
+    "ast_hash": "2f2b2ab68966142cb0b9b764d6a44a01",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/DeveloperControllers.cs": {
     "mtime": 1788584870.2572622,
@@ -246,16 +246,16 @@
     "semantic_hash": "e3d2dd2223429cc8e2b408fde978f4c2"
   },
   "AegisCore.API/Controllers/S2AdmissionsController.cs": {
-    "mtime": 1788584961.524623,
-    "seen": 1788586302.1413069,
-    "ast_hash": "1eaa6790a301789cbbe039c391da18c8",
-    "semantic_hash": "1eaa6790a301789cbbe039c391da18c8"
+    "mtime": 1788633600.7087815,
+    "seen": 1788634077.3843453,
+    "ast_hash": "29e32f5076ae0fc02f23ea1d131301b1",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/S3ExaminationController.cs": {
-    "mtime": 1788584961.525623,
-    "seen": 1788586302.141309,
-    "ast_hash": "f3cb47b11d5d6b645c68447c6b457e92",
-    "semantic_hash": "f3cb47b11d5d6b645c68447c6b457e92"
+    "mtime": 1788633600.7088332,
+    "seen": 1788634077.3843465,
+    "ast_hash": "775a49d7e7d51185572f84d7cd7283be",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/S5ObeController.cs": {
     "mtime": 1788584870.2618952,
@@ -2622,10 +2622,10 @@
     "semantic_hash": "e0de87752097d671cf75b92018bf041a"
   },
   "AegisCore.Domain/Entities/Student.cs": {
-    "mtime": 1788506092.4619968,
-    "seen": 1788507080.7408009,
-    "ast_hash": "b3def02933c2ee7a3a840ebe1a9b372a",
-    "semantic_hash": "b3def02933c2ee7a3a840ebe1a9b372a"
+    "mtime": 1788631785.541573,
+    "seen": 1788634077.3850467,
+    "ast_hash": "786ae9cceaf05d3e7994b773acf1eb1b",
+    "semantic_hash": ""
   },
   "AegisCore.Domain/Entities/StudentLifecycleEntities.cs": {
     "mtime": 1788506089.897972,
@@ -2778,9 +2778,9 @@
     "semantic_hash": "4de06a8ac0a8580d1b5ddb9a63f49a2d"
   },
   "AegisCore.Domain/Enums.cs": {
-    "mtime": 1788630410.4677925,
-    "seen": 1788631314.5129943,
-    "ast_hash": "0e939bc5151110e0714e26fde9868626",
+    "mtime": 1788631809.4784048,
+    "seen": 1788634077.3850875,
+    "ast_hash": "b2901cd4ab1e161e9433288f2f77e59d",
     "semantic_hash": ""
   },
   "AegisCore.Domain/GlobalUsings.cs": {
@@ -2880,9 +2880,9 @@
     "semantic_hash": "9ff609bb6f016d6d1b9bef6b4d601a57"
   },
   "AegisCore.Infrastructure/AegisDbContext.cs": {
-    "mtime": 1788613547.6671197,
-    "seen": 1788631314.5130198,
-    "ast_hash": "31a73d2b922e1ff2ef0ce17b85981f08",
+    "mtime": 1788631931.327584,
+    "seen": 1788634077.3851147,
+    "ast_hash": "bdd58e991ebc43be481c5d96c0cf5b1a",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/AegisDbContextFactory.cs": {
@@ -3060,21 +3060,21 @@
     "semantic_hash": "3c6a018c39c407f37f1d87cc3c4ed36a"
   },
   "AegisCore.Infrastructure/Compliance/ComplianceServiceExtensions.cs": {
-    "mtime": 1788459723.3643274,
-    "seen": 1788461387.4189017,
-    "ast_hash": "37f04f85c89b34292769b835a4d54aee",
-    "semantic_hash": "37f04f85c89b34292769b835a4d54aee"
+    "mtime": 1788632213.810679,
+    "seen": 1788634077.3851626,
+    "ast_hash": "932a836667afd8f6288bb2c076478952",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Config/DefaultTenantConfigTemplate.cs": {
-    "mtime": 1788586569.7679737,
-    "seen": 1788607868.6864574,
-    "ast_hash": "8eba326bd3dbb2172056e648d76c082b",
+    "mtime": 1788632213.8106012,
+    "seen": 1788634077.3851674,
+    "ast_hash": "faced595f41098faf5acf21821a88847",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Config/TenantConfigService.cs": {
-    "mtime": 1788586569.7689736,
-    "seen": 1788607868.68646,
-    "ast_hash": "82d720fa43384d519cf9cd9654c85bd7",
+    "mtime": 1788632213.810679,
+    "seen": 1788634077.3851686,
+    "ast_hash": "cd8a5676ab0c0da65fafc955aeb8f906",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Config/TenantConfigServiceExtensions.cs": {
@@ -4056,9 +4056,9 @@
     "semantic_hash": "92eeac4b0082bff663a8275ddae46966"
   },
   "AegisCore.Infrastructure/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1788613943.6555853,
-    "seen": 1788631314.513452,
-    "ast_hash": "c974da8cd39589c5812b5209a76b9082",
+    "mtime": 1788632752.396804,
+    "seen": 1788634077.3856776,
+    "ast_hash": "ad61814d85a24cff372e3b3b2d1ffa19",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Obe/ObeServices.cs": {
@@ -4068,9 +4068,9 @@
     "semantic_hash": "c6e966d04302c33e4b58a77eef1d1b3a"
   },
   "AegisCore.Infrastructure/Onboarding/EnhancedSetupService.cs": {
-    "mtime": 1788630813.8983223,
-    "seen": 1788631314.5134616,
-    "ast_hash": "132ad92b30db9fbc98777a1b568b35a6",
+    "mtime": 1788632387.859995,
+    "seen": 1788634077.3856874,
+    "ast_hash": "f5457ecfea8a39f78d559a14e18fe727",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Onboarding/OnboardingService.cs": {
@@ -4470,10 +4470,10 @@
     "semantic_hash": "4dc3ad029d0fc8584f1876632ce3578a"
   },
   "AegisCore.Infrastructure/Search/SearchService.cs": {
-    "mtime": 1788459723.4106135,
-    "seen": 1788461387.4193118,
-    "ast_hash": "d86903a00b917beeadbbf64eea348df8",
-    "semantic_hash": "d86903a00b917beeadbbf64eea348df8"
+    "mtime": 1788632477.2327547,
+    "seen": 1788634077.3858058,
+    "ast_hash": "823286e834cb97709143603da940e9ff",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Search/SearchServiceExtensions.cs": {
     "mtime": 1788507327.4546893,
@@ -8226,9 +8226,9 @@
     "semantic_hash": "182f807e744d33e4a0f2c66035656ce4"
   },
   "AegisCore.Infrastructure/Onboarding/WizardRolePermissionService.cs": {
-    "mtime": 1788613098.476828,
-    "seen": 1788631314.5135717,
-    "ast_hash": "6eb40f6e029c64aa2943de9df3ee49df",
+    "mtime": 1788632387.859954,
+    "seen": 1788634077.385702,
+    "ast_hash": "d436b2dc63a013da8ce512dc3e677de9",
     "semantic_hash": ""
   },
   "AegisCore.Tests/DynamicRbacTests.cs": {
@@ -8304,9 +8304,9 @@
     "semantic_hash": ""
   },
   "CODEX_HANDOFF.md": {
-    "mtime": 1788611442.2937276,
-    "seen": 1788611591.9643772,
-    "ast_hash": "93b7b9f9eb982b1c982876415cbcbde8",
+    "mtime": 1788631416.8880877,
+    "seen": 1788634077.3865623,
+    "ast_hash": "7cfda63b15ce7d4fffc3b54814fc3789",
     "semantic_hash": ""
   },
   "docs/rbac-role-attribute-migration.md": {
@@ -8352,9 +8352,9 @@
     "semantic_hash": ""
   },
   "AegisCore.API/Controllers/AttendanceGeolocationController.cs": {
-    "mtime": 1788614489.3747566,
-    "seen": 1788631314.512173,
-    "ast_hash": "8a59e5fe521aeb2537db25d3a390f6a6",
+    "mtime": 1788633600.7088559,
+    "seen": 1788634077.3842683,
+    "ast_hash": "b5cca1fced973be3808e701a6f412a80",
     "semantic_hash": ""
   },
   "AegisCore.API/Controllers/CampusPolygonController.cs": {
@@ -8409,6 +8409,66 @@
     "mtime": 1788630343.9715853,
     "seen": 1788631314.5141368,
     "ast_hash": "3f6c59c4e4e1994c322562226a846c4d",
+    "semantic_hash": ""
+  },
+  "AegisCore.API/Authorization/RequireFerpaAuditAttribute.cs": {
+    "mtime": 1788632238.8879144,
+    "seen": 1788634077.384251,
+    "ast_hash": "b377450caae175d70d6ea3a35b610b83",
+    "semantic_hash": ""
+  },
+  "AegisCore.API/Controllers/PrivacyComplianceController.cs": {
+    "mtime": 1788632281.4153194,
+    "seen": 1788634077.384339,
+    "ast_hash": "d5f69b2417fa99d29f232511f15a7a3d",
+    "semantic_hash": ""
+  },
+  "AegisCore.Application/Compliance/PrivacyComplianceContracts.cs": {
+    "mtime": 1788631963.8922904,
+    "seen": 1788634077.384553,
+    "ast_hash": "159cd9215a70e8485a6562322415dbb4",
+    "semantic_hash": ""
+  },
+  "AegisCore.Domain/Entities/PrivacyComplianceEntities.cs": {
+    "mtime": 1788631770.1624258,
+    "seen": 1788634077.3850152,
+    "ast_hash": "c4201a75ec0391b33e979181d7e19010",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Compliance/ComplianceRetentionWorker.cs": {
+    "mtime": 1788632189.9294498,
+    "seen": 1788634077.3851595,
+    "ast_hash": "ac1ef4ecd28a7a4fdc64f0f57a67d29b",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Compliance/FerpaAuditService.cs": {
+    "mtime": 1788632054.1001582,
+    "seen": 1788634077.3851638,
+    "ast_hash": "de6b728cc0df867388e6aa19b248444c",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Compliance/PrivacyComplianceService.cs": {
+    "mtime": 1788632146.3280356,
+    "seen": 1788634077.3851655,
+    "ast_hash": "50c4a020538b9df7f8f51ea5bdae6a13",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Migrations/20260905182552_AddFerpaGdprCompliance.Designer.cs": {
+    "mtime": 1788632752.395804,
+    "seen": 1788634077.3856728,
+    "ast_hash": "199eb4044bf34a7ce1f565ab59bf0a45",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Migrations/20260905182552_AddFerpaGdprCompliance.cs": {
+    "mtime": 1788632752.392804,
+    "seen": 1788634077.3856754,
+    "ast_hash": "01d6a0ea3dae0860e09b9c12f17dcdbe",
+    "semantic_hash": ""
+  },
+  "AegisCore.Tests/PrivacyComplianceTests.cs": {
+    "mtime": 1788633757.6616096,
+    "seen": 1788634077.3862946,
+    "ast_hash": "f0ede0be03858f320d9ac8b5b74449fa",
     "semantic_hash": ""
   }
 }

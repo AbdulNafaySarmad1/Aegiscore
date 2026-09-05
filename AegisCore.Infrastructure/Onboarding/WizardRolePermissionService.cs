@@ -13,7 +13,7 @@ public sealed class WizardRolePermissionService(AegisDbContext db, WizardStateSe
 
     private static readonly HashSet<string> AllowedActions = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Read", "Write", "Delete", "Approve", "Export"
+        "Read", "Write", "Delete", "Approve", "Export", "Admin"
     };
 
     public async Task<IReadOnlyList<Role>> SaveRolesAsync(string token, SaveWizardRolesRequest request, CancellationToken ct = default)

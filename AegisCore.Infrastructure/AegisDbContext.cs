@@ -66,6 +66,9 @@ public class AegisDbContext : DbContext
     /// </summary>
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<CampusPolygon> CampusPolygons => Set<CampusPolygon>();
+    public DbSet<FerpaAuditLog> FerpaAuditLogs => Set<FerpaAuditLog>();
+    public DbSet<ConsentLedger> ConsentLedgers => Set<ConsentLedger>();
+    public DbSet<ErasureRequest> ErasureRequests => Set<ErasureRequest>();
 
     /// <summary>
     /// Exam schedules.
@@ -1978,6 +1981,26 @@ public class AegisDbContext : DbContext
             entity.HasIndex(item => new { item.TenantId, item.IsActive });
         });
 
+        modelBuilder.Entity<FerpaAuditLog>(entity =>
+        {
+            entity.Property(item => item.IpAddressEncrypted).HasColumnName("IpAddress").HasColumnType("bytea");
+            entity.HasIndex(item => new { item.TenantId, item.AccessedAt });
+            entity.HasIndex(item => new { item.TenantId, item.StudentId, item.AccessedAt });
+        });
+
+        modelBuilder.Entity<ConsentLedger>(entity =>
+        {
+            entity.Property(item => item.IpAddressEncrypted).HasColumnName("IpAddress").HasColumnType("bytea");
+            entity.HasIndex(item => new { item.TenantId, item.UserId, item.DataCategory });
+            entity.HasIndex(item => new { item.TenantId, item.RevokedAt });
+        });
+
+        modelBuilder.Entity<ErasureRequest>(entity =>
+        {
+            entity.Property(item => item.Status).HasConversion<string>().HasMaxLength(24).HasDefaultValue(ErasureRequestStatus.Pending);
+            entity.HasIndex(item => new { item.TenantId, item.Status, item.DeadlineAt });
+        });
+
         // Enum conversions (store as strings)
         modelBuilder.HasPostgresEnum<EnrollmentStatus>();
         modelBuilder.HasPostgresEnum<AttendanceStatus>();
@@ -3059,6 +3082,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<Student>(entity =>
         {
             entity.HasIndex(e => e.UniversityId).IsUnique();
+            entity.Property(e => e.DirectoryOptOut).HasDefaultValue(false);
         });
 
         // Course

@@ -43,6 +43,7 @@ public static class DefaultTenantConfigTemplate
     public const string DefaultPaymentGateway = "stripe";
     public const string DefaultAccreditorName = "Accreditor";
     public const string DefaultIdentityDocumentName = "Identity document";
+    public const int DefaultAuditRetentionYears = 6;
     public const decimal LateFeePercentage = 0.05m;
     public const decimal LibraryFinePerDay = 50m;
     public const int DefaultWaitSeconds = 60;

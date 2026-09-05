@@ -12,16 +12,18 @@ public class Student : ITenantScoped
 
     [Required]
     [MaxLength(100)]
-    public required string FirstName { get; init; }
+    public required string FirstName { get; set; }
 
     [Required]
     [MaxLength(100)]
-    public required string LastName { get; init; }
+    public required string LastName { get; set; }
 
     [MaxLength(50)]
-    public string? UniversityId { get; init; }
+    public string? UniversityId { get; set; }
 
     public EnrollmentStatus EnrollmentStatus { get; init; }
+    public bool DirectoryOptOut { get; set; }
+
 
     // FK
     public Guid BatchId { get; init; }

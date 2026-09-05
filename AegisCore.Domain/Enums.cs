@@ -23,6 +23,14 @@ public enum LocationStatus
     OnCampus,
     OffCampus
 }
+public enum ErasureRequestStatus
+{
+    Pending,
+    InProgress,
+    Completed,
+    Failed
+}
+
 
 public enum ExamType
 {

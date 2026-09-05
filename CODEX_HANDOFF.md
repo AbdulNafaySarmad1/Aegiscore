@@ -4,11 +4,11 @@ Updated: 2026-09-05. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
-Fully completed through **P15** (15/17); P15 is recorded in the commit containing this handoff.
+Completed prompts: **P1–P10 and P12–P16**. P11 remains intentionally deferred until all prerequisite prompts are complete.
 
-Next prompt: **P16 — Accessibility**.
+Next prompt: **P17 — WCAG 2.1 AA Accessibility**.
 
-Remaining execution order: **P16 → P17 → P11 (last)**. Do not start P11 before the other prerequisites/prompts are complete.
+Remaining execution order: **P17 → P11 (last)**. Do not start P11 before P17 is complete.
 
 ## Completed prompt commits
 
@@ -26,9 +26,10 @@ Remaining execution order: **P16 → P17 → P11 (last)**. Do not start P11 befo
 - P12: `b9d16168`
 - P13: `9ffd7caf`
 - P14: `cdfe8c90`
-- P15: current commit
+- P15: `bf8779ec`
+- P16: current commit
 
-P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 104 `RequirePermission(...)` controller attributes after P15.
+P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 105 `RequirePermission(...)` controller attributes after P16.
 
 ## P14 verified implementation
 
@@ -57,10 +58,23 @@ P13 includes tenant-defined wizard roles/permission matrix, two-argument `Requir
 
 No P15 implementation work remains.
 
+## P16 verified implementation
+
+- Added tenant-scoped FERPA audit, consent-ledger, and erasure-request schemas plus migration `AddFerpaGdprCompliance`; IP addresses are encrypted at rest.
+- Added `RequireFerpaAudit` enforcement on grade, attendance, transcript, and admission record endpoints. It audits allowed and denied access, validates admin/self/assigned-faculty/applicant relationships, and returns the specified 403 denial message.
+- Added the permission-protected, filterable, paginated `GET /api/admin/ferpa-audit` report with human-readable summaries.
+- Added student directory opt-out enforcement in search results, indexing, and full index rebuilds.
+- Added consent record/revoke APIs, user-or-admin erasure requests with 30-day deadlines, transactional cascade anonymization, active-session/profile-photo cleanup, and retained anonymized academic facts.
+- Added on-demand five-file DSAR ZIP exports with 24-hour expiry metadata and no location coordinates or encrypted IP values.
+- Added pending-erasure processing and tenant-local 02:00 retention with a configurable six-year default.
+- Added focused coverage for allowed/denied FERPA access, encrypted IP storage, complete erasure, DSAR contents/expiry, retention windows, and directory opt-out.
+
+No P16 implementation work remains.
+
 ## Current verification status
 
-- `dotnet build AegisCore.slnx -c Release --no-restore`: **PASS**, 0 errors, 20 warnings (existing analyzer/package warnings).
-- `dotnet test AegisCore.Tests/AegisCore.Tests.csproj -c Release --no-build`: **PASS**, 603 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
+- `dotnet test AegisCore.slnx -c Release --no-restore`: **PASS**, 607 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
+- P16 focused compliance tests: **PASS**, 4/4.
 - Portal `npm run typecheck`: **PASS**.
 - Portal `npm run build`: **PASS**, 46 generated routes including `/admin/campus` and `/student/attendance`.
 - Portal `npm run lint -- --quiet`: **PASS**, 0 errors.
@@ -75,8 +89,8 @@ No P15 implementation work remains.
 - Finish one prompt, run Release build/tests, refresh Graphify, commit, and push before starting the next.
 - Preserve client-owned infrastructure and introduce no Nocturne-hosted dependency.
 - `AEGISCORE_FINAL_17_PROMPTS.md` is user-confirmed source of truth and must be committed with the repository.
-- P15 is verified and included in the current commit; the worktree should be clean before beginning P16.
+- P16 is verified and included in the current commit; the worktree should be clean before beginning P17.
 
 ## Exact next action
 
-Query the refreshed graph for P16 accessibility implementation, read P16 in full, then implement and verify it before committing and pushing.
+Query the refreshed graph for P17 accessibility implementation, read P17 in full, then implement and verify it before committing and pushing.
