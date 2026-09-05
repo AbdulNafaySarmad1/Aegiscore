@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AegisCore.Application.DataImport;
 using AegisCore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -16,21 +17,31 @@ namespace AegisCore.API.Controllers;
 
 [HttpGet("connections/{id:guid}/tables/{table}/columns")] public async Task<IActionResult> DiscoverColumns(Guid id, string table, [FromQuery] string? schema, CancellationToken ct) { var cols = await _s.DiscoverColumnsAsync(id, table, schema, ct); return Ok(new { connectionId = id, table, schema, total = cols.Count, columns = cols }); }
 
-[HttpPost("jobs")] public async Task<IActionResult> StartImport([FromBody] StartImportRequest req, CancellationToken ct) { if (!IsQuerySafe(req.SourceQuery)) return BadRequest(new { error = "SourceQuery contains prohibited SQL keywords or patterns. Only SELECT and WITH (CTE) queries are allowed." }); var mappings = JsonSerializer.Deserialize<Dictionary<string, string>>(req.FieldMappingsJson ?? "{}") ?? new(); var job = await _s.StartImportAsync(req.ConnectionId, req.EntityType, req.SourceQuery, mappings, req.TriggeredByUserId, ct); return Ok(job); }
+[HttpPost("jobs")] public async Task<IActionResult> StartImport([FromBody] StartImportRequest req, CancellationToken ct) { if (!IsReadOnlySelect(req.SourceQuery)) return BadRequest(new { error = "SourceQuery contains prohibited syntax. It must be one read-only SELECT or WITH query using approved SQL syntax." }); var mappings = JsonSerializer.Deserialize<Dictionary<string, string>>(req.FieldMappingsJson ?? "{}") ?? new(); var job = await _s.StartImportAsync(req.ConnectionId, req.EntityType, req.SourceQuery, mappings, req.TriggeredByUserId, ct); return Ok(job); }
 
-        private static readonly string[] _dangerousKeywords = { "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE", "EXEC", "EXECUTE", "--", ";", "UNION", "COPY", "TRUNCATE" };
-
-        private static bool IsQuerySafe(string query)
+        private static readonly HashSet<string> AllowedReadOnlyKeywords = new(StringComparer.OrdinalIgnoreCase)
         {
-            if (string.IsNullOrWhiteSpace(query)) return false;
-            var upper = query.ToUpperInvariant();
-            var trimmed = upper.TrimStart();
-            if (!trimmed.StartsWith("SELECT") && !trimmed.StartsWith("WITH")) return false;
-            foreach (var kw in _dangerousKeywords)
-            {
-                if (upper.Contains(kw)) return false;
-            }
-            return true;
+            "SELECT", "WITH", "RECURSIVE", "AS", "FROM", "WHERE", "JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "FULL", "CROSS", "ON",
+            "AND", "OR", "NOT", "NULL", "IS", "IN", "EXISTS", "BETWEEN", "LIKE", "ILIKE", "DISTINCT", "ALL", "GROUP", "BY", "HAVING",
+            "ORDER", "ASC", "DESC", "LIMIT", "OFFSET", "FETCH", "FIRST", "NEXT", "ROW", "ROWS", "ONLY", "CASE", "WHEN", "THEN", "ELSE", "END",
+            "CAST", "TRUE", "FALSE", "OVER", "PARTITION", "WINDOW", "NULLS", "LAST", "COLLATE", "LATERAL"
+        };
+
+        private static readonly HashSet<string> SqlStatementKeywords = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "SELECT", "WITH", "INSERT", "UPDATE", "DELETE", "MERGE", "UPSERT", "DROP", "ALTER", "CREATE", "TRUNCATE", "COPY", "CALL", "EXEC", "EXECUTE",
+            "GRANT", "REVOKE", "COMMENT", "VACUUM", "ANALYZE", "REINDEX", "CLUSTER", "REFRESH", "DO", "SET", "RESET", "SHOW", "LOCK", "INTO",
+            "ATTACH", "DETACH", "PRAGMA", "REPLACE", "LOAD", "UNLOAD", "UNION", "INTERSECT", "EXCEPT"
+        };
+
+        public static bool IsReadOnlySelect(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length > 10_000 || query.Contains(';') || query.Contains("--", StringComparison.Ordinal) || query.Contains("/*", StringComparison.Ordinal)) return false;
+            var withoutLiterals = Regex.Replace(query, "'(?:''|[^'])*'|\"(?:\"\"|[^\"])*\"", " ", RegexOptions.CultureInvariant);
+            var tokens = Regex.Matches(withoutLiterals, "[A-Za-z_][A-Za-z0-9_$]*", RegexOptions.CultureInvariant).Select(match => match.Value).ToArray();
+            if (tokens.Length == 0 || (!tokens[0].Equals("SELECT", StringComparison.OrdinalIgnoreCase) && !tokens[0].Equals("WITH", StringComparison.OrdinalIgnoreCase))) return false;
+            if (withoutLiterals.Count(character => character == '(') != withoutLiterals.Count(character => character == ')')) return false;
+            return tokens.Where(SqlStatementKeywords.Contains).All(AllowedReadOnlyKeywords.Contains);
         }
 
 [HttpGet("jobs/{id:guid}")] public async Task<IActionResult> JobStatus(Guid id, CancellationToken ct) => Ok(await _s.GetJobStatusAsync(id, ct));

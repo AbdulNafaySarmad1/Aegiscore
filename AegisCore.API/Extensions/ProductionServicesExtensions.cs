@@ -4,6 +4,7 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.API.Authorization;
 using AegisCore.API.Background;
 using AegisCore.API.Hubs;
+using AegisCore.API.Validation;
 using AegisCore.Application.Onboarding;
 using AegisCore.Application.Platform;
 using AegisCore.Application.Finance;
@@ -26,6 +27,7 @@ using Microsoft.OpenApi.Models;
 using Polly;
 using Polly.Extensions.Http;
 using System.Security.Cryptography.X509Certificates;
+using FluentValidation;
 
 namespace AegisCore.API.Extensions;
 
@@ -79,7 +81,9 @@ public static class CoreServicesExtensions
             });
         });
         services.AddHealthChecks();
-        services.AddControllers();
+        services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>(ServiceLifetime.Scoped);
+        services.AddScoped<AsyncFluentValidationFilter>();
+        services.AddControllers(options => options.Filters.AddService<AsyncFluentValidationFilter>());
         return services;
     }
 
