@@ -110,7 +110,36 @@ public sealed class LicenseService(
             return await FailHeartbeatAsync(null, "pending_activation", "License is not activated.", ct);
         }
 
-        var endpoint = configuration["License:HeartbeatUrl"] ?? configuration["License:ServerUrl"];
+        if (OfflineModeEnabled())
+        {
+            var validation = await ValidateAsync(state.LicenseKey, ct);
+            if (!validation.IsValid)
+            {
+                var status = validation.FailureReason == LicenseValidationFailureReason.Expired ? "expired" : "invalid";
+                state.Status = status;
+                state.LastHeartbeatStatus = "offline_validation_failed";
+                state.LockedAt = DateTimeOffset.UtcNow;
+                state.LockReason = status;
+                state.UpdatedAt = DateTimeOffset.UtcNow;
+                await db.SaveChangesAsync(ct);
+                return new HeartbeatResult(false, status, validation.ValidationMessage);
+            }
+
+            state.Status = "active";
+            state.LastHeartbeatAt = DateTimeOffset.UtcNow;
+            state.LastHeartbeatStatus = "offline";
+            state.FailedHeartbeatCount = 0;
+            state.LockedAt = null;
+            state.LockReason = null;
+            state.UpdatedAt = DateTimeOffset.UtcNow;
+            await db.SaveChangesAsync(ct);
+            return new HeartbeatResult(
+                true,
+                "offline",
+                "Offline licence mode is enabled; the locally signed licence was validated and no heartbeat data was transmitted.");
+        }
+
+        var endpoint = configuration["License:HeartbeatUrl"] ?? configuration["License:ServerUrl"] ?? configuration["LICENSE_SERVER_URL"];
         if (string.IsNullOrWhiteSpace(endpoint)
             || !Uri.TryCreate(endpoint, UriKind.Absolute, out var heartbeatUri)
             || heartbeatUri.Scheme != Uri.UriSchemeHttps)
@@ -234,6 +263,10 @@ public sealed class LicenseService(
         await db.SaveChangesAsync(ct);
         return new HeartbeatResult(false, status, message);
     }
+
+    private bool OfflineModeEnabled() =>
+        configuration.GetValue<bool>("License:OfflineMode")
+        || bool.TryParse(configuration["LICENSE_OFFLINE_MODE"], out var enabled) && enabled;
 
     private async Task<LicenseState?> CurrentAsync(CancellationToken ct)
     {

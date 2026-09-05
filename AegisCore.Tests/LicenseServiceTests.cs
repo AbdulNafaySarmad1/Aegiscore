@@ -52,6 +52,7 @@ public sealed class LicenseServiceTests
     [Fact]
     public async Task ValidateAsync_Rejects_Malformed_Signed_Payload_Without_Throwing()
     {
+
         var service = CreateService();
         var license = SignedLicense("not-a-date");
 
@@ -59,6 +60,41 @@ public sealed class LicenseServiceTests
 
         Assert.False(result.IsValid);
         Assert.Equal(AegisCore.Application.Licensing.LicenseValidationFailureReason.InvalidSignature, result.FailureReason);
+    }
+
+    [Fact]
+    public async Task SendHeartbeatAsync_OfflineMode_ValidatesLocallyAndDoesNotCallHome()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options;
+        await using var db = new AegisDbContext(options);
+        await db.Database.EnsureCreatedAsync();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["License:HmacSecret"] = "test-secret-with-enough-entropy",
+            ["License:OfflineMode"] = "true",
+            ["License:ServerUrl"] = "https://license.example.test/heartbeat"
+        }).Build();
+        var clients = new Mock<IHttpClientFactory>();
+        var service = new LicenseService(
+            db,
+            configuration,
+            clients.Object,
+            new AegisCore.Infrastructure.Foundation.AuditService(db),
+            NullLogger<LicenseService>.Instance);
+        var universityId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        await service.ActivateAsync(SignedLicense(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30))), universityId);
+
+        var result = await service.SendHeartbeatAsync();
+
+        Assert.True(result.Success);
+        Assert.Equal("offline", result.Status);
+        Assert.Contains("no heartbeat data was transmitted", result.Message, StringComparison.Ordinal);
+        var state = await db.LicenseStates.SingleAsync();
+        Assert.Equal("offline", state.LastHeartbeatStatus);
+        Assert.Equal(0, state.FailedHeartbeatCount);
+        clients.Verify(factory => factory.CreateClient(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]

@@ -1,43 +1,43 @@
 # Graph Report - Aegiscore  (2026-09-05)
 
 ## Corpus Check
-- 1354 files · ~1,733,856 words
+- 1356 files · ~1,734,884 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 26504 nodes · 51680 edges · 1299 communities (1173 shown, 83 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 3367 edges (avg confidence: 0.84)
+- 26518 nodes · 51709 edges · 1278 communities (1152 shown, 83 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 3375 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bf8779ec`
+- Built from commit: `c5be80d4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - AegisDbContext
-- MultiTenantSsoService
+- UniversitySsoProfile
 - FinanceVoucher
 - ITenantScoped
 - CoreErpEntities2.cs
-- .AddAsync
+- .AddExtendedPlatform
 - CoreErpEntities1.cs
 - ITenantScoped
 - .MapFinanceModuleEndpoints
 - CoreErpEntities3.cs
 - MisconductCase
-- .Activation_RollsBackInvalidConfirmation_ThenCreatesTenantUsersAndPqcRegistry
-- WorkflowEngine
-- Prompt
+- WizardAdminCredential
+- .GetByIdAsync
+- License
 - HealthScore
 - AegisCore.Domain
 - FinancePurchaseOrder
-- PayrollService
+- IMaintenanceTicketRepository
 - AppShell.tsx
 - Enums.cs
-- WizardProviderConfigurationService
-- AchievementBadge
-- PlatformEntitiesP111_120.cs
+- SsoConfigDto
+- ExecutiveDashboard
+- GradeDistribution
 - FinanceForeignCurrencyTransaction
 - CatalogCourseRecord
 - ProcurementRequisition
@@ -49,15 +49,15 @@
 - LmsProvision
 - WizardController
 - CancellationToken
-- MenuItem
-- Semester
+- CafeteriaUnit
+- PolicyConfig
 - SLADefinition
 - CancellationToken
 - MaintenanceTicket
 - SearchHitDto
 - .Permission_handler_uses_JWT_roles_tenant_and_Casbin
 - EnhancedSetupService
-- WizardStateService
+- .CreateAsync
 - RoomMapDto
 - .SaveChangesAsync
 - CancellationToken
@@ -66,9 +66,9 @@
 - FinanceRegulatoryReportService
 - CancellationToken
 - .AddPlatformServices
-- .FindAsync
+- .AddAsync
 - WorkOrder
-- AdmissionApplication
+- ApplicationDocument
 - AegisCore.Domain.Entities
 - AegisCore.Infrastructure
 - index.ts
@@ -86,27 +86,27 @@
 - usePersonalityTranslations
 - ControllerBase
 - OcrResult
-- .CreateAsync
+- SecurityHardeningTests
 - StudentProgressDto
-- ExamPaperScan
+- SsoSession
 - CancellationToken
 - AccreditationFramework
 - FinanceVendor
-- .AddExtendedPlatform
+- Repository
 - InfisicalSecretService
 - TaxSlabDto
-- RuleAction
-- ReplicationScaleEvent
+- RuleEngineDtos.cs
+- ReplicationScalingConfig
 - CancellationToken
 - BackupConfigurationDto
 - CampusOperationsService
 - LostFoundItem
-- AegisCore.Domain.Common
+- FinanceLibraryAcquisition
 - MentalHealthTicket
 - GateEntry
 - PreventiveMaintenanceSchedule
 - .AddFinanceModule
-- .ActivateAsync
+- .CommitAsync
 - CancellationToken
 - HybridPqcTransportMiddlewareTests
 - BoardAlert
@@ -115,51 +115,51 @@
 - UserResponse
 - Faculty
 - Document 9 — User Manual
-- SamlConfiguration
+- SamlService
 - Guid
 - .CreateAsync
 - CancellationToken
 - src/App.tsx
 - .AuthFlow_LoginRefreshLogout_Cycle
 - PrerequisiteConflict
-- HrController
+- CancellationToken
 - FinancePayrollPaymentFile
 - CancellationToken
 - SupportTicketService
 - IStorageService
-- DataExportLog
+- AdvisorMeeting
 - AegisCore Codebase Knowledge
 - AegisCore — Community Plugin Ecosystem (U9)
 - TenantConfigService
 - .AddMultiCampus
-- DeansListEntry
+- LeaderboardEntry
 - devDependencies
-- .AddCloudProvider
 - CancellationToken
+- PlagiarismApiSubmission
 - CancellationToken
 - AegisCore — Sprint 13: Mobile Apps (Student + Faculty Native Apps)
 - HighRiskValidators.cs
 - S2AdmissionsController
 - ExtensionDetail
-- FinancePettyCashCount
+- AegisCore.Domain.Common
 - AEGISCORE_FINAL_17_PROMPTS.md
-- IBackupService
+- DatabaseHealthService
 - CancellationToken
 - IExtensionRepository
 - EquipmentMaintenance
 - app/page.tsx
 - DocumentTemplateService
-- ReplicaManagerService
+- ReadReplicaConfig
 - messages.ts
 - AegisCore's Unfair Advantages (Why We Win)
-- ReplicationController
+- IReplicaManagerService
 - Guid
 - LlmOptions
 - Attendance
-- StudentFeePayment
+- FeeService
 - NodeConfigDto
 - ConfigurationEntry
-- DigitalTwinService
+- .AddDigitalTwin
 - ILabBookingRepository
 - FinanceFleetProfile
 - CancellationToken
@@ -168,7 +168,7 @@
 - RuleEngineController
 - FinanceAssetAccountingEvent
 - FinanceBankFeedTransaction
-- LicenseService
+- LicenseState
 - GrievanceTicket
 - NotificationDelivery
 - apiGet
@@ -176,9 +176,9 @@
 - BoardPortalContracts.cs
 - InstallationStateService
 - ApiKey
-- GradingScheme
+- GradeAppeal
 - CountryPack
-- DataImportJob
+- ExternalDbConnection
 - ChartConfiguration
 - ImportBatch
 - Document 2 — Software Requirements Specification
@@ -191,7 +191,7 @@
 - ExamSeating
 - ConfigDto
 - .ApplyGracemarksAsync
-- Guid
+- .AddInfrastructure
 - Course
 - FireEquipment
 - CounselorProfile
@@ -203,10 +203,10 @@
 - MarketplaceController
 - SsoHitlController
 - VoiceAssistantService
-- CampusConfiguration
+- Room
 - MaintenanceContractor
 - EquipmentBooking
-- Course
+- Enrollment
 - CancellationToken
 - PromptFiveEdgeCaseTests
 - .CreateAsync
@@ -215,25 +215,25 @@
 - BackupRecord
 - VehiclePass
 - IDataImportService
-- StringBuilder
+- Course
 - FormDto
 - IGuardShiftRepository
 - CancellationToken
 - SeedPipeline.cs
 - 6 Specialized Codex Prompts for AegisCore
 - DataImportController
-- .AddAuthenticationServices
+- SignalRFinanceRealtimePublisher
 - LabConsumable
 - IUnitOfWork
 - AuditLog
 - GatewayRtpRequest
-- FleetVehicle
+- TransportInspection
 - FileBackedStorageProvider
 - PqcCryptographyService
 - InMemoryVectorStore
 - ConfigAuditLog
 - FormFieldConfig
-- .AddRuleEngine
+- RuleDomain
 - Student
 - PlagiarismScan
 - dependencies
@@ -247,26 +247,26 @@
 - ReplicaHealthDto
 - IFormSubmissionRepository
 - FinancePayrollPosting
-- StudentProctoringRecord
+- .LogEvent
 - IR2StorageService
-- Role
+- .AddIdentityGovernance
 - Document 12 — Performance Report
 - 🚀 SPRINT PROMPTS
 - IdentityController
-- StudentLifecycleController
+- AegisCore.Application.StudentLifecycle
 - ConfigurationCenterService
 - CalibrationRecord
 - FinanceInsurancePolicy
-- SearchService
+- UnifiedSearchRequest
 - SecurityIncident
 - AegisCore.Infrastructure
 - include
 - AegisCore — Native Mobile Architecture & Docker Integration (U13)
 - DegreeAuditController
-- JobPosting
-- CancellationToken
+- AdmissionApplication
+- Role
 - FinanceContinuousControlService
-- JobDto
+- NotificationDeliveryDto
 - IApiKeyRepository
 - DocumentVaultEntry
 - FinanceInventoryMovement
@@ -289,13 +289,13 @@
 - User
 - Document 10 — Test Plan
 - CancellationToken
-- CancellationToken
+- LibraryBook
 - FormsController
 - IUnitOfWork
-- OpenAiEmbeddingProvider
+- .AddAiPlatform
 - LabEquipment
 - AegisCore.Application.Backup
-- CurriculumService
+- OfflineAttendanceEvent
 - ArgumentOutOfRangeException
 - RuleCondition
 - Batch
@@ -304,7 +304,7 @@
 - SubstitutionConfigurationProvider
 - 3. Data Dictionary
 - Guid
-- CancellationToken
+- WorkflowInstance
 - MarkAttendanceRequest
 - PqcSignatureService
 - Election
@@ -315,10 +315,10 @@
 - .CreateKey
 - .CurrentValue
 - CasbinPolicySyncService
-- .AddInfrastructure
+- .CalculateAsync
 - CampusDtos.cs
 - CourseAssignment
-- TranslationKey
+- FinanceReportProfile
 - LoginAuditRecord
 - FacultyCompensation
 - VisitingFacultyProfile
@@ -329,42 +329,42 @@
 - DisasterRecoveryController
 - Guid
 - CancellationToken
-- RuleDomain
-- GradeDistribution
+- .ConfigureSaml
+- VisitorDto
 - IoTSensor
 - FormDefinition
 - LabEquipment
-- .V4Contract_UsesTenantPathAndCorrectCreateUpdateDeleteMethods
+- DecisionTable
 - .CheckIn_EndToEnd_EncryptsCoordinates_RedactsRoster_AndAllowsOverride
 - PrivacyComplianceService
 - VehiclePass
-- DocumentAccessLog
+- StartImportRequest
 - Guid
 - Guid
 - Student
 - IAccountingStandardsEngine
 - .ImportAsync
-- .AddWorkflowStudio
+- CancellationToken
 - Campus
 - ComplianceControl
 - CurriculumVersionRecord
 - FinanceAuditSample
-- SectionOverrideRequest
+- SystemConfiguration
 - ResearchLab
 - WizardSession
-- WorkflowInstance
+- WorkflowDefinition
 - AegisCoreLicenseController
 - Enrollment
-- ISecurityIncidentRepository
+- SecurityIncident
 - TaxSlab
 - PaymentPlanInstallment
-- Convocation
-- LicenseState
-- BackupStatus
-- GradeAppeal
+- ConvocationControllerTests
+- DashboardWidget
+- JwtTokenService
+- DefaulterRiskScore
 - WorkflowStep
 - AncillaryFinanceService
-- CancellationToken
+- StudentLifecycleController
 - ApiKeyService
 - SupportBotQueryService
 - AegisCore.Infrastructure.Migrations
@@ -375,9 +375,9 @@
 - LoginAuditController
 - .AddMicrosoftEcosystem
 - AegisCore.Application.AI
-- ApprovalRecord
-- Asset
-- ElasticsearchIndex
+- DataImportJob
+- StudentProctoringRecord
+- ISearchIndex
 - AuditFinding
 - ConfigurationEntry
 - ElectionControllerTests
@@ -396,13 +396,13 @@
 - AegisCore.API
 - CommunicationsController
 - ElectionContracts.cs
-- CancellationToken
-- .AddAiPlatform
+- Currency
+- SamlConfiguration
 - AssetInventoryService
-- SearchableStudent
+- CampusConfiguration
 - .Create
-- AdmissionLead
-- PlagiarismApiSubmission
+- MeritList
+- MeritListEntry
 - GradeAppealsControllerTests
 - GradeOverrideRequest
 - LabConsumable
@@ -417,7 +417,7 @@
 - ScimController
 - DayOfWeek
 - ErrorDisplay.tsx
-- DecisionTable
+- RuleVersion
 - DegreeAudit
 - DegreeRequirement
 - FinanceRestatementRun
@@ -426,10 +426,10 @@
 - EXECUTION STEPS
 - AegisCore — Course Trees, Curriculum Management, Teacher Workload & Offline Attendance (U11)
 - Wizard Flow — 7 Steps
-- ILicenseService
-- ExtensionManifest
+- ProctoringSession
+- MenuItem
 - SyncLagController
-- .InvokeAsync
+- FleetVehicle
 - LoginAuditService
 - WizardRolePermissionService
 - UniversityReportDto
@@ -444,21 +444,21 @@
 - compilerOptions
 - AccountingStandardsEngine
 - FormService
-- PqcKeyCeremonyService
+- FinancePqcKeyCeremony
 - convocations/page.tsx
 - AegisCore Technical Spec Sheet
 - EXECUTION STEPS
 - AegisCore — Sprint 9: Communications Hub (WhatsApp + Email + SMS + Notifications)
 - .CourseReport
-- NotificationRecord
+- .AddAuthenticationServices
 - DefaultPredictionService
-- DocumentVaultService
+- CheckpointScan
 - AegisCore.Application.Foundation
 - CreditTransfer
 - ForeignStudentRegistry
 - FinanceConsolidationRun
 - FormSubmission
-- SsoSession
+- MarkModeration
 - dependencies
 - SecurityGuard
 - dependencies
@@ -480,15 +480,15 @@
 - AegisCore — Sprint 4: HR (Recruitment → Payroll → Leave → Appraisal)
 - AegisCore — Deployment Guide
 - SupportController
-- OfflineAttendanceEvent
-- SecurityIncident
+- CurriculumTests
+- Vendor
 - ResearchLab
 - SecurityGuard
 - ConsumableRequisition
 - IncidentWitness
 - CorrectiveActionPlan
-- Currency
-- ILabBookingRepository
+- SafetyChecklistItem
+- .AddCloudProvider
 - DegreeAuditService
 - .BuildTargetModel
 - expo
@@ -504,26 +504,26 @@
 - AegisCore — Sprint 6: Microsoft Ecosystem (Teams + Moodle LMS + Power BI)
 - AegisCore — Sprint 7: Finance (Fee Management → Accounting → Procurement)
 - AegisCore — Multi-Tenant SSO, 2FA Enforcement & Agentic HITL Exam Pipeline (U14)
-- .RequestGradeOverride
-- BackupConfiguration
+- StrategicGoal
+- CallLog
 - GradePredictionResult
-- SystemConfiguration
+- StudentFeePayment
 - CountryPackController
 - MicrosoftEcosystemContracts.cs
 - SyncLagDashboardDto
-- .FindAsync
-- Employee
+- AlumniDonation
+- DemoSeeder
 - CisUpload
 - ComplianceFramework
 - LabBooking
-- IAttendanceRepository
+- AlumniProfile
 - PaymentPlanArrangement
 - EmergencyAlert
 - EmergencyContact
-- DocumentVaultController
-- IReplicaManagerService
+- DocumentVaultEntryDto
+- MedicalVisit
 - FacultyEngagement
-- CampusService
+- CampusDto
 - .BuildTargetModel
 - .BuildTargetModel
 - .BuildTargetModel
@@ -544,12 +544,12 @@
 - .BuildTargetModel
 - .BuildTargetModel
 - AbacPolicyService.cs
-- ReplicationScalingConfig
+- SickLeaveApplication
 - RedisStateMachineService
 - MentalHealthControllerTests
 - Instructions
-- UnifiedSearchRequest
-- CampusDto
+- SearchController
+- ICampusService
 - Timetable
 - IFormSubmissionRepository
 - VisitingFacultyService
@@ -557,10 +557,10 @@
 - ForeignStudentRecord
 - PrivacyComplianceController
 - DegreeProgram
-- VisitingFacultyContract
-- ReadReplicaConfig
+- StudentHealthRecord
+- TicketComment
 - Claim
-- IDocumentVaultService
+- WorkOrderRepository
 - SlotCandidateMatch
 - WorkOrderTimeEntry
 - ConcernType
@@ -575,18 +575,18 @@
 - The Complete Module Suite
 - ExtensionInstallation
 - IApiKeyService
-- UniversitySsoProfile
+- .HandleAsync
 - IdentityService
 - IIdentityService
 - .BuildTargetModel
-- DegreeVerification
+- IWorkOrderRepository
 - cafeteria/page.tsx
 - InterventionRecord
 - ExtensionReview
 - transport/page.tsx
 - Room
 - SyncLagConfig
-- TranslationValue
+- TranslationKey
 - FinanceStandingPurchaseOrder
 - WorkOrderMaterial
 - VoiceIntentType
@@ -607,66 +607,66 @@
 - useTenantFormatter
 - document-vault/page.tsx
 - AchievementControllerTests
-- ExecutiveDashboard
-- PolicyConfig
+- BoardControllerTests
+- Convocation
 - AegisCore on a Bare Linux VPS
 - Cleanup Targets
 - DefaulterPredictionControllerTests
 - .GetClientLogo
 - IBCCEquivalenceService
-- .AddCoreServices
+- AegisCore.API/Program.cs
 - RateLimitAuthMiddleware
 - CourseSuggestion
 - RoomLayoutDto
 - RoomOccupancy
 - .Split
-- DocumentVaultDashboardDto
+- ActivityParticipation
 - ISyncLagService
 - SyncLagEntryDto
-- IDocumentOcrService
+- StudentSociety
 - ControlEvidence
 - CashFlowForecast
 - ConfigVersion
 - FinanceAuditorEngagement
 - Building
 - FloorPlan
-- CheckpointScan
+- GuardRound
 - PluginRevenueShare
 - FinanceControlEvaluationBatch
 - TeachingSlot
 - ChartType
 - SystemAlertService
 - LocalAuthentication
-- IGuardRoundRepository
+- .ProvisionAsync
 - CourseGrade
 - readiness/page.tsx
 - ExamSchedule
 - bootstrap-env.sh
 - AegisCore.Application
-- FinancePettyCashExpense
+- AegisCore.Application.ApiGateway
 - SensitiveDataDestructuringPolicy
 - DemoExpiryMiddleware
-- GlobalRateLimitMiddleware
+- SocietyMembership
 - FinanceAuditSeal
-- FinancePettyCashFund
+- NotificationTemplateChannel
 - Permission
 - DigitalTwinController
 - .UpdateRuleAsync
 - ConvocationEligibility
-- TransportInspection
+- ColumnInfo
 - TransportService
 - UploadValidationService
 - IncidentEvidence
-- .AcademicCalendarService_Counts_WorkingDays_And_Excludes_Holidays
+- ImportResultDto
 - plagiarism/page.tsx
 - TransportRegistration
 - VisualizationType
 - devDependencies
 - SemesterFreezeControllerTests
-- IPrivacyComplianceService
+- LeadStatus
 - What AegisCore Covers
-- DocumentVaultEntryDto
-- ConsumableAlertDto
+- TicketStatus
+- AegisCore.Application.Campus
 - LicenseServiceTests
 - AegisCore on Google Cloud Platform (GCP)
 - AegisCore — Patch Prompt (One Level Deep)
@@ -679,31 +679,31 @@
 - WorkflowStepDto
 - ILoginAuditRecordRepository
 - .LocalDiskStorageProvider_RoundTrips_And_BlocksTraversal
-- DocumentTier
+- IMaintenanceContractorRepository
 - .CheckHealthAsync
 - EquipmentUsageLog
 - PowerBiReport
-- FinancePaymentPlanConfiguration
-- DatabaseHealthService
+- BookingStatus
+- SSRStatus
 - .Upload
 - FinanceAuditContracts.cs
 - IAssetInventoryService
-- AutoLockBackgroundService
+- UpdateStatus
 - DataCategory
 - JobCategory
 - .BuildModel
 - AlertTriggerType
 - Screens (iOS + Android)
 - AegisCore Mobile Apps
-- IDigitalTwinService
-- StudentFeeDue
+- DigitalTwinService
+- WorkOrderStatus
 - Recovery
 - README-DEPLOY.md
 - P4 — Tenant Query-Bypass Audit
 - Scenario: University says "No cloud, we need data on our servers"
 - AegisCore — Docker Build Validator Prompt
 - IEquipmentBookingRepository
-- BoardDecision
+- FERPA and GDPR compliance operations
 - GuardShift
 - FinanceTests
 - ILabSafetyInspectionRepository
@@ -725,7 +725,7 @@
 - aegiscore-mobile-app/react-native/src/sync/offlineQueue.ts
 - aegiscore-mobile/react-native/src/sync/offlineQueue.ts
 - AegisCore.Mobile/src/sync/offlineQueue.ts
-- SimpleXlsx
+- AIModelCapability
 - AegisCore.Tests
 - GovernanceTests
 - _Imports.razor
@@ -735,14 +735,14 @@
 - AegisCore Deployment Runbook
 - OfflineAttendanceDao
 - AegisCore.Web.csproj
-- ComplianceFrameworkDto
-- ICalibrationRecordRepository
+- BackupType
+- CalibrationAlertDto
 - LedgerArchive
 - IConfigurationCenterService
 - CriterionEvidence
-- AegisCore.API.Controllers
-- AegisCore.Application.StudentLifecycle
-- FinanceRestatementMemoLine
+- CommunicationsController.cs
+- CeremonyAttendance
+- DefaulterRiskTier
 - AegisCore.slnx
 - FinanceVendorContact
 - AccreditationCycleStatus
@@ -761,17 +761,17 @@
 - RuleDto
 - ADR 0001: Multi-tenant modular monolith
 - AegisCore.Application.Governance
-- AegisCore.Infrastructure/GlobalUsings.cs
+- DriveStatus
 - DocumentType
-- TenantIsolationTest.cs
+- ErasureRequestStatus
 - ConfigDiffDto
-- LicenseValidationFailureReason
+- GuardrailAction
 - ApplicationStatus
 - BookStatus
 - CertificateStatus
 - ChangeEventType
 - ConditionOperator
-- AegisCore.Application.Compliance
+- InterviewStatus
 - ElectionStatus
 - FacultyContractStatus
 - GradeCurveShape
@@ -779,7 +779,7 @@
 - InterventionType
 - LoginEvent
 - PublicationType
-- AlertCategory
+- LeaderboardScope
 - FinancePaymentPlanWorker
 - .BuildTargetModel
 - .Up
@@ -792,7 +792,7 @@
 - AegisCore — Complete University Operating Suite
 - AegisCore Abuse and Limit Test Report
 - IEquipmentMaintenanceRepository
-- UserRole
+- MandatoryReportTrigger
 - GlobalExceptionHandlerMiddleware
 - devDependencies
 - ValidationExceptionMiddleware
@@ -869,8 +869,8 @@
 - run-all.sh
 - aegiscore-android/app/src/main/kotlin/pk/edu/aegiscore/mobile/Api.kt
 - aegiscore-android/app/src/main/kotlin/pk/edu/aegiscore/mobile/MainActivity.kt
-- CreateApiKeyRequest
-- EvidenceStrength
+- ApiGatewayDtos.cs
+- MealType
 - AccreditationBody
 - AIProviderType
 - CreateProgramRequest
@@ -883,16 +883,16 @@
 - InsightType
 - AwardTier
 - BadgeCategory
-- AlignmentLevel
+- MilestoneStatus
 - CampaignStatus
-- CampaignType
+- ReplicaStatus
 - CAPStatus
 - CareerEventType
 - CommitteeRole
 - ConflictSeverity
 - CriterionScore
 - DefaulterStatus
-- DeliverableStatus
+- TransferStatus
 - DeviceType
 - DirectoryProvider
 - DisposalMethod
@@ -907,18 +907,18 @@
 - FeeStatus
 - FindingType
 - FreezeReturnStatus
-- HardcodingType
+- ReadOnlySqlQueryValidator
 - HealthScoreGrade
-- DecisionTableDto
+- ApiProviderType
 - AccreditationAuditFinding
 - InstitutionHealthGrade
 - IssueStatus
 - JobExecutionStatus
 - JobType
 - LeaveStatus
-- LicenseStatus
+- CareerGoalStatus
 - MemberType
-- MisconductStatus
+- FlagScope
 - NominationStatus
 - OccupancyState
 - OrderStatus
@@ -934,7 +934,7 @@
 - StudentDistributionStrategy
 - SubmissionStatus
 - TravelStatus
-- .EveryGeneratedWorkbookPassesItsOwnValidator
+- LabStatus
 - VehicleMaintenanceStatus
 - FacultyVettingStatus
 - EmployerStatus
@@ -1024,35 +1024,33 @@
 - aegiscore-mobile-app/android/app/src/main/kotlin/pk/edu/aegiscore/mobile/MainActivity.kt
 - AegisCore.Native/android/app/src/main/kotlin/pk/edu/aegiscore/mobile/Api.kt
 - AegisCore.Native/android/app/src/main/kotlin/pk/edu/aegiscore/mobile/MainActivity.kt
-- MemberStatus
+- NotificationStatus
 - AegisCore Cloud Concerns Pitch
 - AegisCore Plugin Ecosystem
 - Repository Split Report
 - Android Cleanup Report
-- RenewalStatus
+- ReferralStatus
 - P8 — Wizard consolidation and security
 - Scenario: University wants to host on Azure Singapore
 - Deployment Checklist
 - 🏆 Competitive Advantages
 - Memory Maintenance
-- LicenseHeartbeatHostedService
+- ScheduleFrequency
 - DegreeRequirementCategory
 - ShiftStatus
-- ApiServicesExtensions
+- SSRReviewStatus
 - ActionItemStatus
 - SimilarityTier
 - VoiceRegister
 - ApiKeyStatus
 - JobPostingStatus
-- DocumentVaultContracts.cs
+- VehiclePassStatus
 - PlagiarismLayer
 - CareerEventStatus
 - ClearanceStatus
-- QueueStatus
+- .AddDataImport
 - ControlReviewFrequency
-- ControlStatus
-- CopyStakes
-- ComplianceFrameworkStatus
+- IPAddressExtensions
 - CrisisLevel
 - RoomStatus
 - DeansListStatus
@@ -1071,16 +1069,12 @@
 - EvidenceFreshness
 - ExtensionPricingModel
 - ExtensionStatus
-- WebhookSubscriptionRequest
 - FallbackReason
 - FeeDefaulterLevel
-- SecretsProvider
 - FireEquipmentStatus
 - FlagType
 - FormStatus
 - FreezeTimingRule
-- IncidentStatus
-- IncidentDashboardDto
 - GuardrailSeverity
 - VoiceLanguage
 - IncidentSeverity
@@ -1091,8 +1085,6 @@
 - DisciplineStatus
 - InventoryAlertType
 - EmergencyAlertSeverity
-- JournalEntryType
-- FacultyDistributionRule
 - LicenseEdition
 - LmsProvisionStatus
 - FindingSeverity
@@ -1106,13 +1098,11 @@
 - MoodleCoexistenceMode
 - MoraStatus
 - ComplianceLevel
-- ProctoringMode
 - RegistrationStatus
 - CountResultStatus
 - SensorStatus
 - RequisitionStatus
 - SSRSectionStatus
-- VehicleStatus
 - RiskCategory
 - VisaType
 - RoomType
@@ -1121,21 +1111,16 @@
 - VisitStatus
 - .AddCasbinAuthorization
 - DisposalStatus
-- EscalationLevel
 - SpecializationAlignment
-- BenchmarkStatus
 - tablet-responsive.spec.ts
 - StrategicGoalStatus
 - P14_VIEWPORT_RESULTS.md
 - DiagnosticSeverity
-- DriveType
 - UserStatus
 - NotificationChannel
 - VerificationCycleStatus
 - VerificationStatus
-- ExportFormat
 - VisitorStatus
-- VisitorType
 - ScholarshipStatus
 - HostelBlockType
 - HostelStatus
@@ -1153,15 +1138,11 @@
 - 🚢 Launch Roadmap
 - AegisCore Android
 - TicketResolution
-- MessageSender
 - ApiPermission
 - PlacementType
 - ApprovalType
 - FailoverMode
-- UpdateChannel
 - CalendarType
-- CalibrationStatus
-- .AddDocumentVault
 - scripts
 - LeadTaskStatus
 - Codex Handoff — AegisCore Deployment Prompts
@@ -1174,9 +1155,8 @@
 - InterviewType
 - S5ObeController
 - .AddAiSupportTicketing
-- IntegrationType
+- CancellationToken
 - V1.0_AegisCoreBaseline.sql
-- CurriculumApprovalStatus
 - AegisCore Frontend
 - .AddTenantConfig
 - AegisCore Android
@@ -1237,7 +1217,6 @@
 - LmsProvider
 - ReviewStatus
 - AegisCore.LedgerVerifier
-- .AddSyncLag
 - expo-application
 - expo-local-authentication
 - expo-notifications
@@ -1273,7 +1252,7 @@
 - .AddSetupServices
 
 ## God Nodes (most connected - your core abstractions)
-1. `AegisDbContext` - 1290 edges
+1. `AegisDbContext` - 1291 edges
 2. `AegisCore.Domain.Entities` - 505 edges
 3. `ITenantScoped` - 205 edges
 4. `AegisCore.Infrastructure.Migrations` - 172 edges
@@ -1299,79 +1278,79 @@
 ## Import Cycles
 - None detected.
 
-## Communities (1299 total, 83 thin omitted)
+## Communities (1278 total, 83 thin omitted)
 
 ### Community 0 - "AegisDbContext"
 Cohesion: 0.00
 Nodes (618): AegisDbContext, AcademicHolidays, AcademicYears, AccessAuditLogs, AccreditationAuditFindings, AccreditationAuditLogs, AccreditationBodies, AccreditationCommittees (+610 more)
 
-### Community 1 - "MultiTenantSsoService"
-Cohesion: 0.10
-Nodes (15): IAgenticExamService, IMultiTenantSsoService, SsoProviderDetection, CancellationToken, Guid, Task, IServiceCollection, AgenticExamService (+7 more)
+### Community 1 - "UniversitySsoProfile"
+Cohesion: 0.07
+Nodes (26): IMultiTenantSsoService, SsoProviderDetection, CancellationToken, Task, UniversitySsoProfile, Code, CreatedAt, Domain (+18 more)
 
 ### Community 2 - "FinanceVoucher"
 Cohesion: 0.01
-Nodes (234): ExchangeRateSnapshot, BaseCurrency, Id, PulledAt, QuoteCurrency, Rate, Source, TenantId (+226 more)
+Nodes (204): ExchangeRateSnapshot, BaseCurrency, Id, PulledAt, QuoteCurrency, Rate, Source, TenantId (+196 more)
 
 ### Community 3 - "ITenantScoped"
 Cohesion: 0.01
-Nodes (221): ITenantScoped, TenantId, Guid, AttendanceRecord, CheckIn, CheckOut, EmployeeId, Id (+213 more)
+Nodes (236): ITenantScoped, TenantId, Guid, AttendanceRecord, CheckIn, CheckOut, EmployeeId, Id (+228 more)
 
 ### Community 4 - "CoreErpEntities2.cs"
 Cohesion: 0.01
-Nodes (252): FindingType, AccreditationAuditLog, AccreditationCycleId, Action, Cycle, Details, Id, PerformedAt (+244 more)
+Nodes (231): FindingType, AccreditationAuditLog, AccreditationCycleId, Action, Cycle, Details, Id, PerformedAt (+223 more)
 
-### Community 5 - ".AddAsync"
-Cohesion: 0.06
-Nodes (37): CancellationToken, Guid, Task, Guid, ArchitectureExplorerService, BenchmarkService, CurriculumGovernanceService, CustomerPortalService (+29 more)
+### Community 5 - ".AddExtendedPlatform"
+Cohesion: 0.05
+Nodes (64): IAccessAuditLogRepository, IAIFeedbackRepository, IAIModelRepository, IAIProviderRepository, IAITokenUsageRepository, IApiEndpointRepository, IBenchmarkRunRepository, ICurriculumProposalRepository (+56 more)
 
 ### Community 6 - "CoreErpEntities1.cs"
 Cohesion: 0.01
-Nodes (242): AccreditationReport, AccreditationBody, Id, SubmittedAt, TenantId, Title, AttainmentThreshold, CreatedAt (+234 more)
+Nodes (248): AccreditationReport, AccreditationBody, Id, SubmittedAt, TenantId, Title, AttainmentThreshold, CreatedAt (+240 more)
 
 ### Community 7 - "ITenantScoped"
 Cohesion: 0.01
-Nodes (298): PatentInventor, FacultyId, Id, Patent, ResearchPatentId, TenantId, AdvisorAssignment, AssignedAt (+290 more)
+Nodes (313): ApplicationStatus, AdmissionLead, Activities, CreatedAt, Email, Id, Name, Phone (+305 more)
 
 ### Community 8 - ".MapFinanceModuleEndpoints"
 Cohesion: 0.03
-Nodes (117): FinanceModuleEndpoints, CancellationToken, DateTime, Dictionary, Guid, HttpContext, ICollection, IEndpointRouteBuilder (+109 more)
+Nodes (109): FinanceModuleEndpoints, CancellationToken, DateTime, Dictionary, Guid, HttpContext, ICollection, IEndpointRouteBuilder (+101 more)
 
 ### Community 9 - "CoreErpEntities3.cs"
 Cohesion: 0.01
-Nodes (251): VerificationStatus, AllocationStatus, AssetCategory, Code, CreatedAt, Id, Name, TenantId (+243 more)
+Nodes (269): VerificationStatus, AllocationStatus, Asset, AssetCategoryId, Category, CreatedAt, CurrentValue, DepreciationMethod (+261 more)
 
 ### Community 10 - "MisconductCase"
+Cohesion: 0.01
+Nodes (178): IAccessAuditLogRepository, ICurriculumProposalRepository, IDegreeVerificationRepository, IFacultyWorkloadRepository, IOfficialModuleRepository, IRegistrationWindowRepository, ISupportTicketRepository, IUpdateDeploymentRepository (+170 more)
+
+### Community 11 - "WizardAdminCredential"
+Cohesion: 0.17
+Nodes (11): WizardAdminCredential, CreatedAt, Email, FullName, Id, PasswordHash, RoleName, SessionId (+3 more)
+
+### Community 12 - ".GetByIdAsync"
+Cohesion: 0.12
+Nodes (30): NodeDefinitionDto, Config, Id, Label, Type, X, Y, TransitionDefinitionDto (+22 more)
+
+### Community 13 - "License"
 Cohesion: 0.02
-Nodes (151): CurriculumProposal, ApprovedAt, ChangesJson, CreatedAt, Description, Id, ProposedByUserId, Status (+143 more)
-
-### Community 11 - ".Activation_RollsBackInvalidConfirmation_ThenCreatesTenantUsersAndPqcRegistry"
-Cohesion: 0.07
-Nodes (28): WizardAdminCredential, CreatedAt, Email, FullName, Id, PasswordHash, RoleName, SessionId (+20 more)
-
-### Community 12 - "WorkflowEngine"
-Cohesion: 0.15
-Nodes (22): NodeDefinitionDto, Config, Id, Label, Type, X, Y, TransitionDefinitionDto (+14 more)
-
-### Community 13 - "Prompt"
-Cohesion: 0.02
-Nodes (141): AIFeedback, Comment, CreatedAt, Domain, Id, IsThumbsUp, PromptId, Rating (+133 more)
+Nodes (141): IAIFeedbackRepository, IAIModelRepository, IAIProviderRepository, IBenchmarkRunRepository, IGuardrailRuleRepository, IGuardrailViolationRepository, IPromptVersionRepository, AIFeedback (+133 more)
 
 ### Community 14 - "HealthScore"
 Cohesion: 0.02
-Nodes (133): ApiEndpoint, AuthRequired, Id, Method, Module, Path, RegisteredAt, TenantId (+125 more)
+Nodes (126): IDiagnosticFindingRepository, IEventSchemaVersionRepository, IQueueDefinitionRepository, IServiceRegistrationRepository, ISlowQueryRepository, IEventSchemaVersionRepository, ApiEndpoint, AuthRequired (+118 more)
 
 ### Community 15 - "AegisCore.Domain"
-Cohesion: 0.03
-Nodes (20): GradingSchemeResolver, ResultService, IConfiguration, ILogger, AegisCore.Application.Grading, AegisCore.Application.ApiGateway, AegisCore.Infrastructure.RuleEngine, AegisCore.Infrastructure.Marketplace (+12 more)
+Cohesion: 0.04
+Nodes (19): CampusServiceExtensions, ComplianceServiceExtensions, ExtendedPlatformServiceExtensions, AegisCore.Infrastructure.Forms, AegisCore.Application.Grading, AegisCore.Application.Forms, AegisCore.Application.RuleEngine, AegisCore.Infrastructure.RuleEngine (+11 more)
 
 ### Community 16 - "FinancePurchaseOrder"
 Cohesion: 0.03
-Nodes (113): FinanceGoodsReceipt, ConfirmedByUserId, Id, Lines, Number, PurchaseOrderId, ReceivedAt, Status (+105 more)
+Nodes (116): CreateFinanceGoodsReceiptCommand, CreateProcurementPaymentVoucherCommand, FinanceGoodsReceiptLineCommand, FinanceGoodsReceipt, ConfirmedByUserId, Id, Lines, Number (+108 more)
 
-### Community 17 - "PayrollService"
-Cohesion: 0.13
-Nodes (16): IPayrollService, PayslipData, CancellationToken, DateOnly, Guid, Task, PayrollRun, PayrollService (+8 more)
+### Community 17 - "IMaintenanceTicketRepository"
+Cohesion: 0.09
+Nodes (27): IMaintenanceTicketRepository, CancellationToken, Guid, IReadOnlyList, MaintenanceCategory, Task, TicketStatus, ISLADefinitionRepository (+19 more)
 
 ### Community 18 - "AppShell.tsx"
 Cohesion: 0.03
@@ -1379,19 +1358,19 @@ Nodes (33): RouteLayoutProps, RouteLayoutProps, RouteLayoutProps, RouteLayoutPro
 
 ### Community 19 - "Enums.cs"
 Cohesion: 0.02
-Nodes (125): AlertCondition, Above, Below, Equals, AllocationStatus, Active, CheckedOut, Suspended (+117 more)
+Nodes (130): AlertCategory, Academic, Compliance, Financial, Hr, Reputational, AlertCondition, Above (+122 more)
 
-### Community 20 - "WizardProviderConfigurationService"
-Cohesion: 0.07
-Nodes (36): AiConfigDto, IAiSetupProvider, Name, ISsoProvider, Name, IWizardProviderConfigurationService, SsoConfigDto, CancellationToken (+28 more)
+### Community 20 - "SsoConfigDto"
+Cohesion: 0.08
+Nodes (30): SsoConfigDto, FixedClientFactory, RecordingAiProvider, LastConfig, LastPrompt, Name, RecordingHandler, AuthorizationParameter (+22 more)
 
-### Community 21 - "AchievementBadge"
+### Community 21 - "ExecutiveDashboard"
 Cohesion: 0.02
-Nodes (122): AchievementBadge, Category, CreatedAt, CriteriaJson, Description, Id, ImageUrl, IsActive (+114 more)
+Nodes (123): BenchmarkComparison, AcademicYear, FactorName, Id, InstitutionValue, IsAboveAverage, NationalAverage, PeerAverage (+115 more)
 
-### Community 22 - "PlatformEntitiesP111_120.cs"
+### Community 22 - "GradeDistribution"
 Cohesion: 0.02
-Nodes (127): AppealCommitteeBrief, AppealId, BriefContent, EvidenceMatrixJson, GeneratedAt, Id, RecommendedOptions, TenantId (+119 more)
+Nodes (144): AppealCommitteeBrief, AppealId, BriefContent, EvidenceMatrixJson, GeneratedAt, Id, RecommendedOptions, TenantId (+136 more)
 
 ### Community 23 - "FinanceForeignCurrencyTransaction"
 Cohesion: 0.11
@@ -1403,27 +1382,27 @@ Nodes (105): CatalogCourseRecord, AnnotationsJson, CourseCode, CourseCodeNormali
 
 ### Community 25 - "ProcurementRequisition"
 Cohesion: 0.03
-Nodes (78): CostCenter, BudgetAllocation, Code, CreatedAt, DepartmentId, Id, Name, TenantId (+70 more)
+Nodes (80): CostCenter, BudgetAllocation, Code, CreatedAt, DepartmentId, Id, Name, TenantId (+72 more)
 
 ### Community 26 - "AssessmentComponent"
 Cohesion: 0.03
-Nodes (85): AssessmentComponent, ComponentType, CreatedAt, Id, IsMandatory, OrderIndex, PassingMarks, Scheme (+77 more)
+Nodes (73): AssessmentComponent, ComponentType, CreatedAt, Id, IsMandatory, OrderIndex, PassingMarks, Scheme (+65 more)
 
 ### Community 27 - "WizardStateDto"
 Cohesion: 0.03
-Nodes (84): ConnectionTestResult, DnsPropagationResult, DnsRecord, DomainProvisioningResult, FileStorageProvider, AwsS3, AzureBlob, GcpGcs (+76 more)
+Nodes (93): ConnectionTestResult, DnsPropagationResult, DnsRecord, DomainProvisioningResult, FileStorageProvider, AwsS3, AzureBlob, GcpGcs (+85 more)
 
 ### Community 28 - "CancellationToken"
 Cohesion: 0.04
-Nodes (63): IAccessAuditLogRepository, IAIFeedbackRepository, IAIModelRepository, IAIProviderRepository, IAITokenUsageRepository, IApiEndpointRepository, IBenchmarkRunRepository, ICurriculumProposalRepository (+55 more)
+Nodes (56): IAITokenUsageRepository, IApiEndpointRepository, IDomainEventRepository, IFeeDefaulterRepository, IHardcodingFindingRepository, IHealthScoreRepository, IIntegrationRegistrationRepository, ILicenseRepository (+48 more)
 
 ### Community 29 - "FinanceScholarshipProgram"
 Cohesion: 0.03
-Nodes (82): TransitionScholarshipApplicationCommand, FinanceGrant, AwardAmount, Awards, Currency, DonorName, EndDate, Id (+74 more)
+Nodes (85): ApplyForScholarshipCommand, CreateScholarshipProgramCommand, ScholarshipDonorReport, TransitionScholarshipApplicationCommand, FinanceGrant, AwardAmount, Awards, Currency (+77 more)
 
 ### Community 30 - "FinanceModuleService"
-Cohesion: 0.09
-Nodes (29): AccountType, JournalEntryLine, ChartOfAccountId, CostCenterId, CounterpartyReportingEntityId, Credit, Debit, Description (+21 more)
+Cohesion: 0.10
+Nodes (27): AccountType, JournalEntryLine, ChartOfAccountId, CostCenterId, CounterpartyReportingEntityId, Credit, Debit, Description (+19 more)
 
 ### Community 31 - "LmsProvision"
 Cohesion: 0.02
@@ -1437,49 +1416,49 @@ Nodes (17): WizardController, AllowAnonymous, CancellationToken, Dictionary, Htt
 Cohesion: 0.11
 Nodes (20): AchievementsController, BoardController, CatalogIngestionController, ClassGenerationController, DefaulterPredictionController, ElectionsController, ForeignStudentsController, MentalHealthController (+12 more)
 
-### Community 34 - "MenuItem"
+### Community 34 - "CafeteriaUnit"
 Cohesion: 0.03
-Nodes (81): CafeteriaInventory, CafeteriaUnitId, CreatedAt, ExpiryDate, Id, IngredientName, QuantityOnHand, ReorderPoint (+73 more)
+Nodes (68): CafeteriaInventory, CafeteriaUnitId, CreatedAt, ExpiryDate, Id, IngredientName, QuantityOnHand, ReorderPoint (+60 more)
 
-### Community 35 - "Semester"
-Cohesion: 0.04
-Nodes (66): CourseOffering, AcademicYear, CampusId, Capacity, CourseId, EnrolledCount, Id, SectionNumber (+58 more)
+### Community 35 - "PolicyConfig"
+Cohesion: 0.03
+Nodes (80): CourseOffering, AcademicYear, CampusId, Capacity, CourseId, EnrolledCount, Id, SectionNumber (+72 more)
 
 ### Community 36 - "SLADefinition"
 Cohesion: 0.04
-Nodes (58): ISLADefinitionRepository, CancellationToken, IReadOnlyList, MaintenanceCategory, Task, TicketPriority, SLAEngineService, SLAReportDto (+50 more)
+Nodes (54): ISLADefinitionRepository, CancellationToken, IReadOnlyList, Task, SLADefinition, Category, CreatedAt, EscalationLevel (+46 more)
 
 ### Community 37 - "CancellationToken"
-Cohesion: 0.05
-Nodes (52): FeatureFlagDto, Description, FlagType, Id, IsEnabled, Name, GrievanceTicketDto, Category (+44 more)
+Cohesion: 0.06
+Nodes (49): FeatureFlagDto, Description, FlagType, Id, IsEnabled, Name, GrievanceResponseRequest, ResponseText (+41 more)
 
 ### Community 38 - "MaintenanceTicket"
-Cohesion: 0.04
-Nodes (72): IMaintenanceTicketRepository, CancellationToken, Guid, IReadOnlyList, MaintenanceCategory, Task, TicketStatus, TicketDashboardDto (+64 more)
+Cohesion: 0.07
+Nodes (42): IMaintenanceTicketRepository, CancellationToken, Guid, IReadOnlyList, Task, MaintenanceTicket, Asset, AssetId (+34 more)
 
 ### Community 39 - "SearchHitDto"
-Cohesion: 0.07
-Nodes (33): SearchFilter, Field, Value, SearchGroupResult, Count, Domain, Hits, Label (+25 more)
+Cohesion: 0.12
+Nodes (17): SearchHitDto, Description, Domain, EntityType, Highlights, Id, Score, Subtitle (+9 more)
 
 ### Community 40 - ".Permission_handler_uses_JWT_roles_tenant_and_Casbin"
-Cohesion: 0.07
-Nodes (31): PermissionAuthorizationHandler, Task, PermissionPolicyProvider, PermissionRequirement, RequirePermissionAttribute, AuthorizationPolicy, Task, DynamicRbacTests (+23 more)
+Cohesion: 0.09
+Nodes (24): PermissionAuthorizationHandler, Task, PermissionRequirement, RequirePermissionAttribute, DynamicRbacTests, RbacFixture, Db, State (+16 more)
 
 ### Community 41 - "EnhancedSetupService"
-Cohesion: 0.08
-Nodes (37): SaveHierarchyRequest, SavePermissionsRequest, SaveWizardPermissionMatrixRequest, SaveWizardRolesRequest, SetupDepartment, SetupFileValidation, SetupHierarchy, SetupPermission (+29 more)
+Cohesion: 0.06
+Nodes (45): SaveHierarchyRequest, SavePermissionsRequest, SaveWizardRolesRequest, SetupDepartment, SetupFileValidation, SetupHierarchy, SetupPermission, SetupReview (+37 more)
 
-### Community 42 - "WizardStateService"
-Cohesion: 0.13
-Nodes (23): IWizardStateStore, WizardSessionCompletedException, WizardSessionNotFoundException, WizardStateService, CancellationToken, Task, OnboardingServiceExtensions, IServiceCollection (+15 more)
+### Community 42 - ".CreateAsync"
+Cohesion: 0.06
+Nodes (41): IPasswordHashingService, IWizardStateStore, WizardSessionCompletedException, WizardStateService, CancellationToken, Task, WizardActivationService, AegisDbContext (+33 more)
 
 ### Community 43 - "RoomMapDto"
 Cohesion: 0.03
-Nodes (74): BuildingMapDto, ActiveSensors, ActiveTickets, BuildingCode, FloorCount, Floors, Id, Latitude (+66 more)
+Nodes (75): BuildingMapDto, ActiveSensors, ActiveTickets, BuildingCode, FloorCount, Floors, Id, Latitude (+67 more)
 
 ### Community 44 - ".SaveChangesAsync"
 Cohesion: 0.07
-Nodes (38): Guid, CancellationToken, Task, TicketService, CancellationToken, Guid, Task, WorkOrderService (+30 more)
+Nodes (39): Guid, CancellationToken, Task, IWorkOrderRepository, CancellationToken, Guid, IReadOnlyList, Task (+31 more)
 
 ### Community 45 - "CancellationToken"
 Cohesion: 0.07
@@ -1490,8 +1469,8 @@ Cohesion: 0.11
 Nodes (19): dependencies, axios, expo, expo-secure-store, expo-sqlite, react-native, react-native-screens, @react-navigation/bottom-tabs (+11 more)
 
 ### Community 47 - "AiAgentRequest"
-Cohesion: 0.11
-Nodes (22): AiAgentRequest, Context, Mode, TenantId, UserId, UserMessage, UserRole, AiAgentRequestMode (+14 more)
+Cohesion: 0.06
+Nodes (45): AiAgentRequest, Context, Mode, TenantId, UserId, UserMessage, UserRole, AiAgentRequestMode (+37 more)
 
 ### Community 48 - "FinanceRegulatoryReportService"
 Cohesion: 0.05
@@ -1505,57 +1484,57 @@ Nodes (19): IAchievementService, IBoardPortalService, ICatalogIngestionService, 
 Cohesion: 0.09
 Nodes (29): IExportLogRepository, IFeatureFlagRepository, IImportBatchRepository, IJobExecutionRepository, INotificationDeliveryRepository, INotificationTemplateRepository, IPlatformMetricRepository, IScheduledJobRepository (+21 more)
 
-### Community 51 - ".FindAsync"
-Cohesion: 0.13
-Nodes (15): IReadOnlyList, AchievementService, DefaulterPredictionService, MentalHealthService, PrerequisiteConflictService, ReadinessMeterService, VisitingFacultyService, CancellationToken (+7 more)
+### Community 51 - ".AddAsync"
+Cohesion: 0.12
+Nodes (18): CancellationToken, Expression, Func, Task, AchievementService, DefaulterPredictionService, MentalHealthService, PrerequisiteConflictService (+10 more)
 
 ### Community 52 - "WorkOrder"
-Cohesion: 0.05
-Nodes (54): IWorkOrderRepository, CancellationToken, Guid, IReadOnlyList, Task, WorkOrderStatus, IWorkOrderRepository, CancellationToken (+46 more)
+Cohesion: 0.06
+Nodes (31): WorkOrder, AssignedTo, AssignedToContractor, AssignedToContractorId, AssignedToEmployeeId, CompletedAt, CreatedAt, HoursWorked (+23 more)
 
-### Community 53 - "AdmissionApplication"
-Cohesion: 0.03
-Nodes (69): AdmissionApplication, Cnic, CreatedAt, DateOfBirth, Documents, Email, EnquiryLeadId, EntryTestScore (+61 more)
+### Community 53 - "ApplicationDocument"
+Cohesion: 0.10
+Nodes (20): ApplicationDocument, Application, ApplicationId, DocumentType, FilePath, Id, RejectionReason, TenantId (+12 more)
 
 ### Community 54 - "AegisCore.Domain.Entities"
-Cohesion: 0.04
-Nodes (14): IPAddressExtensions, IPAddress, AegisCore.Application.RuleEngine, AegisCore.Application.Security, AegisCore.Application.DegreeAudit, AegisCore.Application.Common.Interfaces, AegisCore.Application.Marketplace, AegisCore.Application.Identity (+6 more)
+Cohesion: 0.05
+Nodes (11): AegisCore.API.Controllers, AegisCore.Application.Security, AegisCore.Application.Common.Interfaces, AegisCore.Tests.Controllers, AegisCore.Application.Identity, AegisCore.Application.ResearchLabs, AegisCore.Application.Platform, AegisCore.Application.Maintenance (+3 more)
 
 ### Community 55 - "AegisCore.Infrastructure"
-Cohesion: 0.05
-Nodes (28): AegisCore.Infrastructure.Foundation, AegisCore.API.Middleware, AegisCore.Infrastructure.Cloud.R2, AegisCore.Infrastructure.Finance, AegisCore.Infrastructure.Cloud.Azure, AegisCore.Infrastructure.Cloud, AegisCore.Infrastructure.Cloud.OnPremise, AegisCore.Infrastructure (+20 more)
+Cohesion: 0.06
+Nodes (19): FinanceVoucherSigningPayload, FinancePaymentPlanSchedule, MarketplaceRevenueTests, PasswordHashingServiceTests, AegisCore.API.Middleware, AegisCore.Infrastructure.Cloud.R2, AegisCore.Infrastructure.Finance, AegisCore.Infrastructure (+11 more)
 
 ### Community 56 - "index.ts"
 Cohesion: 0.08
 Nodes (57): actionBtnStyle, buildWaterfallData(), NChartDataTable(), NChartDataTableProps, SORT_ICONS, DEFAULT_ZONES, describeArc(), NChartGauge() (+49 more)
 
 ### Community 57 - "ControlDto"
-Cohesion: 0.04
-Nodes (64): AddControlRequest, ControlCode, Description, FrameworkId, OwnerName, OwnerUserId, ReviewFrequency, Title (+56 more)
+Cohesion: 0.03
+Nodes (67): AddControlRequest, ControlCode, Description, FrameworkId, OwnerName, OwnerUserId, ReviewFrequency, Title (+59 more)
 
 ### Community 58 - "apiPost"
 Cohesion: 0.05
 Nodes (46): ElectionsPage(), castVote(), certifyResult(), createElection(), nominateCandidate(), ComplianceBreach, daysRemaining(), expiryColor() (+38 more)
 
 ### Community 59 - "IStorageProvider"
-Cohesion: 0.11
-Nodes (23): AuditEntry, AuditQuery, IAcademicCalendarService, IAuditService, IPolicyService, IStorageProvider, PagedResult, CancellationToken (+15 more)
+Cohesion: 0.08
+Nodes (32): AuditEntry, AuditQuery, IAcademicCalendarService, IAuditService, IPolicyService, IStorageProvider, PagedResult, CancellationToken (+24 more)
 
 ### Community 60 - "CancellationToken"
 Cohesion: 0.10
 Nodes (18): IConvocationService, IDefaulterPredictionService, IGradeAppealService, IGradeDistributionService, IPlagiarismApiService, IPlagiarismDetectionService, IPrerequisiteConflictService, IProctoringService (+10 more)
 
 ### Community 61 - "CampusPolygon"
-Cohesion: 0.10
-Nodes (19): GeofenceGeometry, IReadOnlyList, CampusPolygon, CreatedAt, Id, IsActive, Name, TenantId (+11 more)
+Cohesion: 0.09
+Nodes (20): GeofenceGeometry, IReadOnlyList, CampusPolygon, CreatedAt, Id, IsActive, Name, TenantId (+12 more)
 
 ### Community 62 - "FeeDemand"
 Cohesion: 0.03
-Nodes (61): FeeDemand, Currency, DemandNumber, DueDate, Id, Installments, IssuedAt, OutstandingAmount (+53 more)
+Nodes (60): FeeDemand, Currency, DemandNumber, DueDate, Id, Installments, IssuedAt, OutstandingAmount (+52 more)
 
 ### Community 63 - "DeploymentReadinessChecker"
-Cohesion: 0.07
-Nodes (32): DeploymentReadinessChecker, AllPassed, DeploymentReadinessServiceExtensions, ReadinessCheck, CancellationToken, IConfiguration, IHostEnvironment, ILogger (+24 more)
+Cohesion: 0.05
+Nodes (43): DemoIdentityMiddleware, HttpContext, IConfiguration, IHostEnvironment, ILogger, RequestDelegate, Task, DeploymentReadinessChecker (+35 more)
 
 ### Community 64 - "IRepository"
 Cohesion: 0.11
@@ -1566,8 +1545,8 @@ Cohesion: 0.11
 Nodes (18): EnergyReading, Building, BuildingId, Consumption, Cost, Id, ReadingDate, ReadingType (+10 more)
 
 ### Community 66 - ".AddDisasterRecovery"
-Cohesion: 0.14
-Nodes (19): IBackupConfigurationRepository, IBackupRecordRepository, IReadReplicaConfigRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task (+11 more)
+Cohesion: 0.11
+Nodes (24): IBackupConfigurationRepository, IBackupRecordRepository, IReadReplicaConfigRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task (+16 more)
 
 ### Community 67 - "FoodOrder"
 Cohesion: 0.04
@@ -1582,24 +1561,24 @@ Cohesion: 0.09
 Nodes (30): AIAnalyticsController, AIOperationsController, ArchitectureController, BenchmarkController, CurriculumGovernanceController, CustomerPortalController, DegreeVerificationController, DiagnosticsController (+22 more)
 
 ### Community 70 - "OcrResult"
-Cohesion: 0.08
-Nodes (37): DocumentClassification, Confidence, DocumentType, Keywords, FormField, Confidence, FieldType, Label (+29 more)
+Cohesion: 0.07
+Nodes (42): IDocumentOcrService, CancellationToken, IReadOnlyList, Stream, Task, DocumentClassification, Confidence, DocumentType (+34 more)
 
-### Community 71 - ".CreateAsync"
-Cohesion: 0.06
-Nodes (42): CasbinAuthorizationMiddleware, HttpContext, IEnforcer, IServiceProvider, RequestDelegate, Task, OversizedUploadAuthHandler, OversizedUploadHost (+34 more)
+### Community 71 - "SecurityHardeningTests"
+Cohesion: 0.05
+Nodes (47): CasbinAuthorizationMiddleware, HttpContext, IEnforcer, IServiceProvider, RequestDelegate, Task, GlobalRateLimitMiddleware, SlidingWindow (+39 more)
 
 ### Community 72 - "StudentProgressDto"
 Cohesion: 0.04
-Nodes (56): AddRequirementRequest, AllowedCourseIds, Category, CourseCount, CourseId, IsRequired, MinCredits, Name (+48 more)
+Nodes (57): AddRequirementRequest, AllowedCourseIds, Category, CourseCount, CourseId, IsRequired, MinCredits, Name (+49 more)
 
-### Community 73 - "ExamPaperScan"
-Cohesion: 0.04
-Nodes (57): AgenticGradeRun, AgentTraceJson, CreatedAt, Id, ScanId, Status, SuggestedMarks, TenantId (+49 more)
+### Community 73 - "SsoSession"
+Cohesion: 0.03
+Nodes (72): AgenticGradeRun, AgentTraceJson, CreatedAt, Id, ScanId, Status, SuggestedMarks, TenantId (+64 more)
 
 ### Community 74 - "CancellationToken"
-Cohesion: 0.08
-Nodes (30): NotificationTemplateChannel, Email, InApp, Push, Slack, SMS, Teams, Webhook (+22 more)
+Cohesion: 0.11
+Nodes (21): CommandCenterService, ExportService, FeatureFlagService, GrievanceService, ImportService, NoopNotificationRealtimePublisher, NotificationPlatformService, SchedulerService (+13 more)
 
 ### Community 75 - "AccreditationFramework"
 Cohesion: 0.05
@@ -1609,25 +1588,25 @@ Nodes (44): AccreditationFramework, CreatedAt, Criteria, CurrentScore, Framework
 Cohesion: 0.09
 Nodes (22): FinanceVendor, BankName, Category, Contacts, Iban, Id, InvoiceCurrency, LastSanctionsScreenedAt (+14 more)
 
-### Community 77 - ".AddExtendedPlatform"
-Cohesion: 0.04
-Nodes (92): IAIAnalyticsService, IGuardrailService, IAccessAuditLogRepository, IAIFeedbackRepository, IAIModelRepository, IAIProviderRepository, IAITokenUsageRepository, IApiEndpointRepository (+84 more)
+### Community 77 - "Repository"
+Cohesion: 0.06
+Nodes (46): AccessAuditLogRepository, AIFeedbackRepository, AIModelRepository, AIProviderRepository, AITokenUsageRepository, ApiEndpointRepository, BenchmarkRunRepository, CurriculumProposalRepository (+38 more)
 
 ### Community 78 - "InfisicalSecretService"
-Cohesion: 0.18
-Nodes (15): InfisicalSecretService, SecretEnvelope, SecretLocation, SecretResponse, CancellationToken, HttpMethod, HttpResponseMessage, IConfiguration (+7 more)
+Cohesion: 0.07
+Nodes (37): InfisicalSecretService, SecretEnvelope, SecretLocation, SecretResponse, CancellationToken, HttpMethod, HttpResponseMessage, IConfiguration (+29 more)
 
 ### Community 79 - "TaxSlabDto"
 Cohesion: 0.05
 Nodes (39): CurrencyDto, Code, DecimalPlaces, ExchangeRateToBase, Id, IsBaseCurrency, Name, Symbol (+31 more)
 
-### Community 80 - "RuleAction"
+### Community 80 - "RuleEngineDtos.cs"
 Cohesion: 0.05
-Nodes (46): ConditionEvalResult, ActualValue, Condition, Passed, CreateRuleRequest, Actions, Conditions, Description (+38 more)
+Nodes (47): ConditionEvalResult, ActualValue, Condition, Passed, DecisionTableColumn, Name, Operator, Type (+39 more)
 
-### Community 81 - "ReplicationScaleEvent"
-Cohesion: 0.06
-Nodes (36): ReplicaHealthLog, ActiveConnections, CheckedAt, ErrorMessage, Id, IsHealthy, LagSeconds, LagThresholdBreached (+28 more)
+### Community 81 - "ReplicationScalingConfig"
+Cohesion: 0.04
+Nodes (54): ReplicaHealthLog, ActiveConnections, CheckedAt, ErrorMessage, Id, IsHealthy, LagSeconds, LagThresholdBreached (+46 more)
 
 ### Community 82 - "CancellationToken"
 Cohesion: 0.14
@@ -1639,15 +1618,15 @@ Nodes (53): BackupConfigurationDto, BackupType, CronExpression, EncryptBackup, I
 
 ### Community 84 - "CampusOperationsService"
 Cohesion: 0.09
-Nodes (27): CampusOperationsController, CancellationToken, DateTime, Guid, HttpGet, HttpPost, IActionResult, RequirePermission (+19 more)
+Nodes (28): CampusOperationsController, CancellationToken, DateTime, Guid, HttpGet, HttpPost, IActionResult, RequirePermission (+20 more)
 
 ### Community 85 - "LostFoundItem"
 Cohesion: 0.06
 Nodes (42): ILostFoundItemRepository, CancellationToken, IReadOnlyList, LostFoundStatus, LostFoundType, Task, ILostFoundItemRepository, CancellationToken (+34 more)
 
-### Community 86 - "AegisCore.Domain.Common"
-Cohesion: 0.05
-Nodes (32): FinanceLibraryAcquisition, AccountingTreatment, AccumulatedAmortization, AcquiredAt, Cost, Currency, FairValue, Id (+24 more)
+### Community 86 - "FinanceLibraryAcquisition"
+Cohesion: 0.07
+Nodes (31): FinanceLibraryAcquisition, AccountingTreatment, AccumulatedAmortization, AcquiredAt, Cost, Currency, FairValue, Id (+23 more)
 
 ### Community 87 - "MentalHealthTicket"
 Cohesion: 0.09
@@ -1662,16 +1641,16 @@ Cohesion: 0.05
 Nodes (54): IPreventiveMaintenanceScheduleRepository, CancellationToken, Guid, IReadOnlyList, Task, PMDashboardDto, DueCount, OverdueCount (+46 more)
 
 ### Community 90 - ".AddFinanceModule"
-Cohesion: 0.17
-Nodes (26): ISecretService, BillplzFpxPaymentGatewayAdapter, Slug, DuitNowPaymentGatewayAdapter, Slug, GoCardlessPaymentGatewayAdapter, Slug, HttpPaymentGatewayAdapter (+18 more)
+Cohesion: 0.13
+Nodes (29): ISecretService, FinanceModuleServiceExtensions, IServiceCollection, BillplzFpxPaymentGatewayAdapter, Slug, DuitNowPaymentGatewayAdapter, Slug, GoCardlessPaymentGatewayAdapter (+21 more)
 
-### Community 91 - ".ActivateAsync"
-Cohesion: 0.09
-Nodes (23): IPasswordHashingService, SetupImportResult, SetupImportService, AegisDbContext, CancellationToken, Guid, IReadOnlyDictionary, IReadOnlyList (+15 more)
+### Community 91 - ".CommitAsync"
+Cohesion: 0.25
+Nodes (10): OnboardingServiceExtensions, IServiceCollection, SetupImportResult, SetupImportService, AegisDbContext, CancellationToken, Guid, IReadOnlyDictionary (+2 more)
 
 ### Community 92 - "CancellationToken"
 Cohesion: 0.17
-Nodes (15): ConvocationsController, GradeAppealsController, GradeDistributionsController, PlagiarismApiController, PlagiarismController, PrerequisiteConflictsController, ProctoringController, SemesterFreezesController (+7 more)
+Nodes (14): ConvocationsController, GradeAppealsController, GradeDistributionsController, PlagiarismApiController, PlagiarismController, PrerequisiteConflictsController, ProctoringController, SemesterFreezesController (+6 more)
 
 ### Community 93 - "HybridPqcTransportMiddlewareTests"
 Cohesion: 0.09
@@ -1679,7 +1658,7 @@ Nodes (29): AuthenticatedOriginPullsMiddleware, GlobalExceptionMiddleware, Hybri
 
 ### Community 94 - "BoardAlert"
 Cohesion: 0.05
-Nodes (49): BoardAlert, Category, CreatedAt, Id, IsAcknowledged, Message, RecommendedAction, ResponsibleOfficer (+41 more)
+Nodes (50): BoardAlert, Category, CreatedAt, Id, IsAcknowledged, Message, RecommendedAction, ResponsibleOfficer (+42 more)
 
 ### Community 95 - "FinanceInvestmentHolding"
 Cohesion: 0.05
@@ -1690,8 +1669,8 @@ Cohesion: 0.10
 Nodes (19): EncryptedFileSecretService, EnvironmentVariableSecretService, FcmPushService, LocalIdentityService, MinioStorageService, NoOpCalendarService, SmtpEmailService, CancellationToken (+11 more)
 
 ### Community 97 - "UserResponse"
-Cohesion: 0.04
-Nodes (56): AssignRoleRequest, RoleId, UserId, CreateRoleRequest, Description, Name, PermissionIds, CreateUserRequest (+48 more)
+Cohesion: 0.05
+Nodes (49): AssignRoleRequest, RoleId, UserId, CreateRoleRequest, Description, Name, PermissionIds, CreateUserRequest (+41 more)
 
 ### Community 98 - "Faculty"
 Cohesion: 0.11
@@ -1701,13 +1680,13 @@ Nodes (17): Designation, Faculty, Attendances, CourseAssignments, CreatedAt, Dep
 Cohesion: 0.04
 Nodes (47): 1.1 About This Manual, 1.2 Accessibility Notes, 1.3 Glossary of Terms, 1. Introduction, 2.1 Logging In, 2.2 First-Time Setup, 2.3 Profile Configuration, 2.4 Password Change (+39 more)
 
-### Community 100 - "SamlConfiguration"
-Cohesion: 0.05
-Nodes (45): SamlController, CancellationToken, HttpGet, HttpPost, IActionResult, ILogger, Task, ISamlService (+37 more)
+### Community 100 - "SamlService"
+Cohesion: 0.09
+Nodes (21): ISamlService, SamlAssertionResult, Claims, Email, Error, FirstName, IsValid, LastName (+13 more)
 
 ### Community 101 - "Guid"
-Cohesion: 0.14
-Nodes (26): CafeteriaAnalyticsDto, CafeteriaPaymentRequest, CafeteriaTransactionDto, DailyMenuDto, DemandForecastDto, ICafeteriaService, InventoryAlertDto, ItemDemandDto (+18 more)
+Cohesion: 0.12
+Nodes (28): CampusModuleEndpoints, IEndpointRouteBuilder, CafeteriaAnalyticsDto, CafeteriaPaymentRequest, CafeteriaTransactionDto, DailyMenuDto, DemandForecastDto, ICafeteriaService (+20 more)
 
 ### Community 102 - ".CreateAsync"
 Cohesion: 0.10
@@ -1722,20 +1701,20 @@ Cohesion: 0.07
 Nodes (37): apiGet(), apiPost(), connectNotifications(), App(), CatalogResponse, EarningsResponse, facultyPages, PluginMarketplace() (+29 more)
 
 ### Community 105 - ".AuthFlow_LoginRefreshLogout_Cycle"
-Cohesion: 0.08
-Nodes (30): AuthController, LoginRequest, RefreshRequest, CancellationToken, Guid, HttpPost, IActionResult, IConfiguration (+22 more)
+Cohesion: 0.12
+Nodes (22): AuthController, LoginRequest, RefreshRequest, CancellationToken, Guid, HttpPost, IActionResult, IConfiguration (+14 more)
 
 ### Community 106 - "PrerequisiteConflict"
 Cohesion: 0.07
 Nodes (29): ChangeImpactSimulation, AffectedStudents, ChangedElementId, DirectlyAffectedCourses, EventType, Id, IndirectlyAffectedCourses, InvalidRegistrations (+21 more)
 
-### Community 107 - "HrController"
-Cohesion: 0.29
-Nodes (12): HrController, LeaveRequest, AllowAnonymous, CancellationToken, DateOnly, Guid, HttpGet, HttpPost (+4 more)
+### Community 107 - "CancellationToken"
+Cohesion: 0.13
+Nodes (17): IExportLogRepository, IFeatureFlagRepository, IImportBatchRepository, IJobExecutionRepository, INotificationDeliveryRepository, INotificationTemplateRepository, IPlatformMetricRepository, IScheduledJobRepository (+9 more)
 
 ### Community 108 - "FinancePayrollPaymentFile"
 Cohesion: 0.04
-Nodes (57): GeneratePayrollPaymentFileCommand, FinanceGratuityAssumption, BenefitDivisor, DiscountRatePercent, EffectiveFrom, EffectiveTo, Id, RetirementHorizonYears (+49 more)
+Nodes (58): ConfigurePayrollBankInstructionCommand, GeneratePayrollPaymentFileCommand, FinanceGratuityAssumption, BenefitDivisor, DiscountRatePercent, EffectiveFrom, EffectiveTo, Id (+50 more)
 
 ### Community 109 - "CancellationToken"
 Cohesion: 0.17
@@ -1746,12 +1725,12 @@ Cohesion: 0.13
 Nodes (25): CreateSupportTicketRequest, KnowledgeArticleRequest, ResolveEscalationRequest, SupportAnalytics, SupportEscalationDto, SupportFeedbackRequest, SupportTicketDto, SupportTicketStatuses (+17 more)
 
 ### Community 111 - "IStorageService"
-Cohesion: 0.11
-Nodes (22): CalendarEvent, EmailAttachment, EmailMessage, ICalendarService, IEmailService, IIdentityProviderService, INotificationPushService, IStorageService (+14 more)
+Cohesion: 0.10
+Nodes (23): CalendarEvent, EmailAttachment, EmailMessage, ICalendarService, IEmailService, IIdentityProviderService, INotificationPushService, IStorageService (+15 more)
 
-### Community 112 - "DataExportLog"
-Cohesion: 0.07
-Nodes (30): BIReport, CreatedAt, DataWarehouseTable, DataWarehouseTableId, Id, QueryJson, ReportCategory, TenantId (+22 more)
+### Community 112 - "AdvisorMeeting"
+Cohesion: 0.08
+Nodes (24): AdvisorMeeting, AdvisorAssignmentId, Assignment, Id, Notes, ScheduledAt, Status, TenantId (+16 more)
 
 ### Community 113 - "AegisCore Codebase Knowledge"
 Cohesion: 0.04
@@ -1767,23 +1746,23 @@ Nodes (4): TenantConfigService, Guid, ILogger, Task
 
 ### Community 116 - ".AddMultiCampus"
 Cohesion: 0.12
-Nodes (27): IFloorRepository, IBuildingRepository, ICampusRepository, IFloorRepository, IRoomRepository, Campus, CancellationToken, Guid (+19 more)
+Nodes (27): IBuildingRepository, ICampusConfigurationRepository, ICampusRepository, IFloorRepository, IRoomRepository, Campus, CancellationToken, Guid (+19 more)
 
-### Community 117 - "DeansListEntry"
-Cohesion: 0.04
-Nodes (53): AchievementRoadmap, BadgeDefinitionId, Id, NextMilestone, ProgressPercent, StudentId, TenantId, UpdatedAt (+45 more)
+### Community 117 - "LeaderboardEntry"
+Cohesion: 0.05
+Nodes (43): AchievementRoadmap, BadgeDefinitionId, Id, NextMilestone, ProgressPercent, StudentId, TenantId, UpdatedAt (+35 more)
 
 ### Community 118 - "devDependencies"
 Cohesion: 0.15
 Nodes (13): devDependencies, detox, jest, jest-expo, @types/jest, @types/react, typescript, detox (+5 more)
 
-### Community 119 - ".AddCloudProvider"
-Cohesion: 0.10
-Nodes (22): AzureAdIdentityService, AzureSecretService, AzureStorageService, MicrosoftGraphCalendarService, MicrosoftGraphEmailService, CancellationToken, Guid, IConfiguration (+14 more)
+### Community 119 - "CancellationToken"
+Cohesion: 0.12
+Nodes (16): AzureAdIdentityService, AzureSecretService, AzureStorageService, MicrosoftGraphCalendarService, MicrosoftGraphEmailService, CancellationToken, Guid, IConfiguration (+8 more)
 
-### Community 120 - "CancellationToken"
-Cohesion: 0.11
-Nodes (20): ApiProviderType, Custom, IThenticate, Turnitin, ProctorEventSeverity, Critical, Info, Warning (+12 more)
+### Community 120 - "PlagiarismApiSubmission"
+Cohesion: 0.08
+Nodes (33): PlagiarismApiSubmission, AdjustedSimilarity, Classification, CompletedAt, ErrorLogJson, ExcludedSourcesJson, ExternalSubmissionId, FacultySummary (+25 more)
 
 ### Community 121 - "CancellationToken"
 Cohesion: 0.13
@@ -1798,31 +1777,31 @@ Cohesion: 0.06
 Nodes (51): AbstractValidator, ChangeWizardModeRequest, CompleteWizardRequest, DemoImportRequest, SaveStepRequest, ValidateLicenseRequest, WizardDatabaseRequest, DateTimeOffset (+43 more)
 
 ### Community 124 - "S2AdmissionsController"
-Cohesion: 0.12
-Nodes (26): EnquiryRequest, EnquiryStatusRequest, GenerateMeritListRequest, S2AdmissionsController, VerifyApplicationRequest, ActionResult, CancellationToken, Guid (+18 more)
+Cohesion: 0.17
+Nodes (19): EnquiryRequest, EnquiryStatusRequest, GenerateMeritListRequest, S2AdmissionsController, VerifyApplicationRequest, ActionResult, CancellationToken, Guid (+11 more)
 
 ### Community 125 - "ExtensionDetail"
 Cohesion: 0.05
-Nodes (47): ExtensionDependency, Name, VersionConstraint, ExtensionDetail, AverageRating, Category, CreatedAt, Dependencies (+39 more)
+Nodes (43): ExtensionDependency, Name, VersionConstraint, ExtensionDetail, AverageRating, Category, CreatedAt, Dependencies (+35 more)
 
-### Community 126 - "FinancePettyCashCount"
-Cohesion: 0.13
-Nodes (14): FinancePettyCashCount, ConfirmedByUserId, CountedAt, Discrepancy, FinancePettyCashFundId, Fund, Id, InitiatedByUserId (+6 more)
+### Community 126 - "AegisCore.Domain.Common"
+Cohesion: 0.04
+Nodes (43): FinancePettyCashCount, ConfirmedByUserId, CountedAt, Discrepancy, FinancePettyCashFundId, Fund, Id, InitiatedByUserId (+35 more)
 
 ### Community 127 - "AEGISCORE_FINAL_17_PROMPTS.md"
 Cohesion: 0.05
 Nodes (38): 17 Prompts · Hallucination-Proof · Run In Order, AegisCore — Final Deployment Fix Prompts, Based on: Deployment Readiness Audit (commit 950a4043, branch main), Do these before anything else. Nothing is testable until P1 lands., ⚠️ DO THIS LAST. Do not start until P3B, P5, P7, P8 are all complete., EXECUTION ORDER AT A GLANCE, Feed Prompt 3A's output into this prompt before running., Generated: 2026-08-31 (+30 more)
 
-### Community 128 - "IBackupService"
-Cohesion: 0.16
-Nodes (14): IBackupService, IDatabaseHealthService, BackupRecord, CancellationToken, DateTime, Guid, IReadOnlyList, ReadReplicaConfig (+6 more)
+### Community 128 - "DatabaseHealthService"
+Cohesion: 0.10
+Nodes (23): IBackupService, IDatabaseHealthService, BackupRecord, CancellationToken, DateTime, Guid, IReadOnlyList, ReadReplicaConfig (+15 more)
 
 ### Community 129 - "CancellationToken"
 Cohesion: 0.13
 Nodes (12): ICafeteriaService, IChartService, IDefaulterMlEngineService, IOcrIntegrationService, IPersonalityModeService, IPlagiarismEngineService, IProctoringIntegrationService, CancellationToken (+4 more)
 
 ### Community 130 - "IExtensionRepository"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (17): IExtensionInstallationRepository, IExtensionRepository, IExtensionReviewRepository, CancellationToken, Guid, IReadOnlyList, Task, MarketplaceServiceExtensions (+9 more)
 
 ### Community 131 - "EquipmentMaintenance"
@@ -1837,9 +1816,9 @@ Nodes (27): DashboardPage(), KpiCard(), kpiIcons, ModuleCard(), Session, Persona
 Cohesion: 0.09
 Nodes (24): DocumentTemplate, CreatedAt, ExtractedFonts, ExtractedPalette, Id, LogoUrl, Name, RawHtml (+16 more)
 
-### Community 134 - "ReplicaManagerService"
-Cohesion: 0.23
-Nodes (7): ReplicaManagerService, CancellationToken, Guid, IConfiguration, ILogger, List, Task
+### Community 134 - "ReadReplicaConfig"
+Cohesion: 0.11
+Nodes (23): ReadReplicaConfig, ConnectionString, CreatedAt, CurrentLagSeconds, Id, IsEnabled, LastHealthCheckAt, MaxLagSeconds (+15 more)
 
 ### Community 135 - "messages.ts"
 Cohesion: 0.09
@@ -1849,9 +1828,9 @@ Nodes (27): FinanceOperationsPage(), Operations, Voucher, metadata, RootLayout()
 Cohesion: 0.05
 Nodes (41): 10. **Research + Alumni + Placement**, 1. EDUSUITE (Strongest Local Competitor), 1. **SHAP-Explainable Merit Lists**, 2. **100% Cloud Agnostic = Data Sovereignty**, 2. SYBEREDGE (Hardware Integration King), 3. FUTURESOL (Quick Deployment King), 3. **OBE Framework for HEC Accreditation**, 4. **CIS Auto-Scanner (Genius Move)** (+33 more)
 
-### Community 137 - "ReplicationController"
-Cohesion: 0.30
-Nodes (9): ReplicationController, CancellationToken, Guid, HttpGet, HttpPost, HttpPut, IActionResult, ReplicationScalingConfig (+1 more)
+### Community 137 - "IReplicaManagerService"
+Cohesion: 0.17
+Nodes (14): ReplicationController, CancellationToken, Guid, HttpGet, HttpPost, HttpPut, IActionResult, ReplicationScalingConfig (+6 more)
 
 ### Community 138 - "Guid"
 Cohesion: 0.14
@@ -1862,24 +1841,24 @@ Cohesion: 0.06
 Nodes (33): ILlmProvider, ModelName, ProviderName, CancellationToken, IAsyncEnumerable, Task, LlmOptions, FrequencyPenalty (+25 more)
 
 ### Community 140 - "Attendance"
-Cohesion: 0.07
-Nodes (28): IAttendanceRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, Attendance, CourseId (+20 more)
+Cohesion: 0.05
+Nodes (41): IAttendanceRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, IAttendanceRepository, Attendance (+33 more)
 
-### Community 141 - "StudentFeePayment"
-Cohesion: 0.10
-Nodes (29): BudgetVarianceReport, IAccountingService, IBudgetService, IFeeService, PaymentRequest, CancellationToken, DateOnly, Guid (+21 more)
+### Community 141 - "FeeService"
+Cohesion: 0.15
+Nodes (18): BudgetVarianceReport, IAccountingService, IBudgetService, IFeeService, PaymentRequest, CancellationToken, DateOnly, Guid (+10 more)
 
 ### Community 142 - "NodeConfigDto"
 Cohesion: 0.05
 Nodes (49): ApprovalConfigDto, Approvers, EscalationUserId, RejectTransitionId, TimeoutHours, Type, ApproverConfigDto, Role (+41 more)
 
 ### Community 143 - "ConfigurationEntry"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (24): IConfigAuditLogRepository, IConfigurationEntryRepository, IConfigVersionRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task (+16 more)
 
-### Community 144 - "DigitalTwinService"
-Cohesion: 0.13
-Nodes (21): IEnergyReadingRepository, IFloorPlanRepository, IIoTSensorRepository, IRoomOccupancyRepository, ISensorReadingRepository, CancellationToken, DateTime, Guid (+13 more)
+### Community 144 - ".AddDigitalTwin"
+Cohesion: 0.12
+Nodes (25): IEnergyReadingRepository, IFloorPlanRepository, IIoTSensorRepository, IRoomOccupancyRepository, ISensorReadingRepository, CancellationToken, DateTime, Guid (+17 more)
 
 ### Community 145 - "ILabBookingRepository"
 Cohesion: 0.24
@@ -1890,8 +1869,8 @@ Cohesion: 0.05
 Nodes (40): FinanceFleetCostPosting, Amount, CostCenterId, CostDate, CostType, Description, Id, JournalEntryId (+32 more)
 
 ### Community 147 - "CancellationToken"
-Cohesion: 0.11
-Nodes (18): GcpSecretManagerService, GcsStorageService, GmailApiEmailService, GoogleWorkspaceCalendarService, GoogleWorkspaceIdentityService, CancellationToken, Dictionary, Guid (+10 more)
+Cohesion: 0.12
+Nodes (17): GcpSecretManagerService, GcsStorageService, GmailApiEmailService, GoogleWorkspaceCalendarService, GoogleWorkspaceIdentityService, CancellationToken, Dictionary, Guid (+9 more)
 
 ### Community 148 - "5. OWASP ASVS Level 2 Compliance"
 Cohesion: 0.05
@@ -1902,28 +1881,28 @@ Cohesion: 0.11
 Nodes (19): SetupBootstrapToken, SetupBootstrapTokenMiddleware, SetupRateLimitMiddleware, ConcurrentDictionary, DateTimeOffset, HttpContext, IConfiguration, Queue (+11 more)
 
 ### Community 150 - "RuleEngineController"
-Cohesion: 0.24
-Nodes (14): RuleEngineController, CancellationToken, Guid, HttpGet, HttpPost, HttpPut, IActionResult, ILogger (+6 more)
+Cohesion: 0.18
+Nodes (18): RuleEngineController, CancellationToken, Guid, HttpGet, HttpPost, HttpPut, IActionResult, ILogger (+10 more)
 
 ### Community 151 - "FinanceAssetAccountingEvent"
-Cohesion: 0.12
-Nodes (26): ImpairFinanceAssetCommand, RevalueFinanceAssetCommand, VerifyFinanceAssetCommand, FinanceAssetAccountingEvent, ActorUserId, AssetId, EventType, Id (+18 more)
+Cohesion: 0.13
+Nodes (24): RevalueFinanceAssetCommand, FinanceAssetAccountingEvent, ActorUserId, AssetId, EventType, Id, JournalEntryId, NewCarryingValue (+16 more)
 
 ### Community 152 - "FinanceBankFeedTransaction"
 Cohesion: 0.07
-Nodes (32): InvestmentMaturityBucket, FinanceBankAccount, AccountReference, ChartOfAccountId, Currency, FeedTransactions, Id, IsActive (+24 more)
+Nodes (36): CashForecastBucket, CashForecastReport, InvestmentMaturityBucket, PostBankReconciliationAdjustmentCommand, RecordInvestmentBenchmarkCommand, FinanceBankAccount, AccountReference, ChartOfAccountId (+28 more)
 
-### Community 153 - "LicenseService"
-Cohesion: 0.15
-Nodes (14): HeartbeatResult, HeartbeatResponse, LicenseService, AegisDbContext, CancellationToken, DateTimeOffset, Guid, IConfiguration (+6 more)
+### Community 153 - "LicenseState"
+Cohesion: 0.04
+Nodes (56): CancellationToken, Task, HttpContext, IConfiguration, IHostEnvironment, Task, HeartbeatResult, ILicenseService (+48 more)
 
 ### Community 154 - "GrievanceTicket"
 Cohesion: 0.06
 Nodes (39): GrievanceResponse, CreatedAt, Id, ResponderId, ResponseText, StatusUpdate, TenantId, Ticket (+31 more)
 
 ### Community 155 - "NotificationDelivery"
-Cohesion: 0.05
-Nodes (55): IExportLogRepository, IFeatureFlagRepository, IImportBatchRepository, IJobExecutionRepository, INotificationDeliveryRepository, INotificationTemplateRepository, IPlatformMetricRepository, IScheduledJobRepository (+47 more)
+Cohesion: 0.06
+Nodes (38): NotificationDelivery, Channel, CreatedAt, DeliveredAt, ErrorMessage, Id, Module, OpenedAt (+30 more)
 
 ### Community 156 - "apiGet"
 Cohesion: 0.05
@@ -1934,28 +1913,28 @@ Cohesion: 0.07
 Nodes (31): metadata, ACTIONS, AiConnectionResult, AiStep(), testConnection(), DatabaseResult, DatabaseStep(), testConnection() (+23 more)
 
 ### Community 158 - "BoardPortalContracts.cs"
-Cohesion: 0.15
+Cohesion: 0.16
 Nodes (24): BenchmarkComparisonDto, BenchmarkMetricDto, BoardAlertDto, BoardDecisionDto, BoardPackDto, BoardResolutionDto, ExecutiveDashboardDto, IBoardPortalService (+16 more)
 
 ### Community 159 - "InstallationStateService"
-Cohesion: 0.09
-Nodes (23): SetupRequiredMiddleware, SetupRequiredMiddlewareExtensions, HttpContext, IApplicationBuilder, RequestDelegate, Task, IInstallationStateService, InstallationMarker (+15 more)
+Cohesion: 0.10
+Nodes (22): SetupRequiredMiddleware, SetupRequiredMiddlewareExtensions, HttpContext, IApplicationBuilder, RequestDelegate, Task, IInstallationStateService, InstallationMarker (+14 more)
 
 ### Community 160 - "ApiKey"
 Cohesion: 0.08
 Nodes (31): IApiKeyRepository, IWebhookSubscriptionRepository, ApiKeyStatus, CancellationToken, DateTime, IReadOnlyList, Task, ApiKey (+23 more)
 
-### Community 161 - "GradingScheme"
-Cohesion: 0.15
-Nodes (11): Guid, Task, Guid, Task, GradingScheme, GPA4, GPA5, Letter (+3 more)
+### Community 161 - "GradeAppeal"
+Cohesion: 0.09
+Nodes (23): GradeAppeal, AdjustedGrade, AppealGrounds, CommitteeDecision, CommitteeId, CourseId, Deadline, FacultyRespondentId (+15 more)
 
 ### Community 162 - "CountryPack"
 Cohesion: 0.09
 Nodes (28): CountryPack, CountryCode, DefaultCalendarType, DefaultCurrency, DefaultGradingScheme, DefaultLanguage, Id, InstalledAt (+20 more)
 
-### Community 163 - "DataImportJob"
-Cohesion: 0.06
-Nodes (38): DataImportJob, CompletedAt, ConnectionId, EntityType, ErrorLogJson, ErrorRows, FieldMappingsJson, Id (+30 more)
+### Community 163 - "ExternalDbConnection"
+Cohesion: 0.09
+Nodes (22): ExternalDbConnection, ConnectionString, CreatedAt, DbType, Id, IsActive, LastTestedAt, LastTestSuccessful (+14 more)
 
 ### Community 164 - "ChartConfiguration"
 Cohesion: 0.06
@@ -1970,8 +1949,8 @@ Cohesion: 0.05
 Nodes (38): 1.1 Purpose, 1.2 Scope, 1.3 Definitions, Acronyms, and Abbreviations, 1.4 References, 1.5 Overview, 1. Introduction, 2.1 Product Perspective, 2.2 Product Functions (+30 more)
 
 ### Community 167 - "ProfilePictureService"
-Cohesion: 0.11
-Nodes (23): IProfilePictureService, ProfilePictureResult, Accepted, EditingDetected, FaceValidated, FullUrl, Id, RejectionReason (+15 more)
+Cohesion: 0.14
+Nodes (20): IProfilePictureService, ProfilePictureResult, Accepted, EditingDetected, FaceValidated, FullUrl, Id, RejectionReason (+12 more)
 
 ### Community 168 - "Guid"
 Cohesion: 0.14
@@ -1982,12 +1961,12 @@ Cohesion: 0.05
 Nodes (38): ConsentLedger, ConsentedAt, ConsentText, DataCategory, ExpiresAt, Id, IpAddress, IpAddressEncrypted (+30 more)
 
 ### Community 170 - "ExtensionListItem"
-Cohesion: 0.12
-Nodes (15): ExtensionListItem, AverageRating, Category, Description, DeveloperName, DownloadCount, IconUrl, Id (+7 more)
+Cohesion: 0.06
+Nodes (37): ExtensionListItem, AverageRating, Category, Description, DeveloperName, DownloadCount, IconUrl, Id (+29 more)
 
 ### Community 171 - ".AddInternationalization"
 Cohesion: 0.11
-Nodes (25): ICountryPackRepository, ICurrencyRepository, ITaxSlabRepository, ITranslationKeyRepository, ITranslationValueRepository, CancellationToken, Guid, IReadOnlyList (+17 more)
+Nodes (23): ICountryPackRepository, ICurrencyRepository, ITaxSlabRepository, ITranslationKeyRepository, ITranslationValueRepository, CancellationToken, Guid, IReadOnlyList (+15 more)
 
 ### Community 172 - "Extension"
 Cohesion: 0.06
@@ -2005,9 +1984,9 @@ Nodes (36): ConfigAuditLogDto, Action, ChangedAt, ChangedByName, ConfigKey, From
 Cohesion: 0.16
 Nodes (18): GracemarkEntry, IGradingService, ITranscriptService, SemesterGpa, CancellationToken, Guid, IEnumerable, IReadOnlyList (+10 more)
 
-### Community 176 - "Guid"
-Cohesion: 0.15
-Nodes (21): CLOAttainmentResult, ICisExtractionService, IHemisExportService, IOBEAttainmentService, POAttainmentResult, ProgramOBEReport, CancellationToken, Guid (+13 more)
+### Community 176 - ".AddInfrastructure"
+Cohesion: 0.12
+Nodes (25): CLOAttainmentResult, ICisExtractionService, IHemisExportService, IOBEAttainmentService, POAttainmentResult, ProgramOBEReport, CancellationToken, Guid (+17 more)
 
 ### Community 177 - "Course"
 Cohesion: 0.08
@@ -2030,8 +2009,8 @@ Cohesion: 0.06
 Nodes (36): JobExecution, AttemptNumber, CompletedAt, CreatedAt, DurationMs, ErrorMessage, Id, Job (+28 more)
 
 ### Community 182 - "InfrastructureServiceExtensions.cs"
-Cohesion: 0.04
-Nodes (24): CampusModuleEndpoints, AssetInventoryServiceExtensions, CampusOperationsModuleExtensions, CampusOperationsServiceExtensions, CoreErpServiceExtensions, IServiceCollection, SsoHitlServiceExtensions, AegisCore.Infrastructure.Forms (+16 more)
+Cohesion: 0.05
+Nodes (21): VisitingFacultyEndpoints, CoreErpServiceExtensions, IServiceCollection, CurriculumServiceExtensions, AdmissionsTests, AegisCore.Infrastructure.Foundation, AegisCore.Application.Curriculum, AegisCore.Infrastructure.CoreERP (+13 more)
 
 ### Community 183 - "RaastApiClient.cs"
 Cohesion: 0.09
@@ -2046,36 +2025,36 @@ Cohesion: 0.15
 Nodes (18): MarketplaceController, CancellationToken, Extension, Guid, HttpGet, HttpPost, IActionResult, ILogger (+10 more)
 
 ### Community 186 - "SsoHitlController"
-Cohesion: 0.10
-Nodes (15): DetectProviderRequest, SsoHitlController, VerifyTotpRequest, AllowAnonymous, CancellationToken, Guid, HttpGet, HttpPost (+7 more)
+Cohesion: 0.08
+Nodes (20): DetectProviderRequest, SsoHitlController, VerifyTotpRequest, AllowAnonymous, CancellationToken, Guid, HttpGet, HttpPost (+12 more)
 
 ### Community 187 - "VoiceAssistantService"
 Cohesion: 0.11
 Nodes (23): StudentLifecycleModuleEndpoints, EscalationLogDto, IVoiceAssistantService, VoiceInputDto, VoiceIntentDto, VoiceSessionDto, CancellationToken, DateTimeOffset (+15 more)
 
-### Community 188 - "CampusConfiguration"
-Cohesion: 0.11
-Nodes (25): IBuildingRepository, ICampusConfigurationRepository, ICampusRepository, IRoomRepository, CampusStatus, CancellationToken, Guid, IReadOnlyList (+17 more)
+### Community 188 - "Room"
+Cohesion: 0.24
+Nodes (12): IBuildingRepository, ICampusConfigurationRepository, ICampusRepository, IFloorRepository, IRoomRepository, CampusStatus, CancellationToken, Guid (+4 more)
 
 ### Community 189 - "MaintenanceContractor"
-Cohesion: 0.09
-Nodes (28): IMaintenanceContractorRepository, CancellationToken, IReadOnlyList, Task, IMaintenanceContractorRepository, CancellationToken, IReadOnlyList, Task (+20 more)
+Cohesion: 0.10
+Nodes (24): IMaintenanceContractorRepository, CancellationToken, IReadOnlyList, Task, MaintenanceContractor, Address, CompanyName, ContactPerson (+16 more)
 
 ### Community 190 - "EquipmentBooking"
 Cohesion: 0.09
 Nodes (29): IEquipmentBookingRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, EquipmentBooking, ApprovedAt (+21 more)
 
-### Community 191 - "Course"
-Cohesion: 0.05
-Nodes (45): ICourseRepository, CancellationToken, Guid, IReadOnlyList, Task, ICourseRepository, CancellationToken, Guid (+37 more)
+### Community 191 - "Enrollment"
+Cohesion: 0.06
+Nodes (29): Enrollment, Attendances, Course, CourseId, CreatedAt, EnrollmentStatus, GpaPoints, Grade (+21 more)
 
 ### Community 192 - "CancellationToken"
-Cohesion: 0.12
-Nodes (17): AwsSecretsManagerService, CognitoIdentityService, S3StorageService, SesEmailService, CancellationToken, Dictionary, Guid, IConfiguration (+9 more)
+Cohesion: 0.13
+Nodes (16): AwsSecretsManagerService, CognitoIdentityService, S3StorageService, SesEmailService, CancellationToken, Dictionary, Guid, IConfiguration (+8 more)
 
 ### Community 193 - "PromptFiveEdgeCaseTests"
 Cohesion: 0.15
-Nodes (6): PromptFiveEdgeCaseTests, ArgumentException, IEnumerable, InlineData, MemberData, Theory
+Nodes (7): AgenticExamService, PromptFiveEdgeCaseTests, ArgumentException, IEnumerable, InlineData, MemberData, Theory
 
 ### Community 194 - ".CreateAsync"
 Cohesion: 0.09
@@ -2086,24 +2065,24 @@ Cohesion: 0.05
 Nodes (36): 10. Notifications, 10. Performance Appraisal, 11. Leave Management, 1. Dashboard, 1. Dashboard, 2. Attendance Marking, 2. Attendance Tracking, 3. Fee Management (+28 more)
 
 ### Community 196 - "ApiKeyResponse"
-Cohesion: 0.06
-Nodes (34): ApiKeyResponse, ApiKey, CreatedAt, ExpiresAt, Id, KeyPrefix, LastUsedAt, Name (+26 more)
+Cohesion: 0.08
+Nodes (27): ApiKeyResponse, ApiKey, CreatedAt, ExpiresAt, Id, KeyPrefix, LastUsedAt, Name (+19 more)
 
 ### Community 197 - "BackupRecord"
-Cohesion: 0.08
-Nodes (23): BackupRecord, BackupType, Checksum, CompletedAt, Configuration, ConfigurationId, ErrorMessage, ExpiresAt (+15 more)
+Cohesion: 0.05
+Nodes (49): IBackupConfigurationRepository, IBackupRecordRepository, IReadReplicaConfigRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task (+41 more)
 
 ### Community 198 - "VehiclePass"
 Cohesion: 0.17
 Nodes (19): IVehiclePassRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, IVehiclePassRepository, CancellationToken (+11 more)
 
 ### Community 199 - "IDataImportService"
-Cohesion: 0.09
-Nodes (27): ColumnDiscoveryDto, Columns, TableName, ColumnInfo, DataType, IsNullable, MaxLength, Name (+19 more)
+Cohesion: 0.26
+Nodes (9): DiscoveryResultDto, Schema, Tables, IDataImportService, CancellationToken, Dictionary, Guid, List (+1 more)
 
-### Community 200 - "StringBuilder"
-Cohesion: 0.12
-Nodes (22): AiAgentResponse, AnswerText, IsEscalated, ResponseTimeMs, Sources, StructuredData, SuggestedAction, List (+14 more)
+### Community 200 - "Course"
+Cohesion: 0.16
+Nodes (16): ICourseRepository, CancellationToken, Guid, IReadOnlyList, Task, ICourseRepository, CancellationToken, Guid (+8 more)
 
 ### Community 201 - "FormDto"
 Cohesion: 0.06
@@ -2115,7 +2094,7 @@ Nodes (12): IGuardShiftRepository, CancellationToken, DateTime, Guid, IReadOnlyL
 
 ### Community 203 - "CancellationToken"
 Cohesion: 0.03
-Nodes (81): AIAnalyticsDto, AvgLatencyMs, AvgRating, ThumbsDown, ThumbsUp, TotalCost, TotalRequests, AITokenUsageSummaryDto (+73 more)
+Nodes (82): AIAnalyticsDto, AvgLatencyMs, AvgRating, ThumbsDown, ThumbsUp, TotalCost, TotalRequests, AITokenUsageSummaryDto (+74 more)
 
 ### Community 204 - "SeedPipeline.cs"
 Cohesion: 0.15
@@ -2126,32 +2105,32 @@ Cohesion: 0.06
 Nodes (34): 6 Specialized Codex Prompts for AegisCore, Architecture, ✅ Checklist Before Deployment, Code Quality, Complete Build Pipeline: Backend/Frontend Split → Testing → Optimization → Documentation, 📂 Deliverables, DevOps, Documentation (+26 more)
 
 ### Community 206 - "DataImportController"
-Cohesion: 0.16
-Nodes (17): DataImportController, StartImportRequest, ConnectionId, EntityType, FieldMappingsJson, SourceQuery, TriggeredByUserId, CancellationToken (+9 more)
+Cohesion: 0.28
+Nodes (9): DataImportController, CancellationToken, Dictionary, Guid, HttpGet, HttpPost, IActionResult, StartImportRequest (+1 more)
 
-### Community 207 - ".AddAuthenticationServices"
-Cohesion: 0.06
-Nodes (30): PermissionAuthorizationResultHandler, AuthorizationPolicy, HttpContext, RequestDelegate, Task, AuthenticationServicesExtensions, IAuthorizationMiddlewareResultHandler, FinanceHub (+22 more)
+### Community 207 - "SignalRFinanceRealtimePublisher"
+Cohesion: 0.09
+Nodes (16): FinanceHub, SignalRFinanceRealtimePublisher, CancellationToken, Guid, HashSet, IHubContext, Task, NotificationHub (+8 more)
 
 ### Community 208 - "LabConsumable"
 Cohesion: 0.23
 Nodes (13): ILabConsumableRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, LabConsumable, LabConsumableRepository (+5 more)
 
 ### Community 209 - "IUnitOfWork"
-Cohesion: 0.06
-Nodes (36): IUnitOfWork, Attendances, Batches, CloPlomappings, CourseAssignments, Courses, Departments, Enrollments (+28 more)
+Cohesion: 0.07
+Nodes (26): IUnitOfWork, Attendances, Batches, CloPlomappings, CourseAssignments, Courses, Departments, Enrollments (+18 more)
 
 ### Community 210 - "AuditLog"
 Cohesion: 0.09
 Nodes (19): IAuditLogService, Guid, Task, AuditLog, Action, Details, Id, IpAddress (+11 more)
 
 ### Community 211 - "GatewayRtpRequest"
-Cohesion: 0.25
-Nodes (9): GatewayRtpRequest, GatewayRtpResult, CancellationToken, DateTime, Guid, HttpRequestMessage, JsonElement, Task (+1 more)
+Cohesion: 0.29
+Nodes (8): GatewayRtpRequest, GatewayRtpResult, CancellationToken, DateTime, Guid, HttpRequestMessage, Task, CancellationToken
 
-### Community 212 - "FleetVehicle"
-Cohesion: 0.07
-Nodes (33): BoardingLog, BoardedAt, BoardingStatus, Direction, Id, RouteId, RouteStopId, StudentId (+25 more)
+### Community 212 - "TransportInspection"
+Cohesion: 0.06
+Nodes (34): BoardingLog, BoardedAt, BoardingStatus, Direction, Id, RouteId, RouteStopId, StudentId (+26 more)
 
 ### Community 213 - "FileBackedStorageProvider"
 Cohesion: 0.23
@@ -2159,10 +2138,10 @@ Nodes (12): AzureBlobStorageProvider, FileBackedStorageProvider, LocalDiskStorag
 
 ### Community 214 - "PqcCryptographyService"
 Cohesion: 0.09
-Nodes (22): Attendance, IPqcCryptographyService, CurrentAlgorithm, PqcAlgorithm, Aes256Gcm, DilithiumHybrid, KyberHybrid, PqcCryptographyOptions (+14 more)
+Nodes (21): IPqcCryptographyService, CurrentAlgorithm, PqcAlgorithm, Aes256Gcm, DilithiumHybrid, KyberHybrid, PqcCryptographyOptions, Algorithm (+13 more)
 
 ### Community 215 - "InMemoryVectorStore"
-Cohesion: 0.13
+Cohesion: 0.15
 Nodes (20): IVectorStore, CancellationToken, Dictionary, IEnumerable, IReadOnlyList, Task, VectorChunk, Embedding (+12 more)
 
 ### Community 216 - "ConfigAuditLog"
@@ -2173,9 +2152,9 @@ Nodes (23): IConfigAuditLogRepository, IConfigurationEntryRepository, IConfigVer
 Cohesion: 0.07
 Nodes (29): ConditionalRule, FieldId, Operator, Value, FormFieldConfig, Conditional, DefaultValue, HelpText (+21 more)
 
-### Community 218 - ".AddRuleEngine"
-Cohesion: 0.15
-Nodes (17): IDecisionTableRepository, IRuleDefinitionRepository, IRuleVersionRepository, CancellationToken, Guid, IReadOnlyList, Task, DecisionTableRepository (+9 more)
+### Community 218 - "RuleDomain"
+Cohesion: 0.10
+Nodes (27): IDecisionTableRepository, IRuleDefinitionRepository, IRuleVersionRepository, CancellationToken, Guid, IReadOnlyList, Task, RuleDomain (+19 more)
 
 ### Community 219 - "Student"
 Cohesion: 0.12
@@ -2206,12 +2185,12 @@ Cohesion: 0.29
 Nodes (11): CampusController, TransferController, CancellationToken, Guid, HttpGet, HttpPost, HttpPut, IActionResult (+3 more)
 
 ### Community 226 - "Visitor"
-Cohesion: 0.10
-Nodes (29): IVisitorRepository, CancellationToken, Guid, IReadOnlyList, Task, VisitorDashboardDto, BlacklistedCount, CheckedInCount (+21 more)
+Cohesion: 0.18
+Nodes (17): IVisitorRepository, CancellationToken, Guid, IReadOnlyList, Task, IVisitorRepository, CancellationToken, Guid (+9 more)
 
 ### Community 227 - "ComplianceDashboardDto"
-Cohesion: 0.11
-Nodes (19): ComplianceDashboardDto, CompliantControls, CriticalFindings, FrameworkScores, InProgressControls, NonCompliantControls, OpenFindings, OverallComplianceScore (+11 more)
+Cohesion: 0.06
+Nodes (32): ComplianceDashboardDto, CompliantControls, CriticalFindings, FrameworkScores, InProgressControls, NonCompliantControls, OpenFindings, OverallComplianceScore (+24 more)
 
 ### Community 228 - "ComplianceService"
 Cohesion: 0.17
@@ -2219,27 +2198,27 @@ Nodes (15): IComplianceService, AuditFindingSeverity, CancellationToken, Control
 
 ### Community 229 - "ReplicaHealthDto"
 Cohesion: 0.06
-Nodes (29): ReplicaHealthDto, ActiveConnections, CurrentLagSeconds, Id, IsLagAcceptable, LastHealthCheckAt, MaxLagSeconds, Name (+21 more)
+Nodes (30): ReplicaHealthDto, ActiveConnections, CurrentLagSeconds, Id, IsLagAcceptable, LastHealthCheckAt, MaxLagSeconds, Name (+22 more)
 
 ### Community 230 - "IFormSubmissionRepository"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (17): IFormDefinitionRepository, IFormSubmissionRepository, CancellationToken, FormSubmission, Guid, IReadOnlyList, Task, FormsServiceExtensions (+9 more)
 
 ### Community 231 - "FinancePayrollPosting"
 Cohesion: 0.07
 Nodes (31): FinancePayrollPosting, Eobi, Gratuity, GrossSalary, Id, ImportedAt, ImportedByUserId, IncomeTax (+23 more)
 
-### Community 232 - "StudentProctoringRecord"
-Cohesion: 0.12
-Nodes (23): StudentProctoringRecord, AnswerPatternAnalysisJson, CollusionFlagsJson, CriticalCount, EscalatedAt, EventLogJson, Id, IntegrityStatus (+15 more)
+### Community 232 - ".LogEvent"
+Cohesion: 0.23
+Nodes (12): RequestSizeLimit, ProctorEventSeverity, Critical, Info, Warning, ProctoringControllerTests, BadRequestResult, CancellationToken (+4 more)
 
 ### Community 233 - "IR2StorageService"
 Cohesion: 0.13
 Nodes (17): IR2StorageService, R2StorageOptions, AccessKey, AccountId, BucketName, Endpoint, SecretKey, R2StorageService (+9 more)
 
-### Community 234 - "Role"
+### Community 234 - ".AddIdentityGovernance"
 Cohesion: 0.10
-Nodes (25): IPermissionRepository, IRoleRepository, ISamlConfigurationRepository, IUserRepository, IUserRoleRepository, CancellationToken, Guid, IReadOnlyList (+17 more)
+Nodes (24): IPermissionRepository, IRoleRepository, ISamlConfigurationRepository, IUserRepository, IUserRoleRepository, CancellationToken, Guid, IReadOnlyList (+16 more)
 
 ### Community 235 - "Document 12 — Performance Report"
 Cohesion: 0.06
@@ -2253,9 +2232,9 @@ Nodes (31): AegisCore Complete Prompt Library — Master Index, 📊 Dependencie
 Cohesion: 0.34
 Nodes (9): IdentityController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, ILogger, RequirePermission (+1 more)
 
-### Community 238 - "StudentLifecycleController"
-Cohesion: 0.11
-Nodes (17): StudentLifecycleController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, Task, IStudentLifecycleService (+9 more)
+### Community 238 - "AegisCore.Application.StudentLifecycle"
+Cohesion: 0.10
+Nodes (12): IStudentLifecycleService, DateTime, Guid, StudentLifecycleService, DateTime, Guid, StudentLifecycleServiceExtensions, IServiceCollection (+4 more)
 
 ### Community 239 - "ConfigurationCenterService"
 Cohesion: 0.27
@@ -2269,9 +2248,9 @@ Nodes (24): ICalibrationRecordRepository, CancellationToken, Guid, IReadOnlyList
 Cohesion: 0.07
 Nodes (31): FinanceInsuranceClaim, ClaimedAmount, ClaimNumber, Description, FiledAt, FinanceInsurancePolicyId, Id, JournalEntryId (+23 more)
 
-### Community 242 - "SearchService"
-Cohesion: 0.13
-Nodes (17): ISearchIndex, CancellationToken, IEnumerable, Task, SearchQuery, ExcludeFields, Filters, Page (+9 more)
+### Community 242 - "UnifiedSearchRequest"
+Cohesion: 0.04
+Nodes (61): SearchableCourse, Code, CreatedAt, CreditHours, Department, Description, Id, TenantId (+53 more)
 
 ### Community 243 - "SecurityIncident"
 Cohesion: 0.06
@@ -2293,45 +2272,45 @@ Nodes (31): AegisCore — Native Mobile Architecture & Docker Integration (U13),
 Cohesion: 0.15
 Nodes (19): DegreeAuditController, CancellationToken, CurriculumVersion, Guid, HttpGet, HttpPost, IActionResult, ILogger (+11 more)
 
-### Community 248 - "JobPosting"
-Cohesion: 0.09
-Nodes (23): ApplicationStatus, JobApplication, AppliedAt, CoverLetter, Id, JobPosting, JobPostingId, Status (+15 more)
+### Community 248 - "AdmissionApplication"
+Cohesion: 0.10
+Nodes (21): AdmissionApplication, Cnic, CreatedAt, DateOfBirth, Documents, Email, EnquiryLeadId, EntryTestScore (+13 more)
 
-### Community 249 - "CancellationToken"
+### Community 249 - "Role"
 Cohesion: 0.17
-Nodes (12): IPermissionRepository, IRoleRepository, ISamlConfigurationRepository, IUserRepository, IUserRoleRepository, CancellationToken, Dictionary, Guid (+4 more)
+Nodes (13): IPermissionRepository, IRoleRepository, ISamlConfigurationRepository, IUserRepository, IUserRoleRepository, CancellationToken, Dictionary, Guid (+5 more)
 
 ### Community 250 - "FinanceContinuousControlService"
 Cohesion: 0.16
 Nodes (12): FinanceControlDefinition, FinanceContinuousControlService, AegisDbContext, CancellationToken, Dictionary, Guid, IHttpContextAccessor, IReadOnlyDictionary (+4 more)
 
-### Community 251 - "JobDto"
-Cohesion: 0.07
-Nodes (30): ExportLogDto, CreatedAt, Domain, Format, Id, RowCount, JobDto, CronExpression (+22 more)
+### Community 251 - "NotificationDeliveryDto"
+Cohesion: 0.05
+Nodes (40): SignalRNotificationRealtimePublisher, CancellationToken, IHubContext, Task, ExportLogDto, CreatedAt, Domain, Format (+32 more)
 
 ### Community 252 - "IApiKeyRepository"
-Cohesion: 0.17
+Cohesion: 0.16
 Nodes (17): IApiKeyRepository, IWebhookSubscriptionRepository, ApiKey, CancellationToken, DateTime, IReadOnlyList, Task, ApiGatewayServiceExtensions (+9 more)
 
 ### Community 253 - "DocumentVaultEntry"
-Cohesion: 0.07
-Nodes (30): DocumentVaultEntry, ContentType, DeletedAt, DeletionReason, DocumentCategory, FileName, FileSizeBytes, Id (+22 more)
+Cohesion: 0.04
+Nodes (74): DocumentAccessLog, AccessedAt, AccessedByRole, AccessedByUserId, AccessType, DenialReason, DocumentId, Id (+66 more)
 
 ### Community 254 - "FinanceInventoryMovement"
 Cohesion: 0.07
 Nodes (29): FinanceInventoryItem, CostMethod, Id, ItemCode, ItemName, Movements, OnHandQuantity, ReorderLevel (+21 more)
 
 ### Community 255 - "Payslip"
-Cohesion: 0.08
-Nodes (29): PayrollRun, Id, Month, Payslips, RunBy, RunDate, Status, TenantId (+21 more)
+Cohesion: 0.05
+Nodes (57): HrController, LeaveRequest, AllowAnonymous, CancellationToken, DateOnly, Guid, HttpGet, HttpPost (+49 more)
 
 ### Community 256 - "SemesterFreeze"
 Cohesion: 0.07
 Nodes (30): SemesterFreeze, AcademicContinuityPlanJson, ApprovedByUserId, CurrentSemester, EffectiveDate, EnrolledCoursesSnapshotJson, ExpectedReturnDate, FreezesUsed (+22 more)
 
 ### Community 257 - "BackgroundService"
-Cohesion: 0.15
-Nodes (17): FinanceAuditSealService, FinanceAuditSealWorker, FinanceLedgerIntegrityFailure, FinanceLedgerIntegrityResult, FinanceLedgerIntegrityService, FinanceLedgerSignatureWorker, FinanceMerkleTree, AegisDbContext (+9 more)
+Cohesion: 0.14
+Nodes (20): FinanceAuditSealService, FinanceAuditSealWorker, FinanceLedgerIntegrityFailure, FinanceLedgerIntegrityResult, FinanceLedgerIntegrityService, FinanceLedgerSignatureWorker, FinanceMerkleTree, AegisDbContext (+12 more)
 
 ### Community 258 - "aegiscore-mobile-app/react-native/App.tsx"
 Cohesion: 0.11
@@ -2350,44 +2329,44 @@ Cohesion: 0.07
 Nodes (29): 1. Environment Variable Completeness, 1. NuGet Package Audit, 1. Storage Abstraction (Complete), 2. Configuration File Audit, 2. Database Abstraction (Partial — EF Core Handles This), 2. Multi-Cloud Docker Compose Tests, 3. Code Audit — Direct SDK Calls, 3. Deployment Checklist (+21 more)
 
 ### Community 262 - "HighRiskValidationTests"
-Cohesion: 0.11
-Nodes (17): LoginRequestValidator, LoginRequest, HighRiskValidationTests, ValidatorFixture, Db, Fact, IEnumerable, InlineData (+9 more)
+Cohesion: 0.12
+Nodes (16): LoginRequestValidator, LoginRequest, HighRiskValidationTests, ValidatorFixture, Db, Fact, IEnumerable, InlineData (+8 more)
 
 ### Community 263 - ".InvalidRequest"
 Cohesion: 0.19
 Nodes (19): GraceMarksRequest, MarksEntryRequest, ModerationReviewRequest, ModerationSubmitRequest, PublishResultsRequest, S3ExaminationController, TranscriptRequest, ActionResult (+11 more)
 
 ### Community 264 - "GuardRound"
-Cohesion: 0.23
-Nodes (13): IGuardRoundRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, GuardRound, GuardRoundRepository (+5 more)
+Cohesion: 0.15
+Nodes (19): IGuardRoundRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, IGuardRoundRepository, CancellationToken (+11 more)
 
 ### Community 265 - "PrivacyComplianceTests"
 Cohesion: 0.12
 Nodes (20): AcademicSeed, AcademicSeed, ComplianceFixture, Db, TenantId, PrivacyComplianceTests, TestHttpContextAccessor, HttpContext (+12 more)
 
 ### Community 266 - "UnitOfWork"
-Cohesion: 0.08
-Nodes (24): UnitOfWork, Attendances, Batches, CloPlomappings, CourseAssignments, Courses, Departments, Enrollments (+16 more)
+Cohesion: 0.07
+Nodes (26): CancellationToken, Task, UnitOfWork, Attendances, Batches, CloPlomappings, CourseAssignments, Courses (+18 more)
 
 ### Community 267 - "FinanceWithholdingRecord"
 Cohesion: 0.07
 Nodes (28): FinanceTaxRule, EffectiveFrom, EffectiveTo, FilerRatePercent, Id, IsActive, Jurisdiction, NonFilerMultiplier (+20 more)
 
 ### Community 268 - ".AuthorizeAndAuditAsync"
-Cohesion: 0.13
-Nodes (20): RequireFerpaAuditAttribute, ResourceType, StudentIdParam, ActionExecutingContext, ActionExecutionDelegate, Guid, Task, FerpaAccessDecision (+12 more)
+Cohesion: 0.16
+Nodes (16): ActionExecutingContext, ActionExecutionDelegate, Guid, Task, FerpaAccessDecision, FerpaAccessRequest, IFerpaAuditService, IReadOnlyList (+8 more)
 
 ### Community 269 - ".AddComplianceCenter"
-Cohesion: 0.19
-Nodes (12): ComplianceServiceExtensions, IConfiguration, IServiceCollection, AuditFindingRepository, ComplianceControlRepository, ComplianceFrameworkRepository, CorrectiveActionPlanRepository, CancellationToken (+4 more)
+Cohesion: 0.20
+Nodes (11): IConfiguration, IServiceCollection, AuditFindingRepository, ComplianceControlRepository, ComplianceFrameworkRepository, CorrectiveActionPlanRepository, CancellationToken, DateTime (+3 more)
 
 ### Community 270 - "DataImportService"
-Cohesion: 0.16
-Nodes (13): ReadOnlySqlQueryValidator, HashSet, DataImportService, AegisDbContext, CancellationToken, ColumnInfo, DbConnection, Dictionary (+5 more)
+Cohesion: 0.20
+Nodes (11): DataImportService, AegisDbContext, CancellationToken, ColumnInfo, DbConnection, Dictionary, Guid, ILogger (+3 more)
 
 ### Community 271 - "User"
-Cohesion: 0.09
-Nodes (22): User, AuthProvider, CreatedAt, DeactivatedAt, Email, ExternalClaimsJson, ExternalId, FirstName (+14 more)
+Cohesion: 0.06
+Nodes (34): User, AuthProvider, CreatedAt, DeactivatedAt, Email, ExternalClaimsJson, ExternalId, FirstName (+26 more)
 
 ### Community 272 - "Document 10 — Test Plan"
 Cohesion: 0.07
@@ -2397,57 +2376,57 @@ Nodes (28): 10. Risks and Contingencies, 11. Approval Signatures, 1. Test Plan I
 Cohesion: 0.23
 Nodes (9): IAuditFindingRepository, IComplianceControlRepository, IComplianceFrameworkRepository, ICorrectiveActionPlanRepository, CancellationToken, DateTime, Guid, IReadOnlyList (+1 more)
 
-### Community 274 - "CancellationToken"
-Cohesion: 0.23
-Nodes (11): EnergyReadingRepository, FloorPlanRepository, IoTSensorRepository, RoomOccupancyRepository, SensorReadingRepository, CancellationToken, DateTime, Guid (+3 more)
+### Community 274 - "LibraryBook"
+Cohesion: 0.10
+Nodes (21): BookCopy, Barcode, Book, Id, LibraryBookId, Status, TenantId, LibraryBook (+13 more)
 
 ### Community 275 - "FormsController"
 Cohesion: 0.22
 Nodes (15): FormsController, CancellationToken, Dictionary, Guid, HttpGet, HttpPost, HttpPut, IActionResult (+7 more)
 
 ### Community 276 - "IUnitOfWork"
-Cohesion: 0.08
-Nodes (24): IUnitOfWork, Attendances, Batches, CloPlomappings, CourseAssignments, Courses, Departments, Enrollments (+16 more)
+Cohesion: 0.05
+Nodes (37): GradingSchemeResolver, Guid, Task, ResultService, Guid, IConfiguration, ILogger, Task (+29 more)
 
-### Community 277 - "OpenAiEmbeddingProvider"
-Cohesion: 0.14
-Nodes (13): IEmbeddingProvider, ModelName, CancellationToken, IEnumerable, Task, OpenAiEmbeddingProvider, ModelName, CancellationToken (+5 more)
+### Community 277 - ".AddAiPlatform"
+Cohesion: 0.07
+Nodes (28): IEmbeddingProvider, ModelName, CancellationToken, IEnumerable, Task, AiPlatformServiceExtensions, IConfiguration, IServiceCollection (+20 more)
 
 ### Community 278 - "LabEquipment"
 Cohesion: 0.15
 Nodes (18): ILabEquipmentRepository, CancellationToken, EquipmentStatus, Guid, IReadOnlyList, Task, ILabEquipmentRepository, CancellationToken (+10 more)
 
 ### Community 279 - "AegisCore.Application.Backup"
-Cohesion: 0.19
-Nodes (7): BackupEncryptionService, CancellationToken, IConfiguration, ILogger, Task, AegisCore.Application.Backup, AegisCore.Infrastructure.Backup
+Cohesion: 0.13
+Nodes (14): BackupEncryptionService, CancellationToken, IConfiguration, ILogger, Task, RedisHealthCheck, IConnectionMultiplexer, LicenseHealthCheck (+6 more)
 
-### Community 280 - "CurriculumService"
-Cohesion: 0.08
-Nodes (30): CurriculumController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, RequirePermission, Task (+22 more)
+### Community 280 - "OfflineAttendanceEvent"
+Cohesion: 0.06
+Nodes (40): CurriculumController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, RequirePermission, Task (+32 more)
 
 ### Community 281 - "ArgumentOutOfRangeException"
-Cohesion: 0.10
-Nodes (15): AnonymousFeedbackRequest, IGovernanceService, CancellationToken, Guid, Task, GovernanceService, AegisDbContext, CancellationToken (+7 more)
+Cohesion: 0.08
+Nodes (23): GovernanceController, CancellationToken, HttpGet, HttpPost, IActionResult, RequirePermission, Task, AnonymousFeedbackRequest (+15 more)
 
 ### Community 282 - "RuleCondition"
-Cohesion: 0.24
-Nodes (13): RuleCondition, Conditions, Field, LogicalOperator, Operator, Value, RuleEngineService, CancellationToken (+5 more)
+Cohesion: 0.16
+Nodes (20): RuleAction, Message, NotificationTemplate, TargetField, Type, Value, WorkflowId, RuleCondition (+12 more)
 
 ### Community 283 - "Batch"
 Cohesion: 0.13
 Nodes (14): Batch, CreatedAt, Department, DepartmentId, EndYear, Id, Name, StartYear (+6 more)
 
 ### Community 284 - "FinanceAccountingStandardPolicy"
-Cohesion: 0.06
-Nodes (34): FinanceAccountingStandardPolicy, EffectiveFrom, EffectiveTo, Id, PolicyCode, StandardCode, TenantId, ValueJson (+26 more)
+Cohesion: 0.05
+Nodes (42): FinanceAccountingStandardPolicy, EffectiveFrom, EffectiveTo, Id, PolicyCode, StandardCode, TenantId, ValueJson (+34 more)
 
 ### Community 285 - "FinanceUtilityBill"
 Cohesion: 0.08
 Nodes (27): FinanceUtilityAllocation, Amount, Bill, CostCenterId, FinanceUtilityBillId, Id, TenantId, FinanceUtilityBill (+19 more)
 
 ### Community 286 - "SubstitutionConfigurationProvider"
-Cohesion: 0.14
-Nodes (9): EnvironmentSubstitutionExtensions, SubstitutionConfigurationProvider, SubstitutionConfigurationSource, IConfigurationBuilder, IEnumerable, Regex, IChangeToken, IConfigurationProvider (+1 more)
+Cohesion: 0.08
+Nodes (15): EnvironmentSubstitutionExtensions, SubstitutionConfigurationProvider, SubstitutionConfigurationSource, IConfigurationBuilder, IEnumerable, Regex, EnvironmentSubstitutionTest, Fact (+7 more)
 
 ### Community 287 - "3. Data Dictionary"
 Cohesion: 0.07
@@ -2457,17 +2436,17 @@ Nodes (27): 1.1 Purpose, 1.2 Scope, 1.3 References, 1. Introduction, 2.1 Core En
 Cohesion: 0.20
 Nodes (13): IEndpointRouteBuilder, FacultyCompensationDto, FacultyEngagementDto, FacultyPerformanceDto, FacultyProfileDto, PoolAnalyticsDto, CancellationToken, DateTimeOffset (+5 more)
 
-### Community 289 - "CancellationToken"
-Cohesion: 0.20
-Nodes (11): IApprovalRecordRepository, INotificationRecordRepository, IWorkflowDefinitionRepository, IWorkflowInstanceRepository, IWorkflowStepRepository, CancellationToken, Guid, IReadOnlyList (+3 more)
+### Community 289 - "WorkflowInstance"
+Cohesion: 0.05
+Nodes (51): IApprovalRecordRepository, INotificationRecordRepository, IWorkflowDefinitionRepository, IWorkflowInstanceRepository, IWorkflowStepRepository, CancellationToken, Guid, IReadOnlyList (+43 more)
 
 ### Community 290 - "MarkAttendanceRequest"
 Cohesion: 0.07
 Nodes (23): EnrollStudentRequest, CourseId, StudentId, Guid, GetBatchTimetableRequest, BatchId, Guid, MarkAttendanceRequest (+15 more)
 
 ### Community 291 - "PqcSignatureService"
-Cohesion: 0.21
-Nodes (10): IPqcSignatureService, KeyMaterial, PqcSignatureService, CancellationToken, Guid, ReadOnlyMemory, ReadOnlySpan, Task (+2 more)
+Cohesion: 0.23
+Nodes (9): KeyMaterial, PqcSignatureService, CancellationToken, Guid, ReadOnlyMemory, ReadOnlySpan, Task, ICipherParameters (+1 more)
 
 ### Community 292 - "Election"
 Cohesion: 0.04
@@ -2490,20 +2469,20 @@ Cohesion: 0.18
 Nodes (13): AuditDashboardData, AuditorEngagement, AuditPage(), AuditRun, EvidencePackage, optional(), SodRule, AuditDashboard() (+5 more)
 
 ### Community 297 - ".CreateKey"
-Cohesion: 0.24
-Nodes (11): ApiKeysController, DeveloperInfoController, WebhooksController, CancellationToken, Guid, HttpDelete, HttpGet, HttpPost (+3 more)
+Cohesion: 0.20
+Nodes (13): ApiKeysController, DeveloperInfoController, WebhooksController, CancellationToken, Guid, HttpDelete, HttpGet, HttpPost (+5 more)
 
 ### Community 298 - ".CurrentValue"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (8): AssetInventoryController, CancellationToken, DateTime, Guid, HttpGet, IActionResult, RequirePermission, Task
 
 ### Community 299 - "CasbinPolicySyncService"
 Cohesion: 0.23
 Nodes (10): CasbinPolicySyncService, ICasbinPolicySyncService, CancellationToken, Guid, IEnforcer, IEnumerable, IMemoryCache, SemaphoreSlim (+2 more)
 
-### Community 300 - ".AddInfrastructure"
-Cohesion: 0.16
-Nodes (19): IMeritCalculationService, ISeatAllocationService, MeritExplanation, MeritResult, CancellationToken, Guid, IReadOnlyList, Task (+11 more)
+### Community 300 - ".CalculateAsync"
+Cohesion: 0.19
+Nodes (16): IMeritCalculationService, ISeatAllocationService, MeritExplanation, MeritResult, CancellationToken, Guid, IReadOnlyList, Task (+8 more)
 
 ### Community 301 - "CampusDtos.cs"
 Cohesion: 0.08
@@ -2513,9 +2492,9 @@ Nodes (25): ApproveTransferRequest, ApproverName, IsSourceApprover, TransferId, 
 Cohesion: 0.08
 Nodes (23): Faculty, CourseAssignment, Course, CourseId, CreatedAt, Faculty, FacultyId, Id (+15 more)
 
-### Community 303 - "TranslationKey"
-Cohesion: 0.15
-Nodes (12): TranslationKey, Context, CreatedAt, Description, Id, Key, Module, TenantId (+4 more)
+### Community 303 - "FinanceReportProfile"
+Cohesion: 0.10
+Nodes (21): FinanceReportProfile, BudgetVsActual, ComparativeYears, CreatedAt, CreatedByUserId, Delivery, Format, FunderName (+13 more)
 
 ### Community 304 - "LoginAuditRecord"
 Cohesion: 0.08
@@ -2557,17 +2536,17 @@ Nodes (16): DefaultPredictionEndpoints, IEndpointRouteBuilder, CashFlowForecastD
 Cohesion: 0.23
 Nodes (9): IAuditFindingRepository, IComplianceControlRepository, IComplianceFrameworkRepository, ICorrectiveActionPlanRepository, CancellationToken, DateTime, Guid, IReadOnlyList (+1 more)
 
-### Community 314 - "RuleDomain"
-Cohesion: 0.20
-Nodes (10): RuleDomain, Admissions, Attendance, Examinations, Finance, Graduation, HR, Library (+2 more)
+### Community 314 - ".ConfigureSaml"
+Cohesion: 0.14
+Nodes (16): SamlController, CancellationToken, HttpGet, HttpPost, IActionResult, ILogger, Task, SamlConfigurationResponse (+8 more)
 
-### Community 315 - "GradeDistribution"
-Cohesion: 0.08
-Nodes (25): GradeDistribution, AnomaliesJson, CourseId, CurveShape, DistinctionRate, EnrollmentCount, FacultyId, FailureRate (+17 more)
+### Community 315 - "VisitorDto"
+Cohesion: 0.16
+Nodes (15): VisitorDashboardDto, BlacklistedCount, CheckedInCount, CheckedInVisitors, VisitorDto, CheckInTime, Id, Purpose (+7 more)
 
 ### Community 316 - "IoTSensor"
-Cohesion: 0.10
-Nodes (19): IoTSensor, BuildingId, ConfigJson, CreatedAt, HardwareId, Id, InstalledAt, LastReadingAt (+11 more)
+Cohesion: 0.09
+Nodes (29): IEnergyReadingRepository, IIoTSensorRepository, IRoomOccupancyRepository, ISensorReadingRepository, CancellationToken, DateTime, Guid, IReadOnlyList (+21 more)
 
 ### Community 317 - "FormDefinition"
 Cohesion: 0.08
@@ -2577,25 +2556,25 @@ Nodes (24): FormDefinition, AccessRoles, AllowDraftSave, AllowMultipleSubmission
 Cohesion: 0.08
 Nodes (24): LabEquipment, AssetTag, Bookings, CalibrationRecords, CreatedAt, EquipmentName, Id, MaintenanceRequests (+16 more)
 
-### Community 319 - ".V4Contract_UsesTenantPathAndCorrectCreateUpdateDeleteMethods"
-Cohesion: 0.11
-Nodes (21): CapturedRequest, FixedClientFactory, InfisicalSecretServiceTests, RecordingHandler, CancellationToken, CommandFlags, Fact, HttpClient (+13 more)
+### Community 319 - "DecisionTable"
+Cohesion: 0.10
+Nodes (19): DecisionTable, CreatedAt, CreatedByUserId, Domain, EffectiveFrom, EffectiveTo, Id, InputColumnsJson (+11 more)
 
 ### Community 320 - ".CheckIn_EndToEnd_EncryptsCoordinates_RedactsRoster_AndAllowsOverride"
-Cohesion: 0.22
-Nodes (14): AttendanceCheckInRequest, AttendanceGeolocationController, AttendanceOverrideRequest, CancellationToken, Guid, HttpGet, HttpPost, IActionResult (+6 more)
+Cohesion: 0.19
+Nodes (15): AttendanceCheckInRequest, AttendanceGeolocationController, AttendanceOverrideRequest, Attendance, CancellationToken, Guid, HttpGet, HttpPost (+7 more)
 
 ### Community 321 - "PrivacyComplianceService"
-Cohesion: 0.21
-Nodes (13): PrivacyComplianceService, AegisDbContext, CancellationToken, DateTime, Guid, IConfiguration, IEnumerable, ILogger (+5 more)
+Cohesion: 0.15
+Nodes (19): DsarArchive, IPrivacyComplianceService, CancellationToken, DateTime, Guid, Task, PrivacyComplianceService, AegisDbContext (+11 more)
 
 ### Community 322 - "VehiclePass"
 Cohesion: 0.08
 Nodes (24): VehiclePass, CreatedAt, ExpiryDate, GateEntries, Id, IssueDate, OwnerEmployee, OwnerEmployeeId (+16 more)
 
-### Community 323 - "DocumentAccessLog"
-Cohesion: 0.09
-Nodes (22): DocumentAccessLog, AccessedAt, AccessedByRole, AccessedByUserId, AccessType, DenialReason, DocumentId, Id (+14 more)
+### Community 323 - "StartImportRequest"
+Cohesion: 0.11
+Nodes (16): StartImportRequest, ConnectionId, EntityType, FieldMappingsJson, SourceQuery, TriggeredByUserId, ActionExecutingContext, ActionExecutionDelegate (+8 more)
 
 ### Community 324 - "Guid"
 Cohesion: 0.24
@@ -2614,12 +2593,12 @@ Cohesion: 0.21
 Nodes (15): AccountingStandardContext, CreateConsolidationGroupCommand, CreateEliminationRuleCommand, CreateReportingEntityCommand, CreateRestatementRuleCommand, IAccountingStandardsEngine, RunConsolidationCommand, RunRestatementCommand (+7 more)
 
 ### Community 328 - ".ImportAsync"
-Cohesion: 0.16
+Cohesion: 0.17
 Nodes (13): BulkVoucherImportCommand, VoucherImportResult, VoucherImportService, AegisDbContext, CancellationToken, Dictionary, Guid, IReadOnlyDictionary (+5 more)
 
-### Community 329 - ".AddWorkflowStudio"
-Cohesion: 0.12
-Nodes (18): IApprovalService, INotificationService, IWorkflowEngine, CancellationToken, Dictionary, Guid, List, Task (+10 more)
+### Community 329 - "CancellationToken"
+Cohesion: 0.14
+Nodes (15): IApprovalService, INotificationService, IWorkflowEngine, CancellationToken, Dictionary, Guid, List, Task (+7 more)
 
 ### Community 330 - "Campus"
 Cohesion: 0.08
@@ -2637,9 +2616,9 @@ Nodes (52): CurriculumChangeHistory, AfterValueJson, BeforeValueJson, ChangedAt,
 Cohesion: 0.09
 Nodes (23): FinanceAuditSample, AuditorEngagementId, CreatedAt, Id, PeriodFrom, PeriodTo, PopulationCount, PopulationType (+15 more)
 
-### Community 334 - "SectionOverrideRequest"
-Cohesion: 0.06
-Nodes (37): AnonymousFeedbackSubmission, CourseId, EncryptedPayload, FacultyId, Id, Rating, SentimentScore, SubmittedAt (+29 more)
+### Community 334 - "SystemConfiguration"
+Cohesion: 0.04
+Nodes (56): AnonymousFeedbackSubmission, CourseId, EncryptedPayload, FacultyId, Id, Rating, SentimentScore, SubmittedAt (+48 more)
 
 ### Community 335 - "ResearchLab"
 Cohesion: 0.08
@@ -2649,9 +2628,9 @@ Nodes (23): ResearchLab, Bookings, Capacity, Consumables, CreatedAt, Department,
 Cohesion: 0.09
 Nodes (23): Tenant, ActivatedAt, CreatedAt, Id, IsActive, LicenseMode, Name, ShortName (+15 more)
 
-### Community 337 - "WorkflowInstance"
+### Community 337 - "WorkflowDefinition"
 Cohesion: 0.04
-Nodes (65): IWorkflowDefinitionRepository, IWorkflowInstanceRepository, CancellationToken, IReadOnlyList, Task, WorkflowDefinition, Category, CreatedAt (+57 more)
+Nodes (71): IApprovalRecordRepository, INotificationRecordRepository, IWorkflowDefinitionRepository, IWorkflowInstanceRepository, IWorkflowStepRepository, CancellationToken, Guid, IReadOnlyList (+63 more)
 
 ### Community 338 - "AegisCoreLicenseController"
 Cohesion: 0.18
@@ -2661,9 +2640,9 @@ Nodes (15): ActivateLicenseRequest, AegisCoreLicenseController, HeartbeatRequest
 Cohesion: 0.16
 Nodes (16): IEnrollmentRepository, CancellationToken, Guid, IReadOnlyList, Task, IEnrollmentRepository, CancellationToken, Guid (+8 more)
 
-### Community 340 - "ISecurityIncidentRepository"
-Cohesion: 0.21
-Nodes (13): ISecurityIncidentRepository, CancellationToken, Guid, IncidentType, IReadOnlyList, Task, IncidentType, SecurityIncidentRepository (+5 more)
+### Community 340 - "SecurityIncident"
+Cohesion: 0.12
+Nodes (26): ISecurityIncidentRepository, CancellationToken, Guid, IncidentStatus, IReadOnlyList, Task, ISecurityIncidentRepository, CancellationToken (+18 more)
 
 ### Community 341 - "TaxSlab"
 Cohesion: 0.11
@@ -2673,33 +2652,33 @@ Nodes (17): TaxSlab, CountryPack, CountryPackId, EffectiveFrom, EffectiveTo, Fix
 Cohesion: 0.09
 Nodes (22): EthicalAuditLog, AuditCategory, AuditDetail, Id, IsViolation, LoggedAt, RelatedAssessmentId, TenantId (+14 more)
 
-### Community 343 - "Convocation"
-Cohesion: 0.18
-Nodes (16): Convocation, AcademicYear, CeremonyDate, GuestTicketsPerStudent, Id, Status, TenantId, Title (+8 more)
+### Community 343 - "ConvocationControllerTests"
+Cohesion: 0.46
+Nodes (6): ConvocationControllerTests, CancellationToken, Fact, Mock, OkObjectResult, Task
 
-### Community 344 - "LicenseState"
-Cohesion: 0.09
-Nodes (21): LicenseState, ActivatedAt, CreatedAt, FailedHeartbeatCount, Id, LastHeartbeatAt, LastHeartbeatStatus, LicenseJson (+13 more)
+### Community 344 - "DashboardWidget"
+Cohesion: 0.11
+Nodes (18): DashboardWidget, ConfigJson, Dashboard, DashboardId, Id, SortOrder, TenantId, Title (+10 more)
 
-### Community 345 - "BackupStatus"
-Cohesion: 0.18
-Nodes (13): IBackupConfigurationRepository, IBackupRecordRepository, IReadReplicaConfigRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task (+5 more)
+### Community 345 - "JwtTokenService"
+Cohesion: 0.15
+Nodes (9): ClaimsPrincipal, JwtTokenService, ClaimsPrincipal, Guid, IConnectionMultiplexer, Task, TimeSpan, IConnectionMultiplexer (+1 more)
 
-### Community 346 - "GradeAppeal"
+### Community 346 - "DefaulterRiskScore"
 Cohesion: 0.03
-Nodes (60): DefaulterRiskScore, AcademicCorrelationJson, FinancialProfileJson, Id, PaymentBehaviorJson, PredictedAt, PredictionConfidence, ProbabilityScore (+52 more)
+Nodes (60): DeansListEntry, Cgpa, CreatedAt, FormalLetterUrl, Id, ParentNotified, SemesterId, Status (+52 more)
 
 ### Community 347 - "WorkflowStep"
 Cohesion: 0.09
-Nodes (24): IWorkflowStepRepository, WorkflowStep, ApprovalRecords, CompletedAt, ErrorMessage, Id, InputJson, Instance (+16 more)
+Nodes (22): WorkflowStep, ApprovalRecords, CompletedAt, ErrorMessage, Id, InputJson, Instance, InstanceId (+14 more)
 
 ### Community 348 - "AncillaryFinanceService"
-Cohesion: 0.32
-Nodes (8): CompleteFleetMaintenanceCommand, DisposeFinanceAssetCommand, AncillaryFinanceService, AccountType, AegisDbContext, CancellationToken, Guid, Task
+Cohesion: 0.30
+Nodes (9): CompleteFleetMaintenanceCommand, CreateFinanceLibraryFineCommand, DisposeFinanceAssetCommand, AncillaryFinanceService, AccountType, AegisDbContext, CancellationToken, Guid (+1 more)
 
-### Community 349 - "CancellationToken"
-Cohesion: 0.23
-Nodes (11): IEnergyReadingRepository, IFloorPlanRepository, IIoTSensorRepository, IRoomOccupancyRepository, ISensorReadingRepository, CancellationToken, DateTime, Guid (+3 more)
+### Community 349 - "StudentLifecycleController"
+Cohesion: 0.37
+Nodes (7): StudentLifecycleController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, Task
 
 ### Community 350 - "ApiKeyService"
 Cohesion: 0.16
@@ -2738,20 +2717,20 @@ Cohesion: 0.15
 Nodes (17): IPowerBiEmbeddingService, MicrosoftEcosystemServiceExtensions, IConfiguration, IServiceCollection, Uri, AzureAdTokenResponse, GraphClassResponse, MoodleLmsService (+9 more)
 
 ### Community 359 - "AegisCore.Application.AI"
-Cohesion: 0.10
-Nodes (12): DefaultTenantConfigTemplate, FeeDefaults, HostelDefaults, TransportDefaults, AegisCore.Application.ConfigCenter, AegisCore.Infrastructure.Search, AegisCore.Infrastructure.Config, AegisCore.Infrastructure.Support (+4 more)
+Cohesion: 0.07
+Nodes (14): DefaultTenantConfigTemplate, FeeDefaults, HostelDefaults, TransportDefaults, AegisCore.Application.ConfigCenter, AegisCore.Infrastructure.Search, AegisCore.Infrastructure.Config, AegisCore.Application.Compliance (+6 more)
 
-### Community 360 - "ApprovalRecord"
-Cohesion: 0.10
-Nodes (20): IApprovalRecordRepository, ApprovalRecord, ApproverRole, ApproverUserId, Comment, DecidedAt, DelegatedToUserId, DelegationReason (+12 more)
+### Community 360 - "DataImportJob"
+Cohesion: 0.12
+Nodes (16): DataImportJob, CompletedAt, ConnectionId, EntityType, ErrorLogJson, ErrorRows, FieldMappingsJson, Id (+8 more)
 
-### Community 361 - "Asset"
-Cohesion: 0.11
-Nodes (18): Asset, AssetCategoryId, Category, CreatedAt, CurrentValue, DepreciationMethod, Id, LocationBuildingId (+10 more)
+### Community 361 - "StudentProctoringRecord"
+Cohesion: 0.12
+Nodes (16): StudentProctoringRecord, AnswerPatternAnalysisJson, CollusionFlagsJson, CriticalCount, EscalatedAt, EventLogJson, Id, IntegrityStatus (+8 more)
 
-### Community 362 - "ElasticsearchIndex"
-Cohesion: 0.36
-Nodes (6): ElasticsearchIndex, CancellationToken, IElasticClient, IEnumerable, ILogger, Task
+### Community 362 - "ISearchIndex"
+Cohesion: 0.22
+Nodes (10): ISearchIndex, CancellationToken, IEnumerable, Task, ElasticsearchIndex, CancellationToken, IElasticClient, IEnumerable (+2 more)
 
 ### Community 363 - "AuditFinding"
 Cohesion: 0.09
@@ -2786,12 +2765,12 @@ Cohesion: 0.24
 Nodes (9): BackupService, BackupType, CancellationToken, DateTime, Guid, IConfiguration, IEnumerable, ILogger (+1 more)
 
 ### Community 371 - "ExtensionService"
-Cohesion: 0.24
+Cohesion: 0.23
 Nodes (10): IExtensionService, CancellationToken, Guid, Task, ExtensionService, CancellationToken, Guid, ILogger (+2 more)
 
 ### Community 372 - "PqcSigningQueue"
-Cohesion: 0.19
-Nodes (14): FinanceModuleServiceExtensions, IServiceCollection, PqcSignatureResult, InlinePqcSigningQueue, Instance, IPqcSigningQueue, PqcSigningQueue, SigningWorkItem (+6 more)
+Cohesion: 0.24
+Nodes (12): PqcSignatureResult, InlinePqcSigningQueue, Instance, IPqcSigningQueue, PqcSigningQueue, SigningWorkItem, CancellationToken, Channel (+4 more)
 
 ### Community 373 - "expo"
 Cohesion: 0.06
@@ -2818,40 +2797,40 @@ Cohesion: 0.09
 Nodes (22): AegisCore.API, net10.0, Casbin.NET (2.21.2), Microsoft.EntityFrameworkCore (10.0.0), Microsoft.EntityFrameworkCore.Design (10.0.0), Microsoft.IdentityModel.Tokens (8.18.0), Npgsql (10.0.0), Npgsql.EntityFrameworkCore.PostgreSQL (10.0.0) (+14 more)
 
 ### Community 379 - "CommunicationsController"
-Cohesion: 0.16
-Nodes (18): CommunicationsController, NoticeRequest, AllowAnonymous, CancellationToken, DateTime, Guid, HttpGet, HttpPost (+10 more)
+Cohesion: 0.20
+Nodes (15): CommunicationsController, NoticeRequest, AllowAnonymous, CancellationToken, DateTime, Guid, HttpGet, HttpPost (+7 more)
 
 ### Community 380 - "ElectionContracts.cs"
 Cohesion: 0.13
-Nodes (28): IEndpointRouteBuilder, BallotChoice, BallotReceiptDto, CandidateDto, CastBallotRequest, ElectionParticipationDto, ElectionResultDto, ElectionSetupDto (+20 more)
+Nodes (28): BallotChoice, BallotReceiptDto, CandidateDto, CastBallotRequest, ElectionParticipationDto, ElectionResultDto, ElectionSetupDto, ElectionSetupRequest (+20 more)
 
-### Community 381 - "CancellationToken"
-Cohesion: 0.23
-Nodes (9): ICountryPackRepository, ICurrencyRepository, ITaxSlabRepository, ITranslationKeyRepository, ITranslationValueRepository, CancellationToken, Guid, IReadOnlyList (+1 more)
+### Community 381 - "Currency"
+Cohesion: 0.10
+Nodes (25): ICountryPackRepository, ICurrencyRepository, ITaxSlabRepository, ITranslationKeyRepository, ITranslationValueRepository, CancellationToken, Guid, IReadOnlyList (+17 more)
 
-### Community 382 - ".AddAiPlatform"
-Cohesion: 0.11
-Nodes (16): IAiAgent, AgentName, Domain, CancellationToken, Task, AiPlatformServiceExtensions, IConfiguration, IServiceCollection (+8 more)
+### Community 382 - "SamlConfiguration"
+Cohesion: 0.12
+Nodes (15): SamlConfiguration, AttributeMappingJson, CreatedAt, EntityId, Id, IdpCertificate, IdpSloUrl, IdpSsoUrl (+7 more)
 
 ### Community 383 - "AssetInventoryService"
 Cohesion: 0.21
 Nodes (10): AssetInventoryService, AegisDbContext, CancellationToken, DateTime, Guid, IReadOnlyList, Task, AssetInventoryTests (+2 more)
 
-### Community 384 - "SearchableStudent"
-Cohesion: 0.10
-Nodes (21): SearchableCourse, Code, CreatedAt, CreditHours, Department, Description, Id, TenantId (+13 more)
+### Community 384 - "CampusConfiguration"
+Cohesion: 0.13
+Nodes (14): CampusConfiguration, AcademicCalendarJson, AdmissionRulesJson, Campus, CampusId, CreatedAt, FeeStructureJson, GradingPolicyJson (+6 more)
 
 ### Community 385 - ".Create"
-Cohesion: 0.22
+Cohesion: 0.21
 Nodes (12): CampusPolygonController, CampusPolygonRequest, CampusPolygon, CancellationToken, Guid, HttpGet, HttpPost, HttpPut (+4 more)
 
-### Community 386 - "AdmissionLead"
-Cohesion: 0.10
-Nodes (21): AdmissionLead, Activities, CreatedAt, Email, Id, Name, Phone, ProgramInterest (+13 more)
+### Community 386 - "MeritList"
+Cohesion: 0.14
+Nodes (14): MeritList, Entries, GeneratedAt, GeneratedBy, Id, ProgramId, PublishedAt, QuotaType (+6 more)
 
-### Community 387 - "PlagiarismApiSubmission"
-Cohesion: 0.10
-Nodes (21): PlagiarismApiSubmission, AdjustedSimilarity, Classification, CompletedAt, ErrorLogJson, ExcludedSourcesJson, ExternalSubmissionId, FacultySummary (+13 more)
+### Community 387 - "MeritListEntry"
+Cohesion: 0.14
+Nodes (14): MeritListEntry, Application, ApplicationId, CreatedAt, EntryTestContribution, FscContribution, Id, MatricContribution (+6 more)
 
 ### Community 388 - "GradeAppealsControllerTests"
 Cohesion: 0.41
@@ -2894,7 +2873,7 @@ Cohesion: 0.19
 Nodes (12): FinanceWebhookController, GatewayEnvelope, CancellationToken, Guid, HttpPost, IActionResult, IConfiguration, IConnectionMultiplexer (+4 more)
 
 ### Community 398 - "FinanceController"
-Cohesion: 0.30
+Cohesion: 0.29
 Nodes (11): FeeDueRequest, FinanceController, ScholarshipRequest, CancellationToken, DateOnly, Guid, HttpGet, HttpPost (+3 more)
 
 ### Community 399 - "ScimController"
@@ -2909,9 +2888,9 @@ Nodes (19): CreateTimetableEntryRequest, TimetableController, CancellationToken,
 Cohesion: 0.06
 Nodes (32): ErrorPage(), fields, Gateway, GatewayManagementPage(), GlobalError(), actionBtnS, Appeal, AppealStatus (+24 more)
 
-### Community 402 - "DecisionTable"
-Cohesion: 0.06
-Nodes (40): IDecisionTableRepository, IRuleDefinitionRepository, IRuleVersionRepository, CancellationToken, Guid, IReadOnlyList, Task, DecisionTable (+32 more)
+### Community 402 - "RuleVersion"
+Cohesion: 0.11
+Nodes (21): IDecisionTableRepository, IRuleDefinitionRepository, IRuleVersionRepository, CancellationToken, Guid, IReadOnlyList, Task, RuleVersion (+13 more)
 
 ### Community 403 - "DegreeAudit"
 Cohesion: 0.10
@@ -2922,8 +2901,8 @@ Cohesion: 0.10
 Nodes (19): DegreeRequirement, AllowedCourseIdsJson, Category, CourseCount, CourseId, CreatedAt, Id, IsRequired (+11 more)
 
 ### Community 405 - "FinanceRestatementRun"
-Cohesion: 0.11
-Nodes (19): FinanceConsolidationGroup, Id, IsActive, Members, Name, PresentationCurrency, TenantId, FinanceRestatementRun (+11 more)
+Cohesion: 0.10
+Nodes (21): FinanceRestatementMemoLine, ChartOfAccountId, Credit, Debit, Description, Id, RestatementRuleId, RestatementRunId (+13 more)
 
 ### Community 406 - ".BuildTargetModel"
 Cohesion: 0.13
@@ -2945,29 +2924,29 @@ Nodes (19): AegisCore — Course Trees, Curriculum Management, Teacher Workload 
 Cohesion: 0.10
 Nodes (19): AegisCore — Onboarding Wizard Prompt, Completion Screen, Configuration Storage, Context, Do NOT, Error Handling, Role, Security (+11 more)
 
-### Community 411 - "ILicenseService"
-Cohesion: 0.18
-Nodes (12): LicenseLockoutMiddleware, HttpContext, IConfiguration, IHostEnvironment, RequestDelegate, Task, ILicenseService, LicenseRuntimeStatus (+4 more)
+### Community 411 - "ProctoringSession"
+Cohesion: 0.14
+Nodes (14): ProctoringSession, ActualEnd, ActualStart, CameraRequired, DurationMinutes, ExamId, Id, LockdownEnabled (+6 more)
 
-### Community 412 - "ExtensionManifest"
-Cohesion: 0.11
-Nodes (18): ExtensionManifest, Category, Dependencies, Description, DeveloperEmail, DeveloperName, DeveloperWebsite, IconUrl (+10 more)
+### Community 412 - "MenuItem"
+Cohesion: 0.15
+Nodes (13): MenuItem, AllergensCsv, CafeteriaUnitId, Calories, Category, CreatedAt, Id, IngredientsCsv (+5 more)
 
 ### Community 413 - "SyncLagController"
 Cohesion: 0.37
 Nodes (8): SyncLagController, CancellationToken, Guid, HttpGet, HttpPost, HttpPut, IActionResult, Task
 
-### Community 414 - ".InvokeAsync"
-Cohesion: 0.20
-Nodes (11): DemoIdentityMiddleware, HttpContext, IConfiguration, IHostEnvironment, ILogger, RequestDelegate, Task, OperationalRuntimeTests (+3 more)
+### Community 414 - "FleetVehicle"
+Cohesion: 0.15
+Nodes (13): FleetVehicle, ConditionStatus, CreatedAt, FitnessCertificateExpiry, GpsDeviceId, Id, InsuranceExpiry, IsGrounded (+5 more)
 
 ### Community 415 - "LoginAuditService"
 Cohesion: 0.18
 Nodes (15): ILoginAuditRecordRepository, Channel, LoginAuditRecordRepository, GeoIpApiResponse, GeoIpService, IGeoIpService, ILoginAuditService, LoginAuditArchiveWorker (+7 more)
 
 ### Community 416 - "WizardRolePermissionService"
-Cohesion: 0.23
-Nodes (11): SaveWizardPermissionDefinitionsRequest, WizardPermissionDefinition, WizardRolePermissionService, AegisDbContext, CancellationToken, Guid, HashSet, IReadOnlyList (+3 more)
+Cohesion: 0.21
+Nodes (13): SaveWizardPermissionDefinitionsRequest, SaveWizardPermissionMatrixRequest, WizardPermissionDefinition, WizardRolePermissionSelection, WizardRolePermissionService, AegisDbContext, CancellationToken, Guid (+5 more)
 
 ### Community 417 - "UniversityReportDto"
 Cohesion: 0.07
@@ -3017,9 +2996,9 @@ Nodes (6): AccountingStandardsEngine, AegisDbContext, CancellationToken, Guid, I
 Cohesion: 0.25
 Nodes (11): FormService, CancellationToken, Dictionary, FormSubmission, Guid, ILogger, IReadOnlyList, JsonElement (+3 more)
 
-### Community 429 - "PqcKeyCeremonyService"
-Cohesion: 0.18
-Nodes (12): CreatePqcKeyCeremonyCommand, PqcKeyCeremonyService, PqcKeyRotationWorker, AegisDbContext, CancellationToken, DateTime, Guid, IConfiguration (+4 more)
+### Community 429 - "FinancePqcKeyCeremony"
+Cohesion: 0.07
+Nodes (34): FinancePqcKeyCeremony, ActivatedKeyId, Algorithm, Approvals, CompletedAt, CreatedAt, ExpiresAt, Id (+26 more)
 
 ### Community 430 - "convocations/page.tsx"
 Cohesion: 0.13
@@ -3041,21 +3020,21 @@ Nodes (20): AegisCore — Sprint 9: Communications Hub (WhatsApp + Email + SMS +
 Cohesion: 0.16
 Nodes (17): AttendanceController, AttendanceEntry, MarkAttendanceRequest, CancellationToken, DateTime, Guid, HttpGet, HttpPost (+9 more)
 
-### Community 435 - "NotificationRecord"
-Cohesion: 0.10
-Nodes (21): INotificationRecordRepository, Guid, NotificationRecord, Body, Channel, CreatedAt, ErrorMessage, Id (+13 more)
+### Community 435 - ".AddAuthenticationServices"
+Cohesion: 0.17
+Nodes (10): PermissionPolicyProvider, AuthorizationPolicy, Task, AuthenticationServicesExtensions, IAuthorizationMiddlewareResultHandler, AuthorizationOptions, DefaultAuthorizationPolicyProvider, IAuthorizationHandler (+2 more)
 
 ### Community 436 - "DefaultPredictionService"
 Cohesion: 0.29
 Nodes (8): DefaultRiskAssessmentDto, DefaultPredictionService, AegisDbContext, CancellationToken, Guid, ILogger, IReadOnlyList, Task
 
-### Community 437 - "DocumentVaultService"
-Cohesion: 0.24
-Nodes (9): DocumentVaultService, CancellationToken, Guid, ILogger, List, Stream, Task, publicKey (+1 more)
+### Community 437 - "CheckpointScan"
+Cohesion: 0.17
+Nodes (11): CheckpointScan, CheckpointName, CreatedAt, GuardRoundId, Id, Latitude, Longitude, ScanTime (+3 more)
 
 ### Community 438 - "AegisCore.Application.Foundation"
-Cohesion: 0.08
-Nodes (11): VisitingFacultyEndpoints, CompleteSuiteArchitectureTests, Fact, AegisCore.Application.Licensing, AegisCore.Application.Hr, AegisCore.Infrastructure.Hr, AegisCore.Infrastructure.Examination, AegisCore.Application.Admissions (+3 more)
+Cohesion: 0.10
+Nodes (13): LicenseHeartbeatHostedService, ILogger, IServiceScopeFactory, TimeSpan, LicenseLockoutMiddleware, RequestDelegate, CompleteSuiteArchitectureTests, Fact (+5 more)
 
 ### Community 439 - "CreditTransfer"
 Cohesion: 0.11
@@ -3073,9 +3052,9 @@ Nodes (18): FinanceConsolidationMemoLine, ChartOfAccountId, ConsolidatedBalance,
 Cohesion: 0.10
 Nodes (24): IFormService, CancellationToken, Dictionary, Guid, List, SubmissionStatus, Task, FormSubmission (+16 more)
 
-### Community 443 - "SsoSession"
-Cohesion: 0.13
-Nodes (15): SsoSession, AccessTokenEncrypted, CreatedAt, DeviceId, DeviceName, ExpiresAt, Id, IpAddress (+7 more)
+### Community 443 - "MarkModeration"
+Cohesion: 0.17
+Nodes (12): MarkModeration, CourseId, CreatedAt, Id, ReviewComments, ReviewedAt, ReviewedBy, SemesterId (+4 more)
 
 ### Community 444 - "dependencies"
 Cohesion: 0.11
@@ -3161,13 +3140,9 @@ Nodes (18): 4.1 FILE (local `.env` file — default for Docker Compose), 4.2 AZU
 Cohesion: 0.44
 Nodes (7): SupportController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, Task
 
-### Community 465 - "OfflineAttendanceEvent"
-Cohesion: 0.15
-Nodes (13): OfflineAttendanceEvent, ClientEventId, CourseId, Id, MarkedBy, ReceivedAt, Status, StudentId (+5 more)
-
-### Community 466 - "SecurityIncident"
-Cohesion: 0.44
-Nodes (7): ISecurityIncidentRepository, CancellationToken, Guid, IncidentStatus, IReadOnlyList, Task, SecurityIncident
+### Community 466 - "Vendor"
+Cohesion: 0.17
+Nodes (12): Vendor, Address, BankAccount, ContactPerson, CreatedAt, Email, Id, Phone (+4 more)
 
 ### Community 467 - "ResearchLab"
 Cohesion: 0.19
@@ -3178,24 +3153,24 @@ Cohesion: 0.17
 Nodes (16): ISecurityGuardRepository, CancellationToken, Guid, IReadOnlyList, Task, ISecurityGuardRepository, CancellationToken, Guid (+8 more)
 
 ### Community 469 - "ConsumableRequisition"
-Cohesion: 0.12
-Nodes (16): ConsumableRequisition, ApprovedAt, ApprovedByUserId, Id, IssuedAt, IssuedByUserId, LabConsumableId, Notes (+8 more)
+Cohesion: 0.07
+Nodes (32): ConsumableAlertDto, Id, ItemName, LabName, MinimumStockLevel, QuantityInStock, ConsumableManagementService, LowStockAlertDto (+24 more)
 
 ### Community 470 - "IncidentWitness"
-Cohesion: 0.05
-Nodes (32): IncidentWitness, CreatedAt, Id, Phone, SecurityIncident, SecurityIncidentId, Statement, TenantId (+24 more)
+Cohesion: 0.17
+Nodes (11): IncidentWitness, CreatedAt, Id, Phone, SecurityIncident, SecurityIncidentId, Statement, TenantId (+3 more)
 
 ### Community 471 - "CorrectiveActionPlan"
 Cohesion: 0.12
 Nodes (16): CorrectiveActionPlan, AssignedToName, AssignedToUserId, CompletedAt, CompletionNotes, CreatedAt, Description, DueDate (+8 more)
 
-### Community 472 - "Currency"
-Cohesion: 0.12
-Nodes (16): Currency, Code, CreatedAt, DecimalPlaces, DecimalSeparator, ExchangeRateToBase, ExchangeRateUpdatedAt, Id (+8 more)
+### Community 472 - "SafetyChecklistItem"
+Cohesion: 0.17
+Nodes (11): SafetyChecklistItem, CreatedAt, Id, IsCompliant, ItemDescription, LabSafetyInspection, LabSafetyInspectionId, Remarks (+3 more)
 
-### Community 473 - "ILabBookingRepository"
-Cohesion: 0.45
-Nodes (6): ILabBookingRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task
+### Community 473 - ".AddCloudProvider"
+Cohesion: 0.17
+Nodes (10): CloudProviderExtensions, IConfiguration, IConnectionMultiplexer, IHttpClientFactory, ILogger, IServiceCollection, AegisCore.Infrastructure.Cloud.Azure, AegisCore.Infrastructure.Cloud.Gcp (+2 more)
 
 ### Community 474 - "DegreeAuditService"
 Cohesion: 0.17
@@ -3257,24 +3232,24 @@ Nodes (18): AegisCore — Sprint 7: Finance (Fee Management → Accounting → P
 Cohesion: 0.11
 Nodes (17): 2FA Verification Middleware (per request), AegisCore — Multi-Tenant SSO, 2FA Enforcement & Agentic HITL Exam Pipeline (U14), Agentic Grading Implementation, Complete Checklist, Complete Paper Digitization Flow, Database Schema, Database Schema, Flow Diagram (+9 more)
 
-### Community 489 - ".RequestGradeOverride"
-Cohesion: 0.32
-Nodes (7): GovernanceController, CancellationToken, HttpGet, HttpPost, IActionResult, RequirePermission, Task
+### Community 489 - "StrategicGoal"
+Cohesion: 0.18
+Nodes (11): StrategicGoal, CreatedAt, CurrentValue, Description, GoalTitle, Id, LastUpdatedAt, Status (+3 more)
 
-### Community 490 - "BackupConfiguration"
-Cohesion: 0.11
-Nodes (18): BackupConfiguration, BackupType, CreatedAt, CronExpression, DatabaseName, EncryptBackup, Id, IsEnabled (+10 more)
+### Community 490 - "CallLog"
+Cohesion: 0.18
+Nodes (11): CallLog, AdmissionLeadId, CallDate, Direction, Disposition, DurationSeconds, Id, Notes (+3 more)
 
 ### Community 491 - "GradePredictionResult"
 Cohesion: 0.13
 Nodes (15): FactorContribution, FactorName, Impact, Weight, GradePredictionResult, Confidence, ContributingFactors, CourseCode (+7 more)
 
-### Community 492 - "SystemConfiguration"
-Cohesion: 0.11
-Nodes (19): SystemConfiguration, CreatedAt, CustomDnsEnabled, DnsNameserver1, DnsNameserver2, ExamClassCapacity, Id, PrimaryDbConnectionString (+11 more)
+### Community 492 - "StudentFeePayment"
+Cohesion: 0.18
+Nodes (11): StudentFeePayment, Amount, CreatedAt, FeeDueId, Id, PaymentDate, PaymentMethod, ReferenceNumber (+3 more)
 
 ### Community 493 - "CountryPackController"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (18): CountryPackController, I18nController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, ILogger (+10 more)
 
 ### Community 494 - "MicrosoftEcosystemContracts.cs"
@@ -3282,16 +3257,16 @@ Cohesion: 0.24
 Nodes (11): IMoodleLmsService, ITeamsProvisioningService, LmsSyncResult, PowerBiEmbedConfig, PowerBiRoles, TeamsSyncResult, CancellationToken, DateTimeOffset (+3 more)
 
 ### Community 495 - "SyncLagDashboardDto"
-Cohesion: 0.25
-Nodes (8): SyncLagDashboardDto, AutoCommitEnabled, CommittedToday, CorrectedToday, DefaultGraceSeconds, ExpiringWithin5Min, RecentEntries, TotalPending
+Cohesion: 0.13
+Nodes (12): SyncLagDashboardDto, AutoCommitEnabled, CommittedToday, CorrectedToday, DefaultGraceSeconds, ExpiringWithin5Min, RecentEntries, TotalPending (+4 more)
 
-### Community 496 - ".FindAsync"
-Cohesion: 0.20
-Nodes (8): Expression, Func, CancellationToken, Expression, Func, Guid, IReadOnlyList, Task
+### Community 496 - "AlumniDonation"
+Cohesion: 0.18
+Nodes (11): AlumniDonation, AlumniProfileId, CreatedAt, DonationAmount, DonationDate, DonationType, Id, PaymentMethod (+3 more)
 
-### Community 497 - "Employee"
-Cohesion: 0.07
-Nodes (29): Description, Employee, Contracts, CreatedAt, DateOfJoining, DateOfLeaving, DepartmentId, Documents (+21 more)
+### Community 497 - "DemoSeeder"
+Cohesion: 0.13
+Nodes (14): Description, FirstName, LastName, DemoSeeder, CancellationToken, Guid, ILogger, Role (+6 more)
 
 ### Community 498 - "CisUpload"
 Cohesion: 0.12
@@ -3303,11 +3278,11 @@ Nodes (15): ComplianceFramework, Code, Controls, CreatedAt, Description, Id, Las
 
 ### Community 500 - "LabBooking"
 Cohesion: 0.11
-Nodes (18): LabBooking, ApprovedAt, ApprovedByUserId, BookedByUserId, CreatedAt, EndTime, ExpectedAttendees, Id (+10 more)
+Nodes (24): ILabBookingRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task, LabBooking, ApprovedAt (+16 more)
 
-### Community 501 - "IAttendanceRepository"
-Cohesion: 0.17
-Nodes (13): IAttendanceRepository, Attendance, CancellationToken, DateTime, Guid, IReadOnlyList, Task, AttendanceRepository (+5 more)
+### Community 501 - "AlumniProfile"
+Cohesion: 0.18
+Nodes (11): AlumniProfile, AlumniId, Bio, CreatedAt, CurrentCompany, CurrentDesignation, CurrentLocation, GraduationYear (+3 more)
 
 ### Community 502 - "PaymentPlanArrangement"
 Cohesion: 0.12
@@ -3321,21 +3296,21 @@ Nodes (15): EmergencyAlert, AlertMessage, CreatedAt, Id, IsActive, RecipientCoun
 Cohesion: 0.12
 Nodes (15): EmergencyContact, AlternatePhone, ContactName, CreatedAt, Department, Email, Id, IsActive (+7 more)
 
-### Community 505 - "DocumentVaultController"
-Cohesion: 0.29
-Nodes (10): DocumentVaultController, CancellationToken, DocumentTier, Guid, HttpGet, HttpPost, HttpPut, IActionResult (+2 more)
+### Community 505 - "DocumentVaultEntryDto"
+Cohesion: 0.06
+Nodes (47): DocumentVaultController, CancellationToken, DocumentTier, Guid, HttpGet, HttpPost, HttpPut, IActionResult (+39 more)
 
-### Community 506 - "IReplicaManagerService"
-Cohesion: 0.30
-Nodes (5): IReplicaManagerService, CancellationToken, Guid, List, Task
+### Community 506 - "MedicalVisit"
+Cohesion: 0.18
+Nodes (11): MedicalVisit, CreatedAt, DiagnosisEncrypted, Id, MedicalOfficerId, RestDays, StudentId, TenantId (+3 more)
 
 ### Community 507 - "FacultyEngagement"
 Cohesion: 0.12
 Nodes (16): FacultyEngagement, AttendanceCompliant, ContractNumber, ContractStatus, CreatedAt, EndDate, FacultyProfile, FacultyProfileId (+8 more)
 
-### Community 508 - "CampusService"
-Cohesion: 0.22
-Nodes (11): ICampusConfigurationRepository, CampusService, CalendarType, Campus, CancellationToken, GradingScheme, Guid, ILogger (+3 more)
+### Community 508 - "CampusDto"
+Cohesion: 0.11
+Nodes (24): CampusDto, Address, BuildingCount, CalendarType, CampusCode, City, Country, CreatedAt (+16 more)
 
 ### Community 509 - ".BuildTargetModel"
 Cohesion: 0.13
@@ -3417,13 +3392,13 @@ Nodes (11): DateTime, Guid, MigrationBuilder, AddDocumentTemplate, DateOnly, Dat
 Cohesion: 0.24
 Nodes (10): AbacMiddleware, AbacPolicyService, AbacServiceExtensions, IAbacPolicyService, CancellationToken, HttpContext, ILogger, IServiceCollection (+2 more)
 
-### Community 529 - "ReplicationScalingConfig"
-Cohesion: 0.11
-Nodes (18): ReplicationScalingConfig, AutoFailoverEnabled, AutoScalingEnabled, CriticalLagSeconds, DefaultMaxLagSeconds, Id, MaxReplicas, MinReplicas (+10 more)
+### Community 529 - "SickLeaveApplication"
+Cohesion: 0.18
+Nodes (11): SickLeaveApplication, ApprovedBy, CreatedAt, FromDate, Id, MedicalVisitId, Status, StudentId (+3 more)
 
 ### Community 530 - "RedisStateMachineService"
-Cohesion: 0.26
-Nodes (8): IStateMachineService, RedisStateMachineService, StateMachineServiceExtensions, CancellationToken, IConnectionMultiplexer, ILogger, IServiceCollection, Task
+Cohesion: 0.14
+Nodes (15): AutoLockBackgroundService, CancellationToken, IHubContext, ILogger, IServiceProvider, Task, TimeSpan, IStateMachineService (+7 more)
 
 ### Community 531 - "MentalHealthControllerTests"
 Cohesion: 0.37
@@ -3433,20 +3408,20 @@ Nodes (7): MentalHealthControllerTests, BadRequestResult, CancellationToken, Fac
 Cohesion: 0.12
 Nodes (15): 10. Onboarding Summary, 1. Solution Structure, 2. Domain Model, 3. Database Layer, 4. API Layer, 5. Configuration & Secrets, 6. Module Completeness Matrix, 7. Infrastructure & Deployment (+7 more)
 
-### Community 533 - "UnifiedSearchRequest"
-Cohesion: 0.09
-Nodes (27): SearchController, CancellationToken, HttpDelete, HttpGet, HttpPost, IActionResult, ILogger, RequirePermission (+19 more)
+### Community 533 - "SearchController"
+Cohesion: 0.15
+Nodes (16): SearchController, CancellationToken, HttpDelete, HttpGet, HttpPost, IActionResult, ILogger, RequirePermission (+8 more)
 
-### Community 534 - "CampusDto"
-Cohesion: 0.11
-Nodes (21): CampusDto, Address, BuildingCount, CalendarType, CampusCode, City, Country, CreatedAt (+13 more)
+### Community 534 - "ICampusService"
+Cohesion: 0.30
+Nodes (6): ICampusService, IConsolidatedReportingService, CancellationToken, Guid, IReadOnlyList, Task
 
 ### Community 535 - "Timetable"
 Cohesion: 0.11
 Nodes (17): Timetable, Batch, BatchId, Course, CourseId, CreatedAt, DayOfWeek, EndTime (+9 more)
 
 ### Community 536 - "IFormSubmissionRepository"
-Cohesion: 0.40
+Cohesion: 0.36
 Nodes (7): IFormDefinitionRepository, IFormSubmissionRepository, CancellationToken, FormSubmission, Guid, IReadOnlyList, Task
 
 ### Community 537 - "VisitingFacultyService"
@@ -3469,21 +3444,21 @@ Nodes (11): PrivacyComplianceController, RecordConsentRequest, CancellationToken
 Cohesion: 0.15
 Nodes (21): ICreditTransferRepository, IDegreeAuditRepository, IDegreeProgramRepository, IDegreeRequirementRepository, CancellationToken, Guid, IReadOnlyList, Task (+13 more)
 
-### Community 542 - "VisitingFacultyContract"
-Cohesion: 0.12
-Nodes (17): VisitingFacultyContract, CompensationAmount, ContractUrl, CourseId, CreditHours, EndDate, FacultyProfileId, Id (+9 more)
+### Community 542 - "StudentHealthRecord"
+Cohesion: 0.18
+Nodes (11): StudentHealthRecord, AllergiesEncrypted, BloodType, ChronicConditionsEncrypted, CreatedAt, EmergencyContactName, EmergencyContactPhone, Id (+3 more)
 
-### Community 543 - "ReadReplicaConfig"
-Cohesion: 0.12
-Nodes (16): ReadReplicaConfig, ConnectionString, CreatedAt, CurrentLagSeconds, Id, IsEnabled, LastHealthCheckAt, MaxLagSeconds (+8 more)
+### Community 543 - "TicketComment"
+Cohesion: 0.18
+Nodes (10): TicketComment, Comment, CommentedAt, CommentedByUserId, Id, MaintenanceTicket, MaintenanceTicketId, TenantId (+2 more)
 
 ### Community 544 - "Claim"
 Cohesion: 0.19
 Nodes (11): TenantContextMiddleware, HttpContext, RequestDelegate, Task, TenantContextMiddlewareTests, DefaultHttpContext, Fact, InlineData (+3 more)
 
-### Community 545 - "IDocumentVaultService"
-Cohesion: 0.33
-Nodes (6): IDocumentVaultService, CancellationToken, Guid, List, Stream, Task
+### Community 545 - "WorkOrderRepository"
+Cohesion: 0.42
+Nodes (6): WorkOrderRepository, CancellationToken, Guid, IReadOnlyList, Task, WorkOrderStatus
 
 ### Community 546 - "SlotCandidateMatch"
 Cohesion: 0.13
@@ -3534,12 +3509,12 @@ Cohesion: 0.12
 Nodes (15): ExtensionInstallation, ConfigJson, Extension, ExtensionId, Id, InstalledAt, InstalledByUserId, InstalledVersion (+7 more)
 
 ### Community 559 - "IApiKeyService"
-Cohesion: 0.20
-Nodes (12): RateLimitingMiddleware, HttpContext, ILogger, IMemoryCache, RequestDelegate, Task, IApiKeyService, ApiKey (+4 more)
+Cohesion: 0.27
+Nodes (8): HttpContext, Task, IApiKeyService, ApiKey, ApiKeyTier, CancellationToken, Guid, Task
 
-### Community 560 - "UniversitySsoProfile"
-Cohesion: 0.12
-Nodes (16): UniversitySsoProfile, Code, CreatedAt, Domain, Id, LogoUrl, Name, PrimaryColor (+8 more)
+### Community 560 - ".HandleAsync"
+Cohesion: 0.20
+Nodes (8): PermissionAuthorizationResultHandler, AuthorizationPolicy, HttpContext, RequestDelegate, Task, AuthorizationMiddlewareResultHandler, IAuthorizationMiddlewareResultHandler, PolicyAuthorizationResult
 
 ### Community 561 - "IdentityService"
 Cohesion: 0.31
@@ -3553,9 +3528,9 @@ Nodes (6): IIdentityService, CancellationToken, Dictionary, Guid, IReadOnlyList,
 Cohesion: 0.13
 Nodes (11): DateTime, Guid, MigrationBuilder, AddFerpaGdprCompliance, DateOnly, DateTime, DateTimeOffset, Guid (+3 more)
 
-### Community 564 - "DegreeVerification"
-Cohesion: 0.17
-Nodes (13): IDegreeVerificationRepository, DegreeVerification, EmployerName, ExpiresAt, Id, RequestedAt, RequestedBy, Status (+5 more)
+### Community 564 - "IWorkOrderRepository"
+Cohesion: 0.49
+Nodes (5): IWorkOrderRepository, CancellationToken, Guid, IReadOnlyList, Task
 
 ### Community 565 - "cafeteria/page.tsx"
 Cohesion: 0.18
@@ -3581,9 +3556,9 @@ Nodes (13): Room, Capacity, CreatedAt, Floor, FloorId, Id, IsActive, Name (+5 mo
 Cohesion: 0.14
 Nodes (13): SyncLagConfig, AutoCommitOnGraceExpiry, CorrectionPermission, DefaultGracePeriodSeconds, Id, MaxGracePeriodSeconds, NotifyOwnerOnCorrection, RequireAdminApprovalForCorrections (+5 more)
 
-### Community 571 - "TranslationValue"
-Cohesion: 0.10
-Nodes (17): TranslationValue, CreatedAt, Id, IsMachineTranslated, LanguageCode, LastReviewedAt, TenantId, TranslationKey (+9 more)
+### Community 571 - "TranslationKey"
+Cohesion: 0.06
+Nodes (32): TranslationKey, Context, CreatedAt, Description, Id, Key, Module, TenantId (+24 more)
 
 ### Community 572 - "FinanceStandingPurchaseOrder"
 Cohesion: 0.13
@@ -3665,13 +3640,13 @@ Nodes (13): btn(), cardS, Dashboard, DocumentVaultPage(), handleUpload(), refres
 Cohesion: 0.38
 Nodes (7): AchievementControllerTests, BadRequestResult, CancellationToken, Fact, Mock, OkObjectResult, Task
 
-### Community 592 - "ExecutiveDashboard"
-Cohesion: 0.15
-Nodes (20): ExecutiveDashboard, AcademicExcellenceScore, AccreditationScore, CompositeRankingScore, FacultyQualityScore, FinancialStabilityScore, FiscalYear, GeneratedAt (+12 more)
+### Community 592 - "BoardControllerTests"
+Cohesion: 0.45
+Nodes (6): BoardControllerTests, CancellationToken, Fact, Mock, OkObjectResult, Task
 
-### Community 593 - "PolicyConfig"
-Cohesion: 0.13
-Nodes (14): PolicyConfig, CreatedAt, CreatedBy, Description, EffectiveFrom, EffectiveTo, Id, Key (+6 more)
+### Community 593 - "Convocation"
+Cohesion: 0.20
+Nodes (10): Convocation, AcademicYear, CeremonyDate, GuestTicketsPerStudent, Id, Status, TenantId, Title (+2 more)
 
 ### Community 594 - "AegisCore on a Bare Linux VPS"
 Cohesion: 0.14
@@ -3686,16 +3661,16 @@ Cohesion: 0.38
 Nodes (7): DefaulterPredictionControllerTests, BadRequestResult, CancellationToken, Fact, Mock, OkObjectResult, Task
 
 ### Community 597 - ".GetClientLogo"
-Cohesion: 0.24
+Cohesion: 0.22
 Nodes (9): BrandingController, AllowAnonymous, CancellationToken, HttpGet, HttpPost, IActionResult, IConfiguration, RequestSizeLimit (+1 more)
 
 ### Community 598 - "IBCCEquivalenceService"
-Cohesion: 0.27
-Nodes (4): IIBCCEquivalenceService, IBCCEquivalenceService, AdmissionsTests, Fact
+Cohesion: 0.29
+Nodes (3): IIBCCEquivalenceService, IBCCEquivalenceService, Fact
 
-### Community 599 - ".AddCoreServices"
-Cohesion: 0.11
-Nodes (15): BackgroundWorkersExtensions, CoreServicesExtensions, ProductionServicesExtensions, IConfiguration, IServiceCollection, AsyncFluentValidationFilter, ActionExecutingContext, ActionExecutionDelegate (+7 more)
+### Community 599 - "AegisCore.API/Program.cs"
+Cohesion: 0.05
+Nodes (33): RequireFerpaAuditAttribute, ResourceType, StudentIdParam, ApiServicesExtensions, IApplicationBuilder, IConfiguration, IServiceCollection, BackgroundWorkersExtensions (+25 more)
 
 ### Community 600 - "RateLimitAuthMiddleware"
 Cohesion: 0.17
@@ -3714,12 +3689,12 @@ Cohesion: 0.13
 Nodes (14): RoomOccupancy, BookingUntil, CurrentEvent, CurrentOccupants, Id, MaxCapacity, RecordedAt, Room (+6 more)
 
 ### Community 604 - ".Split"
-Cohesion: 0.22
-Nodes (7): MarketplaceRevenueCalculator, RecordPluginRevenueRequest, RevenueSplit, Guid, MarketplaceRevenueTests, InlineData, Theory
+Cohesion: 0.25
+Nodes (6): MarketplaceRevenueCalculator, RecordPluginRevenueRequest, RevenueSplit, Guid, InlineData, Theory
 
-### Community 605 - "DocumentVaultDashboardDto"
-Cohesion: 0.14
-Nodes (14): DocumentVaultDashboardDto, LockedCount, PqcVerifiedCount, RecentUploads, Tiers, TotalDocuments, TotalSizeBytes, TierSummaryDto (+6 more)
+### Community 605 - "ActivityParticipation"
+Cohesion: 0.20
+Nodes (10): ActivityParticipation, ActivityId, CreatedAt, Id, ParticipationRole, ParticipationStatus, PointsEarned, StudentId (+2 more)
 
 ### Community 606 - "ISyncLagService"
 Cohesion: 0.40
@@ -3729,9 +3704,9 @@ Nodes (5): ISyncLagService, CancellationToken, Guid, List, Task
 Cohesion: 0.15
 Nodes (13): SyncLagEntryDto, CanCorrect, EntityType, FieldName, GraceExpiresAt, Id, IsLocked, OriginalValue (+5 more)
 
-### Community 608 - "IDocumentOcrService"
-Cohesion: 0.39
-Nodes (5): IDocumentOcrService, CancellationToken, IReadOnlyList, Stream, Task
+### Community 608 - "StudentSociety"
+Cohesion: 0.20
+Nodes (10): StudentSociety, Active, CreatedAt, Description, FacultyAdvisorId, FoundedYear, Id, PresidentId (+2 more)
 
 ### Community 609 - "ControlEvidence"
 Cohesion: 0.17
@@ -3754,12 +3729,12 @@ Cohesion: 0.07
 Nodes (25): Building, Address, BuildingCode, CampusId, CreatedAt, FloorCount, Floors, Id (+17 more)
 
 ### Community 614 - "FloorPlan"
-Cohesion: 0.15
-Nodes (12): FloorPlan, CreatedAt, Floor, FloorId, Id, ImageHeight, ImageUrl, ImageWidth (+4 more)
+Cohesion: 0.14
+Nodes (13): IFloorPlanRepository, FloorPlan, CreatedAt, Floor, FloorId, Id, ImageHeight, ImageUrl (+5 more)
 
-### Community 615 - "CheckpointScan"
-Cohesion: 0.08
-Nodes (23): CheckpointScan, CheckpointName, CreatedAt, GuardRoundId, Id, Latitude, Longitude, ScanTime (+15 more)
+### Community 615 - "GuardRound"
+Cohesion: 0.15
+Nodes (12): GuardRound, CheckpointScans, CreatedAt, Id, Notes, RoundEndTime, RoundStartTime, SecurityGuardId (+4 more)
 
 ### Community 616 - "PluginRevenueShare"
 Cohesion: 0.15
@@ -3785,9 +3760,9 @@ Nodes (8): AlertingExtensions, SystemAlertService, CancellationToken, ILogger, I
 Cohesion: 0.15
 Nodes (7): BiometricGate, Bool, BiometricGate, Bool, BiometricGate, Bool, LocalAuthentication
 
-### Community 622 - "IGuardRoundRepository"
-Cohesion: 0.39
-Nodes (6): IGuardRoundRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task
+### Community 622 - ".ProvisionAsync"
+Cohesion: 0.40
+Nodes (6): WizardProvisioningService, AegisDbContext, CancellationToken, Guid, JsonObject, Task
 
 ### Community 623 - "CourseGrade"
 Cohesion: 0.14
@@ -3809,9 +3784,9 @@ Nodes (11): ask_deployment_mode(), ask_secrets_provider(), check_cmd(), err(), i
 Cohesion: 0.13
 Nodes (15): AegisCore.Application, net10.0, Microsoft.Extensions.Logging.Abstractions (10.0.0), Npgsql (10.0.0), Quartz (3.13.0), SixLabors.ImageSharp (3.1.12), StackExchange.Redis (2.8.16), Microsoft.NET.Sdk (+7 more)
 
-### Community 628 - "FinancePettyCashExpense"
-Cohesion: 0.14
-Nodes (14): FinancePettyCashExpense, Amount, Category, CreatedAt, CreatedByUserId, Description, FinancePettyCashFundId, Fund (+6 more)
+### Community 628 - "AegisCore.Application.ApiGateway"
+Cohesion: 0.25
+Nodes (6): RateLimitingMiddleware, ILogger, IMemoryCache, RequestDelegate, AegisCore.Application.ApiGateway, AegisCore.Infrastructure.ApiGateway
 
 ### Community 629 - "SensitiveDataDestructuringPolicy"
 Cohesion: 0.20
@@ -3821,17 +3796,17 @@ Nodes (8): SensitiveDataDestructuringPolicy, HashSet, Type, AegisCore.API.Loggin
 Cohesion: 0.21
 Nodes (7): DemoExpiryMiddleware, DateTime, HashSet, HttpContext, IConfiguration, RequestDelegate, Task
 
-### Community 631 - "GlobalRateLimitMiddleware"
-Cohesion: 0.20
-Nodes (10): GlobalRateLimitMiddleware, SlidingWindow, Timestamps, ConcurrentDictionary, DateTimeOffset, HttpContext, List, RequestDelegate (+2 more)
+### Community 631 - "SocietyMembership"
+Cohesion: 0.22
+Nodes (8): SocietyMembership, CreatedAt, Id, JoinedDate, Role, SocietyId, StudentId, TenantId
 
 ### Community 632 - "FinanceAuditSeal"
 Cohesion: 0.13
 Nodes (14): FinanceAuditSeal, Algorithm, EventCount, Id, KeyId, MerkleRoot, PeriodEnd, PeriodStart (+6 more)
 
-### Community 633 - "FinancePettyCashFund"
-Cohesion: 0.14
-Nodes (14): FinancePettyCashFund, Counts, CreatedAt, Currency, CurrentBalance, CustodianUserId, DepartmentId, Expenses (+6 more)
+### Community 633 - "NotificationTemplateChannel"
+Cohesion: 0.22
+Nodes (9): NotificationTemplateChannel, Email, InApp, Push, Slack, SMS, Teams, Webhook (+1 more)
 
 ### Community 634 - "Permission"
 Cohesion: 0.14
@@ -3846,12 +3821,12 @@ Cohesion: 0.36
 Nodes (7): IRuleEngineService, CancellationToken, Dictionary, Guid, List, RuleDomain, Task
 
 ### Community 637 - "ConvocationEligibility"
-Cohesion: 0.14
-Nodes (14): ConvocationEligibility, BlockingReason, CgpaMet, ConvocationId, CreditsCompleted, DisciplinaryCleared, DuesCleared, Id (+6 more)
+Cohesion: 0.08
+Nodes (25): ConvocationEligibility, BlockingReason, CgpaMet, ConvocationId, CreditsCompleted, DisciplinaryCleared, DuesCleared, Id (+17 more)
 
-### Community 638 - "TransportInspection"
-Cohesion: 0.14
-Nodes (14): TransportInspection, BrakesOk, CreatedAt, DriverId, EmergencyExitsOk, FirstAidKitOk, Id, InspectedAt (+6 more)
+### Community 638 - "ColumnInfo"
+Cohesion: 0.25
+Nodes (8): ColumnDiscoveryDto, Columns, TableName, ColumnInfo, DataType, IsNullable, MaxLength, Name
 
 ### Community 639 - "TransportService"
 Cohesion: 0.35
@@ -3865,9 +3840,9 @@ Nodes (6): UploadValidationResult, UploadValidationService, Extension, Stream, C
 Cohesion: 0.17
 Nodes (11): IncidentEvidence, Description, EvidenceType, FileUrl, Id, SecurityIncidentId, TenantId, UploadedAt (+3 more)
 
-### Community 642 - ".AcademicCalendarService_Counts_WorkingDays_And_Excludes_Holidays"
+### Community 642 - "ImportResultDto"
 Cohesion: 0.25
-Nodes (8): DbFixture, Db, S1FoundationTests, Fact, SqliteConnection, Task, ValueTask, DbFixture
+Nodes (8): ImportResultDto, ErrorRows, JobId, RecentErrors, SkippedRows, Status, SuccessRows, TotalRows
 
 ### Community 643 - "plagiarism/page.tsx"
 Cohesion: 0.22
@@ -3889,21 +3864,17 @@ Nodes (43): dependencies, lucide-react, @microsoft/signalr, react, react-dom, re
 Cohesion: 0.45
 Nodes (6): SemesterFreezeControllerTests, CancellationToken, Fact, Mock, OkObjectResult, Task
 
-### Community 648 - "IPrivacyComplianceService"
-Cohesion: 0.40
-Nodes (6): DsarArchive, IPrivacyComplianceService, CancellationToken, DateTime, Guid, Task
+### Community 648 - "LeadStatus"
+Cohesion: 0.29
+Nodes (7): LeadStatus, Applied, Contacted, Enrolled, Interested, Lost, New
 
 ### Community 649 - "What AegisCore Covers"
 Cohesion: 0.17
 Nodes (11): Academic Operations, Administration and Governance, AegisCore Capabilities, Core Design Principles, Finance and Fees, In Practice, Platform and Operations, Student Experience (+3 more)
 
-### Community 650 - "DocumentVaultEntryDto"
-Cohesion: 0.15
-Nodes (13): DocumentVaultEntryDto, Category, FileName, FileSizeBytes, Id, IsPqcVerified, IsRetentionLocked, RetentionExpiresAt (+5 more)
-
-### Community 651 - "ConsumableAlertDto"
-Cohesion: 0.15
-Nodes (13): ConsumableAlertDto, Id, ItemName, LabName, MinimumStockLevel, QuantityInStock, LowStockAlertDto, ExpiringCount (+5 more)
+### Community 650 - "TicketStatus"
+Cohesion: 0.29
+Nodes (7): TicketStatus, Assigned, Closed, InProgress, Open, Reopened, Resolved
 
 ### Community 652 - "LicenseServiceTests"
 Cohesion: 0.42
@@ -3949,13 +3920,13 @@ Nodes (6): ILoginAuditRecordRepository, CancellationToken, DateTime, Guid, IRead
 Cohesion: 0.29
 Nodes (6): FoundationStorageTests, Fact, InlineData, InvalidOperationException, Task, Theory
 
-### Community 664 - "DocumentTier"
-Cohesion: 0.15
-Nodes (13): DocumentTier, BucketName, Description, Id, IsActive, Name, ObjectLockMode, RequirePqcVerification (+5 more)
+### Community 664 - "IMaintenanceContractorRepository"
+Cohesion: 0.53
+Nodes (4): IMaintenanceContractorRepository, CancellationToken, IReadOnlyList, Task
 
 ### Community 665 - ".CheckHealthAsync"
-Cohesion: 0.32
-Nodes (9): LicenseHealthCheck, StorageHealthCheck, TunnelHealthCheck, CancellationToken, HealthCheckContext, HealthCheckResult, ILogger, Task (+1 more)
+Cohesion: 0.57
+Nodes (4): CancellationToken, HealthCheckContext, HealthCheckResult, Task
 
 ### Community 666 - "EquipmentUsageLog"
 Cohesion: 0.15
@@ -3965,29 +3936,29 @@ Nodes (12): EquipmentUsageLog, CreatedAt, EndTime, Id, LabEquipment, LabEquipmen
 Cohesion: 0.18
 Nodes (11): PowerBiReport, CreatedAt, DatasetId, Description, EmbedUrl, Id, PowerBiReportId, PowerBiWorkspaceId (+3 more)
 
-### Community 668 - "FinancePaymentPlanConfiguration"
-Cohesion: 0.15
-Nodes (13): FinancePaymentPlanConfiguration, Enabled, Id, LatePenaltyAmount, LatePenaltyPercent, MaximumDuration, MaximumMissedInstallments, MinimumDownPaymentPercent (+5 more)
+### Community 668 - "BookingStatus"
+Cohesion: 0.33
+Nodes (6): BookingStatus, Approved, Cancelled, Completed, Pending, Rejected
 
-### Community 669 - "DatabaseHealthService"
-Cohesion: 0.26
-Nodes (9): DatabaseHealthService, CancellationToken, Guid, IConfiguration, IConnectionMultiplexer, ILogger, IReadOnlyList, ReadReplicaConfig (+1 more)
+### Community 669 - "SSRStatus"
+Cohesion: 0.33
+Nodes (6): SSRStatus, Approved, Draft, InReview, Rejected, Submitted
 
 ### Community 670 - ".Upload"
-Cohesion: 0.36
-Nodes (8): ProfilePictureController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, RequestSizeLimit, Task
+Cohesion: 0.21
+Nodes (10): ProfilePictureController, CancellationToken, Guid, HttpGet, HttpPost, IActionResult, RequestSizeLimit, Task (+2 more)
 
 ### Community 671 - "FinanceAuditContracts.cs"
 Cohesion: 0.31
 Nodes (8): ConfigureSodRuleCommand, CreateAuditorEngagementCommand, CreateAuditSampleCommand, FinanceControlResult, GenerateSoc2EvidenceCommand, DateTime, Guid, IReadOnlyList
 
 ### Community 672 - "IAssetInventoryService"
-Cohesion: 0.24
-Nodes (7): IAssetInventoryService, CancellationToken, DateTime, Guid, IReadOnlyList, Task, IServiceCollection
-
-### Community 673 - "AutoLockBackgroundService"
 Cohesion: 0.16
-Nodes (9): AutoLockBackgroundService, CancellationToken, IHubContext, ILogger, IServiceProvider, Task, TimeSpan, StateMachineHub (+1 more)
+Nodes (9): IAssetInventoryService, CancellationToken, DateTime, Guid, IReadOnlyList, Task, AssetInventoryServiceExtensions, IServiceCollection (+1 more)
+
+### Community 673 - "UpdateStatus"
+Cohesion: 0.33
+Nodes (6): UpdateStatus, Available, Downloading, Failed, Installed, RolledBack
 
 ### Community 674 - "DataCategory"
 Cohesion: 0.18
@@ -4013,13 +3984,13 @@ Nodes (12): 1. Authentication, 2. Dashboard, 3. Attendance, 4. Grades & Results,
 Cohesion: 0.18
 Nodes (11): AegisCore Mobile Apps, Android Native, Apps Included, Build & Deploy, Connecting to Backend, Documentation, iOS Native, Key Features (+3 more)
 
-### Community 680 - "IDigitalTwinService"
-Cohesion: 0.41
-Nodes (5): IDigitalTwinService, CancellationToken, Guid, List, Task
+### Community 680 - "DigitalTwinService"
+Cohesion: 0.20
+Nodes (12): IDigitalTwinService, CancellationToken, Guid, List, Task, DigitalTwinService, CancellationToken, Guid (+4 more)
 
-### Community 681 - "StudentFeeDue"
-Cohesion: 0.14
-Nodes (14): StudentFeeDue, CreatedAt, FeeStructureId, Id, OutstandingAmount, PaidAmount, ScholarshipDeduction, SemesterId (+6 more)
+### Community 681 - "WorkOrderStatus"
+Cohesion: 0.33
+Nodes (6): WorkOrderStatus, Assigned, Cancelled, Completed, InProgress, SignedOff
 
 ### Community 682 - "Recovery"
 Cohesion: 0.18
@@ -4045,9 +4016,9 @@ Nodes (10): AegisCore — Docker Build Validator Prompt, Objectives, Role, Step 
 Cohesion: 0.42
 Nodes (6): IEquipmentBookingRepository, CancellationToken, DateTime, Guid, IReadOnlyList, Task
 
-### Community 688 - "BoardDecision"
-Cohesion: 0.17
-Nodes (12): BoardDecision, Background, CreatedAt, DecidedAt, Id, ImpactAssessment, MeetingId, OptionsCsv (+4 more)
+### Community 688 - "FERPA and GDPR compliance operations"
+Cohesion: 0.33
+Nodes (5): FERPA and GDPR compliance operations, FERPA-oriented controls, GDPR-oriented controls, Licence heartbeat disclosure and offline mode, Optional Cloudflare tunnel
 
 ### Community 689 - "GuardShift"
 Cohesion: 0.11
@@ -4078,8 +4049,8 @@ Cohesion: 0.20
 Nodes (10): FinanceRestatementRule, Factor, Id, IsActive, Rationale, SourceAccountId, SourceStandard, TargetAccountId (+2 more)
 
 ### Community 696 - "StudentActivity"
-Cohesion: 0.02
-Nodes (96): ActivityParticipation, ActivityId, CreatedAt, Id, ParticipationRole, ParticipationStatus, PointsEarned, StudentId (+88 more)
+Cohesion: 0.15
+Nodes (13): StudentActivity, ActivityName, ActivityType, ApprovalStatus, ApprovedBy, CreatedAt, Description, Id (+5 more)
 
 ### Community 697 - "ComplianceRetentionWorker"
 Cohesion: 0.23
@@ -4106,12 +4077,12 @@ Cohesion: 0.20
 Nodes (10): SensorType, AirQuality, EnergyMeter, FireSmoke, Humidity, Light, Noise, OccupancyPIR (+2 more)
 
 ### Community 703 - "ScalingEvent"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (9): ScalingEvent, EventType, Id, ReplicaName, TenantId, Timestamp, TotalReplicas, DateTime (+1 more)
 
 ### Community 704 - "VendorSanctionsService"
-Cohesion: 0.19
-Nodes (11): VendorSanctionsRescreenWorker, VendorSanctionsService, AegisDbContext, CancellationToken, Guid, IConfiguration, IHttpClientFactory, IHttpContextAccessor (+3 more)
+Cohesion: 0.27
+Nodes (8): VendorSanctionsService, AegisDbContext, CancellationToken, Guid, IConfiguration, IHttpClientFactory, IHttpContextAccessor, Task
 
 ### Community 705 - ".SyncMoodleAsync"
 Cohesion: 0.42
@@ -4133,16 +4104,16 @@ Nodes (7): apiClient, registerPushToken(), setupPushNotifications(), AttendanceD
 Cohesion: 0.31
 Nodes (7): apiClient, registerPushToken(), setupPushNotifications(), AttendanceDraft, flushAttendanceQueue(), getAttendanceQueue(), queueAttendance()
 
-### Community 710 - "SimpleXlsx"
-Cohesion: 0.29
-Nodes (4): SimpleXlsx, Stream, ZipArchive, XNamespace
+### Community 710 - "AIModelCapability"
+Cohesion: 0.40
+Nodes (5): AIModelCapability, Chat, Embedding, FunctionCalling, Vision
 
 ### Community 711 - "AegisCore.Tests"
 Cohesion: 0.17
 Nodes (12): AegisCore.Tests, net10.0, System.Security.Cryptography.Xml (10.0.0), Microsoft.NET.Sdk, coverlet.collector (6.0.0), Microsoft.AspNetCore.TestHost (10.0.0), Microsoft.EntityFrameworkCore.Sqlite (10.0.0), Microsoft.NET.Test.Sdk (17.9.0) (+4 more)
 
 ### Community 712 - "GovernanceTests"
-Cohesion: 0.36
+Cohesion: 0.42
 Nodes (4): GovernanceTests, Fact, InlineData, Theory
 
 ### Community 713 - "_Imports.razor"
@@ -4173,13 +4144,13 @@ Nodes (4): AegisCoreDatabase, RoomDatabase, OfflineAttendance, OfflineAttendance
 Cohesion: 0.29
 Nodes (6): net10.0, Microsoft.AspNetCore.Components.WebAssembly (10.0.0), Microsoft.AspNetCore.Components.WebAssembly.Authentication (10.0.0), Microsoft.AspNetCore.Components.WebAssembly.DevServer (10.0.0), Microsoft.Extensions.Http (10.0.0), Microsoft.NET.Sdk.BlazorWebAssembly
 
-### Community 720 - "ComplianceFrameworkDto"
-Cohesion: 0.18
-Nodes (11): ComplianceFrameworkDto, Code, ComplianceScore, CompliantCount, ControlCount, Description, Id, Name (+3 more)
+### Community 720 - "BackupType"
+Cohesion: 0.40
+Nodes (5): BackupType, FileStorage, Full, Incremental, WalArchive
 
-### Community 721 - "ICalibrationRecordRepository"
-Cohesion: 0.46
-Nodes (5): ICalibrationRecordRepository, CancellationToken, Guid, IReadOnlyList, Task
+### Community 721 - "CalibrationAlertDto"
+Cohesion: 0.12
+Nodes (19): ICalibrationRecordRepository, CancellationToken, Guid, IReadOnlyList, Task, CalibrationAlertDto, DaysOverdue, EquipmentName (+11 more)
 
 ### Community 722 - "LedgerArchive"
 Cohesion: 0.38
@@ -4193,13 +4164,17 @@ Nodes (7): IConfigurationCenterService, CancellationToken, ConfigurationDomain, 
 Cohesion: 0.18
 Nodes (11): CriterionEvidence, CreatedAt, CriterionId, EvidenceDate, EvidenceDescription, EvidenceTitle, EvidenceUrl, ExpiryDate (+3 more)
 
-### Community 725 - "AegisCore.API.Controllers"
-Cohesion: 0.09
-Nodes (10): WhatsAppStatusDto, WhatsAppWebhookRequest, List, AegisCore.API.Controllers, AegisCore.Tests.Controllers, AegisCore.Infrastructure.DataImport, AegisCore.Application.Platform, AegisCore.Application.SyncLag (+2 more)
+### Community 725 - "CommunicationsController.cs"
+Cohesion: 0.67
+Nodes (3): WhatsAppStatusDto, WhatsAppWebhookRequest, List
 
-### Community 727 - "FinanceRestatementMemoLine"
-Cohesion: 0.20
-Nodes (10): FinanceRestatementMemoLine, ChartOfAccountId, Credit, Debit, Description, Id, RestatementRuleId, RestatementRunId (+2 more)
+### Community 726 - "CeremonyAttendance"
+Cohesion: 0.40
+Nodes (5): CeremonyAttendance, Absent, CheckedIn, Late, Registered
+
+### Community 727 - "DefaulterRiskTier"
+Cohesion: 0.40
+Nodes (5): DefaulterRiskTier, Green, Orange, Red, Yellow
 
 ### Community 728 - "AegisCore.slnx"
 Cohesion: 0.14
@@ -4270,28 +4245,28 @@ Cohesion: 0.22
 Nodes (7): ADR 0001: Multi-tenant modular monolith, Boundary rules, Commercial invariant, Decision, Migration order, Status, Target repository shape
 
 ### Community 745 - "AegisCore.Application.Governance"
-Cohesion: 0.19
-Nodes (7): ManagementEndpoints, AccreditationServiceExtensions, BoardPortalServiceExtensions, IServiceCollection, GovernanceServiceExtensions, AegisCore.Application.Governance, AegisCore.Infrastructure.Governance
+Cohesion: 0.18
+Nodes (6): ManagementEndpoints, AccreditationServiceExtensions, BoardPortalServiceExtensions, IServiceCollection, AegisCore.Application.Governance, AegisCore.Infrastructure.Governance
 
-### Community 746 - "AegisCore.Infrastructure/GlobalUsings.cs"
-Cohesion: 0.25
-Nodes (4): AssemblyReference, ServiceCollectionExtensions, IServiceCollection, AegisCore.Application
+### Community 746 - "DriveStatus"
+Cohesion: 0.40
+Nodes (5): DriveStatus, Cancelled, Completed, InProgress, Scheduled
 
 ### Community 747 - "DocumentType"
 Cohesion: 0.20
 Nodes (10): DocumentType, Application, Certificate, IdentityCard, Invoice, Other, Report, Syllabus (+2 more)
 
-### Community 748 - "TenantIsolationTest.cs"
-Cohesion: 0.20
-Nodes (6): EnvironmentSubstitutionTest, Fact, TenantIsolationTest, Fact, AegisCore.Infrastructure.Configuration, AegisCore.Tests.Infrastructure
+### Community 748 - "ErasureRequestStatus"
+Cohesion: 0.40
+Nodes (5): ErasureRequestStatus, Completed, Failed, InProgress, Pending
 
 ### Community 749 - "ConfigDiffDto"
 Cohesion: 0.25
 Nodes (8): ConfigDiffDto, Changes, Key, ValueA, ValueB, VersionA, VersionB, List
 
-### Community 750 - "LicenseValidationFailureReason"
-Cohesion: 0.24
-Nodes (9): LicenseInfo, LicenseValidationFailureReason, CouldNotContactServer, Expired, InvalidSignature, Revoked, UniversityMismatch, LicenseValidationResult (+1 more)
+### Community 750 - "GuardrailAction"
+Cohesion: 0.40
+Nodes (5): GuardrailAction, Block, Bypass, Flag, Log
 
 ### Community 751 - "ApplicationStatus"
 Cohesion: 0.25
@@ -4312,6 +4287,10 @@ Nodes (8): ChangeEventType, CourseAdded, CourseDeactivated, CourseRemoved, Credi
 ### Community 755 - "ConditionOperator"
 Cohesion: 0.25
 Nodes (8): ConditionOperator, Contains, Equals, GreaterThan, IsEmpty, IsNotEmpty, LessThan, NotEquals
+
+### Community 756 - "InterviewStatus"
+Cohesion: 0.40
+Nodes (5): InterviewStatus, Cancelled, Completed, NoShow, Scheduled
 
 ### Community 757 - "ElectionStatus"
 Cohesion: 0.25
@@ -4341,9 +4320,9 @@ Nodes (8): LoginEvent, ForcedLogout, Login, LoginFailed, Logout, PasswordReset, 
 Cohesion: 0.25
 Nodes (8): PublicationType, Book, BookChapter, ConferencePaper, JournalArticle, Patent, TechnicalReport, Thesis
 
-### Community 764 - "AlertCategory"
-Cohesion: 0.33
-Nodes (6): AlertCategory, Academic, Compliance, Financial, Hr, Reputational
+### Community 764 - "LeaderboardScope"
+Cohesion: 0.40
+Nodes (5): LeaderboardScope, Class, Department, Institution, Program
 
 ### Community 765 - "FinancePaymentPlanWorker"
 Cohesion: 0.36
@@ -4393,9 +4372,9 @@ Nodes (7): Abuse and resource limits, AegisCore Abuse and Limit Test Report, Bas
 Cohesion: 0.39
 Nodes (6): IEquipmentMaintenanceRepository, CancellationToken, Guid, IReadOnlyList, MaintenanceStatus, Task
 
-### Community 777 - "UserRole"
-Cohesion: 0.15
-Nodes (12): UserRole, AssignedAt, AssignedByUserId, ExpiresAt, Id, Role, RoleId, TenantId (+4 more)
+### Community 777 - "MandatoryReportTrigger"
+Cohesion: 0.40
+Nodes (5): MandatoryReportTrigger, AbuseDisclosure, ChildSafeguarding, ImminentHarmToOthers, ImminentSelfHarm
 
 ### Community 778 - "GlobalExceptionHandlerMiddleware"
 Cohesion: 0.29
@@ -4423,7 +4402,7 @@ Nodes (7): ActivityType, Call, Email, Meeting, Note, SMS, StatusChange
 
 ### Community 785 - ".OnModelCreating"
 Cohesion: 0.01
-Nodes (180): AIModelCapability, Chat, Embedding, FunctionCalling, Vision, BackupRetentionTier, Cold, Hot (+172 more)
+Nodes (163): BackupRetentionTier, Cold, Hot, BenchmarkStatus, Completed, Failed, Running, BudgetStatus (+155 more)
 
 ### Community 786 - "AppealGroundType"
 Cohesion: 0.29
@@ -4697,13 +4676,13 @@ Nodes (3): AegisCoreApi, AttendanceRecord, SyncResponse
 Cohesion: 0.53
 Nodes (4): AegisCoreHome(), Bundle, ComponentActivity, MainActivity
 
-### Community 854 - "CreateApiKeyRequest"
-Cohesion: 0.33
-Nodes (6): CreateApiKeyRequest, AllowedDomains, Name, OwnerEmail, OwnerName, Tier
+### Community 854 - "ApiGatewayDtos.cs"
+Cohesion: 0.12
+Nodes (16): CreateApiKeyRequest, AllowedDomains, Name, OwnerEmail, OwnerName, Tier, RateLimitTierConfig, BurstLimit (+8 more)
 
-### Community 855 - "EvidenceStrength"
-Cohesion: 0.33
-Nodes (6): EvidenceStrength, Conclusive, Moderate, None, Strong, Weak
+### Community 855 - "MealType"
+Cohesion: 0.40
+Nodes (5): MealType, Breakfast, Dinner, Lunch, Snacks
 
 ### Community 856 - "AccreditationBody"
 Cohesion: 0.33
@@ -4753,17 +4732,17 @@ Nodes (6): AwardTier, Bronze, Diamond, Gold, Platinum, Silver
 Cohesion: 0.33
 Nodes (6): BadgeCategory, Academic, Community, Engagement, Leadership, Lifecycle
 
-### Community 868 - "AlignmentLevel"
+### Community 868 - "MilestoneStatus"
 Cohesion: 0.40
-Nodes (5): AlignmentLevel, Critical, High, Low, Medium
+Nodes (5): MilestoneStatus, Completed, Delayed, InProgress, Pending
 
 ### Community 869 - "CampaignStatus"
 Cohesion: 0.33
 Nodes (6): CampaignStatus, Active, Cancelled, Completed, Draft, Scheduled
 
-### Community 870 - "CampaignType"
-Cohesion: 0.33
-Nodes (6): CampaignType, Email, Event, Print, SMS, SocialMedia
+### Community 870 - "ReplicaStatus"
+Cohesion: 0.40
+Nodes (5): ReplicaStatus, Lagging, Offline, Online, Promoting
 
 ### Community 871 - "CAPStatus"
 Cohesion: 0.33
@@ -4789,9 +4768,9 @@ Nodes (6): CriterionScore, FullyMet, MinimallyMet, NotMet, PartiallyMet, Substan
 Cohesion: 0.33
 Nodes (6): DefaulterStatus, Cleared, Escalated, Notified, Pending, RTPAttempted
 
-### Community 877 - "DeliverableStatus"
-Cohesion: 0.33
-Nodes (6): DeliverableStatus, Accepted, Pending, Rejected, Reviewed, Submitted
+### Community 877 - "TransferStatus"
+Cohesion: 0.40
+Nodes (5): TransferStatus, Approved, Completed, Rejected, Requested
 
 ### Community 878 - "DeviceType"
 Cohesion: 0.33
@@ -4849,17 +4828,13 @@ Nodes (6): FindingType, Concern, Deficiency, Observation, Strength, Weakness
 Cohesion: 0.33
 Nodes (6): FreezeReturnStatus, Confirmed, Extended, NoResponse, Notified, Returned
 
-### Community 892 - "HardcodingType"
-Cohesion: 0.33
-Nodes (6): HardcodingType, Credential, Number, Path, String, URL
-
 ### Community 893 - "HealthScoreGrade"
 Cohesion: 0.33
 Nodes (6): HealthScoreGrade, A, B, C, D, F
 
-### Community 894 - "DecisionTableDto"
-Cohesion: 0.17
-Nodes (12): DecisionTableColumn, Name, Operator, Type, DecisionTableDto, Domain, Id, InputColumns (+4 more)
+### Community 894 - "ApiProviderType"
+Cohesion: 0.50
+Nodes (4): ApiProviderType, Custom, IThenticate, Turnitin
 
 ### Community 895 - "AccreditationAuditFinding"
 Cohesion: 0.17
@@ -4885,17 +4860,17 @@ Nodes (6): JobType, Contract, FullTime, Internship, PartTime, Remote
 Cohesion: 0.33
 Nodes (6): LeaveStatus, ApprovedByHod, ApprovedByHr, Cancelled, Pending, Rejected
 
-### Community 901 - "LicenseStatus"
-Cohesion: 0.33
-Nodes (6): LicenseStatus, Active, Expired, Revoked, Suspended, Trial
+### Community 901 - "CareerGoalStatus"
+Cohesion: 0.50
+Nodes (4): CareerGoalStatus, Abandoned, Achieved, Active
 
 ### Community 902 - "MemberType"
 Cohesion: 0.33
 Nodes (6): MemberType, Alumni, External, Faculty, Staff, Student
 
-### Community 903 - "MisconductStatus"
-Cohesion: 0.33
-Nodes (6): MisconductStatus, Appealed, HearingScheduled, Reported, Resolved, UnderInvestigation
+### Community 903 - "FlagScope"
+Cohesion: 0.50
+Nodes (4): FlagScope, Global, Tenant, UserGroup
 
 ### Community 904 - "NominationStatus"
 Cohesion: 0.33
@@ -4942,8 +4917,8 @@ Cohesion: 0.33
 Nodes (6): SanctionType, CourseFailure, Expulsion, GradeReduction, Suspension, Warning
 
 ### Community 915 - ".CheckHealthAsync"
-Cohesion: 0.31
-Nodes (7): DatabaseHealthCheck, RedisHealthCheck, CancellationToken, HealthCheckContext, HealthCheckResult, IConnectionMultiplexer, Task
+Cohesion: 0.43
+Nodes (5): DatabaseHealthCheck, CancellationToken, HealthCheckContext, HealthCheckResult, Task
 
 ### Community 916 - "StudentDistributionStrategy"
 Cohesion: 0.33
@@ -4957,9 +4932,9 @@ Nodes (6): SubmissionStatus, Approved, Draft, Rejected, Submitted, UnderReview
 Cohesion: 0.33
 Nodes (6): TravelStatus, Approved, Completed, Reimbursed, Rejected, Requested
 
-### Community 919 - ".EveryGeneratedWorkbookPassesItsOwnValidator"
-Cohesion: 0.25
-Nodes (6): EnhancedSetupAndSupportTests, ArgumentException, Fact, InlineData, Task, Theory
+### Community 919 - "LabStatus"
+Cohesion: 0.50
+Nodes (4): LabStatus, Active, Closed, UnderMaintenance
 
 ### Community 920 - "VehicleMaintenanceStatus"
 Cohesion: 0.33
@@ -5313,9 +5288,9 @@ Nodes (3): AegisCoreApi, AttendanceRecord, SyncResponse
 Cohesion: 0.53
 Nodes (4): AegisCoreHome(), Bundle, ComponentActivity, MainActivity
 
-### Community 1009 - "MemberStatus"
-Cohesion: 0.40
-Nodes (5): MemberStatus, Active, Blacklisted, Expired, Suspended
+### Community 1009 - "NotificationStatus"
+Cohesion: 0.50
+Nodes (4): NotificationStatus, Failed, Pending, Sent
 
 ### Community 1010 - "AegisCore Cloud Concerns Pitch"
 Cohesion: 0.33
@@ -5333,9 +5308,9 @@ Nodes (5): Added Split Artifacts, Created Working Trees, Not Performed, Reposito
 Cohesion: 0.33
 Nodes (5): Android Cleanup Report, Current Native Android State, Dependency Review, Local Build, Standalone Repository Files
 
-### Community 1014 - "RenewalStatus"
-Cohesion: 0.40
-Nodes (5): RenewalStatus, Approved, Processing, Rejected, Submitted
+### Community 1014 - "ReferralStatus"
+Cohesion: 0.50
+Nodes (4): ReferralStatus, Active, Expired, Filled
 
 ### Community 1015 - "P8 — Wizard consolidation and security"
 Cohesion: 0.33
@@ -5357,9 +5332,9 @@ Nodes (6): 🏆 Competitive Advantages, vs EduSuite, vs Futuresol, vs Global ERP
 Cohesion: 0.33
 Nodes (5): Add/update threshold, Discovery Model, Maintenance Actions, Memory Maintenance, Style
 
-### Community 1020 - "LicenseHeartbeatHostedService"
-Cohesion: 0.29
-Nodes (6): LicenseHeartbeatHostedService, CancellationToken, ILogger, IServiceScopeFactory, Task, TimeSpan
+### Community 1020 - "ScheduleFrequency"
+Cohesion: 0.50
+Nodes (4): ScheduleFrequency, Daily, Monthly, Weekly
 
 ### Community 1021 - "DegreeRequirementCategory"
 Cohesion: 0.29
@@ -5369,9 +5344,9 @@ Nodes (7): DegreeRequirementCategory, Core, Elective, GeneralEducation, Internsh
 Cohesion: 0.40
 Nodes (5): ShiftStatus, Absent, Completed, InProgress, Scheduled
 
-### Community 1023 - "ApiServicesExtensions"
-Cohesion: 0.29
-Nodes (4): ApiServicesExtensions, IApplicationBuilder, IConfiguration, IServiceCollection
+### Community 1023 - "SSRReviewStatus"
+Cohesion: 0.50
+Nodes (4): SSRReviewStatus, Approved, ChangesRequested, Pending
 
 ### Community 1024 - "ActionItemStatus"
 Cohesion: 0.40
@@ -5393,6 +5368,10 @@ Nodes (5): ApiKeyStatus, Active, Expired, Revoked, Suspended
 Cohesion: 0.40
 Nodes (5): JobPostingStatus, Active, Closed, Draft, Filled
 
+### Community 1029 - "VehiclePassStatus"
+Cohesion: 0.50
+Nodes (4): VehiclePassStatus, Active, Expired, Suspended
+
 ### Community 1030 - "PlagiarismLayer"
 Cohesion: 0.40
 Nodes (5): PlagiarismLayer, Paraphrase, Structural, StyleDeviation, Verbatim
@@ -5405,25 +5384,9 @@ Nodes (5): CareerEventStatus, Cancelled, Completed, InProgress, Upcoming
 Cohesion: 0.50
 Nodes (4): ClearanceStatus, Cleared, Pending, Rejected
 
-### Community 1033 - "QueueStatus"
-Cohesion: 0.40
-Nodes (5): QueueStatus, Backlogged, Failing, Healthy, Paused
-
 ### Community 1034 - "ControlReviewFrequency"
 Cohesion: 0.40
 Nodes (5): ControlReviewFrequency, Annually, BiAnnually, Monthly, Quarterly
-
-### Community 1035 - "ControlStatus"
-Cohesion: 0.40
-Nodes (5): ControlStatus, Compliant, InProgress, NonCompliant, NotApplicable
-
-### Community 1036 - "CopyStakes"
-Cohesion: 0.40
-Nodes (5): CopyStakes, High, Irreversible, Low, Medium
-
-### Community 1037 - "ComplianceFrameworkStatus"
-Cohesion: 0.50
-Nodes (4): ComplianceFrameworkStatus, Active, Archived, UnderReview
 
 ### Community 1038 - "CrisisLevel"
 Cohesion: 0.40
@@ -5497,10 +5460,6 @@ Nodes (5): ExtensionPricingModel, Free, OneTime, RevenueShare, Subscription
 Cohesion: 0.40
 Nodes (5): ExtensionStatus, Deprecated, Draft, Published, Suspended
 
-### Community 1056 - "WebhookSubscriptionRequest"
-Cohesion: 0.40
-Nodes (5): WebhookSubscriptionRequest, EndpointUrl, EventType, Name, Secret
-
 ### Community 1057 - "FallbackReason"
 Cohesion: 0.33
 Nodes (6): FallbackReason, AsrFailure, EmotionalDistress, IntentUnclassified, SeriousComplaint, UserRequestedHuman
@@ -5508,10 +5467,6 @@ Nodes (6): FallbackReason, AsrFailure, EmotionalDistress, IntentUnclassified, Se
 ### Community 1058 - "FeeDefaulterLevel"
 Cohesion: 0.40
 Nodes (5): FeeDefaulterLevel, Level1_Reminder, Level2_Warning, Level3_Final, Level4_Legal
-
-### Community 1059 - "SecretsProvider"
-Cohesion: 0.40
-Nodes (5): SecretsProvider, AwsSecretsManager, AzureKeyVault, EnvironmentVariables, GcpSecretManager
 
 ### Community 1060 - "FireEquipmentStatus"
 Cohesion: 0.40
@@ -5528,14 +5483,6 @@ Nodes (5): FormStatus, Archived, Closed, Draft, Published
 ### Community 1063 - "FreezeTimingRule"
 Cohesion: 0.40
 Nodes (5): FreezeTimingRule, Week1to2_FullRefund, Week3to4_PartialRefund, Week5to8_NoRefund, Week9Plus_MedicalOnly
-
-### Community 1064 - "IncidentStatus"
-Cohesion: 0.33
-Nodes (6): IncidentStatus, Closed, Escalated, Reported, Resolved, UnderInvestigation
-
-### Community 1065 - "IncidentDashboardDto"
-Cohesion: 0.40
-Nodes (5): IncidentDashboardDto, ReportedCount, ResolvedCount, TotalIncidents, UnderInvestigationCount
 
 ### Community 1066 - "GuardrailSeverity"
 Cohesion: 0.40
@@ -5576,14 +5523,6 @@ Nodes (5): InventoryAlertType, Expired, ExpiringSoon, LowStock, ReorderPoint
 ### Community 1075 - "EmergencyAlertSeverity"
 Cohesion: 0.40
 Nodes (5): EmergencyAlertSeverity, Critical, High, Low, Medium
-
-### Community 1076 - "JournalEntryType"
-Cohesion: 0.40
-Nodes (5): JournalEntryType, Adjustment, AutoGenerated, Manual, Reversal
-
-### Community 1077 - "FacultyDistributionRule"
-Cohesion: 0.40
-Nodes (5): FacultyDistributionRule, Manual, PrimarySecondary, SharedAll, SplitSections
 
 ### Community 1078 - "LicenseEdition"
 Cohesion: 0.40
@@ -5637,10 +5576,6 @@ Nodes (5): MoraStatus, Exempted, Lapsed, Pending, Registered
 Cohesion: 0.40
 Nodes (5): ComplianceLevel, ActionRequired, Critical, FullyCompliant, NonCompliant
 
-### Community 1091 - "ProctoringMode"
-Cohesion: 0.40
-Nodes (5): ProctoringMode, AiAutomated, Hybrid, LiveHuman, RecordReview
-
 ### Community 1092 - "RegistrationStatus"
 Cohesion: 0.40
 Nodes (5): RegistrationStatus, Closed, InProgress, Open, Waitlisted
@@ -5660,10 +5595,6 @@ Nodes (5): RequisitionStatus, Approved, Issued, Pending, Rejected
 ### Community 1096 - "SSRSectionStatus"
 Cohesion: 0.40
 Nodes (5): SSRSectionStatus, Completed, InProgress, NotStarted, Reviewed
-
-### Community 1097 - "VehicleStatus"
-Cohesion: 0.40
-Nodes (5): VehicleStatus, Active, InMaintenance, OutOfService, Retired
 
 ### Community 1098 - "RiskCategory"
 Cohesion: 0.40
@@ -5697,17 +5628,9 @@ Nodes (3): CasbinServiceExtensions, IEnforcer, IServiceCollection
 Cohesion: 0.40
 Nodes (5): DisposalStatus, Approved, Completed, Pending, Rejected
 
-### Community 1106 - "EscalationLevel"
-Cohesion: 0.40
-Nodes (5): EscalationLevel, Level1, Level2, Level3, Management
-
 ### Community 1107 - "SpecializationAlignment"
 Cohesion: 0.40
 Nodes (5): SpecializationAlignment, AdjacentField, ExactMatch, General, RelatedField
-
-### Community 1108 - "BenchmarkStatus"
-Cohesion: 0.50
-Nodes (4): BenchmarkStatus, Completed, Failed, Running
 
 ### Community 1110 - "StrategicGoalStatus"
 Cohesion: 0.40
@@ -5716,10 +5639,6 @@ Nodes (5): StrategicGoalStatus, AtRisk, Completed, OffTrack, OnTrack
 ### Community 1112 - "DiagnosticSeverity"
 Cohesion: 0.50
 Nodes (4): DiagnosticSeverity, Critical, Info, Warning
-
-### Community 1113 - "DriveType"
-Cohesion: 0.50
-Nodes (4): DriveType, Hybrid, OnCampus, Virtual
 
 ### Community 1114 - "UserStatus"
 Cohesion: 0.40
@@ -5737,17 +5656,9 @@ Nodes (5): VerificationCycleStatus, Cancelled, Completed, InProgress, Planned
 Cohesion: 0.40
 Nodes (5): VerificationStatus, Discrepancy, NotFound, Pending, Verified
 
-### Community 1118 - "ExportFormat"
-Cohesion: 0.50
-Nodes (4): ExportFormat, CSV, Excel, PDF
-
 ### Community 1119 - "VisitorStatus"
 Cohesion: 0.40
 Nodes (5): VisitorStatus, Blacklisted, CheckedIn, CheckedOut, Registered
-
-### Community 1120 - "VisitorType"
-Cohesion: 0.40
-Nodes (5): VisitorType, Contractor, PreApproved, VIP, WalkIn
 
 ### Community 1121 - "ScholarshipStatus"
 Cohesion: 0.40
@@ -5809,10 +5720,6 @@ Nodes (3): AegisCore Android, Release, Setup
 Cohesion: 0.40
 Nodes (5): TicketResolution, CrisisEscalated, LostContact, Referred, Resolved
 
-### Community 1138 - "MessageSender"
-Cohesion: 0.50
-Nodes (4): MessageSender, Bot, Counselor, Visitor
-
 ### Community 1139 - "ApiPermission"
 Cohesion: 0.50
 Nodes (4): ApiPermission, Admin, ReadOnly, ReadWrite
@@ -5829,17 +5736,9 @@ Nodes (4): ApprovalType, Parallel, Sequential, Single
 Cohesion: 0.50
 Nodes (4): FailoverMode, Automatic, Manual, Scheduled
 
-### Community 1143 - "UpdateChannel"
-Cohesion: 0.50
-Nodes (4): UpdateChannel, Beta, LTS, Stable
-
 ### Community 1144 - "CalendarType"
 Cohesion: 0.50
 Nodes (4): CalendarType, Quarter, Semester, Trimester
-
-### Community 1145 - "CalibrationStatus"
-Cohesion: 0.50
-Nodes (4): CalibrationStatus, Completed, Overdue, Scheduled
 
 ### Community 1147 - "scripts"
 Cohesion: 0.22
@@ -5850,8 +5749,8 @@ Cohesion: 0.50
 Nodes (4): LeadTaskStatus, Cancelled, Completed, Pending
 
 ### Community 1149 - "Codex Handoff — AegisCore Deployment Prompts"
-Cohesion: 0.22
-Nodes (8): Architecture and workflow constraints, Codex Handoff — AegisCore Deployment Prompts, Completed prompt commits, Current verification status, Exact next action, P14 verified implementation, P15 verified implementation, Prompt status
+Cohesion: 0.20
+Nodes (9): Architecture and workflow constraints, Codex Handoff — AegisCore Deployment Prompts, Completed prompt commits, Current verification status, Exact next action, P14 verified implementation, P15 verified implementation, P16 verified implementation (+1 more)
 
 ### Community 1154 - "ExtensionCategory"
 Cohesion: 0.25
@@ -5882,16 +5781,12 @@ Cohesion: 0.50
 Nodes (4): InterviewType, OnCampus, Phone, Virtual
 
 ### Community 1165 - "S5ObeController"
-Cohesion: 0.22
+Cohesion: 0.21
 Nodes (14): CloPoMappingRequest, S5ObeController, ActionResult, CancellationToken, Guid, HttpGet, HttpPost, IActionResult (+6 more)
 
-### Community 1170 - "IntegrationType"
-Cohesion: 0.29
-Nodes (7): IntegrationType, Cloud, Communication, IdentityProvider, LMS, PaymentGateway, Webhook
-
-### Community 1177 - "CurriculumApprovalStatus"
-Cohesion: 0.33
-Nodes (6): CurriculumApprovalStatus, Approved, BoardReview, DepartmentReview, Draft, Rejected
+### Community 1170 - "CancellationToken"
+Cohesion: 0.05
+Nodes (43): CancellationToken, DateTime, Guid, IReadOnlyList, Task, CurriculumApprovalStatus, Approved, BoardReview (+35 more)
 
 ### Community 1181 - "AegisCore Frontend"
 Cohesion: 0.50
@@ -5990,28 +5885,28 @@ Cohesion: 0.40
 Nodes (5): AegisCore.LedgerVerifier, net10.0, BouncyCastle.Cryptography (2.7.0), Microsoft.NET.Sdk, Newtonsoft.Json (13.0.4)
 
 ### Community 1363 - ".AddSetupServices"
-Cohesion: 0.11
-Nodes (30): SetupServicesExtensions, AiConnectionResult, HandshakeResult, CustomAiSetupProvider, EntraSsoProvider, GenericSamlSsoProvider, GoogleWorkspaceSsoProvider, GraniteProvider (+22 more)
+Cohesion: 0.07
+Nodes (42): SetupServicesExtensions, AiConfigDto, AiConnectionResult, HandshakeResult, IAiSetupProvider, Name, ISsoProvider, Name (+34 more)
 
 ## Knowledge Gaps
-- **12111 isolated node(s):** `net10.0`, `Microsoft.AspNetCore.Authentication.JwtBearer (10.0.0)`, `prometheus-net.AspNetCore (8.2.1)`, `System.IdentityModel.Tokens.Jwt (8.18.0)`, `Microsoft.IdentityModel.JsonWebTokens (8.18.0)` (+12106 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 14713 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **12117 isolated node(s):** `net10.0`, `Microsoft.AspNetCore.Authentication.JwtBearer (10.0.0)`, `prometheus-net.AspNetCore (8.2.1)`, `System.IdentityModel.Tokens.Jwt (8.18.0)`, `Microsoft.IdentityModel.JsonWebTokens (8.18.0)` (+12112 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 14721 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **83 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AegisDbContext` connect `AegisDbContext` to `FinanceVoucher`, `ITenantScoped`, `CoreErpEntities2.cs`, `.CreateAsync`, `CoreErpEntities1.cs`, `ITenantScoped`, `.MapFinanceModuleEndpoints`, `CoreErpEntities3.cs`, `MisconductCase`, `.Activation_RollsBackInvalidConfirmation_ThenCreatesTenantUsersAndPqcRegistry`, `Prompt`, `HealthScore`, `AegisCore.Domain`, `FinancePurchaseOrder`, `PayrollService`, `ReplicationScalingConfig`, `WizardProviderConfigurationService`, `AchievementBadge`, `PlatformEntitiesP111_120.cs`, `FinanceForeignCurrencyTransaction`, `CatalogCourseRecord`, `ProcurementRequisition`, `AssessmentComponent`, `ForeignStudentRecord`, `PrivacyComplianceController`, `DegreeProgram`, `FinanceModuleService`, `FinanceScholarshipProgram`, `LmsProvision`, `CancellationToken`, `MenuItem`, `Semester`, `VisitingFacultyContract`, `ReadReplicaConfig`, `MaintenanceTicket`, `SLADefinition`, `.Permission_handler_uses_JWT_roles_tenant_and_Casbin`, `SlotCandidateMatch`, `WorkOrderTimeEntry`, `WizardStateService`, `CancellationToken`, `ExtensionInstallation`, `FinanceRegulatoryReportService`, `UniversitySsoProfile`, `DegreeVerification`, `AdmissionApplication`, `InterventionRecord`, `ExtensionReview`, `WorkOrder`, `SyncLagConfig`, `TranslationValue`, `FinanceStandingPurchaseOrder`, `CampusPolygon`, `FeeDemand`, `WorkOrderMaterial`, `IRepository`, `EnergyReading`, `.AuditorEngagement_Rejects_Invalid_Trust_Window`, `FoodOrder`, `.CreateAsync`, `ExamPaperScan`, `AccreditationFramework`, `FinanceVendor`, `FireDrill`, `.AddExtendedPlatform`, `ExecutiveDashboard`, `PolicyConfig`, `ReplicationScaleEvent`, `LostFoundItem`, `AegisCore.Domain.Common`, `MentalHealthTicket`, `GateEntry`, `PreventiveMaintenanceSchedule`, `RoomOccupancy`, `BoardAlert`, `FinanceInvestmentHolding`, `ControlEvidence`, `CashFlowForecast`, `ConfigVersion`, `FinanceAuditorEngagement`, `Building`, `FloorPlan`, `CheckpointScan`, `PluginRevenueShare`, `.AuthFlow_LoginRefreshLogout_Cycle`, `FinanceControlEvaluationBatch`, `HrController`, `FinancePayrollPaymentFile`, `PrerequisiteConflict`, `TeachingSlot`, `CourseGrade`, `DataExportLog`, `ExamSchedule`, `.AddMultiCampus`, `FinancePettyCashExpense`, `DeansListEntry`, `FinanceAuditSeal`, `FinancePettyCashFund`, `HighRiskValidators.cs`, `S2AdmissionsController`, `ConvocationEligibility`, `FinancePettyCashCount`, `TransportInspection`, `IncidentEvidence`, `.AcademicCalendarService_Counts_WorkingDays_And_Excludes_Holidays`, `EquipmentMaintenance`, `Timetable`, `DocumentTemplateService`, `TransportRegistration`, `WizardStateDto`, `Guid`, `LicenseServiceTests`, `S5ObeController`, `StudentFeePayment`, `ConfigurationEntry`, `FinanceFleetProfile`, `FinanceAssetAccountingEvent`, `DocumentTier`, `FinanceBankFeedTransaction`, `GrievanceTicket`, `EquipmentUsageLog`, `FinancePaymentPlanConfiguration`, `PowerBiReport`, `NotificationDelivery`, `CountryPack`, `DataImportJob`, `ChartConfiguration`, `ImportBatch`, `StudentFeeDue`, `FerpaAuditLog`, `Extension`, `ExamSeating`, `BoardDecision`, `GuardShift`, `FinanceTests`, `CounselorProfile`, `ProfilePictureRecord`, `CloPlomapping`, `ScheduledJob`, `FinanceRestatementRule`, `SensorReading`, `MarketplaceController`, `StudentActivity`, `CampusConfiguration`, `MaintenanceContractor`, `EquipmentBooking`, `Course`, `ScalingEvent`, `.CreateAsync`, `BackupRecord`, `VehiclePass`, `LabConsumable`, `AuditLog`, `CriterionEvidence`, `FleetVehicle`, `FinanceRestatementMemoLine`, `ConfigAuditLog`, `FinanceVendorContact`, `PlagiarismScan`, `FinancePayrollPosting`, `StudentProctoringRecord`, `Role`, `IdentityController`, `StudentLifecycleController`, `CalibrationRecord`, `FinanceInsurancePolicy`, `JobPosting`, `CancellationToken`, `DocumentVaultEntry`, `FinanceInventoryMovement`, `Payslip`, `SemesterFreeze`, `FinancePaymentPlanWorker`, `HighRiskValidationTests`, `.InvalidRequest`, `GuardRound`, `PrivacyComplianceTests`, `UnitOfWork`, `FinanceWithholdingRecord`, `User`, `.OnModelCreating`, `LabEquipment`, `Batch`, `FinanceAccountingStandardPolicy`, `FinanceUtilityBill`, `PqcSignatureService`, `Election`, `RuleDefinition`, `CasbinPolicySyncService`, `CourseAssignment`, `TranslationKey`, `LoginAuditRecord`, `FacultyCompensation`, `VisitingFacultyProfile`, `AegisDbContextFactory`, `GradeDistribution`, `IoTSensor`, `FormDefinition`, `.CheckIn_EndToEnd_EncryptsCoordinates_RedactsRoster_AndAllowsOverride`, `DocumentAccessLog`, `ComplianceControl`, `CurriculumVersionRecord`, `FinanceAuditSample`, `SectionOverrideRequest`, `WizardSession`, `WorkflowInstance`, `AegisCoreLicenseController`, `Enrollment`, `TaxSlab`, `PaymentPlanInstallment`, `Convocation`, `LicenseState`, `GradeAppeal`, `WorkflowStep`, `ApprovalRecord`, `AuditFinding`, `LabSafetyInspection`, `TeamsSyncLog`, `VoiceIntent`, `CommunicationsController`, `ElectionContracts.cs`, `AccreditationAuditFinding`, `.Create`, `AdmissionLead`, `PlagiarismApiSubmission`, `GradeOverrideRequest`, `RolePermission`, `FinanceWebhookController`, `FinanceController`, `DayOfWeek`, `DecisionTable`, `DegreeRequirement`, `FinanceRestatementRun`, `DefaultRiskAssessment`, `FinanceAuditEvidencePackage`, `FeatureFlag`, `DefaulterIntervention`, `StudentTransfer`, `SyncLagEntry`, `.CourseReport`, `NotificationRecord`, `CreditTransfer`, `ForeignStudentRegistry`, `FinanceConsolidationRun`, `SsoSession`, `WebhookSubscription`, `.AddAegisDbContext`, `OfflineAttendanceEvent`, `SecurityIncident`, `ResearchLab`, `SecurityGuard`, `ConsumableRequisition`, `IncidentWitness`, `CorrectiveActionPlan`, `Currency`, `SamlConfiguration`, `BackupConfiguration`, `SystemConfiguration`, `Employee`, `CisUpload`, `ComplianceFramework`, `LabBooking`, `PaymentPlanArrangement`, `EmergencyAlert`, `EmergencyContact`, `FacultyEngagement`?**
-  _High betweenness centrality (0.346) - this node is a cross-community bridge._
-- **Why does `AegisCore.Domain.Entities` connect `AegisCore.Domain.Entities` to `MultiTenantSsoService`, `FinanceVoucher`, `ITenantScoped`, `CoreErpEntities2.cs`, `DocumentVaultContracts.cs`, `CoreErpEntities1.cs`, `ITenantScoped`, `.MapFinanceModuleEndpoints`, `CoreErpEntities3.cs`, `MisconductCase`, `.Activation_RollsBackInvalidConfirmation_ThenCreatesTenantUsersAndPqcRegistry`, `.AddAsync`, `Prompt`, `HealthScore`, `AegisCore.Domain`, `FinancePurchaseOrder`, `PayrollService`, `AchievementBadge`, `CampusDto`, `FinanceForeignCurrencyTransaction`, `CatalogCourseRecord`, `ProcurementRequisition`, `AssessmentComponent`, `ForeignStudentRecord`, `CancellationToken`, `FinanceScholarshipProgram`, `PlatformEntitiesP111_120.cs`, `LmsProvision`, `ReadReplicaConfig`, `CancellationToken`, `MenuItem`, `Semester`, `SLADefinition`, `WorkOrderTimeEntry`, `MaintenanceTicket`, `CancellationToken`, `ExtensionInstallation`, `FinanceRegulatoryReportService`, `CancellationToken`, `.AddPlatformServices`, `.FindAsync`, `WorkOrder`, `AdmissionApplication`, `AegisCore.Infrastructure`, `ExtensionReview`, `Room`, `SyncLagConfig`, `IStorageProvider`, `CancellationToken`, `CampusPolygon`, `TranslationValue`, `WorkOrderMaterial`, `IRepository`, `EnergyReading`, `.AddDisasterRecovery`, `FoodOrder`, `ControllerBase`, `ExamPaperScan`, `CancellationToken`, `AccreditationFramework`, `FireDrill`, `.AddExtendedPlatform`, `ReplicationScaleEvent`, `CampusOperationsService`, `LostFoundItem`, `AegisCore.Domain.Common`, `GateEntry`, `PreventiveMaintenanceSchedule`, `.AddFinanceModule`, `RoomOccupancy`, `CancellationToken`, `BoardAlert`, `FinanceInvestmentHolding`, `Faculty`, `ConfigVersion`, `SamlConfiguration`, `Building`, `FloorPlan`, `CheckpointScan`, `PluginRevenueShare`, `FinancePayrollPaymentFile`, `CancellationToken`, `ExamSchedule`, `DeansListEntry`, `FinanceAuditSeal`, `CancellationToken`, `Permission`, `HighRiskValidators.cs`, `CancellationToken`, `FinancePettyCashCount`, `CancellationToken`, `IExtensionRepository`, `EquipmentMaintenance`, `IncidentEvidence`, `DocumentTemplateService`, `Timetable`, `Attendance`, `StudentFeePayment`, `ConfigurationEntry`, `DigitalTwinService`, `FinanceFleetProfile`, `FinanceBankFeedTransaction`, `GrievanceTicket`, `NotificationDelivery`, `EquipmentUsageLog`, `ApiKey`, `CountryPack`, `DataImportJob`, `ChartConfiguration`, `ImportBatch`, `ProfilePictureService`, `FerpaAuditLog`, `Extension`, `ExamSeating`, `.ApplyGracemarksAsync`, `Guid`, `Course`, `FireEquipment`, `GuardShift`, `CounselorProfile`, `CloPlomapping`, `InfrastructureServiceExtensions.cs`, `ProfilePictureRecord`, `ScheduledJob`, `MarketplaceController`, `SensorReading`, `StudentActivity`, `CampusConfiguration`, `MaintenanceContractor`, `EquipmentBooking`, `Course`, `BackupRecord`, `CancellationToken`, `SeedPipeline.cs`, `AuditLog`, `FleetVehicle`, `AegisCore.API.Controllers`, `AegisCore.Application.StudentLifecycle`, `ConfigAuditLog`, `FinanceVendorContact`, `.AddRuleEngine`, `Student`, `ReplicaHealthDto`, `FinancePayrollPosting`, `AegisCore.Application.Governance`, `Role`, `CalibrationRecord`, `FinanceInsurancePolicy`, `SecurityIncident`, `AegisCore.Application.Compliance`, `DegreeAuditController`, `CancellationToken`, `FinanceInventoryMovement`, `Payslip`, `.InvalidRequest`, `UserRole`, `FinanceWithholdingRecord`, `.AuthorizeAndAuditAsync`, `.AddComplianceCenter`, `User`, `CancellationToken`, `CancellationToken`, `AegisCore.Application.Backup`, `CurriculumService`, `ArgumentOutOfRangeException`, `Batch`, `FinanceAccountingStandardPolicy`, `FinanceUtilityBill`, `CancellationToken`, `Election`, `RuleDefinition`, `.AddInfrastructure`, `CourseAssignment`, `TranslationKey`, `LoginAuditRecord`, `FacultyCompensation`, `Visitor`, `CancellationToken`, `IoTSensor`, `FormDefinition`, `LabEquipment`, `VehiclePass`, `DocumentAccessLog`, `IAccountingStandardsEngine`, `.AddWorkflowStudio`, `Campus`, `CurriculumVersionRecord`, `FinanceAuditSample`, `SectionOverrideRequest`, `ResearchLab`, `WizardSession`, `WorkflowInstance`, `TaxSlab`, `PaymentPlanInstallment`, `LicenseState`, `BackupStatus`, `WorkflowStep`, `CancellationToken`, `.AddMicrosoftEcosystem`, `AegisCore.Application.AI`, `ApprovalRecord`, `ConfigurationEntry`, `LabSafetyInspection`, `TeamsSyncLog`, `VoiceIntent`, `CancellationToken`, `LabConsumable`, `RolePermission`, `DecisionTable`, `DegreeAudit`, `DegreeRequirement`, `DegreeProgram`, `FeatureFlag`, `StudentTransfer`, `NotificationRecord`, `AegisCore.Application.Foundation`, `CreditTransfer`, `FormSubmission`, `SecurityGuard`, `WebhookSubscription`, `ConsumableRequisition`, `IncidentWitness`, `Currency`, `BackupConfiguration`, `CisUpload`, `LabBooking`, `EmergencyAlert`, `EmergencyContact`?**
-  _High betweenness centrality (0.088) - this node is a cross-community bridge._
-- **Why does `AegisCore.Infrastructure` connect `AegisCore.Infrastructure` to `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.InvalidRequest`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `AegisCore.Domain`, `.BuildTargetModel`, `.BuildTargetModel`, `.Up`, `.BuildTargetModel`, `FinancePaymentPlanAccounting`, `.BuildModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `AegisDbContextFactory`, `.BuildTargetModel`, `FinancePaymentPlans`, `AegisCore.Domain.Entities`, `AegisCore.Application.Foundation`, `InfrastructureServiceExtensions.cs`, `FinanceSecurityDeposits`, `StandingPurchaseOrderSpend`, `FinanceReportArtifacts`, `FinanceReportProfiles`, `FinancePqcKeys`, `FinancePayrollPosting`, `FinanceTreasuryFeeds`, `FinanceGrantsScholarships`, `.AddAegisDbContext`, `.BuildTargetModel`, `.BuildTargetModel`, `FinanceUtilities`, `FinanceInsurance`, `FinanceInventory`, `FinanceFleet`, `FinanceInvestments`, `FinanceTax`, `.BuildTargetModel`, `TenantFinanceConfiguration`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `AegisCore.API.Controllers`, `AegisCore.Application.StudentLifecycle`, `.BuildTargetModel`, `Migration`, `AegisCore.Infrastructure.Migrations`, `TenantIsolationTest.cs`, `AegisCore.Application.Compliance`, `HighRiskValidators.cs`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`?**
+- **Why does `AegisDbContext` connect `AegisDbContext` to `UniversitySsoProfile`, `FinanceVoucher`, `ITenantScoped`, `CoreErpEntities2.cs`, `CoreErpEntities1.cs`, `ITenantScoped`, `.MapFinanceModuleEndpoints`, `CoreErpEntities3.cs`, `MisconductCase`, `WizardAdminCredential`, `License`, `HealthScore`, `FinancePurchaseOrder`, `SickLeaveApplication`, `SsoConfigDto`, `ExecutiveDashboard`, `GradeDistribution`, `FinanceForeignCurrencyTransaction`, `CatalogCourseRecord`, `ProcurementRequisition`, `AssessmentComponent`, `ForeignStudentRecord`, `PrivacyComplianceController`, `DegreeProgram`, `FinanceModuleService`, `FinanceScholarshipProgram`, `LmsProvision`, `CancellationToken`, `CafeteriaUnit`, `PolicyConfig`, `SLADefinition`, `StudentHealthRecord`, `MaintenanceTicket`, `TicketComment`, `.Permission_handler_uses_JWT_roles_tenant_and_Casbin`, `SlotCandidateMatch`, `WorkOrderTimeEntry`, `.CreateAsync`, `CancellationToken`, `ExtensionInstallation`, `FinanceRegulatoryReportService`, `WorkOrder`, `ApplicationDocument`, `InterventionRecord`, `ExtensionReview`, `SyncLagConfig`, `TranslationKey`, `FinanceStandingPurchaseOrder`, `CampusPolygon`, `FeeDemand`, `WorkOrderMaterial`, `IRepository`, `EnergyReading`, `.AuditorEngagement_Rejects_Invalid_Trust_Window`, `FoodOrder`, `IStorageProvider`, `SecurityHardeningTests`, `SsoSession`, `AccreditationFramework`, `FinanceVendor`, `FireDrill`, `Convocation`, `ReplicationScalingConfig`, `LostFoundItem`, `FinanceLibraryAcquisition`, `MentalHealthTicket`, `GateEntry`, `PreventiveMaintenanceSchedule`, `RoomOccupancy`, `ActivityParticipation`, `BoardAlert`, `FinanceInvestmentHolding`, `StudentSociety`, `ControlEvidence`, `CashFlowForecast`, `ConfigVersion`, `FinanceAuditorEngagement`, `Building`, `FloorPlan`, `.CreateAsync`, `PluginRevenueShare`, `.AuthFlow_LoginRefreshLogout_Cycle`, `FinanceControlEvaluationBatch`, `PrerequisiteConflict`, `FinancePayrollPaymentFile`, `TeachingSlot`, `CourseGrade`, `AdvisorMeeting`, `ExamSchedule`, `.AddMultiCampus`, `LeaderboardEntry`, `SocietyMembership`, `FinanceAuditSeal`, `PlagiarismApiSubmission`, `HighRiskValidators.cs`, `S2AdmissionsController`, `ConvocationEligibility`, `AegisCore.Domain.Common`, `IncidentEvidence`, `EquipmentMaintenance`, `Timetable`, `DocumentTemplateService`, `ReadReplicaConfig`, `TransportRegistration`, `WizardStateDto`, `Guid`, `LicenseServiceTests`, `S5ObeController`, `ConfigurationEntry`, `FinanceFleetProfile`, `FinanceAssetAccountingEvent`, `FinanceBankFeedTransaction`, `LicenseState`, `GrievanceTicket`, `EquipmentUsageLog`, `PowerBiReport`, `NotificationDelivery`, `GradeAppeal`, `CountryPack`, `ExternalDbConnection`, `ChartConfiguration`, `ImportBatch`, `FerpaAuditLog`, `Extension`, `ExamSeating`, `GuardShift`, `FinanceTests`, `CounselorProfile`, `ProfilePictureRecord`, `CloPlomapping`, `ScheduledJob`, `FinanceRestatementRule`, `SensorReading`, `MarketplaceController`, `StudentActivity`, `Room`, `MaintenanceContractor`, `EquipmentBooking`, `ScalingEvent`, `Enrollment`, `.CreateAsync`, `BackupRecord`, `VehiclePass`, `Course`, `LabConsumable`, `AuditLog`, `CriterionEvidence`, `TransportInspection`, `ConfigAuditLog`, `FinanceVendorContact`, `PlagiarismScan`, `FinancePayrollPosting`, `.AddIdentityGovernance`, `IdentityController`, `CalibrationRecord`, `FinanceInsurancePolicy`, `AdmissionApplication`, `Role`, `DocumentVaultEntry`, `FinanceInventoryMovement`, `Payslip`, `SemesterFreeze`, `FinancePaymentPlanWorker`, `HighRiskValidationTests`, `.InvalidRequest`, `GuardRound`, `PrivacyComplianceTests`, `UnitOfWork`, `FinanceWithholdingRecord`, `User`, `.OnModelCreating`, `LibraryBook`, `LabEquipment`, `OfflineAttendanceEvent`, `Batch`, `FinanceAccountingStandardPolicy`, `FinanceUtilityBill`, `WorkflowInstance`, `PqcSignatureService`, `Election`, `RuleDefinition`, `CasbinPolicySyncService`, `CourseAssignment`, `FinanceReportProfile`, `LoginAuditRecord`, `FacultyCompensation`, `VisitingFacultyProfile`, `AegisDbContextFactory`, `IoTSensor`, `FormDefinition`, `DecisionTable`, `.CheckIn_EndToEnd_EncryptsCoordinates_RedactsRoster_AndAllowsOverride`, `ComplianceControl`, `CurriculumVersionRecord`, `FinanceAuditSample`, `SystemConfiguration`, `WizardSession`, `WorkflowDefinition`, `AegisCoreLicenseController`, `Enrollment`, `SecurityIncident`, `TaxSlab`, `PaymentPlanInstallment`, `DashboardWidget`, `DefaulterRiskScore`, `WorkflowStep`, `StudentLifecycleController`, `DataImportJob`, `StudentProctoringRecord`, `AuditFinding`, `LabSafetyInspection`, `TeamsSyncLog`, `VoiceIntent`, `CommunicationsController`, `ElectionContracts.cs`, `Currency`, `SamlConfiguration`, `AccreditationAuditFinding`, `CampusConfiguration`, `.Create`, `MeritList`, `MeritListEntry`, `GradeOverrideRequest`, `RolePermission`, `FinanceWebhookController`, `FinanceController`, `DayOfWeek`, `RuleVersion`, `DegreeRequirement`, `FinanceRestatementRun`, `ProctoringSession`, `MenuItem`, `FleetVehicle`, `DefaultRiskAssessment`, `FinanceAuditEvidencePackage`, `FeatureFlag`, `DefaulterIntervention`, `StudentTransfer`, `SyncLagEntry`, `FinancePqcKeyCeremony`, `.CourseReport`, `CheckpointScan`, `CreditTransfer`, `ForeignStudentRegistry`, `FinanceConsolidationRun`, `MarkModeration`, `WebhookSubscription`, `.AddAegisDbContext`, `Vendor`, `ResearchLab`, `SecurityGuard`, `ConsumableRequisition`, `IncidentWitness`, `CorrectiveActionPlan`, `SafetyChecklistItem`, `StrategicGoal`, `CallLog`, `StudentFeePayment`, `AlumniDonation`, `DemoSeeder`, `CisUpload`, `ComplianceFramework`, `LabBooking`, `AlumniProfile`, `PaymentPlanArrangement`, `EmergencyAlert`, `EmergencyContact`, `MedicalVisit`, `FacultyEngagement`?**
+  _High betweenness centrality (0.327) - this node is a cross-community bridge._
+- **Why does `AegisCore.Domain.Entities` connect `AegisCore.Domain.Entities` to `UniversitySsoProfile`, `FinanceVoucher`, `ITenantScoped`, `CoreErpEntities2.cs`, `.AddExtendedPlatform`, `CoreErpEntities1.cs`, `ITenantScoped`, `.MapFinanceModuleEndpoints`, `CoreErpEntities3.cs`, `MisconductCase`, `WizardAdminCredential`, `License`, `HealthScore`, `AegisCore.Domain`, `FinancePurchaseOrder`, `ExecutiveDashboard`, `ICampusService`, `FinanceForeignCurrencyTransaction`, `IFormSubmissionRepository`, `CatalogCourseRecord`, `AssessmentComponent`, `ProcurementRequisition`, `ForeignStudentRecord`, `FinanceScholarshipProgram`, `GradeDistribution`, `LmsProvision`, `TicketComment`, `CancellationToken`, `CafeteriaUnit`, `PolicyConfig`, `SLADefinition`, `WorkOrderTimeEntry`, `MaintenanceTicket`, `RoomMapDto`, `CancellationToken`, `ExtensionInstallation`, `IApiKeyService`, `FinanceRegulatoryReportService`, `CancellationToken`, `.AddPlatformServices`, `.AddAsync`, `WorkOrder`, `ApplicationDocument`, `AegisCore.Infrastructure`, `ExtensionReview`, `Room`, `SyncLagConfig`, `IStorageProvider`, `CancellationToken`, `CampusPolygon`, `TranslationKey`, `WorkOrderMaterial`, `IRepository`, `EnergyReading`, `.AddDisasterRecovery`, `FoodOrder`, `ControllerBase`, `StudentProgressDto`, `SsoSession`, `CancellationToken`, `AccreditationFramework`, `FireDrill`, `Repository`, `ReplicationScalingConfig`, `CampusOperationsService`, `LostFoundItem`, `FinanceLibraryAcquisition`, `AegisCore.API/Program.cs`, `GateEntry`, `PreventiveMaintenanceSchedule`, `.AddFinanceModule`, `RoomOccupancy`, `CancellationToken`, `BoardAlert`, `FinanceInvestmentHolding`, `Faculty`, `ConfigVersion`, `Building`, `FloorPlan`, `GuardRound`, `PluginRevenueShare`, `CancellationToken`, `FinancePayrollPaymentFile`, `CancellationToken`, `ExamSchedule`, `.AddMultiCampus`, `LeaderboardEntry`, `AegisCore.Application.ApiGateway`, `SocietyMembership`, `FinanceAuditSeal`, `PlagiarismApiSubmission`, `Permission`, `HighRiskValidators.cs`, `S2AdmissionsController`, `CancellationToken`, `AegisCore.Domain.Common`, `CancellationToken`, `IExtensionRepository`, `EquipmentMaintenance`, `IncidentEvidence`, `DocumentTemplateService`, `ReadReplicaConfig`, `Timetable`, `AegisCore.Application.Campus`, `Attendance`, `S5ObeController`, `FeeService`, `ConfigurationEntry`, `.AddDigitalTwin`, `.TotalDepreciation`, `FinanceFleetProfile`, `FinanceAssetAccountingEvent`, `FinanceBankFeedTransaction`, `LicenseState`, `GrievanceTicket`, `EquipmentUsageLog`, `NotificationDelivery`, `.Upload`, `IAssetInventoryService`, `ApiKey`, `CountryPack`, `ExternalDbConnection`, `ChartConfiguration`, `ImportBatch`, `FerpaAuditLog`, `.AddInternationalization`, `Extension`, `ExamSeating`, `.ApplyGracemarksAsync`, `.AddInfrastructure`, `Course`, `FireEquipment`, `GuardShift`, `CounselorProfile`, `CloPlomapping`, `InfrastructureServiceExtensions.cs`, `ProfilePictureRecord`, `ScheduledJob`, `MarketplaceController`, `SensorReading`, `Room`, `MaintenanceContractor`, `EquipmentBooking`, `Enrollment`, `ScalingEvent`, `BackupRecord`, `CancellationToken`, `SeedPipeline.cs`, `AuditLog`, `TransportInspection`, `ConfigAuditLog`, `FinanceVendorContact`, `RuleDomain`, `Student`, `ReplicaHealthDto`, `IFormSubmissionRepository`, `FinancePayrollPosting`, `AegisCore.Application.Governance`, `.AddIdentityGovernance`, `AegisCore.Application.StudentLifecycle`, `CalibrationRecord`, `FinanceInsurancePolicy`, `SecurityIncident`, `Role`, `IApiKeyRepository`, `DocumentVaultEntry`, `FinanceInventoryMovement`, `Payslip`, `BackgroundService`, `.InvalidRequest`, `FinanceWithholdingRecord`, `.AuthorizeAndAuditAsync`, `.AddComplianceCenter`, `User`, `CancellationToken`, `AegisCore.Application.Backup`, `OfflineAttendanceEvent`, `ArgumentOutOfRangeException`, `Batch`, `FinanceAccountingStandardPolicy`, `FinanceUtilityBill`, `WorkflowInstance`, `Election`, `RuleDefinition`, `.CalculateAsync`, `CourseAssignment`, `LoginAuditRecord`, `FacultyCompensation`, `Visitor`, `CancellationToken`, `IoTSensor`, `FormDefinition`, `LabEquipment`, `DecisionTable`, `.CheckIn_EndToEnd_EncryptsCoordinates_RedactsRoster_AndAllowsOverride`, `VehiclePass`, `IAccountingStandardsEngine`, `CancellationToken`, `Campus`, `CurriculumVersionRecord`, `FinanceAuditSample`, `SystemConfiguration`, `ResearchLab`, `WizardSession`, `WorkflowDefinition`, `TaxSlab`, `PaymentPlanInstallment`, `WorkflowStep`, `.AddMicrosoftEcosystem`, `AegisCore.Application.AI`, `ConfigurationEntry`, `LabSafetyInspection`, `TeamsSyncLog`, `VoiceIntent`, `ExtensionService`, `Currency`, `SamlConfiguration`, `CampusConfiguration`, `.Create`, `LabConsumable`, `RolePermission`, `FinanceController`, `RuleVersion`, `DegreeAudit`, `DegreeRequirement`, `DegreeProgram`, `FeatureFlag`, `StudentTransfer`, `FinancePqcKeyCeremony`, `.CourseReport`, `CheckpointScan`, `AegisCore.Application.Foundation`, `CreditTransfer`, `FormSubmission`, `SecurityGuard`, `WebhookSubscription`, `ConsumableRequisition`, `IncidentWitness`, `SafetyChecklistItem`, `CountryPackController`, `SyncLagDashboardDto`, `CisUpload`, `LabBooking`, `EmergencyAlert`, `EmergencyContact`, `DocumentVaultEntryDto`?**
+  _High betweenness centrality (0.122) - this node is a cross-community bridge._
+- **Why does `AegisCore.Infrastructure` connect `AegisCore.Infrastructure` to `.BuildTargetModel`, `.Create`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.InvalidRequest`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `S5ObeController`, `FinanceController`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.Up`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `AegisCore.Domain`, `AegisCore.Application.Foundation`, `FinancePaymentPlanAccounting`, `SubstitutionConfigurationProvider`, `.BuildModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.CourseReport`, `AegisDbContextFactory`, `.BuildTargetModel`, `FinancePaymentPlans`, `AegisCore.Domain.Entities`, `InfrastructureServiceExtensions.cs`, `FinanceSecurityDeposits`, `StandingPurchaseOrderSpend`, `FinanceReportArtifacts`, `FinanceReportProfiles`, `FinancePqcKeys`, `FinancePayrollPosting`, `FinanceTreasuryFeeds`, `ScalingEvent`, `.CheckIn_EndToEnd_EncryptsCoordinates_RedactsRoster_AndAllowsOverride`, `.AddAegisDbContext`, `.BuildTargetModel`, `.BuildTargetModel`, `FinanceGrantsScholarships`, `FinanceUtilities`, `FinanceInsurance`, `FinanceInventory`, `FinanceFleet`, `FinanceInvestments`, `FinanceTax`, `.BuildTargetModel`, `TenantFinanceConfiguration`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `.BuildTargetModel`, `AegisCoreLicenseController`, `CommunicationsController.cs`, `AegisCore.API/Program.cs`, `.BuildTargetModel`, `Migration`, `AegisCore.Infrastructure.Migrations`, `AegisCore.Application.AI`, `AegisCore.Application.StudentLifecycle`, `HighRiskValidators.cs`, `S2AdmissionsController`, `.BuildTargetModel`, `.BuildTargetModel`, `Payslip`?**
   _High betweenness centrality (0.082) - this node is a cross-community bridge._
-- **Are the 14 inferred relationships involving `AegisDbContext` (e.g. with `.MigratePostgresAsync()` and `.Accounting_Context_Is_Driven_By_Tenant_Configuration()`) actually correct?**
-  _`AegisDbContext` has 14 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 15 inferred relationships involving `AegisDbContext` (e.g. with `.MigratePostgresAsync()` and `.Accounting_Context_Is_Driven_By_Tenant_Configuration()`) actually correct?**
+  _`AegisDbContext` has 15 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `net10.0`, `Microsoft.AspNetCore.Authentication.JwtBearer (10.0.0)`, `prometheus-net.AspNetCore (8.2.1)` to the rest of the system?**
-  _12111 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _12117 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AegisDbContext` be split into smaller, more focused modules?**
   _Cohesion score 0.003236245954692557 - nodes in this community are weakly interconnected._
-- **Should `MultiTenantSsoService` be split into smaller, more focused modules?**
-  _Cohesion score 0.10338680926916222 - nodes in this community are weakly interconnected._
+- **Should `UniversitySsoProfile` be split into smaller, more focused modules?**
+  _Cohesion score 0.07179487179487179 - nodes in this community are weakly interconnected._

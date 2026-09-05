@@ -19,4 +19,5 @@ data:
   HybridPqcTransport__Enforce: "true"
   HybridPqcTransport__MaxSkewSeconds: "60"
   License__ServerUrl: https://license.aegiscore.systems
+  License__OfflineMode: "false"
   Database__AutoMigrate: "true"

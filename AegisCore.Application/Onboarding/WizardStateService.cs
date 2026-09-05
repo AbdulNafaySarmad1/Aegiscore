@@ -19,7 +19,7 @@ public record ConnectionTestResult(bool Success, string Message, WizardError? Er
 public record DnsPropagationResult(bool IsComplete, int PropagationPercent, string Message);
 public record GoLiveResult(bool Success, string? ErpUrl = null, WizardError? Error = null, List<GoLiveCheck>? Checks = null);
 public record GoLiveCheck(string Name, bool Passed, string Detail);
-public record DomainProvisioningResult(string ErpUrl, DnsRecord CnameRecord);
+public record DomainProvisioningResult(string ErpUrl, DnsRecord? CnameRecord);
 public record DnsRecord(string Type, string Name, string Value, string Ttl);
 
 public sealed class WizardStateDto
@@ -71,6 +71,7 @@ public sealed class WizardStateDto
     public string SmtpFromName { get; set; } = string.Empty;
 
     public string UniversityDomain { get; set; } = string.Empty;
+    public bool UseCloudflareTunnel { get; set; }
     public string? CloudflareTunnelId { get; set; }
     public string? CloudflareTunnelToken { get; set; }
     public string? CloudflareCnameTarget { get; set; }

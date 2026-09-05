@@ -183,20 +183,37 @@ public class OnboardingService
         return new DnsPropagationResult(true, 100, $"DNS ready — {state.ErpUrl} is accessible.");
     }
 
-    public DomainProvisioningResult ProvisionDomain(WizardStateDto state, string universityDomain)
+    public DomainProvisioningResult ProvisionDomain(
+        WizardStateDto state,
+        string universityDomain,
+        bool useCloudflareTunnel = false)
     {
         state.UniversityDomain = universityDomain;
-        var tunnelId = $"aegiscore-{state.UniversityShortName.ToLower()}-{state.TenantId:N}"[..8];
+        state.UseCloudflareTunnel = useCloudflareTunnel;
+        if (!useCloudflareTunnel)
+        {
+            state.CloudflareTunnelId = null;
+            state.CloudflareTunnelToken = null;
+            state.CloudflareCnameTarget = null;
+            return new DomainProvisioningResult(state.ErpUrl, null);
+        }
+
+        var tunnelId = $"aegiscore-{state.UniversityShortName.ToLowerInvariant()}-{state.TenantId:N}"[..8];
         state.CloudflareTunnelId = tunnelId;
         state.CloudflareCnameTarget = $"{tunnelId}.cfargotunnel.com";
-
         return new DomainProvisioningResult(state.ErpUrl, new DnsRecord("CNAME", "erp", state.CloudflareCnameTarget, "Auto"));
     }
 
-    public string GenerateDnsInstructions(WizardStateDto state) =>
-        $"Add this DNS record to {state.UniversityDomain}:\n\n" +
-        $"Type: CNAME\nName: erp\nValue: {state.CloudflareCnameTarget}\nTTL: Auto\n\n" +
-        $"Where: cPanel → Zone Editor, GoDaddy → DNS, Cloudflare → DNS → Add Record";
+    public string GenerateDnsInstructions(WizardStateDto state)
+    {
+        if (!state.UseCloudflareTunnel || string.IsNullOrWhiteSpace(state.CloudflareCnameTarget))
+            return $"Point {state.ErpSubdomain} to the university-managed ingress, load balancer, or public IP. "
+                + "Cloudflare Tunnel is not enabled; configure the appropriate A, AAAA, or CNAME record with your DNS provider.";
+
+        return $"Add this DNS record to {state.UniversityDomain}:\n\n"
+            + $"Type: CNAME\nName: erp\nValue: {state.CloudflareCnameTarget}\nTTL: Auto\n\n"
+            + "Where: your university DNS provider (Cloudflare, cPanel, GoDaddy, or equivalent).";
+    }
 
     public async Task<GoLiveResult> GoLiveAsync(WizardStateDto state, CancellationToken ct = default)
     {
@@ -252,7 +269,8 @@ public class OnboardingService
         sb.AppendLine($"SMTP_FROM_ADDRESS={state.SmtpFromAddress}");
         sb.AppendLine($"SMTP_FROM_NAME={state.SmtpFromName}");
         sb.AppendLine($"AEGISCORE_ERP_URL={state.ErpUrl}");
-        sb.AppendLine($"CLOUDFLARE_TUNNEL_ID={state.CloudflareTunnelId ?? ""}");
+        sb.AppendLine($"AEGISCORE_USE_CLOUDFLARE_TUNNEL={state.UseCloudflareTunnel.ToString().ToLowerInvariant()}");
+        if (state.UseCloudflareTunnel) sb.AppendLine($"CLOUDFLARE_TUNNEL_ID={state.CloudflareTunnelId ?? ""}");
         sb.AppendLine($"# Sensitive values stored in secrets provider only:");
         sb.AppendLine($"# DB_PASS, REDIS_PASSWORD, SMTP_PASSWORD, AZURE_CLIENT_SECRET");
         return sb.ToString();

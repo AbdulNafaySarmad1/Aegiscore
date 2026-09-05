@@ -271,6 +271,7 @@ registry_db_password="$(random_hex 24)"
     esac
 
     echo "LICENSE_SERVER_URL=https://license.aegiscore.systems"
+    echo "LICENSE_OFFLINE_MODE=false"
     echo "LICENSE_HMAC_SECRET=$(random_hex 32)"
     echo "AEGISCORE_ENCRYPTION_KEY=$(random_b64 32)"
     echo "PQC_MLKEM_PUBLIC_KEY=$(random_b64 32)"

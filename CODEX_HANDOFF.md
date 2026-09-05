@@ -27,7 +27,8 @@ Remaining execution order: **P17 → P11 (last)**. Do not start P11 before P17 i
 - P13: `9ffd7caf`
 - P14: `cdfe8c90`
 - P15: `bf8779ec`
-- P16: current commit
+- P16: `c5be80d4` (core compliance)
+- P16 appendix: current commit
 
 P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 105 `RequirePermission(...)` controller attributes after P16.
 
@@ -68,13 +69,17 @@ No P15 implementation work remains.
 - Added on-demand five-file DSAR ZIP exports with 24-hour expiry metadata and no location coordinates or encrypted IP values.
 - Added pending-erasure processing and tenant-local 02:00 retention with a configurable six-year default.
 - Added focused coverage for allowed/denied FERPA access, encrypted IP storage, complete erasure, DSAR contents/expiry, retention windows, and directory opt-out.
+- Added `docs/FERPA_GDPR_COMPLIANCE.md` documenting the modules as institutional opt-ins, operational prerequisites, and legal limitations.
+- Disclosed the exact licence-heartbeat payload and added locally signed offline validation via `License__OfflineMode`/`LICENSE_OFFLINE_MODE`; verified that offline mode creates no HTTP client.
+- Made Cloudflare Tunnel an explicit setup choice that defaults off; direct university ingress/DNS remains supported and no empty tunnel variable is emitted.
 
 No P16 implementation work remains.
 
 ## Current verification status
 
-- `dotnet test AegisCore.slnx -c Release --no-restore`: **PASS**, 607 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
+- `dotnet test AegisCore.slnx -c Release --no-build`: **PASS**, 609 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
 - P16 focused compliance tests: **PASS**, 4/4.
+- P16 appendix licensing/infrastructure tests: **PASS**, 7/7.
 - Portal `npm run typecheck`: **PASS**.
 - Portal `npm run build`: **PASS**, 46 generated routes including `/admin/campus` and `/student/attendance`.
 - Portal `npm run lint -- --quiet`: **PASS**, 0 errors.

@@ -50,6 +50,7 @@ services:
       AEGISCORE_STORAGE_PROVIDER: local
       AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
       License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.aegiscore.systems}
+      License__OfflineMode: ${LICENSE_OFFLINE_MODE:-false}
       License__HmacSecret: ${LICENSE_HMAC_SECRET:?Run ./scripts/bootstrap-env.sh first}
       AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:?Run ./scripts/bootstrap-env.sh first}
       PQC_MLKEM_PUBLIC_KEY: ${PQC_MLKEM_PUBLIC_KEY:-}
