@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
@@ -80,7 +81,7 @@ export default function ForeignStudentsPage() {
           apiGet<ComplianceBreach[]>("/api/foreign-students/compliance-breaches", ctrl.signal).catch(() => [] as ComplianceBreach[])
         ]);
         setStudents(s); setRenewals(r); setBreaches(b);
-      } catch { setError("Failed to load foreign student data"); }
+      } catch { setError("Foreign student records are temporarily unavailable."); }
       finally { setLoading(false); }
     };
     fetch();
@@ -154,13 +155,7 @@ export default function ForeignStudentsPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={() => window.location.reload()} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} />;
 
   const expiredStudents = students.filter(s => daysRemaining(s.visaExpiry) <= 7);
 

@@ -37,13 +37,13 @@ public sealed class EnhancedSetupService
         new Dictionary<string, SetupTemplateDefinition>(StringComparer.OrdinalIgnoreCase)
         {
             ["students"] = new("students", "Students", ["Student ID", "Name", "Email", "Phone", "Department", "Program", "Admission Date"],
-                [["STU-001-2024", "Ahmed Khan", "ahmed@university.edu.pk", "03001234567", "Computer Science", "BS 4Y", "2024-01-15"]],
+                [["STUDENT-001", "Student Name", "student@example.invalid", "+12025550123", "Example Department", "Example Program", "2024-01-15"]],
                 ["Student ID: STU-XXX-YYYY", "Email must be unique", "Phone must be 11 digits and start with 03", "Admission Date: YYYY-MM-DD"]),
             ["faculty"] = new("faculty", "Faculty", ["Faculty ID", "Name", "Email", "Phone", "Department", "Designation"],
-                [["FAC-001", "Dr. Ayesha Ahmed", "ayesha@university.edu.pk", "03002222222", "Computer Science", "Associate Professor"]],
+                [["FACULTY-001", "Faculty Name", "faculty@example.invalid", "+12025550124", "Example Department", "Faculty Member"]],
                 ["Faculty ID: FAC-XXX", "Email must be unique", "Use a supported academic designation"]),
             ["employees"] = new("employees", "Employees", ["Employee ID", "Name", "Email", "Department", "Designation"],
-                [["EMP-001", "Sara Ahmed", "sara@university.edu.pk", "Administration", "Registrar"]],
+                [["EMPLOYEE-001", "Employee Name", "employee@example.invalid", "Example Department", "Administrator"]],
                 ["Employee ID must be unique", "Email must be valid", "Department must exist"]),
             ["programs"] = new("programs", "Programs", ["Program Code", "Program Name", "Department", "Degree Type", "Duration Years"],
                 [["BS-CS", "BS Computer Science", "Computer Science", "Bachelor", "4"]],
@@ -52,7 +52,7 @@ public sealed class EnhancedSetupService
                 [["CS-101", "Introduction to Programming", "Computer Science", "3", "3", "0"]],
                 ["Course Code: DEPT-XXX", "Credits must be between 1 and 6", "Department must exist"]),
             ["departments"] = new("departments", "Departments", ["Department Code", "Department Name", "HOD Name"],
-                [["CS", "Computer Science", "Dr. Muhammad Hassan"]],
+                [["EX", "Example Department", "Department Head"]],
                 ["Department code and name must be unique", "HOD may be left blank during initial setup"]),
             ["attendance"] = new("attendance", "Attendance", ["Date", "Course Code", "Student ID", "Status", "Notes"],
                 [["2024-01-15", "CS-101", "STU-001-2024", "Present", ""]],
@@ -68,7 +68,7 @@ public sealed class EnhancedSetupService
                 ["Course must exist", "Exam date: YYYY-MM-DD", "Total marks must be positive"]),
             ["financial"] = new("financial", "Financial", ["Student ID", "Date", "Type", "Amount", "Description"],
                 [["STU-001-2024", "2024-01-15", "Tuition", "150000", "Semester tuition fee"]],
-                ["Date: YYYY-MM-DD", "Amount is in PKR", "Negative amounts are discounts or refunds"])
+                ["Date: YYYY-MM-DD", "Amount uses the tenant's configured currency", "Negative amounts are discounts or refunds"])
         };
 
     public IReadOnlyCollection<SetupTemplateDefinition> GetTemplates() => Templates.Values.ToArray();

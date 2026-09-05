@@ -42,21 +42,22 @@ export default function ReplicationPage() {
       apiGet<{ alerts: Alert[] }>("/api/admin/replication/alerts").catch(() => ({ alerts: [] })),
     ]);
     setDash(d); setConfig(c); setEvents(Array.isArray(e) ? e : []);
-    setAlerts(Array.isArray(a) ? [] : "alerts" in (a||{}) ? (a as any).alerts : []);
+    setAlerts(a.alerts ?? []);
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- initial dashboard hydration.
   useEffect(() => { const ctrl = new AbortController(); refresh(); return () => ctrl.abort(); }, []);
 
-  async function doPost(path: string) { try { await apiPost(path); setMsg("Done"); refresh(); } catch { setMsg("Failed"); } }
+  async function doPost(path: string) { try { await apiPost(path); setMsg("Replication action completed."); refresh(); } catch { setMsg("Replication action failed — verify the replica connection and try again."); } }
 
-  async function addReplica() { try { await apiPost(`/api/admin/replication/replicas?name=${addName}&connectionString=${addConn}&priority=1&weight=1`); setMsg("Replica added"); setAddName(""); setAddConn(""); refresh(); } catch { setMsg("Failed"); } }
+  async function addReplica() { try { await apiPost(`/api/admin/replication/replicas?name=${addName}&connectionString=${addConn}&priority=1&weight=1`); setMsg("Replica added."); setAddName(""); setAddConn(""); refresh(); } catch { setMsg("Replica could not be added — verify its name and connection string."); } }
 
   async function saveConfig() {
     if (!config) return;
-    try { await apiPut("/api/admin/replication/config", config); setMsg("Config saved"); } catch { setMsg("Failed"); }
+    try { await apiPut("/api/admin/replication/config", config); setMsg("Replication configuration saved."); } catch { setMsg("Replication configuration could not be saved — try again."); }
   }
 
-  if (!dash) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading...</p></main>;
+  if (!dash) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading replication dashboard...</p></main>;
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}>

@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState, useMemo } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, CheckCircle2, Clock, Goal, RefreshCw, ShieldCheck, Timer, TrendingDown, XCircle } from "lucide-react";
@@ -75,7 +76,7 @@ export default function ReadinessPage() {
   }, [data]);
 
   if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("computingReadiness")}</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (error) return <PageErrorDisplay message={error} />;
   if (!data) return null;
 
   return (

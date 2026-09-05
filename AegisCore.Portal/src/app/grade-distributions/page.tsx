@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { AlertCircle, AlertTriangle, BarChart3, CheckCircle2, PlayCircle, TrendingUp } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, PlayCircle, TrendingUp } from "lucide-react";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { ErrorDisplay, toWizardError } from "@/components/ErrorDisplay";
 
 type Stats = { mean: number; median: number; stdDev: number; passPercent: number; failPercent: number; studentCount: number };
 type Anomaly = { id: string; courseName: string; semester: string; severity: "Critical" | "Warning" | "Info"; description: string; detectedAt: string };
@@ -79,7 +80,7 @@ export default function GradeDistributionsPage() {
             <PlayCircle style={{ width: 15 }} /> {loading ? t("analyzing") : t("runAnalysis")}
           </button>
         </div>
-        {error && <div style={{ padding: "0 18px 18px", color: "var(--red)", fontSize: 11, display: "flex", alignItems: "center", gap: 6 }}><AlertCircle style={{ width: 15 }} />{error}</div>}
+        {error && <div style={{ padding: "0 18px 18px" }}><ErrorDisplay error={toWizardError(error, "Grade distribution analysis could not be completed.")} onRetry={() => void runAnalysis()} /></div>}
       </section>
 
       {report && (

@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useLocale, useTranslations } from "next-intl";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 
 type VoucherProof = { voucherNumber: string; status: string; pqcAlgorithm: string | null; pqcKeyId: string | null; signature: string | null; publicKey: string | null; signedPayload: string | null; verified: boolean; clientVerified: boolean };
 
@@ -20,12 +21,13 @@ function base64Bytes(value: string): Uint8Array {
 export function FinanceDashboard({ dashboard, security }: { dashboard: ExecutiveDashboard | null; security: SecurityPosture | null }) {
   const t = useTranslations("finance");
   const locale = useLocale();
+  const tenant = useTenantFormatter();
   const router = useRouter();
   const [voucherId, setVoucherId] = useState("");
   const [proof, setProof] = useState<VoucherProof | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
   const net = (dashboard?.kpis.revenue ?? 0) - (dashboard?.kpis.expenses ?? 0);
-  const money = (value: number) => new Intl.NumberFormat(locale, { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(value);
+  const money = (value: number) => tenant.money(value);
   const dateTime = (value: string) => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 
   async function verifyVoucher() {

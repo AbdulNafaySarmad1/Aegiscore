@@ -24,6 +24,7 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing dependent data is intentional.
     if (!selectedCourse) { setRoster([]); return; }
     apiGet<Roster>(`/api/attendance/roster/${selectedCourse}`).then(r => {
       setRoster(r.students ?? []);
@@ -67,7 +68,7 @@ export default function AttendancePage() {
           <div>
             <div className="page-header-breadcrumb"><span>Academic</span><span>/</span><span>Attendance</span></div>
             <h1>Attendance Marking</h1>
-            <p>Mark present/absent for today's session.</p>
+            <p>Mark present/absent for today&apos;s session.</p>
           </div>
         </div>
 

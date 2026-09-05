@@ -1,9 +1,11 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api-client";
 import { AlertCircle, Building2, FileCheck2, Globe, GraduationCap, TrendingUp, UserPlus } from "lucide-react";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 
 type PlacementStatus = "Placed" | "OfferAccepted" | "Interviewing" | "Searching" | "NotParticipating";
 type Placement = {
@@ -48,10 +50,9 @@ function statusBadge(s: PlacementStatus) {
 
 const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)", background: "var(--canvas)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" };
 
-function money(val: number) { return new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(val); }
-
 export default function PlacementPage() {
   const t = usePersonalityTranslations("academic");
+  const { money } = useTenantFormatter();
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -71,7 +72,7 @@ export default function PlacementPage() {
       apiGet<Partner[]>("/api/placement/partners", ctrl.signal).catch(() => [] as Partner[])
     ]).then(([pl, an, pa]) => {
       if (!ctrl.signal.aborted) { setPlacements(pl); setAnalytics(an); setPartners(pa); setLoading(false); }
-    }).catch(() => { if (!ctrl.signal.aborted) { setError("Failed to load placement data"); setLoading(false); } });
+    }).catch(() => { if (!ctrl.signal.aborted) { setError("Placement records are temporarily unavailable."); setLoading(false); } });
     return () => ctrl.abort();
   }, []);
 
@@ -86,7 +87,7 @@ export default function PlacementPage() {
   }
 
   if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingPlacement")}</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (error) return <PageErrorDisplay message={error} />;
 
   const placed = placements.filter(p => p.status === "Placed" || p.status === "OfferAccepted").length;
   const interviewing = placements.filter(p => p.status === "Interviewing").length;

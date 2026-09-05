@@ -90,6 +90,7 @@ export function WizardShell() {
   useEffect(() => {
     const saved = window.sessionStorage.getItem("aegiscore_setup_token");
     if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restore persisted bootstrap token on mount.
       setToken(saved);
       void loadSession();
     }
@@ -251,7 +252,9 @@ export function WizardShell() {
 function IdentityStep({ value, update }: { value: WizardData; update: (patch: WizardData) => void }) {
   const country = text(value, "country");
   const [regions, setRegions] = useState<string[]>([]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear dependent region options.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear dependent region options.
     if (!country) { setRegions([]); return; }
     apiGet<{ regions: string[] }>(`/api/wizard/options/regions?country=${encodeURIComponent(country)}`)
       .then(result => setRegions(result.regions)).catch(() => setRegions([]));

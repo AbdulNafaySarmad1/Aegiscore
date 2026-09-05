@@ -34,6 +34,7 @@ export default function SyncLagPage() {
     ]);
     setDash(d); setConfig(c);
   }
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- initial dashboard hydration and polling.
   useEffect(() => { refresh(); const i = setInterval(refresh, 10000); return () => clearInterval(i); }, []);
 
   async function correct(id: string) {
@@ -48,10 +49,10 @@ export default function SyncLagPage() {
 
   async function saveConfig() {
     if (!config) return;
-    try { await apiPut("/api/admin/sync-lag/config", config); setMsg("Config saved"); } catch { setMsg("Failed"); }
+    try { await apiPut("/api/admin/sync-lag/config", config); setMsg("Sync-lag configuration saved."); } catch { setMsg("Sync-lag configuration could not be saved — try again."); }
   }
 
-  if (!dash || !config) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading...</p></main>;
+  if (!dash || !config) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading sync-lag dashboard...</p></main>;
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}>

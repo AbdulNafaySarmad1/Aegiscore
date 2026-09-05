@@ -38,7 +38,7 @@ export function usePaginatedFetch<T>(basePath: string, defaultPageSize = 20) {
           pageSize: ps,
         });
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load data.");
+        setError(e instanceof Error ? e.message : "The requested page of data could not be loaded.");
       } finally {
         setLoading(false);
       }

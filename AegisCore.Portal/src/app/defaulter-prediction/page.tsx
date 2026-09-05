@@ -1,9 +1,11 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, BrainCircuit, CreditCard, Lightbulb, Search, Target, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 
 type RiskTier = "Green" | "Yellow" | "Orange" | "Red";
 type TierCounts = Record<RiskTier, number>;
@@ -22,6 +24,7 @@ function tierBadge(t: RiskTier) {
 const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)", background: "var(--canvas)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" };
 
 export default function DefaulterPredictionPage() {
+  const tenant = useTenantFormatter();
   const t = usePersonalityTranslations("academic");
   const [tierCounts, setTierCounts] = useState<TierCounts>({ Green: 0, Yellow: 0, Orange: 0, Red: 0 });
   const [forecast, setForecast] = useState<CashFlowForecast[]>([]);
@@ -45,7 +48,7 @@ export default function DefaulterPredictionPage() {
       apiGet<InterventionTemplate[]>("/api/defaulter-prediction/intervention-templates", ctrl.signal).catch(() => [] as InterventionTemplate[])
     ]).then(([tc, f, it]) => {
       if (!ctrl.signal.aborted) { setTierCounts(tc); setForecast(f); setInterventions(it); setLoading(false); }
-    }).catch(() => { if (!ctrl.signal.aborted) { setError("Failed to load prediction data"); setLoading(false); } });
+    }).catch(() => { if (!ctrl.signal.aborted) { setError("Defaulter forecasts are temporarily unavailable."); setLoading(false); } });
     return () => ctrl.abort();
   }, []);
 
@@ -74,7 +77,7 @@ export default function DefaulterPredictionPage() {
   const tierIcons: Record<RiskTier, typeof CreditCard> = { Green: Users, Yellow: AlertCircle, Orange: Target, Red: BrainCircuit };
 
   if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingDefaulter")}</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (error) return <PageErrorDisplay message={error} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -190,7 +193,7 @@ export default function DefaulterPredictionPage() {
             <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--surface-soft)" }}>
-                  {["Month", "Expected (PKR)", "At Risk (PKR)", "Gap (PKR)", "Health"].map(h => (
+                  {["Month", `Expected (${tenant.currency})`, `At Risk (${tenant.currency})`, `Gap (${tenant.currency})`, "Health"].map(h => (
                     <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
                   ))}
                 </tr>

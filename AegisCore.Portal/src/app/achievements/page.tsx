@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
@@ -73,7 +74,7 @@ export default function AchievementsPage() {
     ]).then(([bd, ac, dl, lb]) => {
       setBadges(bd); setAchievements(ac); setDeansEntries(dl); setLeaderboard(lb);
       setError(null); setLoading(false);
-    }).catch(() => { setError("Failed to load achievements data"); setLoading(false); });
+    }).catch(() => { setError("Achievement records are temporarily unavailable."); setLoading(false); });
     return () => { ctrl.abort(); };
   }, []);
 
@@ -122,13 +123,7 @@ export default function AchievementsPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={refresh} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} onRetry={() => void refresh()} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -136,7 +131,7 @@ export default function AchievementsPage() {
         <div>
           <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Student Engagement</p>
           <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("achievements") ?? "Student Achievement Gamification"}</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badge catalog, achievement detection, Dean's List, leaderboards, and roadmap</span>
+          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Badge catalog, achievement detection, Dean&apos;s List, leaderboards, and roadmap</span>
         </div>
       </header>
 
@@ -158,7 +153,7 @@ export default function AchievementsPage() {
           <small style={{ color: "var(--muted)" }}>across all students</small>
         </article>
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Dean's List</span>
+          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Dean&apos;s List</span>
           <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--amber)" }}>{deansEntries.length}</strong>
           <small style={{ color: "var(--muted)" }}>honored students</small>
         </article>
@@ -193,14 +188,14 @@ export default function AchievementsPage() {
         </div>
 
         <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Dean's List Processing</h2><p>Process end-of-semester honors</p></div><Crown /></div>
+          <div className="surface-heading"><div><h2>Dean&apos;s List Processing</h2><p>Process end-of-semester honors</p></div><Crown /></div>
           <form onSubmit={processDeansList} style={{ display: "grid", gap: 12, padding: 18 }}>
             <label style={labelS}>
               Semester <b style={{ color: "var(--red)" }}>*</b>
               <input placeholder="e.g. Fall 2025" value={deansSemester} onChange={e => setDeansSemester(e.target.value)} style={inputS} required />
             </label>
             <button type="submit" disabled={processingDeans} style={{ padding: "0.7rem", background: "var(--amber)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: processingDeans ? 0.6 : 1 }}>
-              {processingDeans ? "Processing..." : <><Crown style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Process Dean's List</>}
+              {processingDeans ? "Processing..." : <><Crown style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Process Dean&apos;s List</>}
             </button>
           </form>
         </div>
@@ -312,12 +307,12 @@ export default function AchievementsPage() {
       </section>
 
       <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Dean's List & Honors Roll</h2><p>{deansEntries.length} entries</p></div><Crown /></div>
+        <div className="surface-heading"><div><h2>Dean&apos;s List & Honors Roll</h2><p>{deansEntries.length} entries</p></div><Crown /></div>
         {deansEntries.length === 0 ? (
           <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <Crown style={{ width: 28 }} />
-            <strong>No Dean's List entries</strong>
-            <span>Process a semester to generate the Dean's List</span>
+            <strong>No Dean&apos;s List entries</strong>
+            <span>Process a semester to generate the Dean&apos;s List</span>
           </div>
         ) : (
           <div style={{ overflow: "auto" }}>

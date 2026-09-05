@@ -216,7 +216,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "revenue", label: "Revenue This Month", value: "--", format: "currency", icon: "Landmark", iconColor: "green", source: "/api/finance/v2/dashboard/executive" },
       { id: "collection-rate", label: "Collection Rate %", value: "--", format: "percentage", icon: "CreditCard", iconColor: "blue", source: "/api/finance/v2/dashboard/executive" },
       { id: "defaulters", label: "Defaulters", value: "--", format: "number", icon: "FileSearch", iconColor: "amber", source: "/api/defaulter-prediction?summary" },
-      { id: "outstanding", label: "Outstanding (PKR)", value: "--", format: "currency", icon: "Landmark", iconColor: "red", source: "/api/finance/v2/dashboard/executive" },
+      { id: "outstanding", label: "Outstanding balance", value: "--", format: "currency", icon: "Landmark", iconColor: "red", source: "/api/finance/v2/dashboard/executive" },
     ],
     quickActions: [
       { id: "challan", label: "Generate Challan", icon: "FileText", route: "/finance" },

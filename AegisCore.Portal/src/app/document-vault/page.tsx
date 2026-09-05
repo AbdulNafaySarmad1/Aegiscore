@@ -32,6 +32,7 @@ export default function DocumentVaultPage() {
     const d = await apiGet<Dashboard>("/api/document-vault/dashboard").catch(() => null);
     setDash(d);
   }
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- initial dashboard hydration.
   useEffect(() => { refresh(); }, []);
 
   async function handleUpload() {
@@ -47,7 +48,7 @@ export default function DocumentVaultPage() {
 
   async function seedTiers() { await apiPost("/api/document-vault/seed-tiers"); setMsg("Tiers seeded"); refresh(); }
 
-  if (!dash) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading...</p></main>;
+  if (!dash) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading document vault...</p></main>;
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}>

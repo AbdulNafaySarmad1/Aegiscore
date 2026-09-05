@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, Camera, CheckCircle2, Clock, Eye, Lock, Monitor, PlayCircle, ShieldAlert, ShieldCheck, Upload, UserCheck } from "lucide-react";
@@ -52,7 +53,7 @@ export default function ProctoringPage() {
       apiGet<SessionData[]>("/api/proctoring/sessions", ctrl.signal).catch(() => [] as SessionData[])
     ]).then(([s, ev, se]) => {
       if (!ctrl.signal.aborted) { setStudents(s); setEvents(ev); setSessions(se); setLoading(false); }
-    }).catch(() => { if (!ctrl.signal.aborted) { setError("Failed to load proctoring data"); setLoading(false); } });
+    }).catch(() => { if (!ctrl.signal.aborted) { setError("Proctoring data is temporarily unavailable."); setLoading(false); } });
     return () => ctrl.abort();
   }, []);
 
@@ -88,7 +89,7 @@ export default function ProctoringPage() {
   const referred = students.filter(s => s.status === "Referred").length;
 
   if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingProctoring")}</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (error) return <PageErrorDisplay message={error} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>

@@ -4,6 +4,7 @@ import { apiPost, ApiError } from "@/lib/api-client";
 import { CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useTenantPreferences } from "@/components/TenantPreferencesProvider";
 
 type PaymentRequest = { success: boolean; isSandbox: boolean; rtpRequestId: string; expiresAt: string; deepLink: string | null };
 
@@ -12,7 +13,7 @@ export function StudentPaymentAction({ demandId, currency, outstanding }: { dema
   const [result, setResult] = useState<PaymentRequest | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const gateway = currency === "PKR" ? "raast" : "stripe";
+  const { paymentGateway: gateway } = useTenantPreferences();
 
   async function requestPayment() {
     setBusy(true); setError(null); setResult(null);

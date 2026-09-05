@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
@@ -78,7 +79,7 @@ export default function ElectionsPage() {
           apiGet<ElectionResult[]>("/api/elections/results", ctrl.signal).catch(() => [] as ElectionResult[])
         ]);
         setElections(e); setCandidates(c); setResults(r);
-      } catch { setError("Failed to load election data"); }
+      } catch { setError("Election records are temporarily unavailable."); }
       finally { setLoading(false); }
     };
     fetch();
@@ -165,13 +166,7 @@ export default function ElectionsPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={() => window.location.reload()} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>

@@ -1,8 +1,10 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 import {
   AlertCircle, Ban, CalendarClock, CheckCircle2, ClipboardList, Clock,
   FileText, RefreshCw, Send, Upload, Users, XCircle
@@ -48,6 +50,7 @@ const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--mut
 
 export default function FreezesPage() {
   const t = usePersonalityTranslations("academic");
+  const { money } = useTenantFormatter();
 
   const [freezes, setFreezes] = useState<Freeze[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +76,7 @@ export default function FreezesPage() {
     const ctrl = new AbortController();
     apiGet<Freeze[]>("/api/freezes", ctrl.signal)
       .then(d => { setFreezes(d); setError(null); })
-      .catch(() => { setError("Failed to load freeze data"); })
+      .catch(() => { setError("Freeze application records are temporarily unavailable."); })
       .finally(() => { setLoading(false); });
     return () => { ctrl.abort(); };
   }, []);
@@ -144,13 +147,7 @@ export default function FreezesPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={refresh} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} onRetry={() => void refresh()} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -187,7 +184,7 @@ export default function FreezesPage() {
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
           <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Refunds Pending</span>
           <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--amber)" }}>
-            {new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(
+            {money(
               freezes.reduce((sum, f) => sum + (f.refundAmount || 0), 0)
             )}
           </strong>
@@ -320,7 +317,7 @@ export default function FreezesPage() {
                       {new Date(f.effectiveFrom).toLocaleDateString()} → {new Date(f.effectiveTo).toLocaleDateString()}
                     </td>
                     <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>
-                      {f.refundAmount > 0 ? new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(f.refundAmount) : "—"}
+                      {f.refundAmount > 0 ? money(f.refundAmount) : "—"}
                     </td>
                     <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)" }}>{f.returnStatus || "In freeze"}</td>
                   </tr>

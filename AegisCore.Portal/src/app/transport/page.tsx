@@ -1,8 +1,10 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 import {
   AlertCircle, AlertTriangle, Bus, CalendarDays, CheckCircle2, Clock,
   CreditCard, FileText, MapPin, Navigation, QrCode, Route, ShieldCheck, UserCheck, Users, X
@@ -45,6 +47,7 @@ const complianceColors: Record<ComplianceSeverity, { c: string; bg: string }> = 
 const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)", background: "var(--canvas)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" };
 
 export default function TransportPage() {
+  const { money } = useTenantFormatter();
   const t = usePersonalityTranslations("academic");
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -70,7 +73,7 @@ export default function TransportPage() {
         setVehicles(v); setRoutes(r); setComplianceItems(c); setFeeSummary(f); setLoading(false);
       }
     }).catch(() => {
-      if (!ctrl.signal.aborted) { setError("Failed to load transport data"); setLoading(false); }
+      if (!ctrl.signal.aborted) { setError("Transport records are temporarily unavailable."); setLoading(false); }
     });
     return () => ctrl.abort();
   }, []);
@@ -97,7 +100,7 @@ export default function TransportPage() {
   const totalFleet = vehicles.length;
 
   if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>Loading transport dashboard...</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (error) return <PageErrorDisplay message={error} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -288,11 +291,11 @@ export default function TransportPage() {
             <div style={{ padding: 18, display: "grid", gap: 14 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
                 <div style={{ padding: 16, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)", textAlign: "center" }}>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "var(--green)" }}>PKR {feeSummary.totalCollected.toLocaleString()}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: "var(--green)" }}>{money(feeSummary.totalCollected)}</div>
                   <small style={{ color: "var(--muted)", fontSize: 10 }}>Collected</small>
                 </div>
                 <div style={{ padding: 16, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)", textAlign: "center" }}>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: feeSummary.pendingCollections > 0 ? "var(--amber)" : "var(--green)" }}>PKR {feeSummary.pendingCollections.toLocaleString()}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: feeSummary.pendingCollections > 0 ? "var(--amber)" : "var(--green)" }}>{money(feeSummary.pendingCollections)}</div>
                   <small style={{ color: "var(--muted)", fontSize: 10 }}>Pending</small>
                 </div>
               </div>
@@ -306,7 +309,7 @@ export default function TransportPage() {
               </div>
               <div style={{ padding: 12, borderRadius: 8, border: "1px solid var(--line)", background: "var(--surface-soft)", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 11, color: "var(--muted)" }}>Monthly per Student</span>
-                <strong style={{ fontSize: 12 }}>PKR {feeSummary.perStudentMonthly?.toLocaleString() ?? "—"}</strong>
+                <strong style={{ fontSize: 12 }}>{feeSummary.perStudentMonthly == null ? "—" : money(feeSummary.perStudentMonthly)}</strong>
               </div>
               <div style={{ padding: 12, borderRadius: 8, border: "1px solid var(--line)", background: "var(--surface-soft)", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 11, color: "var(--muted)" }}>Semester</span>

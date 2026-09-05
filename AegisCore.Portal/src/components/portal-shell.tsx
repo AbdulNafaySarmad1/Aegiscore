@@ -77,6 +77,7 @@ export function PortalShell({ children }: { children?: React.ReactNode }) {
       const raw = localStorage.getItem("aegiscore_demo_session");
       if (raw) {
         const acc = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
         setSession({
           userId: acc.email,
           tenantId: "iobm-demo-tenant",
@@ -235,7 +236,7 @@ export function PortalShell({ children }: { children?: React.ReactNode }) {
               <motion.div className="search-overlay" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }}>
                 <div className="search-results">
                   {filteredModules.length === 0 ? (
-                    <p className="search-empty">No modules match "<strong>{search}</strong>"</p>
+                    <p className="search-empty">No modules match &quot;<strong>{search}</strong>&quot;</p>
                   ) : (
                     filteredModules.map(m => (
                       <Link key={m.id} href={m.route} className="search-result-item" onClick={() => setSearchOpen(false)}>

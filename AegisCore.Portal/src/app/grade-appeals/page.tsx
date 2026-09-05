@@ -5,6 +5,7 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, CheckCircle2, FileSearch, FileText, FolderOpen, Scale, Send, Upload } from "lucide-react";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
 
+import { ErrorDisplay, toWizardError } from "@/components/ErrorDisplay";
 type AppealStatus = "Pending" | "UnderReview" | "Resolved" | "Rejected";
 type Appeal = {
   id: string;
@@ -64,7 +65,7 @@ export default function GradeAppealsPage() {
     const ctrl = new AbortController();
     apiGet<Appeal[]>("/api/grade-appeals", ctrl.signal)
       .then(d => { if (!ctrl.signal.aborted) { setAppeals(d); setError(null); } })
-      .catch(() => { if (!ctrl.signal.aborted) setError("Failed to load appeals"); })
+      .catch(() => { if (!ctrl.signal.aborted) setError("Grade appeal records are temporarily unavailable."); })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
     return () => ctrl.abort();
   }, []);
@@ -72,7 +73,7 @@ export default function GradeAppealsPage() {
   const refreshAppeals = () => {
     apiGet<Appeal[]>("/api/grade-appeals")
       .then(d => { setAppeals(d); setError(null); })
-      .catch(() => setError("Failed to load appeals"));
+      .catch(() => setError("Grade appeal records are temporarily unavailable."));
   };
 
   async function submitAppeal(e: React.FormEvent) {
@@ -208,7 +209,7 @@ export default function GradeAppealsPage() {
         {loading ? (
           <div style={{ padding: "3rem", textAlign: "center", color: "var(--muted)" }}>{t("loadingAppeals")}</div>
         ) : error ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "var(--red)" }}>{error}</div>
+          <div style={{ padding: 18 }}><ErrorDisplay error={toWizardError(error, "Grade appeals could not be loaded.")} onRetry={refreshAppeals} /></div>
         ) : appeals.length === 0 ? (
           <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
             <FolderOpen style={{ width: 28, color: "var(--green)" }} />

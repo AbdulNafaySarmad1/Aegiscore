@@ -1,8 +1,10 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 import {
   AlertCircle, Award, CheckCircle2, DollarSign, FileText, GraduationCap,
   MapPin, Search, Send, Star, Upload, UserCheck, UserPlus, Users
@@ -26,9 +28,9 @@ type Contract = {
   status: "Draft" | "Active" | "Completed" | "Terminated";
 };
 
-const hecBadge = (approved: boolean) => (
+const accreditorBadge = (approved: boolean, accreditor: string) => (
   <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: approved ? "var(--green-soft)" : "var(--amber-soft)", color: approved ? "var(--green)" : "var(--amber)" }}>
-    {approved ? "HEC Approved" : "Pending HEC"}
+    {approved ? `${accreditor} approved` : `Pending ${accreditor}`}
   </span>
 );
 
@@ -48,6 +50,7 @@ const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--mut
 
 export default function VisitingFacultyPage() {
   const t = usePersonalityTranslations("academic");
+  const tenant = useTenantFormatter();
 
   const [faculty, setFaculty] = useState<Faculty[]>([]);
   const [matches, setMatches] = useState<SlotMatch[]>([]);
@@ -86,7 +89,7 @@ export default function VisitingFacultyPage() {
     ]).then(([fc, mt, ct]) => {
       setFaculty(fc); setMatches(mt); setContracts(ct);
       setError(null); setLoading(false);
-    }).catch(() => { setError("Failed to load visiting faculty data"); setLoading(false); });
+    }).catch(() => { setError("Visiting faculty records are temporarily unavailable."); setLoading(false); });
     return () => { ctrl.abort(); };
   }, []);
 
@@ -154,13 +157,7 @@ export default function VisitingFacultyPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={refresh} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} onRetry={() => void refresh()} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -182,7 +179,7 @@ export default function VisitingFacultyPage() {
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
           <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Registered Faculty</span>
           <strong style={{ margin: "7px 0 3px", fontSize: 28 }}>{faculty.length}</strong>
-          <small style={{ color: "var(--muted)" }}>{faculty.filter(f => f.hecApproved).length} HEC approved</small>
+          <small style={{ color: "var(--muted)" }}>{faculty.filter(f => f.hecApproved).length} {tenant.accreditorName} approved</small>
         </article>
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
           <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Slot Matches</span>
@@ -213,7 +210,7 @@ export default function VisitingFacultyPage() {
                 <input placeholder="e.g. Dr. Ali Khan" value={name} onChange={e => setName(e.target.value)} style={inputS} required />
               </label>
               <label style={labelS}>
-                CNIC <b style={{ color: "var(--red)" }}>*</b>
+                {tenant.identityDocumentName} <b style={{ color: "var(--red)" }}>*</b>
                 <input placeholder="e.g. 35202-1234567-1" value={cnic} onChange={e => setCnic(e.target.value)} style={inputS} required />
               </label>
               <label style={labelS}>
@@ -229,7 +226,7 @@ export default function VisitingFacultyPage() {
                 <input placeholder="e.g. AI, Machine Learning" value={specializations} onChange={e => setSpecializations(e.target.value)} style={inputS} />
               </label>
               <label style={labelS}>
-                Hourly Rate (PKR)
+                Hourly Rate ({tenant.currency})
                 <input type="number" placeholder="e.g. 5000" value={compensation} onChange={e => setCompensation(e.target.value)} style={inputS} />
               </label>
             </div>
@@ -271,7 +268,7 @@ export default function VisitingFacultyPage() {
                 </label>
               </div>
               <label style={labelS}>
-                Compensation (PKR)
+                Compensation ({tenant.currency})
                 <input type="number" placeholder="e.g. 150000" value={contractCompensation} onChange={e => setContractCompensation(e.target.value)} style={inputS} />
               </label>
               <button type="submit" disabled={generatingContract} style={{ padding: "0.7rem", background: "var(--green)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: generatingContract ? 0.6 : 1 }}>
@@ -363,7 +360,7 @@ export default function VisitingFacultyPage() {
             <table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--surface-soft)" }}>
-                  {["Name", "CNIC", "Qualification", "Specializations", "HEC Status", "Rate/hr", "Rating", "Assignments"].map(h => (
+                  {["Name", tenant.identityDocumentName, "Qualification", "Specializations", `${tenant.accreditorName} Status`, "Rate/hr", "Rating", "Assignments"].map(h => (
                     <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
                   ))}
                 </tr>
@@ -375,8 +372,8 @@ export default function VisitingFacultyPage() {
                     <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace", color: "var(--muted)" }}>{f.cnic}</td>
                     <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{f.qualification}</td>
                     <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)" }}>{f.specializations.join(", ")}</td>
-                    <td style={{ padding: "10px 14px" }}>{hecBadge(f.hecApproved)}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>PKR {f.compensation.toLocaleString()}</td>
+                    <td style={{ padding: "10px 14px" }}>{accreditorBadge(f.hecApproved, tenant.accreditorName)}</td>
+                    <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{tenant.money(f.compensation)}</td>
                     <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600, color: f.rating >= 4 ? "var(--green)" : f.rating >= 3 ? "var(--amber)" : "var(--muted)" }}>{f.rating}/5</td>
                     <td style={{ padding: "10px 14px", fontSize: 11 }}>{f.totalAssignments}</td>
                   </tr>

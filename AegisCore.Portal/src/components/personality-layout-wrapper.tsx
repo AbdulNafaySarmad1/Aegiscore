@@ -11,6 +11,7 @@ export function PersonalityLayoutWrapper({ children }: { children: React.ReactNo
   useEffect(() => {
     try {
       const raw = localStorage.getItem("aegiscore_demo_session");
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
       if (raw) { const acc = JSON.parse(raw); setUserId(acc.email); }
       else { setUserId(null); }
     } catch { setUserId(null); }

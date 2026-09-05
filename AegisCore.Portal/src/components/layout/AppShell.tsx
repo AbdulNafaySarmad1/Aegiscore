@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [session, setSession] = useState<Session | null>(null);
   const [dark, setDark] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches);
   const [menuOpen, setMenuOpen] = useState(false);
   const [fontScale, setFontScale] = useState(() => { try { return localStorage.getItem("aegis-font-scale") ?? "medium"; } catch { return "medium"; } });
   const [highContrast, setHighContrast] = useState(false);
@@ -38,6 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem("aegiscore_demo_session");
       if (raw) {
         const acc = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
         setSession({
           userId: acc.email,
           tenantId: "iobm-demo-tenant",
@@ -123,7 +124,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="shell-main">
         {/* Topbar */}
         <header className="topbar">
-          <button className="btn btn-ghost btn-sm" style={{ display: "none" }} onClick={() => setMenuOpen(true)}><Menu size={20} /></button>
+          <button className="btn btn-ghost btn-sm mobile-menu-button" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Menu size={20} /></button>
           <span className="topbar-title">{(pathname ?? "/") === "/" ? "Command Center" : modules.find(m => (pathname ?? "").startsWith(m.route))?.label ?? "AegisCore"}</span>
 
           <div className="topbar-search">
@@ -162,11 +163,3 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
-/* Shell overrides */
-const shellCss = `
-.shell{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
-.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:#0F172A;color:#E2E8F0;border-right:1px solid #1E293B;z-index:30;overflow:hidden auto;transition:width .25s}.sidebar.collapsed{width:64px}
-.shell-main{min-width:0;display:flex;flex-direction:column}
-@media(max-width:1023px){.shell{grid-template-columns:1fr}.sidebar{position:fixed;left:0;width:260px!important;transform:translateX(-105%);box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .25s}.sidebar.open{transform:none}}
-`;

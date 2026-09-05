@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api-client";
+import { ErrorDisplay, toWizardError } from "@/components/ErrorDisplay";
 
 type ModulePageProps = {
   title: string;
@@ -30,13 +31,9 @@ export function ModuleDashboard({ title, description, apiPath, metricKeys, metri
   }, [apiPath]);
 
   if (error) {
-    return (
-      <main style={{ padding: "1.5rem", maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--line)", padding: "2rem", textAlign: "center" }}>
-          <p style={{ color: "var(--muted)" }}>{error}</p>
-        </div>
-      </main>
-    );
+    return <main style={{ padding: "1.5rem", maxWidth: 1100, margin: "0 auto" }}>
+      <ErrorDisplay error={toWizardError(error, `The ${title} data could not be loaded.`)} onRetry={() => window.location.reload()} />
+    </main>;
   }
 
   return (
@@ -47,7 +44,7 @@ export function ModuleDashboard({ title, description, apiPath, metricKeys, metri
       </div>
       {loading ? (
         <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--line)", padding: "2rem", textAlign: "center" }}>
-          <div style={{ color: "var(--muted)" }}>Loading...</div>
+          <div style={{ color: "var(--muted)" }}>Loading {title.toLowerCase()}...</div>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>

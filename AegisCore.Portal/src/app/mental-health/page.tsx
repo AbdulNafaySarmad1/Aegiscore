@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { AlertCircle, AlertTriangle, Ban, CheckCircle2, Clock, EyeOff, HeartPulse, LifeBuoy, Loader2, Send, ShieldOff, ThermometerSun } from "lucide-react";
@@ -59,7 +60,7 @@ export default function MentalHealthPage() {
     const ctrl = new AbortController();
     apiGet<Ticket[]>("/api/mental-health/counselor/queue", ctrl.signal)
       .then(d => { if (!ctrl.signal.aborted) { setQueue(d); setError(null); } })
-      .catch(() => { if (!ctrl.signal.aborted) setError("Failed to load counselor queue"); })
+      .catch(() => { if (!ctrl.signal.aborted) setError("The counselor queue is temporarily unavailable."); })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
     return () => ctrl.abort();
   }, []);
@@ -67,7 +68,7 @@ export default function MentalHealthPage() {
   const refreshQueue = () => {
     apiGet<Ticket[]>("/api/mental-health/counselor/queue")
       .then(d => { setQueue(d); setError(null); })
-      .catch(() => setError("Failed to load counselor queue"));
+      .catch(() => setError("The counselor queue is temporarily unavailable."));
   };
 
   async function submitTicket(e: React.FormEvent) {
@@ -97,7 +98,7 @@ export default function MentalHealthPage() {
   const openCount = queue.filter(t => t.status === "Open").length;
 
   if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted)" }}>{t("loadingMentalHealth")}</main>;
-  if (error) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--red)" }}>{error}</main>;
+  if (error) return <PageErrorDisplay message={error} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>

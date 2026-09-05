@@ -2,8 +2,9 @@
 
 import { FinanceRealtimeRefresh } from "@/components/finance/finance-realtime-refresh";
 import { AlertCircle, Banknote, ClipboardCheck, WalletCards } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, Treemap } from "recharts";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 
 export type DepartmentDashboard = {
   department: { id: string; name: string; code: string };
@@ -15,8 +16,7 @@ export type DepartmentDashboard = {
 
 export function DepartmentFinanceDashboard({ dashboard }: { dashboard: DepartmentDashboard | null }) {
   const t = useTranslations("finance");
-  const locale = useLocale();
-  const money = (value: number, currency = "PKR") => new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(value);
+  const { money } = useTenantFormatter();
   if (!dashboard) return <main className="finance-page"><p className="finance-alert" role="alert"><AlertCircle />{t("departmentUnavailable")}</p></main>;
   const budget = [{ name: t("spent"), value: dashboard.budget.spent }, { name: t("committed"), value: dashboard.budget.committed }, { name: t("available"), value: Math.max(0, dashboard.budget.available) }];
   const pettyPercent = dashboard.pettyCash && dashboard.pettyCash.floatAmount > 0 ? dashboard.pettyCash.currentBalance / dashboard.pettyCash.floatAmount * 100 : 0;

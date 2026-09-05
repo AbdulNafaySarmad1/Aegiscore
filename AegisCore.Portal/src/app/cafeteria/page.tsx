@@ -1,8 +1,10 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 import {
   AlertCircle, AlertTriangle, BarChart3, CheckCircle2, Clock, Coffee, DollarSign,
   ForkKnife, Package, PlusCircle, RefreshCw, Send, ShoppingCart, Store, Trash2,
@@ -55,6 +57,7 @@ const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: 
 const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 };
 
 export default function CafeteriaPage() {
+  const { money } = useTenantFormatter();
   const t = usePersonalityTranslations("academic");
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -100,7 +103,7 @@ export default function CafeteriaPage() {
           apiGet<InventoryAlert[]>("/api/cafeteria/inventory-alerts", ctrl.signal).catch(() => [] as InventoryAlert[])
         ]);
         setMenuItems(m); setOrders(o); setAlerts(a);
-      } catch { setError("Failed to load cafeteria data"); }
+      } catch { setError("Cafeteria records are temporarily unavailable."); }
       finally { setLoading(false); }
     };
     fetch();
@@ -153,13 +156,7 @@ export default function CafeteriaPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={() => window.location.reload()} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
@@ -191,7 +188,7 @@ export default function CafeteriaPage() {
         <article style={{ minHeight: 110, display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)" }}>
           <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Today Revenue</span>
           <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--green)" }}>
-            {new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(orders.reduce((s, o) => s + o.amount, 0))}
+            {money(orders.reduce((s, o) => s + o.amount, 0))}
           </strong>
           <small style={{ color: "var(--muted)" }}>{orders.length} transactions</small>
         </article>
@@ -216,7 +213,7 @@ export default function CafeteriaPage() {
                   Menu Item <b style={{ color: "var(--red)" }}>*</b>
                   <select value={selectedItem} onChange={e => setSelectedItem(e.target.value)} style={inputS} required>
                     <option value="">Select item...</option>
-                    {menuItems.map(m => <option key={m.id} value={m.id}>{m.name} ({new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(m.price)})</option>)}
+                    {menuItems.map(m => <option key={m.id} value={m.id}>{m.name} ({money(m.price)})</option>)}
                   </select>
                 </label>
                 <label style={labelS}>
@@ -327,7 +324,7 @@ export default function CafeteriaPage() {
                       <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{o.studentName}</td>
                       <td style={{ padding: "10px 14px", fontSize: 11 }}>{o.itemName}</td>
                       <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>x{o.quantity}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(o.amount)}</td>
+                      <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{money(o.amount)}</td>
                       <td style={{ padding: "10px 14px" }}>{orderStatusBadge(o.status)}</td>
                     </tr>
                   ))}

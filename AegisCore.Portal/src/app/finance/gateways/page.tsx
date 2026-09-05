@@ -1,8 +1,9 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, KeyRound, RefreshCw, ShieldCheck } from "lucide-react";
+import { CheckCircle2, KeyRound, RefreshCw, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, apiGet, apiPost, apiPut } from "@/lib/api-client";
+import { ErrorDisplay, toWizardError } from "@/components/ErrorDisplay";
 
 type Gateway = {
   gatewaySlug: string;
@@ -69,7 +70,7 @@ export default function GatewayManagementPage() {
   return <main className="finance-page">
     <header className="finance-heading"><div><p>Finance settings</p><h1>Payment gateways</h1><span>Credentials are write-only and stored in the tenant vault. They are never returned or logged.</span></div><button className="icon-button" onClick={() => void load()} aria-label="Refresh gateway configuration"><RefreshCw /></button></header>
     {message && <div className="finance-alert" role="status"><CheckCircle2 /><span>{message}</span></div>}
-    {error && <div className="finance-alert" role="alert"><AlertCircle /><span>{error}</span></div>}
+    {error && <ErrorDisplay error={toWizardError(error, "Payment gateway settings could not be loaded.")} onRetry={() => void load()} />}
     <section className="finance-grid" aria-label="Configured payment gateways">
       {gateways.map(gateway => <article className="surface finance-panel" key={gateway.gatewaySlug}>
         <div className="surface-heading"><div><h2>{gateway.gatewaySlug.toUpperCase()}</h2><p>{gateway.environment} · {gateway.healthStatus}</p></div><ShieldCheck /></div>

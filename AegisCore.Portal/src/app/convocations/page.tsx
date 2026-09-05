@@ -1,5 +1,6 @@
 "use client";
 
+import { PageErrorDisplay } from "@/components/ErrorDisplay";
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { usePersonalityTranslations } from "@/lib/personality-translator";
@@ -116,7 +117,7 @@ export default function ConvocationsPage() {
     ]).then(([ce, el, ct, at]) => {
       setCeremonies(ce); setEligibility(el); setCertificates(ct); setAttendees(at);
       setError(null); setLoading(false);
-    }).catch(() => { setError("Failed to load convocation data"); setLoading(false); });
+    }).catch(() => { setError("Convocation records are temporarily unavailable."); setLoading(false); });
     return () => { ctrl.abort(); };
   }, []);
 
@@ -179,13 +180,7 @@ export default function ConvocationsPage() {
     </main>
   );
 
-  if (error) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", alignContent: "center", gap: 12, color: "var(--red)" }}>
-      <AlertCircle style={{ width: 32 }} />
-      <strong>{error}</strong>
-      <button onClick={refreshAll} style={{ minHeight: 40, padding: "0 18px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontWeight: 700 }}>Retry</button>
-    </main>
-  );
+  if (error) return <PageErrorDisplay message={error} onRetry={() => void refreshAll()} />;
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>

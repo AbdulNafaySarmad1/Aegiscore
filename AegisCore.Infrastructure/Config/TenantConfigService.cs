@@ -45,6 +45,10 @@ public class TenantConfigService
     public int GetRateLimitBurst(Guid? tenantId = null) => ResolveInt("api.rate_limit_burst", DefaultTenantConfigTemplate.DefaultRateLimitBurst);
     public string GetTimezone(Guid? tenantId = null) => Resolve("locale.timezone", DefaultTenantConfigTemplate.DefaultTimezone);
     public string GetCurrency(Guid? tenantId = null) => Resolve("locale.currency", DefaultTenantConfigTemplate.DefaultCurrency);
+    public string GetLocale(Guid? tenantId = null) => Resolve("locale.language", DefaultTenantConfigTemplate.DefaultLanguage);
+    public string GetPaymentGateway(Guid? tenantId = null) => Resolve("payment.default_gateway", DefaultTenantConfigTemplate.DefaultPaymentGateway);
+    public string GetAccreditorName(Guid? tenantId = null) => Resolve("academic.accreditor_name", DefaultTenantConfigTemplate.DefaultAccreditorName);
+    public string GetIdentityDocumentName(Guid? tenantId = null) => Resolve("identity.document_name", DefaultTenantConfigTemplate.DefaultIdentityDocumentName);
 
     private string Resolve(string key, string fallback)
     {

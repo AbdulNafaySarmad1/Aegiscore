@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { apiGet } from "@/lib/api-client";
 import { getRoleProfile, getDomainColor, getGreeting } from "@/lib/roles";
 import { AppShell } from "@/components/layout/AppShell";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
 import {
   BookOpenCheck, Briefcase, Building2, CalendarDays, ClipboardCheck, CreditCard,
   FileSearch, FileText, GraduationCap, Landmark, LayoutDashboard, Scale, ShieldCheck,
@@ -30,7 +31,8 @@ function TrendArrow({ trend }: { trend?: string }) {
 }
 
 function KpiCard({ kpi, value }: { kpi: KPIDefinition; value: string }) {
-  const formatted = kpi.format === "currency" ? `₨ ${Number(value).toLocaleString("en-PK")}`
+  const { money } = useTenantFormatter();
+  const formatted = kpi.format === "currency" ? money(Number(value))
     : kpi.format === "percentage" ? `${value}%` : String(value);
   return (
     <motion.article className="kpi-card" whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 180, damping: 20 }}>
@@ -66,6 +68,7 @@ function ModuleCard({ module: m, index }: { module: DashboardModule; index: numb
 }
 
 export default function DashboardPage() {
+  const { date } = useTenantFormatter();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,6 +77,7 @@ export default function DashboardPage() {
       const raw = localStorage.getItem("aegiscore_demo_session");
       if (raw) {
         const acc = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
         setSession({
           userId: acc.email,
           tenantId: "iobm-demo-tenant",
@@ -105,7 +109,7 @@ export default function DashboardPage() {
         <motion.div className="hero-greeting" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
           <h1>{greeting}</h1>
           <p>{profile.displayName} · {session.tenantId.slice(0, 8)}</p>
-          <div className="hero-time">{new Date().toLocaleDateString("en-PK", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+          <div className="hero-time">{date(new Date())}</div>
         </motion.div>
 
         {/* KPIs */}

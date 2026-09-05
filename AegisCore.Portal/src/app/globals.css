@@ -250,6 +250,15 @@ code,pre{font-family:var(--font-mono);font-size:var(--text-sm)}
 
 /* ── CONTENT PAGE ─────────────────── */
 .content-page{max-width:var(--max-content);margin:0 auto;padding:var(--space-6) var(--space-6) var(--space-16)}
+.mobile-menu-button{display:none}
+
+/* ── ERROR / EMPTY / LOADING STATES ── */
+.error-page{min-height:60vh;display:grid;place-items:center;padding:var(--space-6)}
+.error-display{width:min(680px,100%);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:var(--space-4);padding:var(--space-6);border:1px solid var(--danger);border-radius:var(--radius-lg);background:var(--danger-soft);color:var(--danger)}
+.error-display.warning{border-color:var(--warning);background:var(--warning-soft);color:var(--warning)}
+.error-display>svg{width:28px;height:28px}.error-display-copy{display:grid;gap:var(--space-2)}.error-display-copy h1,.error-display-copy h2{color:var(--ink)}.error-display-copy p{color:var(--muted)}
+.error-display details{margin-top:var(--space-2)}.error-display summary{cursor:pointer;font-weight:var(--weight-label)}.error-display pre{max-height:180px;overflow:auto;margin-top:var(--space-2);padding:var(--space-3);border-radius:var(--radius-sm);background:var(--neutral-900);color:var(--neutral-100);white-space:pre-wrap}
+.empty-state,.loading-state{display:grid;place-items:center;gap:var(--space-3);min-height:180px;padding:var(--space-8);text-align:center;color:var(--muted)}
 
 /* ── FINANCE / AUDIT WORKSPACES ───── */
 .finance-page{max-width:var(--max-content);margin:0 auto;padding:var(--space-8) var(--space-6) var(--space-16);display:grid;gap:var(--space-6)}
@@ -309,14 +318,33 @@ code,pre{font-family:var(--font-mono);font-size:var(--text-sm)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--neutral-700);border-radius:99px;border:2px solid var(--neutral-900)}
 
 /* ── RESPONSIVE ───────────────────── */
-@media(max-width:1023px){
+@media(min-width:768px) and (max-width:1023px){
+  .shell{grid-template-columns:var(--sidebar-collapsed) minmax(0,1fr)}
+  .sidebar{position:sticky;left:auto;width:var(--sidebar-collapsed)!important;transform:none;box-shadow:none;transition:width var(--duration-std)}
+  .sidebar:not(.collapsed),.sidebar:hover,.sidebar:focus-within{position:fixed;width:var(--sidebar-w)!important;box-shadow:var(--shadow-lg)}
+  .sidebar.collapsed .sidebar-logo>div,.sidebar.collapsed .sidebar-nav-label,.sidebar.collapsed .sidebar-nav a>span,.sidebar.collapsed .sidebar-footer button>span{display:none}
+  .sidebar.collapsed .sidebar-nav a{justify-content:center;padding-inline:0}
+  .sidebar-scrim,.mobile-menu-button{display:none}
+  .kpi-grid,.dashboard-grid,.module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .audit-layout,.form-grid,.wizard-form-grid{grid-template-columns:1fr!important}
+  .content-page,.finance-page{padding:var(--space-5)}
+  .modal,.modal-content,[role="dialog"]{width:90vw!important;max-width:90vw!important}
+  button,.btn,a[role="button"]{min-width:44px;min-height:44px}
+  .table-wrap,.audit-table{overflow:visible;border:0}
+  .table-wrap table,.audit-table table{display:block;min-width:0}.table-wrap thead,.audit-table thead{display:none}.table-wrap tbody,.audit-table tbody{display:grid;gap:var(--space-3)}
+  .table-wrap tr,.audit-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-2);padding:var(--space-4);border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);box-shadow:var(--shadow-sm)}
+  .table-wrap td,.table-wrap th,.audit-table td,.audit-table th{position:static!important;display:block;padding:var(--space-1);border:0;background:transparent;font-size:var(--text-sm)}
+}
+@media(max-width:767px){
   .shell{grid-template-columns:1fr}
   .sidebar{position:fixed;left:0;transform:translateX(-105%);width:var(--sidebar-w)!important;box-shadow:var(--shadow-lg);transition:transform var(--duration-std)}.sidebar.open{transform:none}
   .sidebar-scrim{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.5)}
+  .mobile-menu-button{display:inline-flex}
   .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .audit-layout{grid-template-columns:1fr}
   .content-page{padding:var(--space-4) var(--space-4) var(--space-10)}
   .topbar{padding:0 var(--space-4)}.topbar-search{display:none}
+  .error-display{grid-template-columns:auto minmax(0,1fr)}.error-display>.btn{grid-column:1/-1}
 }
 @media(max-width:639px){
   .kpi-grid{grid-template-columns:1fr}

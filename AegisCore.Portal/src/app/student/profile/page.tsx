@@ -15,6 +15,7 @@ export default function StudentProfile() {
       const raw = localStorage.getItem("aegiscore_demo_session");
       if (raw) {
         const acc = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
         setSession({
           userId: acc.email,
           tenantId: "iobm-demo-tenant",
@@ -33,7 +34,7 @@ export default function StudentProfile() {
     { label: "Current Semester", value: "5th", icon: CalendarDays },
     { label: "CGPA", value: "3.67 / 4.0", icon: GraduationCap },
     { label: "Credit Hours", value: "87 / 130 Completed", icon: BookOpenCheck },
-    { label: "Fee Status", value: "PKR 48,500 Outstanding — Due Sep 30", icon: CreditCard },
+    { label: "Fee Status", value: "View current balance in Fees & Aid", icon: CreditCard },
     { label: "Contact", value: "Koenigsegg$One1", icon: Mail },
     { label: "Guardian", value: "Mr. Hassan Ali — +92 300 1234567", icon: Phone },
     { label: "Address", value: "A-12, Block 3, Gulshan-e-Iqbal, Karachi", icon: MapPin },

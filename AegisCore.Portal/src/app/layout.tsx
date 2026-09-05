@@ -3,6 +3,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getPortalLocale } from "@/i18n/server";
 import { portalMessages } from "@/i18n/messages";
 import { PersonalityLayoutWrapper } from "@/components/personality-layout-wrapper";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { TenantPreferencesProvider } from "@/components/TenantPreferencesProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,7 +27,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = await getPortalLocale();
   return (
     <html lang={locale} dir={locale === "ar-AE" ? "rtl" : "ltr"}>
-      <body><NextIntlClientProvider locale={locale} messages={portalMessages[locale]}><PersonalityLayoutWrapper>{children}</PersonalityLayoutWrapper></NextIntlClientProvider></body>
+      <body><NextIntlClientProvider locale={locale} messages={portalMessages[locale]}><TenantPreferencesProvider><PersonalityLayoutWrapper><ErrorBoundary>{children}</ErrorBoundary></PersonalityLayoutWrapper></TenantPreferencesProvider></NextIntlClientProvider></body>
     </html>
   );
 }

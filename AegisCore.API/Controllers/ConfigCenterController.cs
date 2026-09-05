@@ -3,6 +3,7 @@ using AegisCore.Application.ConfigCenter;
 using AegisCore.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AegisCore.Infrastructure.Config;
 
 namespace AegisCore.API.Controllers;
 
@@ -13,14 +14,27 @@ public class ConfigCenterController : ControllerBase
 {
     private readonly IConfigurationCenterService _configService;
     private readonly ILogger<ConfigCenterController> _logger;
+    private readonly TenantConfigService _tenantConfig;
 
     public ConfigCenterController(
         IConfigurationCenterService configService,
-        ILogger<ConfigCenterController> logger)
+        ILogger<ConfigCenterController> logger,
+        TenantConfigService tenantConfig)
     {
         _configService = configService;
         _logger = logger;
+        _tenantConfig = tenantConfig;
     }
+
+    [HttpGet("portal-preferences")]
+    public IActionResult GetPortalPreferences() => Ok(new
+    {
+        Locale = _tenantConfig.GetLocale(),
+        Currency = _tenantConfig.GetCurrency(),
+        PaymentGateway = _tenantConfig.GetPaymentGateway(),
+        AccreditorName = _tenantConfig.GetAccreditorName(),
+        IdentityDocumentName = _tenantConfig.GetIdentityDocumentName()
+    });
 
     [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost]

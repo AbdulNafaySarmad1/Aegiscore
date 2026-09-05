@@ -40,6 +40,9 @@ public static class DefaultTenantConfigTemplate
     public const string DefaultTimezone = "Asia/Karachi";
     public const string DefaultCurrency = "PKR";
     public const string DefaultLanguage = "en-PK";
+    public const string DefaultPaymentGateway = "stripe";
+    public const string DefaultAccreditorName = "Accreditor";
+    public const string DefaultIdentityDocumentName = "Identity document";
     public const decimal LateFeePercentage = 0.05m;
     public const decimal LibraryFinePerDay = 50m;
     public const int DefaultWaitSeconds = 60;

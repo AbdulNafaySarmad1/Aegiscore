@@ -21,6 +21,7 @@ export function PersonalityModeProvider({ children, userId }: { children: React.
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- unauthenticated state is resolved on mount.
     if (!userId) { setIsLoading(false); return; }
     const ctrl = new AbortController();
     apiGet<{ isActive: boolean }>(`/api/personality/users/${userId}/active`, ctrl.signal)

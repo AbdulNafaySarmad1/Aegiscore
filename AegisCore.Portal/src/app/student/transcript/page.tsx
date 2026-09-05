@@ -18,7 +18,7 @@ const semesters = [
     { course: "Data Structures", grade: "A-", credits: 3 },
     { course: "Discrete Math", grade: "B+", credits: 3 },
     { course: "Digital Logic", grade: "A", credits: 3 },
-    { course: "Pakistan Studies", grade: "B", credits: 2 },
+    { course: "Civic Studies", grade: "B", credits: 2 },
     { course: "OOP", grade: "A", credits: 3 },
   ], sgpa: 3.55 },
   { sem: "Fall 2025 (Current)", grades: [
