@@ -78,10 +78,10 @@
     "semantic_hash": "b182f5fe7edd39ed842884e905b2b66f"
   },
   "AegisCore.API/Controllers/ConfigCenterController.cs": {
-    "mtime": 1788584870.2568135,
-    "seen": 1788586302.14045,
-    "ast_hash": "26ff181c97dbb799a487432bb9f3e8f0",
-    "semantic_hash": "26ff181c97dbb799a487432bb9f3e8f0"
+    "mtime": 1788586569.7689736,
+    "seen": 1788607868.6632366,
+    "ast_hash": "dd641a3711df863041698540661fdb4d",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/CoreErpControllers.cs": {
     "mtime": 1788459723.3268602,
@@ -3066,16 +3066,16 @@
     "semantic_hash": "37f04f85c89b34292769b835a4d54aee"
   },
   "AegisCore.Infrastructure/Config/DefaultTenantConfigTemplate.cs": {
-    "mtime": 1788459723.3643274,
-    "seen": 1788461387.4189036,
-    "ast_hash": "bc300db2d0d7c2ed7191ca3e743b54c8",
-    "semantic_hash": "bc300db2d0d7c2ed7191ca3e743b54c8"
+    "mtime": 1788586569.7679737,
+    "seen": 1788607868.6864574,
+    "ast_hash": "8eba326bd3dbb2172056e648d76c082b",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Config/TenantConfigService.cs": {
-    "mtime": 1788459723.3644128,
-    "seen": 1788461387.4189055,
-    "ast_hash": "dbfac83e8bd60d411760e93ad3a7af15",
-    "semantic_hash": "dbfac83e8bd60d411760e93ad3a7af15"
+    "mtime": 1788586569.7689736,
+    "seen": 1788607868.68646,
+    "ast_hash": "82d720fa43384d519cf9cd9654c85bd7",
+    "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Config/TenantConfigServiceExtensions.cs": {
     "mtime": 1788459723.3644128,
@@ -5022,10 +5022,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/cafeteria/page.tsx": {
-    "mtime": 1788459723.4253352,
-    "seen": 1788461387.4196775,
-    "ast_hash": "e285efaa4105f970280ef47b77fba6d3",
-    "semantic_hash": "e285efaa4105f970280ef47b77fba6d3"
+    "mtime": 1788586714.4423096,
+    "seen": 1788607868.7049735,
+    "ast_hash": "8009c2a110d9baafe7203d8f47c499c6",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/catalog/layout.tsx": {
     "mtime": 1788459723.4253352,
@@ -5088,10 +5088,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/defaulter-prediction/page.tsx": {
-    "mtime": 1788459723.4261568,
-    "seen": 1788461387.419695,
-    "ast_hash": "c32c31bebdd6c70731aca17baa5169a9",
-    "semantic_hash": "c32c31bebdd6c70731aca17baa5169a9"
+    "mtime": 1788586781.1929388,
+    "seen": 1788607868.7054834,
+    "ast_hash": "35c64a1ec7a1110a8d8014e1db908533",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/document-vault/layout.tsx": {
     "mtime": 1788459723.4261568,
@@ -5142,10 +5142,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/finance/operations/page.tsx": {
-    "mtime": 1788459723.4266088,
-    "seen": 1788461387.4197106,
-    "ast_hash": "11551697fdf763b3ef8abf8eb1f594e9",
-    "semantic_hash": "11551697fdf763b3ef8abf8eb1f594e9"
+    "mtime": 1788586677.8899558,
+    "seen": 1788607868.7060227,
+    "ast_hash": "df5771676f469385b2da715318e9a3b2",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/finance/page.tsx": {
     "mtime": 1788459723.4266088,
@@ -5172,10 +5172,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/freezes/page.tsx": {
-    "mtime": 1788459723.427104,
-    "seen": 1788461387.4197195,
-    "ast_hash": "27fb98d1114608c219b32a3619484500",
-    "semantic_hash": "27fb98d1114608c219b32a3619484500"
+    "mtime": 1788586714.4403095,
+    "seen": 1788607868.7062466,
+    "ast_hash": "31f3176e211dd2907f6c5c3d232435e1",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/grade-appeals/layout.tsx": {
     "mtime": 1788459723.427104,
@@ -5214,10 +5214,10 @@
     "semantic_hash": "88547e7d30edc93927f0e00d76f8964e"
   },
   "AegisCore.Portal/src/app/layout.tsx": {
-    "mtime": 1788459723.427818,
-    "seen": 1788461387.41973,
-    "ast_hash": "05738d18fd5c90a4525c08baeae53014",
-    "semantic_hash": "05738d18fd5c90a4525c08baeae53014"
+    "mtime": 1788586543.899729,
+    "seen": 1788607868.706605,
+    "ast_hash": "60d10ea002642e80143926a83268ecda",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/login/page.tsx": {
     "mtime": 1788459723.427818,
@@ -5256,10 +5256,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/placement/page.tsx": {
-    "mtime": 1788459723.4283533,
-    "seen": 1788461387.4197412,
-    "ast_hash": "f426e22f2d5bbec3ebf129bfc6fc1b31",
-    "semantic_hash": "f426e22f2d5bbec3ebf129bfc6fc1b31"
+    "mtime": 1788586714.4403095,
+    "seen": 1788607868.7069328,
+    "ast_hash": "2da21c40438e6db842eb8541bc3be30b",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/plagiarism/layout.tsx": {
     "mtime": 1788459723.4283533,
@@ -5340,22 +5340,22 @@
     "semantic_hash": "d697e1c0859fa76d374e8ece97a39011"
   },
   "AegisCore.Portal/src/app/student/finance/[studentId]/page.tsx": {
-    "mtime": 1788459723.4294739,
-    "seen": 1788461387.4197638,
-    "ast_hash": "3a2490c6e93cd7f0f502e8aa6ddcc43c",
-    "semantic_hash": "3a2490c6e93cd7f0f502e8aa6ddcc43c"
+    "mtime": 1788586661.7468052,
+    "seen": 1788607868.707605,
+    "ast_hash": "14935730346a5f6be6a2c667f8459985",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/student/profile/page.tsx": {
-    "mtime": 1788459723.4296021,
-    "seen": 1788461387.419765,
-    "ast_hash": "525bd8a5c16cfc139632d20d3e9c298e",
-    "semantic_hash": "525bd8a5c16cfc139632d20d3e9c298e"
+    "mtime": 1788586646.9066677,
+    "seen": 1788607868.707607,
+    "ast_hash": "2b41ed461a2283250aedd788d01b9b23",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/student/transcript/page.tsx": {
-    "mtime": 1788459723.4296021,
-    "seen": 1788461387.4197664,
-    "ast_hash": "d41d0ed39c6d6e3843ebe5f913f7eb6e",
-    "semantic_hash": "d41d0ed39c6d6e3843ebe5f913f7eb6e"
+    "mtime": 1788586646.9066677,
+    "seen": 1788607868.707609,
+    "ast_hash": "f4bcc66929eaaac3fad5dabe2703a15b",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/sync-lag/layout.tsx": {
     "mtime": 1788459723.4296021,
@@ -5376,10 +5376,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/transport/page.tsx": {
-    "mtime": 1788459723.4300644,
-    "seen": 1788461387.4197726,
-    "ast_hash": "f1ff4573021a36e2c0640cb7fe85ec84",
-    "semantic_hash": "f1ff4573021a36e2c0640cb7fe85ec84"
+    "mtime": 1788586781.1909387,
+    "seen": 1788607868.7077746,
+    "ast_hash": "eac526aff49b4c53b77d4f0d4fed1501",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/visiting-faculty/layout.tsx": {
     "mtime": 1788459723.4300644,
@@ -5388,10 +5388,10 @@
     "semantic_hash": "75a004b1b7aff890d441fa1b0421a0e1"
   },
   "AegisCore.Portal/src/app/visiting-faculty/page.tsx": {
-    "mtime": 1788459723.43022,
-    "seen": 1788461387.4197755,
-    "ast_hash": "538452213cb0de76e5294460a62e9a6e",
-    "semantic_hash": "538452213cb0de76e5294460a62e9a6e"
+    "mtime": 1788586714.4383094,
+    "seen": 1788607868.7078292,
+    "ast_hash": "e2b1d6dfeadff42c5d9ed9db25ae56e7",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/voice/layout.tsx": {
     "mtime": 1788459723.43022,
@@ -5442,16 +5442,16 @@
     "semantic_hash": "a12ae72e9f284a70f7498f86aefd6aa2"
   },
   "AegisCore.Portal/src/components/finance/department-finance-dashboard.tsx": {
-    "mtime": 1788459723.430615,
-    "seen": 1788461387.4197905,
-    "ast_hash": "ff554ef04b3e61d1365df7fba1a74141",
-    "semantic_hash": "ff554ef04b3e61d1365df7fba1a74141"
+    "mtime": 1788586661.7468052,
+    "seen": 1788607868.7084198,
+    "ast_hash": "a385d74f5b336e0889a653812e65ff6f",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/finance/finance-dashboard.tsx": {
-    "mtime": 1788459723.430615,
-    "seen": 1788461387.4197924,
-    "ast_hash": "67938f0b5a912c07ec5d85c4f304b0f0",
-    "semantic_hash": "67938f0b5a912c07ec5d85c4f304b0f0"
+    "mtime": 1788586646.9036677,
+    "seen": 1788607868.7084236,
+    "ast_hash": "ab33695b9591d75d2d754ced12b6a299",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/finance/finance-realtime-refresh.tsx": {
     "mtime": 1788459723.430615,
@@ -5460,16 +5460,16 @@
     "semantic_hash": "ba23be71a70eee95267751c03eb7d2f5"
   },
   "AegisCore.Portal/src/components/finance/student-payment-action.tsx": {
-    "mtime": 1788459723.430615,
-    "seen": 1788461387.419796,
-    "ast_hash": "2ab25bfb153540c016fb77bfbeec26d1",
-    "semantic_hash": "2ab25bfb153540c016fb77bfbeec26d1"
+    "mtime": 1788586646.9056678,
+    "seen": 1788607868.7085094,
+    "ast_hash": "c149eb7c5ef5bdf238948ee736fd2ddb",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/layout/AppShell.tsx": {
-    "mtime": 1788459723.430615,
-    "seen": 1788461387.4197974,
-    "ast_hash": "862e8a77bcf4b5ff14079408c552d9be",
-    "semantic_hash": "862e8a77bcf4b5ff14079408c552d9be"
+    "mtime": 1788586616.05739,
+    "seen": 1788607868.7085125,
+    "ast_hash": "7ef9d2d93341aa750e6a87eb7255e489",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/locale-switcher.tsx": {
     "mtime": 1788459723.430615,
@@ -5616,10 +5616,10 @@
     "semantic_hash": "2049bdad9dd07af6f38ab8ae0395b163"
   },
   "AegisCore.Portal/src/lib/roles.ts": {
-    "mtime": 1788459723.4331813,
-    "seen": 1788461387.419841,
-    "ast_hash": "a5569e5574158827186b20add156d07b",
-    "semantic_hash": "a5569e5574158827186b20add156d07b"
+    "mtime": 1788586781.1939387,
+    "seen": 1788607868.7099974,
+    "ast_hash": "fe1526e0cf43c98a3694436bb7b20e72",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/lib/server-api.ts": {
     "mtime": 1788459723.4331813,
@@ -8236,5 +8236,83 @@
     "seen": 1788586302.2276518,
     "ast_hash": "0899bb458409efa98f53354dcd0d931c",
     "semantic_hash": "0899bb458409efa98f53354dcd0d931c"
+  },
+  "AegisCore.Portal/src/app/admissions/error.tsx": {
+    "mtime": 1788586543.898729,
+    "seen": 1788607868.7045486,
+    "ast_hash": "00ddbb879e0da609f3b5a15f1f53e948",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/error.tsx": {
+    "mtime": 1788586554.9718342,
+    "seen": 1788607868.7057006,
+    "ast_hash": "aa8266ed1fd5c8f86350a80a49aa6286",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/examinations/error.tsx": {
+    "mtime": 1788586543.895729,
+    "seen": 1788607868.7057033,
+    "ast_hash": "00ddbb879e0da609f3b5a15f1f53e948",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/finance/error.tsx": {
+    "mtime": 1788586543.894729,
+    "seen": 1788607868.7058375,
+    "ast_hash": "00ddbb879e0da609f3b5a15f1f53e948",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/global-error.tsx": {
+    "mtime": 1788586543.894729,
+    "seen": 1788607868.7062492,
+    "ast_hash": "4d67f803e2179e1df4cce510aba410e3",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/grades/error.tsx": {
+    "mtime": 1788586543.899729,
+    "seen": 1788607868.7064972,
+    "ast_hash": "00ddbb879e0da609f3b5a15f1f53e948",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/not-found.tsx": {
+    "mtime": 1788586543.894729,
+    "seen": 1788607868.7067778,
+    "ast_hash": "d828b9fe7637634c154b2417f14caf48",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/components/ErrorBoundary.tsx": {
+    "mtime": 1788586543.893729,
+    "seen": 1788607868.7079344,
+    "ast_hash": "1698c4388fdeaecbe6546861bde62bfc",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/components/ErrorDisplay.tsx": {
+    "mtime": 1788586543.893729,
+    "seen": 1788607868.7079368,
+    "ast_hash": "7c1b61bdea82eaaf4f8b3db0c1744186",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/components/TenantPreferencesProvider.tsx": {
+    "mtime": 1788586554.969834,
+    "seen": 1788607868.707939,
+    "ast_hash": "19e53b787ed21a01d600b9729d53f5e0",
+    "semantic_hash": ""
+  },
+  "AEGISCORE_FINAL_17_PROMPTS.md": {
+    "mtime": 1788607114.1124434,
+    "seen": 1788607868.718204,
+    "ast_hash": "f617605650dbdf6cadf934e050659623",
+    "semantic_hash": ""
+  },
+  "CODEX_HANDOFF.md": {
+    "mtime": 1788607339.677603,
+    "seen": 1788607868.7186358,
+    "ast_hash": "dd99838cb205c83375088d053d2a1cda",
+    "semantic_hash": ""
+  },
+  "docs/rbac-role-attribute-migration.md": {
+    "mtime": 1788585712.249783,
+    "seen": 1788607868.722437,
+    "ast_hash": "0e29dcddb2eb945110fea92782846624",
+    "semantic_hash": ""
   }
 }
