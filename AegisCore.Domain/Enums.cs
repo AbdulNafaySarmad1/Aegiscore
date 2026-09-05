@@ -17,6 +17,13 @@ public enum AttendanceStatus
     Excused
 }
 
+public enum LocationStatus
+{
+    Unverifiable,
+    OnCampus,
+    OffCampus
+}
+
 public enum ExamType
 {
     Midterm,

@@ -2103,6 +2103,31 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<Guid>("FacultyId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("GeofenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsManualOverride")
+                        .HasColumnType("boolean");
+
+                    b.Property<byte[]>("LatitudeEncrypted")
+                        .HasColumnType("bytea")
+                        .HasColumnName("Latitude");
+
+                    b.Property<string>("LocationStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasDefaultValue("Unverifiable");
+
+                    b.Property<byte[]>("LongitudeEncrypted")
+                        .HasColumnType("bytea")
+                        .HasColumnName("Longitude");
+
+                    b.Property<string>("OverrideReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -2116,6 +2141,8 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasIndex("EnrollmentId");
 
                     b.HasIndex("FacultyId");
+
+                    b.HasIndex("GeofenceId");
 
                     b.ToTable("Attendances");
                 });
@@ -3507,6 +3534,38 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CampusDrives");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.CampusPolygon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VerticesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("Vertices");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.ToTable("CampusPolygons");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.CandidateNomination", b =>
@@ -26467,11 +26526,18 @@ namespace AegisCore.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AegisCore.Domain.Entities.CampusPolygon", "Geofence")
+                        .WithMany()
+                        .HasForeignKey("GeofenceId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Course");
 
                     b.Navigation("Enrollment");
 
                     b.Navigation("Faculty");
+
+                    b.Navigation("Geofence");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.AuditFinding", b =>

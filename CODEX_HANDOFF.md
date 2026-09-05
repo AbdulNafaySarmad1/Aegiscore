@@ -4,11 +4,11 @@ Updated: 2026-09-05. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
-Fully completed, committed, and pushed: **P1, P2, P10, P3A, P3B, P5, P4, P6, P7, P8, P9, P12, P13** (13/17). Graphify was refreshed and pushed in `cdecb28b`.
+Fully completed through **P15** (15/17); P15 is recorded in the commit containing this handoff.
 
-Current prompt: **P14 — Frontend UX (verified; pending Graphify refresh, commit, and push)**.
+Next prompt: **P16 — Accessibility**.
 
-Remaining execution order after P14: **P15 → P16 → P17 → P11 (last)**. Do not start P11 before the other prerequisites/prompts are complete.
+Remaining execution order: **P16 → P17 → P11 (last)**. Do not start P11 before the other prerequisites/prompts are complete.
 
 ## Completed prompt commits
 
@@ -25,8 +25,10 @@ Remaining execution order after P14: **P15 → P16 → P17 → P11 (last)**. Do 
 - P9: `16e6dc7f`
 - P12: `b9d16168`
 - P13: `9ffd7caf`
+- P14: `cdfe8c90`
+- P15: current commit
 
-P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, all 97 legacy role attributes replaced, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 97 `RequirePermission(...)` controller attributes.
+P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 104 `RequirePermission(...)` controller attributes after P15.
 
 ## P14 verified implementation
 
@@ -45,17 +47,26 @@ P13 includes tenant-defined wizard roles/permission matrix, two-argument `Requir
 - Added `tests/tablet-responsive.spec.ts` and `docs/P14_VIEWPORT_RESULTS.md`; all three required viewport checks pass.
 - Portal lint now has zero errors. Generated Playwright reports are excluded from the lint surface.
 
-No P14 implementation work remains. Refresh Graphify with the installed CLI's verified command `graphify update .`, commit, and push before beginning P15.
+## P15 verified implementation
+
+- Added encrypted-at-rest attendance coordinates, tenant-scoped campus polygons, location statuses, manual overrides, and migration `AddGeolocationToAttendance`.
+- Added boundary-inclusive ray casting and six focused tests, including a SQLite-backed check-in/roster/override integration path.
+- Added permission-protected check-in, teacher override, roster, student-course, and campus-polygon management APIs.
+- Added student mobile check-in, teacher status/filter/override UI, and an administrator map-based campus editor.
+- Fixed the enum persistence sentinel found by the integration test, plus onboarding template/RBAC regression tests exposed by the full suite.
+
+No P15 implementation work remains.
 
 ## Current verification status
 
 - `dotnet build AegisCore.slnx -c Release --no-restore`: **PASS**, 0 errors, 20 warnings (existing analyzer/package warnings).
-- `dotnet test AegisCore.slnx -c Release --no-build`: **PASS**, 597 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
+- `dotnet test AegisCore.Tests/AegisCore.Tests.csproj -c Release --no-build`: **PASS**, 603 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
 - Portal `npm run typecheck`: **PASS**.
-- Portal `npm run build`: **PASS**, 44 generated routes including `_not-found` (43 page roots).
+- Portal `npm run build`: **PASS**, 46 generated routes including `/admin/campus` and `/student/attendance`.
 - Portal `npm run lint -- --quiet`: **PASS**, 0 errors.
 - Portal tablet Playwright suite: **PASS**, 3/3 required viewport tests.
 - `git diff --check`: **PASS**.
+- EF `migrations has-pending-model-changes`: **PASS**, no pending model changes.
 
 ## Architecture and workflow constraints
 
@@ -64,8 +75,8 @@ No P14 implementation work remains. Refresh Graphify with the installed CLI's ve
 - Finish one prompt, run Release build/tests, refresh Graphify, commit, and push before starting the next.
 - Preserve client-owned infrastructure and introduce no Nocturne-hosted dependency.
 - `AEGISCORE_FINAL_17_PROMPTS.md` is user-confirmed source of truth and must be committed with the repository.
-- P14 is verified but not yet committed or pushed. Preserve every current modified/untracked P14 file.
+- P15 is verified and included in the current commit; the worktree should be clean before beginning P16.
 
 ## Exact next action
 
-Run `graphify update .`, verify the artifact diff, commit/push P14, then begin P15 geolocation attendance.
+Query the refreshed graph for P16 accessibility implementation, read P16 in full, then implement and verify it before committing and pushing.

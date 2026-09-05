@@ -8,7 +8,7 @@ public sealed class WizardRolePermissionService(AegisDbContext db, WizardStateSe
 {
     private static readonly HashSet<string> AllowedResources = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System"
+        "Students", "Grades", "Attendance", "CampusPolygon", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System"
     };
 
     private static readonly HashSet<string> AllowedActions = new(StringComparer.OrdinalIgnoreCase)

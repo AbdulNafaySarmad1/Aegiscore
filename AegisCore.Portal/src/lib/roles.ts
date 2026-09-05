@@ -353,6 +353,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "achievements", label: "Achievements", icon: "GraduationCap", route: "/achievements", color: "violet", description: "Student achievement tracking.", priority: 10, domain: "welfare" },
       { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health monitoring.", priority: 11, domain: "operations" },
       { id: "data-import", label: "Data Import", icon: "FileSearch", route: "/data-import", color: "amber", description: "Bulk data import management.", priority: 12, domain: "operations" },
+      { id: "campus-geofences", label: "Campus Geofences", icon: "MapPin", route: "/admin/campus", color: "green", description: "Configure attendance campus boundaries.", priority: 13, domain: "operations" },
     ],
     kpis: [
       { id: "enrollment", label: "Total Enrollment", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue" },

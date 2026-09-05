@@ -19,6 +19,24 @@ public class Attendance : ITenantScoped
 
     public AttendanceStatus Status { get; init; }
 
+    [NotMapped]
+    public decimal? Latitude { get; private set; }
+
+    [NotMapped]
+    public decimal? Longitude { get; private set; }
+
+    [Column("Latitude")]
+    public byte[]? LatitudeEncrypted { get; private set; }
+
+    [Column("Longitude")]
+    public byte[]? LongitudeEncrypted { get; private set; }
+
+    public Guid? GeofenceId { get; set; }
+    public LocationStatus LocationStatus { get; set; } = LocationStatus.Unverifiable;
+    public bool IsManualOverride { get; private set; }
+    [MaxLength(500)]
+    public string? OverrideReason { get; private set; }
+
     // Calculated property (not mapped)
     [NotMapped]
     public double Percentage { get; set; } = 0.0;
@@ -29,6 +47,25 @@ public class Attendance : ITenantScoped
     }
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public void SetEncryptedLocation(decimal? latitude, decimal? longitude, byte[]? latitudeEncrypted, byte[]? longitudeEncrypted)
+    {
+        if (latitude is < -90 or > 90) throw new ArgumentOutOfRangeException(nameof(latitude));
+        if (longitude is < -180 or > 180) throw new ArgumentOutOfRangeException(nameof(longitude));
+        if ((latitude is null) != (longitude is null)) throw new ArgumentException("Latitude and longitude must both be supplied or both be null.");
+        if ((latitudeEncrypted is null) != (longitudeEncrypted is null)) throw new ArgumentException("Encrypted latitude and longitude must both be supplied or both be null.");
+
+        Latitude = latitude;
+        Longitude = longitude;
+        LatitudeEncrypted = latitudeEncrypted;
+        LongitudeEncrypted = longitudeEncrypted;
+    }
+
+    public void ApplyManualOverride(string reason)
+    {
+        OverrideReason = string.IsNullOrWhiteSpace(reason) ? throw new ArgumentException("An override reason is required.", nameof(reason)) : reason.Trim();
+        IsManualOverride = true;
+    }
+
 
     // Navigation
     [ForeignKey(nameof(EnrollmentId))]
@@ -39,4 +76,6 @@ public class Attendance : ITenantScoped
 
     [ForeignKey(nameof(FacultyId))]
     public virtual Faculty Faculty { get; init; } = null!;
+    [ForeignKey(nameof(GeofenceId))]
+    public virtual CampusPolygon? Geofence { get; set; }
 }

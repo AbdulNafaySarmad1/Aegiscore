@@ -37,10 +37,10 @@ public sealed class EnhancedSetupService
         new Dictionary<string, SetupTemplateDefinition>(StringComparer.OrdinalIgnoreCase)
         {
             ["students"] = new("students", "Students", ["Student ID", "Name", "Email", "Phone", "Department", "Program", "Admission Date"],
-                [["STUDENT-001", "Student Name", "student@example.invalid", "+12025550123", "Example Department", "Example Program", "2024-01-15"]],
+                [["STU-001-2024", "Student Name", "student@example.invalid", "03001234567", "Example Department", "Example Program", "2024-01-15"]],
                 ["Student ID: STU-XXX-YYYY", "Email must be unique", "Phone must be 11 digits and start with 03", "Admission Date: YYYY-MM-DD"]),
             ["faculty"] = new("faculty", "Faculty", ["Faculty ID", "Name", "Email", "Phone", "Department", "Designation"],
-                [["FACULTY-001", "Faculty Name", "faculty@example.invalid", "+12025550124", "Example Department", "Faculty Member"]],
+                [["FAC-001", "Faculty Name", "faculty@example.invalid", "03001234568", "Example Department", "Faculty Member"]],
                 ["Faculty ID: FAC-XXX", "Email must be unique", "Use a supported academic designation"]),
             ["employees"] = new("employees", "Employees", ["Employee ID", "Name", "Email", "Department", "Designation"],
                 [["EMPLOYEE-001", "Employee Name", "employee@example.invalid", "Example Department", "Administrator"]],
@@ -386,7 +386,10 @@ public sealed class EnhancedSetupService
             ["Grades.Read"] = ["Admin", "Faculty", "Student"],
             ["Grades.Write"] = ["Admin", "Faculty"],
             ["Attendance.Read"] = ["Admin", "Faculty", "Student"],
-            ["Attendance.Write"] = ["Admin", "Faculty"],
+            ["Attendance.Write"] = ["Admin", "Faculty", "Student"],
+            ["Attendance.Approve"] = ["Admin", "Faculty"],
+            ["CampusPolygon.Read"] = ["Admin"],
+            ["CampusPolygon.Write"] = ["Admin"],
             ["System.Write"] = ["Admin"]
         };
         return features.SelectMany(feature => roles.Select(role =>

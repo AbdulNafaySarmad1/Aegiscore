@@ -39,6 +39,7 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
             db.Attendances.Add(new Attendance
             {
                 Id = Guid.NewGuid(),
+                TenantId = db.CurrentTenantId,
                 CourseId = request.CourseId,
                 EnrollmentId = entry.EnrollmentId,
                 FacultyId = request.MarkedByFacultyId,

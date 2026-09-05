@@ -65,6 +65,7 @@ public class AegisDbContext : DbContext
     /// Attendances.
     /// </summary>
     public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<CampusPolygon> CampusPolygons => Set<CampusPolygon>();
 
     /// <summary>
     /// Exam schedules.
@@ -1961,6 +1962,21 @@ public class AegisDbContext : DbContext
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
             }
         }
+
+        modelBuilder.Entity<Attendance>(entity =>
+        {
+            entity.Property(item => item.LatitudeEncrypted).HasColumnName("Latitude").HasColumnType("bytea");
+            entity.Property(item => item.LongitudeEncrypted).HasColumnName("Longitude").HasColumnType("bytea");
+            entity.Property(item => item.LocationStatus).HasConversion<string>().HasMaxLength(24).HasDefaultValue(LocationStatus.Unverifiable);
+            entity.HasOne(item => item.Geofence).WithMany().HasForeignKey(item => item.GeofenceId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<CampusPolygon>(entity =>
+        {
+            entity.Property(item => item.VerticesJson).HasColumnName("Vertices").HasColumnType("jsonb");
+            entity.HasIndex(item => new { item.TenantId, item.IsActive });
+        });
 
         // Enum conversions (store as strings)
         modelBuilder.HasPostgresEnum<EnrollmentStatus>();
