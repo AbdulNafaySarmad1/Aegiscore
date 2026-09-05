@@ -29,7 +29,9 @@ public sealed class WizardController(
     OnboardingService onboarding,
     EnhancedSetupService enhancedSetup,
     IInstallationStateService installation,
-    ISecretService secrets) : ControllerBase
+    ISecretService secrets,
+    IWizardProviderConfigurationService providerConfiguration,
+    DocumentTemplateService documentTemplates) : ControllerBase
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const int MaxStepPayloadBytes = 128 * 1024;
@@ -78,6 +80,66 @@ public sealed class WizardController(
         await state.SaveState(token, wizardState, ct);
         return result.Success ? Ok(result) : UnprocessableEntity(result);
     }
+
+    [HttpPost("step3/configure")]
+    public async Task<IActionResult> ConfigureSso([FromBody] SsoConfigDto request, CancellationToken ct)
+    {
+        try
+        {
+            await providerConfiguration.ConfigureSsoAsync(SetupToken(), request, ct);
+            return Ok(new { success = true, provider = request.Provider, hasSecret = !string.IsNullOrWhiteSpace(request.ClientSecret) });
+        }
+        catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
+    }
+
+    [HttpPost("step3/test")]
+    public async Task<IActionResult> TestSso(CancellationToken ct)
+    {
+        var result = await providerConfiguration.TestSsoAsync(SetupToken(), ct);
+        return result.Success ? Ok(result) : UnprocessableEntity(result);
+    }
+
+    [HttpPost("step5/configure")]
+    public async Task<IActionResult> ConfigureAi([FromBody] AiConfigDto request, CancellationToken ct)
+    {
+        try
+        {
+            await providerConfiguration.ConfigureAiAsync(SetupToken(), request, ct);
+            return Ok(new { success = true, provider = request.Provider, hasSecret = !string.IsNullOrWhiteSpace(request.ApiKey) });
+        }
+        catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
+    }
+
+    [HttpPost("step5/test")]
+    public async Task<IActionResult> TestAi(CancellationToken ct)
+    {
+        var result = await providerConfiguration.TestAiAsync(SetupToken(), ct);
+        return result.Success ? Ok(result) : UnprocessableEntity(result);
+    }
+
+    [HttpPost("step1/template/upload")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadDocumentTemplate([FromForm] IFormFile file, [FromForm] string? name, [FromForm] string? logoUrl, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0) return BadRequest(new { error = "Choose an HTML, PDF, or DOCX file." });
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            return Ok(await documentTemplates.UploadAsync(SetupToken(), file.FileName, stream, name, logoUrl, ct));
+        }
+        catch (ArgumentException ex) { return UnprocessableEntity(new { error = ex.Message }); }
+    }
+
+    [HttpPost("step1/template/write")]
+    public async Task<IActionResult> WriteDocumentTemplate([FromBody] DocumentTemplateWriteRequest request, CancellationToken ct)
+    {
+        try { return Ok(await documentTemplates.WriteAsync(SetupToken(), request, ct)); }
+        catch (ArgumentException ex) { return UnprocessableEntity(new { error = ex.Message }); }
+    }
+
+    [HttpGet("step1/template/preview")]
+    public async Task<IActionResult> PreviewDocumentTemplate(CancellationToken ct)
+        => Ok(await documentTemplates.PreviewAsync(SetupToken(), ct));
 
     [HttpGet("step4/permissions")]
     public IActionResult GetPermissionTree() => Ok(enhancedSetup.GetPermissions());
@@ -192,7 +254,7 @@ public sealed class WizardController(
         if (Encoding.UTF8.GetByteCount(request.Data.GetRawText()) > MaxStepPayloadBytes)
             return StatusCode(StatusCodes.Status413PayloadTooLarge, new { success = false, error = "Wizard step payload exceeds the 128 KiB limit." });
         if (!ValidateStep(step, request.Data, out var error)) return UnprocessableEntity(new { success = false, error });
-        var data = request.Data;
+        var data = step is 3 or 5 ? RemoveSensitiveConfiguration(request.Data) : request.Data;
         try
         {
             var session = await sessions.SaveAsync(token, request.SessionId, step, data, ct);
@@ -521,6 +583,8 @@ public sealed class WizardController(
             licenseStep.Remove("licenseKey");
         foreach (var step in root.Select(property => property.Value).OfType<JsonObject>())
         {
+            step.Remove("clientSecret");
+            step.Remove("apiKey");
             foreach (var property in step.ToList())
             {
                 if (Encoding.UTF8.GetByteCount(property.Value?.ToJsonString() ?? "null") > 64 * 1024)
@@ -572,10 +636,15 @@ public sealed class WizardController(
                 error = "Test and confirm the database connection."; return false;
             case 3 when !Has("provider"):
                 error = "Choose an SSO provider."; return false;
+            case 3 when data.GetProperty("provider").GetString() != "local" &&
+                             (!data.TryGetProperty("connectionTested", out var ssoTested) || ssoTested.ValueKind != JsonValueKind.True):
+                error = "Test and confirm the SSO connection, or choose Local."; return false;
             case 4 when !HasDynamicRoles(data):
                 error = "Add at least one role and permission selection."; return false;
             case 5 when !Has("provider", "model"):
                 error = "Choose an AI provider and model."; return false;
+            case 5 when !data.TryGetProperty("connectionTested", out var aiTested) || aiTested.ValueKind != JsonValueKind.True:
+                error = "Test and confirm the AI model connection."; return false;
             case 6 when !HasImportDecision(data):
                 error = "Upload validated data or explicitly skip data import."; return false;
             case 7 when !data.TryGetProperty("confirmed", out var confirmed) || confirmed.ValueKind != JsonValueKind.True || !HasAdministratorAccounts(data):
@@ -585,6 +654,14 @@ public sealed class WizardController(
     }
 
     private static bool HasArray(JsonElement data, string name) => data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array && value.GetArrayLength() > 0;
+
+    private static JsonElement RemoveSensitiveConfiguration(JsonElement data)
+    {
+        var safe = JsonNode.Parse(data.GetRawText())?.AsObject() ?? new JsonObject();
+        safe.Remove("clientSecret");
+        safe.Remove("apiKey");
+        return JsonSerializer.SerializeToElement(safe, JsonOptions);
+    }
 
     private static bool HasDynamicRoles(JsonElement data)
         => data.TryGetProperty("roles", out var roles) && roles.ValueKind == JsonValueKind.Array

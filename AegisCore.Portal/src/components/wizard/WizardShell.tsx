@@ -10,6 +10,9 @@ type Session = { sessionId: string; currentStep: number; licenseMode: "demo" | "
 type RoleConfig = { name: string; permissions: string[] };
 type ImportResult = { isValid: boolean; totalRows: number; errors: string[]; warnings: string[] };
 type DatabaseResult = { success: boolean; message: string; error?: { userMessage?: string } };
+type HandshakeResult = { success: boolean; error?: string; fixHint?: string; loginUrl?: string };
+type AiConnectionResult = { success: boolean; response?: string; error?: string; fixHint?: string };
+type TemplateResult = { id: string; name: string; previewHtml: string; extractedPalette: string[]; extractedFonts: string[]; logoUrl?: string };
 
 const STEPS = [
   "University identity",
@@ -93,6 +96,8 @@ export function WizardShell() {
   }, [loadSession]);
 
   const current = useMemo(() => data[`step${step}`] ?? {}, [data, step]);
+  const canContinue = (step !== 3 || text(current, "provider", "local") === "local" || current.connectionTested === true)
+    && (step !== 5 || current.connectionTested === true);
   const update = (patch: WizardData) => setData(existing => ({
     ...existing,
     [`step${step}`]: { ...existing[`step${step}`], ...patch },
@@ -225,7 +230,7 @@ export function WizardShell() {
           <button className="wizard-secondary" disabled={step === 1 || busy} onClick={() => setStep(value => value - 1)}>
             <ChevronLeft size={18} /> Back
           </button>
-          <button className="wizard-primary" disabled={busy} onClick={step === 7 ? goLive : saveAndContinue}>
+          <button className="wizard-primary" disabled={busy || !canContinue} onClick={step === 7 ? goLive : saveAndContinue}>
             {busy ? "Saving..." : step === 7 ? "Review and go live" : <>Save and continue <ChevronRight size={18} /></>}
           </button>
         </footer>
@@ -243,6 +248,7 @@ function IdentityStep({ value, update }: { value: WizardData; update: (patch: Wi
       .then(result => setRegions(result.regions)).catch(() => setRegions([]));
   }, [country]);
   return (
+    <div className="wizard-sections">
     <div className="wizard-form-grid">
       <SelectField label="License mode" value={text(value, "licenseMode", "demo")} onChange={licenseMode => update({ licenseMode })} options={[
         { value: "demo", label: "Demo" }, { value: "paid", label: "Licensed" },
@@ -261,6 +267,58 @@ function IdentityStep({ value, update }: { value: WizardData; update: (patch: Wi
       <Field label="Primary contact" value={text(value, "contactName")} onChange={contactName => update({ contactName })} />
       <Field label="Contact email" type="email" value={text(value, "contactEmail")} onChange={contactEmail => update({ contactEmail })} />
     </div>
+    <DocumentTemplateDesigner value={value} update={update} />
+    </div>
+  );
+}
+
+function DocumentTemplateDesigner({ value, update }: { value: WizardData; update: (patch: WizardData) => void }) {
+  const [mode, setMode] = useState<"upload" | "write" | "skip">((text(value, "templateMode", "skip") as "upload" | "write" | "skip"));
+  const [html, setHtml] = useState(text(value, "templateHtml", "<header><h1>{{university}}</h1></header><main><h2>Academic transcript</h2><p>{{student}}</p>{{records}}</main>"));
+  const [result, setResult] = useState<TemplateResult | null>(null);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  function choose(next: "upload" | "write" | "skip") {
+    setMode(next); update({ templateMode: next, templateConfirmed: next === "skip" }); setMessage("");
+  }
+  async function upload(file: File) {
+    setBusy(true); setMessage("");
+    try {
+      const form = new FormData(); form.append("file", file); form.append("name", file.name.replace(/\.[^.]+$/, ""));
+      const next = await apiPostForm<TemplateResult>("/api/wizard/step1/template/upload", form);
+      setResult(next); update({ templateMode: "upload", templateId: next.id, templateConfirmed: false });
+    } catch (error) { setMessage(error instanceof Error ? error.message : "The template could not be uploaded."); }
+    finally { setBusy(false); }
+  }
+  async function write() {
+    setBusy(true); setMessage("");
+    try {
+      const next = await apiPost<TemplateResult>("/api/wizard/step1/template/write", { name: "University document template", rawHtml: html, logoUrl: text(value, "logoUrl") || null });
+      setResult(next); update({ templateMode: "write", templateId: next.id, templateHtml: html, templateConfirmed: false });
+    } catch (error) { setMessage(error instanceof Error ? error.message : "The HTML template could not be saved."); }
+    finally { setBusy(false); }
+  }
+  async function loadDefault() {
+    try { setResult(await apiGet<TemplateResult>("/api/wizard/step1/template/preview")); } catch { /* preview remains optional */ }
+  }
+  return (
+    <section className="wizard-card wizard-template-designer">
+      <div><p className="wizard-kicker">DOCUMENT TEMPLATE</p><h3>Design university documents</h3><p className="wizard-muted">Upload an existing design, write HTML, or use the AegisCore default.</p></div>
+      <div className="wizard-row" role="tablist" aria-label="Document template source">
+        {(["upload", "write", "skip"] as const).map(option => <button type="button" role="tab" aria-selected={mode === option} className={mode === option ? "wizard-primary" : "wizard-secondary"} key={option} onClick={() => { choose(option); if (option === "skip") void loadDefault(); }}>{option === "upload" ? "Upload file" : option === "write" ? "Write HTML" : "Use default"}</button>)}
+      </div>
+      {mode === "upload" && <label className="wizard-field"><span>HTML, PDF or DOCX (maximum 10 MiB)</span><input type="file" accept=".html,.htm,.pdf,.docx" disabled={busy} onChange={event => { const file = event.target.files?.[0]; if (file) void upload(file); }} /></label>}
+      {mode === "write" && <><label className="wizard-field"><span>Template HTML</span><textarea rows={12} value={html} onChange={event => setHtml(event.target.value)} /></label><button type="button" className="wizard-secondary" disabled={busy || !html.trim()} onClick={write}>{busy ? "Building preview..." : "Build preview"}</button></>}
+      {result && <>
+        <div><strong>Extracted colours</strong><div className="wizard-swatches">{result.extractedPalette.map(color => <span key={color} title={color} style={{ background: color }}><i>{color}</i></span>)}</div></div>
+        <p><strong>Fonts:</strong> {result.extractedFonts.join(", ")}</p>
+        <div className="wizard-template-compare"><section><h4>Your template</h4><iframe title="Your document template preview" sandbox="" srcDoc={result.previewHtml} /></section><section><h4>Default AegisCore</h4><iframe title="Default AegisCore document preview" sandbox="" srcDoc={'<main style="font-family:system-ui;padding:24px"><h1>Example University</h1><h2>Academic transcript</h2><p>Student: Sample Learner</p><table><tr><th>Course</th><th>Grade</th></tr><tr><td>Systems Design</td><td>A</td></tr></table></main>'} /></section></div>
+        <button type="button" className="wizard-primary" onClick={() => { update({ templateConfirmed: true }); setMessage("Document template confirmed."); }}>Confirm template</button>
+      </>}
+      {mode === "skip" && <p>AegisCore&apos;s accessible default transcript and invoice layout will be used.</p>}
+      {message && <p aria-live="polite">{message}</p>}
+    </section>
   );
 }
 
@@ -299,15 +357,32 @@ function DatabaseStep({ value, update }: { value: WizardData; update: (patch: Wi
 
 function SsoStep({ value, update }: { value: WizardData; update: (patch: WizardData) => void }) {
   const provider = text(value, "provider", "local");
+  const [testing, setTesting] = useState(false);
+  const [message, setMessage] = useState("");
+  async function testConnection() {
+    setTesting(true); setMessage(""); update({ connectionTested: false });
+    try {
+      await apiPost("/api/wizard/step3/configure", {
+        provider, tenantId: text(value, "tenantId"), clientId: text(value, "clientId"), clientSecret: text(value, "clientSecret"),
+        domain: text(value, "domain"), metadataUrl: text(value, "metadataUrl"), metadataXml: text(value, "metadataXml"),
+        entityId: text(value, "entityId"), acsUrl: text(value, "acsUrl"),
+      });
+      const result = await apiPost<HandshakeResult>("/api/wizard/step3/test");
+      update({ connectionTested: result.success, clientSecret: "" });
+      setMessage(result.success ? `SSO handshake successful — ${provider} connected` : `${result.error ?? "Handshake failed."} ${result.fixHint ?? ""}`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "SSO handshake failed."); }
+    finally { setTesting(false); }
+  }
   return (
-    <div className="wizard-form-grid">
-      <SelectField label="SSO provider" value={provider} onChange={next => update({ provider: next })} options={[
+    <div className="wizard-sections"><div className="wizard-form-grid">
+      <SelectField label="SSO provider" value={provider} onChange={next => update({ provider: next, connectionTested: next === "local" })} options={[
         { value: "local", label: "Local email and password" }, { value: "entra", label: "Microsoft Entra ID" },
         { value: "google", label: "Google Workspace" }, { value: "saml", label: "SAML 2.0" },
       ]} />
-      {provider !== "local" && <Field label="Client / entity ID" value={text(value, "clientId")} onChange={clientId => update({ clientId })} />}
-      {provider !== "local" && <Field label="Client secret" value={text(value, "clientSecret")} onChange={clientSecret => update({ clientSecret })} type="password" />}
-    </div>
+      {provider === "entra" && <><Field label="Tenant ID" value={text(value, "tenantId")} onChange={tenantId => update({ tenantId, connectionTested: false })} /><Field label="Client ID" value={text(value, "clientId")} onChange={clientId => update({ clientId, connectionTested: false })} /><Field label="Client secret" value={text(value, "clientSecret")} onChange={clientSecret => update({ clientSecret, connectionTested: false })} type="password" /></>}
+      {provider === "google" && <><Field label="Client ID" value={text(value, "clientId")} onChange={clientId => update({ clientId, connectionTested: false })} /><Field label="Client secret" value={text(value, "clientSecret")} onChange={clientSecret => update({ clientSecret, connectionTested: false })} type="password" /><Field label="Workspace domain" value={text(value, "domain")} onChange={domain => update({ domain, connectionTested: false })} /></>}
+      {provider === "saml" && <><Field label="Metadata URL" required={false} value={text(value, "metadataUrl")} onChange={metadataUrl => update({ metadataUrl, connectionTested: false })} /><label className="wizard-field"><span>Or metadata XML</span><textarea rows={6} value={text(value, "metadataXml")} onChange={event => update({ metadataXml: event.target.value, connectionTested: false })} /></label><label className="wizard-field"><span>Upload metadata XML</span><input type="file" accept=".xml,text/xml,application/xml" onChange={event => { const file = event.target.files?.[0]; if (file) void file.text().then(metadataXml => update({ metadataXml, metadataUrl: "", connectionTested: false })); }} /></label><Field label="Entity ID" value={text(value, "entityId")} onChange={entityId => update({ entityId, connectionTested: false })} /><Field label="ACS URL" value={text(value, "acsUrl")} onChange={acsUrl => update({ acsUrl, connectionTested: false })} /></>}
+    </div><button className="wizard-secondary" type="button" disabled={testing} onClick={testConnection}>{testing ? "Testing..." : "Test Connection"}</button>{message && <p aria-live="polite">{message}</p>}</div>
   );
 }
 
@@ -339,17 +414,30 @@ function PermissionStep({ value, update }: { value: WizardData; update: (patch: 
 }
 
 function AiStep({ value, update }: { value: WizardData; update: (patch: WizardData) => void }) {
-  const provider = text(value, "provider", "ollama");
+  const provider = text(value, "provider", "ollama-local");
+  const [testing, setTesting] = useState(false);
+  const [message, setMessage] = useState("");
+  const defaultModel = provider === "ollama-local" ? "mistral" : provider === "openai" ? "gpt-4o-mini" : provider === "granite" ? "ibm/granite-13b-chat-v2" : "";
+  async function testConnection() {
+    setTesting(true); setMessage(""); update({ connectionTested: false });
+    try {
+      await apiPost("/api/wizard/step5/configure", { provider, model: text(value, "model", defaultModel), endpoint: text(value, "endpoint") || null, apiKey: text(value, "apiKey") || null });
+      const result = await apiPost<AiConnectionResult>("/api/wizard/step5/test");
+      update({ connectionTested: result.success, apiKey: "" });
+      setMessage(result.success ? `Model responded — ${provider} connected` : `${result.error ?? "Model test failed."} ${result.fixHint ?? ""}`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "AI model test failed."); }
+    finally { setTesting(false); }
+  }
   return (
-    <div className="wizard-form-grid">
-      <SelectField label="AI provider" value={provider} onChange={next => update({ provider: next })} options={[
-        { value: "ollama", label: "Ollama Local" }, { value: "openai", label: "OpenAI" },
+    <div className="wizard-sections"><div className="wizard-form-grid">
+      <SelectField label="AI provider" value={provider} onChange={next => update({ provider: next, model: next === "ollama-local" ? "mistral" : next === "openai" ? "gpt-4o-mini" : next === "granite" ? "ibm/granite-13b-chat-v2" : "", connectionTested: false })} options={[
+        { value: "ollama-local", label: "Ollama Local" }, { value: "ollama-cloud", label: "Ollama Cloud" }, { value: "openai", label: "OpenAI" },
         { value: "granite", label: "IBM Granite" }, { value: "custom", label: "Custom endpoint" },
       ]} />
-      <Field label="Model" value={text(value, "model", provider === "ollama" ? "mistral" : "gpt-4o-mini")} onChange={model => update({ model })} />
-      {provider !== "ollama" && <Field label="Endpoint" value={text(value, "endpoint")} onChange={endpoint => update({ endpoint })} />}
-      {provider !== "ollama" && <Field label="API key" value={text(value, "apiKey")} onChange={apiKey => update({ apiKey })} type="password" />}
-    </div>
+      <Field label="Model" value={text(value, "model", defaultModel)} onChange={model => update({ model, connectionTested: false })} />
+      {(provider === "ollama-cloud" || provider === "custom") && <Field label="Endpoint URL" value={text(value, "endpoint")} onChange={endpoint => update({ endpoint, connectionTested: false })} />}
+      {(provider === "openai" || provider === "granite" || provider === "custom" || provider === "ollama-cloud") && <Field label={provider === "granite" ? "IBM IAM API key" : "API key"} required={provider !== "custom"} value={text(value, "apiKey")} onChange={apiKey => update({ apiKey, connectionTested: false })} type="password" />}
+    </div><button className="wizard-secondary" type="button" disabled={testing} onClick={testConnection}>{testing ? "Testing..." : "Test Connection"}</button>{message && <p aria-live="polite">{message}</p>}</div>
   );
 }
 

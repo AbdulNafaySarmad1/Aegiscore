@@ -16,6 +16,7 @@ using AegisCore.Infrastructure.Payments.Raast;
 using AegisCore.Infrastructure.Finance;
 using AegisCore.Infrastructure.Cloud.R2;
 using AegisCore.Infrastructure.Cloud;
+using AegisCore.Infrastructure.Cloud.Azure;
 using AegisCore.Infrastructure.Deployment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -123,6 +124,7 @@ public static class SetupServicesExtensions
             if (Uri.TryCreate(configuration["INFISICAL_URL"], UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
                 client.BaseAddress = uri;
         });
+        services.AddHttpClient("wizard-providers", client => client.Timeout = TimeSpan.FromSeconds(20));
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddPqcSigningQueue();
         services.AddScoped<IPqcSignatureService, PqcSignatureService>();
@@ -136,6 +138,18 @@ public static class SetupServicesExtensions
         services.AddScoped<WizardActivationService>();
         services.AddScoped<WizardGatewayService>();
         services.AddScoped<SetupImportService>();
+        services.AddTransient<AzureAdIdentityService>();
+        services.AddTransient<ISsoProvider, LocalSsoProvider>();
+        services.AddTransient<ISsoProvider, EntraSsoProvider>();
+        services.AddTransient<ISsoProvider, GoogleWorkspaceSsoProvider>();
+        services.AddTransient<ISsoProvider, GenericSamlSsoProvider>();
+        services.AddTransient<IAiSetupProvider, OllamaLocalSetupProvider>();
+        services.AddTransient<IAiSetupProvider, OllamaCloudSetupProvider>();
+        services.AddTransient<IAiSetupProvider, OpenAiSetupProvider>();
+        services.AddTransient<IAiSetupProvider, GraniteProvider>();
+        services.AddTransient<IAiSetupProvider, CustomAiSetupProvider>();
+        services.AddScoped<IWizardProviderConfigurationService, WizardProviderConfigurationService>();
+        services.AddScoped<DocumentTemplateService>();
         services.AddControllers();
         return services;
     }

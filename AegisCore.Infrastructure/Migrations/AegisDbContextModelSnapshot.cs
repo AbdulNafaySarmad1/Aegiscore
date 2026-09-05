@@ -6942,6 +6942,46 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("DocumentRetentionPolicies");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.DocumentTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExtractedFonts")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("ExtractedPalette")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("RawHtml")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.ToTable("DocumentTemplates");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.DocumentTier", b =>
                 {
                     b.Property<Guid>("Id")

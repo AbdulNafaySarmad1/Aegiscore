@@ -1758,6 +1758,7 @@ public class AegisDbContext : DbContext
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<WizardSession> WizardSessions => Set<WizardSession>();
+    public DbSet<DocumentTemplate> DocumentTemplates => Set<DocumentTemplate>();
     public DbSet<WizardAdminCredential> WizardAdminCredentials => Set<WizardAdminCredential>();
     public DbSet<AdmissionApplication> AdmissionApplications => Set<AdmissionApplication>();
     public DbSet<ApplicationDocument> ApplicationDocuments => Set<ApplicationDocument>();
@@ -2161,6 +2162,17 @@ public class AegisDbContext : DbContext
             entity.Property(e => e.LicenseKey).HasMaxLength(50);
             entity.Property(e => e.StepData).HasColumnType("jsonb").IsRequired();
             entity.Property(e => e.CreatedByIp).HasMaxLength(64);
+        });
+
+        modelBuilder.Entity<DocumentTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.CreatedAt });
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.RawHtml).HasColumnType("text").IsRequired();
+            entity.Property(e => e.ExtractedPalette).HasColumnType("jsonb").IsRequired();
+            entity.Property(e => e.ExtractedFonts).HasColumnType("jsonb").IsRequired();
+            entity.Property(e => e.LogoUrl).HasMaxLength(2048);
         });
 
         modelBuilder.Entity<WizardAdminCredential>(entity =>

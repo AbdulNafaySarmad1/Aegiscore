@@ -662,7 +662,9 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
                     http.RequestServices.GetRequiredService<AegisCore.Infrastructure.Onboarding.OnboardingService>(),
                     null!,
                     Mock.Of<AegisCore.Infrastructure.Installation.IInstallationStateService>(),
-                    http.RequestServices.GetRequiredService<ISecretService>())
+                    http.RequestServices.GetRequiredService<ISecretService>(),
+                    null!,
+                    null!)
                 {
                     ControllerContext = new ControllerContext { HttpContext = http }
                 };
