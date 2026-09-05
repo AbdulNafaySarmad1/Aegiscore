@@ -22,7 +22,7 @@ public class ConfigCenterController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost]
     public async Task<IActionResult> SetConfig([FromBody] SetConfigRequest request, CancellationToken cancellationToken)
     {
@@ -67,7 +67,7 @@ public class ConfigCenterController : ControllerBase
         return Ok(diff);
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Approve")]
     [HttpPost("{entryId:guid}/rollback")]
     public async Task<IActionResult> Rollback(Guid entryId, [FromBody] RollbackRequest request, CancellationToken cancellationToken)
     {

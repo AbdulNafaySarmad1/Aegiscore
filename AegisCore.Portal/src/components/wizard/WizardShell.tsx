@@ -123,8 +123,17 @@ export function WizardShell() {
       }
       if (step === 4) {
         const roles = (current.roles as RoleConfig[] | undefined) ?? DEFAULT_ROLES;
+        const definitions = MODULES.flatMap(resource => ACTIONS.map(action => ({ resource, action })));
+        await apiPost("/api/wizard/step4/roles", { roles: roles.map(role => role.name) });
         await apiPost("/api/wizard/step4/permissions", {
-          permissions: roles.flatMap(role => role.permissions.map(feature => ({ role: role.name, feature, allowed: true }))),
+          permissions: definitions,
+        });
+        await apiPost("/api/wizard/step4/matrix", {
+          entries: roles.flatMap(role => definitions.map(permission => ({
+            role: role.name,
+            ...permission,
+            allowed: role.permissions.includes(`${permission.resource}.${permission.action}`),
+          }))),
         });
       }
       const result = await apiPost<{ nextStep: number }>(`/api/wizard/step/${step}/save`, {
@@ -466,19 +475,23 @@ function ImportStep({ value, update }: { value: WizardData; update: (patch: Wiza
 }
 
 function ReviewStep({ data, value, update }: { data: Record<string, WizardData>; value: WizardData; update: (patch: WizardData) => void }) {
+  const configuredRoles = ((data.step4?.roles as RoleConfig[] | undefined) ?? DEFAULT_ROLES).filter(role => role.name.trim());
+  const defaultRole = configuredRoles.find(role => role.permissions.includes("System.Write"))?.name ?? configuredRoles[0]?.name ?? "Admin";
   const users = (value.users as Array<{ name: string; email: string; password: string; role: string }> | undefined) ?? [
-    { name: "", email: "", password: "", role: "Super Admin" },
-    { name: "", email: "", password: "", role: "Finance Controller" },
+    { name: "", email: "", password: "", role: defaultRole },
   ];
   return (
     <div className="wizard-sections">
       <div className="wizard-review-grid">{STEPS.slice(0, 6).map((label, index) => <article key={label}><span>STEP {index + 1}</span><h3>{label}</h3><p>{Object.keys(data[`step${index + 1}`] ?? {}).length} configured fields</p></article>)}</div>
       <h3>Initial administrators</h3>
-      {users.map((user, index) => <div className="wizard-row" key={user.role}>
+      {users.map((user, index) => <div className="wizard-row" key={index}>
         <Field label={`${user.role} name`} value={user.name} onChange={name => update({ users: users.map((item, i) => i === index ? { ...item, name } : item) })} />
         <Field label={`${user.role} email`} type="email" value={user.email} onChange={email => update({ users: users.map((item, i) => i === index ? { ...item, email } : item) })} />
         <Field label={`${user.role} password`} type="password" value={user.password} onChange={password => update({ users: users.map((item, i) => i === index ? { ...item, password } : item) })} />
+        <label className="wizard-field"><span>Role *</span><select value={user.role} onChange={event => update({ users: users.map((item, i) => i === index ? { ...item, role: event.target.value } : item) })}>{configuredRoles.map(role => <option key={role.name} value={role.name}>{role.name}</option>)}</select></label>
+        {users.length > 1 && <button type="button" className="icon-button" aria-label={`Remove administrator ${index + 1}`} onClick={() => update({ users: users.filter((_, i) => i !== index) })}><Trash2 size={16} /></button>}
       </div>)}
+      <button type="button" className="link-button" onClick={() => update({ users: [...users, { name: "", email: "", password: "", role: defaultRole }] })}><Plus size={16} /> Add administrator</button>
       <label className="wizard-check"><input type="checkbox" checked={value.confirmed === true} onChange={event => update({ confirmed: event.target.checked })} /> I confirm this configuration and am authorised to activate this installation.</label>
     </div>
   );

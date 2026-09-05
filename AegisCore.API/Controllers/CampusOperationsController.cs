@@ -25,7 +25,7 @@ public class CampusOperationsController : ControllerBase
         => Ok(await _service.GetTransportCapacityAsync(routeId, ct));
 
     [HttpPost("visitors/{visitorId:guid}/passes")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     public async Task<IActionResult> VisitorPass(Guid visitorId, [FromQuery] DateTime validFrom, [FromQuery] DateTime validTo, CancellationToken ct)
         => Ok(await _service.GenerateVisitorPassAsync(visitorId, validFrom, validTo, ct));
 }

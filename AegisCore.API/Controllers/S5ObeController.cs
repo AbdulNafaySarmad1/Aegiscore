@@ -10,7 +10,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/obe/v2")]
-[Authorize(Roles = "Faculty,OBECoordinator,Dean,Registrar,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Grades", "Read")]
 public sealed class S5ObeController(
     AegisDbContext db,
     ICisExtractionService cis,

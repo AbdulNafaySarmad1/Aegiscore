@@ -53,7 +53,7 @@ public sealed class S2AdmissionsController(
         return Created($"/api/admissions/enquiries/{lead.Id}", lead);
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,AdmissionsHead")]
+    [AegisCore.API.Authorization.RequirePermission("Admissions", "Read")]
     [HttpGet("enquiries")]
     public async Task<IReadOnlyList<AdmissionLead>> ListEnquiries([FromQuery] LeadStatus? status, CancellationToken ct)
     {
@@ -62,7 +62,7 @@ public sealed class S2AdmissionsController(
         return await query.OrderByDescending(l => l.CreatedAt).ToListAsync(ct);
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,AdmissionsHead")]
+    [AegisCore.API.Authorization.RequirePermission("Admissions", "Write")]
     [HttpPatch("enquiries/{id:guid}/status")]
     public async Task<IActionResult> UpdateEnquiryStatus(Guid id, [FromBody] EnquiryStatusRequest request, CancellationToken ct)
     {
@@ -122,7 +122,7 @@ public sealed class S2AdmissionsController(
         });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,AdmissionsHead")]
+    [AegisCore.API.Authorization.RequirePermission("Admissions", "Read")]
     [HttpGet("applications/{id:guid}")]
     public async Task<ActionResult<AdmissionApplication>> Get(Guid id, CancellationToken ct)
         => await db.AdmissionApplications.Include(a => a.Documents).FirstOrDefaultAsync(a => a.Id == id, ct) is { } app ? app : NotFound();
@@ -169,7 +169,7 @@ public sealed class S2AdmissionsController(
         return document;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,AdmissionsHead")]
+    [AegisCore.API.Authorization.RequirePermission("Admissions", "Approve")]
     [HttpPost("applications/{id:guid}/verify")]
     public async Task<IActionResult> Verify(Guid id, [FromBody] VerifyApplicationRequest request, CancellationToken ct)
     {
@@ -190,7 +190,7 @@ public sealed class S2AdmissionsController(
         return NoContent();
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,AdmissionsHead")]
+    [AegisCore.API.Authorization.RequirePermission("Admissions", "Approve")]
     [HttpPost("merit-lists")]
     public async Task<ActionResult<MeritList>> GenerateMeritList([FromBody] GenerateMeritListRequest request, CancellationToken ct)
     {
@@ -232,7 +232,7 @@ public sealed class S2AdmissionsController(
         return list;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin,AdmissionsHead")]
+    [AegisCore.API.Authorization.RequirePermission("Admissions", "Approve")]
     [HttpPost("merit-lists/{id:guid}/allocate")]
     public async Task<IReadOnlyList<SeatAllocation>> Allocate(Guid id, CancellationToken ct) => await allocation.AllocateAsync(id, ct);
 

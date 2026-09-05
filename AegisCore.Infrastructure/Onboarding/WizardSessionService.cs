@@ -155,8 +155,8 @@ public sealed class WizardSessionService(
 
         var credentials = await db.WizardAdminCredentials.IgnoreQueryFilters()
             .Where(item => item.SessionId == sessionId && item.TenantId == state.TenantId).ToListAsync(ct);
-        if (!credentials.Any(item => item.RoleName is "Admin" or "Super Admin"))
-            throw new InvalidOperationException("An administrator account is required.");
+        if (credentials.Count == 0 || credentials.Any(item => string.IsNullOrWhiteSpace(item.RoleName)))
+            throw new InvalidOperationException("At least one administrator assigned to a configured role is required.");
 
         foreach (var credential in credentials)
         {

@@ -10,7 +10,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/timetable")]
-[Authorize(Roles = "Faculty,HOD,Registrar,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Timetable", "Read")]
 public sealed class TimetableController(AegisDbContext db) : ControllerBase
 {
     [HttpPost("entries")]
@@ -92,7 +92,7 @@ public sealed class TimetableController(AegisDbContext db) : ControllerBase
     }
 
     [HttpDelete("entries/{id:guid}")]
-    [Authorize(Roles = "Registrar,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Timetable", "Delete")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var entry = await db.Timetables.FindAsync([id], ct);

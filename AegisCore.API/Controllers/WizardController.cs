@@ -31,7 +31,8 @@ public sealed class WizardController(
     IInstallationStateService installation,
     ISecretService secrets,
     IWizardProviderConfigurationService providerConfiguration,
-    DocumentTemplateService documentTemplates) : ControllerBase
+    DocumentTemplateService documentTemplates,
+    WizardRolePermissionService? rolePermissions = null) : ControllerBase
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const int MaxStepPayloadBytes = 128 * 1024;
@@ -141,15 +142,29 @@ public sealed class WizardController(
     public async Task<IActionResult> PreviewDocumentTemplate(CancellationToken ct)
         => Ok(await documentTemplates.PreviewAsync(SetupToken(), ct));
 
-    [HttpGet("step4/permissions")]
-    public IActionResult GetPermissionTree() => Ok(enhancedSetup.GetPermissions());
-
-    [HttpPost("step4/permissions")]
-    public IActionResult SavePermissionTree([FromBody] SavePermissionsRequest request)
+    [HttpPost("step4/roles")]
+    public async Task<IActionResult> SaveRoles([FromBody] SaveWizardRolesRequest request, CancellationToken ct)
     {
-        try { return Ok(enhancedSetup.SavePermissions(request)); }
+        try { return Ok(await RequiredRolePermissions().SaveRolesAsync(SetupToken(), request, ct)); }
         catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
     }
+
+    [HttpPost("step4/permissions")]
+    public async Task<IActionResult> SavePermissions([FromBody] SaveWizardPermissionDefinitionsRequest request, CancellationToken ct)
+    {
+        try { return Ok(await RequiredRolePermissions().SavePermissionsAsync(SetupToken(), request, ct)); }
+        catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpPost("step4/matrix")]
+    public async Task<IActionResult> SavePermissionMatrix([FromBody] SaveWizardPermissionMatrixRequest request, CancellationToken ct)
+    {
+        try { return Ok(await RequiredRolePermissions().SaveMatrixAsync(SetupToken(), request, ct)); }
+        catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    private WizardRolePermissionService RequiredRolePermissions()
+        => rolePermissions ?? throw new InvalidOperationException("Wizard role and permission persistence is not configured.");
 
     [HttpGet("step6/import/templates")]
     public IActionResult ImportTemplates() => Ok(enhancedSetup.GetTemplates());
@@ -698,8 +713,7 @@ public sealed class WizardController(
             user.TryGetProperty("email", out var email) && email.ValueKind == JsonValueKind.String && IsEmail(email.GetString()) &&
             user.TryGetProperty("password", out var password) && password.ValueKind == JsonValueKind.String && password.GetString()?.Length >= 12 &&
             user.TryGetProperty("role", out var role) && role.ValueKind == JsonValueKind.String);
-        var roles = valid.Select(user => user.GetProperty("role").GetString()).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        return roles.Contains("Super Admin") && roles.Contains("Finance Controller");
+        return valid.Any(user => !string.IsNullOrWhiteSpace(user.GetProperty("role").GetString()));
     }
 
     private static bool IsEmail(JsonElement data, string name) => data.TryGetProperty(name, out var value) && IsEmail(value.GetString());

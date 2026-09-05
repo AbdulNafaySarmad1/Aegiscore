@@ -8,7 +8,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/identity/saml")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
 public class SamlController : ControllerBase
 {
     private readonly ISamlService _samlService;

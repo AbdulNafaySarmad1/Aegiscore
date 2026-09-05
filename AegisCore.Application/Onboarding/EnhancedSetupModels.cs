@@ -40,3 +40,12 @@ public sealed record SaveHierarchyRequest(
 
 public sealed record SavePermissionsRequest(IReadOnlyList<SetupPermission> Permissions);
 
+public sealed record SaveWizardRolesRequest(IReadOnlyList<string> Roles);
+
+public sealed record WizardPermissionDefinition(string Resource, string Action);
+
+public sealed record SaveWizardPermissionDefinitionsRequest(IReadOnlyList<WizardPermissionDefinition> Permissions);
+
+public sealed record WizardRolePermissionSelection(string Role, string Resource, string Action, bool Allowed);
+
+public sealed record SaveWizardPermissionMatrixRequest(IReadOnlyList<WizardRolePermissionSelection> Entries);

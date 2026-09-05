@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.API.Authorization;
 using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,8 @@ public sealed class AuthController(
     IJwtTokenService tokens,
     IConfiguration configuration,
     IBruteForceProtectionService bruteForce,
-    IConnectionMultiplexer redis) : ControllerBase
+    IConnectionMultiplexer redis,
+    ICasbinPolicySyncService? casbin = null) : ControllerBase
 {
     private const string RefreshTokenKeyPrefix = "aegiscore:auth:refresh:token:";
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(7);
@@ -52,6 +54,7 @@ public sealed class AuthController(
         }
 
         await bruteForce.ClearFailedAttemptsAsync(email);
+        if (casbin is not null) await casbin.SyncTenantAsync(tenantId, ct);
         user.LastLoginAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
@@ -72,7 +75,7 @@ public sealed class AuthController(
         user.RefreshTokenExpiry = expiresAt;
         await db.SaveChangesAsync(ct);
 
-        return Ok(new { accessToken, refreshToken, tokenType = "Bearer", expiresIn = 900 });
+        return Ok(new { accessToken, refreshToken, tokenType = "Bearer", expiresIn = SessionLifetimeSeconds() });
     }
 
     [HttpPost("refresh")]
@@ -112,6 +115,7 @@ public sealed class AuthController(
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active)
             return Unauthorized(new { error = "Invalid or expired refresh token." });
 
+        if (casbin is not null) await casbin.SyncTenantAsync(tenantId, ct);
         var accessToken = tokens.GenerateAccessToken(user);
         var newRefreshToken = tokens.GenerateRefreshToken();
         var newFamilyId = await tokens.GenerateRefreshTokenFamilyAsync(user.Id);
@@ -130,7 +134,7 @@ public sealed class AuthController(
         user.LastLoginAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
-        return Ok(new { accessToken, refreshToken = newRefreshToken, tokenType = "Bearer", expiresIn = 900 });
+        return Ok(new { accessToken, refreshToken = newRefreshToken, tokenType = "Bearer", expiresIn = SessionLifetimeSeconds() });
     }
 
     [HttpPost("logout")]
@@ -159,6 +163,9 @@ public sealed class AuthController(
     {
         return Guid.TryParse(configuration["TENANT_ID"], out var configured) ? configured : Guid.Empty;
     }
+
+    private int SessionLifetimeSeconds()
+        => int.TryParse(configuration["SESSION_LIFETIME"], out var seconds) && seconds is >= 60 and <= 86_400 ? seconds : 900;
 
     public sealed record LoginRequest(string Email, string Password);
     public sealed record RefreshRequest(string RefreshToken);

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/security")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("System", "Approve")]
 public class LoginAuditController : ControllerBase
 {
     private readonly ILoginAuditRecordRepository _repo;

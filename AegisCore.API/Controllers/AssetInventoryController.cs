@@ -21,7 +21,7 @@ public class AssetInventoryController : ControllerBase
         => Ok(new { items = await _service.GetLowStockAsync(ct) });
 
     [HttpGet("hemis-export")]
-    [Authorize(Roles = "Registrar,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Reports", "Export")]
     public async Task<IActionResult> Hemis([FromQuery] int academicYear, CancellationToken ct)
         => Content(await _service.BuildHemisXmlAsync(academicYear, ct), "application/xml");
 }

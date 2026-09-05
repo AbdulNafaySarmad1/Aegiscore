@@ -10,11 +10,11 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/finance")]
-[Authorize(Roles = "Student,Finance,CFO,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Finance", "Read")]
 public sealed class FinanceController(AegisDbContext db, IFeeService fees, IAccountingService accounting, IBudgetService budget) : ControllerBase
 {
     [HttpPost("fee-structures")]
-    [Authorize(Roles = "Finance,CFO,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Finance", "Write")]
     public async Task<IActionResult> CreateFeeStructure([FromBody] FeeStructure structure, CancellationToken ct)
     {
         if (structure.TotalFee < 0 || structure.Semester < 1 || string.IsNullOrWhiteSpace(structure.FeeType)) return BadRequest("Fee structure values are invalid.");
@@ -38,7 +38,7 @@ public sealed class FinanceController(AegisDbContext db, IFeeService fees, IAcco
     }
 
     [HttpPost("dues/{id:guid}/scholarship")]
-    [Authorize(Roles = "Finance,CFO,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Finance", "Approve")]
     public async Task<IActionResult> Scholarship(Guid id, [FromBody] ScholarshipRequest request, CancellationToken ct)
     {
         await fees.ApplyScholarshipAsync(id, request.Amount, request.ScholarshipId, ct);
@@ -46,7 +46,7 @@ public sealed class FinanceController(AegisDbContext db, IFeeService fees, IAcco
     }
 
     [HttpGet("pifra")]
-    [Authorize(Roles = "Finance,CFO,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Finance", "Export")]
     public async Task<IActionResult> Pifra([FromQuery] DateOnly from, [FromQuery] DateOnly to, CancellationToken ct)
     {
         if (to < from) return BadRequest("Date range is invalid.");
@@ -54,11 +54,11 @@ public sealed class FinanceController(AegisDbContext db, IFeeService fees, IAcco
     }
 
     [HttpGet("cost-centers/{id:guid}/variance")]
-    [Authorize(Roles = "Finance,CFO,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Finance", "Read")]
     public async Task<IActionResult> Variance(Guid id, CancellationToken ct) => Ok(await budget.GetVarianceAsync(id, ct));
 
     [HttpPost("procurement/requisitions")]
-    [Authorize(Roles = "Finance,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Finance", "Write")]
     public async Task<IActionResult> Requisition([FromBody] ProcurementRequisition requisition, CancellationToken ct)
     {
         if (requisition.RequestingDepartmentId == Guid.Empty || requisition.LineItems.Count == 0) return BadRequest("Department and at least one line item are required.");
@@ -75,7 +75,7 @@ public sealed class FinanceController(AegisDbContext db, IFeeService fees, IAcco
     }
 
     [HttpGet("vendors")]
-    [Authorize(Roles = "Finance,CFO,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Finance", "Read")]
     public async Task<IActionResult> Vendors(CancellationToken ct) => Ok(await db.Vendors.AsNoTracking().Where(v => v.Status == "active").ToListAsync(ct));
 
     private Guid UserId() => Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : Guid.Empty;

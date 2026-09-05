@@ -9,7 +9,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/degree-audit")]
-[Authorize(Roles = "Admin,Registrar,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Grades", "Read")]
 public class DegreeAuditController : ControllerBase
 {
     private readonly IDegreeAuditService _auditService;

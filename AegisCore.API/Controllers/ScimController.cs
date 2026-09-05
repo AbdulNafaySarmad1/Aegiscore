@@ -10,7 +10,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("scim/v2")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
 public class ScimController : ControllerBase
 {
     private readonly IIdentityService _identityService;

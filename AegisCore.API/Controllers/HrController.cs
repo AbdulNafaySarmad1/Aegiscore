@@ -12,16 +12,16 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/hr")]
-[Authorize(Roles = "Employee,Faculty,HOD,HR,HRManager,Finance,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("System", "Read")]
 public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAcademicCalendarService calendar) : ControllerBase
 {
     [HttpGet("employees")]
-    [Authorize(Roles = "HR,HRManager,Finance,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     public async Task<IActionResult> Employees(CancellationToken ct)
         => Ok(await db.Employees.AsNoTracking().OrderBy(e => e.EmployeeCode).ToListAsync(ct));
 
     [HttpPost("employees")]
-    [Authorize(Roles = "HR,HRManager,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     public async Task<IActionResult> CreateEmployee([FromBody] Employee employee, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(employee.FirstName) || string.IsNullOrWhiteSpace(employee.LastName)) return BadRequest("Employee name is required.");
@@ -47,7 +47,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
         => Ok(await db.JobPostings.AsNoTracking().Where(j => j.Status == JobPostingStatus.Active).OrderByDescending(j => j.PostedAt).ToListAsync(ct));
 
     [HttpPost("jobs")]
-    [Authorize(Roles = "HR,HRManager,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     public async Task<IActionResult> CreateJob([FromBody] JobPosting posting, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(posting.Title)) return BadRequest("Job title is required.");
@@ -74,7 +74,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
     }
 
     [HttpPost("leaves/{id:guid}/approve")]
-    [Authorize(Roles = "HOD,HR,HRManager,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     public async Task<IActionResult> ApproveLeave(Guid id, CancellationToken ct)
     {
         var leave = await db.LeaveApplications.FindAsync([id], ct);
@@ -92,7 +92,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
     }
 
     [HttpPost("leaves/{id:guid}/reject")]
-    [Authorize(Roles = "HOD,HR,HRManager,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     public async Task<IActionResult> RejectLeave(Guid id, CancellationToken ct)
     {
         var leave = await db.LeaveApplications.FindAsync([id], ct);
@@ -105,7 +105,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
     }
 
     [HttpPost("payroll/{year:int}/{month:int}/run")]
-    [Authorize(Roles = "Finance,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     public async Task<IActionResult> RunPayroll(int year, int month, CancellationToken ct)
     {
         if (month is < 1 or > 12 || year is < 2000 or > 2100) return BadRequest("Payroll month is invalid.");
@@ -113,12 +113,12 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
     }
 
     [HttpGet("payroll/{id:guid}/bank-export")]
-    [Authorize(Roles = "Finance,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Export")]
     public async Task<IActionResult> BankExport(Guid id, CancellationToken ct)
         => File(System.Text.Encoding.UTF8.GetBytes(await payroll.ExportBankTransferCsvAsync(id, ct)), "text/csv", $"payroll-{id:N}.csv");
 
     [HttpGet("employees/{id:guid}/gratuity")]
-    [Authorize(Roles = "HR,HRManager,Finance,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Read")]
     public async Task<IActionResult> Gratuity(Guid id, [FromQuery] DateOnly resignationDate, CancellationToken ct)
     {
         var employee = await db.Employees.FindAsync([id], ct);

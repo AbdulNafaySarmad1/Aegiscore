@@ -9,10 +9,10 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/examination")]
-[Authorize(Roles = "Faculty,ExamController,HOD,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Grades", "Read")]
 public sealed class S3ExaminationController(AegisDbContext db, IGradingService grading, ITranscriptService transcripts) : ControllerBase
 {
-    [Authorize(Roles = "ExamController,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Grades", "Write")]
     [HttpPost("schemes")]
     public async Task<ActionResult<AssessmentScheme>> CreateScheme([FromBody] AssessmentScheme scheme, CancellationToken ct)
     {
@@ -89,7 +89,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
         return Ok(moderation);
     }
 
-    [Authorize(Roles = "ExamController,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Grades", "Approve")]
     [HttpPost("moderation/{id:guid}/review")]
     public async Task<IActionResult> ReviewModeration(Guid id, [FromBody] ModerationReviewRequest request, CancellationToken ct)
     {
@@ -118,7 +118,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
     [HttpGet("grades/{studentId:guid}/cgpa")]
     public Task<decimal> Cgpa(Guid studentId, CancellationToken ct) => grading.CalculateCGPAAsync(studentId, ct);
 
-    [Authorize(Roles = "ExamController,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Grades", "Write")]
     [HttpPost("grades/{courseId:guid}/grace")]
     public async Task<IActionResult> Grace(Guid courseId, [FromBody] GraceMarksRequest request, CancellationToken ct)
     {
@@ -129,7 +129,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
         return NoContent();
     }
 
-    [Authorize(Roles = "ExamController,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Grades", "Approve")]
     [HttpPost("courses/{courseId:guid}/publish")]
     public async Task<IActionResult> Publish(Guid courseId, [FromBody] PublishResultsRequest request, CancellationToken ct)
     {

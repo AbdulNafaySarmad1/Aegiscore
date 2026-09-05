@@ -8,7 +8,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/developer/keys")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("System", "Write")]
 public class ApiKeysController : ControllerBase
 {
     private readonly IApiKeyService _apiKeyService;
@@ -71,7 +71,7 @@ public class ApiKeysController : ControllerBase
 
 [ApiController]
 [Route("api/developer/webhooks")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("System", "Write")]
 public class WebhooksController : ControllerBase
 {
     private readonly IWebhookSubscriptionRepository _webhookRepo;

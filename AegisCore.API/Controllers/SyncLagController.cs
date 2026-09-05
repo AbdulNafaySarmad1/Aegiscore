@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AegisCore.API.Controllers;
 
 [ApiController][Route("api/admin/sync-lag")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("System", "Write")]
 public class SyncLagController : ControllerBase
 {
     private readonly ISyncLagService _svc;

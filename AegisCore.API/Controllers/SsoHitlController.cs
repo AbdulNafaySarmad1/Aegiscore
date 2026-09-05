@@ -15,7 +15,7 @@ public sealed class SsoHitlController(IMultiTenantSsoService sso, ITwoFactorServ
         => Ok(await sso.DetectProviderAsync(request.Email, request.ReturnUrl, ct));
 
     [HttpPost("auth/temp-password")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     public IActionResult TempPassword() => Ok(new { password = sso.GenerateTemporaryPassword() });
 
     [HttpPost("auth/2fa/setup")]
@@ -30,12 +30,12 @@ public sealed class SsoHitlController(IMultiTenantSsoService sso, ITwoFactorServ
         => Ok(new { valid = twoFactor.VerifyTotp(request.Secret, request.Code, DateTimeOffset.UtcNow) });
 
     [HttpGet("exams/qr")]
-    [Authorize(Roles = "ExamController,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Read")]
     public IActionResult Qr([FromQuery] Guid examId, [FromQuery] Guid studentId)
         => Ok(new { payload = exams.BuildQrPayload(examId, studentId) });
 
     [HttpGet("exams/review-required")]
-    [Authorize(Roles = "Faculty,ExamController,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     public IActionResult ReviewRequired([FromQuery] decimal confidence)
         => Ok(new { required = exams.RequiresHumanReview(confidence) });
 }

@@ -29,7 +29,7 @@ public class CampusController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost]
     public async Task<IActionResult> RegisterCampus([FromBody] CreateCampusRequest request, CancellationToken cancellationToken)
     {
@@ -61,7 +61,7 @@ public class CampusController : ControllerBase
         });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateCampus(Guid id, [FromBody] UpdateCampusRequest request, CancellationToken cancellationToken)
     {
@@ -118,7 +118,7 @@ public class TransferController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost]
     public async Task<IActionResult> InitiateTransfer([FromBody] InitiateTransferRequest request, CancellationToken cancellationToken)
     {
@@ -142,7 +142,7 @@ public class TransferController : ControllerBase
         return Ok(new { total = response.Count(), transfers = response });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Approve")]
     [HttpPost("{id:guid}/approve-source")]
     public async Task<IActionResult> ApproveSource(Guid id, [FromBody] ApproveTransferRequest request, CancellationToken cancellationToken)
     {
@@ -150,7 +150,7 @@ public class TransferController : ControllerBase
         return Ok(new { message = "Source campus approved." });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Approve")]
     [HttpPost("{id:guid}/approve-dest")]
     public async Task<IActionResult> ApproveDest(Guid id, [FromBody] ApproveTransferRequest request, CancellationToken cancellationToken)
     {

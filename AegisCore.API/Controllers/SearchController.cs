@@ -42,7 +42,7 @@ public class SearchController : ControllerBase
         return Ok(response);
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("index/rebuild")]
     public async Task<IActionResult> RebuildIndices(CancellationToken cancellationToken)
     {
@@ -50,7 +50,7 @@ public class SearchController : ControllerBase
         return Ok(new { message = "All search indices rebuilt successfully." });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("index/{entityType}/{entityId}")]
     public async Task<IActionResult> IndexEntity(string entityType, string entityId, CancellationToken cancellationToken)
     {
@@ -58,7 +58,7 @@ public class SearchController : ControllerBase
         return Ok(new { message = $"Entity {entityType}/{entityId} indexed." });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Delete")]
     [HttpDelete("index/{entityType}/{entityId}")]
     public async Task<IActionResult> DeleteFromIndex(string entityType, string entityId, CancellationToken cancellationToken)
     {

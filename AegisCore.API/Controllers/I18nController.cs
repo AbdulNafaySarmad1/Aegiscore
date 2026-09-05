@@ -76,7 +76,7 @@ public class I18nController : ControllerBase
 
 [ApiController]
 [Route("api/country-packs")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
 public class CountryPackController : ControllerBase
 {
     private readonly ICountryPackService _packService;

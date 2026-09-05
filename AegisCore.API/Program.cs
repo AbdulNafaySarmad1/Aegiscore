@@ -198,8 +198,6 @@ else
 
     app.UseMiddleware<TurnstileMiddleware>();
     app.UseMiddleware<AbacMiddleware>();
-    app.UseMiddleware<CasbinAuthorizationMiddleware>();
-
     app.MapGet("/health", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/ready", async (DeploymentReadinessChecker checker, CancellationToken ct) =>

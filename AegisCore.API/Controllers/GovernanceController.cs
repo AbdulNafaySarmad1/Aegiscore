@@ -12,12 +12,12 @@ namespace AegisCore.API.Controllers;
 public sealed class GovernanceController(IGovernanceService governance) : ControllerBase
 {
     [HttpGet("replication-lag")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     public IActionResult ReplicationLag([FromQuery] int? hours)
         => Ok(new { hours = governance.NormalizeReplicationLag(hours) });
 
     [HttpPost("grade-overrides")]
-    [Authorize(Roles = "Faculty,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Approve")]
     public async Task<IActionResult> RequestGradeOverride([FromBody] GradeOverrideRequest request, CancellationToken ct)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"), out var actor)) return Unauthorized();

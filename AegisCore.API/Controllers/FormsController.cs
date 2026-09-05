@@ -30,7 +30,7 @@ public class FormsController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost]
     public async Task<IActionResult> CreateForm([FromBody] CreateFormRequest request, CancellationToken cancellationToken)
     {
@@ -158,7 +158,7 @@ public class FormsController : ControllerBase
         return File(data, contentType, $"submissions_{formId}.{format}");
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("templates/{templateName}")]
     public async Task<IActionResult> CreateFromTemplate(string templateName, CancellationToken cancellationToken)
     {

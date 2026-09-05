@@ -19,7 +19,7 @@ public sealed class AegisCoreLicenseController(
     [HttpGet("/api/license/status")]
     public Task<LicenseRuntimeStatus> Status(CancellationToken ct) => licenses.GetStatusAsync(ct);
 
-    [Authorize(Roles = "SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     [HttpPost("/api/admin/license/activate")]
     public async Task<IActionResult> Activate([FromBody] ActivateLicenseRequest request, CancellationToken ct)
     {
@@ -27,7 +27,7 @@ public sealed class AegisCoreLicenseController(
         return NoContent();
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     [HttpPost("/api/admin/license/override")]
     public async Task<IActionResult> Override([FromBody] LicenseOverrideRequest request, CancellationToken ct)
     {

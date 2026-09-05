@@ -25,7 +25,7 @@ public class RuleEngineController : ControllerBase
         _ruleService = ruleService; _ruleRepo = ruleRepo; _tableRepo = tableRepo; _logger = logger;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost]
     public async Task<IActionResult> CreateRule([FromBody] CreateRuleRequest request, CancellationToken cancellationToken)
     {
@@ -42,7 +42,7 @@ public class RuleEngineController : ControllerBase
         return Ok(new RuleDto { Id = created.Id, Name = created.Name, Domain = created.Domain.ToString(), Priority = created.Priority, CurrentVersion = created.CurrentVersion });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPut("{ruleId:guid}")]
     public async Task<IActionResult> UpdateRule(Guid ruleId, [FromBody] CreateRuleRequest request, CancellationToken cancellationToken)
     {
@@ -67,7 +67,7 @@ public class RuleEngineController : ControllerBase
         return Ok(new { domain, total = response.Count(), rules = response });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("evaluate/{domain}")]
     public async Task<IActionResult> EvaluateRules(string domain, [FromBody] EvaluateFactsRequest request, CancellationToken cancellationToken)
     {
@@ -78,7 +78,7 @@ public class RuleEngineController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("simulate/{ruleId:guid}")]
     public async Task<IActionResult> SimulateRule(Guid ruleId, [FromBody] EvaluateFactsRequest request, CancellationToken cancellationToken)
     {
@@ -86,7 +86,7 @@ public class RuleEngineController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("decision-tables")]
     public async Task<IActionResult> CreateDecisionTable([FromBody] DecisionTableDto request, CancellationToken cancellationToken)
     {
@@ -105,7 +105,7 @@ public class RuleEngineController : ControllerBase
         return Ok(new { table.Id, table.Name, table.Domain });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
     [HttpPost("decision-tables/{tableId:guid}/evaluate")]
     public async Task<IActionResult> EvaluateDecisionTable(Guid tableId, [FromBody] EvaluateFactsRequest request, CancellationToken cancellationToken)
     {

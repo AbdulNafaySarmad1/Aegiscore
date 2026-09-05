@@ -10,7 +10,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/compliance")]
-[Authorize(Roles = "Auditor,Finance,Finance Controller,CFO,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Reports", "Read")]
 public class ComplianceController : ControllerBase
 {
     private readonly IComplianceService _complianceService;

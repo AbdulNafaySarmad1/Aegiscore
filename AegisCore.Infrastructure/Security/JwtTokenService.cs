@@ -19,6 +19,7 @@ public class JwtTokenService : IJwtTokenService
     private readonly SecurityKey _validationKey;
     private readonly string _algorithm;
     private readonly IConnectionMultiplexer _redis;
+    private readonly int _sessionLifetimeSeconds;
     private const string RefreshFamilyKeyPrefix = "aegiscore:auth:refresh:family:";
     private static readonly TimeSpan FamilyTtl = TimeSpan.FromDays(14);
 
@@ -30,6 +31,9 @@ public class JwtTokenService : IJwtTokenService
     public JwtTokenService(IConfiguration configuration, IConnectionMultiplexer redis)
     {
         _redis = redis;
+        _sessionLifetimeSeconds = int.TryParse(configuration["SESSION_LIFETIME"], out var lifetime) && lifetime is >= 60 and <= 86_400
+            ? lifetime
+            : 900;
         var privateKeyPem = configuration["Jwt:PrivateKey"];
         var publicKeyPem = configuration["Jwt:PublicKey"];
         if (!string.IsNullOrWhiteSpace(privateKeyPem) && !string.IsNullOrWhiteSpace(publicKeyPem))
@@ -71,7 +75,7 @@ public class JwtTokenService : IJwtTokenService
             issuer: "https://aegiscore.pk",
             audience: "aegiscore-api",
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(15),
+            expires: DateTime.UtcNow.AddSeconds(_sessionLifetimeSeconds),
             signingCredentials: credentials
         );
 

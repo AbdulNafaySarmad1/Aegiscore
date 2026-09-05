@@ -9,7 +9,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/admin/dr")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("System", "Write")]
 public class DisasterRecoveryController : ControllerBase
 {
     private readonly IBackupConfigurationRepository _configRepo;

@@ -9,7 +9,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [Route("api/attendance")]
-[Authorize(Roles = "Faculty,HOD,Admin,SuperAdmin")]
+[AegisCore.API.Authorization.RequirePermission("Attendance", "Read")]
 public sealed class AttendanceController(AegisDbContext db) : ControllerBase
 {
     [HttpPost("mark")]

@@ -21,6 +21,7 @@ using AegisCore.Infrastructure.Cloud.Azure;
 using AegisCore.Infrastructure.Deployment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -154,6 +155,7 @@ public static class SetupServicesExtensions
         services.AddTransient<IAiSetupProvider, CustomAiSetupProvider>();
         services.AddScoped<IWizardProviderConfigurationService, WizardProviderConfigurationService>();
         services.AddScoped<DocumentTemplateService>();
+        services.AddScoped<WizardRolePermissionService>();
         services.AddControllers();
         return services;
     }
@@ -226,6 +228,8 @@ public static class AuthenticationServicesExtensions
         services.AddAuthorization();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddScoped<ICasbinPolicySyncService, CasbinPolicySyncService>();
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, PermissionAuthorizationResultHandler>();
         services.AddSingleton<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         services.AddSingleton<IFinanceRealtimePublisher, SignalRFinanceRealtimePublisher>();
         return services;

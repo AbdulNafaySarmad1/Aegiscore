@@ -127,7 +127,7 @@ public class MarketplaceController : ControllerBase
         });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("publish")]
     public async Task<IActionResult> PublishExtension([FromBody] ExtensionManifest manifest, CancellationToken cancellationToken)
     {
@@ -157,7 +157,7 @@ public class MarketplaceController : ControllerBase
         return Ok(new { id = published.Id, name = published.Name, version = published.Version, status = published.Status.ToString() });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("install")]
     public async Task<IActionResult> InstallExtension([FromBody] InstallExtensionRequest request, CancellationToken cancellationToken)
     {
@@ -175,7 +175,7 @@ public class MarketplaceController : ControllerBase
         });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Delete")]
     [HttpPost("install/{installationId:guid}/uninstall")]
     public async Task<IActionResult> UninstallExtension(Guid installationId, CancellationToken cancellationToken)
     {
@@ -183,7 +183,7 @@ public class MarketplaceController : ControllerBase
         return Ok(new { message = "Extension uninstalled successfully." });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("install/{installationId:guid}/upgrade")]
     public async Task<IActionResult> UpgradeExtension(Guid installationId, CancellationToken cancellationToken)
     {
@@ -226,7 +226,7 @@ public class MarketplaceController : ControllerBase
         return Ok(new { categories });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("revenue")]
     public async Task<IActionResult> RecordRevenue([FromBody] RecordPluginRevenueRequest request, CancellationToken cancellationToken)
     {

@@ -124,7 +124,7 @@ public sealed class HighRiskValidationTests
         3 => new SsoConfigDto(""),
         4 => new AiConfigDto("", ""),
         5 => new DocumentTemplateWriteRequest("", ""),
-        6 => new SavePermissionsRequest([]),
+        6 => new SaveWizardPermissionDefinitionsRequest([]),
         7 => new ValidateLicenseRequest(""),
         8 => new ChangeWizardModeRequest(Guid.Empty, "", null),
         9 => new SaveStepRequest(Guid.Empty, default),

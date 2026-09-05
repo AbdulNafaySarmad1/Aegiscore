@@ -25,7 +25,7 @@ public sealed class CurriculumController(ICurriculumService curriculum) : Contro
     }
 
     [HttpPost("attendance/offline-sync")]
-    [Authorize(Roles = "Faculty,HOD,Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("Grades", "Write")]
     public async Task<IActionResult> OfflineSync([FromBody] OfflineAttendanceEvent[]? events, CancellationToken ct)
     {
         if (events is null) return BadRequest("Attendance events are required.");

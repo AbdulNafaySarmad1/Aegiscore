@@ -26,7 +26,7 @@ public static class HighRiskEndpointRegistry
         new("POST", "/api/wizard/step3/configure", typeof(SsoConfigDto), typeof(SsoConfigDtoValidator)),
         new("POST", "/api/wizard/step5/configure", typeof(AiConfigDto), typeof(AiConfigDtoValidator)),
         new("POST", "/api/wizard/step1/template/write", typeof(DocumentTemplateWriteRequest), typeof(DocumentTemplateWriteRequestValidator)),
-        new("POST", "/api/wizard/step4/permissions", typeof(SavePermissionsRequest), typeof(SavePermissionsRequestValidator)),
+        new("POST", "/api/wizard/step4/permissions", typeof(SaveWizardPermissionDefinitionsRequest), typeof(SaveWizardPermissionDefinitionsRequestValidator)),
         new("POST", "/api/wizard/validate-license-key", typeof(ValidateLicenseRequest), typeof(ValidateLicenseRequestValidator)),
         new("POST", "/api/wizard/mode", typeof(ChangeWizardModeRequest), typeof(ChangeWizardModeRequestValidator)),
         new("POST", "/api/wizard/step/{step}/save", typeof(SaveStepRequest), typeof(SaveStepRequestValidator)),
@@ -131,15 +131,46 @@ public sealed class DocumentTemplateWriteRequestValidator : SecureValidator<Docu
     }
 }
 
-public sealed class SavePermissionsRequestValidator : SecureValidator<SavePermissionsRequest>
+public sealed class SaveWizardPermissionDefinitionsRequestValidator : SecureValidator<SaveWizardPermissionDefinitionsRequest>
 {
-    public SavePermissionsRequestValidator()
+    private static readonly string[] Resources = ["Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System"];
+    private static readonly string[] Actions = ["Read", "Write", "Delete", "Approve", "Export"];
+
+    public SaveWizardPermissionDefinitionsRequestValidator()
     {
         RuleFor(x => x.Permissions).NotNull().NotEmpty().Must(items => items.Count <= 5000);
         RuleForEach(x => x.Permissions).ChildRules(item =>
         {
-            item.RuleFor(x => x.Role).NotEmpty().MaximumLength(64).Must(IsTrimmed);
-            item.RuleFor(x => x.Feature).NotEmpty().MaximumLength(129).Matches("^[A-Za-z][A-Za-z0-9 -]{0,63}\\.(Read|Write|Delete|Approve|Export)$");
+            item.RuleFor(x => x.Resource).NotEmpty().Must(value => Resources.Contains(value, StringComparer.OrdinalIgnoreCase));
+            item.RuleFor(x => x.Action).NotEmpty().Must(value => Actions.Contains(value, StringComparer.OrdinalIgnoreCase));
+        });
+    }
+}
+
+public sealed class SaveWizardRolesRequestValidator : SecureValidator<SaveWizardRolesRequest>
+{
+    public SaveWizardRolesRequestValidator()
+    {
+        RuleFor(x => x.Roles).NotNull().NotEmpty().Must(roles => roles.Count <= 500)
+            .Must(roles => roles.Distinct(StringComparer.OrdinalIgnoreCase).Count() == roles.Count)
+            .WithMessage("Role names must be unique.");
+        RuleForEach(x => x.Roles).NotEmpty().MaximumLength(64).Must(IsTrimmed);
+    }
+}
+
+public sealed class SaveWizardPermissionMatrixRequestValidator : SecureValidator<SaveWizardPermissionMatrixRequest>
+{
+    private static readonly string[] Resources = ["Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System"];
+    private static readonly string[] Actions = ["Read", "Write", "Delete", "Approve", "Export"];
+
+    public SaveWizardPermissionMatrixRequestValidator()
+    {
+        RuleFor(x => x.Entries).NotNull().Must(entries => entries.Count <= 10_000);
+        RuleForEach(x => x.Entries).ChildRules(entry =>
+        {
+            entry.RuleFor(x => x.Role).NotEmpty().MaximumLength(64).Must(IsTrimmed);
+            entry.RuleFor(x => x.Resource).NotEmpty().Must(value => Resources.Contains(value, StringComparer.OrdinalIgnoreCase));
+            entry.RuleFor(x => x.Action).NotEmpty().Must(value => Actions.Contains(value, StringComparer.OrdinalIgnoreCase));
         });
     }
 }

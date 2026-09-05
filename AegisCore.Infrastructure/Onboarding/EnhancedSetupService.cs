@@ -6,27 +6,30 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using AegisCore.Application.Onboarding;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace AegisCore.Infrastructure.Onboarding;
 
 public sealed class EnhancedSetupService
 {
-    private const int MaxRows = 50_000;
+    private const int DefaultMaxRows = 50_000;
     private static readonly Regex EmailPattern = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
     private static readonly Regex PhonePattern = new(@"^03\d{9}$", RegexOptions.Compiled);
     private static readonly Regex StudentIdPattern = new(@"^STU-\d{3,}-\d{4}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex FacultyIdPattern = new(@"^FAC-\d{3,}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex CourseCodePattern = new(@"^[A-Z]{2,10}-\d{3,4}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly string _statePath;
+    private readonly int _maxRows;
     private readonly object _gate = new();
     private EnhancedSetupState _state;
 
-    public EnhancedSetupService(IHostEnvironment environment)
+    public EnhancedSetupService(IHostEnvironment environment, IConfiguration? configuration = null)
     {
         var directory = Path.Combine(environment.ContentRootPath, "config");
         Directory.CreateDirectory(directory);
         _statePath = Path.Combine(directory, "enhanced-setup.json");
+        _maxRows = Math.Clamp(configuration?.GetValue<int?>("TenantConfiguration:ImportMaxRows") ?? DefaultMaxRows, 1, 1_000_000);
         _state = Load();
     }
 
@@ -197,12 +200,12 @@ public sealed class EnhancedSetupService
         var dataRows = rows.Skip(1).Where(x => x.Any(v => !string.IsNullOrWhiteSpace(v))).ToArray();
         var errors = new List<string>();
         var warnings = new List<string>();
-        if (dataRows.Length > MaxRows) errors.Add($"Maximum {MaxRows:N0} data rows are allowed.");
+        if (dataRows.Length > _maxRows) errors.Add($"Maximum {_maxRows:N0} data rows are allowed.");
 
         var index = headers.Select((name, i) => (name, i)).ToDictionary(x => x.name, x => x.i, StringComparer.OrdinalIgnoreCase);
         var seenPrimary = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        for (var i = 0; i < Math.Min(dataRows.Length, MaxRows); i++)
+        for (var i = 0; i < Math.Min(dataRows.Length, _maxRows); i++)
         {
             var rowNumber = i + 2;
             string Cell(string name) => index.TryGetValue(name, out var position) && position < dataRows[i].Length ? dataRows[i][position].Trim() : "";
@@ -384,7 +387,7 @@ public sealed class EnhancedSetupService
             ["Grades.Write"] = ["Admin", "Faculty"],
             ["Attendance.Read"] = ["Admin", "Faculty", "Student"],
             ["Attendance.Write"] = ["Admin", "Faculty"],
-            ["System.Admin"] = ["Admin"]
+            ["System.Write"] = ["Admin"]
         };
         return features.SelectMany(feature => roles.Select(role =>
             new SetupPermission(role, feature.Key, feature.Value.Contains(role)))).ToList();

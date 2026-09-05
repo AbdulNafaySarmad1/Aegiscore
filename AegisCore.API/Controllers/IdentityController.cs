@@ -36,7 +36,7 @@ public class IdentityController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("users")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
@@ -51,7 +51,7 @@ public class IdentityController : ControllerBase
         });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Read")]
     [HttpGet("users")]
     public async Task<IActionResult> ListUsers([FromQuery] string? status, CancellationToken cancellationToken)
     {
@@ -99,7 +99,7 @@ public class IdentityController : ControllerBase
         });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     [HttpPost("users/{id:guid}/deactivate")]
     public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken cancellationToken)
     {
@@ -107,7 +107,7 @@ public class IdentityController : ControllerBase
         return Ok(new { message = "User deactivated." });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Read")]
     [HttpPost("users/{id:guid}/suspend")]
     public async Task<IActionResult> SuspendUser(Guid id, CancellationToken cancellationToken)
     {
@@ -127,7 +127,7 @@ public class IdentityController : ControllerBase
         return Ok(new { total = response.Count(), roles = response });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("roles")]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request, CancellationToken cancellationToken)
     {
@@ -148,7 +148,7 @@ public class IdentityController : ControllerBase
         return Ok(new RoleDto { Id = role.Id, Name = role.Name, Description = role.Description });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("users/assign-role")]
     public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequest request, CancellationToken cancellationToken)
     {
@@ -156,7 +156,7 @@ public class IdentityController : ControllerBase
         return Ok(new { message = "Role assigned." });
     }
 
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Write")]
     [HttpPost("users/remove-role")]
     public async Task<IActionResult> RemoveRole([FromBody] AssignRoleRequest request, CancellationToken cancellationToken)
     {

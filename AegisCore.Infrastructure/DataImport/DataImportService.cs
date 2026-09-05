@@ -235,18 +235,5 @@ public class DataImportService : IDataImportService
         }
     }
 
-    private static readonly string[] _dangerousKeywords = { "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE", "EXEC", "EXECUTE", "--", ";", "UNION", "COPY", "TRUNCATE" };
-
-    private static bool IsQuerySafe(string query)
-    {
-        if (string.IsNullOrWhiteSpace(query)) return false;
-        var upper = query.ToUpperInvariant();
-        var trimmed = upper.TrimStart();
-        if (!trimmed.StartsWith("SELECT") && !trimmed.StartsWith("WITH")) return false;
-        foreach (var kw in _dangerousKeywords)
-        {
-            if (upper.Contains(kw)) return false;
-        }
-        return true;
-    }
+    private static bool IsQuerySafe(string query) => ReadOnlySqlQueryValidator.IsValid(query);
 }
