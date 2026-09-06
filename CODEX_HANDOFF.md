@@ -14,7 +14,7 @@ Remaining execution order: **None**.
 
 - P1: `57e4b56b` (compile fixes), `a1032a24` (schema-aligned tests)
 - P2: `6a6ecf05`
-- P11: this completion change set (multi-dialect adapters, migrations, CI, and verification)
+- P11: `187970a2`
 - P10: `dd657541`
 - P3A: `e5daf47a`
 - P3B: `b7b314bf`
@@ -130,8 +130,8 @@ No P17 implementation work remains.
 - Finish one prompt, run Release build/tests, refresh Graphify, commit, and push before starting the next.
 - Preserve client-owned infrastructure and introduce no Nocturne-hosted dependency.
 - `AEGISCORE_FINAL_17_PROMPTS.md` is user-confirmed source of truth and must be committed with the repository.
-- P17 is verified in `dacb1435`; P11 changes are uncommitted until all provider checks pass.
+- P17 is verified in `dacb1435`; P11 is verified in `187970a2`.
 
 ## Exact next action
 
-Commit and push this verified P11 completion change set; no prompt implementation remains afterward.
+None. All P1–P17 implementation, verification, Graphify refresh, commits, and pushes are complete.
