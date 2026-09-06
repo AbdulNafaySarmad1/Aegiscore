@@ -128,15 +128,15 @@ export default function DataImportPage() {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
-        <button onClick={() => setTab("import")} style={{ ...btn(tab === "import" ? "var(--blue)" : "var(--line)"), color: tab === "import" ? "#fff" : "var(--muted)" }}><Database size={16} /> Database Import</button>
-        <button onClick={() => setTab("formats")} style={{ ...btn(tab === "formats" ? "var(--blue)" : "var(--line)"), color: tab === "formats" ? "#fff" : "var(--muted)" }}><FileDown size={16} /> Download Templates</button>
+      <div role="tablist" aria-label="Data import views" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        <button role="tab" aria-selected={tab === "import"} onClick={() => setTab("import")} style={{ ...btn(tab === "import" ? "var(--blue)" : "var(--line)"), color: tab === "import" ? "#fff" : "var(--muted)" }}><Database size={16} /> Database Import</button>
+        <button role="tab" aria-selected={tab === "formats"} onClick={() => setTab("formats")} style={{ ...btn(tab === "formats" ? "var(--blue)" : "var(--line)"), color: tab === "formats" ? "#fff" : "var(--muted)" }}><FileDown size={16} /> Download Templates</button>
       </div>
 
       {msg && (
-        <div style={{ padding: "0.75rem 1rem", borderRadius: 8, marginBottom: "1rem", background: msg.ok ? "var(--green-soft)" : "var(--red-soft)", color: msg.ok ? "var(--green)" : "var(--red)", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div role={msg.ok ? "status" : "alert"} style={{ padding: "0.75rem 1rem", borderRadius: 8, marginBottom: "1rem", background: msg.ok ? "var(--green-soft)" : "var(--red-soft)", color: msg.ok ? "var(--green)" : "var(--red)", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
           {msg.ok ? "✓" : "✕"} {msg.text}
-          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={14} /></button>
+          <button aria-label="Dismiss message" onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={14} /></button>
         </div>
       )}
 
@@ -144,21 +144,21 @@ export default function DataImportPage() {
         <div style={card}>
           <h3 style={cardH}><Link2 size={18} style={{ marginRight: "0.4rem" }} />External Database Connections</h3>
           <div style={grid2}>
-            <div><label style={labelS}>Connection Name</label><input style={inputS} value={form.name} onChange={e => setVal("name", e.target.value)} placeholder="e.g. Legacy Oracle DB" /></div>
+            <div><label htmlFor="connection-name" style={labelS}>Connection Name</label><input id="connection-name" style={inputS} value={form.name} onChange={e => setVal("name", e.target.value)} placeholder="e.g. Legacy Oracle DB" /></div>
             <div>
-              <label style={labelS}>Database Type</label>
-              <select style={inputS} value={form.dbType} onChange={e => setVal("dbType", e.target.value)}>
+              <label htmlFor="database-type" style={labelS}>Database Type</label>
+              <select id="database-type" style={inputS} value={form.dbType} onChange={e => setVal("dbType", e.target.value)}>
                 <option>PostgreSQL</option><option>MySQL</option><option>MSSQL</option><option>Oracle</option><option>SQLite</option>
               </select>
             </div>
           </div>
           <div style={{ marginTop: "0.75rem" }}>
-            <label style={labelS}>Connection String</label>
-            <input style={inputS} value={form.connString} onChange={e => setVal("connString", e.target.value)} placeholder="Host=old-db.server.com;Port=5432;Database=legacy_erp;Username=readonly;Password=..." />
+            <label htmlFor="connection-string" style={labelS}>Connection String</label>
+            <input id="connection-string" style={inputS} value={form.connString} onChange={e => setVal("connString", e.target.value)} placeholder="Host=old-db.server.com;Port=5432;Database=legacy_erp;Username=readonly;Password=..." />
           </div>
           <div style={{ marginTop: "0.75rem" }}>
-            <label style={labelS}>Schema (optional)</label>
-            <input style={inputS} value={form.schema} onChange={e => setVal("schema", e.target.value)} placeholder="public" />
+            <label htmlFor="connection-schema" style={labelS}>Schema (optional)</label>
+            <input id="connection-schema" style={inputS} value={form.schema} onChange={e => setVal("schema", e.target.value)} placeholder="public" />
           </div>
           <button onClick={addConnection} disabled={loading} style={{ ...btn("var(--blue)"), marginTop: "0.75rem" }}><Link2 size={14} /> Add Connection</button>
         </div>
@@ -194,7 +194,7 @@ export default function DataImportPage() {
           <div style={card}>
             <h3 style={cardH}>Columns in {selectedTable}</h3>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
-              <thead><tr style={{ borderBottom: "1px solid var(--line)" }}>{["Column Name","Data Type","Nullable","Max Length"].map(h => <th key={h} style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "var(--muted)", fontWeight: 500, fontSize: "0.75rem" }}>{h}</th>)}</tr></thead>
+              <thead><tr style={{ borderBottom: "1px solid var(--line)" }}>{["Column Name","Data Type","Nullable","Max Length"].map(h => <th scope="col" key={h} style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "var(--muted)", fontWeight: 500, fontSize: "0.75rem" }}>{h}</th>)}</tr></thead>
               <tbody>
                 {columns.map(c => <tr key={c.name} style={{ borderBottom: "1px solid var(--gray)" }}><td style={{ padding: "0.4rem 0.75rem", color: "var(--ink)", fontFamily: "monospace", fontSize: "0.82rem" }}>{c.name}</td><td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.82rem" }}>{c.dataType}</td><td style={{ padding: "0.4rem 0.75rem", color: c.isNullable ? "var(--amber)" : "var(--green)", fontSize: "0.82rem" }}>{c.isNullable ? "Yes" : "No"}</td><td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.82rem" }}>{c.maxLength ?? "—"}</td></tr>)}
               </tbody>
@@ -212,7 +212,7 @@ export default function DataImportPage() {
                 </div>
                 <div></div>
               </div>
-              <textarea style={{ ...inputS, marginTop: "0.75rem", height: 120, resize: "vertical", fontFamily: "monospace" }} value={form.fieldMapText} onChange={e => setVal("fieldMapText", e.target.value)} placeholder={"student_id → StudentId\nfirst_name → FirstName\nlast_name → LastName\nemail_address → Email"} />
+              <textarea aria-label="Field mappings" style={{ ...inputS, marginTop: "0.75rem", height: 120, resize: "vertical", fontFamily: "monospace" }} value={form.fieldMapText} onChange={e => setVal("fieldMapText", e.target.value)} placeholder={"student_id → StudentId\nfirst_name → FirstName\nlast_name → LastName\nemail_address → Email"} />
               <button onClick={startImport} disabled={loading} style={{ ...btn("var(--green)"), marginTop: "0.75rem" }}><Play size={14} /> Start Import</button>
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function DataImportPage() {
           <div style={card}>
             <h3 style={cardH}>Import History</h3>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
-              <thead><tr style={{ borderBottom: "1px solid var(--line)" }}>{["Job","Entity","Status","Total","Success","Errors","Started"].map(h => <th key={h} style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "var(--muted)", fontWeight: 500, fontSize: "0.75rem" }}>{h}</th>)}</tr></thead>
+              <thead><tr style={{ borderBottom: "1px solid var(--line)" }}>{["Job","Entity","Status","Total","Success","Errors","Started"].map(h => <th scope="col" key={h} style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "var(--muted)", fontWeight: 500, fontSize: "0.75rem" }}>{h}</th>)}</tr></thead>
               <tbody>
                 {jobs.map(j => <tr key={j.id} style={{ borderBottom: "1px solid var(--gray)" }}>
                   <td style={{ padding: "0.4rem 0.75rem", fontFamily: "monospace", fontSize: "0.78rem", color: "var(--blue)" }}>{j.id.slice(0,8)}</td>

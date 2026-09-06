@@ -332,7 +332,7 @@ export default function ElectionsPage() {
         <div className="surface-heading">
           <div><h2>Election Results</h2><p>{results.length} position results</p></div>
           <div style={{ display: "flex", gap: 8 }}>
-            <select value={tallyElectionId} onChange={e => setTallyElectionId(e.target.value)} style={{ minHeight: 33, padding: "0 8px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
+            <select aria-label="Election results" value={tallyElectionId} onChange={e => setTallyElectionId(e.target.value)} style={{ minHeight: 33, padding: "0 8px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
               <option value="">Select election...</option>
               {elections.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
             </select>

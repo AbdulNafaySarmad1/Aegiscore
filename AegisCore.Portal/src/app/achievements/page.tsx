@@ -239,7 +239,7 @@ export default function AchievementsPage() {
         <div className="surface" style={{ overflow: "hidden" }}>
           <div className="surface-heading">
             <div><h2>Leaderboard</h2><p>{leaderboard.length} ranked students</p></div>
-            <select value={leaderboardScope} onChange={e => { setLeaderboardScope(e.target.value); refresh(); }} style={{ minHeight: 33, padding: "0 9px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
+            <select aria-label="Leaderboard scope" value={leaderboardScope} onChange={e => { setLeaderboardScope(e.target.value); refresh(); }} style={{ minHeight: 33, padding: "0 9px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
               <option value="all">All Students</option>
               <option value="department">Department</option>
               <option value="batch">Batch</option>

@@ -84,7 +84,7 @@ export default function GradeEntry() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-body">
             {loading ? <div className="skeleton" style={{ height: 40 }} /> : (
-              <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14 }}>
+              <select aria-label="Course" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14 }}>
                 <option value="">Select a course...</option>
                 {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
               </select>
@@ -109,9 +109,9 @@ export default function GradeEntry() {
               <table>
                 <thead>
                   <tr>
-                    <th>Student</th>
-                    <th>ID</th>
-                    {scheme.components.map(c => <th key={c.id}>{c.name}</th>)}
+                    <th scope="col">Student</th>
+                    <th scope="col">ID</th>
+                    {scheme.components.map(c => <th scope="col" key={c.id}>{c.name}</th>)}
                   </tr>
                 </thead>
                 <tbody>
@@ -123,6 +123,7 @@ export default function GradeEntry() {
                         <td key={c.id}>
                           <input
                             type="number"
+                            aria-label={`${s.name} ${c.name} marks out of ${c.totalMarks}`}
                             min={0}
                             max={c.totalMarks}
                             value={marks[s.enrollmentId]?.[c.id] ?? 0}
@@ -145,7 +146,7 @@ export default function GradeEntry() {
         )}
 
         {message && (
-          <div className={message.includes("success") ? "error-state" : "error-state"} style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
+          <div role={message.includes("success") ? "status" : "alert"} className="error-state" style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
             <ClipboardCheck size={20} /><p>{message}</p>
           </div>
         )}

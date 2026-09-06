@@ -84,3 +84,40 @@ jobs:
 
       - name: Build Portal image
         run: docker build -t aegiscore-portal:ci-test AegisCore.Portal
+  accessibility-check:
+    name: WCAG 2.1 AA (Portal)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: AegisCore.Portal/package-lock.json
+
+      - name: Install Portal dependencies
+        working-directory: AegisCore.Portal
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: AegisCore.Portal
+        run: npx playwright install --with-deps chromium
+
+      - name: Run axe and keyboard accessibility checks
+        working-directory: AegisCore.Portal
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
+        run: npm run test:accessibility:ci
+
+      - name: Upload accessibility violation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-report
+          path: |
+            AegisCore.Portal/accessibility-reports/
+            AegisCore.Portal/playwright-report/
+          if-no-files-found: error
+          retention-days: 14

@@ -27,7 +27,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = await getPortalLocale();
   return (
     <html lang={locale} dir={locale === "ar-AE" ? "rtl" : "ltr"}>
-      <body><NextIntlClientProvider locale={locale} messages={portalMessages[locale]}><TenantPreferencesProvider><PersonalityLayoutWrapper><ErrorBoundary>{children}</ErrorBoundary></PersonalityLayoutWrapper></TenantPreferencesProvider></NextIntlClientProvider></body>
+      <body>
+        <a className="skip-link" href="#main-content">Skip to main content</a>
+        <NextIntlClientProvider locale={locale} messages={portalMessages[locale]}>
+          <TenantPreferencesProvider>
+            <PersonalityLayoutWrapper>
+              <ErrorBoundary>{children}</ErrorBoundary>
+            </PersonalityLayoutWrapper>
+          </TenantPreferencesProvider>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

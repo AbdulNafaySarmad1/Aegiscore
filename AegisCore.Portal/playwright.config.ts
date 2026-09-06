@@ -14,6 +14,9 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
+    env: {
+      AEGISCORE_API_INTERNAL_URL: "http://127.0.0.1:9",
+    },
     reuseExistingServer: false,
     timeout: 60000,
   },

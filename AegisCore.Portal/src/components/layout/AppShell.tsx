@@ -11,7 +11,7 @@ import {
   Settings, ShieldCheck, Sun, UserRound, Utensils, Vote, X, Bell, Accessibility,
 } from "lucide-react";
 import { apiGet } from "@/lib/api-client";
-import { getRoleProfile, getDomainColor, getGreeting } from "@/lib/roles";
+import { getRoleProfile, getGreeting } from "@/lib/roles";
 import type { DashboardModule } from "@/lib/roles";
 
 type Session = { userId: string; tenantId: string; studentId: string | null; departmentId: string | null; name: string; roles: string[] };
@@ -21,7 +21,7 @@ const iconMap: Record<string, typeof LayoutDashboard> = {
   ClipboardCheck, CalendarDays, ShieldCheck, Building2, Scale, FileSearch,
   Briefcase, UserRound, Vote, Utensils, Settings, CircleHelp, Search, LogOut,
 };
-function Icon({ name }: { name: string }) { const C = iconMap[name] ?? CircleHelp; return <C size={20} />; }
+function Icon({ name }: { name: string }) { const C = iconMap[name] ?? CircleHelp; return <C size={20} aria-hidden="true" />; }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [modules]);
 
   if (!session) return (
-    <main className="launch-screen">
+    <main id="main-content" className="launch-screen" tabIndex={-1}>
       <img src="/aegiscore-logo.png" alt="AegisCore" style={{ width: 48, borderRadius: 10 }} />
       <div className="launch-pulse" />
       <p style={{ color: "var(--muted)", fontSize: 14 }}>Loading your university workspace…</p>
@@ -87,20 +87,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="shell">
       {/* Sidebar */}
-      <aside className={`sidebar ${collapsed ? "collapsed" : ""} ${menuOpen ? "open" : ""}`}>
+      <aside className={`sidebar ${collapsed ? "collapsed" : ""} ${menuOpen ? "open" : ""}`} aria-label="Application navigation">
         <div className="sidebar-logo">
           <img src="/aegiscore-logo.png" alt="AegisCore" />
           {!collapsed && <div><strong>AegisCore</strong><small>University ERP</small></div>}
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Primary navigation">
           {grouped.map(([domain, items]) => (
             <div key={domain} className="sidebar-nav-group">
-              {!collapsed && <div className="sidebar-nav-label" style={{ color: getDomainColor(domain) }}>{domain}</div>}
+              {!collapsed && <div className="sidebar-nav-label" data-domain={domain}>{domain}</div>}
               {items.map(m => {
                 const active = (pathname ?? "") === m.route || (pathname ?? "").startsWith(m.route + "/");
                 return (
-                  <Link key={m.id} href={m.route} className={active ? "active" : ""} onClick={() => setMenuOpen(false)}>
+                  <Link key={m.id} href={m.route} className={active ? "active" : ""} aria-label={collapsed ? m.label : undefined} aria-current={active ? "page" : undefined} onClick={() => setMenuOpen(false)}>
                     <Icon name={m.icon} />
                     {!collapsed && <span>{m.label}</span>}
                     {!collapsed && m.badge && <span className="badge badge-info" style={{ marginLeft: "auto", fontSize: 9 }}>{m.badge}</span>}
@@ -112,16 +112,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button onClick={() => setCollapsed(v => !v)} aria-label={collapsed ? "Expand" : "Collapse"}>
+          <button onClick={() => setCollapsed(v => !v)} aria-label={collapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!collapsed}>
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             {!collapsed && <span>Collapse</span>}
           </button>
         </div>
       </aside>
-      {menuOpen && <div className="sidebar-scrim" onClick={() => setMenuOpen(false)} />}
+      {menuOpen && <button type="button" className="sidebar-scrim" onClick={() => setMenuOpen(false)} aria-label="Close navigation" />}
 
       {/* Main */}
-      <main className="shell-main">
+      <main id="main-content" className="shell-main" tabIndex={-1}>
         {/* Topbar */}
         <header className="topbar">
           <button className="btn btn-ghost btn-sm mobile-menu-button" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Menu size={20} /></button>
@@ -129,20 +129,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="topbar-search">
             <Search size={16} />
-            <input ref={searchRef} placeholder="Search anything… (⌘K)" />
+            <input ref={searchRef} type="search" aria-label="Search modules" placeholder="Search anything… (⌘K)" />
           </div>
 
           <div className="topbar-actions">
-            <button className="btn btn-ghost btn-sm" onClick={() => setFontScale(s => s === "medium" ? "large" : s === "large" ? "xlarge" : "medium")} title="Font size">
+            <button className="btn btn-ghost btn-sm" onClick={() => setFontScale(s => s === "medium" ? "large" : s === "large" ? "xlarge" : "medium")} aria-label="Change text size" title="Font size">
               <Accessibility size={18} />
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => setHighContrast(v => !v)} title="High contrast">
+            <button className="btn btn-ghost btn-sm" onClick={() => setHighContrast(v => !v)} aria-label="Toggle high contrast" aria-pressed={highContrast} title="High contrast">
               <span style={{ fontSize: 14, fontWeight: 700 }}>{highContrast ? "HC" : "Aa"}</span>
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => setDark(v => !v)} title="Toggle theme">
+            <button className="btn btn-ghost btn-sm" onClick={() => setDark(v => !v)} aria-label="Toggle dark theme" aria-pressed={dark} title="Toggle theme">
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <div className="notification-bell"><Bell size={18} /></div>
+            <button type="button" className="notification-bell" aria-label="Open notifications"><Bell size={18} aria-hidden="true" /></button>
             <div className="avatar-menu">
               <div className="topbar-avatar">{session.name[0]?.toUpperCase()}</div>
               <div className="avatar-menu-info">

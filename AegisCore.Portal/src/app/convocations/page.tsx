@@ -350,7 +350,7 @@ export default function ConvocationsPage() {
         <div className="surface-heading">
           <div><h2>Eligibility Status</h2><p>{eligibility.length} students assessed</p></div>
           <div style={{ display: "flex", gap: 8 }}>
-            <select value={eligibilityFilter} onChange={e => setEligibilityFilter(e.target.value)} style={{ minHeight: 33, padding: "0 9px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
+            <select aria-label="Eligibility status" value={eligibilityFilter} onChange={e => setEligibilityFilter(e.target.value)} style={{ minHeight: 33, padding: "0 9px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
               <option value="">All Statuses</option>
               <option value="Eligible">Eligible</option>
               <option value="ConditionallyEligible">Conditionally Eligible</option>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
+import { FocusTrapDialog } from "@/components/FocusTrapDialog";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { ClipboardCheck, CheckCircle, XCircle } from "lucide-react";
 
@@ -97,7 +98,7 @@ export default function AttendancePage() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-body">
             {loading ? <div className="skeleton" style={{ height: 40 }} /> : (
-              <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14, background: "var(--surface)", color: "var(--ink)" }}>
+              <select aria-label="Course" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14, background: "var(--surface)", color: "var(--ink)" }}>
                 <option value="">Select a course...</option>
                 {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
               </select>
@@ -118,7 +119,7 @@ export default function AttendancePage() {
               <div className="card-body" style={{ display: "grid", gap: 4, padding: 0 }}>
                 {visibleRoster.length === 0 ? <p style={{ padding: 16 }}>No off-campus check-ins need review.</p> : visibleRoster.map(s => (
                   <div key={s.enrollmentId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
-                    <button type="button" onClick={() => toggle(s.enrollmentId)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", fontSize: 13, minHeight: 48 }}>
+                    <button type="button" aria-label={`Mark ${s.name} ${statuses[s.enrollmentId] === "present" ? "absent" : "present"}`} aria-pressed={statuses[s.enrollmentId] === "present"} onClick={() => toggle(s.enrollmentId)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", fontSize: 13, minHeight: 48 }}>
                       <span><strong>{s.name}</strong><small style={{ display: "block", color: "var(--muted)", fontSize: 11 }}>{s.universityId}</small></span>
                       <span className={`badge ${statuses[s.enrollmentId] === "present" ? "badge-success" : "badge-danger"}`}>
                         {statuses[s.enrollmentId] === "present" ? <><CheckCircle size={14} />Present</> : <><XCircle size={14} />Absent</>}
@@ -142,7 +143,7 @@ export default function AttendancePage() {
           </>
         )}
         {overrideTarget && (
-          <div className="wizard-modal" role="dialog" aria-modal="true" aria-labelledby="override-title">
+          <FocusTrapDialog labelledBy="override-title" onClose={() => setOverrideTarget(null)}>
             <div className="wizard-card">
               <h2 id="override-title">Override off-campus check-in</h2>
               <p>Approve {overrideTarget.name}&apos;s attendance without viewing or exposing their coordinates.</p>
@@ -155,12 +156,12 @@ export default function AttendancePage() {
                 <button type="button" className="wizard-primary" disabled={saving || !overrideReason.trim()} onClick={() => void submitOverride()}>{saving ? "Saving override…" : "Approve attendance"}</button>
               </div>
             </div>
-          </div>
+          </FocusTrapDialog>
         )}
 
 
         {message && (
-          <div className={message.includes("success") ? "error-state" : "error-state"} style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
+          <div role={message.includes("success") ? "status" : "alert"} className="error-state" style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
             <ClipboardCheck size={20} />
             <p>{message}</p>
           </div>

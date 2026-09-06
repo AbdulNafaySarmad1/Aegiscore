@@ -178,7 +178,7 @@ export function WizardShell() {
 
   if (!tokenAccepted) {
     return (
-      <main className="wizard-loading">
+      <main id="main-content" className="wizard-loading" tabIndex={-1}>
         <ShieldCheck size={38} />
         <h1>Secure installation</h1>
         <p>Enter the setup token printed in the AegisCore container log.</p>
@@ -193,7 +193,7 @@ export function WizardShell() {
 
   if (activated) {
     return (
-      <main className="wizard-success">
+      <main id="main-content" className="wizard-success" tabIndex={-1}>
         <Check size={54} />
         <p>AEGISCORE IS READY</p>
         <h1>Your university instance is live.</h1>
@@ -203,7 +203,7 @@ export function WizardShell() {
   }
 
   return (
-    <main className="wizard-shell">
+    <main id="main-content" className="wizard-shell" tabIndex={-1}>
       <aside className="wizard-rail">
         <div className="wizard-brand"><ShieldCheck size={24} /><strong>AegisCore</strong></div>
         <div>

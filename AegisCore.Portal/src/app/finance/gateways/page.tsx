@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError, apiGet, apiPost, apiPut } from "@/lib/api-client";
 import { ErrorDisplay, toWizardError } from "@/components/ErrorDisplay";
 
+import { FocusTrapDialog } from "@/components/FocusTrapDialog";
 type Gateway = {
   gatewaySlug: string;
   environment: string;
@@ -79,7 +80,7 @@ export default function GatewayManagementPage() {
       </article>)}
       {gateways.length === 0 && <div className="finance-empty"><KeyRound /><strong>No gateways configured</strong><span>Configure a gateway during setup or after activating a licensed tenant.</span></div>}
     </section>
-    {selected && <div className="wizard-modal" role="dialog" aria-modal="true" aria-label={`Configure ${selected}`}><div className="wizard-card"><h2>Configure {selected.toUpperCase()}</h2><p className="wizard-muted">Values are write-only and stored in the tenant vault. Production webhooks also require ML-DSA verification.</p>{(values.ENV === "production" ? [...(fields[selected] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[selected] ?? ["ENV"])).map(field => <label className="wizard-field" key={field}><span>{field.replaceAll("_", " ")} *</span><input type={field.includes("SECRET") || field.includes("PASSWORD") || field.includes("TOKEN") || field.includes("SALT") || field === "PQC_PUBLIC_KEY" ? "password" : "text"} value={values[field] ?? ""} onChange={event => setValues(current => ({ ...current, [field]: event.target.value }))} /></label>)}<div className="wizard-footer"><button className="wizard-secondary" onClick={() => setSelected(null)}>Cancel</button><button className="wizard-primary" disabled={busy || (values.ENV === "production" ? [...(fields[selected] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[selected] ?? ["ENV"])).some(field => !values[field]?.trim())} onClick={() => void configure()}>{busy ? "Saving..." : "Save and verify"}</button></div></div></div>}
+    {selected && <FocusTrapDialog label={`Configure ${selected}`} onClose={() => setSelected(null)}><div className="wizard-card"><h2>Configure {selected.toUpperCase()}</h2><p className="wizard-muted">Values are write-only and stored in the tenant vault. Production webhooks also require ML-DSA verification.</p>{(values.ENV === "production" ? [...(fields[selected] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[selected] ?? ["ENV"])).map(field => <label className="wizard-field" key={field}><span>{field.replaceAll("_", " ")} *</span><input type={field.includes("SECRET") || field.includes("PASSWORD") || field.includes("TOKEN") || field.includes("SALT") || field === "PQC_PUBLIC_KEY" ? "password" : "text"} value={values[field] ?? ""} onChange={event => setValues(current => ({ ...current, [field]: event.target.value }))} /></label>)}<div className="wizard-footer"><button className="wizard-secondary" onClick={() => setSelected(null)}>Cancel</button><button className="wizard-primary" disabled={busy || (values.ENV === "production" ? [...(fields[selected] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[selected] ?? ["ENV"])).some(field => !values[field]?.trim())} onClick={() => void configure()}>{busy ? "Saving..." : "Save and verify"}</button></div></div></FocusTrapDialog>}
   </main>;
 }
 

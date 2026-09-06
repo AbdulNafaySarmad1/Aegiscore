@@ -70,9 +70,9 @@ export default function TranscriptPage() {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "var(--surface-muted)" }}>
-                    <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, color: "var(--muted)", textTransform: "uppercase" }}>Course</th>
-                    <th style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, color: "var(--muted)" }}>Credits</th>
-                    <th style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, color: "var(--muted)" }}>Grade</th>
+                    <th scope="col" style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, color: "var(--muted)", textTransform: "uppercase" }}>Course</th>
+                    <th scope="col" style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, color: "var(--muted)" }}>Credits</th>
+                    <th scope="col" style={{ padding: "10px 16px", textAlign: "center", fontSize: 11, color: "var(--muted)" }}>Grade</th>
                   </tr>
                 </thead>
                 <tbody>

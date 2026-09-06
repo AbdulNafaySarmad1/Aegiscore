@@ -169,7 +169,7 @@ export default function CatalogPage() {
               style={{ minHeight: 150, display: "grid", placeItems: "center", alignContent: "center", gap: 10, padding: 24, border: `2px dashed ${dragOver ? "var(--blue-600)" : "var(--line-strong)"}`, borderRadius: 12, background: dragOver ? "var(--blue-100)" : "var(--surface-soft)", cursor: "pointer", transition: "all .2s" }}>
               <Upload style={{ width: 32, color: "var(--blue-600)", opacity: dragOver ? 1 : 0.6 }} />
               {file ? <strong style={{ fontSize: 12 }}>{file.name}</strong> : <><strong style={{ fontSize: 12 }}>Drag & drop a file here</strong><small style={{ color: "var(--muted)" }}>or click to browse (PDF, Excel, Images)</small></>}
-              <input type="file" accept=".pdf,.xlsx,.xls,.jpg,.png,.jpeg" style={{ position: "absolute", opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
+              <input type="file" aria-label="Catalog document" accept=".pdf,.xlsx,.xls,.jpg,.png,.jpeg" style={{ position: "absolute", opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
             </div>
             <button onClick={startIngestion} disabled={ingesting || !file}
               style={{ marginTop: 14, width: "100%", padding: "0.7rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, opacity: ingesting || !file ? 0.6 : 1 }}>

@@ -55,7 +55,7 @@ export default function LoginPage() {
   const TI = T.icon;
 
   return (
-    <main className="login-page">
+    <main id="main-content" className="login-page" tabIndex={-1}>
       {/* Left panel */}
       <aside className="login-visual">
         <div className="login-visual-content">
@@ -105,13 +105,13 @@ export default function LoginPage() {
           <form className="login-form" onSubmit={handleSubmit}>
             <label className="field-label">
               University email
-              <input type="email" placeholder="you@iobm.edu.pk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
+              <input type="email" placeholder="you@iobm.edu.pk" autoComplete="email" aria-describedby={error ? "login-error" : undefined} required value={email} onChange={e => setEmail(e.target.value)} />
             </label>
             <label className="field-label">
               Password
               <div className="password-field">
-                <input type={showPassword ? "text" : "password"} placeholder="Enter your password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} />
-                <button type="button" className="password-toggle" onClick={() => setShowPassword(v => !v)} aria-label="Toggle password visibility">
+                <input type={showPassword ? "text" : "password"} aria-label="Password" placeholder="Enter your password" autoComplete="current-password" aria-describedby={error ? "login-error" : undefined} required value={password} onChange={e => setPassword(e.target.value)} />
+                <button type="button" className="password-toggle" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -122,7 +122,7 @@ export default function LoginPage() {
               <a href="#" style={{ fontSize: 13, color: "var(--primary)" }}>Forgot password?</a>
             </div>
 
-            {error && <p style={{color:"var(--danger)",fontSize:13,textAlign:"center",margin:0}}>{error}</p>}
+            {error && <p id="login-error" role="alert" style={{color:"var(--danger)",fontSize:13,textAlign:"center",margin:0}}>{error}</p>}
             <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%" }}>
               Sign in
             </button>
@@ -183,7 +183,7 @@ export default function LoginPage() {
         .demo-role-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-muted);cursor:pointer;transition:all .15s}.demo-role-card:hover{background:var(--primary-soft);border-color:var(--primary)}
         .demo-role-icon{font-size:20px}
         .demo-role-card strong{font-size:11px;display:block}.demo-role-card small{font-size:10px;color:var(--muted)}
-        .login-footer{margin-top:24px;text-align:center;font-size:11px;color:var(--subtle)}
+        .login-footer{margin-top:24px;text-align:center;font-size:11px;color:var(--muted)}
         @media(max-width:768px){.login-page{grid-template-columns:1fr}.login-visual{display:none}.login-form-panel{padding:32px 20px}}
       `}</style>
     </main>

@@ -14,7 +14,7 @@ type StudentRisk = { studentId: string; studentName: string; tier: RiskTier; pro
 type CashFlowForecast = { month: string; expected: number; atRisk: number; gap: number };
 type InterventionTemplate = { id: string; tier: RiskTier; title: string; description: string };
 
-const tierColors: Record<RiskTier, string> = { Green: "var(--green)", Yellow: "var(--amber)", Orange: "#d98a20", Red: "var(--red)" };
+const tierColors: Record<RiskTier, string> = { Green: "var(--green)", Yellow: "var(--amber)", Orange: "var(--warning)", Red: "var(--red)" };
 const tierBgColors: Record<RiskTier, string> = { Green: "var(--green-soft)", Yellow: "var(--amber-soft)", Orange: "#fdf0db", Red: "var(--red-soft)" };
 
 function tierBadge(t: RiskTier) {

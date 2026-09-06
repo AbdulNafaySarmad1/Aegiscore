@@ -224,7 +224,7 @@ export default function BoardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 18, marginBottom: 18 }}>
         <div className="surface" style={{ overflow: "hidden" }}>
           <div className="surface-heading"><div><h2>Alerts Feed</h2><p>{alerts.length} active alerts</p></div><Zap /></div>
-          <div style={{ padding: 12, maxHeight: 420, overflow: "auto" }}>
+          <div role="region" tabIndex={0} aria-label="Board alerts" style={{ padding: 12, maxHeight: 420, overflow: "auto" }}>
             {alerts.map(a => (
               <div key={a.id} style={{ display: "flex", alignItems: "start", gap: 10, padding: "12px 8px", borderBottom: "1px solid var(--line)" }}>
                 <div style={{ minWidth: 8, height: 8, marginTop: 5, borderRadius: "50%", background: a.severity === "Critical" ? "var(--red)" : a.severity === "High" ? "var(--amber)" : a.severity === "Medium" ? "var(--blue-600)" : "var(--muted)" }} />
@@ -243,7 +243,7 @@ export default function BoardPage() {
 
         <div className="surface" style={{ overflow: "hidden" }}>
           <div className="surface-heading"><div><h2>Benchmark Comparison</h2><p>Institutional performance against peers</p></div><BarChart3 /></div>
-          <div style={{ overflow: "auto" }}>
+          <div role="region" tabIndex={0} aria-label="Benchmark comparison" style={{ overflow: "auto" }}>
             <table style={{ width: "100%", minWidth: 500, borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--surface-soft)" }}>

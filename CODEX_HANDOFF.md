@@ -1,14 +1,14 @@
 # Codex Handoff — AegisCore Deployment Prompts
 
-Updated: 2026-09-05. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
+Updated: 2026-09-06. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
-Completed prompts: **P1–P10 and P12–P16**. P11 remains intentionally deferred until all prerequisite prompts are complete.
+Completed prompts: **P1–P10 and P12–P17**. P11 remains intentionally deferred until all prerequisite prompts are complete.
 
-Next prompt: **P17 — WCAG 2.1 AA Accessibility**.
+Next prompt: **P11 — final production readiness and deployment verification**.
 
-Remaining execution order: **P17 → P11 (last)**. Do not start P11 before P17 is complete.
+Remaining execution order: **P11 (last)**.
 
 ## Completed prompt commits
 
@@ -28,7 +28,8 @@ Remaining execution order: **P17 → P11 (last)**. Do not start P11 before P17 i
 - P14: `cdfe8c90`
 - P15: `bf8779ec`
 - P16: `c5be80d4` (core compliance)
-- P16 appendix: current commit
+- P16 appendix: `202008ce`
+- P17: current commit
 
 P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 105 `RequirePermission(...)` controller attributes after P16.
 
@@ -75,12 +76,27 @@ No P15 implementation work remains.
 
 No P16 implementation work remains.
 
+## P17 verified implementation
+
+- Added `@axe-core/playwright`, a PR/push CI accessibility job, exact coverage for the ten required high-risk URLs, and uploaded JSON/Playwright evidence.
+- Audited all 45 current `page.tsx` roots using WCAG 2.1 A/AA tags; the final no-retry scan passes 45/45 with zero automated violations.
+- Documented and fixed 20 pre-remediation page-rule findings: 4 critical and 16 serious findings across 39 affected nodes.
+- Added global skip navigation, visible focus styles, reduced-motion handling, landmark/control semantics, table scope, form error relationships, and corrected AA colour tokens.
+- Added a reusable modal focus trap with initial focus, Tab/Shift+Tab wrapping, Escape close, and trigger restoration.
+- Added six Playwright keyboard workflows covering login, dashboard, grade entry, attendance, all seven wizard steps, and data import.
+- Replaced the inaccurate accessibility statement and added complete axe and keyboard audit evidence.
+
+No P17 implementation work remains.
+
 ## Current verification status
 
 - `dotnet test AegisCore.slnx -c Release --no-build`: **PASS**, 609 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
 - P16 focused compliance tests: **PASS**, 4/4.
 - P16 appendix licensing/infrastructure tests: **PASS**, 7/7.
 - Portal `npm run typecheck`: **PASS**.
+- Full no-retry WCAG audit: **PASS**, 45/45 current Portal page roots.
+- Exact CI accessibility command: **PASS**, 10/10 required axe routes and 6/6 keyboard workflows.
+- `@axe-core/playwright` reports: **PASS**, zero violations after remediation.
 - Portal `npm run build`: **PASS**, 46 generated routes including `/admin/campus` and `/student/attendance`.
 - Portal `npm run lint -- --quiet`: **PASS**, 0 errors.
 - Portal tablet Playwright suite: **PASS**, 3/3 required viewport tests.
@@ -94,8 +110,8 @@ No P16 implementation work remains.
 - Finish one prompt, run Release build/tests, refresh Graphify, commit, and push before starting the next.
 - Preserve client-owned infrastructure and introduce no Nocturne-hosted dependency.
 - `AEGISCORE_FINAL_17_PROMPTS.md` is user-confirmed source of truth and must be committed with the repository.
-- P16 is verified and included in the current commit; the worktree should be clean before beginning P17.
+- P17 is verified and included in the current commit; the worktree should be clean before beginning P11.
 
 ## Exact next action
 
-Query the refreshed graph for P17 accessibility implementation, read P17 in full, then implement and verify it before committing and pushing.
+Commit and push P17, then query the refreshed graph for P11, read P11 and its applicable appendix in full, and complete the final production-readiness verification.
