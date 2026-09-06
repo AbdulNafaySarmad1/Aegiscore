@@ -1,9 +1,9 @@
+using AegisCore.Infrastructure.Database;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using StackExchange.Redis;
 
 namespace AegisCore.Infrastructure.Deployment;
@@ -14,6 +14,7 @@ public class DeploymentReadinessChecker
     private readonly ILogger<DeploymentReadinessChecker> _logger;
     private readonly IEnvironmentValidator _environmentValidator;
     private readonly IHostEnvironment _environment;
+    private readonly IDbDialectAdapter _dialectAdapter;
     private readonly List<ReadinessCheck> _checks = new();
 
     public bool AllPassed => _checks.All(c => c.Passed);
@@ -22,12 +23,14 @@ public class DeploymentReadinessChecker
         IConfiguration configuration,
         ILogger<DeploymentReadinessChecker> logger,
         IEnvironmentValidator environmentValidator,
-        IHostEnvironment environment)
+        IHostEnvironment environment,
+        IDbDialectAdapter dialectAdapter)
     {
         _configuration = configuration;
         _logger = logger;
         _environmentValidator = environmentValidator;
         _environment = environment;
+        _dialectAdapter = dialectAdapter;
     }
 
     public async Task<IReadOnlyList<ReadinessCheck>> RunAllAsync(CancellationToken ct = default)
@@ -35,7 +38,7 @@ public class DeploymentReadinessChecker
         _checks.Clear();
 
         CheckRequiredEnvVars();
-        await CheckPostgresAsync(ct);
+        await CheckDatabaseAsync(ct);
         await CheckRedisAsync(ct);
         CheckJwtConfig();
         CheckCloudProvider();
@@ -51,43 +54,22 @@ public class DeploymentReadinessChecker
         return _checks;
     }
 
-    private async Task CheckPostgresAsync(CancellationToken ct)
+    private async Task CheckDatabaseAsync(CancellationToken ct)
     {
-        var name = "PostgreSQL Connectivity";
+        var name = $"{_dialectAdapter.Dialect} Database Connectivity";
         try
         {
-            var cs = new[]
-                {
-                    _configuration["AEGISCORE_DB_CONNECTION"],
-                    _configuration["POSTGRES_CONNECTION_STRING"],
-                    _configuration.GetConnectionString("Postgres"),
-                    _configuration.GetConnectionString("SupabasePostgres"),
-                    _configuration["Postgres:ConnectionString"],
-                    _configuration["Database:ConnectionString"]
-                }
-                .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
-                ?? BuildConnectionStringFromRegistry();
+            var connectionString = DbConnectionStringFactory.Build(_configuration, _dialectAdapter);
+            await using var connection = _dialectAdapter.CreateConnection(connectionString);
+            await connection.OpenAsync(ct);
+            await using var command = connection.CreateCommand();
+            command.CommandText = _dialectAdapter.GetVersionQuery();
+            var version = (await command.ExecuteScalarAsync(ct))?.ToString();
 
-            if (string.IsNullOrEmpty(cs))
-            {
-                _checks.Add(new ReadinessCheck(name, false, "No PostgreSQL connection string configured."));
-                return;
-            }
-
-            await using var conn = new NpgsqlConnection(cs);
-            await conn.OpenAsync(ct);
-            await using var cmd = new NpgsqlCommand("SELECT 1", conn);
-            await cmd.ExecuteScalarAsync(ct);
-
-            _checks.Add(new ReadinessCheck(name, true, "Connected successfully."));
-            await using var roleCommand = new NpgsqlCommand("SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user", conn);
-            await using var reader = await roleCommand.ExecuteReaderAsync(ct);
-            if (!await reader.ReadAsync(ct))
-                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The connected database role could not be inspected."));
-            else if (reader.GetBoolean(0) || reader.GetBoolean(1))
-                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The API database role must not be SUPERUSER or BYPASSRLS."));
-            else
-                _checks.Add(new ReadinessCheck("PostgreSQL Application Role", true, "The API role cannot bypass row-level security."));
+            _checks.Add(new ReadinessCheck(
+                name,
+                true,
+                string.IsNullOrWhiteSpace(version) ? "Connected successfully." : $"Connected successfully: {version}"));
         }
         catch (Exception ex)
         {
@@ -186,16 +168,6 @@ public class DeploymentReadinessChecker
     private bool FailOnReadinessError()
         => _configuration.GetValue<bool?>("Deployment:FailOnReadinessError") ?? _environment.IsProduction();
 
-    private string? BuildConnectionStringFromRegistry()
-    {
-        var host = _configuration["DB_HOST"];
-        var port = _configuration["DB_PORT"];
-        var database = _configuration["DB_NAME"];
-        var user = _configuration["DB_USER"];
-        var password = _configuration["DB_PASS"];
-        if (new[] { host, port, database, user, password }.Any(string.IsNullOrWhiteSpace)) return null;
-        return $"Host={host};Port={port};Database={database};Username={user};Password={password};SslMode=Require";
-    }
 }
 
 public record ReadinessCheck(string Name, bool Passed, string Detail);

@@ -341,8 +341,8 @@ function DatabaseStep({ value, update }: { value: WizardData; update: (patch: Wi
     setTesting(true); setMessage("");
     try {
       const result = await apiPost<DatabaseResult>("/api/wizard/step2/test", {
-        host: text(value, "host"), port: Number(value.port || 5432), databaseName: text(value, "databaseName"),
-        username: text(value, "username"), password: text(value, "password"), sslEnabled: value.sslEnabled !== false,
+        dialect: text(value, "dialect", "postgres"), host: text(value, "host"), port: Number(value.port || 5432),
+        databaseName: text(value, "databaseName"), username: text(value, "username"), password: text(value, "password"), sslEnabled: value.sslEnabled !== false,
       });
       update({ connectionTested: result.success });
       setMessage(result.message);
@@ -354,7 +354,7 @@ function DatabaseStep({ value, update }: { value: WizardData; update: (patch: Wi
   return (
     <div className="wizard-sections">
       <div className="wizard-form-grid">
-        <SelectField label="Database" value={text(value, "dialect", "postgres")} onChange={dialect => update({ dialect, connectionTested: false })} options={[{ value: "postgres", label: "PostgreSQL" }]} />
+        <SelectField label="Database" value={text(value, "dialect", "postgres")} onChange={dialect => update({ dialect, port: ({ postgres: 5432, mysql: 3306, mssql: 1433, oracle: 1521 } as Record<string, number>)[dialect], connectionTested: false })} options={[{ value: "postgres", label: "PostgreSQL" }, { value: "mysql", label: "MySQL / MariaDB" }, { value: "mssql", label: "Microsoft SQL Server" }, { value: "oracle", label: "Oracle Database" }]} />
         <Field label="Host" value={text(value, "host")} onChange={host => update({ host, connectionTested: false })} />
         <Field label="Port" value={String(value.port ?? 5432)} onChange={port => update({ port: Number(port), connectionTested: false })} type="number" />
         <Field label="Database name" value={text(value, "databaseName")} onChange={databaseName => update({ databaseName, connectionTested: false })} />

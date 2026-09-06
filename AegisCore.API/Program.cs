@@ -221,8 +221,8 @@ else
         report["environment"] = app.Environment.EnvironmentName;
         report["version"] = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0";
 
-        try { await db.Database.ExecuteSqlRawAsync("SELECT 1", ct); report["postgres"] = "healthy"; }
-        catch (Exception ex) { report["postgres"] = $"unhealthy: {ex.Message}"; }
+        try { await db.Database.ExecuteSqlRawAsync("SELECT 1", ct); report["database"] = "healthy"; }
+        catch (Exception ex) { report["database"] = $"unhealthy: {ex.Message}"; }
 
         try { await redis.GetDatabase().PingAsync(); report["redis"] = "healthy"; }
         catch (Exception ex) { report["redis"] = $"unhealthy: {ex.Message}"; }

@@ -18,8 +18,8 @@
     <!-- Data Access -->
     <PackageReference Include="Npgsql" Version="10.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
     
     <!-- Serialisation -->
     <!-- HTTP & Networking -->
@@ -55,6 +55,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AegisCore.Application\AegisCore.Application.csproj" />
+    <ProjectReference Include="..\AegisCore.Migrations.MySql\AegisCore.Migrations.MySql.csproj" />
+    <ProjectReference Include="..\AegisCore.Migrations.MsSql\AegisCore.Migrations.MsSql.csproj" />
+    <ProjectReference Include="..\AegisCore.Migrations.Oracle\AegisCore.Migrations.Oracle.csproj" />
     <ProjectReference Include="..\AegisCore.Infrastructure\AegisCore.Infrastructure.csproj" />
     <ProjectReference Include="..\AegisCore.Domain\AegisCore.Domain.csproj" />
     <ProjectReference Include="..\AegisCore.Contracts\AegisCore.Contracts.csproj" />

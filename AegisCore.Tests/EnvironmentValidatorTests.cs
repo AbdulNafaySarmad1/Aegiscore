@@ -1,5 +1,6 @@
 using AegisCore.Infrastructure.Deployment;
 using Microsoft.Extensions.Configuration;
+using AegisCore.Infrastructure.Database;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -16,12 +17,12 @@ public sealed class EnvironmentValidatorTests
 
         var result = validator.Validate();
 
-        Assert.Equal(26, EnvironmentValidator.Registry.Count);
+        Assert.Equal(27, EnvironmentValidator.Registry.Count);
         Assert.Equal(
             new[]
             {
                 "AEGISCORE_ENCRYPTION_KEY", "AEGISCORE_SETUP_TOKEN", "AI_API_KEY", "AI_ENDPOINT", "AI_MODEL", "AI_PROVIDER",
-                "APP_ENV", "APP_SECRET", "APP_URL", "CF_TURNSTILE_SECRET_KEY", "CF_TURNSTILE_SITE_KEY", "DB_HOST", "DB_NAME",
+                "APP_ENV", "APP_SECRET", "APP_URL", "CF_TURNSTILE_SECRET_KEY", "CF_TURNSTILE_SITE_KEY", "DB_DIALECT", "DB_HOST", "DB_NAME",
                 "DB_PASS", "DB_PORT", "DB_USER", "PQC_MLDSA_PRIVATE_KEY", "PQC_MLDSA_PUBLIC_KEY", "PQC_MLKEM_PRIVATE_KEY",
                 "PQC_MLKEM_PUBLIC_KEY", "SESSION_LIFETIME", "SSO_CALLBACK_URL", "SSO_CLIENT_ID", "SSO_CLIENT_SECRET", "SSO_PROVIDER",
                 "SSO_TENANT_ID"
@@ -73,7 +74,8 @@ public sealed class EnvironmentValidatorTests
             configuration,
             Mock.Of<ILogger<DeploymentReadinessChecker>>(),
             new EnvironmentValidator(configuration),
-            environment.Object);
+            environment.Object,
+            new PostgresDialectAdapter());
 
         var exception = await Assert.ThrowsAsync<ApplicationException>(() => checker.RunAllAsync());
 

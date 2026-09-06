@@ -37,6 +37,7 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
 
     public static IReadOnlyList<EnvironmentVariableDefinition> Registry { get; } =
     [
+        new("DB_DIALECT", "Database", EnvironmentValueType.String, false, AllowedValues: Values("postgres", "mysql", "mssql", "oracle")),
         new("DB_HOST", "Database", EnvironmentValueType.String, true),
         new("DB_PORT", "Database", EnvironmentValueType.Integer, true),
         new("DB_NAME", "Database", EnvironmentValueType.String, true),

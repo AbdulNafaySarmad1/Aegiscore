@@ -9,12 +9,29 @@ public partial class AddTenantId_PolicyConfig : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        // DATA MIGRATION REQUIRED — populate TenantId from known tenant before running this migration in production.
+        // Baseline policy rows are system templates and intentionally use Guid.Empty.
+        // Tenant onboarding creates tenant-specific policy copies after this migration.
         migrationBuilder.AddColumn<Guid>(
             name: "TenantId",
             table: "PolicyConfigs",
             type: "uuid",
-            nullable: false);
+            nullable: true);
+
+        migrationBuilder.Sql(
+            """
+            UPDATE "PolicyConfigs"
+            SET "TenantId" = '00000000-0000-0000-0000-000000000000'
+            WHERE "TenantId" IS NULL;
+            """);
+
+        migrationBuilder.AlterColumn<Guid>(
+            name: "TenantId",
+            table: "PolicyConfigs",
+            type: "uuid",
+            nullable: false,
+            oldClrType: typeof(Guid),
+            oldType: "uuid",
+            oldNullable: true);
 
         migrationBuilder.CreateIndex(
             name: "IX_PolicyConfigs_TenantId",

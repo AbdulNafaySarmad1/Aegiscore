@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using AegisCore.Domain;
 using AegisCore.Domain.Common;
 using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure.Database;
 using AccreditationBodyEntity = AegisCore.Domain.Entities.AccreditationBody;
 
 namespace AegisCore.Infrastructure;
@@ -14,6 +15,7 @@ namespace AegisCore.Infrastructure;
 public class AegisDbContext : DbContext
 {
     private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IDbDialectAdapter _dialectAdapter;
     public Guid CurrentTenantId => _httpContextAccessor?.HttpContext?.Items["TenantId"] as Guid? ?? Guid.Empty;
 
     /// <summary>
@@ -21,9 +23,11 @@ public class AegisDbContext : DbContext
     /// </summary>
     /// <param name="options">The options to be used by the context.</param>
     /// <param name="httpContextAccessor">The HTTP context accessor for tenant resolution.</param>
-    public AegisDbContext(DbContextOptions<AegisDbContext> options, IHttpContextAccessor? httpContextAccessor = null) : base(options)
+    /// <param name="dialectAdapter">The selected database dialect; PostgreSQL remains the compatibility default.</param>
+    public AegisDbContext(DbContextOptions<AegisDbContext> options, IHttpContextAccessor? httpContextAccessor = null, IDbDialectAdapter? dialectAdapter = null) : base(options)
     {
         _httpContextAccessor = httpContextAccessor;
+        _dialectAdapter = dialectAdapter ?? new PostgresDialectAdapter();
     }
 
     /// <summary>
@@ -1950,6 +1954,7 @@ public class AegisDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var dialectAdapter = _dialectAdapter;
 
         // Apply global query filter for multi-tenancy
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -1977,7 +1982,7 @@ public class AegisDbContext : DbContext
 
         modelBuilder.Entity<CampusPolygon>(entity =>
         {
-            entity.Property(item => item.VerticesJson).HasColumnName("Vertices").HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(item => item.VerticesJson), "Vertices");
             entity.HasIndex(item => new { item.TenantId, item.IsActive });
         });
 
@@ -2002,139 +2007,139 @@ public class AegisDbContext : DbContext
         });
 
         // Enum conversions (store as strings)
-        modelBuilder.HasPostgresEnum<EnrollmentStatus>();
-        modelBuilder.HasPostgresEnum<AttendanceStatus>();
-        modelBuilder.HasPostgresEnum<ExamType>();
-        modelBuilder.HasPostgresEnum<AegisCore.Domain.DayOfWeek>();
-        modelBuilder.HasPostgresEnum<Designation>();
-        modelBuilder.HasPostgresEnum<AlignmentLevel>();
-        modelBuilder.HasPostgresEnum<AccountType>();
-        modelBuilder.HasPostgresEnum<JournalEntryType>();
-        modelBuilder.HasPostgresEnum<EmployeeType>();
-        modelBuilder.HasPostgresEnum<EmployeeStatus>();
-        modelBuilder.HasPostgresEnum<JobPostingStatus>();
-        modelBuilder.HasPostgresEnum<ApplicationStatus>();
-        modelBuilder.HasPostgresEnum<InterviewStatus>();
-        modelBuilder.HasPostgresEnum<LeaveType>();
-        modelBuilder.HasPostgresEnum<LeaveStatus>();
-        modelBuilder.HasPostgresEnum<AttendanceMethod>();
-        modelBuilder.HasPostgresEnum<ReviewType>();
-        modelBuilder.HasPostgresEnum<ReviewStatus>();
-        modelBuilder.HasPostgresEnum<TrainingStatus>();
-        modelBuilder.HasPostgresEnum<ResearchProjectStatus>();
-        modelBuilder.HasPostgresEnum<ResearchMemberRole>();
-        modelBuilder.HasPostgresEnum<MilestoneStatus>();
-        modelBuilder.HasPostgresEnum<DeliverableType>();
-        modelBuilder.HasPostgresEnum<DeliverableStatus>();
-        modelBuilder.HasPostgresEnum<GrantStatus>();
-        modelBuilder.HasPostgresEnum<PublicationType>();
-        modelBuilder.HasPostgresEnum<PatentStatus>();
-        modelBuilder.HasPostgresEnum<EthicsReviewStatus>();
-        modelBuilder.HasPostgresEnum<TravelStatus>();
-        modelBuilder.HasPostgresEnum<BloomsLevel>();
-        modelBuilder.HasPostgresEnum<MappingStrength>();
-        modelBuilder.HasPostgresEnum<AssessmentType>();
-        modelBuilder.HasPostgresEnum<CIPStatus>();
-        modelBuilder.HasPostgresEnum<AccreditationCycleStatus>();
-        modelBuilder.HasPostgresEnum<SSRStatus>();
-        modelBuilder.HasPostgresEnum<SSRSectionStatus>();
-        modelBuilder.HasPostgresEnum<SSRReviewStatus>();
-        modelBuilder.HasPostgresEnum<CommitteeRole>();
-        modelBuilder.HasPostgresEnum<ActionItemStatus>();
-        modelBuilder.HasPostgresEnum<FindingType>();
-        modelBuilder.HasPostgresEnum<FindingSeverity>();
-        modelBuilder.HasPostgresEnum<FeeStatus>();
-        modelBuilder.HasPostgresEnum<DisciplineSeverity>();
-        modelBuilder.HasPostgresEnum<DisciplineStatus>();
-        modelBuilder.HasPostgresEnum<AchievementType>();
-        modelBuilder.HasPostgresEnum<ScholarshipStatus>();
-        modelBuilder.HasPostgresEnum<HostelStatus>();
-        modelBuilder.HasPostgresEnum<TransportStatus>();
-        modelBuilder.HasPostgresEnum<TransferStatus>();
-        modelBuilder.HasPostgresEnum<ClearanceStatus>();
-        modelBuilder.HasPostgresEnum<BookStatus>();
-        modelBuilder.HasPostgresEnum<CopyStatus>();
-        modelBuilder.HasPostgresEnum<MemberType>();
-        modelBuilder.HasPostgresEnum<MemberStatus>();
-        modelBuilder.HasPostgresEnum<IssueStatus>();
-        modelBuilder.HasPostgresEnum<ReservationStatus>();
-        modelBuilder.HasPostgresEnum<OrderStatus>();
-        modelBuilder.HasPostgresEnum<BudgetStatus>();
-        modelBuilder.HasPostgresEnum<LabStatus>();
-        modelBuilder.HasPostgresEnum<EquipmentStatus>();
-        modelBuilder.HasPostgresEnum<BookingStatus>();
-        modelBuilder.HasPostgresEnum<RequisitionStatus>();
-        modelBuilder.HasPostgresEnum<CalibrationStatus>();
-        modelBuilder.HasPostgresEnum<InspectionStatus>();
-        modelBuilder.HasPostgresEnum<MaintenanceStatus>();
-        modelBuilder.HasPostgresEnum<AssetStatus>();
-        modelBuilder.HasPostgresEnum<DepreciationMethod>();
-        modelBuilder.HasPostgresEnum<AssetMaintenanceStatus>();
-        modelBuilder.HasPostgresEnum<DisposalMethod>();
-        modelBuilder.HasPostgresEnum<DisposalStatus>();
-        modelBuilder.HasPostgresEnum<VerificationStatus>();
-        modelBuilder.HasPostgresEnum<VerificationCycleStatus>();
-        modelBuilder.HasPostgresEnum<MaintenanceCategory>();
-        modelBuilder.HasPostgresEnum<TicketPriority>();
-        modelBuilder.HasPostgresEnum<TicketStatus>();
-        modelBuilder.HasPostgresEnum<WorkOrderStatus>();
-        modelBuilder.HasPostgresEnum<PMFrequency>();
-        modelBuilder.HasPostgresEnum<EscalationLevel>();
-        modelBuilder.HasPostgresEnum<VisitorType>();
-        modelBuilder.HasPostgresEnum<VisitorStatus>();
-        modelBuilder.HasPostgresEnum<VehiclePassType>();
-        modelBuilder.HasPostgresEnum<VehiclePassStatus>();
-        modelBuilder.HasPostgresEnum<EntryType>();
-        modelBuilder.HasPostgresEnum<GuardStatus>();
-        modelBuilder.HasPostgresEnum<ShiftStatus>();
-        modelBuilder.HasPostgresEnum<IncidentType>();
-        modelBuilder.HasPostgresEnum<IncidentSeverity>();
-        modelBuilder.HasPostgresEnum<IncidentStatus>();
-        modelBuilder.HasPostgresEnum<EmergencyContactType>();
-        modelBuilder.HasPostgresEnum<EmergencyAlertType>();
-        modelBuilder.HasPostgresEnum<EmergencyAlertSeverity>();
-        modelBuilder.HasPostgresEnum<FireEquipmentStatus>();
-        modelBuilder.HasPostgresEnum<LostFoundType>();
-        modelBuilder.HasPostgresEnum<LostFoundStatus>();
-        modelBuilder.HasPostgresEnum<RouteType>();
-        modelBuilder.HasPostgresEnum<VehicleStatus>();
-        modelBuilder.HasPostgresEnum<DriverStatus>();
-        modelBuilder.HasPostgresEnum<VehicleMaintenanceStatus>();
-        modelBuilder.HasPostgresEnum<HostelBlockType>();
-        modelBuilder.HasPostgresEnum<RoomType>();
-        modelBuilder.HasPostgresEnum<RoomStatus>();
-        modelBuilder.HasPostgresEnum<AllocationStatus>();
-        modelBuilder.HasPostgresEnum<InspectionType>();
-        modelBuilder.HasPostgresEnum<GateLogType>();
-        modelBuilder.HasPostgresEnum<HostelDisciplineStatus>();
-        modelBuilder.HasPostgresEnum<UtilityType>();
-        modelBuilder.HasPostgresEnum<MealType>();
-        modelBuilder.HasPostgresEnum<RiskCategory>();
-        modelBuilder.HasPostgresEnum<MeetingStatus>();
-        modelBuilder.HasPostgresEnum<InterventionType>();
-        modelBuilder.HasPostgresEnum<InterventionOutcome>();
-        modelBuilder.HasPostgresEnum<CareerGoalStatus>();
-        modelBuilder.HasPostgresEnum<AlertTriggerType>();
-        modelBuilder.HasPostgresEnum<EmployerStatus>();
-        modelBuilder.HasPostgresEnum<JobType>();
-        modelBuilder.HasPostgresEnum<InterviewType>();
-        modelBuilder.HasPostgresEnum<PlacementType>();
-        modelBuilder.HasPostgresEnum<AegisCore.Domain.DriveType>();
-        modelBuilder.HasPostgresEnum<DriveStatus>();
-        modelBuilder.HasPostgresEnum<ReferralStatus>();
-        modelBuilder.HasPostgresEnum<CareerEventType>();
-        modelBuilder.HasPostgresEnum<CareerEventStatus>();
-        modelBuilder.HasPostgresEnum<LeadSource>();
-        modelBuilder.HasPostgresEnum<LeadStatus>();
-        modelBuilder.HasPostgresEnum<ActivityType>();
-        modelBuilder.HasPostgresEnum<LeadTaskStatus>();
-        modelBuilder.HasPostgresEnum<CampaignType>();
-        modelBuilder.HasPostgresEnum<CampaignStatus>();
-        modelBuilder.HasPostgresEnum<VisitStatus>();
-        modelBuilder.HasPostgresEnum<CallDirection>();
-        modelBuilder.HasPostgresEnum<CallDisposition>();
-        modelBuilder.HasPostgresEnum<MessageSender>();
-        modelBuilder.HasPostgresEnum<RefreshFrequency>();
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EnrollmentStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AttendanceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ExamType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AegisCore.Domain.DayOfWeek));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(Designation));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AlignmentLevel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AccountType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(JournalEntryType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmployeeType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmployeeStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(JobPostingStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApplicationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InterviewStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LeaveType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LeaveStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AttendanceMethod));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ReviewType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ReviewStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TrainingStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ResearchProjectStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ResearchMemberRole));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MilestoneStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DeliverableType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DeliverableStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(GrantStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(PublicationType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(PatentStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EthicsReviewStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TravelStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BloomsLevel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MappingStrength));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AssessmentType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CIPStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AccreditationCycleStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SSRStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SSRSectionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SSRReviewStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CommitteeRole));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ActionItemStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FindingType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FindingSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FeeStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DisciplineSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DisciplineStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AchievementType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ScholarshipStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(HostelStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TransportStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TransferStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ClearanceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BookStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CopyStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MemberType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MemberStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IssueStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ReservationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(OrderStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BudgetStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LabStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EquipmentStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BookingStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RequisitionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CalibrationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InspectionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MaintenanceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AssetStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DepreciationMethod));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AssetMaintenanceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DisposalMethod));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DisposalStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VerificationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VerificationCycleStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MaintenanceCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TicketPriority));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TicketStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkOrderStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(PMFrequency));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EscalationLevel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VisitorType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VisitorStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VehiclePassType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VehiclePassStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EntryType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(GuardStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ShiftStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IncidentType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IncidentSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IncidentStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmergencyContactType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmergencyAlertType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmergencyAlertSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FireEquipmentStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LostFoundType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LostFoundStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RouteType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VehicleStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DriverStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VehicleMaintenanceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(HostelBlockType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RoomType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RoomStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AllocationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InspectionType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(GateLogType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(HostelDisciplineStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(UtilityType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MealType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RiskCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MeetingStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InterventionType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InterventionOutcome));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CareerGoalStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AlertTriggerType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmployerStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(JobType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InterviewType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(PlacementType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AegisCore.Domain.DriveType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DriveStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ReferralStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CareerEventType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CareerEventStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LeadSource));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LeadStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ActivityType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LeadTaskStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CampaignType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CampaignStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VisitStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CallDirection));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CallDisposition));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MessageSender));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RefreshFrequency));
 
         modelBuilder.Entity<PolicyConfig>(entity =>
         {
@@ -2199,7 +2204,7 @@ public class AegisDbContext : DbContext
             entity.Property(e => e.Payload).HasColumnType("text").IsRequired();
             entity.Property(e => e.LicenseMode).HasMaxLength(10).IsRequired();
             entity.Property(e => e.LicenseKey).HasMaxLength(50);
-            entity.Property(e => e.StepData).HasColumnType("jsonb").IsRequired();
+            var stepDataProperty = entity.Property(e => e.StepData).IsRequired(); dialectAdapter.ConfigureJsonColumn(stepDataProperty, "StepData");
             entity.Property(e => e.CreatedByIp).HasMaxLength(64);
         });
 
@@ -2209,8 +2214,8 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.CreatedAt });
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.RawHtml).HasColumnType("text").IsRequired();
-            entity.Property(e => e.ExtractedPalette).HasColumnType("jsonb").IsRequired();
-            entity.Property(e => e.ExtractedFonts).HasColumnType("jsonb").IsRequired();
+            var paletteProperty = entity.Property(e => e.ExtractedPalette).IsRequired(); dialectAdapter.ConfigureJsonColumn(paletteProperty, "ExtractedPalette");
+            var fontsProperty = entity.Property(e => e.ExtractedFonts).IsRequired(); dialectAdapter.ConfigureJsonColumn(fontsProperty, "ExtractedFonts");
             entity.Property(e => e.LogoUrl).HasMaxLength(2048);
         });
 
@@ -2339,7 +2344,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FinanceGratuityAssumption>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.EffectiveFrom }).IsUnique();
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceGratuityAssumptions_Rates", "\"DiscountRatePercent\" >= 0 AND \"SalaryGrowthRatePercent\" >= 0 AND \"TurnoverRatePercent\" >= 0 AND \"BenefitDivisor\" > 0 AND \"RetirementHorizonYears\" > 0"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceGratuityAssumptions_Rates", dialectAdapter.NormalizeSql("\"DiscountRatePercent\" >= 0 AND \"SalaryGrowthRatePercent\" >= 0 AND \"TurnoverRatePercent\" >= 0 AND \"BenefitDivisor\" > 0 AND \"RetirementHorizonYears\" > 0")));
         });
         modelBuilder.Entity<FinanceGratuityValuation>(entity => entity.HasIndex(e => new { e.TenantId, e.ValuationDate }).IsUnique());
         modelBuilder.Entity<FinanceBankAccount>(entity =>
@@ -2363,7 +2368,7 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.Status, e.ClosesAt });
             entity.HasOne(e => e.Grant).WithMany().HasForeignKey(e => e.GrantId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(e => e.Applications).WithOne(e => e.Program).HasForeignKey(e => e.ProgramId).OnDelete(DeleteBehavior.Restrict);
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceScholarshipPrograms_Values", "\"CoverageValue\" > 0 AND \"DurationMonths\" > 0 AND \"ClosesAt\" > \"OpensAt\""));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceScholarshipPrograms_Values", dialectAdapter.NormalizeSql("\"CoverageValue\" > 0 AND \"DurationMonths\" > 0 AND \"ClosesAt\" > \"OpensAt\"")));
         });
         modelBuilder.Entity<FinanceScholarshipApplication>(entity =>
         {
@@ -2385,7 +2390,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.AssetId, e.OccurredAt });
             entity.HasIndex(e => e.JournalEntryId).IsUnique().HasFilter("\"JournalEntryId\" IS NOT NULL");
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceAssetAccountingEvents_Values", "\"PreviousCarryingValue\" >= 0 AND \"NewCarryingValue\" >= 0 AND \"Proceeds\" >= 0"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceAssetAccountingEvents_Values", dialectAdapter.NormalizeSql("\"PreviousCarryingValue\" >= 0 AND \"NewCarryingValue\" >= 0 AND \"Proceeds\" >= 0")));
         });
         modelBuilder.Entity<FinanceUtilityBill>(entity =>
         {
@@ -2422,7 +2427,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.TransportVehicleId }).IsUnique();
             entity.HasIndex(e => new { e.TenantId, e.NextServiceAt, e.Status });
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceFleetProfiles_Service", "\"ModelYear\" >= 1900 AND \"ServiceIntervalDays\" > 0 AND \"ServiceIntervalKm\" > 0 AND \"CurrentOdometer\" >= 0"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceFleetProfiles_Service", dialectAdapter.NormalizeSql("\"ModelYear\" >= 1900 AND \"ServiceIntervalDays\" > 0 AND \"ServiceIntervalKm\" > 0 AND \"CurrentOdometer\" >= 0")));
         });
         modelBuilder.Entity<FinanceInvestmentFund>(entity =>
         {
@@ -2441,7 +2446,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.Code, e.Version }).IsUnique();
             entity.HasIndex(e => new { e.TenantId, e.Code, e.IsActive });
-            entity.Property(e => e.DefinitionJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.DefinitionJson), "DefinitionJson");
         });
         modelBuilder.Entity<FinanceRegulatorySubmission>(entity =>
         {
@@ -2453,7 +2458,7 @@ public class AegisDbContext : DbContext
         {
             entity.Property(e => e.Trigger).HasMaxLength(40);
             entity.Property(e => e.ReferenceType).HasMaxLength(80);
-            entity.Property(e => e.ResultsJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.ResultsJson), "ResultsJson");
             entity.Property(e => e.ContentHash).HasMaxLength(64);
             entity.HasIndex(e => new { e.TenantId, e.EvaluatedAt });
             entity.HasIndex(e => new { e.TenantId, e.ReferenceType, e.ReferenceId });
@@ -2462,7 +2467,7 @@ public class AegisDbContext : DbContext
         {
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.IncompatibleActionsJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.IncompatibleActionsJson), "IncompatibleActionsJson");
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
         });
         modelBuilder.Entity<FinanceAuditorEngagement>(entity =>
@@ -2470,7 +2475,7 @@ public class AegisDbContext : DbContext
             entity.Property(e => e.AuditorName).HasMaxLength(200);
             entity.Property(e => e.AuditorEmail).HasMaxLength(320);
             entity.Property(e => e.TokenHash).HasMaxLength(64);
-            entity.Property(e => e.ScopesJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.ScopesJson), "ScopesJson");
             entity.HasIndex(e => new { e.TenantId, e.ExpiresAt });
             entity.HasIndex(e => e.TokenHash).IsUnique();
         });
@@ -2478,7 +2483,7 @@ public class AegisDbContext : DbContext
         {
             entity.Property(e => e.PopulationType).HasMaxLength(40);
             entity.Property(e => e.SeedHash).HasMaxLength(64);
-            entity.Property(e => e.SelectedReferencesJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.SelectedReferencesJson), "SelectedReferencesJson");
             entity.HasIndex(e => new { e.TenantId, e.AuditorEngagementId, e.CreatedAt });
         });
         modelBuilder.Entity<FinanceAuditEvidencePackage>(entity =>
@@ -2541,7 +2546,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.FinanceVoucherId });
             entity.HasIndex(e => new { e.TenantId, e.ChartOfAccountId });
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherLines_OneSided", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherLines_OneSided", dialectAdapter.NormalizeSql("(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)")));
         });
 
         modelBuilder.Entity<FinanceVoucherApproval>(entity =>
@@ -2553,8 +2558,8 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FinanceVoucherApprovalRule>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.Currency, e.MinimumAmount }).IsUnique();
-            entity.Property(e => e.RequiredRolesJson).HasColumnType("jsonb");
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherApprovalRules_Range", "\"MinimumAmount\" >= 0 AND (\"MaximumAmount\" IS NULL OR \"MaximumAmount\" > \"MinimumAmount\") AND \"MinimumApprovals\" > 0"));
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.RequiredRolesJson), "RequiredRolesJson");
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceVoucherApprovalRules_Range", dialectAdapter.NormalizeSql("\"MinimumAmount\" >= 0 AND (\"MaximumAmount\" IS NULL OR \"MaximumAmount\" > \"MinimumAmount\") AND \"MinimumApprovals\" > 0")));
         });
         modelBuilder.Entity<FinanceVoucherAttachment>(entity =>
         {
@@ -2605,7 +2610,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.ForeignCurrency, e.CreatedAt });
             entity.HasIndex(e => new { e.TenantId, e.SourceType, e.SourceId });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceForeignCurrencyTransactions_CurrenciesDiffer", "\"ForeignCurrency\" <> \"FunctionalCurrency\""));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceForeignCurrencyTransactions_CurrenciesDiffer", dialectAdapter.NormalizeSql("\"ForeignCurrency\" <> \"FunctionalCurrency\"")));
         });
 
         modelBuilder.Entity<FinancePaymentPlanConfiguration>(entity =>
@@ -2646,7 +2651,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.Purpose, e.Status });
             entity.HasMany(e => e.Approvals).WithOne(e => e.Ceremony).HasForeignKey(e => e.CeremonyId).OnDelete(DeleteBehavior.Restrict);
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePqcKeyCeremonies_Threshold", "\"RequiredApprovals\" BETWEEN 2 AND 20"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePqcKeyCeremonies_Threshold", dialectAdapter.NormalizeSql("\"RequiredApprovals\" BETWEEN 2 AND 20")));
         });
         modelBuilder.Entity<FinancePqcKeyCeremonyApproval>(entity =>
         {
@@ -2663,15 +2668,15 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<TenantFinanceConfiguration>(entity =>
         {
             entity.HasIndex(e => e.TenantId).IsUnique();
-            entity.Property(e => e.AdditionalCurrenciesJson).HasColumnType("jsonb");
-            entity.Property(e => e.TaxSettingsJson).HasColumnType("jsonb");
-            entity.ToTable(t => t.HasCheckConstraint("CK_TenantFinanceConfigurations_LibraryThreshold", "\"LibraryCapitalizationThreshold\" >= 0"));
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.AdditionalCurrenciesJson), "AdditionalCurrenciesJson");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.TaxSettingsJson), "TaxSettingsJson");
+            entity.ToTable(t => t.HasCheckConstraint("CK_TenantFinanceConfigurations_LibraryThreshold", dialectAdapter.NormalizeSql("\"LibraryCapitalizationThreshold\" >= 0")));
         });
 
         modelBuilder.Entity<FinanceAccountingStandardPolicy>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.StandardCode, e.PolicyCode, e.EffectiveFrom }).IsUnique();
-            entity.Property(e => e.ValueJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(e => e.ValueJson), "ValueJson");
         });
         modelBuilder.Entity<FinanceReportingEntity>(entity =>
         {
@@ -2681,7 +2686,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FinanceRestatementRule>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.SourceStandard, e.TargetStandard, e.IsActive });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceRestatementRules_Factor", "\"Factor\" <> 0 AND \"SourceAccountId\" <> \"TargetAccountId\""));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceRestatementRules_Factor", dialectAdapter.NormalizeSql("\"Factor\" <> 0 AND \"SourceAccountId\" <> \"TargetAccountId\"")));
         });
         modelBuilder.Entity<FinanceRestatementRun>(entity =>
         {
@@ -2691,7 +2696,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FinanceRestatementMemoLine>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.RestatementRunId, e.ChartOfAccountId });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceRestatementMemoLines_OneSide", "(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceRestatementMemoLines_OneSide", dialectAdapter.NormalizeSql("(\"Debit\" > 0 AND \"Credit\" = 0) OR (\"Credit\" > 0 AND \"Debit\" = 0)")));
         });
         modelBuilder.Entity<FinanceConsolidationGroup>(entity =>
         {
@@ -2716,27 +2721,27 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.IsActive });
             entity.HasMany(e => e.Expenses).WithOne(e => e.Fund).HasForeignKey(e => e.FinancePettyCashFundId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(e => e.Counts).WithOne(e => e.Fund).HasForeignKey(e => e.FinancePettyCashFundId).OnDelete(DeleteBehavior.Restrict);
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashFunds_PositiveFloat", "\"FloatAmount\" > 0 AND \"CurrentBalance\" >= 0 AND \"CurrentBalance\" <= \"FloatAmount\""));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashFunds_PositiveFloat", dialectAdapter.NormalizeSql("\"FloatAmount\" > 0 AND \"CurrentBalance\" >= 0 AND \"CurrentBalance\" <= \"FloatAmount\"")));
         });
         modelBuilder.Entity<FinancePettyCashExpense>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.FinancePettyCashFundId, e.SpentAt });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashExpenses_PositiveAmount", "\"Amount\" > 0"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashExpenses_PositiveAmount", dialectAdapter.NormalizeSql("\"Amount\" > 0")));
         });
         modelBuilder.Entity<FinancePettyCashCount>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.FinancePettyCashFundId, e.CountedAt });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashCounts_NonNegativeBalances", "\"SystemBalance\" >= 0 AND \"PhysicalBalance\" >= 0"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinancePettyCashCounts_NonNegativeBalances", dialectAdapter.NormalizeSql("\"SystemBalance\" >= 0 AND \"PhysicalBalance\" >= 0")));
         });
         modelBuilder.Entity<FinanceLibraryAcquisition>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.Status, e.AcquiredAt });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceLibraryAcquisitions_NonNegativeAmounts", "\"Cost\" >= 0 AND \"FairValue\" >= 0 AND \"AccumulatedAmortization\" >= 0"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceLibraryAcquisitions_NonNegativeAmounts", dialectAdapter.NormalizeSql("\"Cost\" >= 0 AND \"FairValue\" >= 0 AND \"AccumulatedAmortization\" >= 0")));
         });
         modelBuilder.Entity<FinanceLibraryFine>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.StudentId, e.Status });
-            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceLibraryFines_PositiveAmount", "\"Amount\" > 0"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_FinanceLibraryFines_PositiveAmount", dialectAdapter.NormalizeSql("\"Amount\" > 0")));
         });
 
         modelBuilder.Entity<FinanceVendor>(entity =>
@@ -2760,12 +2765,12 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.VendorId, e.Status });
             entity.HasMany(e => e.Lines).WithOne().HasForeignKey(e => e.PurchaseOrderId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<FinanceVendor>().WithMany().HasForeignKey(e => e.VendorId).OnDelete(DeleteBehavior.Restrict);
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinancePurchaseOrders_PositiveTotal", "\"TotalAmount\" > 0"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinancePurchaseOrders_PositiveTotal", dialectAdapter.NormalizeSql("\"TotalAmount\" > 0")));
         });
         modelBuilder.Entity<FinancePurchaseOrderLine>(entity =>
         {
             entity.HasIndex(e => new { e.TenantId, e.PurchaseOrderId });
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinancePurchaseOrderLines_Amounts", "\"Quantity\" > 0 AND \"UnitPrice\" >= 0 AND \"LineTotal\" = \"Quantity\" * \"UnitPrice\""));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinancePurchaseOrderLines_Amounts", dialectAdapter.NormalizeSql("\"Quantity\" > 0 AND \"UnitPrice\" >= 0 AND \"LineTotal\" = \"Quantity\" * \"UnitPrice\"")));
         });
         modelBuilder.Entity<FinanceGoodsReceipt>(entity =>
         {
@@ -2777,7 +2782,7 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => new { e.TenantId, e.PurchaseOrderLineId });
             entity.HasOne<FinancePurchaseOrderLine>().WithMany().HasForeignKey(e => e.PurchaseOrderLineId).OnDelete(DeleteBehavior.Restrict);
-            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceGoodsReceiptLines_Amounts", "\"QuantityAccepted\" >= 0 AND \"QuantityRejected\" >= 0 AND (\"QuantityAccepted\" + \"QuantityRejected\") > 0"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_FinanceGoodsReceiptLines_Amounts", dialectAdapter.NormalizeSql("\"QuantityAccepted\" >= 0 AND \"QuantityRejected\" >= 0 AND (\"QuantityAccepted\" + \"QuantityRejected\") > 0")));
         });
         modelBuilder.Entity<FinanceVendorInvoice>(entity =>
         {
@@ -2867,7 +2872,7 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<CurriculumPrerequisite>(entity =>
         {
             entity.HasIndex(e => new { e.CurriculumVersionId, e.CourseId, e.PrerequisiteCourseId }).IsUnique();
-            entity.ToTable(t => t.HasCheckConstraint("CK_CurriculumPrerequisites_NoSelf", "\"CourseId\" <> \"PrerequisiteCourseId\""));
+            entity.ToTable(t => t.HasCheckConstraint("CK_CurriculumPrerequisites_NoSelf", dialectAdapter.NormalizeSql("\"CourseId\" <> \"PrerequisiteCourseId\"")));
         });
 
         modelBuilder.Entity<CurriculumChangeHistory>(entity =>
@@ -2964,113 +2969,113 @@ public class AegisDbContext : DbContext
             SeedPolicy("11111111-1111-1111-1111-111111111107", "finance", "late_fee_grace_days", "3", "int", "late fee grace period"),
             SeedPolicy("11111111-1111-1111-1111-111111111108", "license", "heartbeat_time", "08:00", "string", "daily license heartbeat time"),
             SeedPolicy("11111111-1111-1111-1111-111111111109", "license", "lockout_on_first_failure", "true", "bool", "lock system on first failed heartbeat"));
-        modelBuilder.HasPostgresEnum<ETLJobStatus>();
-        modelBuilder.HasPostgresEnum<DashboardType>();
-        modelBuilder.HasPostgresEnum<VisualizationType>();
-        modelBuilder.HasPostgresEnum<ReportCategory>();
-        modelBuilder.HasPostgresEnum<ScheduleFrequency>();
-        modelBuilder.HasPostgresEnum<ExportFormat>();
-        modelBuilder.HasPostgresEnum<AlertCondition>();
-        modelBuilder.HasPostgresEnum<WorkflowDefinitionStatus>();
-        modelBuilder.HasPostgresEnum<WorkflowInstanceStatus>();
-        modelBuilder.HasPostgresEnum<WorkflowStepStatus>();
-        modelBuilder.HasPostgresEnum<WorkflowNodeType>();
-        modelBuilder.HasPostgresEnum<WorkflowTriggerType>();
-        modelBuilder.HasPostgresEnum<ApprovalType>();
-        modelBuilder.HasPostgresEnum<ApprovalStatus>();
-        modelBuilder.HasPostgresEnum<NotificationChannel>();
-        modelBuilder.HasPostgresEnum<NotificationStatus>();
-        modelBuilder.HasPostgresEnum<ConditionOperator>();
-        modelBuilder.HasPostgresEnum<LogicalOperator>();
-        modelBuilder.HasPostgresEnum<ApiKeyTier>();
-        modelBuilder.HasPostgresEnum<ApiKeyStatus>();
-        modelBuilder.HasPostgresEnum<ApiPermission>();
-        modelBuilder.HasPostgresEnum<WebhookStatus>();
-        modelBuilder.HasPostgresEnum<ExtensionStatus>();
-        modelBuilder.HasPostgresEnum<ExtensionCategory>();
-        modelBuilder.HasPostgresEnum<ExtensionPricingModel>();
-        modelBuilder.HasPostgresEnum<InstallationStatus>();
-        modelBuilder.HasPostgresEnum<UserStatus>();
-        modelBuilder.HasPostgresEnum<AuthProvider>();
-        modelBuilder.HasPostgresEnum<SessionStatus>();
-        modelBuilder.HasPostgresEnum<BackupType>();
-        modelBuilder.HasPostgresEnum<BackupStatus>();
-        modelBuilder.HasPostgresEnum<ReplicaStatus>();
-        modelBuilder.HasPostgresEnum<FailoverMode>();
-        modelBuilder.HasPostgresEnum<BackupRetentionTier>();
-        modelBuilder.HasPostgresEnum<CampusStatus>();
-        modelBuilder.HasPostgresEnum<AegisCore.Domain.CalendarType>();
-        modelBuilder.HasPostgresEnum<AegisCore.Domain.GradingScheme>();
-        modelBuilder.HasPostgresEnum<TransferRequestStatus>();
-        modelBuilder.HasPostgresEnum<ComplianceFrameworkStatus>();
-        modelBuilder.HasPostgresEnum<ControlStatus>();
-        modelBuilder.HasPostgresEnum<ControlReviewFrequency>();
-        modelBuilder.HasPostgresEnum<AuditFindingSeverity>();
-        modelBuilder.HasPostgresEnum<AuditFindingStatus>();
-        modelBuilder.HasPostgresEnum<CAPStatus>();
-        modelBuilder.HasPostgresEnum<LegalHoldStatus>();
-        modelBuilder.HasPostgresEnum<DataCategory>();
-        modelBuilder.HasPostgresEnum<CountryPackStatus>();
-        modelBuilder.HasPostgresEnum<TextDirection>();
-        modelBuilder.HasPostgresEnum<TaxType>();
-        modelBuilder.HasPostgresEnum<DegreeRequirementCategory>();
-        modelBuilder.HasPostgresEnum<AuditStatus>();
-        modelBuilder.HasPostgresEnum<RequirementType>();
-        modelBuilder.HasPostgresEnum<CurriculumVersion>();
-        modelBuilder.HasPostgresEnum<FormStatus>();
-        modelBuilder.HasPostgresEnum<FormFieldType>();
-        modelBuilder.HasPostgresEnum<SubmissionStatus>();
-        modelBuilder.HasPostgresEnum<SensorType>();
-        modelBuilder.HasPostgresEnum<SensorStatus>();
-        modelBuilder.HasPostgresEnum<OccupancyState>();
-        modelBuilder.HasPostgresEnum<EnergyReadingType>();
-        modelBuilder.HasPostgresEnum<ConfigurationDomain>();
-        modelBuilder.HasPostgresEnum<ConfigEntryStatus>();
-        modelBuilder.HasPostgresEnum<ConfigEnvironment>();
-        modelBuilder.HasPostgresEnum<RuleStatus>();
-        modelBuilder.HasPostgresEnum<RuleActionType>();
-        modelBuilder.HasPostgresEnum<RuleDomain>();
-        modelBuilder.HasPostgresEnum<RuleMatchStrategy>();
-        modelBuilder.HasPostgresEnum<NotificationTemplateChannel>();
-        modelBuilder.HasPostgresEnum<DeliveryStatus>();
-        modelBuilder.HasPostgresEnum<FlagType>();
-        modelBuilder.HasPostgresEnum<FlagScope>();
-        modelBuilder.HasPostgresEnum<JobCategory>();
-        modelBuilder.HasPostgresEnum<JobExecutionStatus>();
-        modelBuilder.HasPostgresEnum<QueueStatus>();
-        modelBuilder.HasPostgresEnum<EventStatus>();
-        modelBuilder.HasPostgresEnum<DiagnosticSeverity>();
-        modelBuilder.HasPostgresEnum<ServiceStatus>();
-        modelBuilder.HasPostgresEnum<DependencyType>();
-        modelBuilder.HasPostgresEnum<HealthScoreGrade>();
-        modelBuilder.HasPostgresEnum<IntegrationStatus>();
-        modelBuilder.HasPostgresEnum<IntegrationType>();
-        modelBuilder.HasPostgresEnum<BenchmarkTier>();
-        modelBuilder.HasPostgresEnum<BenchmarkStatus>();
-        modelBuilder.HasPostgresEnum<AIProviderType>();
-        modelBuilder.HasPostgresEnum<AIModelCapability>();
-        modelBuilder.HasPostgresEnum<PromptApprovalStatus>();
-        modelBuilder.HasPostgresEnum<GuardrailAction>();
-        modelBuilder.HasPostgresEnum<GuardrailSeverity>();
-        modelBuilder.HasPostgresEnum<LicenseEdition>();
-        modelBuilder.HasPostgresEnum<LicenseStatus>();
-        modelBuilder.HasPostgresEnum<UpdateChannel>();
-        modelBuilder.HasPostgresEnum<UpdateStatus>();
-        modelBuilder.HasPostgresEnum<DefaulterStatus>();
-        modelBuilder.HasPostgresEnum<FeeDefaulterLevel>();
-        modelBuilder.HasPostgresEnum<MisconductSeverity>();
-        modelBuilder.HasPostgresEnum<MisconductStatus>();
-        modelBuilder.HasPostgresEnum<SanctionType>();
-        modelBuilder.HasPostgresEnum<WorkloadUnitType>();
-        modelBuilder.HasPostgresEnum<VerificationStatus>();
-        modelBuilder.HasPostgresEnum<RegistrationStatus>();
-        modelBuilder.HasPostgresEnum<CurriculumApprovalStatus>();
-        modelBuilder.HasPostgresEnum<TunnelStatus>();
-        modelBuilder.HasPostgresEnum<HardcodingSeverity>();
-        modelBuilder.HasPostgresEnum<HardcodingType>();
-        modelBuilder.HasPostgresEnum<LoginEvent>();
-        modelBuilder.HasPostgresEnum<LoginProvider>();
-        modelBuilder.HasPostgresEnum<DeviceType>();
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ETLJobStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DashboardType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VisualizationType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ReportCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ScheduleFrequency));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ExportFormat));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AlertCondition));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkflowDefinitionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkflowInstanceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkflowStepStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkflowNodeType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkflowTriggerType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApprovalType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApprovalStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(NotificationChannel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(NotificationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ConditionOperator));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LogicalOperator));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApiKeyTier));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApiKeyStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApiPermission));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WebhookStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ExtensionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ExtensionCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ExtensionPricingModel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(InstallationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(UserStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AuthProvider));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SessionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BackupType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BackupStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ReplicaStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FailoverMode));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BackupRetentionTier));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CampusStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AegisCore.Domain.CalendarType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AegisCore.Domain.GradingScheme));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TransferRequestStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ComplianceFrameworkStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ControlStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ControlReviewFrequency));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AuditFindingSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AuditFindingStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CAPStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LegalHoldStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DataCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CountryPackStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TextDirection));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TaxType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DegreeRequirementCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AuditStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RequirementType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CurriculumVersion));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FormStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FormFieldType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SubmissionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SensorType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SensorStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(OccupancyState));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EnergyReadingType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ConfigurationDomain));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ConfigEntryStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ConfigEnvironment));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RuleStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RuleActionType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RuleDomain));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RuleMatchStrategy));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(NotificationTemplateChannel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DeliveryStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FlagType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FlagScope));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(JobCategory));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(JobExecutionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(QueueStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EventStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DiagnosticSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ServiceStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DependencyType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(HealthScoreGrade));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IntegrationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IntegrationType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BenchmarkTier));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(BenchmarkStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AIProviderType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AIModelCapability));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(PromptApprovalStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(GuardrailAction));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(GuardrailSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LicenseEdition));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LicenseStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(UpdateChannel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(UpdateStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DefaulterStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(FeeDefaulterLevel));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MisconductSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(MisconductStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SanctionType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(WorkloadUnitType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(VerificationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(RegistrationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(CurriculumApprovalStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(TunnelStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(HardcodingSeverity));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(HardcodingType));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LoginEvent));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LoginProvider));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DeviceType));
 
         // Department
         modelBuilder.Entity<Department>(entity =>
@@ -3089,8 +3094,8 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<Course>(entity =>
         {
             entity.HasIndex(e => e.Code).IsUnique();
-            entity.Property(c => c.CloMappingJson).HasColumnType("jsonb");
-            entity.Property(c => c.PloMappingJson).HasColumnType("jsonb");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(c => c.CloMappingJson), "CloMappingJson");
+            dialectAdapter.ConfigureJsonColumn(entity.Property(c => c.PloMappingJson), "PloMappingJson");
         });
 
         // Enrollment
@@ -3481,6 +3486,10 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.TenantId);
         });
+
+        // Entity annotations predate multi-dialect support and may still carry PostgreSQL
+        // store types. Normalize them only after every entity configuration has run.
+        dialectAdapter.NormalizeProviderModel(modelBuilder);
     }
 
     private static PolicyConfig SeedPolicy(string id, string module, string policyName, string policyValue, string valueType, string description)

@@ -40,6 +40,7 @@ services:
       AEGISCORE_SECRET_PROVIDER: ${AEGISCORE_SECRET_PROVIDER:-FILE}
       AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
       TENANT_ID: ${TENANT_ID:?Run ./scripts/bootstrap-env.sh first}
+      DB_DIALECT: ${DB_DIALECT:-postgres}
       DB_HOST: ${DB_HOST:-postgres}
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-${POSTGRES_DB:-aegiscore}}

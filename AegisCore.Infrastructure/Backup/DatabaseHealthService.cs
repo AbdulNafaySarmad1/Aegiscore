@@ -1,6 +1,7 @@
 using AegisCore.Application.Backup;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain;
+using AegisCore.Infrastructure.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -14,32 +15,33 @@ public class DatabaseHealthService : IDatabaseHealthService
     private readonly IConnectionMultiplexer _redis;
     private readonly IConfiguration _configuration;
     private readonly ILogger<DatabaseHealthService> _logger;
+    private readonly IDbDialectAdapter _dialectAdapter;
 
     public DatabaseHealthService(
         IReadReplicaConfigRepository replicaRepo,
         IConnectionMultiplexer redis,
         IConfiguration configuration,
-        ILogger<DatabaseHealthService> logger)
+        ILogger<DatabaseHealthService> logger,
+        IDbDialectAdapter dialectAdapter)
     {
         _replicaRepo = replicaRepo;
         _redis = redis;
         _configuration = configuration;
         _logger = logger;
+        _dialectAdapter = dialectAdapter;
     }
 
     public async Task<bool> IsPrimaryHealthyAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            var connectionString = _configuration.GetConnectionString("SupabasePostgres")
-                ?? _configuration["Postgres:ConnectionString"];
-            if (string.IsNullOrEmpty(connectionString)) return false;
-
-            await using var connection = new NpgsqlConnection(connectionString);
+            var connectionString = DbConnectionStringFactory.Build(_configuration, _dialectAdapter);
+            await using var connection = _dialectAdapter.CreateConnection(connectionString);
             await connection.OpenAsync(cancellationToken);
-            await using var command = new NpgsqlCommand("SELECT 1", connection);
+            await using var command = connection.CreateCommand();
+            command.CommandText = _dialectAdapter.GetVersionQuery();
             var result = await command.ExecuteScalarAsync(cancellationToken);
-            return result != null && (int)result == 1;
+            return result is not null;
         }
         catch (Exception ex)
         {

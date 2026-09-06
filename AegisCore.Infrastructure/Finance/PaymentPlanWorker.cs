@@ -30,7 +30,6 @@ public sealed class FinancePaymentPlanWorker(IServiceScopeFactory scopeFactory, 
             {
                 tenantContext.HttpContext = new DefaultHttpContext();
                 tenantContext.HttpContext.Items["TenantId"] = tenantId;
-                await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
                 await finance.RunPaymentPlanSweepAsync(tenantId, DateTime.UtcNow, ct);
             }
         }

@@ -95,7 +95,6 @@ public sealed class FinanceAuditSealWorker(
             {
                 tenantContext.HttpContext = new DefaultHttpContext();
                 tenantContext.HttpContext.Items["TenantId"] = tenantId;
-                await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
                 await service.SealTenantAsync(tenantId, DateTime.UtcNow, ct);
             }
         }
@@ -174,7 +173,6 @@ public sealed class FinanceLedgerSignatureWorker(IServiceScopeFactory scopes, IL
                 {
                     tenantContext.HttpContext = new DefaultHttpContext();
                     tenantContext.HttpContext.Items["TenantId"] = entry.TenantId;
-                    await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {entry.TenantId:D}, false)", stoppingToken);
                     var signed = await signer.SignAsync(entry.TenantId, "ledger-archive", entry.EntryHash!, archival: true, stoppingToken);
                     db.FinanceLedgerSignatures.Add(new FinanceLedgerSignature
                     {

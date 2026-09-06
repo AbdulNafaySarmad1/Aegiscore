@@ -85,6 +85,7 @@ public sealed class WizardDatabaseRequestValidator : SecureValidator<WizardDatab
 {
     public WizardDatabaseRequestValidator()
     {
+        RuleFor(x => x.Dialect).NotEmpty().Must(value => value is "postgres" or "mysql" or "mssql" or "oracle");
         RuleFor(x => x.Host).NotEmpty().MaximumLength(253).Must(IsTrimmed);
         RuleFor(x => x.Port).InclusiveBetween(1, 65535);
         RuleFor(x => x.DatabaseName).NotEmpty().MaximumLength(128).Matches("^[A-Za-z0-9_.-]+$");

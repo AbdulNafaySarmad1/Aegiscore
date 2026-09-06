@@ -52,7 +52,6 @@ public sealed class VendorSanctionsRescreenWorker(IServiceScopeFactory scopes, I
                 {
                     tenantContext.HttpContext = new DefaultHttpContext();
                     tenantContext.HttpContext.Items["TenantId"] = vendor.TenantId;
-                    await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {vendor.TenantId:D}, false)", stoppingToken);
                     await screening.ScreenAsync(vendor.TenantId, vendor.Id, stoppingToken);
                 }
             }

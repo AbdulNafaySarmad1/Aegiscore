@@ -84,6 +84,100 @@ jobs:
 
       - name: Build Portal image
         run: docker build -t aegiscore-portal:ci-test AegisCore.Portal
+  database-migrations:
+    name: Database Migration (${{ matrix.dialect }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dialect: postgres
+            image: postgres:17-alpine
+            host_port: 15432
+            container_port: 5432
+            project: AegisCore.Infrastructure/AegisCore.Infrastructure.csproj
+            connection: Host=localhost;Port=15432;Database=aegiscore;Username=aegiscore;Password=local-only;SSL Mode=Disable
+            health_options: >-
+              --health-cmd "pg_isready -U aegiscore -d aegiscore"
+              --health-interval 10s --health-timeout 5s --health-retries 20
+          - dialect: mysql
+            image: mysql:8.4
+            host_port: 13306
+            container_port: 3306
+            project: AegisCore.Migrations.MySql/AegisCore.Migrations.MySql.csproj
+            connection: Server=localhost;Port=13306;Database=aegiscore;User ID=aegiscore;Password=local-only;SslMode=Disabled;AllowPublicKeyRetrieval=True
+            health_options: >-
+              --health-cmd "mysqladmin ping -h localhost -uaegiscore -plocal-only"
+              --health-interval 10s --health-timeout 5s --health-retries 30
+          - dialect: mssql
+            image: mcr.microsoft.com/mssql/server:2022-latest
+            host_port: 11433
+            container_port: 1433
+            project: AegisCore.Migrations.MsSql/AegisCore.Migrations.MsSql.csproj
+            connection: Server=localhost,11433;Database=aegiscore;User ID=sa;Password=LocalOnly_Passw0rd!;Encrypt=False;TrustServerCertificate=True
+            health_options: >-
+              --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P LocalOnly_Passw0rd! -C -Q 'SELECT 1' || exit 1"
+              --health-interval 10s --health-timeout 5s --health-retries 30
+          - dialect: oracle
+            image: gvenzl/oracle-free:23-slim-faststart
+            host_port: 11521
+            container_port: 1521
+            project: AegisCore.Migrations.Oracle/AegisCore.Migrations.Oracle.csproj
+            connection: User Id=aegiscore;Password=local-only;Data Source=localhost:11521/FREEPDB1
+            health_options: >-
+              --health-cmd healthcheck.sh
+              --health-interval 10s --health-timeout 5s --health-retries 60
+
+    services:
+      database:
+        image: ${{ matrix.image }}
+        ports:
+          - "${{ matrix.host_port }}:${{ matrix.container_port }}"
+        env:
+          POSTGRES_DB: aegiscore
+          POSTGRES_USER: aegiscore
+          POSTGRES_PASSWORD: local-only
+          MYSQL_DATABASE: aegiscore
+          MYSQL_USER: aegiscore
+          MYSQL_PASSWORD: local-only
+          MYSQL_ROOT_PASSWORD: local-root-only
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: LocalOnly_Passw0rd!
+          ORACLE_PASSWORD: local-root-only
+          APP_USER: aegiscore
+          APP_USER_PASSWORD: local-only
+        options: ${{ matrix.health_options }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore solution and EF tool
+        run: |
+          dotnet restore AegisCore.slnx
+          dotnet tool restore
+
+      - name: Build migration startup
+        run: dotnet build AegisCore.API/AegisCore.API.csproj --configuration Release --no-restore
+
+      - name: Apply ${{ matrix.dialect }} migrations
+        env:
+          AEGISCORE_SETUP_TOKEN: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          DB_DIALECT: ${{ matrix.dialect }}
+          AEGISCORE_DB_CONNECTION: ${{ matrix.connection }}
+        run: >-
+          dotnet tool run dotnet-ef database update
+          --project ${{ matrix.project }}
+          --startup-project AegisCore.API/AegisCore.API.csproj
+          --context AegisDbContext
+          --configuration Release
+          --no-build
+
+
   accessibility-check:
     name: WCAG 2.1 AA (Portal)
     runs-on: ubuntu-latest

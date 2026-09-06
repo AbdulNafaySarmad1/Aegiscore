@@ -74,10 +74,10 @@ public sealed class WizardController(
         var token = SetupToken();
         var wizardState = await state.ResumeWizardAsync(token, ct);
         wizardState.DbSslEnabled = request.SslEnabled;
-        var result = await onboarding.TestPostgresAsync(
-            wizardState, request.Host, request.Port, request.DatabaseName, request.Username, request.Password, ct);
+        var result = await onboarding.TestDatabaseAsync(
+            wizardState, request.Dialect, request.Host, request.Port, request.DatabaseName, request.Username, request.Password, ct);
         if (result.Success)
-            result = await onboarding.MigratePostgresAsync(wizardState, ct);
+            result = await onboarding.MigrateDatabaseAsync(wizardState, ct);
         await state.SaveState(token, wizardState, ct);
         return result.Success ? Ok(result) : UnprocessableEntity(result);
     }
@@ -810,4 +810,4 @@ public sealed record ChangeWizardModeRequest(Guid SessionId, string Mode, string
 public sealed record SaveStepRequest(Guid SessionId, JsonElement Data);
 public sealed record CompleteWizardRequest(Guid SessionId, string ConfirmedBy, DateTimeOffset Timestamp);
 public sealed record DemoImportRequest(string ConnectionString, string DbType);
-public sealed record WizardDatabaseRequest(string Host, int Port, string DatabaseName, string Username, string Password, bool SslEnabled = true);
+public sealed record WizardDatabaseRequest(string Host, int Port, string DatabaseName, string Username, string Password, bool SslEnabled = true, string Dialect = "postgres");

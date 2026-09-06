@@ -40,7 +40,7 @@ public static class DRServiceExtensions
         });
 
         services.AddHealthChecks()
-            .AddCheck<DatabaseHealthCheck>("postgres_primary", tags: new[] { "database", "primary" })
+            .AddCheck<DatabaseHealthCheck>("database_primary", tags: new[] { "database", "primary" })
             .AddCheck<RedisHealthCheck>("redis", tags: new[] { "cache" });
 
         return services;
@@ -60,8 +60,8 @@ public class DatabaseHealthCheck : IHealthCheck
     {
         var isHealthy = await _healthService.IsPrimaryHealthyAsync(cancellationToken);
         return isHealthy
-            ? HealthCheckResult.Healthy("PostgreSQL primary is healthy.")
-            : HealthCheckResult.Unhealthy("PostgreSQL primary is unreachable.");
+            ? HealthCheckResult.Healthy("Primary database is healthy.")
+            : HealthCheckResult.Unhealthy("Primary database is unreachable.");
     }
 }
 

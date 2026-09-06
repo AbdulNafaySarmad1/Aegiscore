@@ -4,16 +4,17 @@ Updated: 2026-09-06. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
-Completed prompts: **P1–P10 and P12–P17**. P11 remains intentionally deferred until all prerequisite prompts are complete.
+Completed prompts: **P1–P17**.
 
-Next prompt: **P11 — final production readiness and deployment verification**.
+Current prompt: **None — all required prompts are implemented and verified**.
 
-Remaining execution order: **P11 (last)**.
+Remaining execution order: **None**.
 
 ## Completed prompt commits
 
 - P1: `57e4b56b` (compile fixes), `a1032a24` (schema-aligned tests)
 - P2: `6a6ecf05`
+- P11: this completion change set (multi-dialect adapters, migrations, CI, and verification)
 - P10: `dd657541`
 - P3A: `e5daf47a`
 - P3B: `b7b314bf`
@@ -29,7 +30,21 @@ Remaining execution order: **P11 (last)**.
 - P15: `bf8779ec`
 - P16: `c5be80d4` (core compliance)
 - P16 appendix: `202008ce`
-- P17: current commit
+- P17: `dacb1435`
+
+## P11 verified implementation
+
+- Added `DB_DIALECT` and PostgreSQL/MySQL/SQL Server/Oracle adapters for runtime registration, design-time context creation, enum/JSON/binary/text mapping, health/readiness, and wizard connections.
+- Implemented per-dialect migration assemblies and stable generated baselines for MySQL, SQL Server, and Oracle; PostgreSQL retains its existing migration history.
+- Added the four-provider wizard selector, persisted dialect/connection formats, exact provider version queries, validation, environment/deployment settings, unit tests, and a real-container CI migration matrix.
+- All 46 historical Finance migrations and all 40 historical RLS migrations contain the P11 portability note. PostgreSQL RLS remains defense in depth through a PostgreSQL-only adapter interceptor; global `ITenantScoped` filters are active for every provider.
+- All non-PostgreSQL snapshots contain zero `jsonb` and zero `bytea`; all four providers report no pending model changes. SQL Server cascades use `NO ACTION`, and Oracle default decimals have stable canonical metadata.
+- Focused dialect/environment coverage passes 21/21, including adapters, exact version queries, model mappings, aliases, connection formats, SQL Server cascades, Oracle decimals, and MySQL non-TLS authentication.
+- Real-engine verification passes: PostgreSQL 17 applies the complete historical chain; MySQL 8.4, SQL Server 2022, and Oracle Free 23 apply their baselines from empty databases.
+- The PostgreSQL run exposed and verified a repair to `AddTenantId_PolicyConfig`: add nullable, backfill system-template rows to `Guid.Empty`, then enforce non-null.
+- A security gate rejected generating a migration that would remove already-deployed PostgreSQL RLS. Do not bypass that gate. The implemented defense-in-depth compatibility preserves security and cross-provider behavior.
+
+No P11 implementation work remains.
 
 P13 includes tenant-defined wizard roles/permission matrix, two-argument `RequirePermission`, tenant-scoped Casbin policy sync with five-minute cache, dynamic JWT lifetime, shared read-only SQL allow-list, and tests. There are zero `[Authorize(Roles=...)]` controller attributes and 105 `RequirePermission(...)` controller attributes after P16.
 
@@ -90,7 +105,7 @@ No P17 implementation work remains.
 
 ## Current verification status
 
-- `dotnet test AegisCore.slnx -c Release --no-build`: **PASS**, 609 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
+- `dotnet test AegisCore.slnx -c Release --no-build`: **PASS**, 626 passed, 1 skipped, 0 failed. The skip is `SecurityHardeningTests.OversizedFileUpload_RejectedAtBoundary`.
 - P16 focused compliance tests: **PASS**, 4/4.
 - P16 appendix licensing/infrastructure tests: **PASS**, 7/7.
 - Portal `npm run typecheck`: **PASS**.
@@ -99,6 +114,11 @@ No P17 implementation work remains.
 - `@axe-core/playwright` reports: **PASS**, zero violations after remediation.
 - Portal `npm run build`: **PASS**, 46 generated routes including `/admin/campus` and `/student/attendance`.
 - Portal `npm run lint -- --quiet`: **PASS**, 0 errors.
+- P11 focused dialect/environment tests: **PASS**, 21/21.
+- Four real database migration runs: **PASS** (PostgreSQL 17 full history; MySQL 8.4, SQL Server 2022, Oracle Free 23 baselines).
+- Four `migrations has-pending-model-changes` checks: **PASS**.
+- CI workflow YAML parse: **PASS**, 5 jobs including the four-dialect matrix.
+- Graphify refresh/query: **PASS**, 26,714 nodes and 51,852 edges.
 - Portal tablet Playwright suite: **PASS**, 3/3 required viewport tests.
 - `git diff --check`: **PASS**.
 - EF `migrations has-pending-model-changes`: **PASS**, no pending model changes.
@@ -110,8 +130,8 @@ No P17 implementation work remains.
 - Finish one prompt, run Release build/tests, refresh Graphify, commit, and push before starting the next.
 - Preserve client-owned infrastructure and introduce no Nocturne-hosted dependency.
 - `AEGISCORE_FINAL_17_PROMPTS.md` is user-confirmed source of truth and must be committed with the repository.
-- P17 is verified and included in the current commit; the worktree should be clean before beginning P11.
+- P17 is verified in `dacb1435`; P11 changes are uncommitted until all provider checks pass.
 
 ## Exact next action
 
-Commit and push P17, then query the refreshed graph for P11, read P11 and its applicable appendix in full, and complete the final production-readiness verification.
+Commit and push this verified P11 completion change set; no prompt implementation remains afterward.

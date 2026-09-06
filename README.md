@@ -8,13 +8,13 @@
 
 ## Overview
 This is the AegisCore university operating platform: a Next.js 16 portal backed
-by a .NET 10/C# 14 authoritative API, PostgreSQL, Redis, background processing,
+by a .NET 10/C# 14 authoritative API, a selectable relational database, Redis, background processing,
 and cloud/on-premises deployment paths.
 
 ## Operational local/demo stack
 
 The supported local stack includes the React portal, ASP.NET Core API,
-PostgreSQL 17, Redis 7, automatic migrations, persistent volumes, and an
+PostgreSQL 17 by default (or MySQL, SQL Server, or Oracle), Redis 7, provider-native migrations, persistent volumes, and an
 explicitly non-production demo identity.
 
 ```bash
@@ -282,7 +282,7 @@ aegiscore-prompts/
 
 - **Language:** C# 14
 - **Framework:** .NET 10
-- **Database:** PostgreSQL (cloud-agnostic)
+- **Database:** PostgreSQL, MySQL/MariaDB-compatible MySQL, SQL Server, or Oracle via `DB_DIALECT`
 - **Cache:** Redis
 - **Frontend:** Blazor Server / Razor Pages (or Next.js if preferred)
 - **Mobile:** React Native (iOS + Android)

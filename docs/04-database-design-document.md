@@ -4,8 +4,8 @@
 | Field | Value |
 |-------|-------|
 | Document ID | AEGIS-DBDD-001 |
-| Version | 1.0.0 |
-| Date | 2025-01-15 |
+| Version | 1.1.0 |
+| Date | 2026-09-06 |
 | Author | Abdul Nafay Sarmad, Founder & CEO |
 | Status | Approved |
 
@@ -14,6 +14,7 @@
 | Version | Date | Author | Description |
 |---------|------|--------|-------------|
 | 1.0.0 | 2025-01-15 | Abdul Nafay Sarmad | Initial release |
+| 1.1.0 | 2026-09-06 | AegisCore Engineering | Added PostgreSQL, MySQL, SQL Server, and Oracle provider/migration strategy |
 
 ## 1. Introduction
 
@@ -23,14 +24,14 @@ This Database Design Document defines the complete logical and physical data mod
 
 ### 1.2 Scope
 
-This document covers all database objects required for AegisCore Version 1.0.0, including tables, indexes, constraints, Row-Level Security policies, and the pgvector extension configuration for ML feature storage.
+This document covers all database objects required for AegisCore, including tables, indexes, constraints, portable tenant filters, provider-specific migrations, PostgreSQL defense-in-depth policies, and optional PostgreSQL pgvector storage.
 
 ### 1.3 References
 
 1. AegisCore Software Requirements Specification (AEGIS-SRS-001)
 2. AegisCore Software Architecture Document (AEGIS-SAD-001)
-3. PostgreSQL 16 Documentation — Row Security Policies
-4. pgvector Documentation — https://github.com/pgvector/pgvector
+3. EF Core providers for PostgreSQL, MySQL, SQL Server, and Oracle
+4. P11 Multi-Dialect Database Support — `docs/deployment/P11_MULTI_DIALECT.md`
 
 ## 2. Entity Relationship Diagram (Structured Notation)
 
@@ -418,7 +419,24 @@ This document covers all database objects required for AegisCore Version 1.0.0, 
 
 ## 5. Multi-Tenancy Isolation Strategy
 
-### 5.1 Row-Level Security Policy
+### 5.1 Portable application filter
 
-PostgreSQL Row-Level Security (RLS) is enabled on all tenant-scoped tables. The RLS policy ensures that every query is automatically filtered by `tenant_id`:
+Every mapped entity that implements `ITenantScoped` receives an EF Core global
+query filter comparing its `TenantId` with
+`AegisDbContext.CurrentTenantId`. This is the authoritative portable isolation
+mechanism for PostgreSQL, MySQL, SQL Server, and Oracle. Cross-tenant background
+jobs may bypass the filter only for tenant-ID discovery and must bind the
+subsequent operation to an explicit tenant.
+
+### 5.2 PostgreSQL defense in depth
+
+Applied PostgreSQL Finance migrations retain their historical forced RLS
+policies. A PostgreSQL-only connection interceptor supplies `app.tenant_id` so
+those policies continue to protect existing installations. Other providers do
+not register the interceptor.
+
+### 5.3 Provider-specific physical model
+
+`DB_DIALECT` selects one adapter and migration assembly. PostgreSQL stores JSON
+as `jsonb`, MySQL as `json`, SQL Server as `nvarchar(max)`, and Oracle as
 

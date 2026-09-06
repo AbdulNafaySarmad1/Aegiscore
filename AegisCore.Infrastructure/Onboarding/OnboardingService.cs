@@ -1,13 +1,14 @@
 using System.Net.Http.Json;
+using System.Data.Common;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using AegisCore.Application.Onboarding;
+using AegisCore.Infrastructure.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using StackExchange.Redis;
 
 namespace AegisCore.Infrastructure.Onboarding;
@@ -51,51 +52,73 @@ public class OnboardingService
         }
     }
 
-    public async Task<ConnectionTestResult> TestPostgresAsync(WizardStateDto state, string host, int port, string dbName, string username, string password, CancellationToken ct = default)
+    public async Task<ConnectionTestResult> TestDatabaseAsync(
+        WizardStateDto state,
+        string dialect,
+        string host,
+        int port,
+        string dbName,
+        string username,
+        string password,
+        CancellationToken ct = default)
     {
-        state.DbHost = host; state.DbPort = port; state.DbName = dbName; state.DbUsername = username; state.DbPassword = password;
+        state.DbDialect = DbDialects.Normalize(dialect);
+        state.DbHost = host;
+        state.DbPort = port;
+        state.DbName = dbName;
+        state.DbUsername = username;
+        state.DbPassword = password;
 
         try
         {
-            await using var conn = new NpgsqlConnection(state.DbConnectionString);
-            // conn.OpenTimeout removed
-            await conn.OpenAsync(ct);
+            var adapter = DbDialectAdapterResolver.Create(state.DbDialect);
+            await using var connection = adapter.CreateConnection(state.DbConnectionString);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            await connection.OpenAsync(ct);
 
-            await using var cmd = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS _aegis_test (id int); DROP TABLE _aegis_test;", conn);
-            await cmd.ExecuteNonQueryAsync(ct);
+            await using var versionCommand = connection.CreateCommand();
+            versionCommand.CommandText = adapter.GetVersionQuery();
+            var version = (await versionCommand.ExecuteScalarAsync(ct))?.ToString() ?? "unknown";
+            stopwatch.Stop();
 
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            await using var ping = new NpgsqlCommand("SELECT version();", conn);
-            var version = (await ping.ExecuteScalarAsync(ct))?.ToString() ?? "unknown";
-            sw.Stop();
-
-            _logger.LogInformation("PostgreSQL tested: {Version} — {Latency}ms", version, sw.ElapsedMilliseconds);
-            return new ConnectionTestResult(true, $"PostgreSQL connected — {version.Split(',')[0]} — {sw.ElapsedMilliseconds}ms");
+            _logger.LogInformation(
+                "{Dialect} tested: {Version} — {Latency}ms",
+                adapter.Dialect,
+                version,
+                stopwatch.ElapsedMilliseconds);
+            return new ConnectionTestResult(
+                true,
+                $"{adapter.Dialect} connected — {version.Split(',')[0]} — {stopwatch.ElapsedMilliseconds}ms");
         }
-        catch (NpgsqlException ex) when (ex.Message.Contains("password"))
+        catch (DbException ex) when (ContainsAny(ex.Message, "password", "authentication", "login failed", "ora-01017"))
         {
-            return new ConnectionTestResult(false, "Authentication failed.", new WizardError("Wrong username or password.", "Check credentials."));
+            return new ConnectionTestResult(false, "Authentication failed.",
+                new WizardError("Wrong username or password.", "Check credentials.", TechnicalDetail: ex.Message));
         }
-        catch (NpgsqlException ex) when (ex.Message.Contains("host") || ex.Message.Contains("connect"))
+        catch (DbException ex) when (ContainsAny(ex.Message, "host", "connect", "network", "listener", "timeout"))
         {
-            return new ConnectionTestResult(false, "Cannot reach host.", new WizardError($"Cannot reach {host}:{port}.", "Check host and firewall.", TechnicalDetail: ex.Message, Owner: WizardError.WizardErrorOwner.NetworkIssue));
+            return new ConnectionTestResult(false, "Cannot reach host.",
+                new WizardError($"Cannot reach {host}:{port}.", "Check host and firewall.",
+                    TechnicalDetail: ex.Message, Owner: WizardError.WizardErrorOwner.NetworkIssue));
         }
         catch (Exception ex)
         {
-            return new ConnectionTestResult(false, "Connection failed.", new WizardError("Database connection failed.", "Check all fields.", TechnicalDetail: ex.Message));
+            return new ConnectionTestResult(false, "Connection failed.",
+                new WizardError("Database connection failed.", "Check all fields.", TechnicalDetail: ex.Message));
         }
     }
 
-    public async Task<ConnectionTestResult> MigratePostgresAsync(WizardStateDto state, CancellationToken ct = default)
+    public async Task<ConnectionTestResult> MigrateDatabaseAsync(WizardStateDto state, CancellationToken ct = default)
     {
         try
         {
-            var options = new DbContextOptionsBuilder<AegisDbContext>()
-                .UseNpgsql(state.DbConnectionString, postgres => postgres.MigrationsAssembly(typeof(AegisDbContext).Assembly.FullName))
-                .Options;
-            await using var target = new AegisDbContext(options);
+            var adapter = DbDialectAdapterResolver.Create(state.DbDialect);
+            var optionsBuilder = new DbContextOptionsBuilder<AegisDbContext>();
+            adapter.ConfigureOptions(optionsBuilder, state.DbConnectionString);
+            await using var target = new AegisDbContext(optionsBuilder.Options, dialectAdapter: adapter);
             await target.Database.MigrateAsync(ct);
-            return new ConnectionTestResult(true, "Database connected and AegisCore migrations applied.");
+            return new ConnectionTestResult(true,
+                $"{adapter.Dialect} connected and AegisCore migrations applied.");
         }
         catch (Exception ex)
         {
@@ -104,6 +127,9 @@ public class OnboardingService
                     "Ensure the database user can create and alter tables.", TechnicalDetail: ex.Message));
         }
     }
+
+    private static bool ContainsAny(string value, params string[] fragments)
+        => fragments.Any(fragment => value.Contains(fragment, StringComparison.OrdinalIgnoreCase));
 
     public async Task<ConnectionTestResult> TestRedisAsync(WizardStateDto state, string host, int port, string? password, CancellationToken ct = default)
     {
@@ -257,6 +283,7 @@ public class OnboardingService
         sb.AppendLine($"AEGISCORE_DOMAIN={state.UniversityDomain}");
         sb.AppendLine($"AEGISCORE_CLOUD_PROVIDER=ONPREMISE");
         sb.AppendLine($"ASPNETCORE_ENVIRONMENT=Production");
+        sb.AppendLine($"DB_DIALECT={state.DbDialect}");
         sb.AppendLine($"DB_HOST={state.DbHost}");
         sb.AppendLine($"DB_PORT={state.DbPort}");
         sb.AppendLine($"DB_NAME={state.DbName}");

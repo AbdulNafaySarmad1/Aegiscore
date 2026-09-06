@@ -49,7 +49,8 @@ public sealed class FinanceWebhookController(
         var tenant = await db.Tenants.AsNoTracking().SingleOrDefaultAsync(x => x.Id == tenantId, ct);
         if (tenant is null || !tenant.IsActive) return Ok(new { accepted = true });
 
-        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT set_config('app.tenant_id', {tenantId:D}, false)", ct);
+        HttpContext.Items["TenantId"] = tenantId;
+        // Anonymous webhook processing bypasses the request filter only with this explicit tenant predicate.
         var gatewayConfig = await db.PaymentGatewayConfigurations.IgnoreQueryFilters()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.GatewaySlug == gateway && x.IsActive, ct);
         if (gatewayConfig is null || !string.Equals(gatewayConfig.SecretNamespace, $"/tenants/{tenantId:D}/gateways/{gateway}", StringComparison.Ordinal)) return Ok(new { accepted = true });

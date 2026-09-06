@@ -39,6 +39,7 @@ public sealed class WizardStateDto
     public string UniversityShortName { get; set; } = string.Empty;
     public string AdminEmail { get; set; } = string.Empty;
 
+    public string DbDialect { get; set; } = "postgres";
     public string DbHost { get; set; } = string.Empty;
     public int DbPort { get; set; } = 5432;
     public string DbName { get; set; } = string.Empty;
@@ -87,8 +88,13 @@ public sealed class WizardStateDto
     public string ErpUrl => $"https://erp.{UniversityDomain}";
 
     [JsonIgnore]
-    public string DbConnectionString =>
-        $"Host={DbHost};Port={DbPort};Database={DbName};Username={DbUsername};Password={DbPassword};SslMode={(DbSslEnabled ? "Require" : "Disable")}";
+    public string DbConnectionString => DbDialect switch
+    {
+        "mysql" => $"Server={DbHost};Port={DbPort};Database={DbName};User ID={DbUsername};Password={DbPassword};SslMode={(DbSslEnabled ? "Required" : "Disabled")}",
+        "mssql" => $"Server={DbHost},{DbPort};Database={DbName};User ID={DbUsername};Password={DbPassword};Encrypt={DbSslEnabled};TrustServerCertificate={!DbSslEnabled}",
+        "oracle" => $"User Id={DbUsername};Password={DbPassword};Data Source={DbHost}:{DbPort}/{DbName}",
+        _ => $"Host={DbHost};Port={DbPort};Database={DbName};Username={DbUsername};Password={DbPassword};SslMode={(DbSslEnabled ? "Require" : "Disable")}"
+    };
 
     [JsonIgnore]
     public string RedisConnectionString =>
