@@ -1,0 +1,11 @@
+# CPU-only inference stack for the AegisCore photo-filter + syllabus-OCR sidecar.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.3.1
+transformers==4.42.4
+Pillow==10.4.0
+fastapi==0.111.1
+uvicorn[standard]==0.30.3
+python-multipart==0.0.9
+pytesseract==0.3.10
+pdf2image==1.17.0
+pypdf==4.3.1

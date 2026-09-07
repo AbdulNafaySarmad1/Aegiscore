@@ -83,6 +83,7 @@ services:
       AI_ENDPOINT: ${AI_ENDPOINT:-http://host.docker.internal:11434/}
       AI_MODEL: ${AI_MODEL:-qwen2.5:7b}
       AI_API_KEY: ${AI_API_KEY:-}
+      CLIP_SERVICE_URL: ${CLIP_SERVICE_URL:-http://aegiscore-clip:8100}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -137,6 +138,30 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  aegiscore-clip:
+    image: ${AEGISCORE_CLIP_IMAGE:-aegiscore-clip:local}
+    build: ./services/aegiscore-clip
+    environment:
+      CLIP_THRESHOLD: ${CLIP_THRESHOLD:-0.82}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8100/health').status==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - backend
+    volumes:
+      - clip_models:/models
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
   redis:
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Run ./scripts/bootstrap-env.sh first}"]
@@ -165,3 +190,4 @@ volumes:
   redis_data:
   api_storage:
   api_config:
+  clip_models:

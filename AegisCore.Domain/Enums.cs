@@ -2100,3 +2100,49 @@ public enum CopyStakes { Low = 1, Medium = 2, High = 3, Irreversible = 4 }
 public enum ChartType { Line = 1, Area = 2, Bar = 3, Donut = 4, Treemap = 5, Scatter = 6, Histogram = 7, Heatmap = 8, Waterfall = 9, Gauge = 10, Gantt = 11, Bullet = 12 }
 public enum InsightType { Trend = 1, Comparison = 2, PartToWhole = 3, Anomaly = 4, Forecast = 5 }
 public enum ZoomLevel { Day = 1, Week = 2, Month = 3, Quarter = 4, Year = 5 }
+
+// P20-P22 Applicant Portal / Admissions
+
+/// <summary>Intake semester code used in the Applicant ID and roll number (F/S/W).</summary>
+public enum IntakeSemester { Fall = 1, Spring = 2, Winter = 3 }
+
+public enum IntakeStatus { Draft = 1, Open = 2, Closed = 3 }
+
+/// <summary>Applicant pipeline status. Persisted as a string via ConfigureEnumStrategy.</summary>
+public enum ApplicantStatus
+{
+    Draft = 1,
+    Submitted = 2,
+    UnderReview = 3,
+    TestScheduled = 4,
+    InterviewScheduled = 5,
+    Admitted = 6,
+    Rejected = 7,
+    Withdrawn = 8
+}
+
+/// <summary>Configurable admission document categories. No document type is hardcoded in flows — admin enables them per intake/program.</summary>
+public enum AdmissionDocumentKind
+{
+    Matric = 1,
+    Intermediate = 2,
+    OLevels = 3,
+    ALevels = 4,
+    IBCC_Equivalency = 5,
+    NationalID = 6,
+    DomicileCertificate = 7,
+    Photo = 8,
+    Other = 9
+}
+
+public enum AdmissionDocumentFormat { Pdf = 1, Image = 2 }
+
+public enum AdmissionDocumentValidationStatus { Pending = 1, Approved = 2, Rejected = 3, ManualReview = 4 }
+
+public enum SyllabusOcrStatus { Pending = 1, Extracted = 2, Failed = 3 }
+
+public enum AdmissionQuestionStatus { Draft = 1, Approved = 2, Rejected = 3 }
+
+public enum ApplicantTestStatus { Scheduled = 1, InProgress = 2, Submitted = 3, Expired = 4, ForceSubmitted = 5 }
+
+public enum EmailProvisioningMode { GoogleWorkspace = 1, Microsoft365 = 2, Manual = 3 }

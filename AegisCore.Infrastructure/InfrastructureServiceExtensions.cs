@@ -83,6 +83,18 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Admissions.IMeritCalculationService, MeritCalculationService>();
         services.AddScoped<AegisCore.Application.Admissions.IIBCCEquivalenceService, IBCCEquivalenceService>();
         services.AddScoped<AegisCore.Application.Admissions.ISeatAllocationService, SeatAllocationService>();
+
+        // P20 Applicant Portal
+        services.AddHttpClient("clip");
+        services.AddSingleton<AegisCore.Application.Admissions.IApplicantTenantResolver, ApplicantTenantResolver>();
+        services.AddScoped<AegisCore.Application.Admissions.IApplicantIdGenerator, ApplicantIdGenerator>();
+        services.AddScoped<AegisCore.Application.Admissions.IApplicantOtpService, ApplicantOtpService>();
+        services.AddScoped<AegisCore.Application.Admissions.IApplicantTokenService, ApplicantTokenService>();
+        services.AddScoped<AegisCore.Application.Admissions.IPhotoValidationService, ClipPhotoValidationService>();
+        services.AddScoped<AegisCore.Application.Admissions.IApplicantPortalService, ApplicantPortalService>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionCatalogService, AdmissionCatalogService>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionConfigService, AdmissionConfigService>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionsAdminService, AdmissionsAdminService>();
         services.AddScoped<AegisCore.Application.Examination.IGradingService, GradingService>();
         services.AddScoped<AegisCore.Application.Examination.ITranscriptService, TranscriptService>();
         services.AddScoped<AegisCore.Application.Obe.ICisExtractionService, CisExtractionService>();

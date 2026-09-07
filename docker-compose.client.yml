@@ -53,6 +53,7 @@ x-application: &application
     AEGISCORE_STORAGE_PROVIDER: local
     AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
     DataProtection__KeyPath: /app/config/data-protection
+    CLIP_SERVICE_URL: http://aegiscore-clip:8100
   volumes:
     - university_storage:/app/storage
     - university_config:/app/config
@@ -102,6 +103,31 @@ services:
         condition: service_healthy
       app-b:
         condition: service_healthy
+  # P20 — internal photo-filter + syllabus-OCR sidecar. No published ports: only the
+  # application containers reach it, over the compose network, at http://aegiscore-clip:8100.
+  aegiscore-clip:
+    image: ghcr.io/nocturne-systems/aegiscore-clip:latest
+    restart: unless-stopped
+    init: true
+    expose: ['8100']
+    environment:
+      CLIP_THRESHOLD: '0.82'
+    volumes:
+      - clip_models:/models
+    tmpfs:
+      - /tmp
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8100/health').status==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    labels:
+      com.centurylinklabs.watchtower.enable: 'true'
+
   watchtower:
     image: containrrr/watchtower:1.7.1
     command: --interval 21600 --rolling-restart --enable-lifecycle-hooks --label-enable --stop-timeout 35s
@@ -116,3 +142,4 @@ services:
 volumes:
   university_storage:
   university_config:
+  clip_models:

@@ -80,3 +80,50 @@ jobs:
             ghcr.io/nocturne-systems/aegiscore:latest
           provenance: false
           sbom: false
+
+  publish-clip:
+    # P20 deliverable — the internal CLIP + OCR sidecar (aegiscore-clip). Published to
+    # ghcr.io/nocturne-systems/aegiscore-clip so docker-compose.client.yml can pull it
+    # by image reference only (the client compose forbids build: directives).
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve and validate release tag
+        id: resolve
+        env:
+          RAW_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          if [[ ! "$RAW_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tag '$RAW_TAG' must match vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          echo "tag=$RAW_TAG" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Require private package
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.allow_bootstrap) }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          visibility=$(gh api /orgs/nocturne-systems/packages/container/aegiscore-clip --jq .visibility)
+          test "$visibility" = private
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./services/aegiscore-clip
+          file: ./services/aegiscore-clip/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/nocturne-systems/aegiscore-clip:${{ steps.resolve.outputs.tag }}
+            ghcr.io/nocturne-systems/aegiscore-clip:latest
+          provenance: false
+          sbom: false

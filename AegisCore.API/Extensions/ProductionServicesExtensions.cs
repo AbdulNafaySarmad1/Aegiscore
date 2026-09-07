@@ -224,6 +224,46 @@ public static class AuthenticationServicesExtensions
                 ValidateIssuerSigningKey = true, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
                 ClockSkew = TimeSpan.FromMinutes(2), ValidAlgorithms = [SecurityAlgorithms.HmacSha256]
             };
+        })
+        .AddJwtBearer(AegisCore.Infrastructure.Admissions.ApplicantAuth.Scheme, options =>
+        {
+            // Applicant portal tokens: distinct audience so they can never satisfy staff/student routes.
+            var validationKey = AegisCore.Infrastructure.Admissions.ApplicantTokenService.ResolveValidationKey(configuration);
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = AegisCore.Infrastructure.Admissions.ApplicantAuth.Issuer,
+                ValidateAudience = true,
+                ValidAudience = AegisCore.Infrastructure.Admissions.ApplicantAuth.Audience,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = validationKey,
+                ClockSkew = TimeSpan.FromMinutes(2),
+                ValidAlgorithms = validationKey is RsaSecurityKey
+                    ? [SecurityAlgorithms.RsaSha256]
+                    : [SecurityAlgorithms.HmacSha256]
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnTokenValidated = async ctx =>
+                {
+                    var sub = ctx.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                        ?? ctx.Principal?.FindFirst("sub")?.Value;
+                    if (!Guid.TryParse(sub, out var applicantId))
+                    {
+                        ctx.Fail("Invalid applicant subject.");
+                        return;
+                    }
+
+                    var revocation = ctx.HttpContext.RequestServices
+                        .GetRequiredService<AegisCore.Application.Admissions.IApplicantTokenService>();
+                    if (await revocation.IsRevokedAsync(applicantId, ctx.HttpContext.RequestAborted))
+                    {
+                        ctx.Fail("Applicant session has been ended.");
+                    }
+                }
+            };
         });
         services.AddAuthorization();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();

@@ -55,6 +55,14 @@ builds the single combined image from the root `Dockerfile`, and pushes
 (push-to-`main` → `aegiscore-api` / `aegiscore-portal` images + GitHub Release) and is
 intentionally left unchanged.
 
+The same workflow also has a `publish-clip` job (P20) that builds
+`services/aegiscore-clip` and pushes `ghcr.io/nocturne-systems/aegiscore-clip:{tag}`
+and `:latest` to a second private package. `docker-compose.client.yml` references
+`aegiscore-clip:latest` by image only (the client compose forbids `build:`
+directives), so this internal photo-filter / OCR sidecar ships through the same
+tag-triggered pipeline and Watchtower keeps it current alongside the application
+image. The first-publish bootstrap (`allow_bootstrap=true`) covers both packages.
+
 First publish, before the package exists: a maintainer pushes the initial reviewed
 image manually and sets Private visibility, then runs `client-release.yml` via
 **Run workflow** (`workflow_dispatch`) with `tag=vX.Y.Z` and `allow_bootstrap=true`,

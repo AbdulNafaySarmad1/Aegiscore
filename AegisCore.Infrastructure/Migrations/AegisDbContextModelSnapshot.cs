@@ -17,7 +17,7 @@ namespace AegisCore.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_type", new[] { "asset", "liability", "equity", "revenue", "expense" });
@@ -25,6 +25,10 @@ namespace AegisCore.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "achievement_type", new[] { "academic", "sports", "cultural", "research", "community_service", "other" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "action_item_status", new[] { "open", "in_progress", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "activity_type", new[] { "call", "email", "meeting", "sms", "note", "status_change" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "admission_document_format", new[] { "pdf", "image" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "admission_document_kind", new[] { "matric", "intermediate", "o_levels", "a_levels", "ibcc_equivalency", "national_id", "domicile_certificate", "photo", "other" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "admission_document_validation_status", new[] { "pending", "approved", "rejected", "manual_review" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "admission_question_status", new[] { "draft", "approved", "rejected" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ai_model_capability", new[] { "chat", "embedding", "vision", "function_calling" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ai_provider_type", new[] { "open_ai", "anthropic", "azure_open_ai", "ollama", "custom" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "alert_condition", new[] { "below", "above", "equals" });
@@ -34,6 +38,8 @@ namespace AegisCore.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "api_key_status", new[] { "active", "revoked", "expired", "suspended" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "api_key_tier", new[] { "free", "basic", "pro", "enterprise" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "api_permission", new[] { "read_only", "read_write", "admin" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "applicant_status", new[] { "draft", "submitted", "under_review", "test_scheduled", "interview_scheduled", "admitted", "rejected", "withdrawn" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "applicant_test_status", new[] { "scheduled", "in_progress", "submitted", "expired", "force_submitted" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "application_status", new[] { "submitted", "under_review", "shortlisted", "interviewed", "offered", "rejected", "hired" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "approval_status", new[] { "pending", "approved", "rejected", "delegated", "timed_out" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "approval_type", new[] { "single", "parallel", "sequential" });
@@ -100,6 +106,7 @@ namespace AegisCore.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "drive_status", new[] { "scheduled", "in_progress", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "drive_type", new[] { "on_campus", "virtual", "hybrid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "driver_status", new[] { "active", "on_leave", "suspended", "terminated" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "email_provisioning_mode", new[] { "google_workspace", "microsoft365", "manual" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "emergency_alert_severity", new[] { "low", "medium", "high", "critical" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "emergency_alert_type", new[] { "fire", "earthquake", "lockdown", "medical", "weather", "other" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "emergency_contact_type", new[] { "fire_department", "police", "ambulance", "hospital", "internal_security", "other" });
@@ -147,6 +154,8 @@ namespace AegisCore.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "inspection_status", new[] { "scheduled", "in_progress", "completed", "signed_off" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "inspection_type", new[] { "move_in", "periodic", "move_out", "complaint" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "installation_status", new[] { "installed", "installing", "failed", "uninstalled" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "intake_semester", new[] { "fall", "spring", "winter" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "intake_status", new[] { "draft", "open", "closed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "integration_status", new[] { "up", "degraded", "down" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "integration_type", new[] { "identity_provider", "payment_gateway", "communication", "lms", "cloud", "webhook" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "intervention_outcome", new[] { "ongoing", "resolved", "escalated", "closed" });
@@ -227,6 +236,7 @@ namespace AegisCore.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ssr_section_status", new[] { "not_started", "in_progress", "completed", "reviewed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ssr_status", new[] { "draft", "in_review", "approved", "submitted", "rejected" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "submission_status", new[] { "draft", "submitted", "under_review", "approved", "rejected" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "syllabus_ocr_status", new[] { "pending", "extracted", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "tax_type", new[] { "income_tax", "sales_tax", "vat", "gst", "zakat", "sst" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "text_direction", new[] { "ltr", "rtl" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ticket_priority", new[] { "critical", "high", "medium", "low" });
@@ -1129,6 +1139,93 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("AdmissionApplications");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionDocumentRequirement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AcceptedFormat")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxFileSizeMb")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId", "DocumentType")
+                        .IsUnique();
+
+                    b.ToTable("AdmissionDocumentRequirements");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionIntake", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BatchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ClosesAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateTimeOffset?>("OpensAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Semester")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Year", "Semester")
+                        .IsUnique();
+
+                    b.ToTable("AdmissionIntakes");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionLead", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1677,6 +1774,145 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppealEvidence");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("ValidationConfidence")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ValidationMethod")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("ValidationStatus")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicantId");
+
+                    b.HasIndex("TenantId", "ApplicantId", "DocumentType")
+                        .IsUnique();
+
+                    b.ToTable("ApplicantDocuments");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApplicantId")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid?>("ConvertedStudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("DecisionNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<DateTimeOffset?>("EmailVerifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ApplicantId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId");
+
+                    b.ToTable("ApplicantProfiles");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ApplicationDocument", b =>
@@ -5172,7 +5408,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("CloMappingJson")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("CloMappingJson");
 
                     b.Property<string>("Code")
                         .HasMaxLength(20)
@@ -5188,7 +5425,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("PloMappingJson")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("PloMappingJson");
 
                     b.Property<Guid?>("PrerequisiteCourseId")
                         .HasColumnType("uuid");
@@ -7056,11 +7294,13 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("ExtractedFonts")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ExtractedFonts");
 
                     b.Property<string>("ExtractedPalette")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ExtractedPalette");
 
                     b.Property<string>("LogoUrl")
                         .HasMaxLength(2048)
@@ -9693,7 +9933,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("ValueJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ValueJson");
 
                     b.HasKey("Id");
 
@@ -9857,7 +10098,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("SelectedReferencesJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("SelectedReferencesJson");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -9952,7 +10194,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("ScopesJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ScopesJson");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -10219,7 +10462,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("ResultsJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ResultsJson");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -12076,7 +12320,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("DefinitionJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("DefinitionJson");
 
                     b.Property<string>("Format")
                         .IsRequired()
@@ -12852,7 +13097,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("IncompatibleActionsJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("IncompatibleActionsJson");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -13631,7 +13877,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("RequiredRolesJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("RequiredRolesJson");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -24196,7 +24443,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("AdditionalCurrenciesJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("AdditionalCurrenciesJson");
 
                     b.Property<string>("BaseCurrency")
                         .IsRequired()
@@ -24230,7 +24478,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("TaxSettingsJson")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("TaxSettingsJson");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -26116,7 +26365,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("StepData")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("StepData");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -26597,6 +26847,17 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantDocument", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.ApplicantProfile", "Applicant")
+                        .WithMany("Documents")
+                        .HasForeignKey("ApplicantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Applicant");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ApplicationDocument", b =>
@@ -28732,6 +28993,11 @@ namespace AegisCore.Infrastructure.Migrations
             modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionLead", b =>
                 {
                     b.Navigation("Activities");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantProfile", b =>
+                {
+                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.AssessmentScheme", b =>

@@ -898,6 +898,97 @@ namespace AegisCore.Migrations.Oracle.Migrations
                     b.ToTable("AdmissionApplications");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionDocumentRequirement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("AcceptedFormat")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(450)");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("BOOLEAN");
+
+                    b.Property<int>("MaxFileSizeMb")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId", "DocumentType")
+                        .IsUnique();
+
+                    b.ToTable("AdmissionDocumentRequirements");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionIntake", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<Guid?>("BatchId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<DateTimeOffset?>("ClosesAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("BOOLEAN");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("NVARCHAR2(150)");
+
+                    b.Property<DateTimeOffset?>("OpensAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<string>("Semester")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(450)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Year", "Semester")
+                        .IsUnique();
+
+                    b.ToTable("AdmissionIntakes");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionLead", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1454,6 +1545,148 @@ namespace AegisCore.Migrations.Oracle.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppealEvidence");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<Guid>("ApplicantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(450)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("NUMBER(19)");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("NVARCHAR2(1000)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("NVARCHAR2(600)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<double?>("ValidationConfidence")
+                        .HasColumnType("BINARY_DOUBLE");
+
+                    b.Property<string>("ValidationMethod")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("ValidationStatus")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicantId");
+
+                    b.HasIndex("TenantId", "ApplicantId", "DocumentType")
+                        .IsUnique();
+
+                    b.ToTable("ApplicantDocuments");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("ApplicantId")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("NVARCHAR2(40)");
+
+                    b.Property<Guid?>("ConvertedStudentId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<string>("DateOfBirth")
+                        .HasColumnType("NVARCHAR2(10)");
+
+                    b.Property<string>("DecisionNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("NVARCHAR2(1000)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("NVARCHAR2(320)");
+
+                    b.Property<DateTimeOffset?>("EmailVerifiedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(450)");
+
+                    b.Property<DateTimeOffset?>("SubmittedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ApplicantId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId");
+
+                    b.ToTable("ApplicantProfiles");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ApplicationDocument", b =>
@@ -26636,6 +26869,17 @@ namespace AegisCore.Migrations.Oracle.Migrations
                     b.Navigation("Assignment");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantDocument", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.ApplicantProfile", "Applicant")
+                        .WithMany("Documents")
+                        .HasForeignKey("ApplicantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Applicant");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.ApplicationDocument", b =>
                 {
                     b.HasOne("AegisCore.Domain.Entities.AdmissionApplication", "Application")
@@ -28769,6 +29013,11 @@ namespace AegisCore.Migrations.Oracle.Migrations
             modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionLead", b =>
                 {
                     b.Navigation("Activities");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantProfile", b =>
+                {
+                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.AssessmentScheme", b =>

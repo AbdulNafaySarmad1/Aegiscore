@@ -1773,6 +1773,12 @@ public class AegisDbContext : DbContext
     public DbSet<MeritList> MeritLists => Set<MeritList>();
     public DbSet<MeritListEntry> MeritListEntries => Set<MeritListEntry>();
     public DbSet<SeatAllocation> SeatAllocations => Set<SeatAllocation>();
+
+    // P20 Applicant Portal
+    public DbSet<AdmissionIntake> AdmissionIntakes => Set<AdmissionIntake>();
+    public DbSet<ApplicantProfile> ApplicantProfiles => Set<ApplicantProfile>();
+    public DbSet<AdmissionDocumentRequirement> AdmissionDocumentRequirements => Set<AdmissionDocumentRequirement>();
+    public DbSet<ApplicantDocument> ApplicantDocuments => Set<ApplicantDocument>();
     public DbSet<AssessmentScheme> AssessmentSchemes => Set<AssessmentScheme>();
     public DbSet<AssessmentComponent> AssessmentComponents => Set<AssessmentComponent>();
     public DbSet<CourseMark> CourseMarks => Set<CourseMark>();
@@ -3076,6 +3082,32 @@ public class AegisDbContext : DbContext
         dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LoginEvent));
         dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(LoginProvider));
         dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(DeviceType));
+
+        // P20-P22 Applicant Portal / Admissions
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IntakeSemester));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(IntakeStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApplicantStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AdmissionDocumentKind));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AdmissionDocumentFormat));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AdmissionDocumentValidationStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(SyllabusOcrStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(AdmissionQuestionStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(ApplicantTestStatus));
+        dialectAdapter.ConfigureEnumStrategy(modelBuilder, typeof(EmailProvisioningMode));
+
+        modelBuilder.Entity<ApplicantProfile>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ApplicantId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status });
+            entity.HasIndex(e => new { e.TenantId, e.IntakeId, e.ProgramId });
+            entity.HasMany(e => e.Documents).WithOne(d => d.Applicant).HasForeignKey(d => d.ApplicantId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<AdmissionIntake>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.Year, e.Semester }).IsUnique());
+        modelBuilder.Entity<AdmissionDocumentRequirement>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.IntakeId, e.ProgramId, e.DocumentType }).IsUnique());
+        modelBuilder.Entity<ApplicantDocument>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.ApplicantId, e.DocumentType }).IsUnique());
 
         // Department
         modelBuilder.Entity<Department>(entity =>
