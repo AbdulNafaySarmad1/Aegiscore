@@ -4,16 +4,76 @@ Updated: 2026-09-08. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
-Completed prompts: **P1–P17**.
+Completed prompts: **P1–P17**. **P18–P19** code complete and pushed (`bcf49bf0`); the
+18A/18B capture artifacts remain blocked on a live install with real role credentials.
 
-Current prompt: **P18–P19 — code complete and pushed (`bcf49bf0`); the 18A/18B capture
-artifacts are the only outstanding item and are blocked on a live install with real
-role credentials.**
+Current prompt: **P20 — Applicant Portal — code complete (see "P20 verified
+implementation" below). P21 (AI Test Engine) and P22 (Post-Admission Migration) are
+planned and not yet started.**
 
-Remaining execution order: run `capture:screenshots` + `capture:demo` against a live
-`APP_URL` with `ADMIN/FACULTY/STUDENT_*` + `AEGISCORE_SETUP_TOKEN` +
-`DEMO_COURSE_ID`/`DEMO_STUDENT_NUMBER`/`DEMO_MARKS` (see `docs/CAPTURE_SUITE.md`), then
-validate the private-client deployment against the published image.
+Remaining execution order: implement P21, then P22 (build/test/graphify/commit between
+each). Separately, still outstanding from P18–P19: run `capture:screenshots` +
+`capture:demo` against a live `APP_URL` with `ADMIN/FACULTY/STUDENT_*` +
+`AEGISCORE_SETUP_TOKEN` + `DEMO_COURSE_ID`/`DEMO_STUDENT_NUMBER`/`DEMO_MARKS` (see
+`docs/CAPTURE_SUITE.md`), then validate the private-client deployment.
+
+## P20 verified implementation
+
+- Entities (`AegisCore.Domain/Entities/ApplicantPortalEntities.cs`): `AdmissionIntake`
+  (year + `IntakeSemester` F/S/W, `IntakeStatus`, optional `BatchId`), `ApplicantProfile`
+  (unique `ApplicantId`, `ApplicantStatus` enum Draft→…→Admitted/Rejected/Withdrawn,
+  `ConvertedStudentId`), `AdmissionDocumentRequirement` (admin-set per intake+program:
+  required/optional, `AdmissionDocumentFormat` Pdf|Image, `MaxFileSizeMb`),
+  `ApplicantDocument` (`StoragePath`, `FileSize`, `MimeType`,
+  `AdmissionDocumentValidationStatus`, `ValidationConfidence`, `ValidationMethod`). All
+  `ITenantScoped`; enum strategies registered in `AegisDbContext.OnModelCreating`.
+- Migration `AddApplicantPortal` added to all four assemblies
+  (`AegisCore.Infrastructure` + MsSql/MySql/Oracle); `has-pending-model-changes` clean
+  for all four dialects.
+- APP ID: `IApplicantIdGenerator` → `APP-{YEAR}{F|S|W}-{PROGRAM_CODE}-{NANOID8}` using
+  `Nanoid` (added package) over a no-vowel/no-ambiguous 32-char alphabet, DB
+  collision-checked with bounded retries. `DegreeProgram.Code` is the program code,
+  editable at `PUT /api/admissions/config/programs/{id}/code` (regex `^[A-Za-z0-9]{2,8}$`).
+- Applicant auth: second JWT bearer scheme `Applicant` (audience `applicant`, issuer
+  `https://aegiscore.pk`) wired in `AddAuthenticationServices`; `OnTokenValidated`
+  checks a Redis revocation key. Passwordless: `IApplicantOtpService` (6-digit code in
+  Redis, 10-min TTL, 5-attempt cap) + `INotificationService` email delivery.
+  `ApplicantPortalController` (`/api/applicant/*`): `[AllowAnonymous]` signup/verify +
+  `intakes/open`; everything else `[Authorize(AuthenticationSchemes = "Applicant")]`.
+  Applicant tokens cannot satisfy the default (`aegiscore-api`) audience and vice-versa.
+- Portal proxy `src/app/api/applicant/[...path]/route.ts` carries its own httpOnly
+  `aegiscore_applicant` cookie, minted from `/auth/verify`.
+- Document upload: enforces the admin-configured format + `MaxFileSizeMb` + magic-byte
+  signature; stored via existing `IStorageProvider` at
+  `tenants/{tenantId}/applicants/{applicantId}/{docType}.{ext}`.
+- CLIP: `services/aegiscore-clip/` (python:3.11-slim, FastAPI, port 8100, container
+  `aegiscore-clip`). `POST /validate-photo` → CLIP zero-shot with the exact
+  positive/negative prompt pair, threshold 0.82, `{passed,confidence,reason}`.
+  `POST /ocr` → digital PDF text with Tesseract fallback (reused by P21). Published as
+  `ghcr.io/nocturne-systems/aegiscore-clip` via a new `publish-clip` job in
+  `client-release.yml`; added to `docker-compose.client.yml` as an internal service
+  (`expose: [8100]`, no host ports) + `docker-compose.yml` (dev, `build:`).
+  `IPhotoValidationService`/`ClipPhotoValidationService` calls it via `CLIP_SERVICE_URL`;
+  **fails open** — unreachable/timeout/5xx ⇒ `ValidationStatus = ManualReview`,
+  `ValidationMethod = "failopen"`, admin in-app alert, applicant not blocked.
+- Admin: `AdmissionsAdminController` (`/api/admissions/intakes`, `/config/documents`,
+  `/config/programs/{id}/code`, `/applicants…`) all behind `[RequirePermission("Admissions",
+  …)]` — actions `Read`/`Approve` reused, new action `Configure` (tenant-granted via the
+  dynamic RBAC matrix; no hardcoded catalog). Document download streams from
+  `IStorageProvider`; per-doc approve/reject; guarded status transitions + bulk move.
+- Portal: `/apply` (6-step public wizard, no AppShell), `/admin/admissions` (list +
+  filters + bulk), `/admin/admissions/[applicantId]` (docs + pipeline), and
+  `/admin/admissions/document-config` (intakes + per-program document requirements +
+  program codes).
+- Validators: `AegisCore.API/Validation/AdmissionsValidators.cs` — `SecureValidator<T>`
+  for every new request DTO.
+- Tests: `AegisCore.Tests/ApplicantPortalTests.cs` (7) — APP ID format/uniqueness +
+  collision retry, CLIP fail-open ⇒ ManualReview + non-blocking submit, document
+  size/format enforcement from DB config, illegal pipeline-transition rejection, CLIP
+  client fail-open with no `CLIP_SERVICE_URL`, applicant token audience.
+- Verification: `dotnet build AegisCore.slnx -c Release` PASS; `dotnet test` **645
+  passed / 1 skipped / 0 failed**; `has-pending-model-changes` clean ×4 dialects;
+  Portal `tsc --noEmit` + `eslint` clean; `next build` compiles the new routes.
 
 ## Completed prompt commits
 
