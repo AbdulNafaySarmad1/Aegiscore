@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { FocusTrapDialog } from "@/components/FocusTrapDialog";
+import { CheckInButton } from "@/components/attendance/CheckInButton";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { ClipboardCheck, CheckCircle, XCircle } from "lucide-react";
 
@@ -15,6 +16,7 @@ export default function AttendancePage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [roster, setRoster] = useState<Student[]>([]);
+  const [checkInStudent, setCheckInStudent] = useState("");
   const [statuses, setStatuses] = useState<Record<string, "present" | "absent">>({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -106,6 +108,13 @@ export default function AttendancePage() {
           </div>
         </div>
 
+        {roster.length > 0 && <section className="card" style={{ padding: 20, marginBottom: 20 }}>
+          <h2>Geolocation check-in</h2><p>Record a student check-in using this device’s location.</p>
+          <label>Student for check-in <select value={checkInStudent} onChange={event => setCheckInStudent(event.target.value)}>
+            <option value="">Select a student</option>{roster.map(student => <option key={student.enrollmentId} value={student.universityId}>{student.name}</option>)}
+          </select></label>
+          {checkInStudent && roster.some(student => student.universityId === checkInStudent) && <CheckInButton key={`${selectedCourse}:${checkInStudent}`} courseId={selectedCourse} studentId={checkInStudent} />}
+        </section>}
         {roster.length > 0 && (
           <>
             <div style={{ marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, fontSize: 13, color: "var(--muted)" }}>

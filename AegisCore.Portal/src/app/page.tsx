@@ -1,4 +1,5 @@
 "use client";
+import { loadSession } from "@/lib/session";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -73,26 +74,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("aegiscore_demo_session");
-      if (raw) {
-        const acc = JSON.parse(raw);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
-        setSession({
-          userId: acc.email,
-          tenantId: "iobm-demo-tenant",
-          studentId: acc.label === "Student" ? "STU-2024-001" : null,
-          departmentId: "CS-DEPT-001",
-          name: acc.desc,
-          roles: [acc.label],
-        });
-      } else {
-        window.location.href = "/login";
-      }
-    } catch {
-      window.location.href = "/login";
-    }
-    setLoading(false);
+    loadSession().then(setSession).catch(() => window.location.assign("/login")).finally(() => setLoading(false));
   }, []);
 
   if (!session) return <AppShell><div className="content-page"><div className="skeleton" style={{ height: 200 }} /></div></AppShell>;

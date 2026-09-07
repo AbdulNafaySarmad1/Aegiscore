@@ -1,5 +1,7 @@
 namespace AegisCore.Application.Licensing;
 
+public enum LicenseTier { Basic, Standard, Premium }
+
 public interface ILicenseService
 {
     Task<LicenseValidationResult> ValidateAsync(string licenseKey, CancellationToken ct = default);
@@ -28,7 +30,8 @@ public sealed record LicenseRuntimeStatus(
     DateTimeOffset? LockedAt,
     DateTimeOffset? LastHeartbeatAt,
     int FailedHeartbeatCount,
-    DateTimeOffset? OverrideUntil);
+    DateTimeOffset? OverrideUntil,
+    LicenseTier Tier = LicenseTier.Basic);
 
 public enum LicenseValidationFailureReason
 {

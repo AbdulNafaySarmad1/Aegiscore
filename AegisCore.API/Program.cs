@@ -113,6 +113,16 @@ else
     builder.Services.AddBackgroundWorkers(builder.Configuration);
 }
 
+// A redundant HTTP replica must not duplicate singleton scheduled business jobs.
+// Signing queues and licence heartbeats remain active on every replica.
+if (builder.Configuration.GetValue<bool>("Deployment:PassiveWorkers"))
+{
+    string[] scheduled = ["FinanceAuditSealWorker", "FinancePaymentPlanWorker", "PqcKeyRotationWorker",
+        "FinanceLedgerSignatureWorker", "VendorSanctionsRescreenWorker", "ComplianceRetentionWorker", "SystemAlertService"];
+    foreach (var descriptor in builder.Services.Where(d => d.ServiceType == typeof(IHostedService)
+        && scheduled.Contains(d.ImplementationType?.Name)).ToArray()) builder.Services.Remove(descriptor);
+}
+
 var app = builder.Build();
 
 app.Use(async (context, next) =>

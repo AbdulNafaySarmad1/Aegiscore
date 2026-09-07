@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiPost } from "@/lib/api-client";
 import { Eye, EyeOff, Shield, Users, TrendingUp, GraduationCap } from "lucide-react";
 
 const testimonials = [
@@ -29,8 +30,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    if (!isDemo) {
+      try {
+        await apiPost("/api/auth/login", { email, password });
+        localStorage.removeItem("aegiscore_demo_session");
+        router.push("/");
+        router.refresh();
+      } catch (reason) { setError(reason instanceof Error ? reason.message : "Sign-in failed. Please retry."); }
+      return;
+    }
     const account = demoAccounts.find(a => a.email === email && a.password === password);
     if (account) {
       localStorage.setItem("aegiscore_demo_session", JSON.stringify(account));

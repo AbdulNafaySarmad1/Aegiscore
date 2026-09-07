@@ -24,10 +24,10 @@
     "semantic_hash": "ab22dc7bcb1007ca34c870c43f11e9d5"
   },
   "AegisCore.API/Background/LicenseHeartbeatHostedService.cs": {
-    "mtime": 1788459723.3267171,
-    "seen": 1788461387.4179275,
-    "ast_hash": "06ad5662285537f22d086b54a2dd8982",
-    "semantic_hash": "06ad5662285537f22d086b54a2dd8982"
+    "mtime": 1788728952.0181627,
+    "seen": 1788752330.6727734,
+    "ast_hash": "aae24d0f5b4d3f69b07ba6d19cfd9ac8",
+    "semantic_hash": ""
   },
   "AegisCore.API/Controllers/AssetInventoryController.cs": {
     "mtime": 1788584870.2555358,
@@ -438,10 +438,10 @@
     "semantic_hash": "b8d0405e95b363a36e53f6e66f227061"
   },
   "AegisCore.API/Middleware/LicenseLockoutMiddleware.cs": {
-    "mtime": 1788459723.3332863,
-    "seen": 1788461387.4180565,
-    "ast_hash": "3fa14ae8e3a45da917cd7e14ca2d54b6",
-    "semantic_hash": "3fa14ae8e3a45da917cd7e14ca2d54b6"
+    "mtime": 1788750427.2421696,
+    "seen": 1788752330.6729143,
+    "ast_hash": "c4073a77099bdcf012c0ed3d3824b951",
+    "semantic_hash": ""
   },
   "AegisCore.API/Middleware/RateLimitAuthMiddleware.cs": {
     "mtime": 1788459723.3332863,
@@ -474,9 +474,9 @@
     "semantic_hash": "060a2e60a388bd241c3e274ec25e6a76"
   },
   "AegisCore.API/Program.cs": {
-    "mtime": 1788693481.1434457,
-    "seen": 1788713904.2124953,
-    "ast_hash": "46de0096f24d5a4d0255d946c8e47945",
+    "mtime": 1788729760.053841,
+    "seen": 1788752330.6729271,
+    "ast_hash": "7add148ca51e061ad8c42314dbafb4ce",
     "semantic_hash": ""
   },
   "AegisCore.API/appsettings.Production.json": {
@@ -1176,10 +1176,10 @@
     "semantic_hash": "6ae6d7cacce4737f0230a0ca8854820f"
   },
   "AegisCore.Application/License/LicenseContracts.cs": {
-    "mtime": 1788459723.3456013,
-    "seen": 1788461387.4182785,
-    "ast_hash": "23e833fe95bc34712c93b73b98e78dc0",
-    "semantic_hash": "23e833fe95bc34712c93b73b98e78dc0"
+    "mtime": 1788728905.5347204,
+    "seen": 1788752330.673139,
+    "ast_hash": "0b807000f36a3a2acfeaceb2d9c72a74",
+    "semantic_hash": ""
   },
   "AegisCore.Application/Maintenance/PreventiveMaintenanceService.cs": {
     "mtime": 1788459723.3456013,
@@ -3492,9 +3492,9 @@
     "semantic_hash": "16bb1001bd1c68cff603708299184fb6"
   },
   "AegisCore.Infrastructure/License/LicenseService.cs": {
-    "mtime": 1788634462.0462778,
-    "seen": 1788635302.0644844,
-    "ast_hash": "d5efe73a01fec5d463db4591b8cf372f",
+    "mtime": 1788728952.0191627,
+    "seen": 1788752330.6738074,
+    "ast_hash": "2a0ee912f87fcff3d4812eb1e6108d90",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Marketplace/ExtensionService.cs": {
@@ -4938,27 +4938,27 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/next-env.d.ts": {
-    "mtime": 1788674367.1972759,
-    "seen": 1788674555.2489,
+    "mtime": 1788752059.9158156,
+    "seen": 1788752330.6745467,
     "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
     "semantic_hash": "2a74d3909800ca5467fa83b0ab4a4890"
   },
   "AegisCore.Portal/next.config.ts": {
-    "mtime": 1788635644.650362,
-    "seen": 1788674555.2489026,
-    "ast_hash": "a5970fb9e0583ca7353d4760b24e2ab9",
+    "mtime": 1788729049.4790876,
+    "seen": 1788752330.6745481,
+    "ast_hash": "1fca0b59715763459bf5a76e5ccbb3f5",
     "semantic_hash": ""
   },
   "AegisCore.Portal/package.json": {
-    "mtime": 1788637004.7204688,
-    "seen": 1788674555.248905,
-    "ast_hash": "d8f0786ac453cdf33bcdf890e877c942",
+    "mtime": 1788729319.3456473,
+    "seen": 1788752330.6745496,
+    "ast_hash": "deda80c23ff02284739108bdc2a75b03",
     "semantic_hash": ""
   },
   "AegisCore.Portal/playwright.config.ts": {
-    "mtime": 1788672914.7632368,
-    "seen": 1788674555.248907,
-    "ast_hash": "4a9d67c57665aacdb9d54c9c7f381fe6",
+    "mtime": 1788751180.7834008,
+    "seen": 1788752330.6745508,
+    "ast_hash": "7a8da67e500f5221c4e5fd1d791c6bfb",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/achievements/layout.tsx": {
@@ -4974,9 +4974,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/attendance/page.tsx": {
-    "mtime": 1788636436.2694848,
-    "seen": 1788674555.2489176,
-    "ast_hash": "f365fcd73d58bbe308aa1464c95b3748",
+    "mtime": 1788729425.1166523,
+    "seen": 1788752330.6745658,
+    "ast_hash": "78cf00180876dc2b85cfa86fc378b504",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/audit/layout.tsx": {
@@ -5118,9 +5118,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/examinations/page.tsx": {
-    "mtime": 1788636436.2694848,
-    "seen": 1788674555.2489645,
-    "ast_hash": "5d608c24eec0ba7b8ecade2d9d2c3918",
+    "mtime": 1788751595.4293826,
+    "seen": 1788752330.6746118,
+    "ast_hash": "f3423f52b7443a478e96ec96cda98afa",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/finance/department/[departmentId]/page.tsx": {
@@ -5220,9 +5220,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/login/page.tsx": {
-    "mtime": 1788636682.4362192,
-    "seen": 1788674555.2490003,
-    "ast_hash": "558a661c23940d534e32cde6fd7b8dc7",
+    "mtime": 1788729049.4780874,
+    "seen": 1788752330.6746767,
+    "ast_hash": "a7b54e3882ea8d5b758d855803ae90cc",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/mental-health/layout.tsx": {
@@ -5244,9 +5244,9 @@
     "semantic_hash": "3db6ef957b87cfba1a4f9c3c3bf45a01"
   },
   "AegisCore.Portal/src/app/page.tsx": {
-    "mtime": 1788609702.8430936,
-    "seen": 1788611591.9534218,
-    "ast_hash": "c996bc69e0dbb85ce6c07b39d377bf0c",
+    "mtime": 1788730015.9182775,
+    "seen": 1788752330.6746864,
+    "ast_hash": "429a42f40bc8c5973e828c05b26806cd",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/placement/layout.tsx": {
@@ -5346,9 +5346,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/student/profile/page.tsx": {
-    "mtime": 1788609702.8430936,
-    "seen": 1788611591.9540362,
-    "ast_hash": "dd6be18899e9e40489abc4e384d0147b",
+    "mtime": 1788730016.8522863,
+    "seen": 1788752330.6747205,
+    "ast_hash": "fcde1aecc1001e3cfd3b30ad7d5d5ac6",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/student/transcript/page.tsx": {
@@ -5466,9 +5466,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/layout/AppShell.tsx": {
-    "mtime": 1788636235.6669796,
-    "seen": 1788674555.2490873,
-    "ast_hash": "3f9ef81e88e74877f21132142521119c",
+    "mtime": 1788730015.9432778,
+    "seen": 1788752330.6747715,
+    "ast_hash": "4617d1db6e56e75265b30f78ce0cb0db",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/locale-switcher.tsx": {
@@ -5544,9 +5544,9 @@
     "semantic_hash": "c1f0f47c92db911e8b24d90ded7f5292"
   },
   "AegisCore.Portal/src/components/personality-layout-wrapper.tsx": {
-    "mtime": 1788609702.8430936,
-    "seen": 1788611591.9555879,
-    "ast_hash": "ed6be75e3623e46e298f3e284df7b457",
+    "mtime": 1788729153.6780772,
+    "seen": 1788752330.674794,
+    "ast_hash": "5b43b63f017308f5dd5b109c002fe5aa",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/personality-toggle.tsx": {
@@ -5556,9 +5556,9 @@
     "semantic_hash": "c56c8db4adfb38a747129c64b237319c"
   },
   "AegisCore.Portal/src/components/portal-shell.tsx": {
-    "mtime": 1788609702.843509,
-    "seen": 1788611591.955663,
-    "ast_hash": "5ac0f81a020b586b2547298f501836ad",
+    "mtime": 1788729066.512249,
+    "seen": 1788752330.6747975,
+    "ast_hash": "fe923263afdb0f39cdf1099eac59812d",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/wizard/WizardShell.tsx": {
@@ -5598,10 +5598,10 @@
     "semantic_hash": "e17c1f76366e0f0856f19ac8622a7725"
   },
   "AegisCore.Portal/src/lib/api-client.ts": {
-    "mtime": 1788538663.4936457,
-    "seen": 1788584368.9959977,
-    "ast_hash": "7c92f180af1c0a9f69b41505e848a090",
-    "semantic_hash": "7c92f180af1c0a9f69b41505e848a090"
+    "mtime": 1788730015.9312775,
+    "seen": 1788752330.6748097,
+    "ast_hash": "b5026e49a3c72232e0ff75539e87ccc3",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/src/lib/personality-context.tsx": {
     "mtime": 1788609702.843683,
@@ -5622,10 +5622,10 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/lib/server-api.ts": {
-    "mtime": 1788459723.4331813,
-    "seen": 1788461387.4198425,
-    "ast_hash": "b4174f1d499c1b17f421d59ec8f4a4d0",
-    "semantic_hash": "b4174f1d499c1b17f421d59ec8f4a4d0"
+    "mtime": 1788729049.4780874,
+    "seen": 1788752330.6748168,
+    "ast_hash": "5ad8cdb5c1b6664d70726e5690d975b3",
+    "semantic_hash": ""
   },
   "AegisCore.Portal/tests/aegiscore.spec.ts": {
     "mtime": 1788459723.4336023,
@@ -8304,9 +8304,9 @@
     "semantic_hash": ""
   },
   "CODEX_HANDOFF.md": {
-    "mtime": 1788694715.2506196,
-    "seen": 1788713904.2147274,
-    "ast_hash": "41a7fce137a1879685c3ce745863dc02",
+    "mtime": 1788752238.2325158,
+    "seen": 1788752330.6752064,
+    "ast_hash": "b15fe397ce2596efc532157a813cbfbf",
     "semantic_hash": ""
   },
   "docs/rbac-role-attribute-migration.md": {
@@ -8394,9 +8394,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/student/attendance/page.tsx": {
-    "mtime": 1788629649.3849313,
-    "seen": 1788631314.513998,
-    "ast_hash": "8ff0893f9eff27d10ebc13cbff10ad48",
+    "mtime": 1788750891.4176154,
+    "seen": 1788752330.674715,
+    "ast_hash": "afff7edfc5a16f2c3b1507aaf9c1f605",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/components/attendance/CheckInButton.tsx": {
@@ -8520,9 +8520,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Database/DbDialectAdapters.cs": {
-    "mtime": 1788712256.2568967,
-    "seen": 1788713904.2132878,
-    "ast_hash": "6b64ca2b2d9fa82a6d282e6b8b08405f",
+    "mtime": 1788729760.0468411,
+    "seen": 1788752330.6736906,
+    "ast_hash": "8298e52726b78208b15ec32b37d7c2d3",
     "semantic_hash": ""
   },
   "AegisCore.Migrations.MsSql/AegisCore.Migrations.MsSql.csproj": {
@@ -8604,9 +8604,171 @@
     "semantic_hash": ""
   },
   "docs/deployment/P11_MULTI_DIALECT.md": {
-    "mtime": 1788713093.9258807,
-    "seen": 1788713904.2148774,
-    "ast_hash": "45a44f911333343c8a25fdc877f04b47",
+    "mtime": 1788714191.3340452,
+    "seen": 1788752330.6753697,
+    "ast_hash": "959e0e5cd77936d721dd6a7e8f3718bb",
+    "semantic_hash": ""
+  },
+  "AegisCore.API/Controllers/StudentDirectoryController.cs": {
+    "mtime": 1788729049.4790876,
+    "seen": 1788752330.6728702,
+    "ast_hash": "dd16ef0afda0225eaca6c80d374d8094",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/License/LicenseWriteInterceptor.cs": {
+    "mtime": 1788729760.040841,
+    "seen": 1788752330.6738105,
+    "ast_hash": "28afd43900ff22b9367ddaecdb47511a",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/admin/settings/page.tsx": {
+    "mtime": 1788729153.6780772,
+    "seen": 1788752330.6745577,
+    "ast_hash": "76056f85e2d3b00f06cbebb9d6366778",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/admissions/page.tsx": {
+    "mtime": 1788729153.6780772,
+    "seen": 1788752330.6745615,
+    "ast_hash": "a6fd0b4d4d9a1b0922f0360210b523aa",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/api/[...path]/route.ts": {
+    "mtime": 1788750427.2441697,
+    "seen": 1788752330.6745632,
+    "ast_hash": "9a2cd9a1cd97c14366061dbf3a27dfed",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/api/runtime/ready/route.ts": {
+    "mtime": 1788729574.6020777,
+    "seen": 1788752330.6745644,
+    "ast_hash": "a62059e2587ff66d7593615d9dfe2f5f",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/dashboard/page.tsx": {
+    "mtime": 1788729049.4790876,
+    "seen": 1788752330.6745932,
+    "ast_hash": "41c55e6f6cc22e163940f34f36978dfc",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/reports/page.tsx": {
+    "mtime": 1788729153.6780772,
+    "seen": 1788752330.6747112,
+    "ast_hash": "1dac5da034c61219f91cbbac1caef366",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/students/page.tsx": {
+    "mtime": 1788729153.677077,
+    "seen": 1788752330.6747236,
+    "ast_hash": "3c36bc60765800a3fa9998fd33af1462",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/components/RecordTable.tsx": {
+    "mtime": 1788729153.677077,
+    "seen": 1788752330.6747456,
+    "ast_hash": "4342f862663f2a6d02af4abb3a496056",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/lib/session.ts": {
+    "mtime": 1788729049.4770875,
+    "seen": 1788752330.674818,
+    "ast_hash": "3f1aaa3deefccd300e7166e32780e69e",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/tests/capture/demo.spec.ts": {
+    "mtime": 1788750848.8942068,
+    "seen": 1788752330.674824,
+    "ast_hash": "f37f7264b3e1299c82d3c2cb0cf2290c",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/tests/capture/helpers.ts": {
+    "mtime": 1788750848.8922067,
+    "seen": 1788752330.6748254,
+    "ast_hash": "0b62034ad74cf549a86a6c627d3ad9fe",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/tests/capture/screenshots.spec.ts": {
+    "mtime": 1788750891.4146154,
+    "seen": 1788752330.6748269,
+    "ast_hash": "8d2e2d859ace58ff170bc43243f46cf5",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/tests/grade-entry.spec.ts": {
+    "mtime": 1788751027.546939,
+    "seen": 1788752330.674828,
+    "ast_hash": "a2f3c585de0284f335e3aa8b1e8ef732",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/tests/portal-auth.spec.ts": {
+    "mtime": 1788730106.5421398,
+    "seen": 1788752330.6748312,
+    "ast_hash": "9967b2692922cbe5c74e03fde978f927",
+    "semantic_hash": ""
+  },
+  "AegisCore.Tests/ClientLicenseTests.cs": {
+    "mtime": 1788750490.0497727,
+    "seen": 1788752330.6748483,
+    "ast_hash": "0a1b1402b954a04132bbf0e7106f5b8a",
+    "semantic_hash": ""
+  },
+  "docker/client/application.cjs": {
+    "mtime": 1788729760.0618412,
+    "seen": 1788752330.6751373,
+    "ast_hash": "814eeaf1d0c398ead76074950c12b9ae",
+    "semantic_hash": ""
+  },
+  "docker/client/entrypoint.sh": {
+    "mtime": 1788729574.6010776,
+    "seen": 1788752330.6751385,
+    "ast_hash": "1f9472f2705e149ccbf1eedff3377c00",
+    "semantic_hash": ""
+  },
+  "docker/client/post-update.sh": {
+    "mtime": 1788729574.6020777,
+    "seen": 1788752330.67514,
+    "ast_hash": "7e192bd781e58e099a42c69d42c59437",
+    "semantic_hash": ""
+  },
+  "docker/client/pre-update.sh": {
+    "mtime": 1788729574.6020777,
+    "seen": 1788752330.6751413,
+    "ast_hash": "427cea821b6b20cc08607969f0208977",
+    "semantic_hash": ""
+  },
+  ".github/workflows/client-release.yml": {
+    "mtime": 1788729574.6020777,
+    "seen": 1788752330.6751678,
+    "ast_hash": "d0d2e22977ee40c8af8b6ebd232bdd5d",
+    "semantic_hash": ""
+  },
+  "DEPLOY.md": {
+    "mtime": 1788729760.0628412,
+    "seen": 1788752330.675208,
+    "ast_hash": "72a97a40f69f36b26b07b09f0f42f9ac",
+    "semantic_hash": ""
+  },
+  "docker-compose.client.yml": {
+    "mtime": 1788751299.844542,
+    "seen": 1788752330.6752753,
+    "ast_hash": "9ac4b74571068eeb3cab1473ef2a77af",
+    "semantic_hash": ""
+  },
+  "docs/CAPTURE_SUITE.md": {
+    "mtime": 1788750848.8952067,
+    "seen": 1788752330.6753435,
+    "ast_hash": "43d0c2b5f7b0f89f147d6c3ddfe2864f",
+    "semantic_hash": ""
+  },
+  "docs/CLIENT_DEPLOYMENT_OPERATIONS.md": {
+    "mtime": 1788750427.2431698,
+    "seen": 1788752330.6753457,
+    "ast_hash": "21c47525ad8009d248050960f557f36b",
+    "semantic_hash": ""
+  },
+  "docs/CLIENT_REGISTRY_ACCESS.md": {
+    "mtime": 1788751125.8228762,
+    "seen": 1788752330.675347,
+    "ast_hash": "8d2220f469959c9b6b70bb7e96d4e7aa",
     "semantic_hash": ""
   }
 }

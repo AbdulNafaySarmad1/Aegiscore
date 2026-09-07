@@ -85,6 +85,7 @@ public sealed class LicenseService(
 
         var state = await CurrentAsync(ct) ?? new LicenseState { Id = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
         state.LicenseKey = licenseKey;
+        state.TenantId = InstallationTenantId();
         state.UniversityId = validation.License.UniversityId;
         state.UniversityName = validation.License.UniversityName;
         state.Status = "active";
@@ -162,7 +163,7 @@ public sealed class LicenseService(
             {
                 university_id = state.UniversityId,
                 university_name = state.UniversityName,
-                current_user_count = await db.Users.CountAsync(ct),
+                current_user_count = await db.Users.IgnoreQueryFilters().CountAsync(u => u.TenantId == state.TenantId, ct),
                 suite = "complete",
                 timestamp = DateTimeOffset.UtcNow
             }, timeout.Token);
@@ -172,6 +173,12 @@ public sealed class LicenseService(
 
             if (response.IsSuccessStatusCode && body.Status == "valid")
             {
+                if (!TryTier(body.Tier ?? "Basic", out var tier))
+                    return await LockAsync(state, "invalid", "License authority returned an unknown tier.", ct);
+                state.Status = "active";
+                var metadata = JsonNode.Parse(state.LicenseJson)?.AsObject() ?? new JsonObject();
+                metadata["tier"] = tier.ToString();
+                state.LicenseJson = metadata.ToJsonString();
                 state.LastHeartbeatAt = DateTimeOffset.UtcNow;
                 state.LastHeartbeatStatus = "success";
                 state.FailedHeartbeatCount = 0;
@@ -182,7 +189,7 @@ public sealed class LicenseService(
                 return new HeartbeatResult(true, "valid", body.Message);
             }
 
-            if (body.Status is "revoked" or "expired")
+            if (body.Status is "revoked" or "expired" or "invalid")
             {
                 state.Status = body.Status;
                 state.LastHeartbeatStatus = body.Status;
@@ -195,7 +202,7 @@ public sealed class LicenseService(
 
             return await FailHeartbeatAsync(state, "failed", body.Message, ct);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             logger.LogWarning(ex, "License heartbeat failed for license ending {Tail}", Tail(state.LicenseKey));
             return await FailHeartbeatAsync(state, "timeout", ex.Message, ct);
@@ -218,7 +225,8 @@ public sealed class LicenseService(
             locked ? state.LockedAt ?? state.OverrideUntil : null,
             state.LastHeartbeatAt,
             state.FailedHeartbeatCount,
-            state.OverrideUntil);
+            state.OverrideUntil,
+            ReadTier(OfflineModeEnabled() ? state.LicenseKey : state.LicenseJson));
     }
 
     public async Task ManualOverrideAsync(Guid actorId, string reason, DateTimeOffset validUntil, CancellationToken ct = default)
@@ -270,12 +278,34 @@ public sealed class LicenseService(
 
     private async Task<LicenseState?> CurrentAsync(CancellationToken ct)
     {
-        var states = await db.LicenseStates.ToListAsync(ct);
+        var tenantId = InstallationTenantId();
+        var states = await db.LicenseStates.IgnoreQueryFilters().Where(s => s.TenantId == tenantId).ToListAsync(ct);
         return states.OrderByDescending(l => l.CreatedAt).FirstOrDefault();
     }
 
+    private Guid InstallationTenantId() => Guid.TryParse(configuration["TENANT_ID"], out var id) ? id : db.CurrentTenantId;
+
+    private async Task<HeartbeatResult> LockAsync(LicenseState state, string status, string message, CancellationToken ct)
+    {
+        state.Status = status;
+        state.LastHeartbeatStatus = status;
+        state.LockedAt = DateTimeOffset.UtcNow;
+        state.LockReason = status;
+        await db.SaveChangesAsync(ct);
+        return new(false, status, message);
+    }
+
+    private static bool TryTier(string value, out LicenseTier tier) =>
+        Enum.TryParse(value, true, out tier) && Enum.IsDefined(tier);
+
+    private static LicenseTier ReadTier(string json)
+    {
+        try { return TryTier(JsonNode.Parse(json)?["tier"]?.ToString() ?? "Basic", out var tier) ? tier : LicenseTier.Basic; }
+        catch (JsonException) { return LicenseTier.Basic; }
+    }
+
     private static bool IsLocked(LicenseState state)
-        => (state.LockedAt is not null || state.FailedHeartbeatCount >= 2)
+        => (state.Status is "expired" or "invalid" or "revoked" || state.LockedAt is not null || state.FailedHeartbeatCount >= 2)
             && (state.OverrideUntil is null || state.OverrideUntil <= DateTimeOffset.UtcNow);
 
     private static LicenseValidationResult Fail(string message, LicenseValidationFailureReason reason)
@@ -303,5 +333,5 @@ public sealed class LicenseService(
 
     private static string Tail(string value) => value.Length <= 8 ? value : value[^8..];
 
-    private sealed record HeartbeatResponse(string Status, string Message);
+    private sealed record HeartbeatResponse(string Status, string Message, string? Tier = null);
 }

@@ -1,0 +1,118 @@
+name: aegiscore-client
+
+# Nocturne supplies .env securely. Required values (no defaults for secrets):
+# APP_URL=https://erp.university.example
+# TENANT_ID=<installation UUID>
+# AEGISCORE_DB_CONNECTION=<client-managed database connection string>
+# AEGISCORE_REDIS_CONNECTION=<client-managed Redis connection string>
+# DB_DIALECT=postgres  # postgres, mysql, mssql, oracle
+# LICENSE_SERVER_URL=https://<Nocturne License Authority>/heartbeat
+# LICENSE_HMAC_SECRET=<license verification secret>
+# LICENSE_HEARTBEAT_TOKEN=<authority authentication token>
+# AEGISCORE_ENCRYPTION_KEY=<32-byte base64 key>
+# AEGISCORE_PQC_KEY_BASE64=<32-byte base64 key>
+# AEGISCORE_JWT_SECRET=<signing secret>
+# GOVERNANCE_FEEDBACK_KEY_BASE64=<32-byte base64 key>
+# AEGISCORE_SETUP_TOKEN=<installation setup token>
+# APP_SECRET=<application secret>
+# AEGISCORE_PORT=8080  # bind behind university TLS ingress
+# AI_PROVIDER=ollama
+# AI_ENDPOINT=http://<university-ai-host>:11434/
+# AI_MODEL=<model>
+# AI_API_KEY=<provider credential, when required>
+# Registry credentials: docker --config .registry-auth login ghcr.io ...
+
+x-application: &application
+  image: ghcr.io/nocturne-systems/aegiscore:latest
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 35s
+  env_file: .env
+  environment: &environment
+    AEGISCORE_COMPONENT: application
+    ASPNETCORE_ENVIRONMENT: Production
+    Runtime__DemoMode: 'false'
+    Database__AutoMigrate: 'false'
+    TENANT_ID: ${TENANT_ID:?Required}
+    DB_DIALECT: ${DB_DIALECT:-postgres}
+    AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:?Required}
+    AEGISCORE_REDIS_CONNECTION: ${AEGISCORE_REDIS_CONNECTION:?Required}
+    License__ServerUrl: ${LICENSE_SERVER_URL:?Required}
+    License__HmacSecret: ${LICENSE_HMAC_SECRET:?Required}
+    License__HeartbeatServerToken: ${LICENSE_HEARTBEAT_TOKEN:?Required}
+    License__OfflineMode: 'false'
+    AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:?Required}
+    AEGISCORE_PQC_KEY_BASE64: ${AEGISCORE_PQC_KEY_BASE64:?Required}
+    AEGISCORE_JWT_SECRET: ${AEGISCORE_JWT_SECRET:?Required}
+    Governance__FeedbackEncryptionKeyBase64: ${GOVERNANCE_FEEDBACK_KEY_BASE64:?Required}
+    APP_URL: ${APP_URL:?Required}
+    APP_SECRET: ${APP_SECRET:?Required}
+    AEGISCORE_SETUP_TOKEN: ${AEGISCORE_SETUP_TOKEN:?Required}
+    AEGISCORE_SECRET_PROVIDER: FILE
+    AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
+    AEGISCORE_STORAGE_PROVIDER: local
+    AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
+    DataProtection__KeyPath: /app/config/data-protection
+  volumes:
+    - university_storage:/app/storage
+    - university_config:/app/config
+  tmpfs:
+    - /tmp
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  healthcheck:
+    test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1:8080/api/runtime/ready']
+    interval: 5s
+    timeout: 5s
+    retries: 24
+    start_period: 120s
+  labels:
+    com.centurylinklabs.watchtower.enable: 'true'
+    com.centurylinklabs.watchtower.lifecycle.pre-update: sh /app/client/pre-update.sh
+    com.centurylinklabs.watchtower.lifecycle.post-update: sh /app/client/post-update.sh
+    com.centurylinklabs.watchtower.lifecycle.post-update-timeout: '0'
+
+services:
+  app-a:
+    <<: *application
+    environment:
+      <<: *environment
+      UPDATE_PEER: app-b
+  app-b:
+    <<: *application
+    environment:
+      <<: *environment
+      UPDATE_PEER: app-a
+      Deployment__PassiveWorkers: 'true'
+  ingress:
+    image: ghcr.io/nocturne-systems/aegiscore:latest
+    environment:
+      AEGISCORE_COMPONENT: ingress
+    ports: ['127.0.0.1:${AEGISCORE_PORT:-8080}:8080']
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    labels:
+      com.centurylinklabs.watchtower.enable: 'false'
+    depends_on:
+      app-a:
+        condition: service_healthy
+      app-b:
+        condition: service_healthy
+  watchtower:
+    image: containrrr/watchtower:1.7.1
+    command: --interval 21600 --rolling-restart --enable-lifecycle-hooks --label-enable --stop-timeout 35s
+    environment:
+      DOCKER_CONFIG: /registry
+      DOCKER_API_VERSION: '1.44'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./.registry-auth:/registry:ro
+    restart: unless-stopped
+
+volumes:
+  university_storage:
+  university_config:

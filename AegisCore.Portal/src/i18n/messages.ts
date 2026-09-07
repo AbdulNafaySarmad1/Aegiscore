@@ -94,6 +94,7 @@ const en = {
     myPendingApprovals: "My pending approvals", noPendingApprovals: "No pending approvals"
   },
   academic: {
+    classes: "Class Generation & LMS",
     gradeAppeals: "Grade Appeals", gradeAppealsDesc: "Manage student grade appeals, evidence, and committee decisions",
     underReview: "Under review", submitted: "Submitted", resolved: "Resolved", pendingFaculty: "Pending faculty response",
     gradeDistributions: "Grade Distribution Analysis", plagiarism: "Plagiarism Detection",

@@ -1,0 +1,82 @@
+name: Client image release
+
+# Task 19A deliverable — the tag-triggered PRIVATE publish of the single combined
+# client image to ghcr.io/nocturne-systems/aegiscore (tags: {vX.Y.Z} and latest).
+#
+# This lives in client-release.yml, NOT release.yml, on purpose. release.yml already
+# exists as an unrelated pre-existing internal build (push-to-main -> aegiscore-api /
+# aegiscore-portal images + GitHub Release), and Task 19A requires existing CI
+# workflows to remain unchanged ("add only"). See docs/CLIENT_REGISTRY_ACCESS.md
+# ("Release automation") for the mapping and the first-publish bootstrap procedure.
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and publish (vMAJOR.MINOR.PATCH).
+        required: true
+        type: string
+      allow_bootstrap:
+        description: Skip the private-package precondition for the first maintainer publish (before the package exists).
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: client-image-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve and validate release tag
+        id: resolve
+        env:
+          RAW_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          if [[ ! "$RAW_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tag '$RAW_TAG' must match vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          echo "tag=$RAW_TAG" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Require private package
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.allow_bootstrap) }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Nocturne must provision the private package and grant this repository Actions access.
+          # First-ever publish: run this workflow via workflow_dispatch with allow_bootstrap=true
+          # after a maintainer has pushed the initial reviewed image with a maintainer credential
+          # and confirmed Private visibility (see docs/CLIENT_REGISTRY_ACCESS.md).
+          visibility=$(gh api /orgs/nocturne-systems/packages/container/aegiscore --jq .visibility)
+          test "$visibility" = private
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/nocturne-systems/aegiscore:${{ steps.resolve.outputs.tag }}
+            ghcr.io/nocturne-systems/aegiscore:latest
+          provenance: false
+          sbom: false

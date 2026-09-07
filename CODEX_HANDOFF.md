@@ -1,14 +1,14 @@
 # Codex Handoff — AegisCore Deployment Prompts
 
-Updated: 2026-09-06. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
+Updated: 2026-09-07. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
 Completed prompts: **P1–P17**.
 
-Current prompt: **None — all required prompts are implemented and verified**.
+Current prompt: **P18–P19 — implementation and verification in progress; capture artifacts outstanding**.
 
-Remaining execution order: **None**.
+Remaining execution order: finish local verification, provide the capture environment, run screenshots/demo, and validate private-client deployment.
 
 ## Completed prompt commits
 
@@ -134,4 +134,23 @@ No P17 implementation work remains.
 
 ## Exact next action
 
-None. All P1–P17 implementation, verification, Graphify refresh, commits, and pushes are complete.
+P1–P17 remain complete. P18–P19 changes are uncommitted and must not be marked complete:
+
+- User approved adding `client-release.yml` because `release.yml` already exists and existing workflows must remain unchanged. Also approved production login, missing UI routes, and redundant client deployment work.
+- Added a cookie-based Portal API proxy, production session loading, students/admissions/reports/settings/dashboard routes, grade submission limited to edited cells, and an admin geolocation check-in control.
+- Extended the existing Playwright config with screenshot/demo modes. See `docs/CAPTURE_SUITE.md` for environment inputs and real fixture requirements. No role credentials or APP_URL were available; `screenshots/` and `recordings/` have not been generated.
+- Current wizard order remains identity (including branding/templates), database, SSO, permissions, AI, import, review. This differs from the requested conceptual ordering; captures faithfully use the implemented seven-step wizard.
+- Added `docker-compose.client.yml`, combined runtime packaging, health-checked ingress, two application replicas, Watchtower peer checks/draining/readiness waits, and client registry/deployment docs. Database/Redis/TLS are client-owned prerequisites prepared by Nocturne; schema changes and ingress maintenance are not automatically orchestrated by Watchtower.
+- Licensing now validates on startup and every 24 hours, isolates installation lookup, restores valid status, consumes Basic/Standard/Premium tiers, and gates AI/proctoring/plagiarism. Middleware permits reads during lockdown; an EF interceptor blocks business SaveChanges from requests and background work. Existing offline validation/overrides are preserved.
+- Final backend verification: 638 passed / 1 skipped / 0 failed (`dotnet test AegisCore.slnx -c Release --no-build -v quiet`); focused licensing 18 passed. Portal typecheck and lint pass. Client compose parses, has zero build directives, and existing workflows have no diff. DEPLOY.md prints on one A4 page at 11pt.
+- Final Docker image build: PASS (`aegiscore-client:verification`). Image runs as non-root, contains API and standalone Portal, and inspection found no first-party C# source, PDBs, source maps, or installed .NET SDK. HAProxy configuration validates. Packaged Portal smoke checks: login 200, readiness without backend 503, cross-origin mutation 403. The isolated smoke container was removed.
+- Final combined browser check: PASS, 10/10 with no retries (`portal-auth`, `keyboard-accessibility`, `grade-entry`, CLI `--timeout=120000`). The preceding run passed 9/10 but cold dashboard compilation exceeded 60 seconds on this 4 GB host; the final dashboard check completed in 2.6 seconds. This is isolated mocked UI regression evidence, not the requested real-role capture evidence.
+- Graphify code refresh: PASS, 26,830 nodes, 52,085 edges, 1,332 communities. Existing community labels may need a separate semantic relabel; no LLM relabel was performed. Final `git diff --check` passes.
+- Do not claim successful screenshots, a sub-four-minute demo, private registry publication/pull, or uninterrupted live updates until those artifacts/checks actually exist. No registry publication or repository push has been performed.
+
+### P18–P19 follow-up fixes (session 01S3NT3haQuhMacUnpd7XTfe)
+
+- `19A` — `release.yml` stays untouched (pre-existing push-to-`main` internal build: `aegiscore-api`/`aegiscore-portal` images + GitHub Release). The `v*.*.*` tag publisher is `.github/workflows/client-release.yml`, now hardened: header comment on the deliberate rename, `workflow_dispatch` with a regex-validated `tag` input and an `allow_bootstrap` boolean, one tag-resolution step feeding `:{tag}` + `:latest`, and the "require private package" guard skipped only when `allow_bootstrap=true`. `docs/CLIENT_REGISTRY_ACCESS.md` has a new "Release automation" section mapping this file to 19A and the first-publish bootstrap.
+- `18A/18B` routes — `/grades` and `/timetable` have no page root; `next.config.ts` already redirects them to `/examinations` and `/classes` (now commented as intentional, kept in sync with the suite `aliases` map). `screenshots.spec.ts` now positively asserts the alias redirect and records it in an `Alias` column in `INDEX.md`; `demo.spec.ts` asserts `/grades → /examinations` before grade entry (flow otherwise unchanged). `fixture-server.mjs` needed no change — the alias target pages' on-load endpoints are all already stubbed.
+- Synthetic capture quarantined — `CAPTURE_MODE=visual-demo` (`visual-demo.spec.ts`) now writes only to `screenshots/_synthetic/` and `recordings/_synthetic/` (`aegiscore-demo-synthetic.mp4`); it no longer overwrites `screenshots/INDEX.md`, `recordings/aegiscore-demo.*`, `run.json`, or `README.md`. `docs/CAPTURE_SUITE.md` documents the alias behaviour and the synthetic/real split. Stale local `screenshots/*` and `recordings/*` artifacts (incl. the old `aegiscore-demo.mp4` and `aegiscore-student-lifecycle.webm`) were deleted; both dirs are gitignored.
+- Verification: `client-release.yml` YAML parses; `ci.yml`/`release.yml`/`deploy.yml`/`deploy-cloud.yml` have zero diff; `docker-compose.client.yml` still has zero `build:` directives; no new backend `.cs` changes; Portal `npm run typecheck` passes; `playwright test --list` resolves for `screenshots`, `demo`, and `visual-demo` modes. The full synthetic `visual-demo` e2e and the real role-credential capture run were not executed here.

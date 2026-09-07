@@ -163,9 +163,11 @@ public abstract class DbDialectAdapterBase : IDbDialectAdapter
     public IServiceCollection AddDbProvider(IServiceCollection services, string connectionString)
     {
         services.AddScoped<TenantSessionInterceptor>();
+        services.AddScoped<AegisCore.Infrastructure.Licensing.LicenseWriteInterceptor>();
         services.AddDbContext<AegisDbContext>((provider, options) =>
         {
             ConfigureOptions(options, connectionString);
+            options.AddInterceptors(provider.GetRequiredService<AegisCore.Infrastructure.Licensing.LicenseWriteInterceptor>());
             if (Dialect == DbDialects.Postgres)
                 options.AddInterceptors(provider.GetRequiredService<TenantSessionInterceptor>());
         });

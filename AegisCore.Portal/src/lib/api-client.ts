@@ -8,6 +8,8 @@ export class ApiError extends Error {
   }
 }
 
+let refreshing: Promise<boolean> | undefined;
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const setupToken = typeof window !== "undefined" && (path.startsWith("/api/wizard") || path.startsWith("/api/setup"))
     ? window.sessionStorage.getItem("aegiscore_setup_token")
@@ -15,11 +17,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (setupToken) headers.set("X-Setup-Token", setupToken);
   if (!(init?.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  const response = await fetch(path, {
+  let response = await fetch(path, {
     credentials: "include",
     ...init,
     headers,
   });
+  if (response.status === 401 && !path.startsWith("/api/auth/")) {
+    refreshing ??= fetch("/api/auth/refresh", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: "{}" })
+      .then(result => result.ok).catch(() => false).finally(() => { refreshing = undefined; });
+    if (await refreshing) response = await fetch(path, { credentials: "include", ...init, headers });
+  }
   const contentType = response.headers.get("content-type") ?? "";
   const payload = contentType.includes("json")
     ? await response.json()

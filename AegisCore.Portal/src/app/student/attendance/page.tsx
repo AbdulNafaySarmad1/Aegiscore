@@ -5,19 +5,9 @@ import { AppShell } from "@/components/layout/AppShell";
 import { CheckInButton } from "@/components/attendance/CheckInButton";
 import { apiGet } from "@/lib/api-client";
 import { ClipboardCheck } from "lucide-react";
+import { loadSession } from "@/lib/session";
 
 type Course = { id: string; code: string | null; title: string };
-type DemoSession = { label?: string; email?: string };
-
-function currentStudentId() {
-  if (typeof window === "undefined") return "";
-  try {
-    const session = JSON.parse(localStorage.getItem("aegiscore_demo_session") ?? "{}") as DemoSession;
-    return session.label === "Student" ? "STU-2024-001" : session.email ?? "";
-  } catch {
-    return "";
-  }
-}
 
 export default function StudentAttendancePage() {
   const [studentId, setStudentId] = useState("");
@@ -25,7 +15,7 @@ export default function StudentAttendancePage() {
   const [courseId, setCourseId] = useState("");
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    Promise.resolve().then(() => setStudentId(currentStudentId()));
+    loadSession().then(session => setStudentId(session.studentId ?? "")).catch(() => setLoading(false));
   }, []);
 
 

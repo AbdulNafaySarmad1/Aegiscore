@@ -1,4 +1,5 @@
 "use client";
+import { loadSession, logout } from "@/lib/session";
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -34,23 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("aegiscore_demo_session");
-      if (raw) {
-        const acc = JSON.parse(raw);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
-        setSession({
-          userId: acc.email,
-          tenantId: "iobm-demo-tenant",
-          studentId: acc.label === "Student" ? "STU-2024-001" : null,
-          departmentId: "CS-DEPT-001",
-          name: acc.desc,
-          roles: [acc.label],
-        });
-      } else {
-        window.location.href = "/login";
-      }
-    } catch { window.location.href = "/login"; }
+    loadSession().then(setSession).catch(() => window.location.assign("/login"));
   }, []);
   useEffect(() => { document.documentElement.dataset.theme = dark ? "dark" : "light"; }, [dark]);
   useEffect(() => {
@@ -94,6 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="sidebar-nav" aria-label="Primary navigation">
+          <button type="button" onClick={() => void logout()}><LogOut size={18} aria-hidden="true" /> Sign out</button>
           {grouped.map(([domain, items]) => (
             <div key={domain} className="sidebar-nav-group">
               {!collapsed && <div className="sidebar-nav-label" data-domain={domain}>{domain}</div>}

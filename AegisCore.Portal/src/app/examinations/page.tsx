@@ -18,6 +18,7 @@ export default function GradeEntry() {
   const [students, setStudents] = useState<Student[]>([]);
   const [marks, setMarks] = useState<Record<string, Record<string, number>>>({});
   const [saving, setSaving] = useState(false);
+  const [edited, setEdited] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +40,12 @@ export default function GradeEntry() {
         }
       }
       setMarks(initial);
+      setEdited(new Set());
     });
   }, [selectedCourse]);
 
   const setMark = (enrollmentId: string, componentId: string, value: number) => {
+    setEdited(previous => new Set(previous).add(`${enrollmentId}:${componentId}`));
     setMarks(prev => ({
       ...prev,
       [enrollmentId]: { ...prev[enrollmentId], [componentId]: Math.max(0, Math.min(value, scheme?.components.find(c=>c.id===componentId)?.totalMarks ?? 100)) }
@@ -55,6 +58,7 @@ export default function GradeEntry() {
     try {
       for (const enrollmentId of Object.keys(marks)) {
         for (const componentId of Object.keys(marks[enrollmentId] ?? {})) {
+          if (!edited.has(`${enrollmentId}:${componentId}`)) continue;
           await apiPut("/api/examination/marks", {
             courseId: selectedCourse,
             studentId: students.find(s => s.enrollmentId === enrollmentId)?.studentId ?? "",
@@ -65,6 +69,7 @@ export default function GradeEntry() {
         }
       }
       setMessage("All marks submitted successfully.");
+      setEdited(new Set());
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Failed to submit marks.");
     } finally { setSaving(false); }

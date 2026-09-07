@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api-client";
 import { PersonalityModeProvider } from "@/lib/personality-context";
+import { loadSession } from "@/lib/session";
 
 type Session = { userId: string };
 
@@ -9,12 +10,7 @@ export function PersonalityLayoutWrapper({ children }: { children: React.ReactNo
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("aegiscore_demo_session");
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
-      if (raw) { const acc = JSON.parse(raw); setUserId(acc.email); }
-      else { setUserId(null); }
-    } catch { setUserId(null); }
+    loadSession().then(session => setUserId(session.userId)).catch(() => setUserId(null));
   }, []);
 
   return (

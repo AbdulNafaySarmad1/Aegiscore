@@ -1,4 +1,5 @@
 "use client";
+import { loadSession } from "@/lib/session";
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -11,21 +12,7 @@ type Session = { userId: string; tenantId: string; studentId: string | null; dep
 export default function StudentProfile() {
   const [session, setSession] = useState<Session | null>(null);
 
-  useEffect(() => { try {
-      const raw = localStorage.getItem("aegiscore_demo_session");
-      if (raw) {
-        const acc = JSON.parse(raw);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session hydration.
-        setSession({
-          userId: acc.email,
-          tenantId: "iobm-demo-tenant",
-          studentId: acc.role === "Student" ? "STU-2024-001" : null,
-          departmentId: "CS-DEPT-001",
-          name: acc.name,
-          roles: [acc.role],
-        });
-      } else { window.location.href = "/login"; }
-    } catch { window.location.href = "/login"; } }, []);
+  useEffect(() => { loadSession().then(setSession).catch(() => window.location.assign("/login")); }, []);
 
   const fields = [
     { label: "Full Name", value: session?.name ?? "--", icon: UserRound },
