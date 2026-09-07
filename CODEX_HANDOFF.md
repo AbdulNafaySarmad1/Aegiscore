@@ -1,14 +1,19 @@
 # Codex Handoff — AegisCore Deployment Prompts
 
-Updated: 2026-09-07. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
+Updated: 2026-09-08. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 
 ## Prompt status
 
 Completed prompts: **P1–P17**.
 
-Current prompt: **P18–P19 — implementation and verification in progress; capture artifacts outstanding**.
+Current prompt: **P18–P19 — code complete and pushed (`bcf49bf0`); the 18A/18B capture
+artifacts are the only outstanding item and are blocked on a live install with real
+role credentials.**
 
-Remaining execution order: finish local verification, provide the capture environment, run screenshots/demo, and validate private-client deployment.
+Remaining execution order: run `capture:screenshots` + `capture:demo` against a live
+`APP_URL` with `ADMIN/FACULTY/STUDENT_*` + `AEGISCORE_SETUP_TOKEN` +
+`DEMO_COURSE_ID`/`DEMO_STUDENT_NUMBER`/`DEMO_MARKS` (see `docs/CAPTURE_SUITE.md`), then
+validate the private-client deployment against the published image.
 
 ## Completed prompt commits
 
@@ -146,7 +151,7 @@ P1–P17 remain complete. P18–P19 changes are uncommitted and must not be mark
 - Final Docker image build: PASS (`aegiscore-client:verification`). Image runs as non-root, contains API and standalone Portal, and inspection found no first-party C# source, PDBs, source maps, or installed .NET SDK. HAProxy configuration validates. Packaged Portal smoke checks: login 200, readiness without backend 503, cross-origin mutation 403. The isolated smoke container was removed.
 - Final combined browser check: PASS, 10/10 with no retries (`portal-auth`, `keyboard-accessibility`, `grade-entry`, CLI `--timeout=120000`). The preceding run passed 9/10 but cold dashboard compilation exceeded 60 seconds on this 4 GB host; the final dashboard check completed in 2.6 seconds. This is isolated mocked UI regression evidence, not the requested real-role capture evidence.
 - Graphify code refresh: PASS, 26,830 nodes, 52,085 edges, 1,332 communities. Existing community labels may need a separate semantic relabel; no LLM relabel was performed. Final `git diff --check` passes.
-- Do not claim successful screenshots, a sub-four-minute demo, private registry publication/pull, or uninterrupted live updates until those artifacts/checks actually exist. No registry publication or repository push has been performed.
+- Do not claim successful screenshots, a sub-four-minute demo, private registry publication/pull, or uninterrupted live updates until those artifacts/checks actually exist. As of `bcf49bf0` the P18–P19 code is pushed to `origin/main`; no registry publication (tagged image build/push) has been performed.
 
 ### P18–P19 follow-up fixes (session 01S3NT3haQuhMacUnpd7XTfe)
 
@@ -154,3 +159,23 @@ P1–P17 remain complete. P18–P19 changes are uncommitted and must not be mark
 - `18A/18B` routes — `/grades` and `/timetable` have no page root; `next.config.ts` already redirects them to `/examinations` and `/classes` (now commented as intentional, kept in sync with the suite `aliases` map). `screenshots.spec.ts` now positively asserts the alias redirect and records it in an `Alias` column in `INDEX.md`; `demo.spec.ts` asserts `/grades → /examinations` before grade entry (flow otherwise unchanged). `fixture-server.mjs` needed no change — the alias target pages' on-load endpoints are all already stubbed.
 - Synthetic capture quarantined — `CAPTURE_MODE=visual-demo` (`visual-demo.spec.ts`) now writes only to `screenshots/_synthetic/` and `recordings/_synthetic/` (`aegiscore-demo-synthetic.mp4`); it no longer overwrites `screenshots/INDEX.md`, `recordings/aegiscore-demo.*`, `run.json`, or `README.md`. `docs/CAPTURE_SUITE.md` documents the alias behaviour and the synthetic/real split. Stale local `screenshots/*` and `recordings/*` artifacts (incl. the old `aegiscore-demo.mp4` and `aegiscore-student-lifecycle.webm`) were deleted; both dirs are gitignored.
 - Verification: `client-release.yml` YAML parses; `ci.yml`/`release.yml`/`deploy.yml`/`deploy-cloud.yml` have zero diff; `docker-compose.client.yml` still has zero `build:` directives; no new backend `.cs` changes; Portal `npm run typecheck` passes; `playwright test --list` resolves for `screenshots`, `demo`, and `visual-demo` modes. The full synthetic `visual-demo` e2e and the real role-credential capture run were not executed here.
+- Committed and pushed: `bcf49bf0` `feat(p18-p19): capture suite, closed-source client delivery, license tiers` → `origin/main` (`f91b2ba4..bcf49bf0`). 65 files.
+- Graphify refreshed with `graphify update .`: **26,862 nodes · 52,114 edges · 1,369 communities**, built from `bcf49bf0`, backup written to `graphify-out/2026-09-08/`. 281 communities were auto-renamed by hub; `graphify label` (LLM relabel) was not run — no `GEMINI_API_KEY`/`GOOGLE_API_KEY` available. This handoff-doc refresh follows in a second commit.
+
+### Completion-checklist status (P18–P19)
+
+| Item | Status |
+| --- | --- |
+| CODEX_HANDOFF.md read before code | done |
+| Graphify queried + summarised | done |
+| All paths verified before use | done |
+| 18A screenshots `screenshots/{role}/{page}.png` (3 roles × 10+ pages) | **blocked** — suite complete (`tests/capture/screenshots.spec.ts`); needs live `APP_URL` + `ADMIN/FACULTY/STUDENT_*`; run externally ordered |
+| 18A `screenshots/INDEX.md` | **blocked** — generated by the same run |
+| 18B `recordings/aegiscore-demo.webm` (<4 min) | **blocked** — suite complete (`tests/capture/demo.spec.ts`); same prerequisites |
+| 19A tag-triggered release workflow | done **as `client-release.yml`** (documented deviation; `release.yml` frozen per "add only") |
+| 19B `docs/CLIENT_REGISTRY_ACCESS.md` | done |
+| 19C `docker-compose.client.yml` zero `build:` | done (grep-verified) |
+| 19D heartbeat wired (not assumed) + `LicenseTier` | done — `ProductionServicesExtensions.cs:247`, `LicenseService.cs` (heartbeat URL + tier parse), `LicenseLockoutMiddleware.cs` (premium gate), `LicenseContracts.cs` (`LicenseTier` enum) |
+| 19E `DEPLOY.md` one page | done |
+| No existing CI workflows modified | done (zero diff on `ci`/`release`/`deploy`/`deploy-cloud`) |
+| No dev services / source mounts in client compose | done |
