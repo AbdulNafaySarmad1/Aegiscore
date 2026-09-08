@@ -7,12 +7,11 @@ Updated: 2026-09-08. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 Completed prompts: **P1–P17**. **P18–P19** code complete and pushed (`bcf49bf0`); the
 18A/18B capture artifacts remain blocked on a live install with real role credentials.
 
-Current prompt: **P20 — Applicant Portal — code complete (see "P20 verified
-implementation" below). P21 (AI Test Engine) and P22 (Post-Admission Migration) are
-planned and not yet started.**
+Current prompt: **P21 — AI Test Engine — code complete (see "P21 verified
+implementation" below). P22 (Post-Admission Migration) is planned and not yet started.**
 
-Remaining execution order: implement P21, then P22 (build/test/graphify/commit between
-each). Separately, still outstanding from P18–P19: run `capture:screenshots` +
+Remaining execution order: implement P22 (build/test/graphify/commit). Separately, still
+outstanding from P18–P19: run `capture:screenshots` +
 `capture:demo` against a live `APP_URL` with `ADMIN/FACULTY/STUDENT_*` +
 `AEGISCORE_SETUP_TOKEN` + `DEMO_COURSE_ID`/`DEMO_STUDENT_NUMBER`/`DEMO_MARKS` (see
 `docs/CAPTURE_SUITE.md`), then validate the private-client deployment.
@@ -74,6 +73,62 @@ each). Separately, still outstanding from P18–P19: run `capture:screenshots` +
 - Verification: `dotnet build AegisCore.slnx -c Release` PASS; `dotnet test` **645
   passed / 1 skipped / 0 failed**; `has-pending-model-changes` clean ×4 dialects;
   Portal `tsc --noEmit` + `eslint` clean; `next build` compiles the new routes.
+
+## P21 verified implementation
+
+- Entities (`AegisCore.Domain/Entities/AdmissionTestEntities.cs`, all `ITenantScoped`):
+  `AdmissionSubject` (admin master list — no subject hardcoded), `ProgramTestProfile` +
+  `ProgramTestSubject` (per intake+program: subjects, question count, marks each, pass
+  mark, time limit), `SyllabusDocument` (uploaded PDF + `ExtractedText` + `SyllabusOcrStatus`),
+  `QuestionGenerationPrompt` (DB-stored, admin-editable LLM system prompt, seeded from
+  `AdmissionQuestionPrompt.Default` — the exact brief text), `AdmissionQuestion`
+  (OptionA-D + `CorrectOption` + `SourceChunk` + `AdmissionQuestionStatus` Draft/Approved/
+  Rejected — named to avoid the legacy `QuestionBanks` table), `ApplicantTest`
+  (`PaperJson` = per-applicant shuffled option order, `PaperHash` = SHA-256 of the
+  ordered question ids, `ResponsesJson`, `Score`, `Passed`, `ApplicantTestStatus`).
+- Migration `AddAdmissionTestEngine` in all four assemblies (pure additive — the three
+  new enum types were already declared by P20's migration); `has-pending-model-changes`
+  clean for postgres/mysql/mssql/oracle.
+- Syllabus OCR: `ISyllabusOcrService`/`SyllabusOcrService` calls the aegiscore-clip
+  sidecar `POST /ocr` (`CLIP_SERVICE_URL`); digital text with a Tesseract fallback,
+  entirely in the sidecar — the existing `IDocumentOcrService` is untouched.
+- Question generation: `AdmissionQuestionGenerator` uses the tenant's configured LLM via
+  the existing `LlmProviderFactory.GetLlmProvider(tenantId)` (no new AI config).
+  `{N}` in the stored prompt is substituted with the count. `AdmissionQuestionGenerator.Parse`
+  is a tested static that tolerates markdown fences and both list- and letter-keyed JSON
+  shapes. `QuestionBankService.IngestSyllabusAsync` stores the PDF via `IStorageProvider`,
+  OCRs, chunks (~3k chars), generates, and inserts **Draft** questions.
+  `/admin/admissions/question-bank` approves/rejects/edits; **only Approved questions
+  enter live papers**.
+- Randomized paper: `TestSchedulingService.ScheduleAsync` pulls `QuestionCount` random
+  Approved questions per subject slot (422-style error when the pool is short), shuffles
+  option order per applicant (Fisher-Yates over A-D, `RandomNumberGenerator`), interleaves
+  subjects, computes `PaperHash`, persists `ApplicantTest` (Scheduled), and moves the
+  applicant to `TestScheduled`.
+- Terminal: `/terminal` — anonymous kiosk page (tenant from `IApplicantTenantResolver`),
+  full-screen via the Fullscreen API with an exit warning, one question at a time, no
+  back navigation, server-authoritative countdown, **auto-submit on expiry**. Options
+  carry their true key in shuffled display order; server scores against `CorrectOption`,
+  stores score/pass, and returns **pass/fail only**. Server also finalizes if an answer
+  arrives past the deadline. Endpoints `POST /api/terminal/start|{id}/answer|{id}/submit`.
+- Proctor: `/admin/admissions/proctor` + `GET /api/admissions/proctor` — live in-progress
+  list (no questions/answers), force-submit, flag. `TestScoring.FinalizeAsync` is the
+  shared scoring path.
+- Permissions: reuses `Admissions` resource; new actions `Configure` and
+  `ApproveQuestions` and `Proctor` (tenant-granted via dynamic RBAC — no hardcoded
+  catalog). All staff endpoints `[RequirePermission("Admissions", …)]`; every new
+  request DTO has a `SecureValidator<T>`.
+- Portal: `/admin/admissions/test-config` (subjects, per-program profile, syllabus
+  upload, prompt editor), `/admin/admissions/question-bank`, `/admin/admissions/proctor`,
+  and `/terminal`.
+- Tests: `AegisCore.Tests/AdmissionTestEngineTests.cs` (6) — per-program subject
+  isolation (MBBS ≠ BCS), approved-only sampling + short-pool failure, terminal scoring +
+  auto-submit + pass/fail-only, start rejected after the window (status → Expired), LLM
+  JSON parsing (fenced / varied shapes), ingest saves Draft questions from the configured
+  prompt.
+- Verification: `dotnet build AegisCore.slnx -c Release` PASS; `dotnet test` **651
+  passed / 1 skipped / 0 failed**; `has-pending-model-changes` clean ×4; Portal `eslint`
+  clean and `next build` compiles `/terminal` + the six `/admin/admissions/*` routes.
 
 ## Completed prompt commits
 
