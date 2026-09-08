@@ -1,3 +1,4 @@
+using MediatR;
 using AegisCore.Infrastructure.AI;
 using AegisCore.Infrastructure.Admissions;
 using AegisCore.Infrastructure.ApiGateway;
@@ -104,6 +105,18 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Admissions.ITestSchedulingService, TestSchedulingService>();
         services.AddScoped<AegisCore.Application.Admissions.ITestTerminalService, TestTerminalService>();
         services.AddScoped<AegisCore.Application.Admissions.ITestProctorService, TestProctorService>();
+
+        // P22 Post-Admission Migration
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(InfrastructureServiceExtensions).Assembly));
+        services.AddSingleton<AegisCore.Infrastructure.Admissions.IEmailCredentialProtector, AegisCore.Infrastructure.Admissions.EmailCredentialProtector>();
+        services.AddScoped<AegisCore.Application.Admissions.IRollNumberService, AegisCore.Infrastructure.Admissions.RollNumberService>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionDecisionService, AegisCore.Infrastructure.Admissions.AdmissionDecisionService>();
+        services.AddScoped<AegisCore.Application.Admissions.IEmailProvisioningConfigService, AegisCore.Infrastructure.Admissions.EmailProvisioningConfigService>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionPipelineService, AegisCore.Infrastructure.Admissions.AdmissionPipelineService>();
+        services.AddScoped<AegisCore.Application.Admissions.IInstitutionalEmailProvisionerFactory, AegisCore.Infrastructure.Admissions.InstitutionalEmailProvisionerFactory>();
+        services.AddScoped<AegisCore.Application.Admissions.IInstitutionalEmailProvisioner, AegisCore.Infrastructure.Admissions.ManualEmailProvisioner>();
+        services.AddScoped<AegisCore.Application.Admissions.IInstitutionalEmailProvisioner, AegisCore.Infrastructure.Admissions.GoogleWorkspaceEmailProvisioner>();
+        services.AddScoped<AegisCore.Application.Admissions.IInstitutionalEmailProvisioner, AegisCore.Infrastructure.Admissions.Microsoft365EmailProvisioner>();
         services.AddScoped<AegisCore.Application.Examination.IGradingService, GradingService>();
         services.AddScoped<AegisCore.Application.Examination.ITranscriptService, TranscriptService>();
         services.AddScoped<AegisCore.Application.Obe.ICisExtractionService, CisExtractionService>();

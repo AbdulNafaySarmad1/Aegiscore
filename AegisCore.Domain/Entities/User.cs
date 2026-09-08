@@ -17,6 +17,13 @@ public class User : ITenantScoped
     [MaxLength(300)]
     public string Email { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Personal recovery address. After admission migration the institutional email becomes
+    /// the primary login and the applicant's personal email is retained here for password reset only.
+    /// </summary>
+    [MaxLength(320)]
+    public string? RecoveryEmail { get; set; }
+
     [MaxLength(2000)]
     public string? PasswordHash { get; set; }
 

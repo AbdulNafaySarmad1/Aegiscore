@@ -8028,6 +8028,39 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("ElectiveSlots");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.EmailProvisioningConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CredentialsCipher")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DomainName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("EmailProvisioningConfigs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.EmergencyAlert", b =>
                 {
                     b.Property<Guid>("Id")
@@ -20531,6 +20564,36 @@ namespace AegisCore.Infrastructure.Migrations
                     b.ToTable("ProgramEducationalObjectives");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramIntakeSequence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("NextValue")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId")
+                        .IsUnique();
+
+                    b.ToTable("ProgramIntakeSequences");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.ProgramOutcome", b =>
                 {
                     b.Property<Guid>("Id")
@@ -23417,6 +23480,13 @@ namespace AegisCore.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AdmissionApplicantProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApplicantId")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
                     b.Property<Guid>("BatchId")
                         .HasColumnType("uuid");
 
@@ -23440,6 +23510,10 @@ namespace AegisCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RollNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -25518,6 +25592,10 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("RecoveryEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
 
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(500)

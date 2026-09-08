@@ -7866,6 +7866,40 @@ namespace AegisCore.Migrations.MySql.Migrations
                     b.ToTable("ElectiveSlots");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.EmailProvisioningConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CredentialsCipher")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DomainName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("EmailProvisioningConfigs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.EmergencyAlert", b =>
                 {
                     b.Property<Guid>("Id")
@@ -20460,6 +20494,36 @@ namespace AegisCore.Migrations.MySql.Migrations
                     b.ToTable("ProgramEducationalObjectives");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramIntakeSequence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("NextValue")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId")
+                        .IsUnique();
+
+                    b.ToTable("ProgramIntakeSequences");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.ProgramOutcome", b =>
                 {
                     b.Property<Guid>("Id")
@@ -23382,6 +23446,13 @@ namespace AegisCore.Migrations.MySql.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("AdmissionApplicantProfileId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ApplicantId")
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)");
+
                     b.Property<Guid>("BatchId")
                         .HasColumnType("char(36)");
 
@@ -23406,6 +23477,10 @@ namespace AegisCore.Migrations.MySql.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("RollNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("char(36)");
@@ -25506,6 +25581,10 @@ namespace AegisCore.Migrations.MySql.Migrations
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("RecoveryEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("varchar(320)");
 
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(500)

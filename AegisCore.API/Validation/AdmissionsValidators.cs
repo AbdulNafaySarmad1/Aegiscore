@@ -186,3 +186,56 @@ public sealed class TerminalAnswerRequestValidator : SecureValidator<TestTermina
             .WithMessage("Option must be A, B, C or D.");
     }
 }
+
+// ---- P22 Post-Admission Migration ----
+
+public sealed class AdmitRequestValidator : SecureValidator<AdmissionsMigrationController.AdmitRequest>
+{
+    public AdmitRequestValidator()
+        => RuleFor(x => x.ManualInstitutionalEmail).EmailAddress().MaximumLength(320)
+            .When(x => !string.IsNullOrWhiteSpace(x.ManualInstitutionalEmail));
+}
+
+public sealed class PipelineMoveRequestValidator : SecureValidator<AdmissionsMigrationController.PipelineMoveRequest>
+{
+    public PipelineMoveRequestValidator()
+    {
+        RuleFor(x => x.ApplicantId).NotEmpty();
+        RuleFor(x => x.Column).NotEmpty()
+            .Must(c => AegisCore.Infrastructure.Admissions.AdmissionPipelineService.BoardColumns.Contains(c))
+            .WithMessage("Unknown pipeline column.");
+        RuleFor(x => x.ManualInstitutionalEmail).EmailAddress().MaximumLength(320)
+            .When(x => !string.IsNullOrWhiteSpace(x.ManualInstitutionalEmail));
+    }
+}
+
+public sealed class PipelineBulkMoveRequestValidator : SecureValidator<AdmissionsMigrationController.PipelineBulkMoveRequest>
+{
+    public PipelineBulkMoveRequestValidator()
+    {
+        RuleFor(x => x.ApplicantIds).NotEmpty().Must(ids => ids.Count <= 500)
+            .WithMessage("A bulk move is limited to 500 applicants.");
+        RuleFor(x => x.Column).NotEmpty()
+            .Must(c => AegisCore.Infrastructure.Admissions.AdmissionPipelineService.BoardColumns.Contains(c))
+            .WithMessage("Unknown pipeline column.");
+    }
+}
+
+public sealed class EmailProvisioningConfigInputValidator : SecureValidator<EmailProvisioningConfigInput>
+{
+    public EmailProvisioningConfigInputValidator()
+    {
+        RuleFor(x => x.Mode).IsInEnum();
+        RuleFor(x => x.DomainName).NotEmpty().MaximumLength(255)
+            .When(x => x.Mode != Domain.EmailProvisioningMode.Manual)
+            .WithMessage("Google Workspace and Microsoft 365 modes require a domain name.");
+        RuleFor(x => x.CredentialsJson).Must(BeJson!).When(x => !string.IsNullOrWhiteSpace(x.CredentialsJson))
+            .WithMessage("Credentials must be a valid JSON document.");
+    }
+
+    private static bool BeJson(string value)
+    {
+        try { using var _ = System.Text.Json.JsonDocument.Parse(value); return true; }
+        catch { return false; }
+    }
+}

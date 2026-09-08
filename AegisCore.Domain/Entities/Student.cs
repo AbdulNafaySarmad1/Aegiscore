@@ -21,6 +21,16 @@ public class Student : ITenantScoped
     [MaxLength(50)]
     public string? UniversityId { get; set; }
 
+    /// <summary>Assigned roll number: {YEAR}{SEM}-{PROGRAM_CODE}-{SEQUENCE}, e.g. 2025F-BCS-181.</summary>
+    [MaxLength(50)]
+    public string? RollNumber { get; set; }
+
+    /// <summary>The Applicant ID this student was admitted under. Retained for audit — never deleted.</summary>
+    [MaxLength(40)]
+    public string? ApplicantId { get; set; }
+
+    public Guid? AdmissionApplicantProfileId { get; set; }
+
     public EnrollmentStatus EnrollmentStatus { get; init; }
     public bool DirectoryOptOut { get; set; }
 

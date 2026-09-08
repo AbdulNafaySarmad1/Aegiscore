@@ -1788,6 +1788,10 @@ public class AegisDbContext : DbContext
     public DbSet<QuestionGenerationPrompt> QuestionGenerationPrompts => Set<QuestionGenerationPrompt>();
     public DbSet<AdmissionQuestion> AdmissionQuestions => Set<AdmissionQuestion>();
     public DbSet<ApplicantTest> ApplicantTests => Set<ApplicantTest>();
+
+    // P22 Post-Admission Migration
+    public DbSet<ProgramIntakeSequence> ProgramIntakeSequences => Set<ProgramIntakeSequence>();
+    public DbSet<EmailProvisioningConfig> EmailProvisioningConfigs => Set<EmailProvisioningConfig>();
     public DbSet<AssessmentScheme> AssessmentSchemes => Set<AssessmentScheme>();
     public DbSet<AssessmentComponent> AssessmentComponents => Set<AssessmentComponent>();
     public DbSet<CourseMark> CourseMarks => Set<CourseMark>();
@@ -3139,6 +3143,15 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.ApplicantId }).IsUnique();
             entity.HasIndex(e => new { e.TenantId, e.Status });
         });
+
+        // P22 Post-Admission Migration
+        modelBuilder.Entity<ProgramIntakeSequence>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.IntakeId, e.ProgramId }).IsUnique();
+            entity.Property(e => e.ConcurrencyStamp).IsConcurrencyToken();
+        });
+        modelBuilder.Entity<EmailProvisioningConfig>(entity =>
+            entity.HasIndex(e => e.TenantId).IsUnique());
 
         // Department
         modelBuilder.Entity<Department>(entity =>

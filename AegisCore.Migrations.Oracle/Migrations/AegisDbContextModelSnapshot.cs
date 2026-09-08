@@ -7874,6 +7874,40 @@ namespace AegisCore.Migrations.Oracle.Migrations
                     b.ToTable("ElectiveSlots");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.EmailProvisioningConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("CredentialsCipher")
+                        .HasColumnType("CLOB");
+
+                    b.Property<string>("DomainName")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("RAW(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("EmailProvisioningConfigs");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.EmergencyAlert", b =>
                 {
                     b.Property<Guid>("Id")
@@ -20477,6 +20511,36 @@ namespace AegisCore.Migrations.Oracle.Migrations
                     b.ToTable("ProgramEducationalObjectives");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramIntakeSequence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<Guid>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<int>("NextValue")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("RAW(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId")
+                        .IsUnique();
+
+                    b.ToTable("ProgramIntakeSequences");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.ProgramOutcome", b =>
                 {
                     b.Property<Guid>("Id")
@@ -23402,6 +23466,13 @@ namespace AegisCore.Migrations.Oracle.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("RAW(16)");
 
+                    b.Property<Guid?>("AdmissionApplicantProfileId")
+                        .HasColumnType("RAW(16)");
+
+                    b.Property<string>("ApplicantId")
+                        .HasMaxLength(40)
+                        .HasColumnType("NVARCHAR2(40)");
+
                     b.Property<Guid>("BatchId")
                         .HasColumnType("RAW(16)");
 
@@ -23426,6 +23497,10 @@ namespace AegisCore.Migrations.Oracle.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("NVARCHAR2(100)");
+
+                    b.Property<string>("RollNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("RAW(16)");
@@ -25526,6 +25601,10 @@ namespace AegisCore.Migrations.Oracle.Migrations
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(2000)
                         .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<string>("RecoveryEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("NVARCHAR2(320)");
 
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(500)

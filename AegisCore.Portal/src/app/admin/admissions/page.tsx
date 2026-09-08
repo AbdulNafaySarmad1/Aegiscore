@@ -64,7 +64,11 @@ export default function AdmissionsAdminPage() {
     <div className="content-page">
       <div className="page-header">
         <div><h1>Admissions</h1><p>{rows.length} applicants</p></div>
-        <Link className="btn btn-secondary" href="/admin/admissions/document-config">Configure intakes &amp; documents</Link>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link className="btn btn-secondary" href="/admin/admissions/pipeline">Pipeline board</Link>
+          <Link className="btn btn-secondary" href="/admin/admissions/test-config">Test config</Link>
+          <Link className="btn btn-secondary" href="/admin/admissions/document-config">Intakes &amp; documents</Link>
+        </div>
       </div>
 
       {error && <div className="error-state">{error}</div>}
