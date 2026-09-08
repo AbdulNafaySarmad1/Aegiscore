@@ -7,11 +7,11 @@ Updated: 2026-09-08. Repository: `/home/ubuntu/Aegiscore`, branch `main`.
 Completed prompts: **P1–P17**. **P18–P19** code complete and pushed (`bcf49bf0`); the
 18A/18B capture artifacts remain blocked on a live install with real role credentials.
 
-Current prompt: **P21 — AI Test Engine — code complete (see "P21 verified
-implementation" below). P22 (Post-Admission Migration) is planned and not yet started.**
+Current prompt: **P22 — Post-Admission Migration — code complete (see "P22 verified
+implementation" below). P20–P22 (admissions) are all implemented.**
 
-Remaining execution order: implement P22 (build/test/graphify/commit). Separately, still
-outstanding from P18–P19: run `capture:screenshots` +
+Remaining execution order: nothing outstanding for P20–P22. Still outstanding from
+P18–P19: run `capture:screenshots` +
 `capture:demo` against a live `APP_URL` with `ADMIN/FACULTY/STUDENT_*` +
 `AEGISCORE_SETUP_TOKEN` + `DEMO_COURSE_ID`/`DEMO_STUDENT_NUMBER`/`DEMO_MARKS` (see
 `docs/CAPTURE_SUITE.md`), then validate the private-client deployment.
@@ -129,6 +129,63 @@ outstanding from P18–P19: run `capture:screenshots` +
 - Verification: `dotnet build AegisCore.slnx -c Release` PASS; `dotnet test` **651
   passed / 1 skipped / 0 failed**; `has-pending-model-changes` clean ×4; Portal `eslint`
   clean and `next build` compiles `/terminal` + the six `/admin/admissions/*` routes.
+
+## P22 verified implementation
+
+- Entities: `Student` gains `RollNumber`, `ApplicantId` (retained for audit — never
+  cleared), `AdmissionApplicantProfileId`; `User` gains `RecoveryEmail`. New
+  `ProgramIntakeSequence` (per intake+program counter with a `ConcurrencyStamp` EF
+  concurrency token) and `EmailProvisioningConfig` (per-tenant, unique; `Mode` +
+  `DomainName` + encrypted `CredentialsCipher`). Migration `AddAdmissionMigration` in all
+  four assemblies; `has-pending-model-changes` clean ×4.
+- Roll number: `RollNumberService.AllocateAsync` → `{YEAR}{F|S|W}-{PROGRAM_CODE}-{SEQ}`
+  (e.g. `2025F-BCS-1`). The increment reads the row, bumps `NextValue` + a fresh
+  `ConcurrencyStamp`, and retries on `DbUpdateException` — collision-safe under concurrent
+  admits (tested across independent `DbContext`s).
+- `AdmissionDecisionService.AdmitAsync` (one `SaveChanges` = one transaction): creates the
+  `Student` (from `ApplicantProfile`, `BatchId` from `AdmissionIntake.BatchId` — admit
+  fails if unset), creates the `User` (personal email as both `Email` and `RecoveryEmail`
+  for now), assigns the tenant's `Student` role, sets `ApplicantProfile.Status = Admitted`
+  + `ConvertedStudentId`, persists a `DomainEvent` row (`EventType = "AdmissionConfirmed"`),
+  then `await IPublisher.Publish(AdmissionConfirmedNotification)`. Re-admitting is
+  rejected.
+- Domain event: MediatR is now also scanned over the Infrastructure assembly.
+  `AdmissionConfirmedHandler` (the one `INotificationHandler`): resolves
+  `EmailProvisioningConfig`, provisions the institutional address, sets
+  `User.Email` = institutional / `User.RecoveryEmail` = personal, revokes the applicant
+  session token (`IApplicantTokenService.RevokeAsync`), and sends the two templated emails
+  (institutional "Welcome to {University}…"; personal "…your personal email is now your
+  recovery address only"). Wrapped in try/catch — the committed admission is never undone
+  by a provisioning failure.
+- Provisioning: `IInstitutionalEmailProvisioner` × 3 —
+  `GoogleWorkspaceEmailProvisioner` (added `Google.Apis.Admin.Directory.directory_v1`;
+  service account + domain-wide delegation, `Users.Insert`, `409` → append sequence),
+  `Microsoft365EmailProvisioner` (existing `Microsoft.Graph` + `Azure.Identity` client
+  credentials, `Users.PostAsync`, `400/409` → append), `ManualEmailProvisioner` (no API
+  call). `InstitutionalEmailProvisionerFactory` picks by mode. Credentials encrypted with
+  the ASP.NET Data Protection key ring (`EmailCredentialProtector`).
+- `/admin/settings/email-provisioning` (mode + domain + credentials; credentials never
+  returned) → `GET/PUT /api/admin/settings/email-provisioning`
+  (`[RequirePermission("Settings", …)]`).
+- Pipeline board (22D): `/admin/admissions/pipeline` — Kanban with the eight columns
+  (Applied → … → Enrolled → Rejected) mapped from `ApplicantStatus` (+ "Enrolled" derived
+  once `ConvertedStudentId` is set, "Test Completed" derived from a submitted
+  `ApplicantTest`), native HTML5 drag-and-drop, confirm dialog on Admitted/Enrolled/
+  Rejected, bulk select + bulk move. `GET /api/admissions/pipeline`,
+  `POST /api/admissions/pipeline/move|bulk-move`. Moving to Admitted/Enrolled runs the
+  admit flow; "Test Completed" is read-only.
+- New `Admissions` action `Admit`; `Settings` actions `Read`/`Write` for the provisioning
+  settings. Every new request DTO has a `SecureValidator<T>`.
+- Tests: `AegisCore.Tests/AdmissionMigrationTests.cs` (6) — roll-number format +
+  per-program/intake increment, collision-safe allocation across contexts, admit creates
+  Student+User (APP ID retained, personal → `RecoveryEmail`) + persists the DomainEvent +
+  publishes the notification + rejects re-admit, handler migrates the account (Manual
+  mode) and invalidates the applicant session and sends both emails, provisioning config
+  encrypts credentials at rest, pipeline column mapping.
+- Verification: `dotnet build AegisCore.slnx -c Release` PASS; `dotnet test` **657
+  passed / 1 skipped / 0 failed**; `has-pending-model-changes` clean ×4; Portal
+  `next build` (lint included) compiles `/admin/admissions/pipeline` and
+  `/admin/settings/email-provisioning`.
 
 ## Completed prompt commits
 

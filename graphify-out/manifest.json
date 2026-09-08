@@ -2622,9 +2622,9 @@
     "semantic_hash": "e0de87752097d671cf75b92018bf041a"
   },
   "AegisCore.Domain/Entities/Student.cs": {
-    "mtime": 1788631785.541573,
-    "seen": 1788634077.3850467,
-    "ast_hash": "786ae9cceaf05d3e7994b773acf1eb1b",
+    "mtime": 1788826319.4991112,
+    "seen": 1788831405.0901616,
+    "ast_hash": "fe120e65292946ba0c2bce010b5c309c",
     "semantic_hash": ""
   },
   "AegisCore.Domain/Entities/StudentLifecycleEntities.cs": {
@@ -2688,10 +2688,10 @@
     "semantic_hash": "3044c175b5d26ffcb647c00c6f77788a"
   },
   "AegisCore.Domain/Entities/User.cs": {
-    "mtime": 1788506091.565988,
-    "seen": 1788507080.740904,
-    "ast_hash": "2725cc5075672de107a9116d5b31b293",
-    "semantic_hash": "2725cc5075672de107a9116d5b31b293"
+    "mtime": 1788826324.5881596,
+    "seen": 1788831405.0901837,
+    "ast_hash": "b0836c42fea4c99ab5fc548bb2451748",
+    "semantic_hash": ""
   },
   "AegisCore.Domain/Entities/UserRole.cs": {
     "mtime": 1788459723.3596015,
@@ -2874,15 +2874,15 @@
     "semantic_hash": "27ef6d5f1f4549ca301b197fa4ee8254"
   },
   "AegisCore.Infrastructure/AegisCore.Infrastructure.csproj": {
-    "mtime": 1788814340.1673574,
-    "seen": 1788819620.9855838,
-    "ast_hash": "df9bd4710286a6958d2c8b39c4928a37",
+    "mtime": 1788826405.5079281,
+    "seen": 1788831405.090262,
+    "ast_hash": "b95ce0bc16680be15f3c7f400ea12c9e",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/AegisDbContext.cs": {
-    "mtime": 1788820179.7567194,
-    "seen": 1788825908.1800776,
-    "ast_hash": "c8896d5f8026f8f19cccf2ec4e8e3ba9",
+    "mtime": 1788826339.5493014,
+    "seen": 1788831405.090264,
+    "ast_hash": "6b60c68fcdb55a68b114f90423bf5a73",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/AegisDbContextFactory.cs": {
@@ -3480,9 +3480,9 @@
     "semantic_hash": "280a21b303ab659d62e678d507827677"
   },
   "AegisCore.Infrastructure/InfrastructureServiceExtensions.cs": {
-    "mtime": 1788820410.858931,
-    "seen": 1788825908.1804593,
-    "ast_hash": "10200a979be6e2611970982c0d588669",
+    "mtime": 1788826556.0293667,
+    "seen": 1788831405.0904706,
+    "ast_hash": "cdeba57ebb4782ace17eecae4185b042",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Installation/InstallationStateService.cs": {
@@ -4056,9 +4056,9 @@
     "semantic_hash": "92eeac4b0082bff663a8275ddae46966"
   },
   "AegisCore.Infrastructure/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1788820899.9965837,
-    "seen": 1788825908.1814275,
-    "ast_hash": "0197250ff8ed54c608dad7479975767e",
+    "mtime": 1788827369.6560924,
+    "seen": 1788831405.0909524,
+    "ast_hash": "1c7bb2619194171d4454df6405bd4745",
     "semantic_hash": ""
   },
   "AegisCore.Infrastructure/Obe/ObeServices.cs": {
@@ -4938,8 +4938,8 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/next-env.d.ts": {
-    "mtime": 1788825594.3272064,
-    "seen": 1788825908.1819022,
+    "mtime": 1788831099.3635375,
+    "seen": 1788831405.0912614,
     "ast_hash": "d0f8375ae1199dc7acd3977fc33b78b8",
     "semantic_hash": ""
   },
@@ -8304,9 +8304,9 @@
     "semantic_hash": ""
   },
   "CODEX_HANDOFF.md": {
-    "mtime": 1788825628.775523,
-    "seen": 1788825908.183695,
-    "ast_hash": "7080bd51f4f32df612a58167f353d162",
+    "mtime": 1788831130.8858287,
+    "seen": 1788831405.0919964,
+    "ast_hash": "bf85b0f06bfd8ef30a778bb019aa8435",
     "semantic_hash": ""
   },
   "docs/rbac-role-attribute-migration.md": {
@@ -8544,9 +8544,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Migrations.MsSql/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1788821350.199804,
-    "seen": 1788825908.181744,
-    "ast_hash": "cfcf96b37e3892c49558ac06414bc049",
+    "mtime": 1788828205.0810585,
+    "seen": 1788831405.091157,
+    "ast_hash": "af0dc4e85e510f9b9c388d0ef15c2229",
     "semantic_hash": ""
   },
   "AegisCore.Migrations.MySql/AegisCore.Migrations.MySql.csproj": {
@@ -8568,9 +8568,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Migrations.MySql/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1788821494.022165,
-    "seen": 1788825908.1817632,
-    "ast_hash": "6c90d4c2fc83e55d5a6ee5695156412f",
+    "mtime": 1788827968.427821,
+    "seen": 1788831405.091175,
+    "ast_hash": "19ad537aca4f9f80614517b3758d4c49",
     "semantic_hash": ""
   },
   "AegisCore.Migrations.Oracle/AegisCore.Migrations.Oracle.csproj": {
@@ -8592,9 +8592,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Migrations.Oracle/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1788821423.5514965,
-    "seen": 1788825908.1817796,
-    "ast_hash": "8e4a2f0856ff6d45471628d599d2ca3a",
+    "mtime": 1788827889.9010782,
+    "seen": 1788831405.0911973,
+    "ast_hash": "5071f736a107756a47ae8c2814c62d91",
     "semantic_hash": ""
   },
   "AegisCore.Tests/DatabaseDialectTests.cs": {
@@ -8820,9 +8820,9 @@
     "semantic_hash": ""
   },
   "AegisCore.API/Validation/AdmissionsValidators.cs": {
-    "mtime": 1788820472.2495182,
-    "seen": 1788825908.1784854,
-    "ast_hash": "55c4c9caf705ed400ca540070edbacd7",
+    "mtime": 1788826594.3827348,
+    "seen": 1788831405.0884311,
+    "ast_hash": "ea7849d808c3b9e14ce0d8408309c5e5",
     "semantic_hash": ""
   },
   "AegisCore.Application/Admissions/ApplicantPortalContracts.cs": {
@@ -8922,9 +8922,9 @@
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/admin/admissions/page.tsx": {
-    "mtime": 1788819118.2246797,
-    "seen": 1788819620.9875398,
-    "ast_hash": "9bbd6ffdf7c5d635e10da1866436feff",
+    "mtime": 1788827486.894226,
+    "seen": 1788831405.0912786,
+    "ast_hash": "41a7a34c54d1617cf54f4ec6847bf196",
     "semantic_hash": ""
   },
   "AegisCore.Portal/src/app/api/applicant/[...path]/route.ts": {
@@ -9075,6 +9075,102 @@
     "mtime": 1788821033.27084,
     "seen": 1788825908.182507,
     "ast_hash": "06960d269fc3bdd5684e72b1611db9a7",
+    "semantic_hash": ""
+  },
+  "AegisCore.API/Controllers/AdmissionsMigrationController.cs": {
+    "mtime": 1788826576.2785614,
+    "seen": 1788831405.0881176,
+    "ast_hash": "ec5d059a501fff73d8ccdfdbc48fd82f",
+    "semantic_hash": ""
+  },
+  "AegisCore.Application/Admissions/AdmissionMigrationContracts.cs": {
+    "mtime": 1788826371.5356047,
+    "seen": 1788831405.0885077,
+    "ast_hash": "5f0349b10380ebfb88a32359ca122ba6",
+    "semantic_hash": ""
+  },
+  "AegisCore.Domain/Entities/AdmissionMigrationEntities.cs": {
+    "mtime": 1788826310.9330301,
+    "seen": 1788831405.089365,
+    "ast_hash": "a27a0bf424076d555aac824b6f76ee84",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Admissions/AdmissionMigrationServices.cs": {
+    "mtime": 1788826534.6011581,
+    "seen": 1788831405.0902433,
+    "ast_hash": "37d34b37a97149d8b6a12f6344dd4030",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Admissions/InstitutionalEmailProvisioners.cs": {
+    "mtime": 1788826908.7707171,
+    "seen": 1788831405.0902598,
+    "ast_hash": "34d31146286c3e804b02932a6e94808f",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Migrations/20260908002929_AddAdmissionMigration.Designer.cs": {
+    "mtime": 1788827369.6540926,
+    "seen": 1788831405.0909488,
+    "ast_hash": "72c280c284cdba2e09e1832dd4a46565",
+    "semantic_hash": ""
+  },
+  "AegisCore.Infrastructure/Migrations/20260908002929_AddAdmissionMigration.cs": {
+    "mtime": 1788827369.6510925,
+    "seen": 1788831405.0909507,
+    "ast_hash": "04d032f34fd6d4c192f622f4c77cf8b0",
+    "semantic_hash": ""
+  },
+  "AegisCore.Migrations.MsSql/Migrations/20260908004324_AddAdmissionMigration.Designer.cs": {
+    "mtime": 1788828205.0790586,
+    "seen": 1788831405.091154,
+    "ast_hash": "76d3bd72791110f485444fa31a406f3b",
+    "semantic_hash": ""
+  },
+  "AegisCore.Migrations.MsSql/Migrations/20260908004324_AddAdmissionMigration.cs": {
+    "mtime": 1788828205.0750585,
+    "seen": 1788831405.0911555,
+    "ast_hash": "a34a61876cf9179fed58b1106694534e",
+    "semantic_hash": ""
+  },
+  "AegisCore.Migrations.MySql/Migrations/20260908003928_AddAdmissionMigration.Designer.cs": {
+    "mtime": 1788827968.4258208,
+    "seen": 1788831405.091172,
+    "ast_hash": "de7beb8429d84cd2bc8686fe1b2f9014",
+    "semantic_hash": ""
+  },
+  "AegisCore.Migrations.MySql/Migrations/20260908003928_AddAdmissionMigration.cs": {
+    "mtime": 1788827968.4228208,
+    "seen": 1788831405.0911734,
+    "ast_hash": "776b1b3da22420ab70d89cd0d43b7882",
+    "semantic_hash": ""
+  },
+  "AegisCore.Migrations.Oracle/Migrations/20260908003809_AddAdmissionMigration.Designer.cs": {
+    "mtime": 1788827889.8990781,
+    "seen": 1788831405.0911937,
+    "ast_hash": "58d6b825da961451cd7208c661516d50",
+    "semantic_hash": ""
+  },
+  "AegisCore.Migrations.Oracle/Migrations/20260908003809_AddAdmissionMigration.cs": {
+    "mtime": 1788827889.896078,
+    "seen": 1788831405.0911949,
+    "ast_hash": "a63a3d297125f82eb712e1b9bd784b31",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/admin/admissions/pipeline/page.tsx": {
+    "mtime": 1788827450.9508703,
+    "seen": 1788831405.09128,
+    "ast_hash": "a225f9336cf9f8e567863741faea6cb1",
+    "semantic_hash": ""
+  },
+  "AegisCore.Portal/src/app/admin/settings/email-provisioning/page.tsx": {
+    "mtime": 1788827477.940139,
+    "seen": 1788831405.0912898,
+    "ast_hash": "dfc67188be4c55f058c39fd401458991",
+    "semantic_hash": ""
+  },
+  "AegisCore.Tests/AdmissionMigrationTests.cs": {
+    "mtime": 1788828873.4734282,
+    "seen": 1788831405.0915542,
+    "ast_hash": "c6c4a171c0bcb1009c2ca4cb646bdc3d",
     "semantic_hash": ""
   }
 }
