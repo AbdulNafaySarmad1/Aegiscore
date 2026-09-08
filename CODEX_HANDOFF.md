@@ -187,6 +187,54 @@ P18–P19: run `capture:screenshots` +
   `next build` (lint included) compiles `/admin/admissions/pipeline` and
   `/admin/settings/email-provisioning`.
 
+## P20–P22 known limitations / not verified end-to-end
+
+These are environment/credential gaps, not code defects. The .NET side is fully built
+and tested; the items below were exercised only through mocks/stubs or compile
+verification.
+
+1. **`aegiscore-clip` Docker image not built or run here.** `services/aegiscore-clip/`
+   (Dockerfile + FastAPI `app/main.py` for `/validate-photo` and `/ocr`) is complete and
+   the `publish-clip` job in `.github/workflows/client-release.yml` builds/pushes
+   `ghcr.io/nocturne-systems/aegiscore-clip`, but no local `docker build` / container run
+   / endpoint smoke test was performed. `IPhotoValidationService` and `ISyllabusOcrService`
+   are covered in tests with fakes (including the CLIP-unreachable fail-open path).
+   *To close:* `docker build ./services/aegiscore-clip`, run it, and curl
+   `POST /validate-photo` (real JPEG/PNG) and `POST /ocr` (real PDF). Needs Docker +
+   outbound network to PyPI and Hugging Face (CLIP weights are downloaded at image-build
+   time). First build is slow (torch CPU + transformers + ~600 MB model).
+
+2. **Live LLM question generation not run.** `AdmissionQuestionGenerator` calls the
+   existing `LlmProviderFactory.GetLlmProvider(tenantId)`; the JSON-parsing layer
+   (`AdmissionQuestionGenerator.Parse`) is unit-tested with sample completions (fenced /
+   list- and letter-keyed shapes), and `QuestionBankService.IngestSyllabusAsync` is
+   tested with a stub generator. No real syllabus PDF → question bank run was done.
+   *To close:* configure an AI provider — either `AI_API_KEY` + `AI_ENDPOINT`
+   (OpenAI-compatible), or `AI_PROVIDER=ollama` + reachable `AI_ENDPOINT` + a pulled
+   `AI_MODEL` — then run `POST /api/admissions/syllabus/{subjectId}` with a real PDF.
+
+3. **Google Workspace / Microsoft 365 provisioning are compile-verified only.**
+   `GoogleWorkspaceEmailProvisioner` (`Google.Apis.Admin.Directory.directory_v1`) and
+   `Microsoft365EmailProvisioner` (`Microsoft.Graph` + `Azure.Identity`) implement account
+   creation with `409/400` → sequence-append collision handling, but no call was made to a
+   real directory. `ManualEmailProvisioner` and the full `AdmitAsync` →
+   `AdmissionConfirmedHandler` account-migration path (personal email → `RecoveryEmail`,
+   applicant-session revocation, dual welcome emails) **are** tested end-to-end in Manual
+   mode. *To close:*
+   - Google: a service-account JSON with domain-wide delegation for scope
+     `https://www.googleapis.com/auth/admin.directory.user`, the delegated admin email
+     (`adminEmail` field in the JSON), and a Workspace domain to create a throwaway user
+     in.
+   - M365: an app registration `tenantId` / `clientId` / `clientSecret` with the
+     **application** permission `User.ReadWrite.All` (admin-consented) and a verified
+     domain.
+   Configure the mode + domain + credentials JSON at `/admin/settings/email-provisioning`,
+   then admit an applicant and confirm the mailbox is created.
+
+4. **Pre-existing, unrelated to P20–P22:** the P18/P19 `capture:screenshots` /
+   `capture:demo` artifacts still need a live `APP_URL` + `ADMIN/FACULTY/STUDENT_*`
+   credentials + `AEGISCORE_SETUP_TOKEN` (see `docs/CAPTURE_SUITE.md`).
+
 ## Completed prompt commits
 
 - P1: `57e4b56b` (compile fixes), `a1032a24` (schema-aligned tests)
@@ -208,6 +256,9 @@ P18–P19: run `capture:screenshots` +
 - P16: `c5be80d4` (core compliance)
 - P16 appendix: `202008ce`
 - P17: `dacb1435`
+- P20: `a958ec5f` (feat), `9062ecc2` (graph + handoff)
+- P21: `af550533` (feat), `27072758` (graph + handoff)
+- P22: `87659941` (feat), `094f0527` (graph + handoff)
 
 ## P11 verified implementation
 
