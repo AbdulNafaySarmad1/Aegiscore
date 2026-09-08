@@ -95,6 +95,15 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Admissions.IAdmissionCatalogService, AdmissionCatalogService>();
         services.AddScoped<AegisCore.Application.Admissions.IAdmissionConfigService, AdmissionConfigService>();
         services.AddScoped<AegisCore.Application.Admissions.IAdmissionsAdminService, AdmissionsAdminService>();
+
+        // P21 AI Test Engine
+        services.AddScoped<AegisCore.Application.Admissions.ISyllabusOcrService, SyllabusOcrService>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionQuestionGenerator, AdmissionQuestionGenerator>();
+        services.AddScoped<AegisCore.Application.Admissions.IAdmissionTestConfigService, AdmissionTestConfigService>();
+        services.AddScoped<AegisCore.Application.Admissions.IQuestionBankService, QuestionBankService>();
+        services.AddScoped<AegisCore.Application.Admissions.ITestSchedulingService, TestSchedulingService>();
+        services.AddScoped<AegisCore.Application.Admissions.ITestTerminalService, TestTerminalService>();
+        services.AddScoped<AegisCore.Application.Admissions.ITestProctorService, TestProctorService>();
         services.AddScoped<AegisCore.Application.Examination.IGradingService, GradingService>();
         services.AddScoped<AegisCore.Application.Examination.ITranscriptService, TranscriptService>();
         services.AddScoped<AegisCore.Application.Obe.ICisExtractionService, CisExtractionService>();

@@ -1030,6 +1030,109 @@ namespace AegisCore.Migrations.MsSql.Migrations
                     b.ToTable("AdmissionLeads");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ApprovedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CorrectOption")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("nvarchar(1)");
+
+                    b.Property<string>("DifficultyLevel")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("OptionA")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<string>("OptionB")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<string>("OptionC")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<string>("OptionD")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("SourceChunk")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "SubjectId", "Status");
+
+                    b.ToTable("AdmissionQuestions");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.AdmissionSubject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("AdmissionSubjects");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.AdvisorAssignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1682,6 +1785,73 @@ namespace AegisCore.Migrations.MsSql.Migrations
                     b.HasIndex("TenantId", "IntakeId", "ProgramId");
 
                     b.ToTable("ApplicantProfiles");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ApplicantTest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApplicantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PaperHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("PaperJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("Passed")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ProctorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProctorNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ResponsesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TestProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ApplicantId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.ToTable("ApplicantTests");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ApplicationDocument", b =>
@@ -20336,6 +20506,72 @@ namespace AegisCore.Migrations.MsSql.Migrations
                     b.ToTable("ProgramOutcomes");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramTestProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("IntakeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PassMark")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TimeLimitMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IntakeId", "ProgramId")
+                        .IsUnique();
+
+                    b.ToTable("ProgramTestProfiles");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramTestSubject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MarksPerQuestion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TestProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestProfileId");
+
+                    b.HasIndex("TenantId", "TestProfileId", "SubjectId")
+                        .IsUnique();
+
+                    b.ToTable("ProgramTestSubjects");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.Prompt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -20563,6 +20799,40 @@ namespace AegisCore.Migrations.MsSql.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("PurchaseOrders");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.QuestionGenerationPrompt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("SystemPrompt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.ToTable("QuestionGenerationPrompts");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.QueueDefinition", b =>
@@ -24057,6 +24327,52 @@ namespace AegisCore.Migrations.MsSql.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SupportTickets");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.SyllabusDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ExtractedText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OcrMethod")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("OcrStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "SubjectId", "UploadedAt");
+
+                    b.ToTable("SyllabusDocuments");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.SyncLagConfig", b =>
@@ -28434,6 +28750,17 @@ namespace AegisCore.Migrations.MsSql.Migrations
                     b.Navigation("Room");
                 });
 
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramTestSubject", b =>
+                {
+                    b.HasOne("AegisCore.Domain.Entities.ProgramTestProfile", "TestProfile")
+                        .WithMany("Subjects")
+                        .HasForeignKey("TestProfileId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("TestProfile");
+                });
+
             modelBuilder.Entity("AegisCore.Domain.Entities.PublicationAuthor", b =>
                 {
                     b.HasOne("AegisCore.Domain.Entities.ResearchPublication", "Publication")
@@ -29443,6 +29770,11 @@ namespace AegisCore.Migrations.MsSql.Migrations
             modelBuilder.Entity("AegisCore.Domain.Entities.ProcurementRequisition", b =>
                 {
                     b.Navigation("LineItems");
+                });
+
+            modelBuilder.Entity("AegisCore.Domain.Entities.ProgramTestProfile", b =>
+                {
+                    b.Navigation("Subjects");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.ResearchGrant", b =>

@@ -1779,6 +1779,15 @@ public class AegisDbContext : DbContext
     public DbSet<ApplicantProfile> ApplicantProfiles => Set<ApplicantProfile>();
     public DbSet<AdmissionDocumentRequirement> AdmissionDocumentRequirements => Set<AdmissionDocumentRequirement>();
     public DbSet<ApplicantDocument> ApplicantDocuments => Set<ApplicantDocument>();
+
+    // P21 AI Test Engine
+    public DbSet<AdmissionSubject> AdmissionSubjects => Set<AdmissionSubject>();
+    public DbSet<ProgramTestProfile> ProgramTestProfiles => Set<ProgramTestProfile>();
+    public DbSet<ProgramTestSubject> ProgramTestSubjects => Set<ProgramTestSubject>();
+    public DbSet<SyllabusDocument> SyllabusDocuments => Set<SyllabusDocument>();
+    public DbSet<QuestionGenerationPrompt> QuestionGenerationPrompts => Set<QuestionGenerationPrompt>();
+    public DbSet<AdmissionQuestion> AdmissionQuestions => Set<AdmissionQuestion>();
+    public DbSet<ApplicantTest> ApplicantTests => Set<ApplicantTest>();
     public DbSet<AssessmentScheme> AssessmentSchemes => Set<AssessmentScheme>();
     public DbSet<AssessmentComponent> AssessmentComponents => Set<AssessmentComponent>();
     public DbSet<CourseMark> CourseMarks => Set<CourseMark>();
@@ -3108,6 +3117,28 @@ public class AegisDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.IntakeId, e.ProgramId, e.DocumentType }).IsUnique());
         modelBuilder.Entity<ApplicantDocument>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.ApplicantId, e.DocumentType }).IsUnique());
+
+        // P21 AI Test Engine
+        modelBuilder.Entity<AdmissionSubject>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique());
+        modelBuilder.Entity<ProgramTestProfile>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.IntakeId, e.ProgramId }).IsUnique();
+            entity.HasMany(e => e.Subjects).WithOne(s => s.TestProfile).HasForeignKey(s => s.TestProfileId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ProgramTestSubject>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.TestProfileId, e.SubjectId }).IsUnique());
+        modelBuilder.Entity<SyllabusDocument>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.SubjectId, e.UploadedAt }));
+        modelBuilder.Entity<QuestionGenerationPrompt>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.IsActive }));
+        modelBuilder.Entity<AdmissionQuestion>(entity =>
+            entity.HasIndex(e => new { e.TenantId, e.SubjectId, e.Status }));
+        modelBuilder.Entity<ApplicantTest>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.ApplicantId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status });
+        });
 
         // Department
         modelBuilder.Entity<Department>(entity =>

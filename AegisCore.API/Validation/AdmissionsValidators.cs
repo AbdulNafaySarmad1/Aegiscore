@@ -112,3 +112,77 @@ public sealed class BulkTransitionRequestValidator : SecureValidator<AdmissionsA
         RuleFor(x => x.Note).MaximumLength(1000);
     }
 }
+
+// ---- P21 AI Test Engine ----
+
+public sealed class SubjectInputValidator : SecureValidator<SubjectInput>
+{
+    public SubjectInputValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(120).Must(IsTrimmed);
+        RuleFor(x => x.Code).NotEmpty().Matches("^[A-Za-z0-9]{2,30}$").WithMessage("Subject code must be 2-30 letters or digits.");
+    }
+}
+
+public sealed class TestProfileInputValidator : SecureValidator<TestProfileInput>
+{
+    public TestProfileInputValidator()
+    {
+        RuleFor(x => x.IntakeId).NotEmpty();
+        RuleFor(x => x.ProgramId).NotEmpty();
+        RuleFor(x => x.PassMark).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.TimeLimitMinutes).InclusiveBetween(1, 600);
+        RuleFor(x => x.Subjects).NotEmpty().Must(s => s.Count <= 20).WithMessage("A test profile allows at most 20 subjects.");
+        RuleForEach(x => x.Subjects).ChildRules(slot =>
+        {
+            slot.RuleFor(s => s.SubjectId).NotEmpty();
+            slot.RuleFor(s => s.QuestionCount).InclusiveBetween(1, 200);
+            slot.RuleFor(s => s.MarksPerQuestion).InclusiveBetween(1, 20);
+        });
+    }
+}
+
+public sealed class QuestionEditInputValidator : SecureValidator<QuestionEditInput>
+{
+    public QuestionEditInputValidator()
+    {
+        RuleFor(x => x.QuestionText).NotEmpty().MaximumLength(2000);
+        RuleFor(x => x.OptionA).NotEmpty().MaximumLength(600);
+        RuleFor(x => x.OptionB).NotEmpty().MaximumLength(600);
+        RuleFor(x => x.OptionC).NotEmpty().MaximumLength(600);
+        RuleFor(x => x.OptionD).NotEmpty().MaximumLength(600);
+        RuleFor(x => x.CorrectOption).NotEmpty().Must(v => v.Trim().ToUpperInvariant() is "A" or "B" or "C" or "D")
+            .WithMessage("CorrectOption must be A, B, C or D.");
+        RuleFor(x => x.DifficultyLevel).NotEmpty().MaximumLength(30);
+    }
+}
+
+public sealed class PromptRequestValidator : SecureValidator<AdmissionsTestController.PromptRequest>
+{
+    public PromptRequestValidator()
+        => RuleFor(x => x.SystemPrompt).NotEmpty().MinimumLength(20).MaximumLength(8000);
+}
+
+public sealed class ProctorFlagRequestValidator : SecureValidator<AdmissionsTestController.ProctorFlagRequest>
+{
+    public ProctorFlagRequestValidator()
+        => RuleFor(x => x.Note).NotEmpty().MaximumLength(500);
+}
+
+public sealed class TerminalStartRequestValidator : SecureValidator<TestTerminalController.StartRequest>
+{
+    public TerminalStartRequestValidator()
+        => RuleFor(x => x.ApplicantId).NotEmpty().MaximumLength(40)
+            .Matches("^APP-[0-9]{4}[FSW]-[A-Za-z0-9]{2,8}-[0-9A-Za-z]{8}$")
+            .WithMessage("Enter a valid Applicant ID.");
+}
+
+public sealed class TerminalAnswerRequestValidator : SecureValidator<TestTerminalController.AnswerRequest>
+{
+    public TerminalAnswerRequestValidator()
+    {
+        RuleFor(x => x.QuestionId).NotEmpty();
+        RuleFor(x => x.OptionKey).NotEmpty().Must(v => v.Trim().ToUpperInvariant() is "A" or "B" or "C" or "D")
+            .WithMessage("Option must be A, B, C or D.");
+    }
+}
