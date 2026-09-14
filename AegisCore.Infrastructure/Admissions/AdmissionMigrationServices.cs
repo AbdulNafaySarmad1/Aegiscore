@@ -98,6 +98,22 @@ public sealed class AdmissionDecisionService(
             throw new InvalidOperationException("Set the enrolment batch on this intake before admitting applicants.");
         }
 
+        var requiredDocuments = await db.AdmissionDocumentRequirements
+            .Where(r => r.TenantId == profile.TenantId && r.IntakeId == profile.IntakeId && r.ProgramId == profile.ProgramId && r.IsRequired)
+            .Select(r => r.DocumentType).ToListAsync(ct);
+        var approvedDocuments = await db.ApplicantDocuments
+            .Where(d => d.TenantId == profile.TenantId && d.ApplicantId == profile.Id && d.ValidationStatus == AdmissionDocumentValidationStatus.Approved)
+            .Select(d => d.DocumentType).ToListAsync(ct);
+        if (requiredDocuments.Except(approvedDocuments).Any())
+            throw new InvalidOperationException("All required admission documents must be approved before admission.");
+        if (await db.ProgramTestProfiles.AnyAsync(t => t.TenantId == profile.TenantId && t.IntakeId == profile.IntakeId && t.ProgramId == profile.ProgramId, ct)
+            && !await db.ApplicantTests.AnyAsync(t => t.TenantId == profile.TenantId && t.ApplicantId == profile.Id && t.Passed == true
+                && (t.Status == ApplicantTestStatus.Submitted || t.Status == ApplicantTestStatus.ForceSubmitted), ct))
+            throw new InvalidOperationException("The configured admission test must be completed and passed before admission.");
+
+        var studentRole = await db.Roles.FirstOrDefaultAsync(r => r.TenantId == profile.TenantId && r.Name == "Student", ct)
+            ?? throw new InvalidOperationException("Configure the Student role before admitting applicants.");
+
         var rollNumber = await rollNumbers.AllocateAsync(intake, program, ct);
         var (firstName, lastName) = SplitName(profile.FullName);
 
@@ -118,7 +134,8 @@ public sealed class AdmissionDecisionService(
 
         var user = new User
         {
-            Id = Guid.NewGuid(),
+            // Student-facing endpoints resolve the authenticated subject as Student.Id.
+            Id = student.Id,
             TenantId = profile.TenantId,
             Username = profile.ApplicantId,
             Email = profile.Email,          // personal for now — the handler swaps in the institutional address
@@ -130,19 +147,11 @@ public sealed class AdmissionDecisionService(
         };
         db.Users.Add(user);
 
-        var studentRole = await db.Roles.FirstOrDefaultAsync(r => r.TenantId == profile.TenantId && r.Name == "Student", ct);
-        if (studentRole is not null)
+        db.UserRoles.Add(new UserRole
         {
-            db.UserRoles.Add(new UserRole
-            {
-                Id = Guid.NewGuid(), TenantId = profile.TenantId, UserId = user.Id, RoleId = studentRole.Id,
-                AssignedByUserId = adminUserId, AssignedAt = DateTime.UtcNow
-            });
-        }
-        else
-        {
-            logger.LogWarning("No 'Student' role found for tenant {TenantId}; student {UserId} created without a role.", profile.TenantId, user.Id);
-        }
+            Id = Guid.NewGuid(), TenantId = profile.TenantId, UserId = user.Id, RoleId = studentRole.Id,
+            AssignedByUserId = adminUserId, AssignedAt = DateTime.UtcNow
+        });
 
         profile.Status = ApplicantStatus.Admitted;
         profile.ConvertedStudentId = student.Id;
@@ -220,7 +229,7 @@ public sealed class AdmissionConfirmedHandler(
                 institutionalEmail = provisioned.Address;
             }
 
-            var user = await db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == n.UserId, ct);
+            var user = await db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == n.UserId && u.TenantId == n.TenantId, ct);
             if (user is not null)
             {
                 user.Email = institutionalEmail;          // primary login becomes institutional

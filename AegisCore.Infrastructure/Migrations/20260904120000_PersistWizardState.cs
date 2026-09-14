@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 #nullable disable
 
 namespace AegisCore.Infrastructure.Migrations;
 
 /// <inheritdoc />
+[DbContext(typeof(AegisDbContext))]
+[Migration("20260904120000_PersistWizardState")]
 public partial class PersistWizardState : Migration
 {
     /// <inheritdoc />

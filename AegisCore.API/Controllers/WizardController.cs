@@ -656,6 +656,8 @@ public sealed class WizardController(
                 error = "Test and confirm the SSO connection, or choose Local."; return false;
             case 4 when !HasDynamicRoles(data):
                 error = "Add at least one role and permission selection."; return false;
+            case 5 when data.TryGetProperty("provider", out var aiProvider) && aiProvider.GetString() == "disabled":
+                return true;
             case 5 when !Has("provider", "model"):
                 error = "Choose an AI provider and model."; return false;
             case 5 when !data.TryGetProperty("connectionTested", out var aiTested) || aiTested.ValueKind != JsonValueKind.True:

@@ -149,6 +149,7 @@ public sealed class AdmissionMigrationTests
         Assert.Equal(s.Batch.Id, student.BatchId);
 
         var user = await db.Users.IgnoreQueryFilters().SingleAsync(x => x.Id == result.UserId);
+        Assert.Equal(student.Id, user.Id);
         Assert.Equal("aisha.khan@gmail.com", user.RecoveryEmail);   // personal retained
         Assert.True(await db.UserRoles.IgnoreQueryFilters().AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == s.StudentRole.Id));
 

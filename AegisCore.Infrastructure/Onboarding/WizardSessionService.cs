@@ -5,19 +5,34 @@ using AegisCore.Application.Common.Interfaces;
 using AegisCore.Application.Onboarding;
 using AegisCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Infrastructure.Onboarding;
 
 public sealed class WizardSessionService(
     AegisDbContext db,
     IPasswordHashingService passwords,
-    WizardStateService states)
+    WizardStateService states,
+    IConfiguration? configuration = null)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const int MaxStepPayloadBytes = 128 * 1024;
 
-    public Task<WizardStateDto> GetOrCreateAsync(string token, string? ip, CancellationToken ct)
-        => states.GetOrCreateStateAsync(token, ip, ct);
+    public async Task<WizardStateDto> GetOrCreateAsync(string token, string? ip, CancellationToken ct)
+    {
+        var state = await states.GetOrCreateStateAsync(token, ip, ct);
+        if (Guid.TryParse(configuration?["TENANT_ID"], out var installationTenant) && installationTenant != Guid.Empty)
+        {
+            if (state.TenantId != Guid.Empty && state.TenantId != installationTenant)
+                throw new InvalidOperationException("Wizard tenant does not match this installation. Restore the matching configuration.");
+            if (state.TenantId == Guid.Empty)
+            {
+                state.TenantId = installationTenant;
+                await states.SaveState(token, state, ct);
+            }
+        }
+        return state;
+    }
 
     public async Task<WizardStateDto?> FindAsync(string token, Guid sessionId, CancellationToken ct)
     {

@@ -22,16 +22,13 @@ license validation remain enabled. Its job is HTTP redundancy, not automatic wor
 failover. The primary resumes scheduled work after restart. Configure backup/restore,
 monitoring, and external database/Redis availability during implementation.
 
-Watchtower polls every 21,600 seconds, uses the client's dedicated registry config,
-and updates only labeled application replicas. Ingress is deliberately excluded so
-the sole local listener is not restarted mid-update. Ingress security updates require
-Nocturne maintenance or redundant university ingress; this compose is not host-level HA.
-Pre-update checks the peer, returns EX_TEMPFAIL (75) to skip if unavailable, and drains
-the current replica. Post-update waits for readiness with its timeout disabled, keeping
-the other replica serving if a release fails. Investigate a stalled updater; restore a
-known-good image through Nocturne's release process before resuming. In-flight long
-requests/WebSockets can reconnect during restart; test workload-specific draining.
-Do not claim unconditional zero downtime from `--rolling-restart` alone.
+Automatic application and sidecar updates are disabled. Supply reviewed immutable
+image references through AEGISCORE_RELEASE_IMAGE and AEGISCORE_CLIP_IMAGE. The
+legacy updater is behind an opt-in profile and cannot update the disabled labels.
+Perform controlled maintenance: back up database, uploads, configuration and keys
+together; review/apply compatible migrations; replace images; verify readiness and
+real login. Restore the matching state and image together on failure. An observed
+upgrade and failed-upgrade recovery remain required acceptance checks.
 
 License validation runs at API startup and then every 24 hours. HTTPS authority
 responses accept `status: valid|invalid|expired|revoked`, `message`, and

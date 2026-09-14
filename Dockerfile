@@ -53,6 +53,7 @@ COPY --from=portal-build --chown=appuser /portal/.next/standalone /app/portal/
 COPY --from=portal-build --chown=appuser /portal/.next/static /app/portal/.next/static/
 COPY --from=portal-build --chown=appuser /portal/public /app/portal/public/
 COPY --chown=appuser docker/client/ /app/client/
+RUN sed -i 's/\r$//' /app/client/*.sh
 
 COPY --chown=appuser formats/ /app/formats/
 COPY --chown=appuser aegiscorelogo.png /app/aegiscore-logo.png

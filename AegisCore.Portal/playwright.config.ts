@@ -34,7 +34,7 @@ export default defineConfig({
     channel: "chromium",
     headless: true,
     screenshot: "only-on-failure",
-    video: capture === "demo" || visualDemo ? "on" : capture ? "off" : "retain-on-failure",
+    video: capture === "demo" || capture === "lifecycle" || visualDemo ? { mode: "on", size: { width: 1920, height: 1080 } } : capture ? "off" : "retain-on-failure",
     trace: capture ? "off" : "on-first-retry",
   },
 });

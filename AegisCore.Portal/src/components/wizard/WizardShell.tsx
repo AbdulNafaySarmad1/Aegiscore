@@ -96,9 +96,12 @@ export function WizardShell() {
     }
   }, [loadSession]);
 
-  const current = useMemo(() => data[`step${step}`] ?? {}, [data, step]);
+  const current = useMemo<WizardData>(() => ({
+    ...(step === 3 ? { provider: "local" } : step === 4 ? { roles: DEFAULT_ROLES } : {}),
+    ...data[`step${step}`],
+  }), [data, step]);
   const canContinue = (step !== 3 || text(current, "provider", "local") === "local" || current.connectionTested === true)
-    && (step !== 5 || current.connectionTested === true);
+    && (step !== 5 || current.provider === "disabled" || current.connectionTested === true);
   const update = (patch: WizardData) => setData(existing => ({
     ...existing,
     [`step${step}`]: { ...existing[`step${step}`], ...patch },
@@ -360,6 +363,7 @@ function DatabaseStep({ value, update }: { value: WizardData; update: (patch: Wi
         <Field label="Database name" value={text(value, "databaseName")} onChange={databaseName => update({ databaseName, connectionTested: false })} />
         <Field label="Username" value={text(value, "username")} onChange={username => update({ username, connectionTested: false })} />
         <Field label="Password" value={text(value, "password")} onChange={password => update({ password, connectionTested: false })} type="password" />
+        <label className="wizard-check"><input type="checkbox" checked={value.sslEnabled !== false} onChange={event => update({ sslEnabled: event.target.checked, connectionTested: false })} />Require database TLS</label>
       </div>
       <button className="wizard-secondary" onClick={testConnection} disabled={testing}>{testing ? "Testing..." : "Connect, test and migrate"}</button>
       {message && <p aria-live="polite">{message}</p>}
@@ -443,13 +447,14 @@ function AiStep({ value, update }: { value: WizardData; update: (patch: WizardDa
   return (
     <div className="wizard-sections"><div className="wizard-form-grid">
       <SelectField label="AI provider" value={provider} onChange={next => update({ provider: next, model: next === "ollama-local" ? "mistral" : next === "openai" ? "gpt-4o-mini" : next === "granite" ? "ibm/granite-13b-chat-v2" : "", connectionTested: false })} options={[
+        { value: "disabled", label: "Disabled — configure later" },
         { value: "ollama-local", label: "Ollama Local" }, { value: "ollama-cloud", label: "Ollama Cloud" }, { value: "openai", label: "OpenAI" },
         { value: "granite", label: "IBM Granite" }, { value: "custom", label: "Custom endpoint" },
       ]} />
-      <Field label="Model" value={text(value, "model", defaultModel)} onChange={model => update({ model, connectionTested: false })} />
+      {provider !== "disabled" && <Field label="Model" value={text(value, "model", defaultModel)} onChange={model => update({ model, connectionTested: false })} />}
       {(provider === "ollama-cloud" || provider === "custom") && <Field label="Endpoint URL" value={text(value, "endpoint")} onChange={endpoint => update({ endpoint, connectionTested: false })} />}
       {(provider === "openai" || provider === "granite" || provider === "custom" || provider === "ollama-cloud") && <Field label={provider === "granite" ? "IBM IAM API key" : "API key"} required={provider !== "custom"} value={text(value, "apiKey")} onChange={apiKey => update({ apiKey, connectionTested: false })} type="password" />}
-    </div><button className="wizard-secondary" type="button" disabled={testing} onClick={testConnection}>{testing ? "Testing..." : "Test Connection"}</button>{message && <p aria-live="polite">{message}</p>}</div>
+    </div>{provider === "disabled" ? <p>AI features will remain unavailable until a provider is configured. No model connection test is claimed.</p> : <button className="wizard-secondary" type="button" disabled={testing} onClick={testConnection}>{testing ? "Testing..." : "Test Connection"}</button>}{message && <p aria-live="polite">{message}</p>}</div>
   );
 }
 

@@ -23,7 +23,7 @@ name: aegiscore-client
 # Registry credentials: docker --config .registry-auth login ghcr.io ...
 
 x-application: &application
-  image: ghcr.io/nocturne-systems/aegiscore:latest
+  image: ${AEGISCORE_RELEASE_IMAGE:?Set an approved version or digest; never latest}
   restart: unless-stopped
   init: true
   stop_grace_period: 35s
@@ -69,7 +69,7 @@ x-application: &application
     retries: 24
     start_period: 120s
   labels:
-    com.centurylinklabs.watchtower.enable: 'true'
+    com.centurylinklabs.watchtower.enable: 'false'
     com.centurylinklabs.watchtower.lifecycle.pre-update: sh /app/client/pre-update.sh
     com.centurylinklabs.watchtower.lifecycle.post-update: sh /app/client/post-update.sh
     com.centurylinklabs.watchtower.lifecycle.post-update-timeout: '0'
@@ -87,7 +87,7 @@ services:
       UPDATE_PEER: app-a
       Deployment__PassiveWorkers: 'true'
   ingress:
-    image: ghcr.io/nocturne-systems/aegiscore:latest
+    image: ${AEGISCORE_RELEASE_IMAGE:?Set an approved version or digest; never latest}
     environment:
       AEGISCORE_COMPONENT: ingress
     ports: ['127.0.0.1:${AEGISCORE_PORT:-8080}:8080']
@@ -106,7 +106,7 @@ services:
   # P20 — internal photo-filter + syllabus-OCR sidecar. No published ports: only the
   # application containers reach it, over the compose network, at http://aegiscore-clip:8100.
   aegiscore-clip:
-    image: ghcr.io/nocturne-systems/aegiscore-clip:latest
+    image: ${AEGISCORE_CLIP_IMAGE:?Set an approved sidecar version or digest}
     restart: unless-stopped
     init: true
     expose: ['8100']
@@ -126,9 +126,10 @@ services:
       retries: 10
       start_period: 90s
     labels:
-      com.centurylinklabs.watchtower.enable: 'true'
+      com.centurylinklabs.watchtower.enable: 'false'
 
   watchtower:
+    profiles: [legacy-updater]
     image: containrrr/watchtower:1.7.1
     command: --interval 21600 --rolling-restart --enable-lifecycle-hooks --label-enable --stop-timeout 35s
     environment:

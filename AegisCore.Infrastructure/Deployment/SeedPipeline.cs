@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Config;
 using Microsoft.Extensions.Logging;
@@ -89,14 +90,17 @@ public static class SeedExtensions
 {
     public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddSeedPipeline(this Microsoft.Extensions.DependencyInjection.IServiceCollection services)
     {
-        services.TryAddTransient<ISeedRunner, SystemAdminSeeder>();
-        services.TryAddTransient<ISeedRunner, DefaultConfigSeeder>();
-        services.TryAddTransient<ISeedRunner, AcademicStructureSeeder>();
-        services.TryAddTransient<ISeedRunner, AcademicCalendarSeeder>();
-        services.TryAddTransient<ISeedRunner, FeeStructureSeeder>();
-        services.TryAddTransient<ISeedRunner, TranslationSeeder>();
-        services.TryAddTransient<ISeedRunner, DemoDataSeeder>();
+        // WizardProvisioningService persists client setup. Never register the
+        // historical logging-only placeholders or fictional data on client startup.
         services.TryAddTransient<SeedOrchestrator>();
+        return services;
+    }
+
+    public static IServiceCollection AddDemoSeedPipeline(this IServiceCollection services)
+    {
+        services.AddSeedPipeline();
+        services.TryAddTransient<Seeders.DemoSeeder>();
+        services.TryAddEnumerable(ServiceDescriptor.Transient<ISeedRunner, DemoDataSeeder>());
         return services;
     }
 }

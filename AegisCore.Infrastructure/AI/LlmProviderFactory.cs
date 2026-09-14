@@ -25,6 +25,7 @@ public class LlmProviderFactory
 
         return provider.ToLowerInvariant() switch
         {
+            "disabled" => throw new InvalidOperationException("AI features are disabled for this installation."),
             "ollama" => _serviceProvider.GetRequiredService<OllamaLlmProvider>(),
             _ => _serviceProvider.GetRequiredService<OpenAiLlmProvider>()
         };
@@ -38,6 +39,7 @@ public class LlmProviderFactory
 
         return provider.ToLowerInvariant() switch
         {
+            "disabled" => throw new InvalidOperationException("AI features are disabled for this installation."),
             "ollama" => _serviceProvider.GetRequiredService<OllamaEmbeddingProvider>(),
             _ => _serviceProvider.GetRequiredService<OpenAiEmbeddingProvider>()
         };

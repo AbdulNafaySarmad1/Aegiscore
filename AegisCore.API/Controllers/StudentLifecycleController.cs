@@ -1,4 +1,6 @@
 using AegisCore.Application.StudentLifecycle;
+using AegisCore.API.Authorization;
+using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
@@ -27,13 +29,48 @@ public class StudentLifecycleController : ControllerBase
         => Ok(new { eligible = _service.IsPlacementEligible(cgpa, completedCredits, requiredCredits, failedCourses, minCgpa) });
 
     [HttpPost("alumni")]
+    [RequirePermission("Graduation", "Approve")]
     public async Task<IActionResult> UpsertAlumni([FromBody] AlumniProfile profile, CancellationToken ct)
     {
-        if (!IsPrivileged() && !Owns(profile.UserId)) return Forbid();
-        profile.AlumniId = string.IsNullOrWhiteSpace(profile.AlumniId) ? $"ALM-{profile.GraduationYear}-{profile.UserId.ToString("N")[..6].ToUpperInvariant()}" : profile.AlumniId;
+        // Academic status and an attributable approval must exist before a profile can
+        // be created. Never accept graduation or tenant identity from the request body.
+        var tenantId = _db.CurrentTenantId;
+        if (tenantId == Guid.Empty) return Forbid();
+        var student = await _db.Students.SingleOrDefaultAsync(s => s.Id == profile.UserId && s.TenantId == tenantId, ct);
+        if (student is null || !await _db.Users.AnyAsync(u => u.Id == profile.UserId && u.TenantId == tenantId, ct)) return NotFound();
+        var approval = await _db.StudentClearances
+            .Where(c => c.TenantId == tenantId && c.StudentId == student.Id && c.Department == "Graduation"
+                && c.Status == ClearanceStatus.Cleared && c.ClearedByUserId != null && c.ClearedAt != null)
+            .OrderByDescending(c => c.ClearedAt).FirstOrDefaultAsync(ct);
+        if (student.EnrollmentStatus != EnrollmentStatus.Graduated || approval is null)
+            return Conflict(new { error = "Approved graduation is required before alumni creation." });
+        var existing = await _db.AlumniProfiles.SingleOrDefaultAsync(a => a.TenantId == tenantId && a.UserId == student.Id, ct);
+        if (existing is not null) return Ok(existing);
+        // A stable primary key also prevents concurrent duplicate inserts.
+        profile.Id = student.Id;
+        profile.TenantId = tenantId;
+        profile.GraduationYear = approval.ClearedAt!.Value.Year;
+        profile.CreatedAt = DateTime.UtcNow;
+        profile.AlumniId = $"ALM-{profile.GraduationYear}-{student.Id:N}";
         _db.AlumniProfiles.Add(profile);
-        await _db.SaveChangesAsync(ct);
+        try { await _db.SaveChangesAsync(ct); }
+        catch (DbUpdateException)
+        {
+            _db.Entry(profile).State = EntityState.Detached;
+            var concurrent = await _db.AlumniProfiles.AsNoTracking()
+                .SingleOrDefaultAsync(a => a.Id == student.Id && a.TenantId == tenantId && a.UserId == student.Id, ct);
+            if (concurrent is null) throw;
+            return Ok(concurrent);
+        }
         return Ok(profile);
+    }
+
+    [HttpGet("alumni/me")]
+    public async Task<IActionResult> MyAlumniProfile(CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"), out var subject)) return Forbid();
+        var profile = await _db.AlumniProfiles.AsNoTracking().SingleOrDefaultAsync(a => a.UserId == subject && a.TenantId == _db.CurrentTenantId, ct);
+        return profile is null ? NotFound(new { error = "No approved alumni profile exists." }) : Ok(profile);
     }
 
     [HttpPost("alumni/{alumniProfileId:guid}/donations")]

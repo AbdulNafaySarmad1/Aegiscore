@@ -5,12 +5,27 @@ using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Onboarding;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Tests;
 
 public sealed class WizardProviderAndTemplateTests
 {
     private const string Token = "provider-test-bootstrap-token-with-at-least-32-bytes";
+
+    [Fact]
+    public async Task Wizard_Uses_Configured_Login_Tenant_And_Rejects_Mismatched_Resume()
+    {
+        await using var fixture = await WizardFixture.CreateAsync();
+        var tenant = Guid.NewGuid();
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["TENANT_ID"] = tenant.ToString() }).Build();
+        var sessions = new WizardSessionService(fixture.Db, new AegisCore.Infrastructure.Security.PasswordHashingService(), fixture.States, configuration);
+        var state = await sessions.GetOrCreateAsync(Token + "-bound", null, default);
+        Assert.Equal(tenant, state.TenantId);
+        Assert.Equal(tenant, (await fixture.States.InitializeTenantAtStepOneAsync(Token + "-bound")).TenantId);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => sessions.GetOrCreateAsync(Token, null, default));
+    }
 
     [Fact]
     public async Task Step3_SsoConfiguration_StoresSecretOutsideWizardPayload_AndTestsHandshake()

@@ -53,7 +53,8 @@ public class DegreeAuditService : IDegreeAuditService
 
         var allCourses = await _courseRepo.GetAllAsync(cancellationToken);
         var completedCourses = enrollments
-            .Where(e => e.Grade != null && e.Grade != "F")
+            .Where(e => AcademicRecordMath.IsPassing(e.Grade))
+            .DistinctBy(e => e.CourseId)
             .Select(e => new { Enrollment = e, Course = allCourses.FirstOrDefault(c => c.Id == e.CourseId) })
             .Where(x => x.Course != null)
             .ToList<dynamic>();
@@ -61,9 +62,7 @@ public class DegreeAuditService : IDegreeAuditService
         var totalCreditsEarned = completedCourses.Sum(x => x.Course!.CreditHours)
             + transfers.Where(t => t.IsApproved).Sum(t => t.CreditHours);
 
-        var cgpa = enrollments
-            .Where(e => e.GpaPoints.HasValue && e.Grade != "F")
-            .Average(e => (double?)e.GpaPoints) ?? 0;
+        var cgpa = AcademicRecordMath.Cgpa(enrollments, allCourses);
 
         var audits = new List<DegreeAuditEntity>();
 
@@ -74,7 +73,7 @@ public class DegreeAuditService : IDegreeAuditService
             var audit = existingAudit ?? new DegreeAuditEntity
             {
                 Id = Guid.NewGuid(), StudentId = studentId, ProgramId = programId,
-                RequirementId = requirement.Id, TenantId = Guid.NewGuid() /* student.TenantId */
+                RequirementId = requirement.Id, TenantId = student.TenantId
             };
 
             EvaluateRequirement(audit, requirement, completedCourses, transfers, totalCreditsEarned, (decimal)cgpa);
@@ -106,9 +105,10 @@ public class DegreeAuditService : IDegreeAuditService
         var courses = await _courseRepo.GetAllAsync(cancellationToken);
         var transfers = await _creditRepo.GetByStudentAsync(studentId, cancellationToken);
 
-        var cgpa = enrollments.Where(e => e.GpaPoints.HasValue && e.Grade != "F").Average(e => (double?)e.GpaPoints) ?? 0;
+        var cgpa = AcademicRecordMath.Cgpa(enrollments, courses);
         var creditsEarned = enrollments
-            .Where(e => e.Grade != null && e.Grade != "F")
+            .Where(e => AcademicRecordMath.IsPassing(e.Grade))
+            .DistinctBy(e => e.CourseId)
             .Sum(e => courses.FirstOrDefault(c => c.Id == e.CourseId)?.CreditHours ?? 0)
             + transfers.Where(t => t.IsApproved).Sum(t => t.CreditHours);
 
@@ -133,9 +133,9 @@ public class DegreeAuditService : IDegreeAuditService
             TotalRequirements = audits.Count,
             SatisfiedRequirements = satisfied,
             InProgressRequirements = inProgress,
-            RemainingRequirements = requiredCount - satisfied,
+            RemainingRequirements = audits.Count(a => a.Requirement?.IsRequired == true && a.Status != AuditStatus.Satisfied && a.Status != AuditStatus.Waived),
             CompletionPercentage = audits.Count > 0 ? Math.Round((double)satisfied / audits.Count * 100, 1) : 0,
-            IsEligibleForGraduation = audits.All(a => a.Status == AuditStatus.Satisfied || a.Status == AuditStatus.Waived)
+            IsEligibleForGraduation = program is not null && requiredCount > 0 && audits.All(a => a.Status == AuditStatus.Satisfied || a.Status == AuditStatus.Waived)
                 && creditsEarned >= (program?.MinCreditHours ?? 0)
                 && (decimal)cgpa >= (program?.MinCGPA ?? 0),
             Requirements = audits.Select(a => new RequirementProgressDto
