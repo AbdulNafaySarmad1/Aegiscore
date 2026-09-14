@@ -56,6 +56,7 @@ COPY --chown=appuser docker/client/ /app/client/
 RUN sed -i 's/\r$//' /app/client/*.sh
 
 COPY --chown=appuser formats/ /app/formats/
+COPY --chown=appuser demo-scenarios/ /app/demo-scenarios/
 COPY --chown=appuser aegiscorelogo.png /app/aegiscore-logo.png
 
 EXPOSE 8080

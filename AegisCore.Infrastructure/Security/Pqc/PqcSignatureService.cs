@@ -61,7 +61,12 @@ public sealed class PqcSignatureService : IPqcSignatureService
         if (_db is not null)
         {
             var keyId = KeyId(key.PublicKey);
-            var registry = await _db.FinancePqcKeys.SingleAsync(x => x.TenantId == tenantId && x.Purpose == normalizedPurpose && x.KeyId == keyId, ct);
+            // Wizard activation signs immediately after creating the tenant and before
+            // an authenticated request can establish the ambient tenant filter.
+            // Resolve the registry entry by its explicit tenant key so first install
+            // does not fail with an empty filtered sequence.
+            var registry = await _db.FinancePqcKeys.IgnoreQueryFilters()
+                .SingleAsync(x => x.TenantId == tenantId && x.Purpose == normalizedPurpose && x.KeyId == keyId, ct);
             registry.LastUsedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync(ct);
         }

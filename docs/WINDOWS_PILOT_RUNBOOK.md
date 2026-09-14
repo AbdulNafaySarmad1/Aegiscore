@@ -8,7 +8,7 @@ From the repository root, in PowerShell:
 
 ```powershell
 docker build -t aegiscore:pilot-local .
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/pilot.ps1 Start
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/pilot.ps1 Start -EnableDemoSeed -Scenario pakistan-bscs-v1 -DatabaseName aegiscore_scenario_v1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/pilot.ps1 Check
 ```
 
@@ -30,19 +30,20 @@ Do not enable `Runtime:DemoMode`: that flag changes authentication/licensing.
 The wizard has a trial option, but its post-activation license behavior must be
 verified; no authority credentials were available for this rehearsal.
 
-For fictional data, explicitly add `DemoSeed__Enabled=true`,
-`DemoSeed__TenantId=eba35470-ad75-4cac-bb60-c8d4886ebfd7`, and a demo-only
-`DemoSeed__Password` of at least 16 characters to the dedicated environment.
-These settings require recreating the application container to take effect.
+`-EnableDemoSeed` is the explicit opt-in. It binds the selected versioned scenario
+to the configured tenant and generates a demo-only password in the ignored local
+runtime environment. Institution, curriculum, accounts, applicant, fees and
+academic history come from `demo-scenarios/<name>/scenario.json`; application code
+and capture tests contain no scenario record IDs. Start recreates only its labeled
+application container when its image or opt-in environment changes.
 After normal administrator login with `Settings.Write`, submit
 `POST /api/admin/demo-seed` through the same-origin portal. This endpoint is
-absent in behavior (404) when opt-in is off. Foundation accounts are
-`admin@pilot.example.invalid`, `faculty@pilot.example.invalid`, and
-`student@pilot.example.invalid`; the configured password applies to newly created
-accounts only. Repeated seeds preserve existing passwords and data.
+absent in behavior (404) when opt-in is off. Account identifiers are read from the
+selected scenario; the generated password applies to newly created accounts only.
+Repeated seeds preserve existing passwords and data.
 This seed is a small foundation, not five completed lifecycle snapshots.
 
-The recorded applicant is `applicant@pilot.example.invalid` / Aisha Fictional.
+The default recorded applicant is `aisha.khan@applicant.example.invalid` / Aisha Khan.
 They must still verify OTP and submit using `/apply`. After admission, `/activate`
 sends a single-use password setup link to the personal recovery email. No default
 password is assigned to admitted students. `/alumni` reads only the signed-in

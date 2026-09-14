@@ -1,0 +1,155 @@
+{
+  "version": "pakistan-bscs-v1.0.0",
+  "institution": {
+    "name": "Fictional National University",
+    "shortName": "FNU",
+    "timezone": "Asia/Karachi",
+    "currency": "PKR",
+    "domain": "fnu-pilot.example.invalid"
+  },
+  "integrations": {
+    "ssoProvider": "local",
+    "aiProvider": "disabled",
+    "emailProvisioning": "manual",
+    "paymentMode": "manual",
+    "databaseTls": false
+  },
+  "department": {
+    "key": "department.computing",
+    "name": "School of Computing",
+    "code": "COMP"
+  },
+  "batch": {
+    "key": "batch.bscs-2026",
+    "name": "BSCS Fall 2026",
+    "startYear": 2026,
+    "endYear": 2030
+  },
+  "program": {
+    "key": "program.bscs",
+    "name": "Bachelor of Science in Computer Science",
+    "code": "BSCS",
+    "degreeType": "Bachelor",
+    "durationYears": 4,
+    "minimumCredits": 130,
+    "minimumCgpa": 2.0
+  },
+  "academicYear": {
+    "key": "academic-year.2026-27",
+    "name": "2026-2027",
+    "start": "2026-09-01",
+    "end": "2027-08-31"
+  },
+  "semester": {
+    "key": "semester.fall-2026",
+    "name": "Fall 2026",
+    "start": "2026-09-01",
+    "end": "2027-01-31",
+    "status": "active"
+  },
+  "intake": {
+    "key": "intake.fall-2026",
+    "name": "Fall 2026 Admissions",
+    "year": 2026,
+    "semester": "Fall"
+  },
+  "roles": [
+    {
+      "key": "role.administrator",
+      "name": "Admin",
+      "description": "Pilot university administrator",
+      "permissions": [
+        "Admissions.Read", "Admissions.Configure", "Admissions.Approve",
+        "Admissions.Admit", "Admissions.ApproveQuestions", "Admissions.Proctor",
+        "Graduation.Approve", "Settings.Read", "Settings.Write"
+      ]
+    },
+    {
+      "key": "role.faculty",
+      "name": "Faculty",
+      "description": "Pilot faculty member",
+      "permissions": ["Attendance.Read", "Attendance.Write", "Examinations.Read", "Examinations.Write"]
+    },
+    {
+      "key": "role.student",
+      "name": "Student",
+      "description": "Pilot student",
+      "permissions": ["Students.Read"]
+    }
+  ],
+  "accounts": [
+    {
+      "key": "account.administrator",
+      "kind": "Administrator",
+      "roleKey": "role.administrator",
+      "email": "administrator@fnu-pilot.example.invalid",
+      "firstName": "Sana",
+      "lastName": "Qureshi"
+    },
+    {
+      "key": "account.faculty",
+      "kind": "Faculty",
+      "roleKey": "role.faculty",
+      "email": "faculty@fnu-pilot.example.invalid",
+      "firstName": "Dr Farhan",
+      "lastName": "Malik"
+    },
+    {
+      "key": "account.reference-student",
+      "kind": "Student",
+      "roleKey": "role.student",
+      "email": "reference.student@fnu-pilot.example.invalid",
+      "firstName": "Omar",
+      "lastName": "Siddiqui"
+    }
+  ],
+  "student": {
+    "accountKey": "account.reference-student",
+    "universityId": "FNU-HISTORY-001",
+    "rollNumber": "2025F-BSCS-001"
+  },
+  "courses": [
+    {
+      "key": "course.programming-fundamentals",
+      "code": "CS101",
+      "title": "Programming Fundamentals",
+      "credits": 3,
+      "facultyAccountKey": "account.faculty"
+    },
+    {
+      "key": "course.object-oriented-programming",
+      "code": "CS102",
+      "title": "Object-Oriented Programming",
+      "credits": 3,
+      "prerequisiteKey": "course.programming-fundamentals",
+      "facultyAccountKey": "account.faculty"
+    }
+  ],
+  "enrollments": [
+    {
+      "key": "enrollment.reference.cs101",
+      "courseKey": "course.programming-fundamentals",
+      "grade": "B",
+      "gpaPoints": 3.0,
+      "status": "Active"
+    }
+  ],
+  "fee": {
+    "key": "fee.bscs.semester-1",
+    "semesterNumber": 1,
+    "type": "open_merit",
+    "total": 115000,
+    "studentDue": 115000,
+    "components": [
+      { "key": "fee-component.tuition", "name": "Tuition", "amount": 95000, "order": 1 },
+      { "key": "fee-component.admission", "name": "Admission", "amount": 12000, "order": 2 },
+      { "key": "fee-component.services", "name": "Student Services", "amount": 8000, "order": 3 }
+    ]
+  },
+  "applicant": {
+    "key": "applicant.primary",
+    "applicationNumber": "APP-2026F-BSCS-0001",
+    "email": "aisha.khan@applicant.example.invalid",
+    "fullName": "Aisha Khan"
+  }
+}

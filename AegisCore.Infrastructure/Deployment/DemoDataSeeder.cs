@@ -4,6 +4,6 @@ namespace AegisCore.Infrastructure.Deployment;
 public sealed class DemoDataSeeder(Seeders.DemoSeeder seeder) : ISeedRunner
 {
     public int Order => 6;
-    public Task SeedAsync(Guid tenantId, TenantSeedData data, CancellationToken ct = default)
-        => seeder.SeedAsync(tenantId, ct);
+    public async Task SeedAsync(Guid tenantId, TenantSeedData data, CancellationToken ct = default)
+        => await seeder.SeedAsync(tenantId, ct);
 }

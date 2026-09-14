@@ -2,7 +2,10 @@
 param(
     [Parameter(Mandatory)][ValidateSet('Start','Check','Snapshot','Reset','Stop')][string]$Action,
     [ValidatePattern('^[a-z0-9][a-z0-9-]{0,48}$')][string]$Chapter = 'foundation',
-    [string]$Image = 'aegiscore:pilot-local'
+    [string]$Image = 'aegiscore:pilot-local',
+    [switch]$EnableDemoSeed,
+    [ValidatePattern('^[a-z0-9][a-z0-9-]{0,48}$')][string]$Scenario = 'pakistan-bscs-v1',
+    [ValidatePattern('^aegiscore_[a-z0-9_]{1,40}$')][string]$DatabaseName = 'aegiscore_pilot'
 )
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -42,6 +45,18 @@ function Secret {
     try { $rng.GetBytes($bytes) } finally { $rng.Dispose() }
     return [Convert]::ToBase64String($bytes)
 }
+function Set-EnvSetting([string]$path, [string]$name, [string]$value) {
+    $lines = @([IO.File]::ReadAllLines($path))
+    $found = $false
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        if ($lines[$index].StartsWith("$name=", [StringComparison]::Ordinal)) {
+            $lines[$index] = "$name=$value"
+            $found = $true
+        }
+    }
+    if (!$found) { $lines += "$name=$value" }
+    [IO.File]::WriteAllLines($path, $lines)
+}
 function Stop-App {
     if (Exists $app) { Assert-Owned $app; Docker stop $app | Out-Null }
 }
@@ -60,7 +75,7 @@ switch ($Action) {
                 'AEGISCORE_COMPONENT=application', 'ASPNETCORE_ENVIRONMENT=Production',
                 'Runtime__DemoMode=false', 'Database__AutoMigrate=true',
                 'TENANT_ID=eba35470-ad75-4cac-bb60-c8d4886ebfd7', 'DB_DIALECT=postgres',
-                "AEGISCORE_DB_CONNECTION=Host=$pg;Port=5432;Database=aegiscore_pilot;Username=aegiscore_pilot;Password=local-fictional-pilot-only",
+                "AEGISCORE_DB_CONNECTION=Host=$pg;Port=5432;Database=$DatabaseName;Username=aegiscore_pilot;Password=local-fictional-pilot-only",
                 "AEGISCORE_REDIS_CONNECTION=$redis`:6379", 'APP_URL=http://localhost:8080',
                 'AEGISCORE_STORAGE_PROVIDER=local', 'AEGISCORE_STORAGE_LOCAL_PATH=/app/storage',
                 'AEGISCORE_SECRET_PROVIDER=FILE', 'AEGISCORE_LOCAL_SECRET_PATH=/app/config/secrets/vault.bin',
@@ -73,6 +88,22 @@ switch ($Action) {
                 "LICENSE_HMAC_SECRET=$(Secret)", 'AI_PROVIDER=disabled'
             )
             [IO.File]::WriteAllLines($envPath, $settings)
+        }
+        Set-EnvSetting $envPath 'AEGISCORE_DB_CONNECTION' "Host=$pg;Port=5432;Database=$DatabaseName;Username=aegiscore_pilot;Password=local-fictional-pilot-only"
+        # Keep the local pilot's readiness contract explicit while retaining all
+        # secrets in the dedicated state file. These values are local-only defaults.
+        Set-EnvSetting $envPath 'DB_HOST' $pg
+        Set-EnvSetting $envPath 'DB_PORT' '5432'
+        Set-EnvSetting $envPath 'DB_NAME' $DatabaseName
+        Set-EnvSetting $envPath 'DB_USER' 'aegiscore_pilot'
+        Set-EnvSetting $envPath 'DB_PASS' 'local-fictional-pilot-only'
+        Set-EnvSetting $envPath 'APP_ENV' 'Production'
+        Set-EnvSetting $envPath 'SESSION_LIFETIME' '3600'
+        Set-EnvSetting $envPath 'CF_TURNSTILE_SITE_KEY' 'local-pilot-disabled'
+        Set-EnvSetting $envPath 'CF_TURNSTILE_SECRET_KEY' 'local-pilot-disabled'
+        foreach ($key in @('PQC_MLKEM_PRIVATE_KEY','PQC_MLKEM_PUBLIC_KEY','PQC_MLDSA_PRIVATE_KEY','PQC_MLDSA_PUBLIC_KEY')) {
+            $existing = [IO.File]::ReadAllLines($envPath) | Where-Object { $_.StartsWith("$key=", [StringComparison]::Ordinal) } | Select-Object -First 1
+            if (!$existing) { Set-EnvSetting $envPath $key (Secret) }
         }
         $runtimeSettings = [IO.File]::ReadAllText($envPath)
         if (!$runtimeSettings.Contains('DataProtection__CertificatePath=')) {
@@ -91,18 +122,59 @@ switch ($Action) {
         if (!$runtimeSettings.Contains('Email__SmtpHost=')) {
             [IO.File]::AppendAllText($envPath, "`nEmail__SmtpHost=$mail`nEmail__SmtpPort=1025`nEmail__EnableSsl=false`nEmail__FromAddress=admissions@pilot.example.invalid`nEmail__FromName=Fictional Pilot University`n")
         }
+        if ($EnableDemoSeed) {
+            $tenantLine = [IO.File]::ReadAllLines($envPath) | Where-Object { $_.StartsWith('TENANT_ID=', [StringComparison]::Ordinal) } | Select-Object -First 1
+            if (!$tenantLine) { throw 'The runtime environment has no TENANT_ID.' }
+            Set-EnvSetting $envPath 'DemoSeed__Enabled' 'true'
+            Set-EnvSetting $envPath 'DemoSeed__TenantId' $tenantLine.Substring('TENANT_ID='.Length)
+            Set-EnvSetting $envPath 'DemoSeed__ScenarioRoot' '/app/demo-scenarios'
+            Set-EnvSetting $envPath 'DemoSeed__Scenario' $Scenario
+            if (!([IO.File]::ReadAllText($envPath).Contains('DemoSeed__Password='))) { Set-EnvSetting $envPath 'DemoSeed__Password' (Secret) }
+        }
         if (!(Exists $pg)) {
-            Docker run -d --name $pg --label aegiscore.scope=dedicated-demo --network $network --memory 1g -p 127.0.0.1:55432:5432 -e POSTGRES_DB=aegiscore_pilot -e POSTGRES_USER=aegiscore_pilot -e POSTGRES_PASSWORD=local-fictional-pilot-only postgres:17-alpine | Out-Null
+            Docker run -d --name $pg --label aegiscore.scope=dedicated-demo --network $network --memory 1g -p 127.0.0.1:55432:5432 -e POSTGRES_DB=$DatabaseName -e POSTGRES_USER=aegiscore_pilot -e POSTGRES_PASSWORD=local-fictional-pilot-only postgres:17-alpine | Out-Null
         } else {
             Assert-Owned $pg; Docker start $pg | Out-Null
             $attached = Docker inspect --format '{{json .NetworkSettings.Networks}}' $pg
             if ($attached -notmatch '"aegiscore-pilot"') { Docker network connect $network $pg }
+        }
+        $postgresReady = $false
+        for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            & docker.exe exec $pg pg_isready -U aegiscore_pilot -d postgres *> $null
+            if ($LASTEXITCODE -eq 0) { $postgresReady = $true; break }
+            Start-Sleep -Seconds 1
+        }
+        if (!$postgresReady) { throw 'Dedicated PostgreSQL did not become ready.' }
+        $databases = @(Docker exec $pg psql -U aegiscore_pilot -d postgres -At -c 'SELECT datname FROM pg_database')
+        if ($databases -notcontains $DatabaseName) { Docker exec $pg createdb -U aegiscore_pilot $DatabaseName }
+        # A completed wizard owns the tenant identity. Rebind the local runtime
+        # to that persisted tenant before starting the API so login and seeding
+        # cannot accidentally use the bootstrap placeholder.
+        $tenantQuery = Join-Path $state 'tenant-query.sql'
+        [IO.File]::WriteAllText($tenantQuery, 'SELECT "Id"::text FROM "Tenants" ORDER BY "CreatedAt" LIMIT 2;')
+        Docker cp $tenantQuery "${pg}:/tmp/pilot-tenant-query.sql"
+        $hasTenantTable = @(Docker exec $pg psql -U aegiscore_pilot -d $DatabaseName -At -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'Tenants' LIMIT 1" 2>$null)
+        $tenantIds = if ($hasTenantTable -contains '1') { @(Docker exec $pg psql -U aegiscore_pilot -d $DatabaseName -At -f /tmp/pilot-tenant-query.sql 2>$null | Where-Object { $_ -match '^[0-9a-fA-F-]{36}$' }) } else { @() }
+        if ($tenantIds.Count -eq 0) {
+            $installationState = Join-Path $state 'config/installation.json'
+            if (Test-Path -LiteralPath $installationState) { Remove-Item -LiteralPath $installationState -Force }
+        }
+        if ($tenantIds.Count -eq 1) {
+            $tenantId = $tenantIds.ToString().Trim()
+            Set-EnvSetting $envPath 'TENANT_ID' $tenantId
+            if ($EnableDemoSeed) { Set-EnvSetting $envPath 'DemoSeed__TenantId' $tenantId }
         }
         foreach ($service in @(@($redis,'redis:7-alpine'), @($mail,'axllent/mailpit:v1.29.1'))) {
             if (!(Exists $service[0])) {
                 $ports = if ($service[0] -eq $mail) { @('-p','127.0.0.1:8025:8025') } else { @() }
                 Docker run -d --name $service[0] --label aegiscore.scope=dedicated-demo --network $network --memory 256m @ports $service[1] | Out-Null
             } else { Assert-Owned $service[0]; Docker start $service[0] | Out-Null }
+        }
+        if (Exists $app) {
+            Assert-Owned $app
+            $requestedImage = Docker image inspect $Image --format '{{.Id}}'
+            $runningImage = Docker inspect $app --format '{{.Image}}'
+            if ($EnableDemoSeed -or $requestedImage -ne $runningImage) { Docker rm -f $app | Out-Null }
         }
         if (!(Exists $app)) {
             Docker run -d --name $app --label aegiscore.scope=dedicated-demo --network $network --memory 4g --restart unless-stopped --env-file $envPath -p 127.0.0.1:8080:8080 --mount "type=bind,source=$state/storage,target=/app/storage" --mount "type=bind,source=$state/config,target=/app/config" $Image | Out-Null
@@ -111,7 +183,7 @@ switch ($Action) {
     }
     'Check' {
         Assert-Owned $pg
-        Docker exec $pg pg_isready -U aegiscore_pilot -d aegiscore_pilot
+        Docker exec $pg pg_isready -U aegiscore_pilot -d $DatabaseName
         if (!(Exists $app)) { throw 'PostgreSQL is ready, but the application has not been created.' }
         Assert-Owned $app
         $response = Invoke-RestMethod 'http://localhost:8080/health/ready' -TimeoutSec 10
@@ -129,17 +201,17 @@ switch ($Action) {
         Stop-App
         try {
             New-Item -ItemType Directory -Path $snapshot | Out-Null
-            Docker exec $pg pg_dump -U aegiscore_pilot -d aegiscore_pilot -Fc -f /tmp/pilot-snapshot.dump
+            Docker exec $pg pg_dump -U aegiscore_pilot -d $DatabaseName -Fc -f /tmp/pilot-snapshot.dump
             Docker cp "${pg}:/tmp/pilot-snapshot.dump" (Join-Path $snapshot 'database.dump')
             foreach ($entry in @('storage','config','runtime.env')) { Copy-Item -LiteralPath (Join-Path $state $entry) -Destination $snapshot -Recurse }
             $schemaQuery = Join-Path $state 'schema-query.sql'
             [IO.File]::WriteAllText($schemaQuery, 'SELECT "MigrationId" FROM "__EFMigrationsHistory" ORDER BY "MigrationId";')
             Docker cp $schemaQuery "${pg}:/tmp/pilot-schema-query.sql"
-            $schema = @(Docker exec $pg psql -U aegiscore_pilot -d aegiscore_pilot -At -v ON_ERROR_STOP=1 -f /tmp/pilot-schema-query.sql)
+            $schema = @(Docker exec $pg psql -U aegiscore_pilot -d $DatabaseName -At -v ON_ERROR_STOP=1 -f /tmp/pilot-schema-query.sql)
             $files = @(Get-ChildItem -LiteralPath $snapshot -File -Recurse | ForEach-Object {
                 @{ path = $_.FullName.Substring($snapshot.Length + 1); sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
             })
-            @{ format = 1; chapter = $Chapter; commit = (git -C $root rev-parse HEAD); image = (Docker image inspect $Image --format '{{.Id}}'); schema = $schema; files = $files; recordedLifecycle = $false } |
+            @{ format = 1; chapter = $Chapter; database = $DatabaseName; commit = (git -C $root rev-parse HEAD); image = (Docker image inspect $Image --format '{{.Id}}'); schema = $schema; files = $files; recordedLifecycle = $false } |
                 ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $snapshot 'manifest.json')
         } finally { if ($running) { Docker start $app | Out-Null } }
     }
@@ -147,7 +219,7 @@ switch ($Action) {
         Assert-Owned $pg
         Assert-StatePath $snapshot
         $manifest = Get-Content -LiteralPath (Join-Path $snapshot 'manifest.json') -Raw | ConvertFrom-Json
-        if ($manifest.format -ne 1 -or $manifest.image -ne (Docker image inspect $Image --format '{{.Id}}')) { throw 'Snapshot and application image versions do not match.' }
+        if ($manifest.format -ne 1 -or $manifest.database -ne $DatabaseName -or $manifest.image -ne (Docker image inspect $Image --format '{{.Id}}')) { throw 'Snapshot, database and application image versions do not match.' }
         foreach ($file in $manifest.files) {
             $source = Join-Path $snapshot $file.path
             Assert-StatePath $source
@@ -158,9 +230,9 @@ switch ($Action) {
         Docker exec $pg pg_restore --list /tmp/pilot-restore.dump | Out-Null
         # Recreate only this fixed, ownership-checked demo DB so objects introduced
         # by a failed upgrade cannot survive a restore to the previous schema.
-        Docker exec $pg dropdb -U aegiscore_pilot --force --if-exists aegiscore_pilot
-        Docker exec $pg createdb -U aegiscore_pilot aegiscore_pilot
-        Docker exec $pg pg_restore -U aegiscore_pilot -d aegiscore_pilot --exit-on-error --single-transaction /tmp/pilot-restore.dump
+        Docker exec $pg dropdb -U aegiscore_pilot --force --if-exists $DatabaseName
+        Docker exec $pg createdb -U aegiscore_pilot $DatabaseName
+        Docker exec $pg pg_restore -U aegiscore_pilot -d $DatabaseName --exit-on-error --single-transaction /tmp/pilot-restore.dump
         foreach ($entry in @('storage','config','runtime.env')) {
             $target = Join-Path $state $entry
             Assert-StatePath $target

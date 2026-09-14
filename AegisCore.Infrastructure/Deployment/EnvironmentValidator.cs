@@ -33,7 +33,7 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
 {
     public const string SsoNonLocalCondition = "SSO_PROVIDER != local";
     public const string SsoEntraCondition = "SSO_PROVIDER = entra";
-    public const string AiRemoteCondition = "AI_PROVIDER != ollama-local";
+    public const string AiRemoteCondition = "AI_PROVIDER != disabled";
 
     public static IReadOnlyList<EnvironmentVariableDefinition> Registry { get; } =
     [
@@ -50,9 +50,9 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
         new("SSO_TENANT_ID", "Auth / SSO", EnvironmentValueType.String, false, SsoEntraCondition),
         new("SSO_CALLBACK_URL", "Auth / SSO", EnvironmentValueType.String, false, SsoNonLocalCondition),
 
-        new("AI_PROVIDER", "AI / Helpbot", EnvironmentValueType.String, true, AllowedValues: Values("ollama", "openai", "granite", "custom")),
-        new("AI_ENDPOINT", "AI / Helpbot", EnvironmentValueType.String, true),
-        new("AI_MODEL", "AI / Helpbot", EnvironmentValueType.String, true),
+        new("AI_PROVIDER", "AI / Helpbot", EnvironmentValueType.String, true, AllowedValues: Values("disabled", "ollama", "openai", "granite", "custom")),
+        new("AI_ENDPOINT", "AI / Helpbot", EnvironmentValueType.String, false, AiRemoteCondition),
+        new("AI_MODEL", "AI / Helpbot", EnvironmentValueType.String, false, AiRemoteCondition),
         new("AI_API_KEY", "AI / Helpbot", EnvironmentValueType.String, false, AiRemoteCondition),
 
         new("PQC_MLKEM_PUBLIC_KEY", "Security / PQC", EnvironmentValueType.String, true),
@@ -143,8 +143,7 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
             SsoNonLocalCondition => !IsMissing(ssoProvider) && !string.Equals(ssoProvider, "local", StringComparison.OrdinalIgnoreCase),
             SsoEntraCondition => string.Equals(ssoProvider, "entra", StringComparison.OrdinalIgnoreCase),
             AiRemoteCondition => !IsMissing(aiProvider)
-                && !string.Equals(aiProvider, "ollama", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(aiProvider, "ollama-local", StringComparison.OrdinalIgnoreCase),
+                && !string.Equals(aiProvider, "disabled", StringComparison.OrdinalIgnoreCase),
             _ => false
         };
     }

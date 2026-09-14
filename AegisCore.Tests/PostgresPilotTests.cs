@@ -33,7 +33,7 @@ public class PostgresPilotTests
     {
         var connection = Environment.GetEnvironmentVariable("PILOT_POSTGRES_CONNECTION")!;
         var parsed = new NpgsqlConnectionStringBuilder(connection);
-        Assert.Equal("aegiscore_pilot", parsed.Database);
+        Assert.StartsWith("aegiscore_", parsed.Database, StringComparison.Ordinal);
         Assert.Contains(parsed.Host, new[] { "127.0.0.1", "localhost" });
         var tenant = Guid.Parse("eba35470-ad75-4cac-bb60-c8d4886ebfd7");
         var http = new DefaultHttpContext(); http.Items["TenantId"] = tenant;
@@ -47,9 +47,12 @@ public class PostgresPilotTests
         // Query the real mapped columns: migration history alone cannot detect an
         // undiscoverable hand-written migration.
         await db.WizardSessions.IgnoreQueryFilters().Select(s => new { s.BootstrapTokenHash, s.Payload }).ToListAsync();
+        var scenarioRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../demo-scenarios"));
+        var scenario = DemoScenario.Load(scenarioRoot, "pakistan-bscs-v1");
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
             ["DemoSeed:Enabled"] = "true", ["DemoSeed:TenantId"] = tenant.ToString(),
-            ["DemoSeed:Password"] = "Fictional-Pilot-Test-Password!"
+            ["DemoSeed:Password"] = "Fictional-Pilot-Test-Password!",
+            ["DemoSeed:ScenarioRoot"] = scenarioRoot, ["DemoSeed:Scenario"] = "pakistan-bscs-v1"
         }).Build();
         var hasher = new PasswordHashingService();
         var seeder = new DemoSeeder(db, NullLogger<DemoSeeder>.Instance, hasher, config);
@@ -57,12 +60,12 @@ public class PostgresPilotTests
         var count = await db.Users.CountAsync();
         await seeder.SeedAsync(tenant);
         Assert.Equal(count, await db.Users.CountAsync());
-        var student = await db.Users.SingleAsync(u => u.Id == DemoSeeder.RecordId(tenant, "user:Student"));
+        var student = await db.Users.SingleAsync(u => u.Id == DemoSeeder.RecordId(tenant, scenario.Version, scenario.Student.AccountKey));
         Assert.True(hasher.VerifyPassword("Fictional-Pilot-Test-Password!", student.PasswordHash!));
         Assert.True(await db.Students.AnyAsync(s => s.Id == student.Id));
         Assert.True(await db.UserRoles.AnyAsync(r => r.UserId == student.Id));
-        Assert.Equal(1, await db.StudentFeeDues.CountAsync());
-        Assert.Equal(1, await db.ApplicantProfiles.CountAsync());
+        Assert.True(await db.StudentFeeDues.AnyAsync(d => d.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"due:{scenario.Student.AccountKey}")));
+        Assert.True(await db.ApplicantProfiles.AnyAsync(a => a.Id == DemoSeeder.RecordId(tenant, scenario.Version, scenario.Applicant.Key)));
         var lifecycle = new StudentLifecycleController(db, new StudentLifecycleService());
         Assert.IsType<ConflictObjectResult>(await lifecycle.UpsertAlumni(new AlumniProfile { UserId = student.Id, GraduationYear = 2030 }, default));
         Assert.Empty(await db.AlumniProfiles.ToListAsync());
@@ -72,7 +75,7 @@ public class PostgresPilotTests
         Assert.Equal(3, progress.EarnedCredits);
         Assert.Equal(3.0m, progress.Cgpa);
         Assert.Contains(progress.Blockers, b => b.Contains("fees"));
-        var approver = DemoSeeder.RecordId(tenant, "user:Admin");
+        var approver = DemoSeeder.RecordId(tenant, scenario.Version, "account.administrator");
         await Assert.ThrowsAsync<InvalidOperationException>(() => graduation.ClearAsync(student.Id, "Finance", approver));
         await Assert.ThrowsAsync<InvalidOperationException>(() => graduation.ApproveAsync(student.Id, approver));
         Assert.Empty(await db.AlumniProfiles.ToListAsync());

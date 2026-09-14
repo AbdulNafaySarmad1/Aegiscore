@@ -43,7 +43,7 @@ public sealed class SetupSecurityMiddlewareTests
     public async Task SetupRateLimit_AllowsTenRequestsThenReturns429()
     {
         var calls = 0;
-        var middleware = new SetupRateLimitMiddleware(_ => { calls++; return Task.CompletedTask; });
+        var middleware = new SetupRateLimitMiddleware(_ => { calls++; return Task.CompletedTask; }, Configuration());
         DefaultHttpContext? last = null;
         var ip = IPAddress.Parse($"198.51.100.{Random.Shared.Next(1, 250)}");
         for (var request = 0; request < 11; request++)
@@ -57,6 +57,23 @@ public sealed class SetupSecurityMiddlewareTests
         last.Response.Body.Position = 0;
         using var body = await JsonDocument.ParseAsync(last.Response.Body);
         Assert.Equal("Too many setup attempts. Wait 60 seconds.", body.RootElement.GetProperty("message").GetString());
+    }
+
+    [Fact]
+    public async Task SetupRateLimit_AllowsCompleteAuthenticatedWizardBurst()
+    {
+        var calls = 0;
+        var middleware = new SetupRateLimitMiddleware(_ => { calls++; return Task.CompletedTask; }, Configuration());
+        var ip = IPAddress.Parse($"198.51.100.{Random.Shared.Next(1, 250)}");
+        DefaultHttpContext? last = null;
+        for (var request = 0; request < 61; request++)
+        {
+            last = Context("/api/wizard/session", ip);
+            last.Request.Headers[SetupBootstrapToken.HeaderName] = Token;
+            await middleware.InvokeAsync(last);
+        }
+        Assert.Equal(60, calls);
+        Assert.Equal(StatusCodes.Status429TooManyRequests, last!.Response.StatusCode);
     }
 
     [Fact]

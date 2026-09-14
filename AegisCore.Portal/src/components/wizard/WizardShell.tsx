@@ -97,7 +97,8 @@ export function WizardShell() {
   }, [loadSession]);
 
   const current = useMemo<WizardData>(() => ({
-    ...(step === 3 ? { provider: "local" } : step === 4 ? { roles: DEFAULT_ROLES } : {}),
+    ...(step === 1 ? { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+      : step === 3 ? { provider: "local" } : step === 4 ? { roles: DEFAULT_ROLES } : {}),
     ...data[`step${step}`],
   }), [data, step]);
   const canContinue = (step !== 3 || text(current, "provider", "local") === "local" || current.connectionTested === true)

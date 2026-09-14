@@ -82,6 +82,33 @@ public sealed class WizardProvisioningService
             _db.Licenses.Add(license);
         }
 
+        // A local/demo wizard issues a scoped trial license as part of go-live.
+        // Without the runtime state, the license middleware correctly treats the
+        // freshly installed tenant as pending activation and blocks real writes.
+        if (licenseMode == "demo")
+        {
+            var licenseState = await _db.LicenseStates.IgnoreQueryFilters()
+                .SingleOrDefaultAsync(item => item.TenantId == tenantId, ct);
+            if (licenseState is null)
+            {
+                _db.LicenseStates.Add(new LicenseState
+                {
+                    Id = Guid.NewGuid(), TenantId = tenantId, LicenseKey = license.LicenseKey,
+                    UniversityId = tenantId, UniversityName = name, Status = "active",
+                    LicenseJson = new JsonObject { ["mode"] = "demo", ["edition"] = "community" }.ToJsonString(),
+                    ActivatedAt = DateTimeOffset.UtcNow, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow
+                });
+            }
+            else
+            {
+                licenseState.Status = "active";
+                licenseState.LicenseKey = license.LicenseKey;
+                licenseState.UniversityName = name;
+                licenseState.ActivatedAt ??= DateTimeOffset.UtcNow;
+                licenseState.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
         await _pqc.SignAsync(tenantId, "voucher-approval", ReadOnlyMemory<byte>.Empty, archival: false, ct);
     }

@@ -111,6 +111,22 @@ public sealed class LicenseService(
             return await FailHeartbeatAsync(null, "pending_activation", "License is not activated.", ct);
         }
 
+        // Demo seeding is an explicit local opt-in. Its trial key is intentionally
+        // not a license-authority artifact, so do not send it to an authority or
+        // lock the dedicated rehearsal tenant on the periodic heartbeat.
+        if (configuration.GetValue<bool>("DemoSeed:Enabled"))
+        {
+            state.Status = "active";
+            state.LastHeartbeatAt = DateTimeOffset.UtcNow;
+            state.LastHeartbeatStatus = "demo-local";
+            state.FailedHeartbeatCount = 0;
+            state.LockedAt = null;
+            state.LockReason = null;
+            state.UpdatedAt = DateTimeOffset.UtcNow;
+            await db.SaveChangesAsync(ct);
+            return new HeartbeatResult(true, "demo-local", "Explicit local demo mode; no license authority was contacted.");
+        }
+
         if (OfflineModeEnabled())
         {
             var validation = await ValidateAsync(state.LicenseKey, ct);

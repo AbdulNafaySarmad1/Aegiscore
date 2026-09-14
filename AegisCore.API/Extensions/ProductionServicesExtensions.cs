@@ -180,7 +180,7 @@ public static class AuthenticationServicesExtensions
         var authority = configuration["Auth:Authority"];
         var audience = configuration["Auth:Audience"];
         if (string.IsNullOrWhiteSpace(audience)) audience = "aegiscore-api";
-        services.AddAuthentication().AddJwtBearer(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
         {
             options.Audience = audience;
             if (Uri.TryCreate(authority, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
@@ -197,7 +197,8 @@ public static class AuthenticationServicesExtensions
             var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
             var isProduction = string.Equals(configuration["ASPNETCORE_ENVIRONMENT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
             var publicKeyPem = configuration["Jwt:PublicKey"];
-            if (isProduction && string.IsNullOrWhiteSpace(publicKeyPem))
+            if (isProduction && string.IsNullOrWhiteSpace(publicKeyPem)
+                && !configuration.GetValue<bool>("DemoSeed:Enabled"))
                 throw new InvalidOperationException("Production requires an RSA JWT authority or Jwt:PublicKey.");
             if (string.IsNullOrWhiteSpace(secret))
             {

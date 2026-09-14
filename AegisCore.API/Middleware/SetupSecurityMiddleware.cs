@@ -58,27 +58,39 @@ public sealed class SetupBootstrapTokenMiddleware(RequestDelegate next, IConfigu
         => path.StartsWithSegments("/api/wizard") || path.StartsWithSegments("/api/setup");
 }
 
-public sealed class SetupRateLimitMiddleware(RequestDelegate next)
+public sealed class SetupRateLimitMiddleware
 {
-    private const int Limit = 10;
+    private const int UnauthenticatedLimit = 10;
+    private const int AuthenticatedLimit = 60;
     private static readonly TimeSpan Window = TimeSpan.FromMinutes(1);
     private static readonly ConcurrentDictionary<string, Queue<DateTimeOffset>> Attempts = new(StringComparer.Ordinal);
+    private readonly RequestDelegate _next;
+    private readonly byte[] _expected;
+
+    public SetupRateLimitMiddleware(RequestDelegate next, IConfiguration configuration)
+    {
+        _next = next;
+        _expected = Encoding.UTF8.GetBytes(SetupBootstrapToken.RequireValid(configuration));
+    }
 
     public async Task InvokeAsync(HttpContext context)
     {
         if (!context.Request.Path.StartsWithSegments("/api/wizard"))
         {
-            await next(context);
+            await _next(context);
             return;
         }
 
-        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var supplied = Encoding.UTF8.GetBytes(context.Request.Headers[SetupBootstrapToken.HeaderName].ToString());
+        var authenticated = supplied.Length == _expected.Length && CryptographicOperations.FixedTimeEquals(supplied, _expected);
+        var limit = authenticated ? AuthenticatedLimit : UnauthenticatedLimit;
+        var key = $"{(authenticated ? "valid" : "invalid")}:{context.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
         var attempts = Attempts.GetOrAdd(key, _ => new Queue<DateTimeOffset>());
         var now = DateTimeOffset.UtcNow;
         lock (attempts)
         {
             while (attempts.TryPeek(out var oldest) && now - oldest >= Window) attempts.Dequeue();
-            if (attempts.Count < Limit)
+            if (attempts.Count < limit)
             {
                 attempts.Enqueue(now);
             }
@@ -99,6 +111,6 @@ public sealed class SetupRateLimitMiddleware(RequestDelegate next)
             return;
         }
 
-        await next(context);
+        await _next(context);
     }
 }

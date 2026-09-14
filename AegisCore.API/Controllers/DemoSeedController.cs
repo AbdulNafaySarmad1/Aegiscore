@@ -14,7 +14,6 @@ public sealed class DemoSeedController(AegisDbContext db, IConfiguration configu
     {
         if (!configuration.GetValue<bool>("DemoSeed:Enabled")) return NotFound();
         var seeder = ActivatorUtilities.CreateInstance<DemoSeeder>(services);
-        await seeder.SeedAsync(db.CurrentTenantId, ct);
-        return Ok(new { version = DemoSeeder.Version, tenantId = db.CurrentTenantId });
+        return Ok(await seeder.SeedAsync(db.CurrentTenantId, ct));
     }
 }

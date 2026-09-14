@@ -573,6 +573,7 @@ public sealed class WizardController(
         }
         catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
         {
+            HttpContext.RequestServices.GetService<ILogger<WizardController>>()?.LogError(ex, "Wizard activation failed for session {SessionId}", request.SessionId);
             return UnprocessableEntity(new { success = false, error = ex.Message });
         }
     }
