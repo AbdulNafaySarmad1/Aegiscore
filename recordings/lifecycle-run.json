@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "viewport": "1920x1080",
+  "cohort": 50,
+  "focalStudent": "Aisha Khan",
+  "studentId": "6b2995cd-2ad5-ceb6-3ed7-64d7eb69c3ad",
+  "applicantId": "d3379967-d1e8-37a7-edfd-687ffdf266b5",
+  "backend": "PostgreSQL",
+  "syntheticFixtures": false
+}

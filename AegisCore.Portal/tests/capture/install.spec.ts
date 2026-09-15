@@ -20,6 +20,11 @@ test("complete the local installation through the real wizard", async ({ page, b
   const account = savedAccount?.email === administrator.email ? savedAccount :
     { email: administrator.email, password: `${randomBytes(24).toString("base64url")}!Aa9` };
   if (account !== savedAccount) writeFileSync(accountPath, JSON.stringify(account));
+  // A fresh PostgreSQL database applies the full migration chain before the API
+  // starts accepting wizard sessions. The portal can render while that happens.
+  await expect.poll(async () => {
+    try { return (await page.request.get("/health/live")).status(); } catch { return 0; }
+  }, { timeout: 90_000 }).toBe(200);
   await page.goto("/setup");
   await page.getByLabel("Setup token", { exact: false }).fill(settings.AEGISCORE_SETUP_TOKEN);
   const session = page.waitForResponse(r => r.url().endsWith("/api/wizard/session"));

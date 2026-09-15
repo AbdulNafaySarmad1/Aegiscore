@@ -39,6 +39,7 @@ public sealed class EnvironmentValidatorTests
         var values = ValidLocalValues();
         values["SSO_PROVIDER"] = "entra";
         values["AI_PROVIDER"] = "openai";
+        values.Remove("AI_API_KEY");
         var validator = new EnvironmentValidator(Configuration(values));
 
         var result = validator.Validate();
@@ -96,6 +97,7 @@ public sealed class EnvironmentValidatorTests
         ["AI_PROVIDER"] = "ollama",
         ["AI_ENDPOINT"] = "http://localhost:11434",
         ["AI_MODEL"] = "qwen2.5:7b",
+        ["AI_API_KEY"] = "local-test-key",
         ["PQC_MLKEM_PUBLIC_KEY"] = "public",
         ["PQC_MLKEM_PRIVATE_KEY"] = "private",
         ["PQC_MLDSA_PUBLIC_KEY"] = "public",

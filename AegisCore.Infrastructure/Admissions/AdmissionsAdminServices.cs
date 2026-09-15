@@ -163,7 +163,9 @@ public sealed class AdmissionsAdminService(AegisDbContext db, IStorageProvider s
 
         var row = new AdmissionApplicantRow(profile.Id, profile.ApplicantId, profile.FullName, profile.Email,
             profile.ProgramId, profile.IntakeId, profile.Status, profile.SubmittedAt, profile.CreatedAt);
-        return new AdmissionApplicantDetail(row, docs);
+        var test = await db.ApplicantTests.Where(t => t.ApplicantId == applicantProfileId)
+            .Select(t => new AdmissionApplicantTest(t.Score, t.Passed, t.Status, t.CompletedAt)).SingleOrDefaultAsync(ct);
+        return new AdmissionApplicantDetail(row, docs, test);
     }
 
     public async Task<DocumentDownload?> DownloadDocumentAsync(Guid applicantProfileId, Guid documentId, CancellationToken ct = default)

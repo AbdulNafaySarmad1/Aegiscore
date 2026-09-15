@@ -23,6 +23,7 @@ public sealed class GraduationController(AegisDbContext db, IAuthorizationServic
     [HttpPost("{studentId:guid}/clearances/{department}"), RequirePermission("Graduation", "Approve")]
     public async Task<IActionResult> Clear(Guid studentId, string department, CancellationToken ct)
     {
+        if (!IsAdministrator) return Forbid();
         try { await new GraduationService(db).ClearAsync(studentId, department, Actor, ct); return Ok(new { cleared = true }); }
         catch (KeyNotFoundException) { return NotFound(); }
         catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
@@ -31,8 +32,11 @@ public sealed class GraduationController(AegisDbContext db, IAuthorizationServic
     [HttpPost("{studentId:guid}/approve"), RequirePermission("Graduation", "Approve")]
     public async Task<IActionResult> Approve(Guid studentId, CancellationToken ct)
     {
+        if (!IsAdministrator) return Forbid();
         try { return Ok(await new GraduationService(db).ApproveAsync(studentId, Actor, ct)); }
         catch (KeyNotFoundException) { return NotFound(); }
         catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
     }
+
+    private bool IsAdministrator => User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
 }

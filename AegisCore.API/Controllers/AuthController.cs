@@ -42,9 +42,13 @@ public sealed class AuthController(
         var tenantId = ResolveTenantId();
         if (tenantId == Guid.Empty) return Unauthorized(new { error = "Invalid credentials." });
 
-        var user = await db.Users.IgnoreQueryFilters()
+        var matchingUsers = await db.Users.IgnoreQueryFilters()
+            .AsSplitQuery()
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
-            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Email == email, ct);
+            .Where(x => x.TenantId == tenantId && x.Email == email)
+            .Take(2)
+            .ToListAsync(ct);
+        var user = matchingUsers.Count == 1 ? matchingUsers[0] : null;
 
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active ||
             string.IsNullOrWhiteSpace(user.PasswordHash) || !passwords.VerifyPassword(request.Password, user.PasswordHash))
@@ -109,6 +113,7 @@ public sealed class AuthController(
         await db2.KeyDeleteAsync(tokenKey);
 
         var user = await db.Users.IgnoreQueryFilters()
+            .AsSplitQuery()
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == userId, ct);
 

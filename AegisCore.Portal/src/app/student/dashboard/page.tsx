@@ -1,106 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { apiGet } from "@/lib/api-client";
-import { BookOpenCheck, CalendarDays, ClipboardCheck, CreditCard, FileText, GraduationCap, TrendingUp } from "lucide-react";
+import { BookOpenCheck, CalendarDays, ClipboardCheck, CreditCard, FileText, GraduationCap } from "lucide-react";
 
-type StudentGrades = { courses: { courseTitle: string; percentage: number; totalSessions: number; presentSessions: number }[] };
-type Attendance = { courses: { courseTitle: string; percentage: number }[] };
-type FeeStatus = { feeFunnel: { demanded: number; collected: number; overdue: number; open: number; paid: number } };
-type Enrollments = { enrollments: { courseName: string; status: string }[] };
+type Overview = {
+  student: { id: string; name: string; universityId: string; rollNumber: string; status: string };
+  admission: { applicationNumber: string; status: string; approvedDocuments: number; testScore: number; testPassed: boolean } | null;
+  academics: { program: string; cgpa: number; earnedCredits: number; requiredCredits: number; completedCourses: number; totalCourses: number; courses: { code: string; title: string; credits: number; grade: string | null; status: string }[] };
+  attendance: { course: string; total: number; present: number; percentage: number }[];
+  finance: { demanded: number; paid: number; outstanding: number; status: string };
+  timetable: { day: string; startTime: string; endTime: string; room: string; course: string }[];
+};
 
 export default function StudentDashboard() {
-  const [grades, setGrades] = useState<StudentGrades | null>(null);
-  const [attendance, setAttendance] = useState<Attendance | null>(null);
-  const [fees, setFees] = useState<FeeStatus | null>(null);
-  const [enrollments, setEnrollments] = useState<Enrollments | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.allSettled([
-      apiGet<StudentGrades>("/api/examination/grades/student?summary").catch(() => null),
-      apiGet<Attendance>("/api/attendance/report/student").catch(() => null),
-      apiGet<FeeStatus>("/api/student/finance").catch(() => null),
-      apiGet<Enrollments>("/api/student/enrollments").catch(() => null),
-    ]).then(([g, a, f, e]) => {
-      if (g.status === "fulfilled") setGrades(g.value);
-      if (a.status === "fulfilled") setAttendance(a.value);
-      if (f.status === "fulfilled") setFees(f.value);
-      if (e.status === "fulfilled") setEnrollments(e.value);
-      setLoading(false);
-    });
-  }, []);
-
+  const [data, setData] = useState<Overview | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => { apiGet<Overview>("/api/student/overview").then(setData).catch(reason => setError(reason.message)); }, []);
+  const attendance = data?.attendance.length ? data.attendance.reduce((sum, row) => sum + row.percentage, 0) / data.attendance.length : 0;
   const kpis = [
-    { label: "CGPA", value: grades?.courses?.length ? "3.67" : "--", icon: GraduationCap, color: "blue" },
-    { label: "Attendance %", value: attendance?.courses?.[0] ? `${Math.round(attendance.courses.reduce((s,c)=>s+c.percentage,0)/attendance.courses.length)}%` : "--", icon: ClipboardCheck, color: "green" },
-    { label: "Credits Done", value: "87/130", icon: BookOpenCheck, color: "blue" },
-    { label: "Fee Status", value: (fees?.feeFunnel?.overdue ?? 0) > 0 ? "Overdue" : "Current", icon: CreditCard, color: (fees?.feeFunnel?.overdue ?? 0) > 0 ? "amber" : "green" },
+    { label: "CGPA", value: data ? data.academics.cgpa.toFixed(2) : "--", icon: GraduationCap },
+    { label: "Attendance", value: data ? `${Math.round(attendance)}%` : "--", icon: ClipboardCheck },
+    { label: "Credits earned", value: data ? `${data.academics.earnedCredits} / ${data.academics.requiredCredits}` : "--", icon: BookOpenCheck },
+    { label: "Fees", value: data?.finance.status ?? "--", icon: CreditCard },
   ];
-
-  return (
-    <AppShell>
-      <div className="content-page">
-        <motion.div className="hero-greeting" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-          <h1>My Dashboard</h1>
-          <p>Your academic overview at a glance</p>
-        </motion.div>
-
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
-          {kpis.map((kpi, i) => (
-            <motion.article key={i} className="kpi-card" whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <div className={`kpi-card-icon kpi-accent ${kpi.color}`}><kpi.icon size={18} /></div>
-              <span className="kpi-label">{kpi.label}</span>
-              <strong className="kpi-number">{loading ? "--" : kpi.value}</strong>
-            </motion.article>
-          ))}
-        </div>
-
-        <div className="quick-actions" style={{ marginBottom: 24 }}>
-          <Link href="/student/timetable" className="quick-action-btn"><CalendarDays size={16} />My Timetable</Link>
-          <Link href="/student/transcript" className="quick-action-btn"><FileText size={16} />Transcript</Link>
-          <Link href="/student/finance" className="quick-action-btn"><CreditCard size={16} />Pay Fee</Link>
-          <Link href="/student/profile" className="quick-action-btn"><GraduationCap size={16} />Profile</Link>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-          <div className="card">
-            <div className="card-header"><h3 style={{ fontSize: 14 }}>Enrolled Courses</h3></div>
-            <div className="card-body">
-              {loading ? <div className="skeleton" style={{ height: 120 }} /> : (
-                <div style={{ display: "grid", gap: 8 }}>
-                  {["Database Systems", "AI", "Operating Systems", "Software Engineering", "Machine Learning", "Cyber Security"].map((c, i) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-                      <span style={{ fontSize: 13 }}>{c}</span>
-                      <span className="badge badge-primary">Enrolled</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header"><h3 style={{ fontSize: 14 }}>Attendance</h3></div>
-            <div className="card-body">
-              {loading ? <div className="skeleton" style={{ height: 120 }} /> : (
-                <div style={{ display: "grid", gap: 8 }}>
-                  {["DB Systems", "AI", "OS", "SE", "ML", "Cyber"].map((c, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 13, minWidth: 80 }}>{c}</span>
-                      <div className="progress" style={{ flex: 1 }}><div className={`progress-bar ${[95,88,92,90,97,85][i] > 90 ? "success" : "warning"}`} style={{ width: `${[95,88,92,90,97,85][i]}%` }} /></div>
-                      <span style={{ fontSize: 12, fontWeight: 600 }}>{[95,88,92,90,97,85][i]}%</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+  return <AppShell><div className="content-page">
+    <div className="page-header"><div><h1>{data ? `Welcome, ${data.student.name}` : "Student dashboard"}</h1><p>{data ? `${data.academics.program} · ${data.student.rollNumber}` : "Loading your verified academic record…"}</p></div></div>
+    {error && <div role="alert" className="error-state">{error}</div>}
+    <div className="kpi-grid">{kpis.map(row => <article className="kpi-card" key={row.label}><div className="kpi-card-icon kpi-accent blue"><row.icon size={18}/></div><span className="kpi-label">{row.label}</span><strong className="kpi-number">{row.value}</strong></article>)}</div>
+    {data && <>
+      <div className="card" style={{ marginTop: 20 }}><div className="card-header"><h3>Admission to enrolment</h3><span className="badge badge-success">Persisted record</span></div><div className="card-body" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
+        <div><small>Application</small><strong style={{display:"block"}}>{data.admission?.applicationNumber}</strong></div><div><small>Verified documents</small><strong style={{display:"block"}}>{data.admission?.approvedDocuments}</strong></div><div><small>Admission test</small><strong style={{display:"block"}}>{data.admission?.testScore}% · Passed</strong></div><div><small>Student number</small><strong style={{display:"block"}}>{data.student.universityId}</strong></div>
+      </div></div>
+      <div style={{ display:"grid", gridTemplateColumns:"1.35fr 1fr", gap:16, marginTop:16 }}>
+        <div className="card"><div className="card-header"><h3>Latest academic record</h3><span>{data.academics.completedCourses} courses completed</span></div><div className="card-body" style={{padding:0}}><table className="data-table"><thead><tr><th>Course</th><th>Credits</th><th>Grade</th></tr></thead><tbody>{data.academics.courses.slice(-6).map(course => <tr key={course.code}><td>{course.code} · {course.title}</td><td>{course.credits}</td><td><span className="badge badge-success">{course.grade ?? "In progress"}</span></td></tr>)}</tbody></table></div></div>
+        <div className="card"><div className="card-header"><h3>Current timetable</h3></div><div className="card-body">{data.timetable.slice(0,5).map(row => <div key={`${row.day}-${row.course}`} style={{padding:"9px 0",borderBottom:"1px solid var(--border)"}}><strong>{row.day} · {row.course}</strong><div style={{fontSize:12,color:"var(--muted)"}}>{row.startTime.slice(0,5)}–{row.endTime.slice(0,5)} · {row.room}</div></div>)}</div></div>
       </div>
-    </AppShell>
-  );
+      <div className="quick-actions" style={{marginTop:16}}><Link href="/student/transcript" className="quick-action-btn"><FileText size={16}/>Verified transcript</Link><Link href={`/graduation/${data.student.id}`} className="quick-action-btn"><GraduationCap size={16}/>Degree progress</Link><Link href="/alumni" className="quick-action-btn"><GraduationCap size={16}/>Alumni access</Link><Link href="/student/profile" className="quick-action-btn"><CalendarDays size={16}/>Student profile</Link></div>
+    </>}
+  </div></AppShell>;
 }

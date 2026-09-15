@@ -159,7 +159,10 @@ public sealed record AdmissionApplicantDocument(
 
 public sealed record AdmissionApplicantDetail(
     AdmissionApplicantRow Applicant,
-    IReadOnlyList<AdmissionApplicantDocument> Documents);
+    IReadOnlyList<AdmissionApplicantDocument> Documents,
+    AdmissionApplicantTest? Test);
+
+public sealed record AdmissionApplicantTest(int? Score, bool? Passed, ApplicantTestStatus Status, DateTimeOffset? CompletedAt);
 
 public sealed record DocumentDownload(Stream Content, string ContentType, string FileName);
 

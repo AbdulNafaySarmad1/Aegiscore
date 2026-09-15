@@ -116,13 +116,14 @@ public sealed class GraduationService(AegisDbContext db)
             if (progress.Approved && existing is not null) return existing;
             if (progress.Blockers.Count > 0) throw new InvalidOperationException(string.Join(" ", progress.Blockers));
             var student = await db.Students.SingleAsync(s => s.Id == studentId, ct);
+            var graduationYear = await db.Batches.Where(b => b.Id == student.BatchId).Select(b => b.EndYear).SingleAsync(ct);
             if (!await db.Users.AnyAsync(u => u.Id == studentId, ct)) throw new InvalidOperationException("Linked student account is missing.");
             db.Entry(student).Property(s => s.EnrollmentStatus).CurrentValue = EnrollmentStatus.Graduated;
             var approval = new StudentClearance { Id = Guid.NewGuid(), TenantId = db.CurrentTenantId, StudentId = studentId,
                 Department = "Graduation", Status = ClearanceStatus.Cleared, ClearedByUserId = actor, ClearedAt = DateTime.UtcNow };
             db.StudentClearances.Add(approval);
             var alumni = new AlumniProfile { Id = studentId, UserId = studentId, TenantId = db.CurrentTenantId,
-                GraduationYear = DateTime.UtcNow.Year, AlumniId = $"ALM-{DateTime.UtcNow.Year}-{studentId:N}" };
+                GraduationYear = graduationYear, AlumniId = $"ALM-{graduationYear}-{studentId:N}" };
             db.AlumniProfiles.Add(alumni);
             var role = await db.Roles.SingleOrDefaultAsync(r => r.Name == "Alumni", ct);
             if (role is null) { role = new Role { Id = Guid.NewGuid(), TenantId = db.CurrentTenantId, Name = "Alumni" }; db.Roles.Add(role); }

@@ -7,11 +7,12 @@ import { apiGet, apiPost } from "@/lib/api-client";
 type Intake = { id: string; year: number; semester: number; name: string; status: number };
 type Applicant = {
   id: string; applicantId: string; fullName: string | null; email: string;
-  programId: string; intakeId: string; status: string;
+  programId: string; intakeId: string; status: string | number;
   submittedAt: string | null; createdAt: string;
 };
 
 const STATUSES = ["Draft", "Submitted", "UnderReview", "TestScheduled", "InterviewScheduled", "Admitted", "Rejected", "Withdrawn"];
+const statusName = (value: string | number) => typeof value === "number" ? STATUSES[value - 1] ?? String(value) : value;
 
 export default function AdmissionsAdminPage() {
   const [intakes, setIntakes] = useState<Intake[]>([]);
@@ -112,7 +113,7 @@ export default function AdmissionsAdminPage() {
               <td><Link href={`/admin/admissions/${r.id}`}>{r.applicantId}</Link></td>
               <td>{r.fullName ?? "—"}</td>
               <td>{r.email}</td>
-              <td><span className="badge badge-neutral">{r.status}</span></td>
+              <td><span className="badge badge-neutral">{statusName(r.status)}</span></td>
               <td>{r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : "—"}</td>
             </tr>
           ))}

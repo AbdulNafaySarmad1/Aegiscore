@@ -74,7 +74,7 @@
       "key": "role.student",
       "name": "Student",
       "description": "Pilot student",
-      "permissions": ["Students.Read"]
+      "permissions": ["Students.Read", "Grades.Read", "Attendance.Read", "Finance.Read"]
     }
   ],
   "accounts": [
@@ -93,46 +93,76 @@
       "email": "faculty@fnu-pilot.example.invalid",
       "firstName": "Dr Farhan",
       "lastName": "Malik"
-    },
-    {
-      "key": "account.reference-student",
-      "kind": "Student",
-      "roleKey": "role.student",
-      "email": "reference.student@fnu-pilot.example.invalid",
-      "firstName": "Omar",
-      "lastName": "Siddiqui"
     }
   ],
-  "student": {
-    "accountKey": "account.reference-student",
-    "universityId": "FNU-HISTORY-001",
-    "rollNumber": "2025F-BSCS-001"
+  "cohort": {
+    "count": 50,
+    "focalStudentNumber": 1,
+    "accountKeyPrefix": "account.student.",
+    "emailDomain": "fnu-pilot.example.invalid",
+    "universityIdPrefix": "FNU-2026-",
+    "rollNumberPrefix": "2026F-BSCS-",
+    "applicationNumberPrefix": "APP-2026F-BSCS-",
+    "givenNames": ["Aisha", "Hira", "Maham", "Sana", "Zoya", "Ali", "Hamza", "Bilal", "Usman", "Rayan"],
+    "familyNames": ["Khan", "Ahmed", "Malik", "Qureshi", "Siddiqui"]
   },
   "courses": [
-    {
-      "key": "course.programming-fundamentals",
-      "code": "CS101",
-      "title": "Programming Fundamentals",
-      "credits": 3,
-      "facultyAccountKey": "account.faculty"
-    },
-    {
-      "key": "course.object-oriented-programming",
-      "code": "CS102",
-      "title": "Object-Oriented Programming",
-      "credits": 3,
-      "prerequisiteKey": "course.programming-fundamentals",
-      "facultyAccountKey": "account.faculty"
-    }
+    { "key": "course.pf", "code": "CS101", "title": "Programming Fundamentals", "credits": 3, "facultyAccountKey": "account.faculty" },
+    { "key": "course.oop", "code": "CS102", "title": "Object-Oriented Programming", "credits": 3, "prerequisiteKey": "course.pf", "facultyAccountKey": "account.faculty" },
+    { "key": "course.calculus", "code": "MT101", "title": "Calculus and Analytical Geometry", "credits": 3 },
+    { "key": "course.english", "code": "HU101", "title": "English Composition", "credits": 3 },
+    { "key": "course.ict", "code": "CS103", "title": "Applications of ICT", "credits": 3 },
+    { "key": "course.discrete", "code": "MT102", "title": "Discrete Structures", "credits": 3 },
+    { "key": "course.dsa", "code": "CS201", "title": "Data Structures and Algorithms", "credits": 3, "prerequisiteKey": "course.oop" },
+    { "key": "course.digital-logic", "code": "CS202", "title": "Digital Logic Design", "credits": 3 },
+    { "key": "course.linear-algebra", "code": "MT201", "title": "Linear Algebra", "credits": 3 },
+    { "key": "course.pakistan-studies", "code": "HU201", "title": "Pakistan Studies", "credits": 3 },
+    { "key": "course.database", "code": "CS203", "title": "Database Systems", "credits": 3, "prerequisiteKey": "course.dsa", "facultyAccountKey": "account.faculty" },
+    { "key": "course.coal", "code": "CS204", "title": "Computer Organization and Assembly Language", "credits": 3 },
+    { "key": "course.probability", "code": "MT202", "title": "Probability and Statistics", "credits": 3 },
+    { "key": "course.communication", "code": "HU202", "title": "Communication and Presentation Skills", "credits": 3 },
+    { "key": "course.os", "code": "CS301", "title": "Operating Systems", "credits": 3, "prerequisiteKey": "course.dsa" },
+    { "key": "course.networks", "code": "CS302", "title": "Computer Networks", "credits": 3 },
+    { "key": "course.software-engineering", "code": "CS303", "title": "Software Engineering", "credits": 3 },
+    { "key": "course.ai", "code": "CS304", "title": "Artificial Intelligence", "credits": 3, "prerequisiteKey": "course.dsa" },
+    { "key": "course.tech-writing", "code": "HU301", "title": "Technical and Business Writing", "credits": 3 },
+    { "key": "course.analysis-algorithms", "code": "CS305", "title": "Design and Analysis of Algorithms", "credits": 3, "prerequisiteKey": "course.dsa" },
+    { "key": "course.theory", "code": "CS306", "title": "Theory of Automata", "credits": 3 },
+    { "key": "course.security", "code": "CS307", "title": "Information Security", "credits": 3 },
+    { "key": "course.hci", "code": "CS308", "title": "Human Computer Interaction", "credits": 3 },
+    { "key": "course.professional-practices", "code": "HU302", "title": "Professional Practices", "credits": 3 },
+    { "key": "course.compiler", "code": "CS401", "title": "Compiler Construction", "credits": 3 },
+    { "key": "course.parallel", "code": "CS402", "title": "Parallel and Distributed Computing", "credits": 3 },
+    { "key": "course.ml", "code": "CS403", "title": "Machine Learning", "credits": 3, "prerequisiteKey": "course.ai" },
+    { "key": "course.web", "code": "CS404", "title": "Web Engineering", "credits": 3 },
+    { "key": "course.mobile", "code": "CS405", "title": "Mobile Application Development", "credits": 3 },
+    { "key": "course.cloud", "code": "CS406", "title": "Cloud Computing", "credits": 3 },
+    { "key": "course.data-science", "code": "CS407", "title": "Data Science", "credits": 3 },
+    { "key": "course.deep-learning", "code": "CS408", "title": "Deep Learning", "credits": 3 },
+    { "key": "course.cyber", "code": "CS409", "title": "Cyber Security", "credits": 3 },
+    { "key": "course.devops", "code": "CS410", "title": "DevOps Engineering", "credits": 3 },
+    { "key": "course.blockchain", "code": "CS411", "title": "Blockchain and Distributed Ledgers", "credits": 3 },
+    { "key": "course.iot", "code": "CS412", "title": "Internet of Things", "credits": 3 },
+    { "key": "course.graphics", "code": "CS413", "title": "Computer Graphics", "credits": 3 },
+    { "key": "course.nlp", "code": "CS414", "title": "Natural Language Processing", "credits": 3 },
+    { "key": "course.vision", "code": "CS415", "title": "Computer Vision", "credits": 3 },
+    { "key": "course.entrepreneurship", "code": "MG401", "title": "Technology Entrepreneurship", "credits": 3 },
+    { "key": "course.ethics", "code": "HU401", "title": "Computing Ethics and Society", "credits": 3 },
+    { "key": "course.internship", "code": "CS490", "title": "Supervised Computing Internship", "credits": 3 },
+    { "key": "course.fyp", "code": "CS499", "title": "Final Year Project", "credits": 4, "prerequisiteKey": "course.software-engineering", "facultyAccountKey": "account.faculty" }
   ],
-  "enrollments": [
-    {
-      "key": "enrollment.reference.cs101",
-      "courseKey": "course.programming-fundamentals",
-      "grade": "B",
-      "gpaPoints": 3.0,
-      "status": "Active"
-    }
+  "academicHistory": {
+    "focalCompletedCourseCount": 43,
+    "cohortMinimumCompletedCourseCount": 6,
+    "attendanceSessions": 12,
+    "passingGrade": "B+",
+    "passingGpaPoints": 3.3
+  },
+  "graduationRequirements": [
+    { "key": "requirement.credits", "name": "Complete 130 credit hours", "category": "Core", "requirementType": "MinimumCredits", "minimumCredits": 130, "order": 1 },
+    { "key": "requirement.cgpa", "name": "Maintain a minimum 2.00 CGPA", "category": "Core", "requirementType": "MinimumCGPA", "minimumGradePoints": 2.0, "order": 2 },
+    { "key": "requirement.internship", "name": "Complete supervised internship", "category": "Internship", "requirementType": "CourseCompletion", "courseKey": "course.internship", "order": 3 },
+    { "key": "requirement.project", "name": "Complete final year project", "category": "Thesis", "requirementType": "CourseCompletion", "courseKey": "course.fyp", "order": 4 }
   ],
   "fee": {
     "key": "fee.bscs.semester-1",
@@ -145,11 +175,5 @@
       { "key": "fee-component.admission", "name": "Admission", "amount": 12000, "order": 2 },
       { "key": "fee-component.services", "name": "Student Services", "amount": 8000, "order": 3 }
     ]
-  },
-  "applicant": {
-    "key": "applicant.primary",
-    "applicationNumber": "APP-2026F-BSCS-0001",
-    "email": "aisha.khan@applicant.example.invalid",
-    "fullName": "Aisha Khan"
   }
 }

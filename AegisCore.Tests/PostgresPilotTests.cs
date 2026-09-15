@@ -14,6 +14,7 @@ using Npgsql;
 using Moq;
 using StackExchange.Redis;
 using AegisCore.Application.Workflow;
+using System.Security.Claims;
 
 namespace AegisCore.Tests;
 
@@ -60,24 +61,33 @@ public class PostgresPilotTests
         var count = await db.Users.CountAsync();
         await seeder.SeedAsync(tenant);
         Assert.Equal(count, await db.Users.CountAsync());
-        var student = await db.Users.SingleAsync(u => u.Id == DemoSeeder.RecordId(tenant, scenario.Version, scenario.Student.AccountKey));
+        var cohort = scenario.BuildCohort();
+        var focal = cohort.Single(member => member.Number == scenario.Cohort.FocalStudentNumber);
+        var incompleteMember = cohort.Single(member => member.Number == 2);
+        var student = await db.Users.SingleAsync(u => u.Id == DemoSeeder.RecordId(tenant, scenario.Version, focal.AccountKey));
         Assert.True(hasher.VerifyPassword("Fictional-Pilot-Test-Password!", student.PasswordHash!));
+        Assert.Equal(50, await db.Students.CountAsync());
         Assert.True(await db.Students.AnyAsync(s => s.Id == student.Id));
         Assert.True(await db.UserRoles.AnyAsync(r => r.UserId == student.Id));
-        Assert.True(await db.StudentFeeDues.AnyAsync(d => d.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"due:{scenario.Student.AccountKey}")));
-        Assert.True(await db.ApplicantProfiles.AnyAsync(a => a.Id == DemoSeeder.RecordId(tenant, scenario.Version, scenario.Applicant.Key)));
-        var lifecycle = new StudentLifecycleController(db, new StudentLifecycleService());
-        Assert.IsType<ConflictObjectResult>(await lifecycle.UpsertAlumni(new AlumniProfile { UserId = student.Id, GraduationYear = 2030 }, default));
+        Assert.True(await db.StudentFeeDues.AnyAsync(d => d.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"due:{focal.AccountKey}") && d.OutstandingAmount == 0));
+        Assert.True(await db.ApplicantProfiles.AnyAsync(a => a.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"applicant:{focal.AccountKey}") && a.ConvertedStudentId == student.Id));
+        http.User = new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim(ClaimTypes.Role, "Admin")], "pilot-test"));
+        var lifecycle = new StudentLifecycleController(db, new StudentLifecycleService())
+        {
+            ControllerContext = new ControllerContext { HttpContext = http }
+        };
+        var incompleteStudentId = DemoSeeder.RecordId(tenant, scenario.Version, incompleteMember.AccountKey);
+        Assert.IsType<ConflictObjectResult>(await lifecycle.UpsertAlumni(new AlumniProfile { UserId = incompleteStudentId, GraduationYear = 2030 }, default));
         Assert.Empty(await db.AlumniProfiles.ToListAsync());
         var graduation = new GraduationService(db);
-        var progress = await graduation.EvaluateAsync(student.Id);
+        var progress = await graduation.EvaluateAsync(incompleteStudentId);
         Assert.False(progress.Approved);
-        Assert.Equal(3, progress.EarnedCredits);
-        Assert.Equal(3.0m, progress.Cgpa);
+        Assert.True(progress.EarnedCredits < scenario.Program.MinimumCredits);
         Assert.Contains(progress.Blockers, b => b.Contains("fees"));
         var approver = DemoSeeder.RecordId(tenant, scenario.Version, "account.administrator");
-        await Assert.ThrowsAsync<InvalidOperationException>(() => graduation.ClearAsync(student.Id, "Finance", approver));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => graduation.ApproveAsync(student.Id, approver));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => graduation.ClearAsync(incompleteStudentId, "Finance", approver));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => graduation.ApproveAsync(incompleteStudentId, approver));
         Assert.Empty(await db.AlumniProfiles.ToListAsync());
         var activationUser = new User { Id = Guid.NewGuid(), TenantId = tenant, Email = $"activation-{Guid.NewGuid():N}@example.invalid" };
         db.Users.Add(activationUser);

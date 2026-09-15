@@ -32,6 +32,10 @@ public class StudentLifecycleController : ControllerBase
     [RequirePermission("Graduation", "Approve")]
     public async Task<IActionResult> UpsertAlumni([FromBody] AlumniProfile profile, CancellationToken ct)
     {
+        // Keep the university-owned boundary explicit even if an external policy
+        // adapter is stale or misconfigured. Students can read their alumni record,
+        // but only administrators may create one after graduation approval.
+        if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin")) return Forbid();
         // Academic status and an attributable approval must exist before a profile can
         // be created. Never accept graduation or tenant identity from the request body.
         var tenantId = _db.CurrentTenantId;
@@ -49,7 +53,7 @@ public class StudentLifecycleController : ControllerBase
         // A stable primary key also prevents concurrent duplicate inserts.
         profile.Id = student.Id;
         profile.TenantId = tenantId;
-        profile.GraduationYear = approval.ClearedAt!.Value.Year;
+        profile.GraduationYear = await _db.Batches.Where(b => b.Id == student.BatchId).Select(b => b.EndYear).SingleAsync(ct);
         profile.CreatedAt = DateTime.UtcNow;
         profile.AlumniId = $"ALM-{profile.GraduationYear}-{student.Id:N}";
         _db.AlumniProfiles.Add(profile);

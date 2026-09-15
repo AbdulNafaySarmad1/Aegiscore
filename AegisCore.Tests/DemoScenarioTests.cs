@@ -11,8 +11,11 @@ public sealed class DemoScenarioTests
         var scenario = DemoScenario.Load(root, "pakistan-bscs-v1");
         Assert.Equal("Asia/Karachi", scenario.Institution.Timezone);
         Assert.Equal("PKR", scenario.Institution.Currency);
-        Assert.Equal("Aisha Khan", scenario.Applicant.FullName);
-        Assert.Contains(scenario.Accounts, account => account.Key == scenario.Student.AccountKey);
+        var cohort = scenario.BuildCohort();
+        Assert.Equal(50, cohort.Count);
+        Assert.Equal("Aisha Khan", $"{cohort[0].FirstName} {cohort[0].LastName}");
+        Assert.Equal(50, cohort.Select(member => member.Email).Distinct().Count());
+        Assert.Equal(130, scenario.Courses.Sum(course => course.Credits));
         Assert.Equal(scenario.Fee.Total, scenario.Fee.Components!.Sum(component => component.Amount));
     }
 
