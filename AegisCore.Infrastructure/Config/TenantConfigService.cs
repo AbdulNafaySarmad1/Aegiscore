@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using AegisCore.Application.ConfigCenter;
 using AegisCore.Infrastructure.Config;
 using Microsoft.Extensions.Logging;
@@ -9,13 +10,35 @@ public class TenantConfigService
     private readonly IConfigurationCenterService _configCenter;
     private readonly ILogger<TenantConfigService> _logger;
 
-    public TenantConfigService(IConfigurationCenterService configCenter, ILogger<TenantConfigService> logger)
+    private readonly AegisDbContext? _db;
+
+    public TenantConfigService(IConfigurationCenterService configCenter, ILogger<TenantConfigService> logger, AegisDbContext? db = null)
     {
-        _configCenter = configCenter; _logger = logger;
+        _configCenter = configCenter; _logger = logger; _db = db;
     }
 
-    public string GetUniversityName(Guid? tenantId = null) => Resolve("identity.university_name", DefaultTenantConfigTemplate.DefaultUniversityName);
-    public string GetUniversityShortName(Guid? tenantId = null) => Resolve("identity.university_short_name", DefaultTenantConfigTemplate.DefaultUniversityShortName);
+    // The institution's identity is answered once, in the installation wizard, and stored on the
+    // Tenant row. The configuration centre can override it later; until then the wizard's answer is
+    // what the portal and every generated document print, never the placeholder.
+    public string GetUniversityName(Guid? tenantId = null) => ResolveIdentity("identity.university_name", t => t.Name, DefaultTenantConfigTemplate.DefaultUniversityName, tenantId);
+    public string GetUniversityShortName(Guid? tenantId = null) => ResolveIdentity("identity.university_short_name", t => t.ShortName, DefaultTenantConfigTemplate.DefaultUniversityShortName, tenantId);
+
+    private string ResolveIdentity(string key, Func<AegisCore.Domain.Entities.Tenant, string?> fromTenant, string fallback, Guid? tenantId)
+    {
+        var configured = Resolve(key, string.Empty);
+        if (!string.IsNullOrWhiteSpace(configured)) return configured;
+        try
+        {
+            var id = tenantId ?? _db?.CurrentTenantId;
+            var tenant = id is { } value && value != Guid.Empty && _db is not null
+                ? _db.Tenants.IgnoreQueryFilters().AsNoTracking().FirstOrDefault(t => t.Id == value)
+                : null;
+            var answer = tenant is null ? null : fromTenant(tenant);
+            if (!string.IsNullOrWhiteSpace(answer)) return answer;
+        }
+        catch (Exception ex) { _logger.LogDebug(ex, "Tenant identity lookup for {Key} fell back to the default.", key); }
+        return fallback;
+    }
     public string GetNoReplyEmail(Guid? tenantId = null) => Resolve("email.no_reply", DefaultTenantConfigTemplate.DefaultNoReplyEmail);
     public string GetSupportEmail(Guid? tenantId = null) => Resolve("email.support", DefaultTenantConfigTemplate.DefaultSupportEmail);
     public string GetSmtpHost(Guid? tenantId = null) => Resolve("email.smtp_host", DefaultTenantConfigTemplate.DefaultSmtpHost);
