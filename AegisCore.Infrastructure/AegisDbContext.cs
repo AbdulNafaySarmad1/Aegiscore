@@ -1971,6 +1971,33 @@ public class AegisDbContext : DbContext
     public DbSet<TransportInspection> TransportInspections => Set<TransportInspection>();
 
     /// <summary>
+    /// A row a request creates belongs to the request's tenant. Controllers and services across the
+    /// modules build entities without setting TenantId (several pass Guid.Empty outright); the tenant
+    /// query filter then hides the row they just wrote. Only an unset TenantId is filled in — a caller
+    /// that sets one explicitly (installation, seeding, cross-tenant administration) keeps it.
+    /// </summary>
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        StampTenant();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        StampTenant();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void StampTenant()
+    {
+        var tenant = CurrentTenantId;
+        if (tenant == Guid.Empty) return;
+        foreach (var entry in ChangeTracker.Entries<ITenantScoped>())
+            if (entry.State == EntityState.Added && entry.Entity.TenantId == Guid.Empty)
+                entry.Entity.TenantId = tenant;
+    }
+
+    /// <summary>
     /// Configures the model that was discovered by convention from the entity types
     /// exposed in <see cref="DbSet{TEntity}"/> properties on your derived context.
     /// </summary>

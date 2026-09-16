@@ -49,9 +49,14 @@ public class Repository<T> : IRepository<T> where T : class
     }
 
     /// <inheritdoc />
+    // Writes persist here. Thirty modules call these from controllers and services that never call
+    // SaveChanges, so a repository that only staged the change answered every POST with 200 and
+    // stored nothing. A caller that batches several writes and saves once still works: a second
+    // SaveChanges with nothing pending is a no-op.
     public virtual async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
         await _dbSet.AddAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
@@ -59,14 +64,14 @@ public class Repository<T> : IRepository<T> where T : class
     public virtual Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
         _dbSet.Update(entity);
-        return Task.CompletedTask;
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
     {
         _dbSet.Remove(entity);
-        return Task.CompletedTask;
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc />
