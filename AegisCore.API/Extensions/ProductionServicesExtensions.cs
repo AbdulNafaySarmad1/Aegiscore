@@ -85,6 +85,8 @@ public static class CoreServicesExtensions
         services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>(ServiceLifetime.Scoped);
         services.AddScoped<AsyncFluentValidationFilter>();
         services.AddControllers(options => options.Filters.AddService<AsyncFluentValidationFilter>());
+        // Query/route DateTimes bind as UTC so PostgreSQL timestamptz comparisons never see Kind=Unspecified.
+        services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options => options.ModelBinderProviders.Insert(0, new ModelBinding.UtcDateTimeModelBinderProvider()));
         return services;
     }
 

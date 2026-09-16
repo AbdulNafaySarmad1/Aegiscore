@@ -120,7 +120,7 @@ public sealed class WizardController(
 
     [HttpPost("step1/template/upload")]
     [RequestSizeLimit(10 * 1024 * 1024)]
-    public async Task<IActionResult> UploadDocumentTemplate([FromForm] IFormFile file, [FromForm] string? name, [FromForm] string? logoUrl, CancellationToken ct)
+    public async Task<IActionResult> UploadDocumentTemplate(IFormFile file, [FromForm] string? name, [FromForm] string? logoUrl, CancellationToken ct)
     {
         if (file is null || file.Length == 0) return BadRequest(new { error = "Choose an HTML, PDF, or DOCX file." });
         try

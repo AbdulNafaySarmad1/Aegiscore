@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Data.Sqlite;
+using AegisCore.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -25,26 +25,26 @@ namespace AegisCore.Tests;
 
 public sealed class FinanceDashboardEndpointTests
 {
-    [Fact]
-    public async Task Department_Manager_Cannot_Read_Another_Department()
+    [Theory, DatabaseProviders]
+    public async Task Department_Manager_Cannot_Read_Another_Department(bool postgres)
     {
-        await using var host = await DashboardHost.CreateAsync();
+        await using var host = await DashboardHost.CreateAsync(postgres);
         using var response = await host.GetDepartmentAsync(host.TenantA, host.DepartmentB, "HOD", host.DepartmentA);
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
-    [Fact]
-    public async Task Finance_User_Cannot_Enumerate_CrossTenant_Department()
+    [Theory, DatabaseProviders]
+    public async Task Finance_User_Cannot_Enumerate_CrossTenant_Department(bool postgres)
     {
-        await using var host = await DashboardHost.CreateAsync();
+        await using var host = await DashboardHost.CreateAsync(postgres);
         using var response = await host.GetDepartmentAsync(host.TenantA, host.DepartmentB, "Finance Controller", null);
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    [Fact]
-    public async Task Department_Manager_Can_Read_Assigned_Department()
+    [Theory, DatabaseProviders]
+    public async Task Department_Manager_Can_Read_Assigned_Department(bool postgres)
     {
-        await using var host = await DashboardHost.CreateAsync();
+        await using var host = await DashboardHost.CreateAsync(postgres);
         using var response = await host.GetDepartmentAsync(host.TenantA, host.DepartmentA, "HOD", host.DepartmentA);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadAsStringAsync();
@@ -52,19 +52,19 @@ public sealed class FinanceDashboardEndpointTests
         Assert.DoesNotContain("Business", body, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public async Task Vice_Chancellor_Can_Read_Executive_Dashboard()
+    [Theory, DatabaseProviders]
+    public async Task Vice_Chancellor_Can_Read_Executive_Dashboard(bool postgres)
     {
-        await using var host = await DashboardHost.CreateAsync();
+        await using var host = await DashboardHost.CreateAsync(postgres);
         using var response = await host.SendAsync(HttpMethod.Get, "/api/finance/v2/dashboard/executive", host.TenantA, "VC");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("feeFunnel", await response.Content.ReadAsStringAsync(), StringComparison.Ordinal);
     }
 
-    [Fact]
-    public async Task Vice_Chancellor_Read_Access_Does_Not_Extend_To_Finance_Actions()
+    [Theory, DatabaseProviders]
+    public async Task Vice_Chancellor_Read_Access_Does_Not_Extend_To_Finance_Actions(bool postgres)
     {
-        await using var host = await DashboardHost.CreateAsync();
+        await using var host = await DashboardHost.CreateAsync(postgres);
         // The executive view is read-only for the VC; the operations queue and every mutation stay behind CanManageFinance.
         using var operations = await host.SendAsync(HttpMethod.Get, "/api/finance/v2/dashboard/operations", host.TenantA, "VC");
         Assert.Equal(HttpStatusCode.Forbidden, operations.StatusCode);
@@ -72,29 +72,28 @@ public sealed class FinanceDashboardEndpointTests
         Assert.Equal(HttpStatusCode.Forbidden, mutation.StatusCode);
     }
 
-    [Fact]
-    public async Task Department_Manager_Cannot_Read_Executive_Dashboard()
+    [Theory, DatabaseProviders]
+    public async Task Department_Manager_Cannot_Read_Executive_Dashboard(bool postgres)
     {
-        await using var host = await DashboardHost.CreateAsync();
+        await using var host = await DashboardHost.CreateAsync(postgres);
         using var response = await host.SendAsync(HttpMethod.Get, "/api/finance/v2/dashboard/executive", host.TenantA, "HOD");
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
-    private sealed class DashboardHost(WebApplication app, SqliteConnection connection) : IAsyncDisposable
+    private sealed class DashboardHost(WebApplication app, TestDatabase database) : IAsyncDisposable
     {
         public Guid TenantA { get; } = Guid.NewGuid();
         public Guid TenantB { get; } = Guid.NewGuid();
         public Guid DepartmentA { get; } = Guid.NewGuid();
         public Guid DepartmentB { get; } = Guid.NewGuid();
 
-        public static async Task<DashboardHost> CreateAsync()
+        public static async Task<DashboardHost> CreateAsync(bool postgres)
         {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            await connection.OpenAsync();
+            var database = await TestDatabase.CreateAsync(postgres);
             var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
             builder.WebHost.UseTestServer();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddDbContext<AegisDbContext>(options => options.UseSqlite(connection));
+            builder.Services.AddDbContext<AegisDbContext>(options => database.Configure(options));
             builder.Services.AddAuthentication("test").AddScheme<AuthenticationSchemeOptions, HeaderAuthenticationHandler>("test", _ => { });
             builder.Services.AddAuthorization();
             builder.Services.AddFinanceModule();
@@ -109,7 +108,7 @@ public sealed class FinanceDashboardEndpointTests
             app.UseAuthorization();
             app.MapFinanceModuleEndpoints();
             await app.StartAsync();
-            var host = new DashboardHost(app, connection);
+            var host = new DashboardHost(app, database);
             await host.SeedAsync();
             return host;
         }
@@ -146,7 +145,7 @@ public sealed class FinanceDashboardEndpointTests
         public async ValueTask DisposeAsync()
         {
             await app.DisposeAsync();
-            await connection.DisposeAsync();
+            await database.DisposeAsync();
         }
     }
 

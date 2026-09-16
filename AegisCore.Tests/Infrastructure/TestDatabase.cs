@@ -76,6 +76,12 @@ public sealed class TestDatabase : IAsyncDisposable
     {
         var http = new DefaultHttpContext();
         http.Items["TenantId"] = tenantId;
+        return CreateContext(http);
+    }
+
+    /// <summary>A context bound to a caller-owned HttpContext, for tests that change tenant or user mid-way.</summary>
+    public AegisDbContext CreateContext(HttpContext http)
+    {
         var options = new DbContextOptionsBuilder<AegisDbContext>();
         Configure(options);
         return new AegisDbContext(options.Options, new HttpContextAccessor { HttpContext = http }, Adapter);

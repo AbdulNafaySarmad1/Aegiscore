@@ -37,11 +37,11 @@ public class PostgresPilotTests
         Assert.StartsWith("aegiscore_", parsed.Database, StringComparison.Ordinal);
         Assert.Contains(parsed.Host, new[] { "127.0.0.1", "localhost" });
         var tenant = Guid.Parse("eba35470-ad75-4cac-bb60-c8d4886ebfd7");
+        // A throwaway database on the pilot server: the seeder never overwrites an existing account, so
+        // running against the live pilot database would compare against whatever password it was seeded with.
+        await using var database = await AegisCore.Tests.Infrastructure.TestDatabase.CreateAsync(postgres: true);
         var http = new DefaultHttpContext(); http.Items["TenantId"] = tenant;
-        var adapter = new PostgresDialectAdapter();
-        var options = new DbContextOptionsBuilder<AegisDbContext>();
-        adapter.ConfigureOptions(options, connection);
-        await using var db = new AegisDbContext(options.Options, new HttpContextAccessor { HttpContext = http }, adapter);
+        await using var db = database.CreateContext(http);
         await db.Database.MigrateAsync();
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
         Assert.Contains("20260904120000_PersistWizardState", await db.Database.GetAppliedMigrationsAsync());

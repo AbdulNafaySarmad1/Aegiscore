@@ -107,8 +107,8 @@ public sealed class AccountingService(AegisDbContext db) : IAccountingService
 
     public async Task<string> ExportPifraAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
     {
-        var fromDate = from.ToDateTime(TimeOnly.MinValue);
-        var toDate = to.ToDateTime(TimeOnly.MaxValue);
+        var fromDate = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var toDate = to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
         var entries = await db.JournalEntries.Where(j => j.EntryDate >= fromDate && j.EntryDate <= toDate).ToListAsync(ct);
         return new XDocument(new XElement("pifra",
             new XAttribute("from", from),

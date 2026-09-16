@@ -3566,6 +3566,35 @@ public class AegisDbContext : DbContext
         // Entity annotations predate multi-dialect support and may still carry PostgreSQL
         // store types. Normalize them only after every entity configuration has run.
         dialectAdapter.NormalizeProviderModel(modelBuilder);
+
+        ApplyUtcDateTimeConvention(modelBuilder);
+    }
+
+    /// <summary>
+    /// Every timestamp this system stores is UTC. Npgsql rejects a <see cref="DateTime"/> whose Kind is
+    /// Unspecified or Local for <c>timestamp with time zone</c>, whether it is written or merely compared
+    /// in a WHERE clause, while SQLite accepts anything; a bare query-string date or a
+    /// <c>DateOnly.ToDateTime</c> therefore passed every SQLite test and 500'd in production. This
+    /// converter stamps outgoing values UTC (converting a Local one) and marks values read back as UTC,
+    /// and EF applies it to query parameters compared against these columns too.
+    /// </summary>
+    private static void ApplyUtcDateTimeConvention(ModelBuilder modelBuilder)
+    {
+        var toStore = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+            v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+        var toStoreNullable = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+            v => v == null ? null : v.Value.Kind == DateTimeKind.Local ? v.Value.ToUniversalTime() : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc),
+            v => v == null ? null : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc));
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.GetValueConverter() is not null) continue;
+                if (property.ClrType == typeof(DateTime)) property.SetValueConverter(toStore);
+                else if (property.ClrType == typeof(DateTime?)) property.SetValueConverter(toStoreNullable);
+            }
+        }
     }
 
     private static PolicyConfig SeedPolicy(string id, string module, string policyName, string policyValue, string valueType, string description)

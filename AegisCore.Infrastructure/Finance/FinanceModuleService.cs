@@ -443,17 +443,16 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (periodTo < periodFrom) throw new ArgumentException("Report date range is invalid.");
-        return await (
+        return (await (
             from line in db.JournalEntryLines.AsNoTracking()
             join entry in db.JournalEntries.AsNoTracking() on line.JournalEntryId equals entry.Id
             join account in db.ChartOfAccounts.AsNoTracking() on line.ChartOfAccountId equals account.Id
             where line.TenantId == tenantId && entry.TenantId == tenantId && account.TenantId == tenantId && entry.IsPosted && !entry.IsSandbox && entry.EntryDate >= periodFrom && entry.EntryDate <= periodTo
             group line by new { account.AccountCode, account.AccountName } into grouped
-            let debit = grouped.Sum(line => line.Debit)
-            let credit = grouped.Sum(line => line.Credit)
             orderby grouped.Key.AccountCode
-            select new TrialBalanceLine(grouped.Key.AccountCode, grouped.Key.AccountName, debit, credit, debit - credit)
-        ).ToListAsync(ct);
+            // Aggregates stay inside the projection: a `let` over the group is not translatable on PostgreSQL.
+            select new { grouped.Key.AccountCode, grouped.Key.AccountName, Debit = grouped.Sum(line => line.Debit), Credit = grouped.Sum(line => line.Credit) }
+        ).ToListAsync(ct)).Select(x => new TrialBalanceLine(x.AccountCode, x.AccountName, x.Debit, x.Credit, x.Debit - x.Credit)).ToList();
     }
 
     public async Task<ReceivablesAgingReport> GetReceivablesAgingAsync(Guid tenantId, DateTime asOf, CancellationToken ct)

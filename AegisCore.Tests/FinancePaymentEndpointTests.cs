@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Data.Sqlite;
+using AegisCore.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -28,10 +28,10 @@ namespace AegisCore.Tests;
 
 public sealed class FinancePaymentEndpointTests
 {
-    [Fact]
-    public async Task RequestToPay_Rejects_A_Different_Student()
+    [Theory, DatabaseProviders]
+    public async Task RequestToPay_Rejects_A_Different_Student(bool postgres)
     {
-        await using var host = await PaymentHost.CreateAsync();
+        await using var host = await PaymentHost.CreateAsync(postgres);
 
         using var response = await host.PostAsync(host.StudentB, host.TenantA, host.DemandA, "PKR");
 
@@ -39,10 +39,10 @@ public sealed class FinancePaymentEndpointTests
         Assert.Null(host.Gateway.LastRequest);
     }
 
-    [Fact]
-    public async Task RequestToPay_Rejects_NonFinance_User_Without_Student_Identity()
+    [Theory, DatabaseProviders]
+    public async Task RequestToPay_Rejects_NonFinance_User_Without_Student_Identity(bool postgres)
     {
-        await using var host = await PaymentHost.CreateAsync();
+        await using var host = await PaymentHost.CreateAsync(postgres);
 
         using var response = await host.PostAsync(null, host.TenantA, host.DemandA, "PKR", "Faculty");
 
@@ -50,10 +50,10 @@ public sealed class FinancePaymentEndpointTests
         Assert.Null(host.Gateway.LastRequest);
     }
 
-    [Fact]
-    public async Task RequestToPay_Uses_Registered_Alias_And_Persists_Sanitized_Event()
+    [Theory, DatabaseProviders]
+    public async Task RequestToPay_Uses_Registered_Alias_And_Persists_Sanitized_Event(bool postgres)
     {
-        await using var host = await PaymentHost.CreateAsync();
+        await using var host = await PaymentHost.CreateAsync(postgres);
 
         using var response = await host.PostAsync(host.StudentA, host.TenantA, host.DemandA, "PKR", payerReference: "attacker-controlled");
 
@@ -67,10 +67,10 @@ public sealed class FinancePaymentEndpointTests
         Assert.DoesNotContain("+923001234567", paymentEvent.SanitizedPayloadJson, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public async Task RequestToPay_Does_Not_Reveal_CrossTenant_Demand()
+    [Theory, DatabaseProviders]
+    public async Task RequestToPay_Does_Not_Reveal_CrossTenant_Demand(bool postgres)
     {
-        await using var host = await PaymentHost.CreateAsync();
+        await using var host = await PaymentHost.CreateAsync(postgres);
 
         using var response = await host.PostAsync(host.StudentA, host.TenantB, host.DemandA, "PKR");
 
@@ -78,7 +78,7 @@ public sealed class FinancePaymentEndpointTests
         Assert.Null(host.Gateway.LastRequest);
     }
 
-    private sealed class PaymentHost(WebApplication app, SqliteConnection connection, CapturingGateway gateway) : IAsyncDisposable
+    private sealed class PaymentHost(WebApplication app, TestDatabase database, CapturingGateway gateway) : IAsyncDisposable
     {
         public WebApplication App { get; } = app;
         public CapturingGateway Gateway { get; } = gateway;
@@ -88,15 +88,14 @@ public sealed class FinancePaymentEndpointTests
         public Guid StudentB { get; } = Guid.NewGuid();
         public Guid DemandA { get; } = Guid.NewGuid();
 
-        public static async Task<PaymentHost> CreateAsync()
+        public static async Task<PaymentHost> CreateAsync(bool postgres)
         {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            await connection.OpenAsync();
+            var database = await TestDatabase.CreateAsync(postgres);
             var gateway = new CapturingGateway();
             var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
             builder.WebHost.UseTestServer();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddDbContext<AegisDbContext>((services, options) => options.UseSqlite(connection));
+            builder.Services.AddDbContext<AegisDbContext>((services, options) => database.Configure(options));
             builder.Services.AddAuthentication("test").AddScheme<AuthenticationSchemeOptions, HeaderAuthenticationHandler>("test", _ => { });
             builder.Services.AddAuthorization();
             builder.Services.AddFinanceModule();
@@ -118,7 +117,7 @@ public sealed class FinancePaymentEndpointTests
             app.MapFinanceModuleEndpoints();
             await app.StartAsync();
 
-            var host = new PaymentHost(app, connection, gateway);
+            var host = new PaymentHost(app, database, gateway);
             await host.SeedAsync();
             return host;
         }
@@ -150,7 +149,7 @@ public sealed class FinancePaymentEndpointTests
         public async ValueTask DisposeAsync()
         {
             await App.DisposeAsync();
-            await connection.DisposeAsync();
+            await database.DisposeAsync();
         }
     }
 

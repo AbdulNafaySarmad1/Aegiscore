@@ -63,11 +63,11 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
     {
         if (request.EmployeeId == Guid.Empty || request.To < request.From) return BadRequest("A valid employee and date range are required.");
         if (!await db.Employees.AnyAsync(e => e.Id == request.EmployeeId && e.Status == EmployeeStatus.Active, ct)) return NotFound("Employee was not found.");
-        var overlap = await db.LeaveApplications.AnyAsync(l => l.EmployeeId == request.EmployeeId && l.Status != LeaveStatus.Rejected && l.Status != LeaveStatus.Cancelled && l.StartDate <= request.To.ToDateTime(TimeOnly.MinValue) && l.EndDate >= request.From.ToDateTime(TimeOnly.MinValue), ct);
+        var overlap = await db.LeaveApplications.AnyAsync(l => l.EmployeeId == request.EmployeeId && l.Status != LeaveStatus.Rejected && l.Status != LeaveStatus.Cancelled && l.StartDate <= request.To.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc) && l.EndDate >= request.From.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc), ct);
         if (overlap) return Conflict("Leave dates overlap an existing application.");
         var days = await calendar.GetWorkingDaysAsync(request.From, request.To, ct);
         if (days == 0) return BadRequest("Leave range contains no working days.");
-        var leave = new LeaveApplication { Id = Guid.NewGuid(), EmployeeId = request.EmployeeId, LeaveType = request.LeaveType, StartDate = request.From.ToDateTime(TimeOnly.MinValue), EndDate = request.To.ToDateTime(TimeOnly.MinValue), Reason = request.Reason?.Trim(), Status = LeaveStatus.Pending };
+        var leave = new LeaveApplication { Id = Guid.NewGuid(), EmployeeId = request.EmployeeId, LeaveType = request.LeaveType, StartDate = request.From.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc), EndDate = request.To.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc), Reason = request.Reason?.Trim(), Status = LeaveStatus.Pending };
         db.LeaveApplications.Add(leave);
         await db.SaveChangesAsync(ct);
         return Ok(new { leave, workingDays = days });
@@ -86,7 +86,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
         var to = DateOnly.FromDateTime(leave.EndDate);
         for (var day = from; day <= to; day = day.AddDays(1))
             if (day.DayOfWeek is not (System.DayOfWeek.Saturday or System.DayOfWeek.Sunday))
-                db.AttendanceRecords.Add(new AttendanceRecord { Id = Guid.NewGuid(), EmployeeId = leave.EmployeeId, CheckIn = day.ToDateTime(TimeOnly.MinValue), Method = AttendanceMethod.Manual, Status = AttendanceStatus.Excused });
+                db.AttendanceRecords.Add(new AttendanceRecord { Id = Guid.NewGuid(), EmployeeId = leave.EmployeeId, CheckIn = day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc), Method = AttendanceMethod.Manual, Status = AttendanceStatus.Excused });
         await db.SaveChangesAsync(ct);
         return Ok(leave);
     }

@@ -20,23 +20,23 @@ namespace AegisCore.API.Controllers;
 public sealed class ReadinessFrameworkController(AegisDbContext db) : ControllerBase
 {
     public sealed record FrameworkRequest(
-        [property: Required, MaxLength(50)] string FrameworkCode,
-        [property: Required, MaxLength(200)] string FrameworkName,
-        [property: MaxLength(50)] string? AccreditationBody,
+        [Required, MaxLength(50)] string FrameworkCode,
+        [Required, MaxLength(200)] string FrameworkName,
+        [MaxLength(50)] string? AccreditationBody,
         DateTimeOffset? LastAuditDate,
         DateTimeOffset? NextAuditDate);
 
     public sealed record CriterionRequest(
-        [property: Required, MaxLength(20)] string CriterionCode,
-        [property: MaxLength(100)] string? SectionName,
-        [property: MaxLength(500)] string? Description,
-        [property: Range(0.01, 9.99)] decimal Weight,
-        [property: MaxLength(200)] string? EvidenceSource);
+        [Required, MaxLength(20)] string CriterionCode,
+        [MaxLength(100)] string? SectionName,
+        [MaxLength(500)] string? Description,
+        [Range(0.01, 9.99)] decimal Weight,
+        [MaxLength(200)] string? EvidenceSource);
 
     public sealed record EvidenceRequest(
-        [property: Required, MaxLength(300)] string EvidenceTitle,
-        [property: MaxLength(500)] string? EvidenceUrl,
-        [property: MaxLength(2000)] string? EvidenceDescription,
+        [Required, MaxLength(300)] string EvidenceTitle,
+        [MaxLength(500)] string? EvidenceUrl,
+        [MaxLength(2000)] string? EvidenceDescription,
         DateTimeOffset? EvidenceDate,
         DateTimeOffset? ExpiryDate);
 
