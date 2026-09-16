@@ -34,6 +34,10 @@ public sealed class TenantIdentityTests
         Assert.Equal("Renamed University", overridden.GetUniversityName());
         Assert.Equal("FNU", overridden.GetUniversityShortName());
 
+        // Anonymous pages have no tenant context; the single active tenant of a per-tenant container still answers.
+        await using var anonymous = database.CreateContext(Guid.Empty);
+        Assert.Equal("Fictional National University", new TenantConfigService(empty.Object, NullLogger<TenantConfigService>.Instance, anonymous).GetUniversityName());
+
         // Without a database the placeholder still applies, as before.
         Assert.Equal(DefaultTenantConfigTemplate.DefaultUniversityName, new TenantConfigService(empty.Object, NullLogger<TenantConfigService>.Instance).GetUniversityName());
     }

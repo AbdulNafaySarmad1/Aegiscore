@@ -30,9 +30,19 @@ public class TenantConfigService
         try
         {
             var id = tenantId ?? _db?.CurrentTenantId;
-            var tenant = id is { } value && value != Guid.Empty && _db is not null
-                ? _db.Tenants.IgnoreQueryFilters().AsNoTracking().FirstOrDefault(t => t.Id == value)
-                : null;
+            AegisCore.Domain.Entities.Tenant? tenant = null;
+            if (_db is not null)
+            {
+                if (id is { } value && value != Guid.Empty)
+                    tenant = _db.Tenants.IgnoreQueryFilters().AsNoTracking().FirstOrDefault(t => t.Id == value);
+                else
+                {
+                    // Anonymous pages (sign-in, activation) have no tenant context; a per-tenant
+                    // container holds exactly one active tenant, and that one is the answer.
+                    var active = _db.Tenants.IgnoreQueryFilters().AsNoTracking().Where(t => t.IsActive).Take(2).ToList();
+                    if (active.Count == 1) tenant = active[0];
+                }
+            }
             var answer = tenant is null ? null : fromTenant(tenant);
             if (!string.IsNullOrWhiteSpace(answer)) return answer;
         }
