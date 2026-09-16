@@ -95,6 +95,10 @@ if (!isInstalled)
     var setupToken = SetupBootstrapToken.RequireValid(builder.Configuration);
     var setupUrl = (builder.Configuration["APP_URL"] ?? "http://localhost:3000").TrimEnd('/');
     Log.Information("AegisCore starting in installation mode - no external dependencies required");
+    // Production validates access tokens with RSA only. Provision the pair into the config volume
+    // now, so the installed runtime finds it on every restart.
+    if (AegisCore.Infrastructure.Security.JwtKeyMaterial.EnsureGenerated(builder.Configuration))
+        Log.Information("[AEGISCORE] Generated the RSA token-signing key pair at {Path}", builder.Configuration[AegisCore.Infrastructure.Security.JwtKeyMaterial.PrivateKeyPathKey]);
     Log.Warning("[AEGISCORE] Setup token: {SetupToken}", setupToken);
     Log.Information("[AEGISCORE] Navigate to {SetupUrl}/setup to begin installation.", setupUrl);
 

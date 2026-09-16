@@ -198,7 +198,7 @@ public static class AuthenticationServicesExtensions
             }
             var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
             var isProduction = string.Equals(configuration["ASPNETCORE_ENVIRONMENT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
-            var publicKeyPem = configuration["Jwt:PublicKey"];
+            var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
             if (isProduction && string.IsNullOrWhiteSpace(publicKeyPem)
                 && !configuration.GetValue<bool>("DemoSeed:Enabled"))
                 throw new InvalidOperationException("Production requires an RSA JWT authority or Jwt:PublicKey.");

@@ -20,6 +20,8 @@ name: aegiscore-client
 #   (pre-populate the university_config volume or `docker cp` it in before first start).
 #   Production refuses to start without it: the Data Protection key ring is encrypted with it.
 # AEGISCORE_SEAL_URL=<optional https URL of the institution seal printed on the portal and documents>
+# Access-token RSA keys are generated into the config volume on first start (Jwt__PrivateKeyPath/PublicKeyPath);
+#   supply Jwt__PrivateKey / Jwt__PublicKey (PEM) instead only if the university manages its own key pair.
 # PQC_MLKEM_PUBLIC_KEY / PQC_MLKEM_PRIVATE_KEY / PQC_MLDSA_PUBLIC_KEY / PQC_MLDSA_PRIVATE_KEY=<post-quantum key pairs; scripts/bootstrap-env.sh generates them>
 # SESSION_LIFETIME=900  # seconds; optional
 # CF_TURNSTILE_SITE_KEY / CF_TURNSTILE_SECRET_KEY=<only when the ingress fronts Cloudflare Turnstile; optional>
@@ -71,6 +73,9 @@ x-application: &application
     AEGISCORE_STORAGE_PROVIDER: local
     AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
     DataProtection__KeyPath: /app/config/data-protection
+    # RSA access-token keys: generated into the config volume on first (installation) start.
+    Jwt__PrivateKeyPath: /app/config/jwt-signing.key
+    Jwt__PublicKeyPath: /app/config/jwt-signing.pub
     # Production refuses to start without the PKCS#12 certificate that encrypts the key ring.
     DataProtection__CertificatePath: /app/config/data-protection.pfx
     DataProtection__CertificatePassword: ${DATA_PROTECTION_CERTIFICATE_PASSWORD:?Required}

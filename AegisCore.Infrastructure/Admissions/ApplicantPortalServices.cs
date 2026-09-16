@@ -151,8 +151,8 @@ public sealed class ApplicantTokenService(IConfiguration configuration, IConnect
     /// <summary>Shared with the JWT bearer validation for the applicant scheme.</summary>
     public static (SecurityKey Key, string Algorithm) ResolveSigningKey(IConfiguration configuration)
     {
-        var privateKeyPem = configuration["Jwt:PrivateKey"];
-        var publicKeyPem = configuration["Jwt:PublicKey"];
+        var privateKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PrivateKeyPem(configuration);
+        var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
         if (!string.IsNullOrWhiteSpace(privateKeyPem) && !string.IsNullOrWhiteSpace(publicKeyPem))
         {
             var rsa = RSA.Create();
@@ -167,7 +167,7 @@ public sealed class ApplicantTokenService(IConfiguration configuration, IConnect
 
     public static SecurityKey ResolveValidationKey(IConfiguration configuration)
     {
-        var publicKeyPem = configuration["Jwt:PublicKey"];
+        var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
         if (!string.IsNullOrWhiteSpace(publicKeyPem))
         {
             var rsa = RSA.Create();

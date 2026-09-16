@@ -34,8 +34,8 @@ public class JwtTokenService : IJwtTokenService
         _sessionLifetimeSeconds = int.TryParse(configuration["SESSION_LIFETIME"], out var lifetime) && lifetime is >= 60 and <= 86_400
             ? lifetime
             : 900;
-        var privateKeyPem = configuration["Jwt:PrivateKey"];
-        var publicKeyPem = configuration["Jwt:PublicKey"];
+        var privateKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PrivateKeyPem(configuration);
+        var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
         if (!string.IsNullOrWhiteSpace(privateKeyPem) && !string.IsNullOrWhiteSpace(publicKeyPem))
         {
             var privateKey = RSA.Create();
