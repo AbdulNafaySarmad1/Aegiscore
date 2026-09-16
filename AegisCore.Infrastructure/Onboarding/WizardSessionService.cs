@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Onboarding;
 using AegisCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

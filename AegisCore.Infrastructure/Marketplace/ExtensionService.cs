@@ -47,7 +47,7 @@ public class ExtensionService : IExtensionService
     public async Task<ExtensionInstallation> InstallExtensionAsync(Guid extensionId, Guid tenantId, Guid installedByUserId, CancellationToken cancellationToken = default)
     {
         var extension = await _extensionRepo.GetByIdAsync(extensionId, cancellationToken)
-            ?? throw new InvalidOperationException("Extension not found.");
+            ?? throw new KeyNotFoundException("Extension not found.");
 
         if (extension.Status != ExtensionStatus.Published)
             throw new InvalidOperationException("Cannot install an extension that is not published.");
@@ -86,7 +86,7 @@ public class ExtensionService : IExtensionService
     public async Task UninstallExtensionAsync(Guid installationId, CancellationToken cancellationToken = default)
     {
         var installation = await _installationRepo.GetByIdAsync(installationId, cancellationToken)
-            ?? throw new InvalidOperationException("Installation not found.");
+            ?? throw new KeyNotFoundException("Installation not found.");
 
         if (installation.Status == InstallationStatus.Uninstalled)
             throw new InvalidOperationException("Extension is already uninstalled.");
@@ -103,10 +103,10 @@ public class ExtensionService : IExtensionService
     public async Task<ExtensionInstallation> UpgradeExtensionAsync(Guid installationId, CancellationToken cancellationToken = default)
     {
         var installation = await _installationRepo.GetByIdAsync(installationId, cancellationToken)
-            ?? throw new InvalidOperationException("Installation not found.");
+            ?? throw new KeyNotFoundException("Installation not found.");
 
         var extension = await _extensionRepo.GetByIdAsync(installation.ExtensionId, cancellationToken)
-            ?? throw new InvalidOperationException("Extension not found.");
+            ?? throw new KeyNotFoundException("Extension not found.");
 
         if (installation.InstalledVersion == extension.Version)
             throw new InvalidOperationException("Already on the latest version.");
@@ -127,7 +127,7 @@ public class ExtensionService : IExtensionService
             throw new ArgumentException("Rating must be between 1 and 5.");
 
         var extension = await _extensionRepo.GetByIdAsync(extensionId, cancellationToken)
-            ?? throw new InvalidOperationException("Extension not found.");
+            ?? throw new KeyNotFoundException("Extension not found.");
 
         var review = new ExtensionReview
         {

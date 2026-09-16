@@ -61,7 +61,7 @@ public sealed class MultiTenantSsoService(AegisDbContext db) : IMultiTenantSsoSe
     {
         var domain = GetEmailDomain(email);
         var profile = await db.UniversitySsoProfiles.FirstOrDefaultAsync(u => u.Domain == domain, ct)
-            ?? throw new InvalidOperationException("University SSO profile was not found.");
+            ?? throw new KeyNotFoundException("University SSO profile was not found.");
         return new SsoProviderDetection(profile.Id, profile.Name, profile.SsoProvider, BuildRedirectUrl(profile, returnUrl), profile.LogoUrl, profile.PrimaryColor);
     }
 }

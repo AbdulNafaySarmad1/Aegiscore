@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Security;
@@ -54,7 +55,7 @@ public class GuardManagementService
     public async Task<CheckpointScan> ScanCheckpointAsync(Guid roundId, string checkpointName, decimal latitude, decimal longitude, CancellationToken cancellationToken = default)
     {
         var round = await _roundRepository.GetWithScansAsync(roundId, cancellationToken)
-            ?? throw new InvalidOperationException("Round not found.");
+            ?? throw new KeyNotFoundException("Round not found.");
 
         var scan = new CheckpointScan
         {
@@ -76,7 +77,7 @@ public class GuardManagementService
     public async Task CompleteRoundAsync(Guid roundId, string notes, CancellationToken cancellationToken = default)
     {
         var round = await _roundRepository.GetByIdAsync(roundId, cancellationToken)
-            ?? throw new InvalidOperationException("Round not found.");
+            ?? throw new KeyNotFoundException("Round not found.");
 
         round.RoundEndTime = DateTime.UtcNow;
         round.Notes = notes;

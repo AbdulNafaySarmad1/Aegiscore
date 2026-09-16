@@ -70,7 +70,7 @@ public class ApiKeyService : IApiKeyService
     public async Task<ApiKey> RotateApiKeyAsync(Guid apiKeyId, CancellationToken cancellationToken = default)
     {
         var apiKey = await _apiKeyRepo.GetByIdAsync(apiKeyId, cancellationToken)
-            ?? throw new InvalidOperationException("API key not found.");
+            ?? throw new KeyNotFoundException("API key not found.");
 
         var rawKey = GenerateRawApiKey();
         apiKey.KeyHash = HashApiKey(rawKey);
@@ -87,7 +87,7 @@ public class ApiKeyService : IApiKeyService
     public async Task RevokeApiKeyAsync(Guid apiKeyId, string reason, CancellationToken cancellationToken = default)
     {
         var apiKey = await _apiKeyRepo.GetByIdAsync(apiKeyId, cancellationToken)
-            ?? throw new InvalidOperationException("API key not found.");
+            ?? throw new KeyNotFoundException("API key not found.");
 
         apiKey.Status = ApiKeyStatus.Revoked;
         apiKey.RevokedAt = DateTime.UtcNow;

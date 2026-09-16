@@ -42,10 +42,10 @@ public class DegreeAuditService : IDegreeAuditService
     public async Task<IReadOnlyList<DegreeAuditEntity>> RunAuditAsync(Guid studentId, Guid programId, CancellationToken cancellationToken = default)
     {
         var student = await _studentRepo.GetByIdAsync(studentId, cancellationToken)
-            ?? throw new InvalidOperationException("Student not found.");
+            ?? throw new KeyNotFoundException("Student not found.");
 
         var program = await _programRepo.GetWithRequirementsAsync(programId, cancellationToken)
-            ?? throw new InvalidOperationException("Program not found.");
+            ?? throw new KeyNotFoundException("Program not found.");
 
         var requirements = await _requirementRepo.GetByProgramAsync(programId, cancellationToken);
         var enrollments = await _enrollmentRepo.FindAsync(e => e.StudentId == studentId, cancellationToken);
@@ -96,7 +96,7 @@ public class DegreeAuditService : IDegreeAuditService
     public async Task<StudentProgressDto> GetStudentProgressAsync(Guid studentId, CancellationToken cancellationToken = default)
     {
         var student = await _studentRepo.GetByIdAsync(studentId, cancellationToken)
-            ?? throw new InvalidOperationException("Student not found.");
+            ?? throw new KeyNotFoundException("Student not found.");
 
         var audits = await _auditRepo.GetByStudentAsync(studentId, cancellationToken);
         var program = audits.FirstOrDefault()?.Program;
@@ -171,7 +171,7 @@ public class DegreeAuditService : IDegreeAuditService
     public async Task<DegreeAuditEntity> WaiveRequirementAsync(Guid auditId, string reason, CancellationToken cancellationToken = default)
     {
         var audit = await _auditRepo.GetByIdAsync(auditId, cancellationToken)
-            ?? throw new InvalidOperationException("Audit record not found.");
+            ?? throw new KeyNotFoundException("Audit record not found.");
 
         audit.Status = AuditStatus.Waived;
         audit.Notes = reason;
@@ -189,7 +189,7 @@ public class DegreeAuditService : IDegreeAuditService
     public async Task<CreditTransfer> ApproveCreditTransferAsync(Guid transferId, string approvedBy, CancellationToken cancellationToken)
     {
         var transfer = await _creditRepo.GetByIdAsync(transferId, cancellationToken)
-            ?? throw new InvalidOperationException("Credit transfer not found.");
+            ?? throw new KeyNotFoundException("Credit transfer not found.");
 
         transfer.IsApproved = true;
         transfer.ApprovedAt = DateTime.UtcNow;

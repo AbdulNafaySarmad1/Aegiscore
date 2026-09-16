@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using AegisCore.Domain.Entities;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 

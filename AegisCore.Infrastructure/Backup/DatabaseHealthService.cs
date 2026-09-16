@@ -110,7 +110,7 @@ public class DatabaseHealthService : IDatabaseHealthService
     public async Task PromoteReplicaAsync(Guid replicaId, CancellationToken cancellationToken = default)
     {
         var replica = await _replicaRepo.GetByIdAsync(replicaId, cancellationToken)
-            ?? throw new InvalidOperationException("Replica not found.");
+            ?? throw new KeyNotFoundException("Replica not found.");
 
         replica.Status = ReplicaStatus.Promoting;
         await _replicaRepo.UpdateAsync(replica, cancellationToken);

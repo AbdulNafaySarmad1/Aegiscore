@@ -37,7 +37,7 @@ public class DigitalTwinService : IDigitalTwinService
     public async Task<CampusMapDto> GetCampusMapAsync(Guid campusId, CancellationToken cancellationToken = default)
     {
         var campus = await _campusRepo.GetByIdAsync(campusId, cancellationToken)
-            ?? throw new InvalidOperationException("Campus not found.");
+            ?? throw new KeyNotFoundException("Campus not found.");
 
         var buildings = await _buildingRepo.GetByCampusAsync(campusId, cancellationToken);
         var buildingMaps = new List<BuildingMapDto>();
@@ -88,7 +88,7 @@ public class DigitalTwinService : IDigitalTwinService
     public async Task<BuildingOverviewDto> GetBuildingOverviewAsync(Guid buildingId, CancellationToken cancellationToken = default)
     {
         var building = await _buildingRepo.GetByIdAsync(buildingId, cancellationToken)
-            ?? throw new InvalidOperationException("Building not found.");
+            ?? throw new KeyNotFoundException("Building not found.");
 
         var sensors = await _sensorRepo.GetByBuildingAsync(buildingId, cancellationToken);
         var floors = await _floorRepo.GetByBuildingAsync(buildingId, cancellationToken);
@@ -120,7 +120,7 @@ public class DigitalTwinService : IDigitalTwinService
     public async Task<SensorReading> IngestSensorDataAsync(Guid sensorId, decimal value, string? unit, CancellationToken cancellationToken = default)
     {
         var sensor = await _sensorRepo.GetByIdAsync(sensorId, cancellationToken)
-            ?? throw new InvalidOperationException("Sensor not found.");
+            ?? throw new KeyNotFoundException("Sensor not found.");
 
         var reading = new SensorReading { Id = Guid.NewGuid(), SensorId = sensorId, Value = value, Unit = unit, TenantId = sensor.TenantId };
         await _readingRepo.AddAsync(reading, cancellationToken);

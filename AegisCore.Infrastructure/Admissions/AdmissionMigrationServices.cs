@@ -76,7 +76,7 @@ public sealed class AdmissionDecisionService(
     public async Task<AdmitResult> AdmitAsync(Guid applicantProfileId, Guid adminUserId, string? manualInstitutionalEmail, CancellationToken ct = default)
     {
         var profile = await db.ApplicantProfiles.FirstOrDefaultAsync(p => p.Id == applicantProfileId, ct)
-            ?? throw new InvalidOperationException("Applicant profile was not found.");
+            ?? throw new KeyNotFoundException("Applicant profile was not found.");
 
         if (profile.ConvertedStudentId is not null || profile.Status == ApplicantStatus.Admitted)
         {
@@ -89,9 +89,9 @@ public sealed class AdmissionDecisionService(
         }
 
         var intake = await db.AdmissionIntakes.FirstOrDefaultAsync(i => i.Id == profile.IntakeId, ct)
-            ?? throw new InvalidOperationException("The applicant's intake was not found.");
+            ?? throw new KeyNotFoundException("The applicant's intake was not found.");
         var program = await db.DegreePrograms.FirstOrDefaultAsync(p => p.Id == profile.ProgramId, ct)
-            ?? throw new InvalidOperationException("The applicant's program was not found.");
+            ?? throw new KeyNotFoundException("The applicant's program was not found.");
 
         if (intake.BatchId is not { } batchId || batchId == Guid.Empty)
         {
@@ -382,7 +382,7 @@ public sealed class AdmissionPipelineService(
                 await MoveAsync(id, targetColumn, adminUserId, null, ct);
                 moved++;
             }
-            catch (InvalidOperationException)
+            catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException) // invalid move, or an applicant that is gone
             {
                 // skip applicants the move is invalid for
             }

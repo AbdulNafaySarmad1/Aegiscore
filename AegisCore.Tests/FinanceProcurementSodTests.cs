@@ -14,14 +14,15 @@ public sealed class FinanceProcurementSodTests
     {
         await using var connection = new SqliteConnection("DataSource=:memory:");
         await connection.OpenAsync();
-        await using var db = await DatabaseAsync(connection);
-        var fixture = await SeedAsync(db);
+        var tenantId = Guid.NewGuid();
+        await using var db = await DatabaseAsync(connection, tenantId);
+        var fixture = await SeedAsync(db, tenantId);
         var service = new FinanceProcurementService(db, Mock.Of<IFinanceModuleService>());
         var command = new CreateFinanceGoodsReceiptCommand(fixture.Order.Id, "GRN-1", DateTime.UtcNow,
             [new FinanceGoodsReceiptLineCommand(fixture.Line.Id, 1m, 0m, null)]);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateGoodsReceiptAsync(fixture.TenantId, fixture.MakerId, command, CancellationToken.None));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateGoodsReceiptAsync(fixture.TenantId, fixture.ApproverId, command, CancellationToken.None));
+        Assert.Contains("independent", (await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateGoodsReceiptAsync(fixture.TenantId, fixture.MakerId, command, CancellationToken.None))).Message);
+        Assert.Contains("independent", (await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateGoodsReceiptAsync(fixture.TenantId, fixture.ApproverId, command, CancellationToken.None))).Message);
         Assert.Empty(db.FinanceGoodsReceipts);
     }
 
@@ -30,14 +31,15 @@ public sealed class FinanceProcurementSodTests
     {
         await using var connection = new SqliteConnection("DataSource=:memory:");
         await connection.OpenAsync();
-        await using var db = await DatabaseAsync(connection);
-        var fixture = await SeedAsync(db);
+        var tenantId = Guid.NewGuid();
+        await using var db = await DatabaseAsync(connection, tenantId);
+        var fixture = await SeedAsync(db, tenantId);
         var receiverId = Guid.NewGuid();
         var invoice = await AddReceivedInvoiceAsync(db, fixture, receiverId);
         var service = new FinanceProcurementService(db, Mock.Of<IFinanceModuleService>());
 
         foreach (var actorId in new[] { fixture.MakerId, fixture.ApproverId, receiverId })
-            await Assert.ThrowsAsync<InvalidOperationException>(() => service.MatchInvoiceAsync(fixture.TenantId, invoice.Id, actorId, CancellationToken.None));
+            Assert.Contains("independent", (await Assert.ThrowsAsync<InvalidOperationException>(() => service.MatchInvoiceAsync(fixture.TenantId, invoice.Id, actorId, CancellationToken.None))).Message);
 
         Assert.Empty(db.FinanceThreeWayMatches);
     }
@@ -47,8 +49,9 @@ public sealed class FinanceProcurementSodTests
     {
         await using var connection = new SqliteConnection("DataSource=:memory:");
         await connection.OpenAsync();
-        await using var db = await DatabaseAsync(connection);
-        var fixture = await SeedAsync(db);
+        var tenantId = Guid.NewGuid();
+        await using var db = await DatabaseAsync(connection, tenantId);
+        var fixture = await SeedAsync(db, tenantId);
         var receiverId = Guid.NewGuid();
         var matcherId = Guid.NewGuid();
         var invoice = await AddReceivedInvoiceAsync(db, fixture, receiverId);
@@ -61,22 +64,23 @@ public sealed class FinanceProcurementSodTests
         var service = new FinanceProcurementService(db, Mock.Of<IFinanceModuleService>());
 
         foreach (var actorId in new[] { fixture.MakerId, fixture.ApproverId, receiverId, matcherId })
-            await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreatePaymentVoucherAsync(
-                fixture.TenantId, invoice.Id, actorId, new CreateProcurementPaymentVoucherCommand(Guid.NewGuid()), CancellationToken.None));
+            Assert.Contains("independent", (await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreatePaymentVoucherAsync(
+                fixture.TenantId, invoice.Id, actorId, new CreateProcurementPaymentVoucherCommand(Guid.NewGuid()), CancellationToken.None))).Message);
 
         Assert.Null(invoice.PaymentVoucherId);
     }
 
-    private static async Task<AegisDbContext> DatabaseAsync(SqliteConnection connection)
+    private static async Task<AegisDbContext> DatabaseAsync(SqliteConnection connection, Guid tenantId)
     {
-        var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options);
+        var http = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        http.Items["TenantId"] = tenantId;
+        var db = new AegisDbContext(new DbContextOptionsBuilder<AegisDbContext>().UseSqlite(connection).Options, new FixedHttpContextAccessor(http));
         await db.Database.EnsureCreatedAsync();
         return db;
     }
 
-    private static async Task<Fixture> SeedAsync(AegisDbContext db)
+    private static async Task<Fixture> SeedAsync(AegisDbContext db, Guid tenantId)
     {
-        var tenantId = Guid.NewGuid();
         var makerId = Guid.NewGuid();
         var approverId = Guid.NewGuid();
         var vendor = new FinanceVendor { Id = Guid.NewGuid(), TenantId = tenantId, LegalName = "Sod Test Vendor", InvoiceCurrency = "PKR", SanctionsStatus = "CLEAR", Status = "ACTIVE" };
@@ -108,6 +112,13 @@ public sealed class FinanceProcurementSodTests
         db.FinanceVendorInvoices.Add(invoice);
         await db.SaveChangesAsync();
         return invoice;
+    }
+
+    // HttpContextAccessor stores the context in an AsyncLocal, which does not flow out of an async
+    // helper back to the test; a plain property does.
+    private sealed class FixedHttpContextAccessor(Microsoft.AspNetCore.Http.HttpContext context) : Microsoft.AspNetCore.Http.IHttpContextAccessor
+    {
+        public Microsoft.AspNetCore.Http.HttpContext? HttpContext { get; set; } = context;
     }
 
     private sealed record Fixture(Guid TenantId, Guid MakerId, Guid ApproverId, FinanceVendor Vendor, FinancePurchaseOrder Order, FinancePurchaseOrderLine Line);

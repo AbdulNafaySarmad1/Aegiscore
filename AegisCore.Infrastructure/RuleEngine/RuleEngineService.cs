@@ -67,7 +67,7 @@ public class RuleEngineService : IRuleEngineService
 
     public async Task<RuleSimulationResult> SimulateRuleAsync(Guid ruleId, Dictionary<string, object?> facts, CancellationToken cancellationToken = default)
     {
-        var rule = await _ruleRepo.GetByIdAsync(ruleId, cancellationToken) ?? throw new InvalidOperationException("Rule not found.");
+        var rule = await _ruleRepo.GetByIdAsync(ruleId, cancellationToken) ?? throw new KeyNotFoundException("Rule not found.");
         var conditions = JsonSerializer.Deserialize<List<RuleCondition>>(rule.ConditionsJson) ?? new();
         var actions = JsonSerializer.Deserialize<List<RuleAction>>(rule.ActionsJson) ?? new();
 
@@ -79,7 +79,7 @@ public class RuleEngineService : IRuleEngineService
 
     public async Task<DecisionTableResult> EvaluateDecisionTableAsync(Guid tableId, Dictionary<string, object?> facts, CancellationToken cancellationToken = default)
     {
-        var table = await _tableRepo.GetByIdAsync(tableId, cancellationToken) ?? throw new InvalidOperationException("Decision table not found.");
+        var table = await _tableRepo.GetByIdAsync(tableId, cancellationToken) ?? throw new KeyNotFoundException("Decision table not found.");
         var inputCols = JsonSerializer.Deserialize<List<DecisionTableColumn>>(table.InputColumnsJson) ?? new();
         var rows = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(table.RowsJson) ?? new();
 
@@ -121,7 +121,7 @@ public class RuleEngineService : IRuleEngineService
 
     public async Task<RuleDefinition> UpdateRuleAsync(Guid ruleId, List<RuleCondition> conditions, List<RuleAction> actions, Guid userId, string? userName, CancellationToken cancellationToken = default)
     {
-        var rule = await _ruleRepo.GetByIdAsync(ruleId, cancellationToken) ?? throw new InvalidOperationException("Rule not found.");
+        var rule = await _ruleRepo.GetByIdAsync(ruleId, cancellationToken) ?? throw new KeyNotFoundException("Rule not found.");
         var newVersion = rule.CurrentVersion + 1;
 
         rule.ConditionsJson = JsonSerializer.Serialize(conditions);

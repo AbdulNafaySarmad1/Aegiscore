@@ -15,7 +15,7 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
     {
         var now = DateTimeOffset.UtcNow;
         var framework = await db.Set<AccreditationFramework>().FindAsync([frameworkId], ct)
-            ?? throw new InvalidOperationException("Framework not found.");
+            ?? throw new KeyNotFoundException("Framework not found.");
         var criteria = await db.Set<ReadinessCriterion>().Where(c => c.FrameworkId == frameworkId).ToListAsync(ct);
         var criterionIds = criteria.Select(c => c.Id).ToArray();
         var evidence = (await db.Set<CriterionEvidence>().Where(e => criterionIds.Contains(e.CriterionId)).ToListAsync(ct)).ToLookup(e => e.CriterionId);

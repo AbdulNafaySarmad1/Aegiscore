@@ -71,7 +71,7 @@ public sealed class AdmissionConfigService(AegisDbContext db) : IAdmissionConfig
     public async Task<AdmissionIntake> UpdateIntakeStatusAsync(Guid intakeId, IntakeStatus status, CancellationToken ct = default)
     {
         var intake = await db.AdmissionIntakes.FirstOrDefaultAsync(i => i.Id == intakeId, ct)
-            ?? throw new InvalidOperationException("Intake was not found.");
+            ?? throw new KeyNotFoundException("Intake was not found.");
         intake.Status = status;
         await db.SaveChangesAsync(ct);
         return intake;
@@ -83,7 +83,7 @@ public sealed class AdmissionConfigService(AegisDbContext db) : IAdmissionConfig
     public async Task SetProgramCodeAsync(Guid programId, string code, CancellationToken ct = default)
     {
         var program = await db.DegreePrograms.FirstOrDefaultAsync(p => p.Id == programId, ct)
-            ?? throw new InvalidOperationException("Program was not found.");
+            ?? throw new KeyNotFoundException("Program was not found.");
         program.Code = code.Trim().ToUpperInvariant();
         await db.SaveChangesAsync(ct);
     }
@@ -181,7 +181,7 @@ public sealed class AdmissionsAdminService(AegisDbContext db, IStorageProvider s
     public async Task ReviewDocumentAsync(Guid applicantProfileId, Guid documentId, bool approve, string? rejectionReason, Guid reviewerId, CancellationToken ct = default)
     {
         var doc = await db.ApplicantDocuments.FirstOrDefaultAsync(d => d.Id == documentId && d.ApplicantId == applicantProfileId, ct)
-            ?? throw new InvalidOperationException("Document was not found.");
+            ?? throw new KeyNotFoundException("Document was not found.");
 
         doc.ValidationStatus = approve ? AdmissionDocumentValidationStatus.Approved : AdmissionDocumentValidationStatus.Rejected;
         doc.RejectionReason = approve ? null : (rejectionReason ?? "Rejected by reviewer");
@@ -206,7 +206,7 @@ public sealed class AdmissionsAdminService(AegisDbContext db, IStorageProvider s
     public async Task TransitionAsync(Guid applicantProfileId, ApplicantStatus target, string? note, CancellationToken ct = default)
     {
         var profile = await db.ApplicantProfiles.FirstOrDefaultAsync(p => p.Id == applicantProfileId, ct)
-            ?? throw new InvalidOperationException("Applicant profile was not found.");
+            ?? throw new KeyNotFoundException("Applicant profile was not found.");
 
         if (profile.Status != target && !Allowed.GetValueOrDefault(profile.Status, []).Contains(target))
         {

@@ -74,7 +74,7 @@ public sealed class FinanceContinuousControlService
     public async Task RevokeEngagementAsync(Guid tenantId, Guid engagementId, Guid actorId, CancellationToken ct)
     {
         var engagement = await _db.FinanceAuditorEngagements.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == engagementId, ct)
-            ?? throw new InvalidOperationException("Auditor engagement was not found.");
+            ?? throw new KeyNotFoundException("Auditor engagement was not found.");
         if (engagement.RevokedAt is null) { engagement.RevokedAt = DateTime.UtcNow; engagement.RevokedByUserId = actorId; await _db.SaveChangesAsync(ct); }
     }
 

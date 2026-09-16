@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Onboarding;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Domain.Entities;

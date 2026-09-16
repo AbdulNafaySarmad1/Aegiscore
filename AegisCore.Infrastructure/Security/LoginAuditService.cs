@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Channels;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;

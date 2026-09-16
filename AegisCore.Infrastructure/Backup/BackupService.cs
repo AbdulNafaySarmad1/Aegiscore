@@ -33,7 +33,7 @@ public class BackupService : IBackupService
     public async Task<BackupRecord> RunBackupAsync(Guid configurationId, string triggeredBy, CancellationToken cancellationToken = default)
     {
         var config = await _configRepo.GetByIdAsync(configurationId, cancellationToken)
-            ?? throw new InvalidOperationException("Backup configuration not found.");
+            ?? throw new KeyNotFoundException("Backup configuration not found.");
 
         var record = new BackupRecord
         {
@@ -114,7 +114,7 @@ public class BackupService : IBackupService
     public async Task VerifyBackupAsync(Guid recordId, CancellationToken cancellationToken = default)
     {
         var record = await _recordRepo.GetByIdAsync(recordId, cancellationToken)
-            ?? throw new InvalidOperationException("Backup record not found.");
+            ?? throw new KeyNotFoundException("Backup record not found.");
 
         if (!File.Exists(record.FilePath))
         {
@@ -174,10 +174,10 @@ public class BackupService : IBackupService
     public async Task<BackupRecord> RestoreFromBackupAsync(Guid recordId, DateTime? pointInTime = null, CancellationToken cancellationToken = default)
     {
         var record = await _recordRepo.GetByIdAsync(recordId, cancellationToken)
-            ?? throw new InvalidOperationException("Backup record not found.");
+            ?? throw new KeyNotFoundException("Backup record not found.");
 
         if (!File.Exists(record.FilePath))
-            throw new InvalidOperationException($"Backup file not found: {record.FilePath}");
+            throw new KeyNotFoundException($"Backup file not found: {record.FilePath}");
 
         if (!record.IsVerified && record.Status == BackupStatus.Completed)
         {

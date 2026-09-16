@@ -99,7 +99,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     {
         if (actorId == Guid.Empty || command.VehicleId == Guid.Empty || command.CostCenterId == Guid.Empty || command.AcquisitionCost <= 0m || command.UsefulLifeYears <= 0 || command.ServiceIntervalDays <= 0 || command.ServiceIntervalKm <= 0m || command.OpeningOdometer < 0m || command.ModelYear is < 1900 or > 2200)
             throw new ArgumentException("Fleet profile fields are invalid.");
-        var vehicle = await db.TransportVehicles.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct) ?? throw new InvalidOperationException("Tenant vehicle was not found.");
+        var vehicle = await db.TransportVehicles.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct) ?? throw new KeyNotFoundException("Tenant vehicle was not found.");
         if (await db.FinanceFleetProfiles.AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == command.VehicleId, ct)) throw new InvalidOperationException("Vehicle already has a finance profile.");
         var category = await db.AssetCategories.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Code == "VEH");
         if (category is null)
@@ -121,7 +121,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     public async Task<VehicleMaintenance> ScheduleMaintenanceAsync(Guid tenantId, Guid vehicleId, ScheduleFleetMaintenanceCommand command, CancellationToken ct)
     {
         if (command.ScheduledDate == default || command.ScheduledDate < DateTime.UtcNow.AddDays(-1)) throw new ArgumentException("Maintenance date is invalid.");
-        if (!await db.FinanceFleetProfiles.AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status == "IN_SERVICE", ct)) throw new InvalidOperationException("Active fleet profile was not found.");
+        if (!await db.FinanceFleetProfiles.AnyAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status == "IN_SERVICE", ct)) throw new KeyNotFoundException("Active fleet profile was not found.");
         var row = new VehicleMaintenance { Id = Guid.NewGuid(), TenantId = tenantId, TransportVehicleId = vehicleId, Status = VehicleMaintenanceStatus.Reported, Description = Required(command.Description, 500, "Description"), ScheduledDate = command.ScheduledDate.ToUniversalTime() };
         db.VehicleMaintenances.Add(row);
         await db.SaveChangesAsync(ct);
@@ -131,7 +131,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
     public async Task<FinanceFleetCostPosting> CompleteMaintenanceAsync(Guid tenantId, Guid actorId, Guid maintenanceId, CompleteFleetMaintenanceCommand command, CancellationToken ct)
     {
         if (command.Cost <= 0m || command.Odometer < 0m) throw new ArgumentException("Maintenance cost and odometer are invalid.");
-        var maintenance = await db.VehicleMaintenances.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == maintenanceId, ct) ?? throw new InvalidOperationException("Maintenance job was not found.");
+        var maintenance = await db.VehicleMaintenances.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == maintenanceId, ct) ?? throw new KeyNotFoundException("Maintenance job was not found.");
         var profile = await db.FinanceFleetProfiles.SingleAsync(x => x.TenantId == tenantId && x.TransportVehicleId == maintenance.TransportVehicleId, ct);
         if (maintenance.Status is VehicleMaintenanceStatus.Completed or VehicleMaintenanceStatus.Cancelled || command.Odometer < profile.CurrentOdometer) throw new InvalidOperationException("Maintenance cannot be completed or odometer moved backwards.");
         FinanceFleetCostPosting posting;
@@ -163,7 +163,7 @@ public sealed class AncillaryFinanceService(AegisDbContext db, IFinanceModuleSer
 
     public async Task<FinanceAssetAccountingEvent> DisposeFleetAsync(Guid tenantId, Guid actorId, Guid vehicleId, DisposeFinanceAssetCommand command, CancellationToken ct)
     {
-        var profile = await db.FinanceFleetProfiles.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status != "DISPOSED", ct) ?? throw new InvalidOperationException("Active fleet profile was not found.");
+        var profile = await db.FinanceFleetProfiles.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.TransportVehicleId == vehicleId && x.Status != "DISPOSED", ct) ?? throw new KeyNotFoundException("Active fleet profile was not found.");
         var result = await assets.DisposeAsync(tenantId, actorId, profile.AssetId, command, ct);
         profile.Status = "DISPOSED";
         var vehicle = await db.TransportVehicles.SingleAsync(x => x.TenantId == tenantId && x.Id == vehicleId, ct);

@@ -43,7 +43,7 @@ public sealed class FinanceRegulatoryReportService(AegisDbContext db, IFinanceMo
         await SeedAsync(tenantId, ct);
         var normalized = Required(code, 30, "Schema code").ToUpperInvariant();
         var schema = await db.FinanceRegulatorySchemas.AsNoTracking().Where(x => x.TenantId == tenantId && x.Code == normalized && x.IsActive).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct)
-            ?? throw new InvalidOperationException("Active regulatory schema was not found.");
+            ?? throw new KeyNotFoundException("Active regulatory schema was not found.");
         var dataset = await DatasetAsync(tenantId, command.From.ToUniversalTime(), command.To.ToUniversalTime(), ct);
         var definition = JsonSerializer.Deserialize<SchemaDefinition>(schema.DefinitionJson, JsonOptions()) ?? throw new InvalidOperationException("Regulatory schema definition is invalid.");
         var rendered = Render(schema, definition, dataset);

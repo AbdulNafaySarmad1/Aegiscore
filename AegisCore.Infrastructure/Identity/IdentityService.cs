@@ -91,7 +91,7 @@ public class IdentityService : IIdentityService
     public async Task DeactivateUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepo.GetByIdAsync(userId, cancellationToken)
-            ?? throw new InvalidOperationException("User not found.");
+            ?? throw new KeyNotFoundException("User not found.");
 
         user.Status = UserStatus.Inactive;
         user.DeactivatedAt = DateTime.UtcNow;
@@ -102,7 +102,7 @@ public class IdentityService : IIdentityService
     public async Task SuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepo.GetByIdAsync(userId, cancellationToken)
-            ?? throw new InvalidOperationException("User not found.");
+            ?? throw new KeyNotFoundException("User not found.");
 
         user.Status = UserStatus.Suspended;
         user.DeactivatedAt = DateTime.UtcNow;
@@ -113,10 +113,10 @@ public class IdentityService : IIdentityService
     public async Task AssignRoleAsync(Guid userId, Guid roleId, Guid assignedByUserId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepo.GetByIdAsync(userId, cancellationToken)
-            ?? throw new InvalidOperationException("User not found.");
+            ?? throw new KeyNotFoundException("User not found.");
 
         var role = await _roleRepo.GetByIdAsync(roleId, cancellationToken)
-            ?? throw new InvalidOperationException("Role not found.");
+            ?? throw new KeyNotFoundException("Role not found.");
 
         var existing = await _userRoleRepo.GetByUserAndRoleAsync(userId, roleId, cancellationToken);
         if (existing != null)

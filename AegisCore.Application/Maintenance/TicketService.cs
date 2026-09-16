@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Maintenance;
@@ -38,7 +39,7 @@ public class TicketService
     public async Task AssignTicketAsync(Guid ticketId, CancellationToken cancellationToken = default)
     {
         var ticket = await _ticketRepository.GetByIdAsync(ticketId, cancellationToken)
-            ?? throw new InvalidOperationException("Ticket not found.");
+            ?? throw new KeyNotFoundException("Ticket not found.");
 
         if (ticket.Status != TicketStatus.Open)
             throw new InvalidOperationException("Only open tickets can be assigned.");
@@ -51,7 +52,7 @@ public class TicketService
     public async Task ResolveTicketAsync(Guid ticketId, CancellationToken cancellationToken = default)
     {
         var ticket = await _ticketRepository.GetByIdAsync(ticketId, cancellationToken)
-            ?? throw new InvalidOperationException("Ticket not found.");
+            ?? throw new KeyNotFoundException("Ticket not found.");
 
         ticket.Status = TicketStatus.Resolved;
         ticket.ClosedAt = DateTime.UtcNow;
@@ -68,7 +69,7 @@ public class TicketService
     public async Task CloseTicketAsync(Guid ticketId, CancellationToken cancellationToken = default)
     {
         var ticket = await _ticketRepository.GetByIdAsync(ticketId, cancellationToken)
-            ?? throw new InvalidOperationException("Ticket not found.");
+            ?? throw new KeyNotFoundException("Ticket not found.");
 
         if (ticket.Status != TicketStatus.Resolved)
             throw new InvalidOperationException("Only resolved tickets can be closed.");
@@ -81,7 +82,7 @@ public class TicketService
     public async Task<TicketComment> AddCommentAsync(Guid ticketId, TicketComment comment, CancellationToken cancellationToken = default)
     {
         var ticket = await _ticketRepository.GetByIdAsync(ticketId, cancellationToken)
-            ?? throw new InvalidOperationException("Ticket not found.");
+            ?? throw new KeyNotFoundException("Ticket not found.");
 
         comment.MaintenanceTicketId = ticketId;
         ticket.Comments.Add(comment);

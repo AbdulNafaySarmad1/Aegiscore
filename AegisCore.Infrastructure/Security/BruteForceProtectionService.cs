@@ -1,5 +1,6 @@
 using StackExchange.Redis;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 
 namespace AegisCore.Infrastructure.Security;
 

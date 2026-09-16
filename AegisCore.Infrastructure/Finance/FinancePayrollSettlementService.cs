@@ -16,7 +16,7 @@ public sealed class FinancePayrollSettlementService(AegisDbContext db, IPqcCrypt
     public async Task<FinancePayrollBankInstruction> ConfigureInstructionAsync(Guid tenantId, ConfigurePayrollBankInstructionCommand command, CancellationToken ct)
     {
         if (command.EmployeeId == Guid.Empty || command.AccountReference.Trim().Length is < 6 or > 34 || command.RoutingCode.Trim().Length is < 3 or > 30 || command.AccountName.Trim().Length is < 2 or > 200 || command.Currency.Trim().Length != 3) throw new ArgumentException("Payroll settlement instruction is invalid.");
-        if (!await db.Employees.AnyAsync(x => x.TenantId == tenantId && x.Id == command.EmployeeId, ct)) throw new InvalidOperationException("Employee was not found.");
+        if (!await db.Employees.AnyAsync(x => x.TenantId == tenantId && x.Id == command.EmployeeId, ct)) throw new KeyNotFoundException("Employee was not found.");
         var instruction = await db.FinancePayrollBankInstructions.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.EmployeeId == command.EmployeeId, ct);
         if (instruction is null) { instruction = new FinancePayrollBankInstruction { Id = Guid.NewGuid(), TenantId = tenantId, EmployeeId = command.EmployeeId }; db.FinancePayrollBankInstructions.Add(instruction); }
         var aad = Encoding.UTF8.GetBytes($"{tenantId:D}|{command.EmployeeId:D}|payroll-bank");
@@ -30,7 +30,7 @@ public sealed class FinancePayrollSettlementService(AegisDbContext db, IPqcCrypt
     {
         var format = command.Format.Trim().ToUpperInvariant();
         if (format is not ("HBL" or "MCB" or "UBL" or "BACS" or "NACHA" or "RAAST")) throw new ArgumentException("Unsupported payroll payment format.");
-        var posting = await db.FinancePayrollPostings.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == payrollPostingId, ct) ?? throw new InvalidOperationException("Payroll posting was not found.");
+        var posting = await db.FinancePayrollPostings.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == payrollPostingId, ct) ?? throw new KeyNotFoundException("Payroll posting was not found.");
         var employeeIds = posting.Lines.Select(x => x.EmployeeId).ToArray();
         var instructions = await db.FinancePayrollBankInstructions.AsNoTracking().Where(x => x.TenantId == tenantId && x.IsActive && employeeIds.Contains(x.EmployeeId)).ToDictionaryAsync(x => x.EmployeeId, ct);
         if (instructions.Count != employeeIds.Distinct().Count()) throw new InvalidOperationException("Every payroll employee must have an active settlement instruction.");

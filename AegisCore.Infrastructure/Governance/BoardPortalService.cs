@@ -32,7 +32,7 @@ public sealed class BoardPortalService(AegisDbContext db, ILogger<BoardPortalSer
     public async Task<BoardPackDto> GenerateBoardPackAsync(Guid meetingId, CancellationToken ct = default)
     {
         var meeting = await db.Set<BoardMeeting>().FindAsync([meetingId], ct)
-            ?? throw new InvalidOperationException("Meeting not found.");
+            ?? throw new KeyNotFoundException("Meeting not found.");
         var decisions = await db.Set<BoardDecision>().Where(d => d.MeetingId == meetingId && d.Status == "pending").ToListAsync(ct);
         var resolutions = await db.Set<BoardResolution>().Where(r => r.MeetingId == meetingId).ToListAsync(ct);
         return new BoardPackDto(meetingId, meeting.Title, meeting.ExecutiveSummary ?? "Executive Summary", decisions.Select(d => new BoardDecisionDto(d.Id, d.Title, d.Background, d.Recommendation, d.ImpactAssessment, d.Status)).ToList(), resolutions.Select(r => new BoardResolutionDto(r.Id, r.ResolutionNumber, r.Content, r.ImplementationStatus)).ToList());

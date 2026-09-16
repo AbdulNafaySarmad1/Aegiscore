@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Forms;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
@@ -115,20 +116,21 @@ public class FormsController : ControllerBase
     [HttpGet("{formId:guid}/submissions")]
     public async Task<IActionResult> ListSubmissions(Guid formId, [FromQuery] string? status, CancellationToken cancellationToken)
     {
+        var form = await _formRepo.GetByIdAsync(formId, cancellationToken);
+        if (form is null) return NotFound(new { error = "Form was not found." });
+
         IReadOnlyList<FormSubmission> submissions;
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<SubmissionStatus>(status, true, out var s))
             submissions = await _submissionRepo.GetByStatusAsync(formId, s, cancellationToken);
         else
             submissions = await _submissionRepo.GetByFormAsync(formId, cancellationToken);
 
-        var form = await _formRepo.GetByIdAsync(formId, cancellationToken);
-
         var response = submissions.Select(s =>
         {
             var values = JsonSerializer.Deserialize<Dictionary<string, object?>>(s.ValuesJson) ?? new();
             return new SubmissionDto
             {
-                Id = s.Id, FormTitle = form?.Title ?? "", SubmittedByName = s.SubmittedByName,
+                Id = s.Id, FormTitle = form.Title, SubmittedByName = s.SubmittedByName,
                 SubmittedByEmail = s.SubmittedByEmail, Status = s.Status.ToString(),
                 Values = values, CreatedAt = s.CreatedAt, SubmittedAt = s.SubmittedAt
             };
@@ -150,6 +152,8 @@ public class FormsController : ControllerBase
     [HttpGet("{formId:guid}/export")]
     public async Task<IActionResult> ExportSubmissions(Guid formId, [FromQuery] string format = "csv", CancellationToken cancellationToken = default)
     {
+        // An export of a form that does not exist is an empty file that looks like a real one.
+        if (await _formRepo.GetByIdAsync(formId, cancellationToken) is null) return NotFound(new { error = "Form was not found." });
         var data = await _formService.ExportSubmissionsAsync(formId, format, cancellationToken);
         var contentType = format.ToLowerInvariant() == "excel"
             ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

@@ -76,19 +76,41 @@ public class GlobalExceptionMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
-            _logger.LogError(ex, "Unhandled exception at {Path} — TraceId: {TraceId}", context.Request.Path, context.TraceIdentifier);
-            context.Response.StatusCode = 500;
+            // The caller went away; there is nobody to answer.
+        }
+        catch (Exception ex) when (!context.Response.HasStarted)
+        {
+            var (status, code, message) = Describe(ex);
+            if (status >= 500)
+                _logger.LogError(ex, "Unhandled exception at {Path} — TraceId: {TraceId}", context.Request.Path, context.TraceIdentifier);
+            else
+                _logger.LogInformation("{Code} at {Path}: {Message}", code, context.Request.Path, ex.Message);
+            context.Response.StatusCode = status;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = "internal_server_error",
-                traceId = context.TraceIdentifier,
-                message = "An unexpected error occurred. Reference: " + context.TraceIdentifier
-            });
+            // `error` is the sentence a person reads (the portal shows it verbatim); `code` is for programs.
+            await context.Response.WriteAsJsonAsync(new { error = message, code, message, traceId = context.TraceIdentifier });
         }
     }
+
+    /// <summary>
+    /// Services signal "no such record" with <see cref="KeyNotFoundException"/> and a bad input with an
+    /// <see cref="ArgumentException"/>; both describe the caller's situation, not a fault, and are answered
+    /// as such. Everything else is a fault, answered with a reference an operator can find in the log.
+    /// </summary>
+    public static (int Status, string Code, string Message) Describe(Exception ex) => ex switch
+    {
+        KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", string.IsNullOrWhiteSpace(ex.Message) ? "The requested record was not found." : ex.Message),
+        ArgumentException => (StatusCodes.Status400BadRequest, "invalid_request", ex.Message),
+        FormatException => (StatusCodes.Status400BadRequest, "invalid_request", "A value in the request has the wrong format: " + ex.Message),
+        Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "concurrency_conflict", "Someone else changed this record first. Reload it and try again."),
+        Microsoft.EntityFrameworkCore.DbUpdateException => (StatusCodes.Status500InternalServerError, "database_write_failed", "The database rejected this change. An administrator can find the details in the application log under the reference below."),
+        System.Data.Common.DbException => (StatusCodes.Status503ServiceUnavailable, "database_unavailable", "The database did not answer. Check that the database server is running and the connection settings are correct; the application log holds the details under the reference below."),
+        StackExchange.Redis.RedisException => (StatusCodes.Status503ServiceUnavailable, "cache_unavailable", "The Redis cache did not answer. Check that Redis is running and AEGISCORE_REDIS_CONNECTION points at it."),
+        System.Text.Json.JsonException => (StatusCodes.Status500InternalServerError, "response_serialization_failed", "The server produced a response it could not serialise. This is a defect; report the reference below."),
+        _ => (StatusCodes.Status500InternalServerError, "internal_server_error", "Something went wrong on the server. Report the reference below to your administrator, who can find the details in the application log.")
+    };
 }
 
 public class AuthenticatedOriginPullsMiddleware

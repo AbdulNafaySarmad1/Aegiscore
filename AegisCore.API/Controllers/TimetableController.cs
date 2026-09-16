@@ -53,12 +53,8 @@ public sealed class TimetableController(AegisDbContext db) : ControllerBase
     [HttpGet("entries/{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken ct)
     {
-        var entry = await db.Timetables
-            .Include(t => t.Course)
-            .Include(t => t.Faculty)
-            .Include(t => t.Batch)
-            .FirstOrDefaultAsync(t => t.Id == id, ct);
-        return entry is not null ? Ok(entry) : NotFound();
+        var entry = await db.Timetables.Where(t => t.Id == id).Select(Shape).FirstOrDefaultAsync(ct);
+        return entry is not null ? Ok(entry) : NotFound(new { error = "Timetable entry was not found." });
     }
 
     [HttpGet("batch/{batchId:guid}")]
@@ -66,11 +62,10 @@ public sealed class TimetableController(AegisDbContext db) : ControllerBase
     {
         var entries = await db.Timetables
             .Where(t => t.BatchId == batchId)
-            .Include(t => t.Course)
-            .Include(t => t.Faculty)
             .OrderBy(t => t.DayOfWeek)
             .ThenBy(t => t.StartTime)
             .Take(200)
+            .Select(Shape)
             .ToListAsync(ct);
 
         return Ok(new { batchId, entries });
@@ -81,15 +76,24 @@ public sealed class TimetableController(AegisDbContext db) : ControllerBase
     {
         var entries = await db.Timetables
             .Where(t => t.FacultyId == facultyId)
-            .Include(t => t.Course)
-            .Include(t => t.Batch)
             .OrderBy(t => t.DayOfWeek)
             .ThenBy(t => t.StartTime)
             .Take(200)
+            .Select(Shape)
             .ToListAsync(ct);
 
         return Ok(new { facultyId, entries });
     }
+
+    // Entities carry navigation graphs that cycle (course → timetables → course); serialising them
+    // 500s once a course has more than one entry. Answer with the flat shape the portal reads.
+    private static readonly System.Linq.Expressions.Expression<Func<Timetable, object>> Shape = t => new
+    {
+        t.Id, t.DayOfWeek, t.StartTime, t.EndTime, t.Room, t.CreatedAt,
+        course = new { id = t.CourseId, t.Course.Code, t.Course.Title },
+        faculty = new { id = t.FacultyId, t.Faculty.FirstName, t.Faculty.LastName, t.Faculty.EmployeeCode },
+        batch = new { id = t.BatchId, t.Batch.Name, t.Batch.StartYear, t.Batch.EndYear }
+    };
 
     [HttpDelete("entries/{id:guid}")]
     [AegisCore.API.Authorization.RequirePermission("Timetable", "Delete")]

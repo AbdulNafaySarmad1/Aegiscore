@@ -39,9 +39,9 @@ public sealed class FinanceTreasuryService(AegisDbContext db, IFinanceModuleServ
             throw new ArgumentException("Bank adjustment fields are invalid.");
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var feed = await db.FinanceBankFeedTransactions.Include(x => x.BankAccount).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == feedId, ct)
-            ?? throw new InvalidOperationException("Bank feed transaction was not found.");
+            ?? throw new KeyNotFoundException("Bank feed transaction was not found.");
         if (feed.Status != "UNMATCHED") throw new InvalidOperationException("Only unmatched bank feed transactions may be posted.");
-        if (!await db.ChartOfAccounts.AnyAsync(x => x.TenantId == tenantId && x.Id == command.OffsetAccountId, ct)) throw new InvalidOperationException("Offset account was not found.");
+        if (!await db.ChartOfAccounts.AnyAsync(x => x.TenantId == tenantId && x.Id == command.OffsetAccountId, ct)) throw new KeyNotFoundException("Offset account was not found.");
         var amount = Math.Abs(feed.Amount);
         if (amount == 0m) throw new InvalidOperationException("A zero bank movement cannot be posted.");
         var bankDebit = feed.Amount > 0m ? amount : 0m;

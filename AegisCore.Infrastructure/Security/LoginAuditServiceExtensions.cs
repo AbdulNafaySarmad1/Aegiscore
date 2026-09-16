@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Infrastructure.Repositories;
 using AegisCore.Infrastructure.Security;
 using Microsoft.Extensions.DependencyInjection;

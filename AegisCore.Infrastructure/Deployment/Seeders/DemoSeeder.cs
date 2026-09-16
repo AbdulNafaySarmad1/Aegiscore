@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Common;
 using AegisCore.Domain.Entities;

@@ -40,7 +40,7 @@ public class CampusOperationsService : ICampusOperationsService
         if (visitorId == Guid.Empty) throw new ArgumentException("A valid visitor id is required.", nameof(visitorId));
         if (validTo <= validFrom) throw new ArgumentException("Pass expiry must be after start time.", nameof(validTo));
         var visitor = await _db.Visitors.FirstOrDefaultAsync(v => v.Id == visitorId, ct)
-            ?? throw new InvalidOperationException("Visitor not found.");
+            ?? throw new KeyNotFoundException("Visitor not found.");
         var passNumber = $"VIS-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
         visitor.BadgeNumber = passNumber;
         visitor.UpdatedAt = DateTime.UtcNow;

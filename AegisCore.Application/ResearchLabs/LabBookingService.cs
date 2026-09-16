@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.ResearchLabs;
@@ -22,7 +23,7 @@ public class LabBookingService
     public async Task<LabBooking> CreateBookingAsync(LabBooking booking, CancellationToken cancellationToken = default)
     {
         var lab = await _labRepository.GetByIdAsync(booking.ResearchLabId, cancellationToken)
-            ?? throw new InvalidOperationException("Lab not found.");
+            ?? throw new KeyNotFoundException("Lab not found.");
 
         if (lab.Status != LabStatus.Active)
             throw new InvalidOperationException("Lab is not active.");
@@ -42,7 +43,7 @@ public class LabBookingService
     public async Task ApproveBookingAsync(Guid bookingId, Guid approvedByUserId, CancellationToken cancellationToken = default)
     {
         var booking = await _bookingRepository.GetByIdAsync(bookingId, cancellationToken)
-            ?? throw new InvalidOperationException("Booking not found.");
+            ?? throw new KeyNotFoundException("Booking not found.");
 
         if (booking.Status != BookingStatus.Pending)
             throw new InvalidOperationException("Only pending bookings can be approved.");
@@ -59,7 +60,7 @@ public class LabBookingService
     public async Task RejectBookingAsync(Guid bookingId, string reason, CancellationToken cancellationToken = default)
     {
         var booking = await _bookingRepository.GetByIdAsync(bookingId, cancellationToken)
-            ?? throw new InvalidOperationException("Booking not found.");
+            ?? throw new KeyNotFoundException("Booking not found.");
 
         booking.Status = BookingStatus.Rejected;
         booking.RejectionReason = reason;

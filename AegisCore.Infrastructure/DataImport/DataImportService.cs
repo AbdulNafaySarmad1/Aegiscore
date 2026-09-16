@@ -27,7 +27,7 @@ public class DataImportService : IDataImportService
 
     public async Task<bool> TestConnectionAsync(Guid connectionId, CancellationToken ct)
     {
-        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new InvalidOperationException("Connection not found.");
+        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new KeyNotFoundException("Connection not found.");
         conn.LastTestedAt = DateTime.UtcNow;
         try
         {
@@ -48,7 +48,7 @@ public class DataImportService : IDataImportService
 
     public async Task<List<string>> DiscoverTablesAsync(Guid connectionId, string? schema, CancellationToken ct)
     {
-        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new InvalidOperationException("Connection not found.");
+        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new KeyNotFoundException("Connection not found.");
         if (conn.DbType != "PostgreSQL")
         {
             _logger.LogWarning("DiscoverTablesAsync: {DbType} discovery simulated; real column metadata unavailable", conn.DbType);
@@ -66,7 +66,7 @@ public class DataImportService : IDataImportService
 
     public async Task<List<ColumnInfo>> DiscoverColumnsAsync(Guid connectionId, string tableName, string? schema, CancellationToken ct)
     {
-        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new InvalidOperationException("Connection not found.");
+        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new KeyNotFoundException("Connection not found.");
         if (conn.DbType != "PostgreSQL")
         {
             _logger.LogWarning("DiscoverColumnsAsync: {DbType} column discovery simulated", conn.DbType);
@@ -92,7 +92,7 @@ public class DataImportService : IDataImportService
 
     public async Task<DataImportJob> StartImportAsync(Guid connectionId, string entityType, string sourceQuery, Dictionary<string, string> fieldMappings, Guid? userId, CancellationToken ct)
     {
-        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new InvalidOperationException("Connection not found.");
+        var conn = await _db.ExternalDbConnections.FindAsync([connectionId], ct) ?? throw new KeyNotFoundException("Connection not found.");
         var job = new DataImportJob { Id = Guid.NewGuid(), ConnectionId = connectionId, EntityType = entityType, Status = "Running", SourceQueryJson = sourceQuery, FieldMappingsJson = JsonSerializer.Serialize(fieldMappings), TriggeredByUserId = userId, StartedAt = DateTime.UtcNow };
         await _db.DataImportJobs.AddAsync(job, ct); await _db.SaveChangesAsync(ct);
 
@@ -131,7 +131,7 @@ public class DataImportService : IDataImportService
 
     public async Task<DataImportJob> GetJobStatusAsync(Guid jobId, CancellationToken ct)
     {
-        var job = await _db.DataImportJobs.FindAsync([jobId], ct) ?? throw new InvalidOperationException("Job not found.");
+        var job = await _db.DataImportJobs.FindAsync([jobId], ct) ?? throw new KeyNotFoundException("Job not found.");
         return job;
     }
 

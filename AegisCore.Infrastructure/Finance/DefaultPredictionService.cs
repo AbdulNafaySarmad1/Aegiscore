@@ -85,7 +85,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
     public async Task<InterventionPlanDto> GenerateInterventionPlanAsync(Guid assessmentId, CancellationToken ct = default)
     {
         var assessment = await db.Set<DefaultRiskAssessment>().FindAsync([assessmentId], ct)
-            ?? throw new InvalidOperationException("Assessment not found.");
+            ?? throw new KeyNotFoundException("Assessment not found.");
 
         var plan = assessment.RiskTier switch
         {

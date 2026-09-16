@@ -28,7 +28,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
 
     public async Task<CounselorAssignmentDto> RouteTicketToCounselorAsync(Guid ticketId, CancellationToken ct = default)
     {
-        var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new InvalidOperationException("Ticket not found.");
+        var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new KeyNotFoundException("Ticket not found.");
         var counselors = await db.Set<CounselorProfile>().Where(c => c.IsActive && c.CurrentCaseload < c.MaxCaseload).OrderBy(c => c.CurrentCaseload).ToListAsync(ct);
         var assigned = counselors.FirstOrDefault() ?? throw new InvalidOperationException("No available counselors.");
         ticket.AssignedCounselorId = assigned.Id;
@@ -47,7 +47,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
 
     public async Task CloseTicketAsync(Guid ticketId, string resolutionType, CancellationToken ct = default)
     {
-        var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new InvalidOperationException("Ticket not found.");
+        var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new KeyNotFoundException("Ticket not found.");
         ticket.Status = "resolved";
         ticket.ResolutionType = resolutionType;
         ticket.ResolvedAt = DateTimeOffset.UtcNow;
@@ -56,7 +56,7 @@ public sealed class MentalHealthService(AegisDbContext db, ILogger<MentalHealthS
 
     public async Task CheckForCrisisFlagsAsync(Guid ticketId, CancellationToken ct = default)
     {
-        var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new InvalidOperationException("Ticket not found.");
+        var ticket = await db.Set<MentalHealthTicket>().FindAsync([ticketId], ct) ?? throw new KeyNotFoundException("Ticket not found.");
         var hasCrisis = CrisisKeywords.Any(k => (ticket.ConcernDescription ?? "").Contains(k, StringComparison.OrdinalIgnoreCase));
         if (hasCrisis && !ticket.CrisisProtocolsTriggered)
         {

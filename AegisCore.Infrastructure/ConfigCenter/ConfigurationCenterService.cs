@@ -93,7 +93,7 @@ public class ConfigurationCenterService : IConfigurationCenterService
 
         var entry = await _entryRepo.GetByKeyAsync(key, cancellationToken: cancellationToken);
         if (entry == null)
-            throw new InvalidOperationException($"Configuration '{key}' not found.");
+            throw new KeyNotFoundException($"Configuration '{key}' not found.");
 
         var dto = MapToDto(entry);
         _cache.Set($"config:{key}", dto, TimeSpan.FromMinutes(5));
@@ -121,10 +121,10 @@ public class ConfigurationCenterService : IConfigurationCenterService
     public async Task<ConfigurationEntry> RollbackAsync(Guid entryId, int targetVersion, Guid userId, string? userName, CancellationToken cancellationToken = default)
     {
         var entry = await _entryRepo.GetByIdAsync(entryId, cancellationToken)
-            ?? throw new InvalidOperationException("Configuration entry not found.");
+            ?? throw new KeyNotFoundException("Configuration entry not found.");
 
         var target = await _versionRepo.GetByEntryAndVersionAsync(entryId, targetVersion, cancellationToken)
-            ?? throw new InvalidOperationException($"Version {targetVersion} not found.");
+            ?? throw new KeyNotFoundException($"Version {targetVersion} not found.");
 
         var previousValue = entry.ValueJson;
         var newVersion = entry.CurrentVersion + 1;
@@ -156,7 +156,7 @@ public class ConfigurationCenterService : IConfigurationCenterService
     public async Task<ConfigDiffDto> GetDiffAsync(Guid entryId, int versionA, int versionB, CancellationToken cancellationToken = default)
     {
         var entry = await _entryRepo.GetByIdAsync(entryId, cancellationToken)
-            ?? throw new InvalidOperationException("Configuration entry not found.");
+            ?? throw new KeyNotFoundException("Configuration entry not found.");
 
         var va = await _versionRepo.GetByEntryAndVersionAsync(entryId, versionA, cancellationToken);
         var vb = await _versionRepo.GetByEntryAndVersionAsync(entryId, versionB, cancellationToken);

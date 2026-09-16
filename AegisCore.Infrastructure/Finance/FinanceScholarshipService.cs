@@ -29,7 +29,7 @@ public sealed class FinanceScholarshipService(AegisDbContext db, IFinanceModuleS
         if (coverage == "PARTIAL_PERCENT" && command.CoverageValue > 100m) throw new ArgumentException("Partial coverage cannot exceed 100 percent.");
         if (command.MinimumCgpa is < 0m or > 4m) throw new ArgumentException("Minimum CGPA must be between 0 and 4.");
         if (command.GrantId is not null && !await db.FinanceGrants.AnyAsync(x => x.TenantId == tenantId && x.Id == command.GrantId && x.Status == "ACTIVE", ct))
-            throw new InvalidOperationException("Active grant was not found.");
+            throw new KeyNotFoundException("Active grant was not found.");
 
         var program = new FinanceScholarshipProgram
         {
@@ -50,10 +50,10 @@ public sealed class FinanceScholarshipService(AegisDbContext db, IFinanceModuleS
             throw new ArgumentException("Scholarship application fields are invalid.");
         var now = DateTime.UtcNow;
         var program = await db.FinanceScholarshipPrograms.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ProgramId, ct)
-            ?? throw new InvalidOperationException("Scholarship program was not found.");
+            ?? throw new KeyNotFoundException("Scholarship program was not found.");
         if (program.Status != "ANNOUNCED" || now < program.OpensAt || now > program.ClosesAt) throw new InvalidOperationException("Scholarship applications are closed.");
         if (program.MinimumCgpa is not null && command.Cgpa < program.MinimumCgpa) throw new InvalidOperationException("Applicant does not meet the minimum CGPA.");
-        if (!await db.StudentProfiles.AnyAsync(x => x.TenantId == tenantId && x.StudentId == command.StudentId, ct)) throw new InvalidOperationException("Tenant student profile was not found.");
+        if (!await db.StudentProfiles.AnyAsync(x => x.TenantId == tenantId && x.StudentId == command.StudentId, ct)) throw new KeyNotFoundException("Tenant student profile was not found.");
         if (!program.AllowsStacking && await db.FinanceScholarshipAwards.AnyAsync(x => x.TenantId == tenantId && x.StudentId == command.StudentId && (x.Status == "ACTIVE" || x.Status == "DISBURSED"), ct))
             throw new InvalidOperationException("This scholarship cannot be combined with another active award.");
 
@@ -72,7 +72,7 @@ public sealed class FinanceScholarshipService(AegisDbContext db, IFinanceModuleS
         if (tenantId == Guid.Empty || actorId == Guid.Empty || applicationId == Guid.Empty) throw new ArgumentException("Application and actor are required.");
         var target = Required(command.Status, 20, "Status").ToUpperInvariant();
         var application = await db.FinanceScholarshipApplications.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == applicationId, ct)
-            ?? throw new InvalidOperationException("Scholarship application was not found.");
+            ?? throw new KeyNotFoundException("Scholarship application was not found.");
         if (!AllowedTransitions.TryGetValue(application.Status, out var allowed) || !allowed.Contains(target, StringComparer.Ordinal)) throw new InvalidOperationException($"Transition from {application.Status} to {target} is not allowed.");
         if (target == "REJECTED" && string.IsNullOrWhiteSpace(command.Note)) throw new ArgumentException("A rejection note is required.");
         if (target == "DISBURSED") throw new InvalidOperationException("Use the disbursement operation to post an approved award.");
@@ -93,7 +93,7 @@ public sealed class FinanceScholarshipService(AegisDbContext db, IFinanceModuleS
     public async Task<FinanceScholarshipAward> DisburseAsync(Guid tenantId, Guid actorId, Guid applicationId, CancellationToken ct)
     {
         var application = await db.FinanceScholarshipApplications.Include(x => x.Program).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == applicationId, ct)
-            ?? throw new InvalidOperationException("Scholarship application was not found.");
+            ?? throw new KeyNotFoundException("Scholarship application was not found.");
         if (application.Status != "APPROVED" || application.AwardId is not null) throw new InvalidOperationException("Only an approved, undistributed application may be disbursed.");
         var program = application.Program;
         var method = program.DisbursementMethod == "REIMBURSEMENT" ? "CASH_STIPEND" : program.DisbursementMethod;
@@ -119,7 +119,7 @@ public sealed class FinanceScholarshipService(AegisDbContext db, IFinanceModuleS
     public async Task<ScholarshipDonorReport> DonorReportAsync(Guid tenantId, Guid grantId, CancellationToken ct)
     {
         var grant = await db.FinanceGrants.AsNoTracking().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == grantId, ct)
-            ?? throw new InvalidOperationException("Grant was not found.");
+            ?? throw new KeyNotFoundException("Grant was not found.");
         var programIds = await db.FinanceScholarshipPrograms.AsNoTracking().Where(x => x.TenantId == tenantId && x.GrantId == grantId).Select(x => x.Id).ToArrayAsync(ct);
         var applications = await db.FinanceScholarshipApplications.AsNoTracking().CountAsync(x => x.TenantId == tenantId && programIds.Contains(x.ProgramId), ct);
         var awards = await db.FinanceScholarshipAwards.AsNoTracking().CountAsync(x => x.TenantId == tenantId && x.GrantId == grantId, ct);

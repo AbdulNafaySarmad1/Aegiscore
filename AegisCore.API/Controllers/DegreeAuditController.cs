@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.DegreeAudit;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;

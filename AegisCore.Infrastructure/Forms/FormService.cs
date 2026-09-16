@@ -39,7 +39,7 @@ public class FormService : IFormService
     public async Task<FormSubmission> SubmitFormAsync(Guid formId, Dictionary<string, object?> values, Guid? userId, string? userName, string? userEmail, CancellationToken cancellationToken = default)
     {
         var form = await _formRepo.GetByIdAsync(formId, cancellationToken)
-            ?? throw new InvalidOperationException("Form not found.");
+            ?? throw new KeyNotFoundException("Form not found.");
 
         if (form.Status != FormStatus.Published)
             throw new InvalidOperationException("Form is not accepting submissions.");
@@ -69,7 +69,7 @@ public class FormService : IFormService
     public async Task<FormSubmission> SaveDraftAsync(Guid formId, Dictionary<string, object?> values, Guid? userId, string? userEmail, CancellationToken cancellationToken = default)
     {
         var form = await _formRepo.GetByIdAsync(formId, cancellationToken)
-            ?? throw new InvalidOperationException("Form not found.");
+            ?? throw new KeyNotFoundException("Form not found.");
 
         if (!form.AllowDraftSave)
             throw new InvalidOperationException("Draft saving is not enabled for this form.");
@@ -100,7 +100,7 @@ public class FormService : IFormService
     public async Task<FormSubmission> UpdateSubmissionStatusAsync(Guid submissionId, SubmissionStatus status, string? notes, CancellationToken cancellationToken = default)
     {
         var submission = await _submissionRepo.GetByIdAsync(submissionId, cancellationToken)
-            ?? throw new InvalidOperationException("Submission not found.");
+            ?? throw new KeyNotFoundException("Submission not found.");
 
         submission.Status = status;
         if (status is SubmissionStatus.Approved or SubmissionStatus.Rejected)

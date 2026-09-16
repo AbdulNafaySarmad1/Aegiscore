@@ -232,9 +232,9 @@ public sealed class ApplicantPortalService(
     {
         var tenantId = TenantId;
         var intake = await db.AdmissionIntakes.IgnoreQueryFilters().FirstOrDefaultAsync(i => i.TenantId == tenantId && i.Id == intakeId, ct)
-            ?? throw new InvalidOperationException("Intake was not found.");
+            ?? throw new KeyNotFoundException("Intake was not found.");
         var program = await db.DegreePrograms.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.TenantId == tenantId && p.Id == programId && p.IsActive, ct)
-            ?? throw new InvalidOperationException("Program was not found.");
+            ?? throw new KeyNotFoundException("Program was not found.");
         return (intake, program);
     }
 
@@ -243,7 +243,7 @@ public sealed class ApplicantPortalService(
         var tenantId = TenantId;
         return await db.ApplicantProfiles.IgnoreQueryFilters()
             .FirstOrDefaultAsync(p => p.TenantId == tenantId && p.Id == applicantProfileId, ct)
-            ?? throw new InvalidOperationException("Applicant profile was not found.");
+            ?? throw new KeyNotFoundException("Applicant profile was not found.");
     }
 
     private static void RequireEditable(ApplicantProfile profile)

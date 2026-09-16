@@ -14,7 +14,7 @@ public sealed class GradingService(AegisDbContext db, IPolicyService policies, I
         var scheme = await db.AssessmentSchemes
             .Include(s => s.Components)
             .FirstOrDefaultAsync(s => s.CourseId == courseId, ct)
-            ?? throw new InvalidOperationException("Assessment scheme was not found for this course.");
+            ?? throw new KeyNotFoundException("Assessment scheme was not found for this course.");
 
         if (scheme.Components.Count == 0 || scheme.Components.Sum(c => c.WeightPercentage) != 100
             || scheme.Components.Any(c => c.TotalMarks <= 0 || c.WeightPercentage < 0))

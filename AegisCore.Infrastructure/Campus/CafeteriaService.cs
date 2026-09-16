@@ -9,14 +9,14 @@ public sealed class CafeteriaService(AegisDbContext db, ILogger<CafeteriaService
 {
     public async Task<DailyMenuDto> GetDailyMenuAsync(Guid cafeteriaUnitId, CancellationToken ct = default)
     {
-        var unit = await db.Set<CafeteriaUnit>().FindAsync([cafeteriaUnitId], ct) ?? throw new InvalidOperationException("Cafeteria unit not found.");
+        var unit = await db.Set<CafeteriaUnit>().FindAsync([cafeteriaUnitId], ct) ?? throw new KeyNotFoundException("Cafeteria unit not found.");
         var items = await db.Set<MenuItem>().Where(m => m.CafeteriaUnitId == cafeteriaUnitId && m.IsAvailable).ToListAsync(ct);
         return new DailyMenuDto(cafeteriaUnitId, unit.Name, items.Select(i => new MenuItemDto(i.Id, i.ItemName, i.Category, i.Price, i.Calories, i.AllergensCsv, i.IsAvailable)).ToList());
     }
 
     public async Task<PreOrderDto> PlacePreOrderAsync(PreOrderRequest request, CancellationToken ct = default)
     {
-        var item = await db.Set<MenuItem>().FindAsync([request.MenuItemId], ct) ?? throw new InvalidOperationException("Menu item not found.");
+        var item = await db.Set<MenuItem>().FindAsync([request.MenuItemId], ct) ?? throw new KeyNotFoundException("Menu item not found.");
         var order = new PreOrder
         {
             Id = Guid.NewGuid(), StudentId = request.StudentId, MenuItemId = request.MenuItemId,
@@ -33,7 +33,7 @@ public sealed class CafeteriaService(AegisDbContext db, ILogger<CafeteriaService
         decimal total = 0m;
         foreach (var pi in request.Items)
         {
-            var item = await db.Set<MenuItem>().FindAsync([pi.MenuItemId], ct) ?? throw new InvalidOperationException("Menu item not found.");
+            var item = await db.Set<MenuItem>().FindAsync([pi.MenuItemId], ct) ?? throw new KeyNotFoundException("Menu item not found.");
             total += item.Price * pi.Quantity;
         }
         var transaction = new CafeteriaTransaction

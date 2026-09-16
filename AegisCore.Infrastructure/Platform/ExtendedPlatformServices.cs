@@ -11,8 +11,8 @@ public class QueueManagementService : IQueueManagementService
     private readonly IQueueDefinitionRepository _qRepo; private readonly IQueueJobRepository _jRepo;
     public QueueManagementService(IQueueDefinitionRepository q, IQueueJobRepository j) { _qRepo = q; _jRepo = j; }
     public async Task<QueueDashboardDto> GetDashboardAsync(CancellationToken ct) { var qs = await _qRepo.GetAllAsync(ct); var failed = await _jRepo.GetFailedAsync(ct); var dl = await _jRepo.GetDeadLetterAsync(ct); return new QueueDashboardDto { TotalQueues = qs.Count, HealthyQueues = qs.Count(q => q.Status == QueueStatus.Healthy), BackloggedQueues = qs.Count(q => q.Status == QueueStatus.Backlogged), TotalFailed = failed.Count, DeadLetterCount = dl.Count }; }
-    public async Task RetryJobAsync(Guid jobId, CancellationToken ct) { var job = await _jRepo.GetByIdAsync(jobId, ct) ?? throw new InvalidOperationException("Job not found."); job.Status = JobExecutionStatus.Queued; job.AttemptCount++; await _jRepo.UpdateAsync(job, ct); }
-    public async Task MoveToDeadLetterAsync(Guid jobId, CancellationToken ct) { var job = await _jRepo.GetByIdAsync(jobId, ct) ?? throw new InvalidOperationException("Job not found."); job.AttemptCount = 99; await _jRepo.UpdateAsync(job, ct); }
+    public async Task RetryJobAsync(Guid jobId, CancellationToken ct) { var job = await _jRepo.GetByIdAsync(jobId, ct) ?? throw new KeyNotFoundException("Job not found."); job.Status = JobExecutionStatus.Queued; job.AttemptCount++; await _jRepo.UpdateAsync(job, ct); }
+    public async Task MoveToDeadLetterAsync(Guid jobId, CancellationToken ct) { var job = await _jRepo.GetByIdAsync(jobId, ct) ?? throw new KeyNotFoundException("Job not found."); job.AttemptCount = 99; await _jRepo.UpdateAsync(job, ct); }
 }
 
 public class EventExplorerService : IEventExplorerService
@@ -20,7 +20,7 @@ public class EventExplorerService : IEventExplorerService
     private readonly IDomainEventRepository _repo;
     public EventExplorerService(IDomainEventRepository r) { _repo = r; }
     public async Task<List<DomainEvent>> GetEventsAsync(string? type, string? aggregateId, DateTime? from, DateTime? to, CancellationToken ct) { var all = await _repo.GetAllAsync(ct); return all.Where(e => (type == null || e.EventType == type) && (aggregateId == null || e.AggregateId == aggregateId)).ToList(); }
-    public async Task ReplayEventAsync(Guid eventId, CancellationToken ct) { var ev = await _repo.GetByIdAsync(eventId, ct) ?? throw new InvalidOperationException("Event not found."); ev.Status = EventStatus.Replayed; ev.ProcessedAt = DateTime.UtcNow; await _repo.UpdateAsync(ev, ct); }
+    public async Task ReplayEventAsync(Guid eventId, CancellationToken ct) { var ev = await _repo.GetByIdAsync(eventId, ct) ?? throw new KeyNotFoundException("Event not found."); ev.Status = EventStatus.Replayed; ev.ProcessedAt = DateTime.UtcNow; await _repo.UpdateAsync(ev, ct); }
     public Task<EventSchemaDto> GetSchemaAsync(string eventType, CancellationToken ct) => Task.FromResult(new EventSchemaDto { EventType = eventType, CurrentVersion = 1 });
 }
 
@@ -53,7 +53,7 @@ public class IntegrationMonitoringService : IIntegrationMonitoringService
 {
     private readonly IIntegrationRegistrationRepository _repo; private readonly ILogger<IntegrationMonitoringService> _logger;
     public IntegrationMonitoringService(IIntegrationRegistrationRepository r, ILogger<IntegrationMonitoringService> l) { _repo = r; _logger = l; }
-    public async Task<IntegrationStatus> CheckIntegrationAsync(Guid id, CancellationToken ct) { var i = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Integration not found."); i.LastCheckedAt = DateTime.UtcNow; i.Status = IntegrationStatus.Up; i.LastSuccessAt = DateTime.UtcNow; i.UptimePercentage = 99.9; await _repo.UpdateAsync(i, ct); return i.Status; }
+    public async Task<IntegrationStatus> CheckIntegrationAsync(Guid id, CancellationToken ct) { var i = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Integration not found."); i.LastCheckedAt = DateTime.UtcNow; i.Status = IntegrationStatus.Up; i.LastSuccessAt = DateTime.UtcNow; i.UptimePercentage = 99.9; await _repo.UpdateAsync(i, ct); return i.Status; }
     public async Task CheckAllIntegrationsAsync(CancellationToken ct) { var all = await _repo.GetAllAsync(ct); foreach (var i in all) await CheckIntegrationAsync(i.Id, ct); }
     public async Task<List<IntegrationRegistration>> GetStatusAsync(CancellationToken ct) { var all = await _repo.GetAllAsync(ct); return all.ToList(); }
 }
@@ -80,7 +80,7 @@ public class PromptManagementService : IPromptManagementService
     private readonly IPromptRepository _pRepo; private readonly IPromptVersionRepository _vRepo;
     public PromptManagementService(IPromptRepository p, IPromptVersionRepository v) { _pRepo = p; _vRepo = v; }
     public async Task<Prompt> CreatePromptAsync(Prompt prompt, CancellationToken ct) { await _pRepo.AddAsync(prompt, ct); var v = new PromptVersion { Id = Guid.NewGuid(), PromptId = prompt.Id, VersionNumber = 1, SystemPrompt = prompt.SystemPrompt, UserPromptTemplate = prompt.UserPromptTemplate, ChangedByUserId = prompt.CreatedByUserId }; await _vRepo.AddAsync(v, ct); return prompt; }
-    public async Task<Prompt> ActivateVersionAsync(Guid promptId, int version, CancellationToken ct) { var p = await _pRepo.GetByIdAsync(promptId, ct) ?? throw new InvalidOperationException("Prompt not found."); p.ActiveVersion = version; await _pRepo.UpdateAsync(p, ct); return p; }
+    public async Task<Prompt> ActivateVersionAsync(Guid promptId, int version, CancellationToken ct) { var p = await _pRepo.GetByIdAsync(promptId, ct) ?? throw new KeyNotFoundException("Prompt not found."); p.ActiveVersion = version; await _pRepo.UpdateAsync(p, ct); return p; }
     public Task<PromptTestResultDto> TestPromptAsync(Guid promptId, int version, string input, CancellationToken ct) => Task.FromResult(new PromptTestResultDto { Response = "Test response for: " + input, TokensUsed = input.Length / 4, LatencyMs = 200 });
     public async Task<PromptABTest> StartABTestAsync(Guid promptId, int vA, int vB, double split, CancellationToken ct) { var test = new PromptABTest { Id = Guid.NewGuid(), PromptId = promptId, VersionA = vA, VersionB = vB, TrafficSplitA = split, IsActive = true }; return test; }
 }
@@ -107,7 +107,7 @@ public class LicenseService : ILicenseService
     public LicenseService(ILicenseRepository r) { _repo = r; }
     public async Task<License> IssueLicenseAsync(string name, string email, LicenseEdition edition, int maxUsers, DateTime? expiresAt, CancellationToken ct) { var l = new License { Id = Guid.NewGuid(), CustomerName = name, CustomerEmail = email, Edition = edition, MaxUsers = maxUsers, LicenseKey = Guid.NewGuid().ToString("N")[..16].ToUpper(), Status = LicenseStatus.Active, IssuedAt = DateTime.UtcNow, ExpiresAt = expiresAt }; await _repo.AddAsync(l, ct); return l; }
     public async Task<bool> ValidateLicenseAsync(string key, CancellationToken ct) { var l = await _repo.GetByKeyAsync(key, ct); return l != null && l.Status == LicenseStatus.Active && (!l.ExpiresAt.HasValue || l.ExpiresAt.Value > DateTime.UtcNow); }
-    public async Task RevokeLicenseAsync(Guid id, string reason, CancellationToken ct) { var l = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("License not found."); l.Status = LicenseStatus.Revoked; l.RevokedAt = DateTime.UtcNow; l.RevocationReason = reason; await _repo.UpdateAsync(l, ct); }
+    public async Task RevokeLicenseAsync(Guid id, string reason, CancellationToken ct) { var l = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("License not found."); l.Status = LicenseStatus.Revoked; l.RevokedAt = DateTime.UtcNow; l.RevocationReason = reason; await _repo.UpdateAsync(l, ct); }
 }
 
 public class CustomerPortalService : ICustomerPortalService
@@ -123,7 +123,7 @@ public class UpdateService : IUpdateService
     private readonly IUpdateDeploymentRepository _repo;
     public UpdateService(IUpdateDeploymentRepository r) { _repo = r; }
     public async Task<UpdateDeployment> StartUpdateAsync(string fromV, string toV, CancellationToken ct) { var d = new UpdateDeployment { Id = Guid.NewGuid(), FromVersion = fromV, ToVersion = toV, Status = UpdateStatus.Installed, StartedAt = DateTime.UtcNow, CompletedAt = DateTime.UtcNow }; await _repo.AddAsync(d, ct); return d; }
-    public async Task RollbackAsync(Guid id, CancellationToken ct) { var d = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Deployment not found."); d.IsRolledBack = true; d.Status = UpdateStatus.RolledBack; await _repo.UpdateAsync(d, ct); }
+    public async Task RollbackAsync(Guid id, CancellationToken ct) { var d = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Deployment not found."); d.IsRolledBack = true; d.Status = UpdateStatus.RolledBack; await _repo.UpdateAsync(d, ct); }
     public async Task<List<UpdateDeployment>> GetHistoryAsync(CancellationToken ct) { var all = await _repo.GetAllAsync(ct); return all.ToList(); }
 }
 
@@ -139,8 +139,8 @@ public class FeeDefaulterService : IFeeDefaulterService
 {
     private readonly IFeeDefaulterRepository _repo;
     public FeeDefaulterService(IFeeDefaulterRepository r) { _repo = r; }
-    public async Task EscalateAsync(Guid id, CancellationToken ct) { var r = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Record not found."); r.Level = r.Level == FeeDefaulterLevel.Level1_Reminder ? FeeDefaulterLevel.Level2_Warning : r.Level == FeeDefaulterLevel.Level2_Warning ? FeeDefaulterLevel.Level3_Final : FeeDefaulterLevel.Level4_Legal; r.NotificationsSent++; r.LastNotifiedAt = DateTime.UtcNow; await _repo.UpdateAsync(r, ct); }
-    public async Task MarkAsClearedAsync(Guid id, CancellationToken ct) { var r = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Record not found."); r.Status = DefaulterStatus.Cleared; await _repo.UpdateAsync(r, ct); }
+    public async Task EscalateAsync(Guid id, CancellationToken ct) { var r = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Record not found."); r.Level = r.Level == FeeDefaulterLevel.Level1_Reminder ? FeeDefaulterLevel.Level2_Warning : r.Level == FeeDefaulterLevel.Level2_Warning ? FeeDefaulterLevel.Level3_Final : FeeDefaulterLevel.Level4_Legal; r.NotificationsSent++; r.LastNotifiedAt = DateTime.UtcNow; await _repo.UpdateAsync(r, ct); }
+    public async Task MarkAsClearedAsync(Guid id, CancellationToken ct) { var r = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Record not found."); r.Status = DefaulterStatus.Cleared; await _repo.UpdateAsync(r, ct); }
     public async Task<List<FeeDefaulterRecord>> GetPendingAsync(CancellationToken ct) { var all = await _repo.GetPendingAsync(ct); return all.ToList(); }
 }
 
@@ -149,8 +149,8 @@ public class MisconductService : IMisconductService
     private readonly IMisconductCaseRepository _repo;
     public MisconductService(IMisconductCaseRepository r) { _repo = r; }
     public async Task<MisconductCase> ReportAsync(MisconductCase c, CancellationToken ct) { await _repo.AddAsync(c, ct); return c; }
-    public async Task AssignInvestigatorAsync(Guid id, Guid userId, CancellationToken ct) { var c = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Case not found."); c.AssignedToUserId = userId; c.Status = MisconductStatus.UnderInvestigation; await _repo.UpdateAsync(c, ct); }
-    public async Task ResolveAsync(Guid id, SanctionType sanction, string resolution, CancellationToken ct) { var c = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Case not found."); c.Sanction = sanction; c.Resolution = resolution; c.Status = MisconductStatus.Resolved; c.ResolvedAt = DateTime.UtcNow; await _repo.UpdateAsync(c, ct); }
+    public async Task AssignInvestigatorAsync(Guid id, Guid userId, CancellationToken ct) { var c = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Case not found."); c.AssignedToUserId = userId; c.Status = MisconductStatus.UnderInvestigation; await _repo.UpdateAsync(c, ct); }
+    public async Task ResolveAsync(Guid id, SanctionType sanction, string resolution, CancellationToken ct) { var c = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Case not found."); c.Sanction = sanction; c.Resolution = resolution; c.Status = MisconductStatus.Resolved; c.ResolvedAt = DateTime.UtcNow; await _repo.UpdateAsync(c, ct); }
 }
 
 public class FacultyWorkloadService : IFacultyWorkloadService
@@ -183,8 +183,8 @@ public class CurriculumGovernanceService : ICurriculumGovernanceService
     private readonly ICurriculumProposalRepository _repo;
     public CurriculumGovernanceService(ICurriculumProposalRepository r) { _repo = r; }
     public async Task<CurriculumProposal> ProposeAsync(CurriculumProposal p, CancellationToken ct) { await _repo.AddAsync(p, ct); return p; }
-    public async Task ApproveAsync(Guid id, Guid userId, CancellationToken ct) { var p = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Proposal not found."); p.Status = CurriculumApprovalStatus.Approved; p.ApprovedAt = DateTime.UtcNow; await _repo.UpdateAsync(p, ct); }
-    public async Task RejectAsync(Guid id, Guid userId, string reason, CancellationToken ct) { var p = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Proposal not found."); p.Status = CurriculumApprovalStatus.Rejected; await _repo.UpdateAsync(p, ct); }
+    public async Task ApproveAsync(Guid id, Guid userId, CancellationToken ct) { var p = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Proposal not found."); p.Status = CurriculumApprovalStatus.Approved; p.ApprovedAt = DateTime.UtcNow; await _repo.UpdateAsync(p, ct); }
+    public async Task RejectAsync(Guid id, Guid userId, string reason, CancellationToken ct) { var p = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Proposal not found."); p.Status = CurriculumApprovalStatus.Rejected; await _repo.UpdateAsync(p, ct); }
 }
 
 public class ZeroTrustService : IZeroTrustService
@@ -201,5 +201,5 @@ public class HardcodingAuditService : IHardcodingAuditService
     public HardcodingAuditService(IHardcodingFindingRepository r) { _repo = r; }
     public async Task<HardcodingFinding> ReportAsync(HardcodingFinding f, CancellationToken ct) { await _repo.AddAsync(f, ct); return f; }
     public async Task<List<HardcodingFinding>> GetUnresolvedAsync(CancellationToken ct) { var all = await _repo.GetUnresolvedAsync(ct); return all.ToList(); }
-    public async Task MarkResolvedAsync(Guid id, CancellationToken ct) { var f = await _repo.GetByIdAsync(id, ct) ?? throw new InvalidOperationException("Finding not found."); f.IsResolved = true; await _repo.UpdateAsync(f, ct); }
+    public async Task MarkResolvedAsync(Guid id, CancellationToken ct) { var f = await _repo.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException("Finding not found."); f.IsResolved = true; await _repo.UpdateAsync(f, ct); }
 }

@@ -39,7 +39,7 @@ public class AzureSecretService : ISecretService
             }
         }
         return Environment.GetEnvironmentVariable(secretName)
-            ?? throw new InvalidOperationException($"Secret '{secretName}' not found in Key Vault or environment.");
+            ?? throw new KeyNotFoundException($"Secret '{secretName}' not found in Key Vault or environment.");
     }
 
     public async Task SetSecretAsync(string secretName, string value, CancellationToken ct = default)

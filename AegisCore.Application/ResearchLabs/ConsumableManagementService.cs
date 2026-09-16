@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.ResearchLabs;
@@ -29,7 +30,7 @@ public class ConsumableManagementService
     public async Task<ConsumableRequisition> RequestConsumableAsync(ConsumableRequisition requisition, CancellationToken cancellationToken = default)
     {
         var consumable = await _consumableRepository.GetByIdAsync(requisition.LabConsumableId, cancellationToken)
-            ?? throw new InvalidOperationException("Consumable not found.");
+            ?? throw new KeyNotFoundException("Consumable not found.");
 
         if (consumable.QuantityInStock < requisition.Quantity)
             throw new InvalidOperationException("Insufficient stock available.");
@@ -43,13 +44,13 @@ public class ConsumableManagementService
     public async Task IssueConsumableAsync(Guid requisitionId, Guid issuedByUserId, CancellationToken cancellationToken = default)
     {
         var requisition = await _requisitionRepository.GetByIdAsync(requisitionId, cancellationToken)
-            ?? throw new InvalidOperationException("Requisition not found.");
+            ?? throw new KeyNotFoundException("Requisition not found.");
 
         if (requisition.Status != RequisitionStatus.Approved)
             throw new InvalidOperationException("Only approved requisitions can be issued.");
 
         var consumable = await _consumableRepository.GetByIdAsync(requisition.LabConsumableId, cancellationToken)
-            ?? throw new InvalidOperationException("Consumable not found.");
+            ?? throw new KeyNotFoundException("Consumable not found.");
 
         consumable.QuantityInStock -= requisition.Quantity;
         consumable.UpdatedAt = DateTime.UtcNow;

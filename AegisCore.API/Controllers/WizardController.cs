@@ -19,6 +19,7 @@ namespace AegisCore.API.Controllers;
 
 [ApiController]
 [AllowAnonymous]
+[AegisCore.API.Extensions.InstallationOnly]
 [Route("api/wizard")]
 public sealed class WizardController(
     IConfiguration configuration,
@@ -409,30 +410,7 @@ public sealed class WizardController(
 
     [AllowAnonymous]
     [HttpGet("demo-status")]
-    public async Task<IActionResult> DemoStatus()
-    {
-        var isDemo = configuration.GetValue<bool>("Runtime:DemoMode");
-        if (!isDemo) return Ok(new { isDemo = false });
-
-        var expiry = configuration["Runtime:DemoExpiryUtc"];
-        if (string.IsNullOrWhiteSpace(expiry))
-        {
-            try { expiry = await secrets.GetSecretAsync("Runtime__DemoExpiryUtc"); }
-            catch { /* secret not set yet — no demo expiry configured */ }
-        }
-        TimeSpan? remaining = null;
-        if (DateTime.TryParse(expiry, out var exp))
-            remaining = exp - DateTime.UtcNow;
-
-        return Ok(new
-        {
-            isDemo = true,
-            expiryUtc = expiry,
-            remainingDays = remaining?.TotalDays ?? -1,
-            remainingHours = remaining?.TotalHours ?? -1,
-            isExpired = remaining.HasValue && remaining.Value.TotalSeconds <= 0
-        });
-    }
+    public async Task<IActionResult> DemoStatus() => Ok(await AegisCore.API.Extensions.SealedWizardEndpoints.DemoStatusAsync(configuration, secrets));
 
     [HttpPost("import-demo-data")]
     public async Task<IActionResult> ImportDemoData([FromBody] DemoImportRequest request, [FromServices] IDataImportService dataImport, CancellationToken ct)

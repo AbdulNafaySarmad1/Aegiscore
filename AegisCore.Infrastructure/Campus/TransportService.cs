@@ -17,14 +17,14 @@ public sealed class TransportService(AegisDbContext db, ILogger<TransportService
     public async Task<RouteDto> OptimizeRouteAsync(Guid routeId, CancellationToken ct = default)
     {
         var route = await db.Set<TransportRoute>().Include(r => r.Stops).FirstOrDefaultAsync(r => r.Id == routeId, ct)
-            ?? throw new InvalidOperationException("Route not found.");
+            ?? throw new KeyNotFoundException("Route not found.");
         return new RouteDto(route.Id, route.Name, Guid.Empty, Guid.Empty, 15000m, 2000m, true,
             route.Stops.OrderBy(s => s.Sequence).Select(s => new RouteStopDto(s.Id, s.StopName, s.Sequence, s.EstimatedTime, null, null)).ToList());
     }
 
     public async Task<TransportRegistrationDto> RegisterStudentAsync(Guid studentId, Guid routeId, Guid stopId, CancellationToken ct = default)
     {
-        var route = await db.Set<TransportRoute>().FindAsync([routeId], ct) ?? throw new InvalidOperationException("Route not found.");
+        var route = await db.Set<TransportRoute>().FindAsync([routeId], ct) ?? throw new KeyNotFoundException("Route not found.");
         var registration = new TransportRegistration
         {
             Id = Guid.NewGuid(), StudentId = studentId, RouteId = routeId, RouteStopId = stopId,
@@ -68,7 +68,7 @@ public sealed class TransportService(AegisDbContext db, ILogger<TransportService
 
     public async Task<LiveTrackingDto> GetLiveVehicleLocationAsync(Guid vehicleId, CancellationToken ct = default)
     {
-        var vehicle = await db.Set<FleetVehicle>().FindAsync([vehicleId], ct) ?? throw new InvalidOperationException("Vehicle not found.");
+        var vehicle = await db.Set<FleetVehicle>().FindAsync([vehicleId], ct) ?? throw new KeyNotFoundException("Vehicle not found.");
         return new LiveTrackingDto(vehicle.Id, vehicle.VehicleNumber, 31.5m, 74.3m, 45, "Stop A", "Stop B", 10);
     }
 }

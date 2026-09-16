@@ -21,7 +21,7 @@ public class AssetInventoryService : IAssetInventoryService
 
     public async Task<decimal> CalculateCurrentValueAsync(Guid assetId, DateTime asAtDate, CancellationToken ct = default)
     {
-        var asset = await _db.Assets.AsNoTracking().FirstAsync(a => a.Id == assetId, ct);
+        var asset = await _db.Assets.AsNoTracking().FirstOrDefaultAsync(a => a.Id == assetId, ct) ?? throw new KeyNotFoundException($"Asset {assetId} was not found.");
         var depreciation = CalculateStraightLineDepreciation(asset.PurchaseCost, asset.UsefulLifeYears, asset.PurchaseDate ?? asset.CreatedAt, asAtDate);
         return Math.Max(0m, asset.PurchaseCost - depreciation);
     }
@@ -31,7 +31,7 @@ public class AssetInventoryService : IAssetInventoryService
 
     public async Task<string> BuildHemisXmlAsync(int academicYear, CancellationToken ct = default)
     {
-        if (academicYear is < 2000 or > 2100) throw new ArgumentOutOfRangeException(nameof(academicYear));
+        if (academicYear is < 2000 or > 2100) throw new ArgumentOutOfRangeException(nameof(academicYear), academicYear, "academicYear must be a four-digit year between 2000 and 2100.");
         var assetCount = await _db.Assets.CountAsync(ct);
         var lowStockCount = await _db.LabConsumables.CountAsync(i => i.QuantityInStock <= i.MinimumStockLevel, ct);
         var evidenceCount = await _db.AccreditationEvidences.CountAsync(ct);

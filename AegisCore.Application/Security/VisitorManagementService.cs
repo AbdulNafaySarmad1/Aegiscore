@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Security;
@@ -39,7 +40,7 @@ public class VisitorManagementService
     public async Task CheckInVisitorAsync(Guid visitorId, string gateName, Guid? guardEmployeeId, CancellationToken cancellationToken = default)
     {
         var visitor = await _visitorRepository.GetByIdAsync(visitorId, cancellationToken)
-            ?? throw new InvalidOperationException("Visitor not found.");
+            ?? throw new KeyNotFoundException("Visitor not found.");
 
         if (visitor.IsBlacklisted)
             throw new InvalidOperationException("Visitor is blacklisted.");
@@ -66,7 +67,7 @@ public class VisitorManagementService
     public async Task CheckOutVisitorAsync(Guid visitorId, string gateName, Guid? guardEmployeeId, CancellationToken cancellationToken = default)
     {
         var visitor = await _visitorRepository.GetByIdAsync(visitorId, cancellationToken)
-            ?? throw new InvalidOperationException("Visitor not found.");
+            ?? throw new KeyNotFoundException("Visitor not found.");
 
         visitor.Status = VisitorStatus.CheckedOut;
         visitor.CheckOutTime = DateTime.UtcNow;
@@ -91,7 +92,7 @@ public class VisitorManagementService
     public async Task BlacklistVisitorAsync(Guid visitorId, string reason, CancellationToken cancellationToken = default)
     {
         var visitor = await _visitorRepository.GetByIdAsync(visitorId, cancellationToken)
-            ?? throw new InvalidOperationException("Visitor not found.");
+            ?? throw new KeyNotFoundException("Visitor not found.");
 
         visitor.IsBlacklisted = true;
         visitor.BlacklistReason = reason;

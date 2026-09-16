@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.ResearchLabs;
@@ -22,7 +23,7 @@ public class CalibrationService
     public async Task<CalibrationRecord> RecordCalibrationAsync(CalibrationRecord record, CancellationToken cancellationToken = default)
     {
         var equipment = await _equipmentRepository.GetByIdAsync(record.LabEquipmentId, cancellationToken)
-            ?? throw new InvalidOperationException("Equipment not found.");
+            ?? throw new KeyNotFoundException("Equipment not found.");
 
         record.Status = CalibrationStatus.Completed;
         var created = await _calibrationRepository.AddAsync(record, cancellationToken);

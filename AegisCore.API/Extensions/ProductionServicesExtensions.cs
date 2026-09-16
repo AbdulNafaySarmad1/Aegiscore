@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.API.Authorization;
 using AegisCore.API.Background;
 using AegisCore.API.Hubs;
@@ -167,6 +168,14 @@ public static class ProductionServicesExtensions
 {
     public static IServiceCollection AddProductionServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // Installation-only controllers (the wizard) depend on services AddSetupServices alone registers;
+        // mapping them here would turn every one of their routes into a 500. See SealedWizardEndpoints.
+        services.AddControllers().ConfigureApplicationPartManager(manager =>
+        {
+            foreach (var provider in manager.FeatureProviders.OfType<Microsoft.AspNetCore.Mvc.Controllers.ControllerFeatureProvider>().ToArray())
+                manager.FeatureProviders.Remove(provider);
+            manager.FeatureProviders.Add(new InstallationOnlyControllerFeatureProvider());
+        });
         services.AddSingleton<IPasswordHashingService, PasswordHashingService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<EnhancedSetupService>();

@@ -11,7 +11,7 @@ public sealed class FinanceProcurementService(AegisDbContext db, IFinanceModuleS
     public async Task<FinancePurchaseOrder> CreatePurchaseOrderAsync(Guid tenantId, Guid actorId, CreateFinancePurchaseOrderCommand command, CancellationToken ct)
     {
         if (actorId == Guid.Empty || command.Lines.Count == 0 || command.Lines.Any(x => x.ExpenseAccountId == Guid.Empty || string.IsNullOrWhiteSpace(x.Description) || x.Quantity <= 0m || x.UnitPrice < 0m)) throw new ArgumentException("Purchase order lines are invalid.");
-        var vendor = await db.FinanceVendors.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.VendorId, ct) ?? throw new InvalidOperationException("Vendor was not found.");
+        var vendor = await db.FinanceVendors.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.VendorId, ct) ?? throw new KeyNotFoundException("Vendor was not found.");
         if (vendor.Status != "ACTIVE" || vendor.SanctionsStatus != "CLEAR") throw new InvalidOperationException("Vendor must be active and sanctions-cleared.");
         var currency = command.Currency.Trim().ToUpperInvariant();
         if (currency.Length != 3 || vendor.InvoiceCurrency != currency || command.Number.Trim().Length is < 1 or > 50) throw new ArgumentException("Purchase order header is invalid.");
@@ -30,7 +30,7 @@ public sealed class FinanceProcurementService(AegisDbContext db, IFinanceModuleS
 
     public async Task<FinancePurchaseOrder> ApprovePurchaseOrderAsync(Guid tenantId, Guid orderId, Guid actorId, CancellationToken ct)
     {
-        var order = await db.FinancePurchaseOrders.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == orderId, ct) ?? throw new InvalidOperationException("Purchase order was not found.");
+        var order = await db.FinancePurchaseOrders.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == orderId, ct) ?? throw new KeyNotFoundException("Purchase order was not found.");
         if (order.Status != "DRAFT" || order.CreatedByUserId == actorId) throw new InvalidOperationException("Purchase order requires an independent approver.");
         order.Status = "APPROVED"; order.ApprovedByUserId = actorId; order.ApprovedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
@@ -39,7 +39,7 @@ public sealed class FinanceProcurementService(AegisDbContext db, IFinanceModuleS
 
     public async Task<FinanceGoodsReceipt> CreateGoodsReceiptAsync(Guid tenantId, Guid actorId, CreateFinanceGoodsReceiptCommand command, CancellationToken ct)
     {
-        var order = await db.FinancePurchaseOrders.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.PurchaseOrderId, ct) ?? throw new InvalidOperationException("Purchase order was not found.");
+        var order = await db.FinancePurchaseOrders.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.PurchaseOrderId, ct) ?? throw new KeyNotFoundException("Purchase order was not found.");
         if (order.Status is not ("APPROVED" or "PARTIALLY_RECEIVED") || command.Lines.Count == 0) throw new InvalidOperationException("Purchase order cannot receive goods.");
         if (actorId == Guid.Empty || actorId == order.CreatedByUserId || actorId == order.ApprovedByUserId) throw new InvalidOperationException("Goods receipt requires a user independent of the purchase order maker and approver.");
         var prior = await db.FinanceGoodsReceiptLines.Where(x => x.TenantId == tenantId && order.Lines.Select(l => l.Id).Contains(x.PurchaseOrderLineId)).GroupBy(x => x.PurchaseOrderLineId).ToDictionaryAsync(x => x.Key, x => x.Sum(y => y.QuantityAccepted), ct);
@@ -58,7 +58,7 @@ public sealed class FinanceProcurementService(AegisDbContext db, IFinanceModuleS
 
     public async Task<FinanceVendorInvoice> CreateInvoiceAsync(Guid tenantId, CreateFinanceVendorInvoiceCommand command, CancellationToken ct)
     {
-        var order = await db.FinancePurchaseOrders.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.PurchaseOrderId, ct) ?? throw new InvalidOperationException("Purchase order was not found.");
+        var order = await db.FinancePurchaseOrders.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.PurchaseOrderId, ct) ?? throw new KeyNotFoundException("Purchase order was not found.");
         if (order.VendorId != command.VendorId || order.Currency != command.Currency.Trim().ToUpperInvariant() || order.Status is not ("RECEIVED" or "PARTIALLY_RECEIVED")) throw new InvalidOperationException("Invoice does not match an receivable purchase order.");
         if (command.Lines.Count == 0 || command.DueDate < command.InvoiceDate) throw new ArgumentException("Invoice dates or lines are invalid.");
         var invoice = new FinanceVendorInvoice { Id = Guid.NewGuid(), TenantId = tenantId, VendorId = command.VendorId, PurchaseOrderId = order.Id, InvoiceNumber = command.InvoiceNumber.Trim(), Currency = order.Currency, InvoiceDate = command.InvoiceDate.ToUniversalTime(), DueDate = command.DueDate.ToUniversalTime(), Lines = command.Lines.Select(x => new FinanceVendorInvoiceLine { Id = Guid.NewGuid(), TenantId = tenantId, PurchaseOrderLineId = x.PurchaseOrderLineId, Quantity = x.Quantity, UnitPrice = x.UnitPrice, LineTotal = x.Quantity * x.UnitPrice }).ToList() };
@@ -72,7 +72,7 @@ public sealed class FinanceProcurementService(AegisDbContext db, IFinanceModuleS
     public async Task<FinanceThreeWayMatch> MatchInvoiceAsync(Guid tenantId, Guid invoiceId, Guid actorId, CancellationToken ct)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var invoice = await db.FinanceVendorInvoices.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == invoiceId, ct) ?? throw new InvalidOperationException("Invoice was not found.");
+        var invoice = await db.FinanceVendorInvoices.Include(x => x.Lines).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == invoiceId, ct) ?? throw new KeyNotFoundException("Invoice was not found.");
         if (invoice.Status != "RECEIVED") throw new InvalidOperationException("Invoice has already been matched.");
         var order = await db.FinancePurchaseOrders.Include(x => x.Lines).SingleAsync(x => x.TenantId == tenantId && x.Id == invoice.PurchaseOrderId, ct);
         var receiptActors = await db.FinanceGoodsReceipts.Where(x => x.TenantId == tenantId && x.PurchaseOrderId == order.Id).Select(x => x.ConfirmedByUserId).Distinct().ToListAsync(ct);
@@ -100,7 +100,7 @@ public sealed class FinanceProcurementService(AegisDbContext db, IFinanceModuleS
 
     public async Task<FinanceVoucher> CreatePaymentVoucherAsync(Guid tenantId, Guid invoiceId, Guid actorId, CreateProcurementPaymentVoucherCommand command, CancellationToken ct)
     {
-        var invoice = await db.FinanceVendorInvoices.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == invoiceId, ct) ?? throw new InvalidOperationException("Invoice was not found.");
+        var invoice = await db.FinanceVendorInvoices.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == invoiceId, ct) ?? throw new KeyNotFoundException("Invoice was not found.");
         if (invoice.Status != "MATCHED" || invoice.PaymentVoucherId is not null) throw new InvalidOperationException("Only a matched, unpaid invoice can be paid.");
         var order = await db.FinancePurchaseOrders.SingleAsync(x => x.TenantId == tenantId && x.Id == invoice.PurchaseOrderId, ct);
         var excludedActors = await db.FinanceGoodsReceipts.Where(x => x.TenantId == tenantId && x.PurchaseOrderId == order.Id).Select(x => x.ConfirmedByUserId)

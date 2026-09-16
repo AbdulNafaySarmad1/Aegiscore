@@ -13,7 +13,7 @@ public sealed class FeeService(AegisDbContext db, IPolicyService policies, IAcco
     {
         if (studentId == Guid.Empty || semesterId == Guid.Empty || feeStructureId == Guid.Empty) throw new ArgumentException("Student, semester, and fee structure are required.");
         var structure = await db.FeeStructures.Include(f => f.Components).FirstOrDefaultAsync(f => f.Id == feeStructureId, ct)
-            ?? throw new InvalidOperationException("Fee structure was not found.");
+            ?? throw new KeyNotFoundException("Fee structure was not found.");
         var total = structure.Components.Count == 0 ? structure.TotalFee : structure.Components.Where(c => c.IsMandatory).Sum(c => c.Amount);
         if (total < 0) throw new InvalidOperationException("Fee structure total cannot be negative.");
         if (await db.StudentFeeDues.AnyAsync(d => d.StudentId == studentId && d.SemesterId == semesterId && d.FeeStructureId == feeStructureId, ct)) throw new InvalidOperationException("Fee due already exists for this student and semester.");
@@ -34,7 +34,7 @@ public sealed class FeeService(AegisDbContext db, IPolicyService policies, IAcco
 
     public async Task RecordPaymentAsync(Guid feeDueId, PaymentRequest payment, CancellationToken ct = default)
     {
-        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new InvalidOperationException("Fee due was not found.");
+        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new KeyNotFoundException("Fee due was not found.");
         if (payment.Amount <= 0 || payment.Amount > due.OutstandingAmount || string.IsNullOrWhiteSpace(payment.Method) || !new[] { "bank_transfer", "jazzcash", "easypaisa", "cheque" }.Contains(payment.Method.Trim().ToLowerInvariant()))
         {
             throw new InvalidOperationException("Payment amount is outside outstanding balance.");
@@ -58,14 +58,14 @@ public sealed class FeeService(AegisDbContext db, IPolicyService policies, IAcco
 
     public async Task<decimal> CalculateLateFeeAsync(Guid feeDueId, CancellationToken ct = default)
     {
-        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new InvalidOperationException("Fee due was not found.");
+        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new KeyNotFoundException("Fee due was not found.");
         var graceDays = await policies.GetAsync("finance", "late_fee_grace_days", 3, ct);
         return due.Status == "paid" ? 0m : Math.Round(due.OutstandingAmount * 0.01m * graceDays, 2);
     }
 
     public async Task ApplyScholarshipAsync(Guid feeDueId, decimal amount, Guid scholarshipId, CancellationToken ct = default)
     {
-        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new InvalidOperationException("Fee due was not found.");
+        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new KeyNotFoundException("Fee due was not found.");
         if (scholarshipId == Guid.Empty || amount <= 0 || amount > due.OutstandingAmount) throw new InvalidOperationException("Scholarship amount is outside the outstanding balance.");
         due.ScholarshipDeduction += amount;
         due.OutstandingAmount = Math.Max(0m, due.TotalDue - due.PaidAmount - due.ScholarshipDeduction);
@@ -135,7 +135,7 @@ public sealed class BudgetService(AegisDbContext db) : IBudgetService
 {
     public async Task<BudgetVarianceReport> GetVarianceAsync(Guid costCenterId, CancellationToken ct = default)
     {
-        var costCenter = await db.CostCenters.FindAsync([costCenterId], ct) ?? throw new InvalidOperationException("Cost center was not found.");
+        var costCenter = await db.CostCenters.FindAsync([costCenterId], ct) ?? throw new KeyNotFoundException("Cost center was not found.");
         var actual = await db.JournalEntryLines.Where(l => l.Debit > 0).SumAsync(l => l.Debit, ct);
         var variance = costCenter.BudgetAllocation - actual;
         var percentage = costCenter.BudgetAllocation == 0 ? 0m : Math.Round(variance / costCenter.BudgetAllocation * 100m, 2);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using AegisCore.Infrastructure;
 using AegisCore.Domain.Entities;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 
 namespace AegisCore.Infrastructure.Security;
 

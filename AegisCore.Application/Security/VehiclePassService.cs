@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Security;
@@ -34,7 +35,7 @@ public class VehiclePassService
     public async Task RecordGateEntryAsync(Guid vehiclePassId, string gateName, Guid? guardEmployeeId, CancellationToken cancellationToken = default)
     {
         var pass = await _vehiclePassRepository.GetByIdAsync(vehiclePassId, cancellationToken)
-            ?? throw new InvalidOperationException("Vehicle pass not found.");
+            ?? throw new KeyNotFoundException("Vehicle pass not found.");
 
         if (pass.Status != VehiclePassStatus.Active)
             throw new InvalidOperationException("Vehicle pass is not active.");

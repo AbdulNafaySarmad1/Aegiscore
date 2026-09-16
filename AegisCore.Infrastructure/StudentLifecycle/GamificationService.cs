@@ -20,7 +20,7 @@ public sealed class GamificationService(AegisDbContext db, ILogger<GamificationS
 
     public async Task<BadgeAwardDto> IssueBadgeAsync(Guid badgeDefinitionId, Guid studentId, CancellationToken ct = default)
     {
-        var badge = await db.Set<BadgeDefinition>().FindAsync([badgeDefinitionId], ct) ?? throw new InvalidOperationException("Badge not found.");
+        var badge = await db.Set<BadgeDefinition>().FindAsync([badgeDefinitionId], ct) ?? throw new KeyNotFoundException("Badge not found.");
         var award = new BadgeAward
         {
             Id = Guid.NewGuid(), BadgeDefinitionId = badgeDefinitionId, StudentId = studentId,

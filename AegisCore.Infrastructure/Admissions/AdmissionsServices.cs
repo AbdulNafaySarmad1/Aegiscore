@@ -63,7 +63,7 @@ public sealed class MeritCalculationService(AegisDbContext db, IPolicyService po
     public async Task<MeritExplanation> ExplainMeritAsync(Guid applicationId, CancellationToken ct = default)
     {
         var application = await db.AdmissionApplications.FindAsync([applicationId], ct)
-            ?? throw new InvalidOperationException("Application was not found.");
+            ?? throw new KeyNotFoundException("Application was not found.");
 
         return (await CalculateAsync(application, Guid.Empty, ct)).Explanation;
     }
@@ -74,7 +74,7 @@ public sealed class SeatAllocationService(AegisDbContext db) : ISeatAllocationSe
     public async Task<IReadOnlyList<SeatAllocation>> AllocateAsync(Guid meritListId, CancellationToken ct = default)
     {
         var list = await db.MeritLists.Include(m => m.Entries).FirstOrDefaultAsync(m => m.Id == meritListId, ct)
-            ?? throw new InvalidOperationException("Merit list was not found.");
+            ?? throw new KeyNotFoundException("Merit list was not found.");
 
         var ordered = list.Entries.OrderBy(e => e.MeritRank).ToList();
         var allocations = new List<SeatAllocation>();

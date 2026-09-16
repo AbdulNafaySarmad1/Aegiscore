@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.ResearchLabs;
@@ -27,7 +28,7 @@ public class SafetyInspectionService
     public async Task CompleteInspectionAsync(Guid inspectionId, string findings, string correctiveActions, bool isCompliant, CancellationToken cancellationToken = default)
     {
         var inspection = await _inspectionRepository.GetByIdAsync(inspectionId, cancellationToken)
-            ?? throw new InvalidOperationException("Inspection not found.");
+            ?? throw new KeyNotFoundException("Inspection not found.");
 
         inspection.Status = InspectionStatus.Completed;
         inspection.Findings = findings;
@@ -42,7 +43,7 @@ public class SafetyInspectionService
     public async Task SignOffInspectionAsync(Guid inspectionId, Guid signedOffByUserId, CancellationToken cancellationToken = default)
     {
         var inspection = await _inspectionRepository.GetByIdAsync(inspectionId, cancellationToken)
-            ?? throw new InvalidOperationException("Inspection not found.");
+            ?? throw new KeyNotFoundException("Inspection not found.");
 
         inspection.Status = InspectionStatus.SignedOff;
         inspection.SignedOffByUserId = signedOffByUserId;

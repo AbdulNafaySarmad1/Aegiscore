@@ -42,7 +42,7 @@ public class NotificationPlatformService : INotificationPlatformService
     {
         if (string.IsNullOrWhiteSpace(request.TemplateName) || string.IsNullOrWhiteSpace(request.Recipient)) throw new ArgumentException("Template and recipient are required.");
         var template = await _templateRepo.GetByNameAsync(request.TemplateName, ct)
-            ?? throw new InvalidOperationException($"Template '{request.TemplateName}' not found.");
+            ?? throw new KeyNotFoundException($"Template '{request.TemplateName}' not found.");
 
         var subject = ApplyVariables(template.Subject, request.Variables);
         var body = ApplyVariables(template.Body, request.Variables);
@@ -208,7 +208,7 @@ public class GrievanceService : IGrievanceService
     public async Task<GrievanceTicketDto> RespondAsync(Guid ticketId, GrievanceResponseRequest request, Guid responderId, CancellationToken ct = default)
     {
         var ticket = await _db.GrievanceTickets.FirstOrDefaultAsync(t => t.Id == ticketId, ct)
-            ?? throw new InvalidOperationException("Grievance ticket not found.");
+            ?? throw new KeyNotFoundException("Grievance ticket not found.");
         var response = new GrievanceResponse { Id = Guid.NewGuid(), TicketId = ticketId, ResponderId = responderId, ResponseText = request.ResponseText, StatusUpdate = request.StatusUpdate };
         _db.GrievanceResponses.Add(response);
         if (!string.IsNullOrWhiteSpace(request.StatusUpdate)) ticket.Status = request.StatusUpdate;
@@ -275,7 +275,7 @@ public class FeatureFlagService : IFeatureFlagService
 
     public async Task<FeatureFlagDto> SetTenantOverrideAsync(string flagName, Guid tenantId, bool enabled, CancellationToken ct)
     {
-        var flag = await _flagRepo.GetByNameAsync(flagName, ct) ?? throw new InvalidOperationException("Flag not found.");
+        var flag = await _flagRepo.GetByNameAsync(flagName, ct) ?? throw new KeyNotFoundException("Flag not found.");
         var overrides = JsonSerializer.Deserialize<Dictionary<string, bool>>(flag.TenantOverridesJson) ?? new();
         overrides[tenantId.ToString()] = enabled;
         flag.TenantOverridesJson = JsonSerializer.Serialize(overrides);
@@ -321,7 +321,7 @@ public class SchedulerService : ISchedulerService
     public async Task<List<JobExecution>> GetJobHistoryAsync(Guid jobId, int limit = 50, CancellationToken ct = default) => (await _execRepo.GetByJobAsync(jobId, limit, ct)).ToList();
     public async Task RetryFailedJobAsync(Guid executionId, CancellationToken ct)
     {
-        var exec = await _execRepo.GetByIdAsync(executionId, ct) ?? throw new InvalidOperationException("Execution not found.");
+        var exec = await _execRepo.GetByIdAsync(executionId, ct) ?? throw new KeyNotFoundException("Execution not found.");
         exec.AttemptNumber++;
         exec.Status = JobExecutionStatus.Queued;
         exec.ErrorMessage = null;
@@ -344,7 +344,7 @@ public class ImportService : IImportService
 
     public async Task RollbackAsync(Guid batchId, CancellationToken ct)
     {
-        var batch = await _batchRepo.GetByIdAsync(batchId, ct) ?? throw new InvalidOperationException("Batch not found.");
+        var batch = await _batchRepo.GetByIdAsync(batchId, ct) ?? throw new KeyNotFoundException("Batch not found.");
         batch.IsRolledBack = true;
         batch.Status = "RolledBack";
         await _batchRepo.UpdateAsync(batch, ct);

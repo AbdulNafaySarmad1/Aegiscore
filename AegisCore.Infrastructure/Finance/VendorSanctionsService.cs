@@ -14,7 +14,7 @@ public sealed class VendorSanctionsService(AegisDbContext db, IHttpClientFactory
 {
     public async Task<string> ScreenAsync(Guid tenantId, Guid vendorId, CancellationToken ct)
     {
-        var vendor = await db.FinanceVendors.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == vendorId, ct) ?? throw new InvalidOperationException("Vendor was not found.");
+        var vendor = await db.FinanceVendors.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == vendorId, ct) ?? throw new KeyNotFoundException("Vendor was not found.");
         var endpointText = configuration["Sanctions:ScreeningUrl"];
         if (!Uri.TryCreate(endpointText, UriKind.Absolute, out var endpoint) || endpoint.Scheme != Uri.UriSchemeHttps) throw new InvalidOperationException("Sanctions screening provider is not configured.");
         using var request = new HttpRequestMessage(HttpMethod.Post, endpoint) { Content = JsonContent.Create(new { name = vendor.LegalName, taxId = vendor.TaxId, iban = vendor.Iban, swift = vendor.Swift, lists = new[] { "OFAC", "UN", "FATF" } }) };

@@ -1,6 +1,7 @@
 using System.Text;
 using Konscious.Security.Cryptography;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using System.Security.Cryptography;
 
 namespace AegisCore.Infrastructure.Security;

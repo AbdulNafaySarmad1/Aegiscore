@@ -222,7 +222,7 @@ public class DocumentVaultService : IDocumentVaultService
     public async Task<DocumentTier> UpdateTierAsync(DocumentTier tier, CancellationToken ct)
     {
         var existing = await _tierRepo.GetByIdAsync(tier.Id, ct);
-        if (existing == null) throw new InvalidOperationException("Tier not found.");
+        if (existing == null) throw new KeyNotFoundException("Tier not found.");
         existing.RetentionYears = tier.RetentionYears;
         existing.RetentionDays = tier.RetentionYears * 365;
         existing.ObjectLockMode = tier.ObjectLockMode;

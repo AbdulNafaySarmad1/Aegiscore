@@ -95,7 +95,7 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
     {
         if (actorId == Guid.Empty || !Enum.TryParse<VerificationStatus>(command.Status, true, out var status) || status == VerificationStatus.Pending) throw new ArgumentException("Verification status or actor is invalid.");
         var verification = await db.AssetVerifications.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.VerificationCycleId == cycleId && x.AssetId == assetId, ct)
-            ?? throw new InvalidOperationException("Asset verification assignment was not found.");
+            ?? throw new KeyNotFoundException("Asset verification assignment was not found.");
         if (verification.Status != VerificationStatus.Pending) throw new InvalidOperationException("Asset has already been verified in this cycle.");
         verification.Status = status;
         verification.VerifiedByUserId = actorId;
@@ -120,7 +120,7 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
 
     private async Task<Asset> AssetAsync(Guid tenantId, Guid id, CancellationToken ct)
         => await db.Assets.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == id && x.Status != AssetStatus.Disposed && x.Status != AssetStatus.WrittenOff, ct)
-           ?? throw new InvalidOperationException("Active asset was not found.");
+           ?? throw new KeyNotFoundException("Active asset was not found.");
 
     private async Task<ChartOfAccount> AccountAsync(Guid tenantId, string code, string name, AccountType type, CancellationToken ct)
     {

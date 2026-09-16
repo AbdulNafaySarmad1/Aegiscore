@@ -16,6 +16,7 @@ using AegisCore.Application.Security;
 using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Repositories;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Infrastructure.AI;
 using AegisCore.Infrastructure.ApiGateway;
 using AegisCore.Infrastructure.Backup;
@@ -296,6 +297,7 @@ else
     app.MapHub<NotificationHub>("/hubs/notifications");
     app.MapHub<FinanceHub>("/hubs/finance");
     app.MapControllers();
+    app.MapSealedWizard();
     app.MapFinanceModuleEndpoints();
     app.MapDefaultPredictionEndpoints();
     app.MapVisitingFacultyEndpoints();

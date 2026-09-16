@@ -39,7 +39,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
     public async Task<FacultyProfileDto> VetFacultyProfileAsync(Guid profileId, CancellationToken ct = default)
     {
         var profile = await db.Set<VisitingFacultyProfile>().FindAsync([profileId], ct)
-            ?? throw new InvalidOperationException("Profile not found.");
+            ?? throw new KeyNotFoundException("Profile not found.");
         profile.ProfileStatus = profile.DocumentsVerified && profile.ReferencesChecked ? "ready_to_deploy" : "pending_documents";
         await db.SaveChangesAsync(ct);
         return new FacultyProfileDto(profile.Id, $"{profile.FirstName} {profile.LastName}", profile.HighestQualification, profile.HecEligibilityStatus, profile.ProfileStatus, profile.YearsOfTeachingExperience, profile.YearsOfIndustryExperience, profile.SpecializationsCsv, profile.DocumentsVerified, profile.ReferencesChecked, profile.VerdictForRehire);
@@ -47,7 +47,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyEngagementDto> CreateEngagementAsync(Guid slotId, Guid profileId, CancellationToken ct = default)
     {
-        var slot = await db.Set<TeachingSlot>().FindAsync([slotId], ct) ?? throw new InvalidOperationException("Teaching slot not found.");
+        var slot = await db.Set<TeachingSlot>().FindAsync([slotId], ct) ?? throw new KeyNotFoundException("Teaching slot not found.");
         var engagement = new FacultyEngagement
         {
             Id = Guid.NewGuid(), TeachingSlotId = slotId, FacultyProfileId = profileId,
@@ -63,7 +63,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyPerformanceDto> RatePerformanceAsync(Guid engagementId, CancellationToken ct = default)
     {
-        var engagement = await db.Set<FacultyEngagement>().FindAsync([engagementId], ct) ?? throw new InvalidOperationException("Engagement not found.");
+        var engagement = await db.Set<FacultyEngagement>().FindAsync([engagementId], ct) ?? throw new KeyNotFoundException("Engagement not found.");
         var rating = new FacultyPerformanceRating
         {
             Id = Guid.NewGuid(), EngagementId = engagementId, AttendanceScore = 85, StudentFeedbackScore = 80,
@@ -77,7 +77,7 @@ public sealed class VisitingFacultyService(AegisDbContext db, ILogger<VisitingFa
 
     public async Task<FacultyCompensationDto> ProcessCompensationAsync(Guid engagementId, CancellationToken ct = default)
     {
-        var engagement = await db.Set<FacultyEngagement>().FindAsync([engagementId], ct) ?? throw new InvalidOperationException("Engagement not found.");
+        var engagement = await db.Set<FacultyEngagement>().FindAsync([engagementId], ct) ?? throw new KeyNotFoundException("Engagement not found.");
         var tax = engagement.TotalCompensation * 0.1m;
         var net = engagement.TotalCompensation - tax;
         var comp = new FacultyCompensation

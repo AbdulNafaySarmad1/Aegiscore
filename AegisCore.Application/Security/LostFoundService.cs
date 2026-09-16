@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Security;
@@ -27,7 +28,7 @@ public class LostFoundService
     public async Task ClaimItemAsync(Guid itemId, Guid claimedByUserId, Guid handedOverByUserId, CancellationToken cancellationToken = default)
     {
         var item = await _itemRepository.GetByIdAsync(itemId, cancellationToken)
-            ?? throw new InvalidOperationException("Item not found.");
+            ?? throw new KeyNotFoundException("Item not found.");
 
         item.Status = LostFoundStatus.Claimed;
         item.ClaimedByUserId = claimedByUserId;

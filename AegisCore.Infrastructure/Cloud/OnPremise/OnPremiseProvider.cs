@@ -16,7 +16,7 @@ public class EnvironmentVariableSecretService : ISecretService
     {
         var value = Environment.GetEnvironmentVariable(secretName);
         if (string.IsNullOrEmpty(value))
-            throw new InvalidOperationException($"Secret '{secretName}' not found in environment variables.");
+            throw new KeyNotFoundException($"Secret '{secretName}' not found in environment variables.");
         return Task.FromResult(value);
     }
 

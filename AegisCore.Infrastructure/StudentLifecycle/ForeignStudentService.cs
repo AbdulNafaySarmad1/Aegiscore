@@ -52,7 +52,7 @@ public sealed class ForeignStudentService(AegisDbContext db, ILogger<ForeignStud
 
     public async Task<VisaRenewalWorkflowDto> InitiateVisaRenewalAsync(Guid studentId, CancellationToken ct = default)
     {
-        var record = await db.Set<ForeignStudentRecord>().FirstOrDefaultAsync(r => r.StudentId == studentId, ct) ?? throw new InvalidOperationException("Foreign student record not found.");
+        var record = await db.Set<ForeignStudentRecord>().FirstOrDefaultAsync(r => r.StudentId == studentId, ct) ?? throw new KeyNotFoundException("Foreign student record not found.");
         var workflow = new VisaRenewalWorkflow
         {
             Id = Guid.NewGuid(), ForeignStudentRecordId = record.Id, Status = "draft",

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Workflow;
 using AegisCore.Infrastructure;
 using Microsoft.AspNetCore.Authorization;

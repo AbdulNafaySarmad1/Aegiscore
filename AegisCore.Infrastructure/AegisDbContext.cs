@@ -313,6 +313,11 @@ public class AegisDbContext : DbContext
     /// </summary>
     public DbSet<AccreditationReport> AccreditationReports => Set<AccreditationReport>();
 
+    // Examination office (GAP 06): the question bank and exam papers were entities without a DbSet, so
+    // their controller could not create a set for them and every request 500d.
+    public DbSet<QuestionBank> QuestionBanks => Set<QuestionBank>();
+    public DbSet<ExamPaper> ExamPapers => Set<ExamPaper>();
+
     // Accreditation Suite
     /// <summary>
     /// Accreditation bodies.

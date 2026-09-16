@@ -213,10 +213,10 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
 
         var demand = await db.Set<FeeDemand>().Include(d => d.Installments)
             .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
-            ?? throw new InvalidOperationException("Fee demand was not found.");
+            ?? throw new KeyNotFoundException("Fee demand was not found.");
         if (command.Amount > demand.OutstandingAmount) throw new InvalidOperationException("Payment exceeds the outstanding demand.");
         var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
-        if (command.FeeInstallmentId is not null && installment is null) throw new InvalidOperationException("Fee installment was not found.");
+        if (command.FeeInstallmentId is not null && installment is null) throw new KeyNotFoundException("Fee installment was not found.");
 
         var payment = new FinancePayment
         {
@@ -266,11 +266,11 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
 
         var demand = await db.Set<FeeDemand>().Include(d => d.Installments)
             .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
-            ?? throw new InvalidOperationException("Fee demand was not found.");
+            ?? throw new KeyNotFoundException("Fee demand was not found.");
         if (!string.Equals(demand.Currency, currency, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Payment currency does not match the fee demand.");
         if (command.Amount > demand.OutstandingAmount) throw new InvalidOperationException("Payment exceeds the outstanding demand.");
         var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
-        if (command.FeeInstallmentId is not null && installment is null) throw new InvalidOperationException("Fee installment was not found.");
+        if (command.FeeInstallmentId is not null && installment is null) throw new KeyNotFoundException("Fee installment was not found.");
 
         var payment = new FinancePayment
         {
@@ -348,7 +348,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         var planType = NormalizePlanType(command.PlanType);
         var demand = await db.Set<FeeDemand>().Include(x => x.Installments)
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.FeeDemandId, ct)
-            ?? throw new InvalidOperationException("Fee demand was not found.");
+            ?? throw new KeyNotFoundException("Fee demand was not found.");
         if (demand.PaidAmount > 0m || await db.Set<FinancePaymentPlan>().AnyAsync(x => x.TenantId == tenantId && x.FeeDemandId == demand.Id, ct)) throw new InvalidOperationException("A paid or planned fee demand cannot be rescheduled.");
         var configuration = await db.Set<FinancePaymentPlanConfiguration>()
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.PlanType == planType && x.Enabled, ct);
@@ -395,7 +395,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         if (approverId == Guid.Empty) throw new ArgumentException("Approver identity is required.");
         var plan = await db.Set<FinancePaymentPlan>().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == planId, ct)
-            ?? throw new InvalidOperationException("Payment plan was not found.");
+            ?? throw new KeyNotFoundException("Payment plan was not found.");
         if (!string.Equals(plan.Status, "PENDING_APPROVAL", StringComparison.Ordinal)) throw new InvalidOperationException("Payment plan is not awaiting approval.");
         plan.Status = "ACTIVE";
         plan.ApprovedByUserId = approverId;
@@ -732,7 +732,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
             throw new ArgumentException("Bank feed rows are invalid.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var account = await db.FinanceBankAccounts.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.BankAccountId && x.IsActive, ct)
-            ?? throw new InvalidOperationException("Bank account was not found.");
+            ?? throw new KeyNotFoundException("Bank account was not found.");
         var rows = new List<FinanceBankFeedTransaction>();
         var matchedJournalIds = new HashSet<Guid>();
         foreach (var row in command.Rows)
@@ -779,7 +779,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
             throw new ArgumentException("Grant receipt fields are invalid.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct)
-            ?? throw new InvalidOperationException("Grant was not found.");
+            ?? throw new KeyNotFoundException("Grant was not found.");
         if (grant.ReceivedAmount + command.Amount > grant.AwardAmount) throw new InvalidOperationException("Receipt exceeds the grant award.");
         var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
         var deferred = await AccountAsync(tenantId, "2201", "Deferred scholarship income", AccountType.Liability, ct);
@@ -804,7 +804,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         FinanceGrant? grant = null;
         if (command.GrantId is not null)
         {
-            grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct) ?? throw new InvalidOperationException("Grant was not found.");
+            grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct) ?? throw new KeyNotFoundException("Grant was not found.");
             if (grant.ReceivedAmount - grant.SpentAmount < command.Amount) throw new InvalidOperationException("Scholarship exceeds the available grant balance.");
         }
         var awardExpense = await AccountAsync(tenantId, method == "FEE_CREDIT" ? "6200" : "6201", method == "FEE_CREDIT" ? "Scholarship expense" : "Stipend expense", AccountType.Expense, ct);
@@ -857,7 +857,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty) throw new ArgumentException("Approver identity is required.");
-        var bill = await db.FinanceUtilityBills.Include(x => x.Allocations).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == billId, ct) ?? throw new InvalidOperationException("Utility bill was not found.");
+        var bill = await db.FinanceUtilityBills.Include(x => x.Allocations).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == billId, ct) ?? throw new KeyNotFoundException("Utility bill was not found.");
         if (bill.Status != "BILL_RECEIVED") throw new InvalidOperationException("Only received utility bills may be approved.");
         var expense = await AccountAsync(tenantId, "6300", "Utility expense", AccountType.Expense, ct);
         var payable = await AccountAsync(tenantId, "2105", "Utility payable", AccountType.Liability, ct);
@@ -899,7 +899,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         if (command.PolicyId == Guid.Empty || string.IsNullOrWhiteSpace(command.ClaimNumber) || string.IsNullOrWhiteSpace(command.Description) || command.ClaimedAmount <= 0m)
             throw new ArgumentException("Insurance claim fields are invalid.");
-        if (!await db.FinanceInsurancePolicies.AnyAsync(x => x.TenantId == tenantId && x.Id == command.PolicyId, ct)) throw new InvalidOperationException("Insurance policy was not found.");
+        if (!await db.FinanceInsurancePolicies.AnyAsync(x => x.TenantId == tenantId && x.Id == command.PolicyId, ct)) throw new KeyNotFoundException("Insurance policy was not found.");
         var claim = new FinanceInsuranceClaim { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInsurancePolicyId = command.PolicyId, ClaimNumber = command.ClaimNumber.Trim(), Description = command.Description.Trim(), ClaimedAmount = command.ClaimedAmount };
         db.FinanceInsuranceClaims.Add(claim);
         await db.SaveChangesAsync(ct);
@@ -910,7 +910,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ClaimId == Guid.Empty || command.SettledAmount < 0m) throw new ArgumentException("Claim settlement fields are invalid.");
-        var claim = await db.FinanceInsuranceClaims.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ClaimId, ct) ?? throw new InvalidOperationException("Insurance claim was not found.");
+        var claim = await db.FinanceInsuranceClaims.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ClaimId, ct) ?? throw new KeyNotFoundException("Insurance claim was not found.");
         if (claim.Status == "SETTLED") throw new InvalidOperationException("Insurance claim is already settled.");
         if (command.SettledAmount > claim.ClaimedAmount) throw new InvalidOperationException("Settlement exceeds the claim amount.");
         var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
@@ -981,7 +981,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ItemId == Guid.Empty || command.Quantity <= 0m || command.UnitCost <= 0m || string.IsNullOrWhiteSpace(command.Reference)) throw new ArgumentException("Inventory receipt fields are invalid.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new InvalidOperationException("Inventory item was not found.");
+        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
         var total = command.Quantity * command.UnitCost;
         var oldValue = item.OnHandQuantity * item.WeightedAverageCost;
         item.OnHandQuantity += command.Quantity;
@@ -1003,7 +1003,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ItemId == Guid.Empty || command.Quantity <= 0m || command.CostCenterId == Guid.Empty || string.IsNullOrWhiteSpace(command.Reference)) throw new ArgumentException("Inventory issue fields are invalid.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new InvalidOperationException("Inventory item was not found.");
+        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
         if (command.Quantity > item.OnHandQuantity) throw new InvalidOperationException("Inventory quantity is insufficient.");
         var unitCost = item.CostMethod == "FIFO" ? await FifoIssueUnitCostAsync(tenantId, item.Id, command.Quantity, ct) : item.WeightedAverageCost;
         var total = Math.Round(command.Quantity * unitCost, 4, MidpointRounding.AwayFromZero);
@@ -1025,7 +1025,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ItemId == Guid.Empty || command.PhysicalQuantity < 0m || string.IsNullOrWhiteSpace(command.Reference)) throw new ArgumentException("Inventory count fields are invalid.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new InvalidOperationException("Inventory item was not found.");
+        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
         var difference = command.PhysicalQuantity - item.OnHandQuantity;
         var total = Math.Round(Math.Abs(difference) * item.WeightedAverageCost, 4, MidpointRounding.AwayFromZero);
         item.OnHandQuantity = command.PhysicalQuantity;
@@ -1050,7 +1050,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         var type = command.CostType.Trim().ToUpperInvariant();
         if (actorId == Guid.Empty || command.VehicleId == Guid.Empty || command.CostCenterId == Guid.Empty || type is not ("FUEL" or "MAINTENANCE") || command.Amount <= 0m || command.Litres < 0m || command.Odometer < 0m || string.IsNullOrWhiteSpace(command.Description) || command.CostDate == default)
             throw new ArgumentException("Fleet cost fields are invalid.");
-        if (!await db.TransportVehicles.AnyAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct)) throw new InvalidOperationException("Vehicle was not found.");
+        if (!await db.TransportVehicles.AnyAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct)) throw new KeyNotFoundException("Vehicle was not found.");
         var expense = await AccountAsync(tenantId, type == "FUEL" ? "6310" : "6311", type == "FUEL" ? "Vehicle fuel expense" : "Vehicle maintenance expense", AccountType.Expense, ct);
         var payable = await AccountAsync(tenantId, "2105", "Fleet payable", AccountType.Liability, ct);
         var posting = new FinanceFleetCostPosting { Id = Guid.NewGuid(), TenantId = tenantId, TransportVehicleId = command.VehicleId, CostCenterId = command.CostCenterId, CostType = type, Amount = command.Amount, Litres = command.Litres, Odometer = command.Odometer, Description = command.Description.Trim(), CostDate = command.CostDate };
@@ -1066,7 +1066,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (command.VehicleId == Guid.Empty || command.DistanceKm <= 0m || string.IsNullOrWhiteSpace(command.Purpose) || command.TripDate == default) throw new ArgumentException("Fleet trip fields are invalid.");
-        if (!await db.TransportVehicles.AnyAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct)) throw new InvalidOperationException("Vehicle was not found.");
+        if (!await db.TransportVehicles.AnyAsync(x => x.TenantId == tenantId && x.Id == command.VehicleId, ct)) throw new KeyNotFoundException("Vehicle was not found.");
         var trip = new FinanceFleetTrip { Id = Guid.NewGuid(), TenantId = tenantId, TransportVehicleId = command.VehicleId, CostCenterId = command.CostCenterId, DistanceKm = command.DistanceKm, Purpose = command.Purpose.Trim(), FromLocation = command.FromLocation?.Trim(), ToLocation = command.ToLocation?.Trim(), TripDate = command.TripDate };
         db.FinanceFleetTrips.Add(trip);
         await db.SaveChangesAsync(ct);
@@ -1093,7 +1093,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         var measurement = command.Measurement.Trim().ToUpperInvariant();
         if (actorId == Guid.Empty || command.FundId == Guid.Empty || string.IsNullOrWhiteSpace(command.InstrumentType) || string.IsNullOrWhiteSpace(command.Issuer) || command.CostBasis <= 0m || command.AnnualYieldPercent < 0m || command.PurchaseDate == default || command.MaturityDate < command.PurchaseDate || measurement is not ("FVTPL" or "FVOCI" or "AMORTIZED_COST"))
             throw new ArgumentException("Investment holding fields are invalid.");
-        var fund = await db.FinanceInvestmentFunds.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.FundId && x.Status == "ACTIVE", ct) ?? throw new InvalidOperationException("Investment fund was not found.");
+        var fund = await db.FinanceInvestmentFunds.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.FundId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Investment fund was not found.");
         var investment = await AccountAsync(tenantId, "1600", "Investment assets", AccountType.Asset, ct);
         var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
         var holding = new FinanceInvestmentHolding { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInvestmentFundId = fund.Id, InstrumentType = command.InstrumentType.Trim().ToUpperInvariant(), Issuer = command.Issuer.Trim(), AssetClass = command.AssetClass.Trim().ToUpperInvariant(), Measurement = measurement, Currency = currency, CostBasis = command.CostBasis, MarketValue = command.CostBasis, AnnualYieldPercent = command.AnnualYieldPercent, PurchaseDate = command.PurchaseDate, MaturityDate = command.MaturityDate };
@@ -1113,7 +1113,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.HoldingId == Guid.Empty || command.MarketValue < 0m || command.ValuationDate == default) throw new ArgumentException("Investment valuation fields are invalid.");
-        var holding = await db.FinanceInvestmentHoldings.Include(x => x.Fund).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.HoldingId && x.Status == "HELD", ct) ?? throw new InvalidOperationException("Investment holding was not found.");
+        var holding = await db.FinanceInvestmentHoldings.Include(x => x.Fund).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.HoldingId && x.Status == "HELD", ct) ?? throw new KeyNotFoundException("Investment holding was not found.");
         var delta = command.MarketValue - holding.MarketValue;
         if (delta == 0m) throw new InvalidOperationException("Valuation does not change market value.");
         var asset = await AccountAsync(tenantId, "1600", "Investment assets", AccountType.Asset, ct);
@@ -1135,7 +1135,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         var context = await accounting.GetContextAsync(tenantId, ct);
         if (!JsonSerializer.Deserialize<bool>(context.Policies["interest_accounts_allowed"])) throw new InvalidOperationException("The tenant accounting policy prohibits interest income.");
         if (actorId == Guid.Empty || command.HoldingId == Guid.Empty || command.Amount <= 0m || command.InterestDate == default) throw new ArgumentException("Investment interest fields are invalid.");
-        var holding = await db.FinanceInvestmentHoldings.Include(x => x.Fund).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.HoldingId && x.Status == "HELD", ct) ?? throw new InvalidOperationException("Investment holding was not found.");
+        var holding = await db.FinanceInvestmentHoldings.Include(x => x.Fund).SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.HoldingId && x.Status == "HELD", ct) ?? throw new KeyNotFoundException("Investment holding was not found.");
         var receivable = await AccountAsync(tenantId, "1610", "Accrued investment interest", AccountType.Asset, ct);
         var income = await AccountAsync(tenantId, "4400", "Investment income", AccountType.Revenue, ct);
         var transaction = new FinanceInvestmentTransaction { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInvestmentHoldingId = holding.Id, TransactionType = "INTEREST", Amount = command.Amount, Description = $"Investment interest {holding.Issuer}", TransactionDate = command.InterestDate };
@@ -1361,7 +1361,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     private async Task<FinanceSecurityDeposit> DepositAsync(Guid tenantId, Guid depositId, CancellationToken ct)
         => await db.Set<FinanceSecurityDeposit>().Include(x => x.Deductions)
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == depositId, ct)
-            ?? throw new InvalidOperationException("Security deposit was not found.");
+            ?? throw new KeyNotFoundException("Security deposit was not found.");
 
     private void AddDepositJournal(Guid tenantId, string entryNumber, string description, decimal amount, Guid debitAccountId, Guid creditAccountId)
     {
@@ -1380,7 +1380,7 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
 
     private async Task<FinanceVoucher> VoucherAsync(Guid tenantId, Guid id, CancellationToken ct)
         => await db.Set<FinanceVoucher>().Include(v => v.Lines).SingleOrDefaultAsync(v => v.Id == id && v.TenantId == tenantId, ct)
-            ?? throw new InvalidOperationException("Voucher was not found.");
+            ?? throw new KeyNotFoundException("Voucher was not found.");
 
     private static void EnsureState(FinanceVoucher voucher, string expected)
     {

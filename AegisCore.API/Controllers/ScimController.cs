@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Identity;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;

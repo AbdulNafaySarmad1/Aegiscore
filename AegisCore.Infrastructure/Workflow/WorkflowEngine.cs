@@ -40,7 +40,7 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task<WorkflowInstance> StartWorkflowAsync(Guid definitionId, Guid triggeredByUserId, Dictionary<string, object?>? context = null, CancellationToken cancellationToken = default)
     {
         var definition = await _definitionRepo.GetByIdAsync(definitionId, cancellationToken)
-            ?? throw new InvalidOperationException("Workflow definition not found.");
+            ?? throw new KeyNotFoundException("Workflow definition not found.");
 
         if (definition.Status != WorkflowDefinitionStatus.Published)
             throw new InvalidOperationException("Cannot start a workflow that is not published.");
@@ -73,13 +73,13 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task AdvanceWorkflowAsync(Guid instanceId, CancellationToken cancellationToken = default)
     {
         var instance = await _instanceRepo.GetByIdAsync(instanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Instance not found.");
+            ?? throw new KeyNotFoundException("Instance not found.");
 
         if (instance.Status != WorkflowInstanceStatus.Running)
             return;
 
         var definition = await _definitionRepo.GetByIdAsync(instance.DefinitionId, cancellationToken)
-            ?? throw new InvalidOperationException("Definition not found.");
+            ?? throw new KeyNotFoundException("Definition not found.");
 
         var nodes = ParseNodes(definition.NodesJson);
         var transitions = ParseTransitions(definition.TransitionsJson);
@@ -114,7 +114,7 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task CancelWorkflowAsync(Guid instanceId, string reason, CancellationToken cancellationToken = default)
     {
         var instance = await _instanceRepo.GetByIdAsync(instanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Instance not found.");
+            ?? throw new KeyNotFoundException("Instance not found.");
 
         instance.Status = WorkflowInstanceStatus.Cancelled;
         instance.CompletedAt = DateTime.UtcNow;
@@ -127,7 +127,7 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task SuspendWorkflowAsync(Guid instanceId, string reason, CancellationToken cancellationToken = default)
     {
         var instance = await _instanceRepo.GetByIdAsync(instanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Instance not found.");
+            ?? throw new KeyNotFoundException("Instance not found.");
 
         instance.Status = WorkflowInstanceStatus.Suspended;
         instance.ErrorMessage = reason;
@@ -137,7 +137,7 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task ResumeWorkflowAsync(Guid instanceId, CancellationToken cancellationToken = default)
     {
         var instance = await _instanceRepo.GetByIdAsync(instanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Instance not found.");
+            ?? throw new KeyNotFoundException("Instance not found.");
 
         if (instance.Status != WorkflowInstanceStatus.Suspended)
             throw new InvalidOperationException("Only suspended workflows can be resumed.");
@@ -152,7 +152,7 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task RetryFailedStepAsync(Guid stepId, CancellationToken cancellationToken = default)
     {
         var step = await _stepRepo.GetByIdAsync(stepId, cancellationToken)
-            ?? throw new InvalidOperationException("Step not found.");
+            ?? throw new KeyNotFoundException("Step not found.");
 
         if (step.Status != WorkflowStepStatus.Failed)
             throw new InvalidOperationException("Only failed steps can be retried.");
@@ -175,7 +175,7 @@ public class WorkflowEngine : IWorkflowEngine
     private async Task ExecuteNodeAsync(Guid instanceId, NodeDefinitionDto node, List<NodeDefinitionDto> allNodes, List<TransitionDefinitionDto> transitions, CancellationToken cancellationToken)
     {
         var instance = await _instanceRepo.GetByIdAsync(instanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Instance not found.");
+            ?? throw new KeyNotFoundException("Instance not found.");
 
         instance.CurrentNodeId = node.Id;
         await _instanceRepo.UpdateAsync(instance, cancellationToken);
@@ -357,7 +357,7 @@ public class WorkflowEngine : IWorkflowEngine
     public async Task OnApprovalDecidedAsync(Guid stepId, bool allApproved, CancellationToken cancellationToken)
     {
         var step = await _stepRepo.GetByIdAsync(stepId, cancellationToken)
-            ?? throw new InvalidOperationException("Step not found.");
+            ?? throw new KeyNotFoundException("Step not found.");
 
         var definition = await GetDefinitionForInstance(step.InstanceId, cancellationToken);
 
@@ -409,10 +409,10 @@ public class WorkflowEngine : IWorkflowEngine
     private async Task<WorkflowDefinition> GetDefinitionForInstance(Guid instanceId, CancellationToken cancellationToken)
     {
         var instance = await _instanceRepo.GetByIdAsync(instanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Instance not found.");
+            ?? throw new KeyNotFoundException("Instance not found.");
 
         return await _definitionRepo.GetByIdAsync(instance.DefinitionId, cancellationToken)
-            ?? throw new InvalidOperationException("Definition not found.");
+            ?? throw new KeyNotFoundException("Definition not found.");
     }
 
     private string? EvaluateConditionalTransition(List<TransitionDefinitionDto> transitions, WorkflowInstance instance, CancellationToken cancellationToken)

@@ -47,7 +47,7 @@ public class OcrIntegrationService : IOcrIntegrationService
     private readonly IRepository<OcrProviderConfig> _repo; private readonly ILogger<OcrIntegrationService> _logger;
     public OcrIntegrationService(IRepository<OcrProviderConfig> r, ILogger<OcrIntegrationService> l) { _repo = r; _logger = l; }
     public async Task<OcrProviderConfig> RegisterProviderAsync(OcrProviderConfig config, CancellationToken ct) { await _repo.AddAsync(config, ct); _logger.LogInformation("OCR provider {Provider} registered", config.Provider); return config; }
-    public async Task<string> ExtractTextAsync(Guid configId, byte[] documentBytes, string documentType, CancellationToken ct) { var config = await _repo.GetByIdAsync(configId, ct) ?? throw new InvalidOperationException("OCR provider not found."); var textLength = Math.Max(100, documentBytes.Length / 100); return $"Extracted text from {documentType} ({documentBytes.Length} bytes) via {config.Provider} — approximately {textLength} characters of content."; }
+    public async Task<string> ExtractTextAsync(Guid configId, byte[] documentBytes, string documentType, CancellationToken ct) { var config = await _repo.GetByIdAsync(configId, ct) ?? throw new KeyNotFoundException("OCR provider not found."); var textLength = Math.Max(100, documentBytes.Length / 100); return $"Extracted text from {documentType} ({documentBytes.Length} bytes) via {config.Provider} — approximately {textLength} characters of content."; }
     public async Task<List<OcrProviderConfig>> GetProvidersAsync(CancellationToken ct) { var all = await _repo.FindAsync(p => p.IsActive, ct); return all.ToList(); }
 }
 

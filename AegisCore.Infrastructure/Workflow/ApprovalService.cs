@@ -29,7 +29,7 @@ public class ApprovalService : IApprovalService
     public async Task InitializeApprovalsForStep(Guid stepId, List<ApproverConfig> configs, CancellationToken cancellationToken = default)
     {
         var step = await _stepRepo.GetByIdAsync(stepId, cancellationToken)
-            ?? throw new InvalidOperationException("Step not found.");
+            ?? throw new KeyNotFoundException("Step not found.");
 
         var approvers = configs;
         for (var i = 0; i < approvers.Count; i++)
@@ -55,7 +55,7 @@ public class ApprovalService : IApprovalService
     public async Task<ApprovalRecord> ApproveAsync(Guid approvalId, Guid userId, string? comment, CancellationToken cancellationToken = default)
     {
         var record = await _approvalRepo.GetByIdAsync(approvalId, cancellationToken)
-            ?? throw new InvalidOperationException("Approval record not found.");
+            ?? throw new KeyNotFoundException("Approval record not found.");
 
         if (record.ApproverUserId != userId && record.DelegatedToUserId != userId)
             throw new UnauthorizedAccessException("You are not authorized to approve this record.");
@@ -80,7 +80,7 @@ public class ApprovalService : IApprovalService
     public async Task<ApprovalRecord> RejectAsync(Guid approvalId, Guid userId, string? comment, CancellationToken cancellationToken = default)
     {
         var record = await _approvalRepo.GetByIdAsync(approvalId, cancellationToken)
-            ?? throw new InvalidOperationException("Approval record not found.");
+            ?? throw new KeyNotFoundException("Approval record not found.");
 
         if (record.ApproverUserId != userId && record.DelegatedToUserId != userId)
             throw new UnauthorizedAccessException("You are not authorized to reject this record.");
@@ -102,7 +102,7 @@ public class ApprovalService : IApprovalService
     public async Task<ApprovalRecord> DelegateAsync(Guid approvalId, Guid fromUserId, Guid toUserId, string reason, CancellationToken cancellationToken = default)
     {
         var record = await _approvalRepo.GetByIdAsync(approvalId, cancellationToken)
-            ?? throw new InvalidOperationException("Approval record not found.");
+            ?? throw new KeyNotFoundException("Approval record not found.");
 
         if (record.ApproverUserId != fromUserId)
             throw new UnauthorizedAccessException("You are not the assigned approver for this record.");
@@ -136,7 +136,7 @@ public class ApprovalService : IApprovalService
     public async Task ProcessTimeoutAsync(Guid approvalId, CancellationToken cancellationToken = default)
     {
         var record = await _approvalRepo.GetByIdAsync(approvalId, cancellationToken)
-            ?? throw new InvalidOperationException("Approval record not found.");
+            ?? throw new KeyNotFoundException("Approval record not found.");
 
         if (record.Status != ApprovalStatus.Pending)
             return;

@@ -1,5 +1,6 @@
 using AegisCore.Application.Compliance;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;

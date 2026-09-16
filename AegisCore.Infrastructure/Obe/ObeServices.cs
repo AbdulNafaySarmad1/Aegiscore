@@ -23,7 +23,7 @@ public sealed class CisExtractionService(AegisDbContext db, IStorageProvider sto
 
     public async Task ProcessAsync(Guid cisUploadId, CancellationToken ct = default)
     {
-        var upload = await db.CisUploads.FindAsync([cisUploadId], ct) ?? throw new InvalidOperationException("CIS upload was not found.");
+        var upload = await db.CisUploads.FindAsync([cisUploadId], ct) ?? throw new KeyNotFoundException("CIS upload was not found.");
         upload.ProcessingStatus = "processing";
         try
         {
@@ -49,7 +49,7 @@ public sealed class CisExtractionService(AegisDbContext db, IStorageProvider sto
 
     public async Task ApproveAsync(Guid cisUploadId, Guid reviewerId, CancellationToken ct = default)
     {
-        var upload = await db.CisUploads.FindAsync([cisUploadId], ct) ?? throw new InvalidOperationException("CIS upload was not found.");
+        var upload = await db.CisUploads.FindAsync([cisUploadId], ct) ?? throw new KeyNotFoundException("CIS upload was not found.");
         upload.HumanReviewStatus = "approved";
         upload.ReviewedBy = reviewerId;
         upload.ReviewedAt = DateTimeOffset.UtcNow;
@@ -85,7 +85,7 @@ public sealed class OBEAttainmentService(AegisDbContext db) : IOBEAttainmentServ
     public async Task<CLOAttainmentResult> CalculateCLOAttainmentAsync(Guid courseId, Guid cloId, Guid semesterId, CancellationToken ct = default)
     {
         var clo = await db.CourseLearningOutcomes.FirstOrDefaultAsync(c => c.Id == cloId && c.CourseId == courseId, ct)
-            ?? throw new InvalidOperationException("CLO was not found for the course.");
+            ?? throw new KeyNotFoundException("CLO was not found for the course.");
         var percentages = await db.CourseGrades
             .Where(g => g.CourseId == courseId && g.SemesterId == semesterId)
             .Select(g => g.PercentageObtained)
@@ -97,7 +97,7 @@ public sealed class OBEAttainmentService(AegisDbContext db) : IOBEAttainmentServ
     public async Task<POAttainmentResult> CalculatePOAttainmentAsync(Guid programId, Guid poId, Guid semesterId, CancellationToken ct = default)
     {
         var po = await db.ProgramOutcomes.FirstOrDefaultAsync(p => p.Id == poId && p.ProgramId == programId, ct)
-            ?? throw new InvalidOperationException("PO was not found for the program.");
+            ?? throw new KeyNotFoundException("PO was not found for the program.");
         var mappings = await db.CLOPOMappings.Where(m => m.ProgramOutcomeId == poId).ToListAsync(ct);
         var clos = new List<CLOAttainmentResult>();
         var weighted = 0m;
@@ -106,7 +106,7 @@ public sealed class OBEAttainmentService(AegisDbContext db) : IOBEAttainmentServ
         {
             var clo = await CalculateCLOAttainmentAsync(
                 (await db.CourseLearningOutcomes.FindAsync([mapping.CourseLearningOutcomeId], ct))?.CourseId
-                    ?? throw new InvalidOperationException("Mapped CLO was not found."),
+                    ?? throw new KeyNotFoundException("Mapped CLO was not found."),
                 mapping.CourseLearningOutcomeId, semesterId, ct);
             var weight = mapping.Strength switch { MappingStrength.Low => 0.33m, MappingStrength.Medium => 0.66m, _ => 1m };
             clos.Add(clo);

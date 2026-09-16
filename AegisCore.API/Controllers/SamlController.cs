@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Identity;
 using AegisCore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;

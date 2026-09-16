@@ -179,7 +179,7 @@ public sealed class AdmissionTestConfigService(AegisDbContext db) : IAdmissionTe
     public async Task<AdmissionSubject> SetSubjectActiveAsync(Guid subjectId, bool isActive, CancellationToken ct = default)
     {
         var subject = await db.AdmissionSubjects.FirstOrDefaultAsync(s => s.Id == subjectId, ct)
-            ?? throw new InvalidOperationException("Subject was not found.");
+            ?? throw new KeyNotFoundException("Subject was not found.");
         subject.IsActive = isActive;
         await db.SaveChangesAsync(ct);
         return subject;
@@ -262,7 +262,7 @@ public sealed class QuestionBankService(
     {
         if (!await db.AdmissionSubjects.AnyAsync(s => s.Id == subjectId, ct))
         {
-            throw new InvalidOperationException("Subject was not found.");
+            throw new KeyNotFoundException("Subject was not found.");
         }
 
         using var buffer = new MemoryStream();
@@ -348,7 +348,7 @@ public sealed class QuestionBankService(
     public async Task ReviewAsync(Guid questionId, bool approve, Guid actorId, CancellationToken ct = default)
     {
         var question = await db.AdmissionQuestions.FirstOrDefaultAsync(q => q.Id == questionId, ct)
-            ?? throw new InvalidOperationException("Question was not found.");
+            ?? throw new KeyNotFoundException("Question was not found.");
         question.Status = approve ? AdmissionQuestionStatus.Approved : AdmissionQuestionStatus.Rejected;
         question.ApprovedAt = approve ? DateTimeOffset.UtcNow : null;
         question.ApprovedBy = approve ? actorId : null;
@@ -358,7 +358,7 @@ public sealed class QuestionBankService(
     public async Task<AdmissionQuestion> EditAsync(Guid questionId, QuestionEditInput input, CancellationToken ct = default)
     {
         var question = await db.AdmissionQuestions.FirstOrDefaultAsync(q => q.Id == questionId, ct)
-            ?? throw new InvalidOperationException("Question was not found.");
+            ?? throw new KeyNotFoundException("Question was not found.");
 
         var correct = input.CorrectOption.Trim().ToUpperInvariant();
         if (correct is not ("A" or "B" or "C" or "D"))

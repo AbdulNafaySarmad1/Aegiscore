@@ -133,13 +133,13 @@ namespace AegisCore.Domain.Entities;
 
 // GAP 06 — Examination Office
 
-[Table("QuestionBanks")] public class QuestionBank { [Key] public Guid Id { get; set; }
+[Table("QuestionBanks")] public class QuestionBank : ITenantScoped { [Key] public Guid Id { get; set; }
     [MaxLength(2000)] public string QuestionText { get; set; } = ""; [MaxLength(50)] public string? QuestionType { get; set; }
     public Guid CourseId { get; set; } public BloomsLevel BloomsLevel { get; set; }
     [MaxLength(100)] public string? Difficulty { get; set; } public bool IsApproved { get; set; }
     public Guid CreatedByUserId { get; set; } public DateTime CreatedAt { get; set; } = DateTime.UtcNow; public Guid TenantId { get; set; } }
 
-[Table("ExamPapers")] public class ExamPaper { [Key] public Guid Id { get; set; }
+[Table("ExamPapers")] public class ExamPaper : ITenantScoped { [Key] public Guid Id { get; set; }
     [MaxLength(300)] public string Title { get; set; } = ""; public Guid CourseId { get; set; }
     public ExamType ExamType { get; set; } public int TotalMarks { get; set; } public int DurationMinutes { get; set; }
     [Column(TypeName = "jsonb")] public string QuestionsJson { get; set; } = "[]";

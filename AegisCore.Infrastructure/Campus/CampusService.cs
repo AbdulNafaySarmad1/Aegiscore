@@ -62,7 +62,7 @@ public class CampusService : ICampusService
     public async Task<CampusDto> UpdateCampusAsync(Guid campusId, UpdateCampusRequest request, CancellationToken cancellationToken = default)
     {
         var campus = await _campusRepo.GetByIdAsync(campusId, cancellationToken)
-            ?? throw new InvalidOperationException("Campus not found.");
+            ?? throw new KeyNotFoundException("Campus not found.");
 
         if (request.Name != null) campus.Name = request.Name;
         if (request.Address != null) campus.Address = request.Address;
@@ -96,7 +96,7 @@ public class CampusService : ICampusService
     public async Task ApproveTransferAsync(Guid transferId, string approver, bool isSource, CancellationToken cancellationToken = default)
     {
         var transfer = await _transferRepo.GetByIdAsync(transferId, cancellationToken)
-            ?? throw new InvalidOperationException("Transfer not found.");
+            ?? throw new KeyNotFoundException("Transfer not found.");
 
         if (isSource)
         {

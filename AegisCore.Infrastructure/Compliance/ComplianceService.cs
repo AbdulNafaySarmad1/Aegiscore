@@ -55,7 +55,7 @@ public class ComplianceService : IComplianceService
     public async Task<ComplianceControl> AddControlAsync(Guid frameworkId, string controlCode, string title, string description, Guid ownerUserId, string ownerName, CancellationToken cancellationToken = default)
     {
         var framework = await _frameworkRepo.GetByIdAsync(frameworkId, cancellationToken)
-            ?? throw new InvalidOperationException("Framework not found.");
+            ?? throw new KeyNotFoundException("Framework not found.");
 
         var control = new ComplianceControl
         {
@@ -72,7 +72,7 @@ public class ComplianceService : IComplianceService
     public async Task<ComplianceControl> UpdateControlStatusAsync(Guid controlId, ControlStatus newStatus, string? notes, CancellationToken cancellationToken = default)
     {
         var control = await _controlRepo.GetByIdAsync(controlId, cancellationToken)
-            ?? throw new InvalidOperationException("Control not found.");
+            ?? throw new KeyNotFoundException("Control not found.");
 
         control.Status = newStatus;
         control.LastReviewedAt = DateTime.UtcNow;
@@ -85,7 +85,7 @@ public class ComplianceService : IComplianceService
 
     public async Task<ControlEvidence> AttachEvidenceAsync(Guid controlId, string fileUrl, string description, Guid uploadedByUserId, CancellationToken cancellationToken = default)
     {
-        _ = await _controlRepo.GetByIdAsync(controlId, cancellationToken) ?? throw new InvalidOperationException("Control not found.");
+        _ = await _controlRepo.GetByIdAsync(controlId, cancellationToken) ?? throw new KeyNotFoundException("Control not found.");
         var evidence = new ControlEvidence
         {
             Id = Guid.NewGuid(), TenantId = TenantId(), ControlId = controlId, FileUrl = fileUrl,
@@ -129,7 +129,7 @@ public class ComplianceService : IComplianceService
     public async Task<CorrectiveActionPlan> CompleteActionPlanAsync(Guid capId, string completionNotes, CancellationToken cancellationToken = default)
     {
         var cap = await _capRepo.GetByIdAsync(capId, cancellationToken)
-            ?? throw new InvalidOperationException("CAP not found.");
+            ?? throw new KeyNotFoundException("CAP not found.");
 
         cap.Status = CAPStatus.Completed;
         cap.CompletedAt = DateTime.UtcNow;

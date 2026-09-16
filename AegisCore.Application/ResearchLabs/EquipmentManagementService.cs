@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.ResearchLabs;
@@ -32,7 +33,7 @@ public class EquipmentManagementService
     public async Task<EquipmentBooking> BookEquipmentAsync(EquipmentBooking booking, CancellationToken cancellationToken = default)
     {
         var equipment = await _equipmentRepository.GetByIdAsync(booking.LabEquipmentId, cancellationToken)
-            ?? throw new InvalidOperationException("Equipment not found.");
+            ?? throw new KeyNotFoundException("Equipment not found.");
 
         if (equipment.Status != EquipmentStatus.Available)
             throw new InvalidOperationException("Equipment is not available.");
@@ -52,7 +53,7 @@ public class EquipmentManagementService
     public async Task<EquipmentMaintenance> ReportMaintenanceAsync(EquipmentMaintenance maintenance, CancellationToken cancellationToken = default)
     {
         var equipment = await _equipmentRepository.GetByIdAsync(maintenance.LabEquipmentId, cancellationToken)
-            ?? throw new InvalidOperationException("Equipment not found.");
+            ?? throw new KeyNotFoundException("Equipment not found.");
 
         equipment.Status = EquipmentStatus.UnderMaintenance;
         maintenance.Status = MaintenanceStatus.Reported;
@@ -66,10 +67,10 @@ public class EquipmentManagementService
     public async Task CompleteMaintenanceAsync(Guid maintenanceId, string resolutionNotes, decimal cost, CancellationToken cancellationToken = default)
     {
         var maintenance = await _maintenanceRepository.GetByIdAsync(maintenanceId, cancellationToken)
-            ?? throw new InvalidOperationException("Maintenance request not found.");
+            ?? throw new KeyNotFoundException("Maintenance request not found.");
 
         var equipment = await _equipmentRepository.GetByIdAsync(maintenance.LabEquipmentId, cancellationToken)
-            ?? throw new InvalidOperationException("Equipment not found.");
+            ?? throw new KeyNotFoundException("Equipment not found.");
 
         maintenance.Status = MaintenanceStatus.Completed;
         maintenance.CompletedAt = DateTime.UtcNow;

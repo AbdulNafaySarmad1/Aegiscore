@@ -83,7 +83,7 @@ public sealed class TestSchedulingService(AegisDbContext db) : ITestSchedulingSe
     public async Task<ScheduleTestResult> ScheduleAsync(Guid applicantProfileId, DateTimeOffset? expiresAt, CancellationToken ct = default)
     {
         var profile = await db.ApplicantProfiles.FirstOrDefaultAsync(p => p.Id == applicantProfileId, ct)
-            ?? throw new InvalidOperationException("Applicant profile was not found.");
+            ?? throw new KeyNotFoundException("Applicant profile was not found.");
 
         if (await db.ApplicantTests.AnyAsync(t => t.ApplicantId == applicantProfileId, ct))
         {
@@ -229,7 +229,7 @@ public sealed class TestTerminalService(
         var tenantId = TenantId;
         var test = await db.ApplicantTests.IgnoreQueryFilters()
             .FirstOrDefaultAsync(t => t.TenantId == tenantId && t.Id == applicantTestId, ct)
-            ?? throw new InvalidOperationException("Test was not found.");
+            ?? throw new KeyNotFoundException("Test was not found.");
 
         if (test.Status != ApplicantTestStatus.InProgress)
         {
@@ -267,7 +267,7 @@ public sealed class TestTerminalService(
         var tenantId = TenantId;
         var test = await db.ApplicantTests.IgnoreQueryFilters()
             .FirstOrDefaultAsync(t => t.TenantId == tenantId && t.Id == applicantTestId, ct)
-            ?? throw new InvalidOperationException("Test was not found.");
+            ?? throw new KeyNotFoundException("Test was not found.");
 
         if (test.Status is ApplicantTestStatus.Submitted or ApplicantTestStatus.ForceSubmitted)
         {
@@ -295,7 +295,7 @@ public sealed class TestProctorService(AegisDbContext db) : ITestProctorService
     public async Task ForceSubmitAsync(Guid applicantTestId, Guid proctorId, CancellationToken ct = default)
     {
         var test = await db.ApplicantTests.FirstOrDefaultAsync(t => t.Id == applicantTestId, ct)
-            ?? throw new InvalidOperationException("Test was not found.");
+            ?? throw new KeyNotFoundException("Test was not found.");
         if (test.Status is ApplicantTestStatus.Submitted or ApplicantTestStatus.ForceSubmitted)
         {
             return;
@@ -308,7 +308,7 @@ public sealed class TestProctorService(AegisDbContext db) : ITestProctorService
     public async Task FlagAsync(Guid applicantTestId, Guid proctorId, string note, CancellationToken ct = default)
     {
         var test = await db.ApplicantTests.FirstOrDefaultAsync(t => t.Id == applicantTestId, ct)
-            ?? throw new InvalidOperationException("Test was not found.");
+            ?? throw new KeyNotFoundException("Test was not found.");
         test.ProctorId = proctorId;
         test.ProctorNote = note.Length > 500 ? note[..500] : note;
         await db.SaveChangesAsync(ct);

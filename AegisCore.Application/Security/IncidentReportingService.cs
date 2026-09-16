@@ -1,4 +1,5 @@
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Security;
@@ -30,7 +31,7 @@ public class IncidentReportingService
     public async Task AssignIncidentAsync(Guid incidentId, Guid assignedToEmployeeId, CancellationToken cancellationToken = default)
     {
         var incident = await _incidentRepository.GetByIdAsync(incidentId, cancellationToken)
-            ?? throw new InvalidOperationException("Incident not found.");
+            ?? throw new KeyNotFoundException("Incident not found.");
 
         incident.Status = IncidentStatus.UnderInvestigation;
         incident.AssignedToEmployeeId = assignedToEmployeeId;
@@ -43,7 +44,7 @@ public class IncidentReportingService
     public async Task ResolveIncidentAsync(Guid incidentId, string resolutionNotes, CancellationToken cancellationToken = default)
     {
         var incident = await _incidentRepository.GetByIdAsync(incidentId, cancellationToken)
-            ?? throw new InvalidOperationException("Incident not found.");
+            ?? throw new KeyNotFoundException("Incident not found.");
 
         incident.Status = IncidentStatus.Resolved;
         incident.ResolvedAt = DateTime.UtcNow;
@@ -58,7 +59,7 @@ public class IncidentReportingService
     public async Task<IncidentWitness> AddWitnessAsync(Guid incidentId, IncidentWitness witness, CancellationToken cancellationToken = default)
     {
         var incident = await _incidentRepository.GetWithDetailsAsync(incidentId, cancellationToken)
-            ?? throw new InvalidOperationException("Incident not found.");
+            ?? throw new KeyNotFoundException("Incident not found.");
 
         if (incident.IsImmutable)
             throw new InvalidOperationException("Cannot modify a resolved incident.");
@@ -74,7 +75,7 @@ public class IncidentReportingService
     public async Task<IncidentEvidence> AddEvidenceAsync(Guid incidentId, IncidentEvidence evidence, CancellationToken cancellationToken = default)
     {
         var incident = await _incidentRepository.GetWithDetailsAsync(incidentId, cancellationToken)
-            ?? throw new InvalidOperationException("Incident not found.");
+            ?? throw new KeyNotFoundException("Incident not found.");
 
         if (incident.IsImmutable)
             throw new InvalidOperationException("Cannot modify a resolved incident.");

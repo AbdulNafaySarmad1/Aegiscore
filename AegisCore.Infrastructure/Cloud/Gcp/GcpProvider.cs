@@ -47,7 +47,7 @@ public class GcpSecretManagerService : ISecretService
     {
         var dict = await LoadAsync(ct);
         if (dict.TryGetValue(secretName, out var value)) return value;
-        throw new InvalidOperationException($"Secret '{secretName}' not found in GCP Secret Manager.");
+        throw new KeyNotFoundException($"Secret '{secretName}' not found in GCP Secret Manager.");
     }
 
     public async Task SetSecretAsync(string secretName, string value, CancellationToken ct = default)
