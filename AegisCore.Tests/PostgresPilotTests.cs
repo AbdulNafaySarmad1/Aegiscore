@@ -42,7 +42,7 @@ public class PostgresPilotTests
         await using var database = await AegisCore.Tests.Infrastructure.TestDatabase.CreateAsync(postgres: true);
         var http = new DefaultHttpContext(); http.Items["TenantId"] = tenant;
         await using var db = database.CreateContext(http);
-        await db.Database.MigrateAsync();
+        await database.MigrateAsync(db);
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
         Assert.Contains("20260904120000_PersistWizardState", await db.Database.GetAppliedMigrationsAsync());
         // Query the real mapped columns: migration history alone cannot detect an

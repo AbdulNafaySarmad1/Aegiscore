@@ -19,7 +19,7 @@ public sealed class MigrationSchemaTests
     {
         await using var database = await TestDatabase.CreateAsync(postgres: true);
         await using var db = database.CreateContext(Guid.NewGuid());
-        await db.Database.MigrateAsync();
+        await database.MigrateAsync(db);
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
         Assert.False(db.Database.HasPendingModelChanges(), "The EF model differs from the migration snapshot: add a migration.");
 

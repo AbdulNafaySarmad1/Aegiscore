@@ -18,6 +18,11 @@ public sealed class TestDatabase : IAsyncDisposable
     public const string PostgresVariable = "PILOT_POSTGRES_CONNECTION";
     public static bool PostgresConfigured => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(PostgresVariable));
 
+    // xUnit runs test classes in parallel; concurrent CREATE DATABASE calls collide on template1
+    // ("source database is being accessed by other users"). Creation and drop are serialised; the
+    // tests themselves still run in parallel against their own databases.
+    private static readonly SemaphoreSlim ServerGate = new(1, 1);
+
     private readonly SqliteConnection? _sqlite;
     private readonly string? _postgresConnection;
     private readonly string? _postgresDatabase;
@@ -55,12 +60,15 @@ public sealed class TestDatabase : IAsyncDisposable
         var maintenance = Environment.GetEnvironmentVariable(PostgresVariable)
             ?? throw new InvalidOperationException($"{PostgresVariable} is not set.");
         var database = $"aegiscore_test_{Guid.NewGuid():N}"[..40];
-        await using (var admin = new NpgsqlConnection(maintenance))
+        await ServerGate.WaitAsync();
+        try
         {
+            await using var admin = new NpgsqlConnection(maintenance);
             await admin.OpenAsync();
             await using var create = new NpgsqlCommand($"CREATE DATABASE \"{database}\"", admin);
             await create.ExecuteNonQueryAsync();
         }
+        finally { ServerGate.Release(); }
         var builder = new NpgsqlConnectionStringBuilder(maintenance) { Database = database, Pooling = false };
         return new TestDatabase(builder.ConnectionString, database, maintenance);
     }
@@ -87,20 +95,39 @@ public sealed class TestDatabase : IAsyncDisposable
         return new AegisDbContext(options.Options, new HttpContextAccessor { HttpContext = http }, Adapter);
     }
 
+    // Building the 600-table schema takes thousands of locks; a dozen in parallel exhausts the
+    // server's max_locks_per_transaction ("53200: out of shared memory"). One schema build at a time.
+    private static readonly SemaphoreSlim SchemaGate = new(1, 1);
+
     public async Task EnsureSchemaAsync(Guid tenantId)
     {
         await using var db = CreateContext(tenantId);
-        await db.Database.EnsureCreatedAsync();
+        await SchemaGate.WaitAsync();
+        try { await db.Database.EnsureCreatedAsync(); }
+        finally { SchemaGate.Release(); }
+    }
+
+    /// <summary>Applies the migration chain (the production path) under the same schema gate.</summary>
+    public async Task MigrateAsync(AegisDbContext db)
+    {
+        await SchemaGate.WaitAsync();
+        try { await db.Database.MigrateAsync(); }
+        finally { SchemaGate.Release(); }
     }
 
     public async ValueTask DisposeAsync()
     {
         if (_sqlite is not null) { await _sqlite.DisposeAsync(); return; }
         NpgsqlConnection.ClearAllPools();
-        await using var admin = new NpgsqlConnection(_postgresMaintenance);
-        await admin.OpenAsync();
-        await using var drop = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{_postgresDatabase}\" WITH (FORCE)", admin);
-        await drop.ExecuteNonQueryAsync();
+        await ServerGate.WaitAsync();
+        try
+        {
+            await using var admin = new NpgsqlConnection(_postgresMaintenance);
+            await admin.OpenAsync();
+            await using var drop = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{_postgresDatabase}\" WITH (FORCE)", admin);
+            await drop.ExecuteNonQueryAsync();
+        }
+        finally { ServerGate.Release(); }
     }
 }
 
