@@ -12,14 +12,14 @@ export type WizardError = {
   severity?: "warning" | "error";
 };
 
-export function toWizardError(error: unknown, fallback = "Something went wrong â€” try again"): WizardError {
+export function toWizardError(error: unknown, fallback = "The request did not complete."): WizardError {
   if (typeof error === "object" && error !== null) {
     const candidate = error as Partial<WizardError> & { message?: string };
     if (candidate.userMessage) {
       return {
         code: candidate.code ?? "REQUEST_FAILED",
         userMessage: candidate.userMessage,
-        howToFix: candidate.howToFix ?? "Check your connection and try again.",
+        howToFix: candidate.howToFix ?? "Check your connection, then try again.",
         fixCommand: candidate.fixCommand,
         technicalDetail: candidate.technicalDetail ?? candidate.message,
         severity: candidate.severity ?? "error",
@@ -29,7 +29,7 @@ export function toWizardError(error: unknown, fallback = "Something went wrong â
       return {
         code: "REQUEST_FAILED",
         userMessage: fallback,
-        howToFix: "Check your connection and try again. If the problem continues, contact your administrator.",
+        howToFix: "Check your connection, then try again. If it keeps happening, tell your IT office and quote the technical detail below.",
         technicalDetail: candidate.message,
         severity: "error",
       };
@@ -39,7 +39,7 @@ export function toWizardError(error: unknown, fallback = "Something went wrong â
   return {
     code: "REQUEST_FAILED",
     userMessage: fallback,
-    howToFix: "Check your connection and try again. If the problem continues, contact your administrator.",
+    howToFix: "Check your connection, then try again. If it keeps happening, tell your IT office and quote the technical detail below.",
     technicalDetail: typeof error === "string" ? error : undefined,
     severity: "error",
   };
@@ -63,12 +63,12 @@ export function ErrorDisplay({ error, onRetry }: { error: WizardError; onRetry?:
           </details>
         )}
       </div>
-      {onRetry && <button className="btn btn-secondary" type="button" onClick={onRetry}><RotateCw aria-hidden="true" />Retry</button>}
+      {onRetry && <button className="btn btn-secondary" type="button" onClick={onRetry}><RotateCw aria-hidden="true" />Try again</button>}
     </section>
   );
 }
 
 export function PageErrorDisplay({ message, onRetry }: { message: string; onRetry?: () => void }) {
   const retry = onRetry ?? (() => window.location.reload());
-  return <main className="error-page"><ErrorDisplay error={toWizardError(message, "This page could not be loaded.")} onRetry={retry} /></main>;
+  return <main id="main-content" className="error-page" tabIndex={-1}><ErrorDisplay error={toWizardError(message, "This page could not be loaded.")} onRetry={retry} /></main>;
 }

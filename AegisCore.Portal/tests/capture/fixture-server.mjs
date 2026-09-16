@@ -29,8 +29,56 @@ const fixtures = {
  '/api/wizard/complete': {success:true},
  '/api/data-import/connections': [],
 };
+
+// ── Lifecycle fixtures (admissions → graduation → alumni) for visual checks ──
+const state = { role: 'Student', clearances: new Set(), approved: false };
+const applicantNames = ['Aisha Khan','Bilal Ahmed','Chandni Raza','Danish Iqbal','Eman Siddiqui','Farhan Malik','Gul Bano','Hassan Tariq','Iqra Shah','Junaid Qureshi','Kiran Baig','Laiba Noor'];
+const applicantStatus = ['Admitted','UnderReview','TestScheduled','Submitted','Rejected','InterviewScheduled','Admitted','Draft','UnderReview','Withdrawn','Submitted','TestScheduled'];
+const applicants = applicantNames.map((name,i)=>({ id:`app-${i+1}`, applicantId:`APP-2026-${String(i+17).padStart(4,'0')}`, fullName: i===7?null:name, email:`${name.split(' ')[0].toLowerCase()}.${name.split(' ')[1].toLowerCase()}@example.invalid`, programId:'bscs', intakeId:'intake-fall-2026', status: applicantStatus[i], submittedAt: i===7?null:`2026-0${(i%6)+3}-1${i%9}T09:30:00Z`, createdAt:'2026-03-01T08:00:00Z' }));
+const documents = [
+  { id:'doc-1', documentType:'Matric', mimeType:'application/pdf', fileSize:412000, validationStatus:'Approved', rejectionReason:null, validationConfidence:0.97, validationMethod:'OCR match', uploadedAt:'2026-04-02T10:00:00Z' },
+  { id:'doc-2', documentType:'Intermediate', mimeType:'application/pdf', fileSize:388000, validationStatus:'Approved', rejectionReason:null, validationConfidence:0.94, validationMethod:'OCR match', uploadedAt:'2026-04-02T10:02:00Z' },
+  { id:'doc-3', documentType:'National ID', mimeType:'image/jpeg', fileSize:1130000, validationStatus:'Approved', rejectionReason:null, validationConfidence:0.99, validationMethod:'NADRA format', uploadedAt:'2026-04-02T10:05:00Z' },
+  { id:'doc-4', documentType:'Photo', mimeType:'image/jpeg', fileSize:210000, validationStatus:'Approved', rejectionReason:null, validationConfidence:null, validationMethod:null, uploadedAt:'2026-04-02T10:06:00Z' },
+  { id:'doc-5', documentType:'Domicile Certificate', mimeType:'application/pdf', fileSize:265000, validationStatus:'Pending', rejectionReason:null, validationConfidence:0.61, validationMethod:'OCR match', uploadedAt:'2026-04-03T11:00:00Z' },
+];
+const courses = [['CS101','Programming Fundamentals',3,'A'],['CS102','Discrete Structures',3,'B+'],['MA101','Calculus I',3,'A-'],['EN101','Functional English',3,'B'],['CS201','Data Structures',4,'A'],['CS202','Object-Oriented Programming',4,'B+'],['CS301','Operating Systems',3,'A-'],['CS302','Database Systems',3,'A'],['CS401','Software Engineering',3,'B'],['CS499','Final Year Project',6,'B+'],['CS402','Computer Networks',3,null]].map(([code,title,credits,grade])=>({code,title,credits,grade,status:grade?'Completed':'In progress'}));
+const overview = { student:{ id:'student-1', name:'Aisha Khan', universityId:'FNU-2026-001', rollNumber:'BSCS-26-001', institutionalEmail:'aisha.khan@fnu.edu.pk', status:'Enrolled' }, admission:{ applicationNumber:'APP-2026-0017', email:'aisha.khan@example.invalid', status:'Admitted', approvedDocuments:4, testScore:84, testPassed:true }, academics:{ program:'BS Computer Science', cgpa:3.3, earnedCredits:130, requiredCredits:130, completedCourses:10, totalCourses:11, courses }, attendance:[{course:'CS401',total:30,present:27,percentage:90},{course:'CS402',total:28,present:22,percentage:78.6},{course:'CS499',total:12,present:12,percentage:100}], finance:{ demanded:1240000, paid:1240000, outstanding:0, status:'Clear' }, timetable:[{day:'Monday',startTime:'09:00:00',endTime:'10:30:00',room:'LT-2',course:'CS402 Computer Networks'},{day:'Tuesday',startTime:'11:00:00',endTime:'12:30:00',room:'Lab 4',course:'CS499 Final Year Project'},{day:'Thursday',startTime:'09:00:00',endTime:'10:30:00',room:'LT-2',course:'CS402 Computer Networks'}] };
+Object.assign(fixtures, {
+  '/api/wizard/demo-status': { isDemo: true, remainingDays: 21 },
+  '/api/admissions/intakes': [{ id:'intake-fall-2026', year:2026, semester:1, name:'Fall 2026', status:1 }, { id:'intake-spring-2027', year:2027, semester:2, name:'Spring 2027', status:0 }],
+  '/api/admissions/applicants': applicants,
+  '/api/admissions/applicants/bulk-status': { updated: true },
+  '/api/student/overview': overview,
+  '/api/examination/transcripts/student-1/request': { requested: true },
+});
+function graduation() {
+  const blockers = [];
+  for (const d of ['Library','Finance','Department']) if (!state.clearances.has(d)) blockers.push(`${d} clearance is required.`);
+  return { studentName: overview.student.name, program: overview.academics.program, cgpa: overview.academics.cgpa, earnedCredits: overview.academics.earnedCredits, requiredCredits: overview.academics.requiredCredits, approved: state.approved, blockers };
+}
+function dynamicRoute(method, pathname) {
+  if (pathname === '/__fixture/reset') { state.role='Student'; state.clearances.clear(); state.approved=false; return [200, {ok:true}]; }
+  const roleMatch = pathname.match(/^\/__fixture\/role\/(\w+)$/); if (roleMatch) { state.role = roleMatch[1]; return [200, {role:state.role}]; }
+  if (pathname === '/api/session') return [200, { userId:'demo-user', tenantId:'demo-tenant', name: state.role==='Student'?'Aisha Khan':state.role==='Admin'?'Dr. Sana Mirza':'Demo User', roles:[state.role], studentId: state.role==='Student'?'student-1':null, departmentId:'cs' }];
+  if (pathname === '/api/auth/login') return [200, { accessToken:'demo-access', refreshToken:'demo-refresh', expiresIn: 900 }];
+  if (pathname === '/api/auth/refresh') return [200, { accessToken:'demo-access', refreshToken:'demo-refresh', expiresIn: 900 }];
+  if (pathname === '/api/auth/logout') return [200, {}];
+  const detail = pathname.match(/^\/api\/admissions\/applicants\/(app-\d+)$/);
+  if (detail) { const a = applicants.find(x=>x.id===detail[1]); if (!a) return [404,{error:'No such applicant'}]; return [200, { applicant:a, documents: a.id==='app-1'?documents:documents.slice(0,2), test: a.status==='Draft'?null:{ score: a.id==='app-1'?84:67, passed: a.status!=='Rejected', status:'Submitted', completedAt:'2026-05-12T10:15:00Z' } }]; }
+  if (/^\/api\/admissions\/applicants\/app-\d+\/documents\/doc-\d+\/review$/.test(pathname)) return [200, {ok:true}];
+  if (/^\/api\/admissions\/applicants\/app-\d+\/status$/.test(pathname)) return [200, {ok:true}];
+  if (pathname === '/api/graduation/student-1') return [200, graduation()];
+  const clearance = pathname.match(/^\/api\/graduation\/student-1\/clearances\/(\w+)$/);
+  if (clearance) { if (state.role!=='Admin') return [403,{error:'forbidden'}]; state.clearances.add(clearance[1]); return [200, graduation()]; }
+  if (pathname === '/api/graduation/student-1/approve') { if (state.role!=='Admin') return [403,{error:'forbidden'}]; if (graduation().blockers.length) return [409,{error:'Outstanding requirements must be cleared before graduation can be approved.'}]; state.approved=true; return [200, graduation()]; }
+  if (pathname === '/api/student-lifecycle/alumni/me') return state.approved ? [200, { alumniId:'ALM-2030-00017', graduationYear:2030, userId:'student-1' }] : [404, {error:'not graduated'}];
+  return null;
+}
 const server=createServer((req,res)=>{
  const pathname=new URL(req.url,'http://127.0.0.1').pathname;
+ const dyn=dynamicRoute(req.method,pathname);
+ if(dyn){res.writeHead(dyn[0],{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(dyn[1]));return;}
  let value=fixtures[pathname];
  const step=pathname.match(/^\/api\/wizard\/step\/(\d+)\/save$/);
  if(step) value={nextStep:Math.min(Number(step[1])+1,7)};

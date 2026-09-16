@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════════════════
+   Gate pages — sign in, account activation. Two columns: the
+   institution's register (ink) and the form (stone).
+   ═══════════════════════════════════════════════════════════════ */
+
+.gate { display: grid; grid-template-columns: minmax(0, 52%) minmax(0, 1fr); min-height: 100vh; background: var(--stone); }
+.gate-register { position: relative; background: var(--rail-bg); color: var(--on-ink); padding: clamp(32px, 5vw, 64px); display: flex; flex-direction: column; gap: var(--s-8); overflow: hidden; }
+.gate-brand { display: flex; align-items: center; gap: var(--s-3); }
+.gate-brand img { width: 36px; height: 36px; }
+.gate-brand strong { font-family: var(--font-serif); font-weight: 400; font-size: var(--t-21); color: var(--on-ink); display: block; line-height: 1.1; }
+.gate-brand small { font-size: var(--t-12); color: var(--on-ink-2); display: block; }
+.gate-folio { margin-top: auto; display: grid; gap: var(--s-6); max-width: 520px; }
+.gate-folio-date { font-family: var(--font-mono); font-size: var(--t-13); color: var(--brass-bright); }
+.gate-folio h1 { font-size: clamp(2rem, 3.6vw, 3.1rem); color: var(--on-ink); max-width: 14ch; }
+.gate-folio p { color: var(--on-ink-2); font-size: var(--t-15); max-width: 44ch; }
+.gate-ledger { border-top: 1px solid var(--ink-rule); display: grid; }
+.gate-ledger > div { display: grid; grid-template-columns: minmax(120px, 36%) minmax(0, 1fr); gap: var(--s-3); align-items: baseline; padding: var(--s-3) 0; border-bottom: 1px solid var(--ink-rule); font-size: var(--t-13); }
+.gate-ledger strong { font-weight: 500; color: var(--on-ink); }
+.gate-ledger em { font-family: var(--font-serif); color: var(--on-ink-2); }
+.gate-foot { margin-top: auto; padding-top: var(--s-6); border-top: 1px solid var(--ink-rule); font-size: var(--t-12); color: var(--on-ink-2); display: flex; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; }
+.gate-foot strong { color: var(--on-ink); font-weight: 500; }
+.gate-form-panel { display: grid; place-items: center; padding: clamp(32px, 5vw, 64px) var(--s-6); }
+.gate-form { width: 100%; max-width: 400px; display: grid; gap: var(--s-6); }
+.gate-form-head { display: grid; gap: var(--s-1); padding-bottom: var(--s-3); border-bottom: 2px solid var(--brass); }
+.gate-form-head h1, .gate-form-head h2 { font-size: var(--t-26); }
+.gate-form-head p { color: var(--ink-2); font-size: var(--t-15); }
+.gate-form form { display: grid; gap: var(--s-4); }
+.gate-form .field input { min-height: 44px; font-size: var(--t-15); }
+.password-field { position: relative; }
+.password-field input { padding-right: 44px; }
+.password-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; display: grid; place-items: center; color: var(--ink-2); border-radius: var(--r-control); }
+.password-toggle:hover { color: var(--ink); }
+.gate-options { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-13); }
+.gate-options a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.gate-demo { display: grid; gap: var(--s-3); padding-top: var(--s-4); border-top: 1px solid var(--rule-strong); }
+.gate-demo-title { font-size: var(--t-13); color: var(--ink-2); display: flex; gap: var(--s-2); align-items: baseline; }
+.gate-demo-title strong { color: var(--ink); font-weight: 500; }
+.gate-demo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-2); }
+.gate-demo-card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-2); align-items: center; text-align: left; padding: var(--s-2) var(--s-3); border: 1px solid var(--rule-strong); border-radius: var(--r-control); background: var(--paper); min-height: 48px; }
+.gate-demo-card:hover { border-color: var(--ink); }
+.gate-demo-card i { font-style: normal; font-family: var(--font-serif); font-size: var(--t-17); color: var(--brass); width: 20px; text-align: center; }
+.gate-demo-card strong { display: block; font-size: var(--t-13); font-weight: 500; }
+.gate-demo-card small { display: block; font-size: var(--t-12); color: var(--ink-2); }
+.gate-form-foot { font-size: var(--t-12); color: var(--ink-2); display: flex; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .gate { grid-template-columns: 1fr; }
+  .gate-register { display: none; }
+  .gate-form-panel { padding: var(--s-8) var(--s-4); align-items: start; }
+}

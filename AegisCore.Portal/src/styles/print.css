@@ -1,0 +1,12 @@
+/* Screen-print fallback. Official documents are generated as designed PDFs
+   (src/lib/pdf); this only keeps a browser print of any screen legible. */
+@media print {
+  html, body { background: #fff; color: #000; }
+  .rail, .masthead, .rail-scrim, .skip-link, .demo-banner, .register-head-actions, .toolbar, .btn, .ledger-foot, .dialog-scrim, .wizard-rail, .wizard-footer { display: none !important; }
+  .shell { display: block; }
+  .page, .content-page, .finance-page { padding: 0; max-width: none; }
+  .panel, .ledger-wrap, .figures, .index, .card, .surface { border-top: 1px solid #000; border-bottom: 1px solid #999; break-inside: avoid; }
+  .register-head-rule { background: #000; }
+  a { text-decoration: none; }
+  .ledger th { position: static; }
+}

@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════
+   AegisCore "Register" — tokens
+   Six named colours; everything else is derived. See DESIGN.md.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Named colours ── */
+  --ink: #1B1A18;
+  --stone: #E7E7E2;
+  --paper: #F8F8F5;
+  --brass: #7D6122;
+  --brass-bright: #B4913F;
+  --oxblood: #6F2230;
+  --laurel: #2F5A3F;
+
+  /* ── Derived ── */
+  --ink-2: #5C5A55;            /* secondary text, 6.4:1 on paper */
+  --ink-3: #8A877F;            /* placeholder / disabled, decorative only */
+  --paper-2: #F1F1EC;          /* table header, hover row */
+  --rule: #D6D6CF;
+  --rule-strong: #B9B9B0;
+  --brass-tint: color-mix(in srgb, var(--brass) 10%, var(--paper));
+  --oxblood-tint: color-mix(in srgb, var(--oxblood) 9%, var(--paper));
+  --laurel-tint: color-mix(in srgb, var(--laurel) 10%, var(--paper));
+  --ink-tint: color-mix(in srgb, var(--ink) 6%, var(--paper));
+  --on-ink: #ECEAE3;
+  --on-ink-2: #A8A59B;
+  --ink-rule: #33312D;
+  --rail-bg: var(--ink);          /* navigation rail ground */
+  --btn-primary-bg: var(--ink);
+  --btn-primary-fg: var(--on-ink);
+
+  /* ── Type ── */
+  --font-serif: var(--font-caslon), "Libre Caslon Text", "Iowan Old Style", "Times New Roman", serif;
+  --font-sans: var(--font-plex), "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  /* rem so the shell's text-size control scales everything */
+  --t-12: .75rem; --t-13: .8125rem; --t-15: .9375rem; --t-17: 1.0625rem; --t-21: 1.3125rem; --t-26: 1.625rem; --t-33: 2.0625rem; --t-41: 2.5625rem;
+  --lh-body: 1.55; --lh-display: 1.12;
+
+  /* ── Space ── */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-6: 24px; --s-8: 32px; --s-12: 48px; --s-16: 64px;
+
+  /* ── Shape ── */
+  --r-control: 2px;
+  --r-panel: 0;
+
+  /* ── Layout ── */
+  --rail-w: 248px;
+  --rail-w-narrow: 60px;
+  --head-h: 56px;
+  --content-max: 1360px;
+
+  /* ── Motion ── */
+  --ease-stamp: cubic-bezier(.2, .9, .3, 1);
+  --ease-out: cubic-bezier(.16, 1, .32, 1);
+  --d-fast: 120ms; --d-std: 200ms; --d-stamp: 420ms;
+
+  /* ── Focus ── */
+  --focus: 0 0 0 2px var(--paper), 0 0 0 4px var(--brass);
+
+  /* ═══ Compatibility aliases ═══
+     Earlier iterations of the portal reference these names in inline styles and in
+     legacy class rules. They are mapped onto the register palette so that every
+     screen — including ones not yet rewritten — renders in the same system. */
+  --primary: var(--brass); --primary-soft: var(--brass-tint); --primary-dark: #66501B;
+  --success: var(--laurel); --success-soft: var(--laurel-tint);
+  --warning: var(--brass); --warning-soft: var(--brass-tint);
+  --danger: var(--oxblood); --danger-soft: var(--oxblood-tint);
+  --info: var(--ink-2); --info-soft: var(--ink-tint);
+  --neutral-50: var(--paper); --neutral-100: var(--paper-2); --neutral-200: var(--rule); --neutral-300: var(--rule-strong);
+  --neutral-400: var(--ink-3); --neutral-500: var(--ink-2); --neutral-600: var(--ink-2); --neutral-700: #3F3D38; --neutral-800: var(--ink-rule); --neutral-900: var(--ink);
+  --bg: var(--stone); --surface: var(--paper); --surface-muted: var(--paper-2); --canvas: var(--stone);
+  --muted: var(--ink-2); --subtle: var(--ink-2); --border: var(--rule); --border-strong: var(--rule-strong);
+  --line: var(--rule); --line-strong: var(--rule-strong);
+  --shadow-sm: none; --shadow-md: none; --shadow-lg: 0 16px 40px rgba(27, 26, 24, .18); --shadow: none; --shadow-primary: none;
+  --text-xs: var(--t-12); --text-sm: var(--t-13); --text-base: var(--t-15); --text-md: var(--t-15); --text-lg: var(--t-17);
+  --text-xl: var(--t-21); --text-2xl: var(--t-26); --text-3xl: var(--t-33); --text-4xl: var(--t-41); --text-hero: var(--t-41);
+  --weight-body: 400; --weight-label: 500; --weight-sub: 600; --weight-head: 600;
+  --lh-head: var(--lh-display);
+  --radius-sm: var(--r-control); --radius-md: var(--r-control); --radius-lg: var(--r-panel); --radius-xl: var(--r-panel); --radius-full: 2px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px;
+  --space-10: 40px; --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
+  --ease-in-out: cubic-bezier(.4, 0, .2, 1); --duration-micro: var(--d-fast); --duration-std: var(--d-std); --duration-page: var(--d-std);
+  --sidebar-w: var(--rail-w); --sidebar-collapsed: var(--rail-w-narrow); --header-h: var(--head-h); --max-content: var(--content-max);
+  --domain-academic: var(--ink); --domain-finance: var(--laurel); --domain-operations: var(--brass); --domain-compliance: var(--oxblood); --domain-welfare: var(--ink-2);
+  --blue: var(--brass); --blue-100: var(--brass-tint); --blue-500: var(--brass); --blue-600: var(--brass); --blue-soft: var(--brass-tint);
+  --green: var(--laurel); --green-soft: var(--laurel-tint); --amber: var(--brass); --amber-soft: var(--brass-tint); --red: var(--oxblood); --red-soft: var(--oxblood-tint);
+}
+
+/* ── Dark scheme (explicit choice via the shell toggle) ── */
+html[data-theme="dark"] {
+  --ink: #ECEAE3;
+  --stone: #151412;
+  --paper: #1E1D1A;
+  --paper-2: #262521;
+  --brass: #C9A551;
+  --brass-bright: #D9B96A;
+  --oxblood: #D48A96;
+  --laurel: #8CC2A0;
+  --ink-2: #B3B0A6;
+  --ink-3: #7C7970;
+  --rule: #34322D;
+  --rule-strong: #4A4740;
+  --on-ink: #ECEAE3;
+  --on-ink-2: #A8A59B;
+  --ink-rule: #34322D;
+  --rail-bg: #0F0E0D;
+  --btn-primary-bg: #ECEAE3;
+  --btn-primary-fg: #1B1A18;
+  --brass-tint: color-mix(in srgb, var(--brass) 14%, var(--paper));
+  --oxblood-tint: color-mix(in srgb, var(--oxblood) 14%, var(--paper));
+  --laurel-tint: color-mix(in srgb, var(--laurel) 14%, var(--paper));
+  --ink-tint: color-mix(in srgb, var(--ink) 8%, var(--paper));
+  --focus: 0 0 0 2px var(--paper), 0 0 0 4px var(--brass);
+  --neutral-700: #C4C1B8; --neutral-800: #34322D; --neutral-900: #0F0E0D;
+  --primary-dark: #E0BE66;
+  color-scheme: dark;
+}
+
+/* ── High contrast ── */
+html[data-high-contrast="true"] {
+  --ink: #000; --stone: #FFF; --paper: #FFF; --paper-2: #F2F2F2; --ink-2: #1A1A1A; --ink-3: #333;
+  --rule: #000; --rule-strong: #000; --brass: #5A4300; --oxblood: #7A0016; --laurel: #004D1F;
+  --brass-tint: #FFF3D6; --oxblood-tint: #FFE6EA; --laurel-tint: #E3F5EA; --ink-tint: #EEE;
+}
+html[data-high-contrast="true"][data-theme="dark"] {
+  --ink: #FFF; --stone: #000; --paper: #000; --paper-2: #111; --ink-2: #EEE; --ink-3: #CCC;
+  --rule: #FFF; --rule-strong: #FFF; --brass: #FFD866; --oxblood: #FF9DAB; --laurel: #9EE8B4;
+  --brass-tint: #2A2000; --oxblood-tint: #2A0009; --laurel-tint: #002A10; --ink-tint: #111;
+}
+
+/* ── Font scale (accessibility control in the shell) ── */
+html[data-font-scale="large"] { font-size: 1.12em; }
+html[data-font-scale="xlarge"] { font-size: 1.25em; }

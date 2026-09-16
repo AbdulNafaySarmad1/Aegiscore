@@ -2,14 +2,106 @@
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { CheckCircle, Download } from "lucide-react";
+import { CheckCircle, Send } from "lucide-react";
+import { RegisterHead, Panel, Figures, Mark, RuledLoading, ErrorNotice, Notice, useAnnounce } from "@/components/register";
+import { TranscriptDownload } from "@/components/documents/TranscriptDownload";
 
-type Overview = { student:{id:string;name:string;rollNumber:string}; academics:{program:string;cgpa:number;earnedCredits:number;requiredCredits:number;courses:{code:string;title:string;credits:number;grade:string|null;status:string}[]} };
-export default function TranscriptPage(){
-  const [data,setData]=useState<Overview|null>(null); const [requested,setRequested]=useState(false); const [error,setError]=useState("");
-  useEffect(()=>{apiGet<Overview>("/api/student/overview").then(setData).catch(e=>setError(e.message));},[]);
-  async function request(){if(!data)return; try{await apiPost(`/api/examination/transcripts/${data.student.id}/request`,{requestedBy:data.student.id,reason:"Official student copy"});setRequested(true);}catch(e){setError(e instanceof Error?e.message:"Request failed");}}
-  return <AppShell><div className="content-page"><div className="page-header"><div><div className="page-header-breadcrumb"><span>Student</span><span>/</span><span>Transcript</span></div><h1>Academic transcript</h1><p>{data?`${data.student.name} · ${data.student.rollNumber} · ${data.academics.program}`:"Loading verified records…"}</p></div><button className="btn btn-primary" disabled={!data||requested} onClick={request}>{requested?<><CheckCircle size={16}/>Requested</>:<><Download size={16}/>Request official copy</>}</button></div>
-    {error&&<div role="alert" className="error-state">{error}</div>}{data&&<><div className="kpi-grid" style={{marginBottom:18}}><article className="kpi-card"><span className="kpi-label">CGPA</span><strong className="kpi-number">{data.academics.cgpa.toFixed(2)}</strong></article><article className="kpi-card"><span className="kpi-label">Earned credits</span><strong className="kpi-number">{data.academics.earnedCredits}</strong></article><article className="kpi-card"><span className="kpi-label">Program requirement</span><strong className="kpi-number">{data.academics.requiredCredits}</strong></article><article className="kpi-card"><span className="kpi-label">Completed courses</span><strong className="kpi-number">{data.academics.courses.filter(c=>c.grade).length}</strong></article></div><div className="card" style={{overflow:"hidden"}}><table className="data-table"><thead><tr><th>Code</th><th>Course</th><th>Credits</th><th>Grade</th><th>Status</th></tr></thead><tbody>{data.academics.courses.map(c=><tr key={c.code}><td>{c.code}</td><td>{c.title}</td><td>{c.credits}</td><td><span className={c.grade?"badge badge-success":"badge badge-neutral"}>{c.grade??"—"}</span></td><td>{c.status}</td></tr>)}</tbody></table></div></>}
-  </div></AppShell>;
+type Course = { code: string; title: string; credits: number; grade: string | null; status: string };
+type Overview = { student: { id: string; name: string; rollNumber: string; universityId?: string }; academics: { program: string; cgpa: number; earnedCredits: number; requiredCredits: number; courses: Course[] } };
+
+const gradeTone = (grade: string | null) => grade == null ? "ink" : /^F/i.test(grade) ? "oxblood" : "laurel";
+
+export default function TranscriptPage() {
+  const [data, setData] = useState<Overview | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [requestState, setRequestState] = useState<"idle" | "sending" | "requested">("idle");
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const { announce, region } = useAnnounce();
+
+  useEffect(() => {
+    const abort = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset on retry.
+    setError(null);
+    apiGet<Overview>("/api/student/overview", abort.signal).then(setData).catch(e => { if (!abort.signal.aborted) setError(e instanceof Error ? e.message : "Your record could not be loaded."); });
+    return () => abort.abort();
+  }, [retry]);
+
+  async function requestOfficial() {
+    if (!data) return;
+    setRequestState("sending"); setRequestError(null);
+    try {
+      await apiPost(`/api/examination/transcripts/${data.student.id}/request`, { requestedBy: data.student.id, reason: "Official student copy" });
+      setRequestState("requested");
+      announce("Official copy requested from the Examinations office.");
+    } catch (e) {
+      setRequestState("idle");
+      setRequestError(e instanceof Error ? e.message : "The request could not be sent.");
+    }
+  }
+
+  const completed = data?.academics.courses.filter(c => c.grade).length ?? 0;
+
+  return (
+    <AppShell>
+      <div className="page">
+        {region}
+        {error ? (
+          <>
+            <RegisterHead title="Academic transcript" crumbs={[{ label: "Student" }, { label: "Transcript" }]} reveal={false} />
+            <ErrorNotice message={error} hint="Check your connection and try again." onRetry={() => setRetry(n => n + 1)} />
+          </>
+        ) : !data ? (
+          <RuledLoading label="Loading your verified record" rows={8} />
+        ) : (
+          <>
+            <RegisterHead
+              title="Academic transcript"
+              crumbs={[{ label: "Student" }, { label: "Transcript" }]}
+              ident={<><strong>{data.student.rollNumber}</strong><br />{data.student.name}</>}
+              meta={<span>{data.academics.program}</span>}
+              actions={<>
+                <button type="button" className={`btn btn-secondary${requestState === "sending" ? " btn-loading" : ""}`} disabled={requestState !== "idle"} onClick={requestOfficial}>
+                  {requestState === "requested" ? <><CheckCircle aria-hidden="true" />Official copy requested</> : <><Send aria-hidden="true" />Request official copy</>}
+                </button>
+                <TranscriptDownload fileName={`transcript-${data.student.rollNumber}.pdf`} data={() => ({
+                  student: { name: data.student.name, rollNumber: data.student.rollNumber, universityId: data.student.universityId, program: data.academics.program },
+                  academics: data.academics,
+                })} />
+              </>}
+            />
+
+            {requestError && <ErrorNotice message={requestError} hint="Nothing was sent. Try again, or contact the Examinations office directly." />}
+            {requestState === "requested" && <Notice tone="laurel" title="Official copy requested.">The Examinations office will issue a sealed transcript and notify you at your institutional email.</Notice>}
+
+            <Figures aria-label="Academic summary" items={[
+              { label: "CGPA", value: data.academics.cgpa.toFixed(2), note: "on a 4.00 scale" },
+              { label: "Credits earned", value: data.academics.earnedCredits, note: `of ${data.academics.requiredCredits} required` },
+              { label: "Courses completed", value: completed, note: `of ${data.academics.courses.length} on record` },
+              { label: "In progress", value: data.academics.courses.length - completed },
+            ]} />
+
+            <Panel title="Record of courses" aside={<span>Grades on the university&rsquo;s approved scale</span>} flush>
+              <div className="ledger-wrap">
+                <table className="ledger" aria-label="Courses and grades">
+                  <thead><tr><th scope="col">Code</th><th scope="col">Course</th><th scope="col" className="num">Credits</th><th scope="col" className="num">Grade</th><th scope="col">Status</th></tr></thead>
+                  <tbody>
+                    {data.academics.courses.map(c => (
+                      <tr key={c.code} data-status={gradeTone(c.grade)}>
+                        <td className="mono">{c.code}</td>
+                        <td>{c.title}</td>
+                        <td className="num mono">{c.credits}</td>
+                        <td className="num mono">{c.grade ?? <span className="text-muted">—</span>}</td>
+                        <td><Mark tone={c.grade ? gradeTone(c.grade) : "ink"}>{c.status}</Mark></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Panel>
+          </>
+        )}
+      </div>
+    </AppShell>
+  );
 }

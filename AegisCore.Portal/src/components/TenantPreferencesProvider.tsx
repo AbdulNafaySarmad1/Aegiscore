@@ -46,5 +46,9 @@ export function useTenantFormatter() {
       new Intl.NumberFormat(preferences.locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(value),
     date: (value: string | number | Date) =>
       new Intl.DateTimeFormat(preferences.locale, { dateStyle: "medium" }).format(new Date(value)),
+    dateTime: (value: string | number | Date) =>
+      new Intl.DateTimeFormat(preferences.locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)),
+    longDate: (value: string | number | Date) =>
+      new Intl.DateTimeFormat(preferences.locale, { dateStyle: "long" }).format(new Date(value)),
   };
 }

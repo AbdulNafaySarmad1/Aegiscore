@@ -8,6 +8,7 @@ type FocusTrapDialogProps = {
   labelledBy?: string;
   onClose: () => void;
   className?: string;
+  tone?: string;
 };
 
 const focusableSelector = [
@@ -24,7 +25,8 @@ export function FocusTrapDialog({
   label,
   labelledBy,
   onClose,
-  className = "wizard-modal"
+  className = "wizard-modal",
+  tone
 }: FocusTrapDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +73,7 @@ export function FocusTrapDialog({
     <div
       ref={dialogRef}
       className={className}
+      data-tone={tone}
       role="dialog"
       aria-modal="true"
       aria-label={label}
