@@ -78,7 +78,7 @@ public static class ExtendedPlatformServiceExtensions
         services.TryAddScoped<IPrerequisiteConflictService, PrerequisiteConflictService>();
         services.TryAddScoped<IDefaulterPredictionService, DefaulterPredictionService>();
         services.TryAddScoped<IVisitingFacultyService, VisitingFacultyService>();
-        services.TryAddScoped<IReadinessMeterService, ReadinessMeterService>();
+        services.TryAddScoped<IReadinessMeterService, Governance.ReadinessMeterService>();
         services.TryAddScoped<IAchievementService, AchievementService>();
         services.TryAddScoped<IMentalHealthService, MentalHealthService>();
         services.TryAddScoped<IForeignStudentService, ForeignStudentService>();

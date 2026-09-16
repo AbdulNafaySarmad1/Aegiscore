@@ -5,33 +5,60 @@ using Microsoft.Extensions.Logging;
 
 namespace AegisCore.Infrastructure.Governance;
 
+/// <summary>
+/// Management-side view of accreditation readiness. Scoring uses the same rule as the P121
+/// readiness meter (<see cref="ReadinessScoring"/>); this service only reads and snapshots.
+/// </summary>
 public sealed class AccreditationService(AegisDbContext db, ILogger<AccreditationService> logger) : IAccreditationService
 {
     public async Task<FrameworkScoreDto> ComputeFrameworkScoreAsync(Guid frameworkId, CancellationToken ct = default)
     {
+        var now = DateTimeOffset.UtcNow;
         var framework = await db.Set<AccreditationFramework>().FindAsync([frameworkId], ct)
             ?? throw new InvalidOperationException("Framework not found.");
-        var criteria = await db.Set<ReadinessCriterion>()
-            .Where(c => c.FrameworkId == frameworkId).ToListAsync(ct);
+        var criteria = await db.Set<ReadinessCriterion>().Where(c => c.FrameworkId == frameworkId).ToListAsync(ct);
+        var criterionIds = criteria.Select(c => c.Id).ToArray();
+        var evidence = (await db.Set<CriterionEvidence>().Where(e => criterionIds.Contains(e.CriterionId)).ToListAsync(ct)).ToLookup(e => e.CriterionId);
+
         foreach (var criterion in criteria)
         {
-            var evidence = await db.Set<CriterionEvidence>()
-                .Where(e => e.CriterionId == criterion.Id && !e.IsStale).AnyAsync(ct);
-            criterion.ComplianceStatus = evidence ? "fully_met" : "not_met";
-            criterion.Score = evidence ? 1.0m : 0.0m;
+            var result = ReadinessScoring.Evaluate(evidence[criterion.Id].ToList(), now);
+            criterion.ComplianceStatus = result.Status;
+            criterion.Score = result.Score;
         }
-        var totalWeight = criteria.Sum(c => c.Weight);
-        var weightedScore = totalWeight > 0 ? criteria.Sum(c => c.Score * c.Weight) / totalWeight : 0m;
-        framework.CurrentScore = Math.Round(weightedScore * 100, 2);
-        var snapshot = new AccreditationScoreSnapshot
+        var overall = ReadinessScoring.WeightedPercent(criteria.Select(c => (c.Score, c.Weight)));
+        var sections = criteria.GroupBy(c => c.SectionName ?? "General").Select(g => new SectionScoreDto(
+            g.Key,
+            ReadinessScoring.WeightedPercent(g.Select(c => (c.Score, c.Weight))) ?? 0m,
+            g.Sum(c => c.Weight),
+            g.Count(c => c.ComplianceStatus == ReadinessScoring.FullyMet),
+            g.Count())).ToList();
+
+        // DateTimeOffset comparisons are filtered in memory: the SQLite provider cannot translate them and a framework has few snapshots.
+        var weekAgo = now.AddDays(-7);
+        var lastWeek = (await db.Set<AccreditationScoreSnapshot>().AsNoTracking().Where(s => s.FrameworkId == frameworkId).ToListAsync(ct))
+            .Where(s => s.SnapshotDate <= weekAgo).OrderByDescending(s => s.SnapshotDate).Select(s => (decimal?)s.Score).FirstOrDefault();
+
+        if (overall is { } score)
         {
-            Id = Guid.NewGuid(), FrameworkId = frameworkId, Score = framework.CurrentScore,
-            Interpretation = InterpretScore(framework.CurrentScore), TenantId = framework.TenantId
-        };
-        db.Set<AccreditationScoreSnapshot>().Add(snapshot);
-        await db.SaveChangesAsync(ct);
-        var daysUntil = framework.NextAuditDate.HasValue ? (int)(framework.NextAuditDate.Value - DateTimeOffset.UtcNow).TotalDays : 365;
-        return new FrameworkScoreDto(frameworkId, framework.FrameworkCode, framework.FrameworkName, framework.CurrentScore, InterpretScore(framework.CurrentScore), framework.NextAuditDate, daysUntil, 0m, []);
+            framework.CurrentScore = score;
+            db.Set<AccreditationScoreSnapshot>().Add(new AccreditationScoreSnapshot
+            {
+                Id = Guid.NewGuid(), FrameworkId = frameworkId, Score = score,
+                Interpretation = ReadinessScoring.Interpretation(score), SnapshotDate = now, CreatedAt = now, TenantId = framework.TenantId
+            });
+            await db.SaveChangesAsync(ct);
+        }
+        else
+        {
+            logger.LogInformation("Framework {FrameworkCode} has no criteria; no score recorded.", framework.FrameworkCode);
+        }
+
+        var daysUntil = framework.NextAuditDate.HasValue ? (int)Math.Ceiling((framework.NextAuditDate.Value - now).TotalDays) : 0;
+        var current = overall ?? framework.CurrentScore;
+        return new FrameworkScoreDto(frameworkId, framework.FrameworkCode, framework.FrameworkName, current,
+            overall is null ? "not_assessed" : ReadinessScoring.Interpretation(current), framework.NextAuditDate, daysUntil,
+            lastWeek is { } previous ? current - previous : 0m, sections);
     }
 
     public async Task<IReadOnlyList<FrameworkScoreDto>> GetAllFrameworkScoresAsync(Guid tenantId, CancellationToken ct = default)
@@ -42,22 +69,24 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
         return results;
     }
 
+    /// <summary>Read-only: derives the gap list from criterion status without writing analysis rows on every call.</summary>
     public async Task<GapAnalysisDto> GetGapAnalysisAsync(Guid frameworkId, CancellationToken ct = default)
     {
-        var criteria = await db.Set<ReadinessCriterion>().Where(c => c.FrameworkId == frameworkId && c.ComplianceStatus != "fully_met").ToListAsync(ct);
-        var gaps = criteria.Select(c =>
-        {
-            var gap = new GapItemDto(c.Id, c.CriterionCode, $"Evidence missing or insufficient for {c.CriterionCode}", "Upload supporting documents", null, "medium_term", c.Weight * 5m, criteria.IndexOf(c) + 1);
-            var item = new GapAnalysisItem
+        var criteria = await db.Set<ReadinessCriterion>().AsNoTracking().Where(c => c.FrameworkId == frameworkId).ToListAsync(ct);
+        var totalWeight = criteria.Sum(c => c.Weight);
+        var gaps = criteria.Where(c => c.ComplianceStatus != ReadinessScoring.FullyMet)
+            .Select(c => new
             {
-                Id = Guid.NewGuid(), CriterionId = c.Id, GapDescription = gap.GapDescription,
-                EvidenceNeeded = gap.EvidenceNeeded, EstimatedEffort = gap.EstimatedEffort,
-                ImpactOnScore = gap.ImpactOnScore, PriorityRank = gap.PriorityRank
-            };
-            db.Set<GapAnalysisItem>().Add(item);
-            return gap;
-        }).ToList();
-        await db.SaveChangesAsync(ct);
+                Criterion = c,
+                Impact = totalWeight > 0 ? Math.Round((1m - c.Score) * c.Weight / totalWeight * 100m, 2) : 0m,
+            })
+            .OrderByDescending(g => g.Impact).ThenBy(g => g.Criterion.CriterionCode)
+            .Select((g, index) => new GapItemDto(g.Criterion.Id, g.Criterion.CriterionCode,
+                g.Criterion.ComplianceStatus == ReadinessScoring.PartiallyMet ? $"All evidence for {g.Criterion.CriterionCode} is stale or expired" : $"No evidence recorded for {g.Criterion.CriterionCode}",
+                g.Criterion.EvidenceSource ?? "Supporting evidence", null,
+                g.Criterion.ComplianceStatus == ReadinessScoring.PartiallyMet ? "quick_win" : g.Criterion.Weight >= 2m ? "medium_term" : "short_term",
+                g.Impact, index + 1))
+            .ToList();
         return new GapAnalysisDto(frameworkId, gaps, gaps.Sum(g => g.ImpactOnScore));
     }
 
@@ -70,18 +99,30 @@ public sealed class AccreditationService(AegisDbContext db, ILogger<Accreditatio
     public async Task<PredictiveReadinessDto> GetPredictiveReadinessAsync(Guid frameworkId, CancellationToken ct = default)
     {
         var score = await ComputeFrameworkScoreAsync(frameworkId, ct);
-        var b = Math.Min(100m, score.OverallScore + 5m);
-        var w = Math.Max(0m, score.OverallScore - 3m);
-        return new PredictiveReadinessDto(frameworkId, score.OverallScore, b, w, ["Complete missing evidence uploads"], score.OverallScore >= 75m);
+        var gaps = await GetGapAnalysisAsync(frameworkId, ct);
+        // Best case: every open gap closed. Worst case: every currently-met criterion whose evidence expires within 90 days lapses to partial credit.
+        var now = DateTimeOffset.UtcNow;
+        var horizon = now.AddDays(90);
+        var criteria = await db.Set<ReadinessCriterion>().AsNoTracking().Where(c => c.FrameworkId == frameworkId).ToListAsync(ct);
+        var criterionIds = criteria.Select(c => c.Id).ToArray();
+        var expiringSoon = (await db.Set<CriterionEvidence>().AsNoTracking().Where(e => criterionIds.Contains(e.CriterionId) && e.ExpiryDate != null).ToListAsync(ct))
+            .Where(e => e.ExpiryDate <= horizon).Select(e => e.CriterionId).Distinct().ToList();
+        var totalWeight = criteria.Sum(c => c.Weight);
+        var atRisk = totalWeight > 0 ? criteria.Where(c => c.ComplianceStatus == ReadinessScoring.FullyMet && expiringSoon.Contains(c.Id)).Sum(c => c.Weight * (1m - ReadinessScoring.PartialCredit)) / totalWeight * 100m : 0m;
+        var best = Math.Min(100m, score.OverallScore + gaps.PotentialScoreImprovement);
+        var worst = Math.Max(0m, score.OverallScore - Math.Round(atRisk, 2));
+        return new PredictiveReadinessDto(frameworkId, score.OverallScore, best, worst,
+            gaps.Gaps.Take(5).Select(g => g.CriterionCode).ToList(), score.OverallScore >= 75m);
     }
 
     public async Task<IReadOnlyList<StaleEvidenceDto>> CheckEvidenceStalenessAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var stale = await db.Set<CriterionEvidence>().Where(e => e.ExpiryDate.HasValue && e.ExpiryDate.Value < DateTimeOffset.UtcNow && !e.IsStale).ToListAsync(ct);
+        var now = DateTimeOffset.UtcNow;
+        var stale = (await db.Set<CriterionEvidence>().Where(e => e.ExpiryDate.HasValue && !e.IsStale).ToListAsync(ct)).Where(e => e.ExpiryDate!.Value < now).ToList();
         foreach (var s in stale) s.IsStale = true;
         await db.SaveChangesAsync(ct);
-        return stale.Select(s => new StaleEvidenceDto(s.Id, s.EvidenceTitle, s.CriterionId, string.Empty, (int)((DateTimeOffset.UtcNow - (s.EvidenceDate)).TotalDays), s.EvidenceDate, null)).ToList();
+        var staleCriteria = stale.Select(s => s.CriterionId).Distinct().ToArray();
+        var codes = await db.Set<ReadinessCriterion>().AsNoTracking().Where(c => staleCriteria.Contains(c.Id)).ToDictionaryAsync(c => c.Id, c => c.CriterionCode, ct);
+        return stale.Select(s => new StaleEvidenceDto(s.Id, s.EvidenceTitle, s.CriterionId, codes.GetValueOrDefault(s.CriterionId, string.Empty), (int)(now - s.EvidenceDate).TotalDays, s.EvidenceDate, null)).ToList();
     }
-
-    private static string InterpretScore(decimal score) => score switch { >= 90 => "excellent", >= 75 => "good", >= 60 => "satisfactory", >= 45 => "needs_improvement", _ => "critical_risk" };
 }

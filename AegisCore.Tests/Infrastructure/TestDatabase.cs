@@ -1,0 +1,109 @@
+using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Database;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
+
+namespace AegisCore.Tests.Infrastructure;
+
+/// <summary>
+/// A throwaway database for a test: SQLite in memory by default, or a freshly created PostgreSQL
+/// database on the pilot server when <c>PILOT_POSTGRES_CONNECTION</c> is set. Tests that build
+/// on this can run under both providers, which is the only way to catch a query that SQLite
+/// translates and PostgreSQL rejects.
+/// </summary>
+public sealed class TestDatabase : IAsyncDisposable
+{
+    public const string PostgresVariable = "PILOT_POSTGRES_CONNECTION";
+    public static bool PostgresConfigured => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(PostgresVariable));
+
+    private readonly SqliteConnection? _sqlite;
+    private readonly string? _postgresConnection;
+    private readonly string? _postgresDatabase;
+    private readonly string? _postgresMaintenance;
+
+    public IDbDialectAdapter Adapter { get; }
+    public string Provider { get; }
+
+    private TestDatabase(SqliteConnection sqlite)
+    {
+        _sqlite = sqlite;
+        // No SQLite adapter exists; existing SQLite tests run the model under the Postgres adapter too.
+        Adapter = new PostgresDialectAdapter();
+        Provider = "sqlite";
+    }
+
+    private TestDatabase(string connection, string database, string maintenance)
+    {
+        _postgresConnection = connection;
+        _postgresDatabase = database;
+        _postgresMaintenance = maintenance;
+        Adapter = new PostgresDialectAdapter();
+        Provider = "postgres";
+    }
+
+    public static async Task<TestDatabase> CreateAsync(bool postgres)
+    {
+        if (!postgres)
+        {
+            var sqlite = new SqliteConnection("DataSource=:memory:");
+            await sqlite.OpenAsync();
+            return new TestDatabase(sqlite);
+        }
+
+        var maintenance = Environment.GetEnvironmentVariable(PostgresVariable)
+            ?? throw new InvalidOperationException($"{PostgresVariable} is not set.");
+        var database = $"aegiscore_test_{Guid.NewGuid():N}"[..40];
+        await using (var admin = new NpgsqlConnection(maintenance))
+        {
+            await admin.OpenAsync();
+            await using var create = new NpgsqlCommand($"CREATE DATABASE \"{database}\"", admin);
+            await create.ExecuteNonQueryAsync();
+        }
+        var builder = new NpgsqlConnectionStringBuilder(maintenance) { Database = database, Pooling = false };
+        return new TestDatabase(builder.ConnectionString, database, maintenance);
+    }
+
+    public void Configure(DbContextOptionsBuilder options)
+    {
+        if (_sqlite is not null) options.UseSqlite(_sqlite);
+        else Adapter.ConfigureOptions(options, _postgresConnection!);
+    }
+
+    /// <summary>A context bound to <paramref name="tenantId"/> so the global tenant filter applies as it does in production.</summary>
+    public AegisDbContext CreateContext(Guid tenantId)
+    {
+        var http = new DefaultHttpContext();
+        http.Items["TenantId"] = tenantId;
+        var options = new DbContextOptionsBuilder<AegisDbContext>();
+        Configure(options);
+        return new AegisDbContext(options.Options, new HttpContextAccessor { HttpContext = http }, Adapter);
+    }
+
+    public async Task EnsureSchemaAsync(Guid tenantId)
+    {
+        await using var db = CreateContext(tenantId);
+        await db.Database.EnsureCreatedAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_sqlite is not null) { await _sqlite.DisposeAsync(); return; }
+        NpgsqlConnection.ClearAllPools();
+        await using var admin = new NpgsqlConnection(_postgresMaintenance);
+        await admin.OpenAsync();
+        await using var drop = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{_postgresDatabase}\" WITH (FORCE)", admin);
+        await drop.ExecuteNonQueryAsync();
+    }
+}
+
+/// <summary>Runs the test on SQLite always, and additionally on PostgreSQL when the pilot server is configured.</summary>
+public sealed class DatabaseProvidersAttribute : Xunit.Sdk.DataAttribute
+{
+    public override IEnumerable<object[]> GetData(System.Reflection.MethodInfo testMethod)
+    {
+        yield return new object[] { false };
+        if (TestDatabase.PostgresConfigured) yield return new object[] { true };
+    }
+}

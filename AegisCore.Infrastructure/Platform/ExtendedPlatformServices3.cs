@@ -48,18 +48,7 @@ public class VisitingFacultyService : IVisitingFacultyService
     public async Task RateFacultyPerformanceAsync(Guid contractId, double rating, string details, CancellationToken ct) { var c = await _cRepo.GetByIdAsync(contractId, ct) ?? throw new InvalidOperationException("Contract not found."); c.PerformanceRating = rating; c.PerformanceDetailsJson = details; c.RehireStatus = rating >= 4.0 ? FacultyRehireStatus.Recommended : rating >= 2.5 ? FacultyRehireStatus.Conditional : FacultyRehireStatus.NotRecommended; await _cRepo.UpdateAsync(c, ct); }
 }
 
-// P121 Accreditation Readiness Score
-public class ReadinessMeterService : IReadinessMeterService
-{
-    private readonly IRepository<ReadinessScore> _sRepo; private readonly IRepository<ReadinessGap> _gRepo; private readonly IRepository<ReadinessAlert> _aRepo; private readonly IRepository<EvidenceFreshnessLog> _eRepo;
-    public ReadinessMeterService(IRepository<ReadinessScore> s, IRepository<ReadinessGap> g, IRepository<ReadinessAlert> a, IRepository<EvidenceFreshnessLog> e) { _sRepo = s; _gRepo = g; _aRepo = a; _eRepo = e; }
-    public async Task<ReadinessScore> ComputeScoreAsync(Guid frameworkId, CancellationToken ct) { var score = new ReadinessScore { Id = Guid.NewGuid(), FrameworkId = frameworkId, FrameworkName = "HEC General", OverallScore = 78.5, Status = ReadinessStatus.Good, NextAuditDate = DateTime.UtcNow.AddMonths(6), DaysUntilAudit = 180, ComplianceVelocity = 2.3 }; await _sRepo.AddAsync(score, ct); return score; }
-    public async Task<List<ReadinessGap>> GetGapsAsync(Guid scoreId, CancellationToken ct) { var gaps = new List<ReadinessGap> { new ReadinessGap { Id = Guid.NewGuid(), ScoreId = scoreId, CriterionId = "CRIT-001", GapDescription = "Faculty CVs need updating", Effort = GapEffort.QuickWin, ImpactOnScore = 2.5, PriorityRank = 1 } }; foreach (var g in gaps) await _gRepo.AddAsync(g, ct); return gaps; }
-    public async Task<List<ReadinessAlert>> GetAlertsAsync(Guid scoreId, CancellationToken ct) { var all = await _aRepo.FindAsync(a => a.ScoreId == scoreId, ct); return all.ToList(); }
-    public async Task<ReadinessGap> CloseGapAsync(Guid gapId, CancellationToken ct) { var g = await _gRepo.GetByIdAsync(gapId, ct) ?? throw new InvalidOperationException("Gap not found."); g.IsClosed = true; g.ClosedAt = DateTime.UtcNow; await _gRepo.UpdateAsync(g, ct); return g; }
-    public async Task<ReadinessScore> PredictReadinessAsync(Guid frameworkId, DateTime targetDate, CancellationToken ct) { var score = new ReadinessScore { Id = Guid.NewGuid(), FrameworkId = frameworkId, FrameworkName = "HEC General", OverallScore = 85.0, Status = ReadinessStatus.Good, DaysUntilAudit = (int)(targetDate - DateTime.UtcNow).TotalDays, ComplianceVelocity = 1.8 }; await _sRepo.AddAsync(score, ct); return score; }
-    public async Task CheckEvidenceFreshnessAsync(CancellationToken ct) { var log = new EvidenceFreshnessLog { Id = Guid.NewGuid(), EvidenceId = Guid.NewGuid(), Status = EvidenceFreshness.Current, DaysSinceUpdate = 30 }; await _eRepo.AddAsync(log, ct); }
-}
+// P121 Accreditation Readiness Score: see Governance/ReadinessMeterService.cs.
 
 // P122 Student Achievement Gamification
 public class AchievementService : IAchievementService
