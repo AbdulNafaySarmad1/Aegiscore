@@ -20,6 +20,9 @@ name: aegiscore-client
 #   (pre-populate the university_config volume or `docker cp` it in before first start).
 #   Production refuses to start without it: the Data Protection key ring is encrypted with it.
 # AEGISCORE_SEAL_URL=<optional https URL of the institution seal printed on the portal and documents>
+# PQC_MLKEM_PUBLIC_KEY / PQC_MLKEM_PRIVATE_KEY / PQC_MLDSA_PUBLIC_KEY / PQC_MLDSA_PRIVATE_KEY=<post-quantum key pairs; scripts/bootstrap-env.sh generates them>
+# SESSION_LIFETIME=900  # seconds; optional
+# CF_TURNSTILE_SITE_KEY / CF_TURNSTILE_SECRET_KEY=<only when the ingress fronts Cloudflare Turnstile; optional>
 # AEGISCORE_PORT=8080  # bind behind university TLS ingress
 # AI_PROVIDER=ollama
 # AI_ENDPOINT=http://<university-ai-host>:11434/
@@ -53,6 +56,16 @@ x-application: &application
     APP_URL: ${APP_URL:?Required}
     APP_SECRET: ${APP_SECRET:?Required}
     AEGISCORE_SETUP_TOKEN: ${AEGISCORE_SETUP_TOKEN:?Required}
+    # Startup readiness contract (AegisCore.Infrastructure/Deployment/EnvironmentValidator.cs):
+    # the installed runtime refuses to start when any of these is missing.
+    APP_ENV: Production
+    SESSION_LIFETIME: ${SESSION_LIFETIME:-900}
+    PQC_MLKEM_PUBLIC_KEY: ${PQC_MLKEM_PUBLIC_KEY:?Required}
+    PQC_MLKEM_PRIVATE_KEY: ${PQC_MLKEM_PRIVATE_KEY:?Required}
+    PQC_MLDSA_PUBLIC_KEY: ${PQC_MLDSA_PUBLIC_KEY:?Required}
+    PQC_MLDSA_PRIVATE_KEY: ${PQC_MLDSA_PRIVATE_KEY:?Required}
+    CF_TURNSTILE_SITE_KEY: ${CF_TURNSTILE_SITE_KEY:-}
+    CF_TURNSTILE_SECRET_KEY: ${CF_TURNSTILE_SECRET_KEY:-}
     AEGISCORE_SECRET_PROVIDER: FILE
     AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
     AEGISCORE_STORAGE_PROVIDER: local

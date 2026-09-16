@@ -34,15 +34,17 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
     public const string SsoNonLocalCondition = "SSO_PROVIDER != local";
     public const string SsoEntraCondition = "SSO_PROVIDER = entra";
     public const string AiRemoteCondition = "AI_PROVIDER != disabled";
+    /// <summary>DB_HOST..DB_PASS describe the database only when no explicit connection string (AEGISCORE_DB_CONNECTION) is given.</summary>
+    public const string NoExplicitConnectionCondition = "AEGISCORE_DB_CONNECTION unset";
 
     public static IReadOnlyList<EnvironmentVariableDefinition> Registry { get; } =
     [
         new("DB_DIALECT", "Database", EnvironmentValueType.String, false, AllowedValues: Values("postgres", "mysql", "mssql", "oracle")),
-        new("DB_HOST", "Database", EnvironmentValueType.String, true),
-        new("DB_PORT", "Database", EnvironmentValueType.Integer, true),
-        new("DB_NAME", "Database", EnvironmentValueType.String, true),
-        new("DB_USER", "Database", EnvironmentValueType.String, true),
-        new("DB_PASS", "Database", EnvironmentValueType.String, true),
+        new("DB_HOST", "Database", EnvironmentValueType.String, false, NoExplicitConnectionCondition),
+        new("DB_PORT", "Database", EnvironmentValueType.Integer, false, NoExplicitConnectionCondition),
+        new("DB_NAME", "Database", EnvironmentValueType.String, false, NoExplicitConnectionCondition),
+        new("DB_USER", "Database", EnvironmentValueType.String, false, NoExplicitConnectionCondition),
+        new("DB_PASS", "Database", EnvironmentValueType.String, false, NoExplicitConnectionCondition),
 
         new("SSO_PROVIDER", "Auth / SSO", EnvironmentValueType.String, false, AllowedValues: Values("okta", "entra", "google", "saml", "local")),
         new("SSO_CLIENT_ID", "Auth / SSO", EnvironmentValueType.String, false, SsoNonLocalCondition),
@@ -60,8 +62,10 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
         new("PQC_MLDSA_PUBLIC_KEY", "Security / PQC", EnvironmentValueType.String, true),
         new("PQC_MLDSA_PRIVATE_KEY", "Security / PQC", EnvironmentValueType.String, true),
 
-        new("CF_TURNSTILE_SITE_KEY", "Cloudflare", EnvironmentValueType.String, true),
-        new("CF_TURNSTILE_SECRET_KEY", "Cloudflare", EnvironmentValueType.String, true),
+        // Turnstile is verified only when a token and a secret are both present; an on-premises
+        // deployment behind the university ingress runs without Cloudflare.
+        new("CF_TURNSTILE_SITE_KEY", "Cloudflare", EnvironmentValueType.String, false),
+        new("CF_TURNSTILE_SECRET_KEY", "Cloudflare", EnvironmentValueType.String, false),
 
         new("APP_URL", "App", EnvironmentValueType.String, true),
         new("APP_ENV", "App", EnvironmentValueType.String, true, AllowedValues: Values("Production", "Staging", "Development")),
@@ -144,6 +148,8 @@ public sealed class EnvironmentValidator(IConfiguration configuration) : IEnviro
             SsoEntraCondition => string.Equals(ssoProvider, "entra", StringComparison.OrdinalIgnoreCase),
             AiRemoteCondition => !IsMissing(aiProvider)
                 && !string.Equals(aiProvider, "disabled", StringComparison.OrdinalIgnoreCase),
+            NoExplicitConnectionCondition => IsMissing(Value("AEGISCORE_DB_CONNECTION")) && IsMissing(Value("ConnectionStrings:Default"))
+                && IsMissing(Value("Database:ConnectionString")) && IsMissing(Value("POSTGRES_CONNECTION_STRING")),
             _ => false
         };
     }

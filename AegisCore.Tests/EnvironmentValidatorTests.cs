@@ -66,6 +66,22 @@ public sealed class EnvironmentValidatorTests
     }
 
     [Fact]
+    public void ExplicitConnectionString_Satisfies_The_Database_Variables()
+    {
+        // docker-compose.client.yml supplies AEGISCORE_DB_CONNECTION, which DbConnectionStringFactory
+        // prefers; the DB_HOST..DB_PASS quintet is only needed when it is absent.
+        var values = ValidLocalValues();
+        foreach (var name in new[] { "DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASS", "CF_TURNSTILE_SITE_KEY", "CF_TURNSTILE_SECRET_KEY" }) values.Remove(name);
+        values["AEGISCORE_DB_CONNECTION"] = "Host=db;Port=5432;Database=aegiscore;Username=app;Password=x";
+        Assert.True(new EnvironmentValidator(Configuration(values)).Validate().IsValid);
+
+        values.Remove("AEGISCORE_DB_CONNECTION");
+        var without = new EnvironmentValidator(Configuration(values)).Validate();
+        Assert.False(without.IsValid);
+        Assert.Equal(["DB_HOST", "DB_NAME", "DB_PASS", "DB_PORT", "DB_USER"], without.MissingConditional);
+    }
+
+    [Fact]
     public async Task ProductionReadiness_MissingRequiredVariable_BlocksStartup()
     {
         var configuration = Configuration(new Dictionary<string, string?>());
