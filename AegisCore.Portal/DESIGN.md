@@ -235,9 +235,13 @@ these filters." + "Clear filters".
 - **Legacy screens** (finance, examinations, wizard, apply, terminal, ~80 others) are restyled
   through `legacy.css`, not rewritten. They look like the same product but still carry their own
   inline layout and older copy; `nchart` axis labels clip at narrow widths as before.
-- **Role-based KPIs** on the home page were removed rather than restyled: `roles.ts` declares
-  `source` endpoints but nothing fetched them, so every card showed "--". Reinstate as a
-  `Figures` strip once each source's response shape is known.
+- **Home-page figures** now render only KPIs with a resolver in `src/lib/kpi-sources.ts`.
+  Wired: *Fee collection rate* (GET `/api/finance/v2/dashboard/executive`, `feeFunnel`); a 403 shows
+  "Not available to your role" — note the endpoint's `CanManageFinance` guard excludes VC.
+  Still need endpoints before they can appear (declared as `pending` in `roles.ts`): *Total enrolment*
+  (`GET /api/students/summary` counting by `EnrollmentStatus`), *Accreditation score*
+  (`GET /api/readiness/current`; the `/readiness` page's `GET /api/readiness/compute` also does not exist),
+  *Faculty to student ratio* (an active-faculty count; nothing reads the `Faculty` table).
 - **Masthead search** filters the rail in place; it does not yet search records.
 - **"Keep me signed in"** on the login form is not wired to the auth API (it was not before either).
 - **Dark scheme** was checked visually, not by axe; brass in dark mode is `#C9A551` (4.6:1 on `#1E1D1A`).

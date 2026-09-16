@@ -6,7 +6,8 @@ import Link from "next/link";
 import { getRoleProfile } from "@/lib/roles";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
-import { RegisterHead, RuledLoading, Mark } from "@/components/register";
+import { RegisterHead, RuledLoading, Mark, Figures, type Figure } from "@/components/register";
+import { hasKpiSource, readKpi, type KpiReading } from "@/lib/kpi-sources";
 import {
   BookOpenCheck, Briefcase, Building2, CalendarDays, ClipboardCheck, CreditCard,
   FileSearch, FileText, GraduationCap, Landmark, LayoutDashboard, Scale, ShieldCheck,
@@ -28,12 +29,23 @@ const DOMAIN_NAME: Record<string, string> = { academic: "Academic", finance: "Fi
 export default function DashboardPage() {
   const { date } = useTenantFormatter();
   const [session, setSession] = useState<Session | null>(null);
+  const [readings, setReadings] = useState<Record<string, KpiReading>>({});
 
   useEffect(() => {
     loadSession().then(setSession).catch(() => window.location.assign("/login"));
   }, []);
 
   const profile = useMemo(() => session ? getRoleProfile(session.roles) : null, [session]);
+  const sourced = useMemo(() => (profile?.kpis ?? []).filter(k => hasKpiSource(k.id)), [profile]);
+
+  useEffect(() => {
+    if (sourced.length === 0) return;
+    const abort = new AbortController();
+    for (const kpi of sourced) {
+      readKpi(kpi.id, abort.signal).then(reading => { if (!abort.signal.aborted) setReadings(r => ({ ...r, [kpi.id]: reading })); });
+    }
+    return () => abort.abort();
+  }, [sourced]);
   const grouped = useMemo(() => {
     const groups = new Map<string, DashboardModule[]>();
     for (const m of [...(profile?.dashboardModules ?? [])].sort((a, b) => a.priority - b.priority)) {
@@ -57,6 +69,15 @@ export default function DashboardPage() {
           ident={<><strong>{date(today)}</strong><br />{profile.displayName}</>}
           meta={<span>{profile.dashboardModules.length} modules available to your role.</span>}
         />
+
+        {sourced.length > 0 && (
+          <Figures aria-label="Figures" items={sourced.map<Figure>(kpi => {
+            const reading = readings[kpi.id];
+            if (!reading) return { label: kpi.label, value: "…", note: "reading" };
+            if (reading.state === "value") return { label: kpi.label, value: reading.value, note: reading.note, tone: reading.value === "—" ? undefined : "laurel" };
+            return { label: kpi.label, value: "—", note: reading.note, tone: reading.state === "forbidden" ? "brass" : undefined };
+          })} />
+        )}
 
         {profile.quickActions.length > 0 && (
           <section aria-labelledby="quick-actions-title" className="panel-stack">
