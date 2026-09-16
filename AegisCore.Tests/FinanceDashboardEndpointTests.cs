@@ -52,6 +52,34 @@ public sealed class FinanceDashboardEndpointTests
         Assert.DoesNotContain("Business", body, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task Vice_Chancellor_Can_Read_Executive_Dashboard()
+    {
+        await using var host = await DashboardHost.CreateAsync();
+        using var response = await host.SendAsync(HttpMethod.Get, "/api/finance/v2/dashboard/executive", host.TenantA, "VC");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("feeFunnel", await response.Content.ReadAsStringAsync(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Vice_Chancellor_Read_Access_Does_Not_Extend_To_Finance_Actions()
+    {
+        await using var host = await DashboardHost.CreateAsync();
+        // The executive view is read-only for the VC; the operations queue and every mutation stay behind CanManageFinance.
+        using var operations = await host.SendAsync(HttpMethod.Get, "/api/finance/v2/dashboard/operations", host.TenantA, "VC");
+        Assert.Equal(HttpStatusCode.Forbidden, operations.StatusCode);
+        using var mutation = await host.SendAsync(HttpMethod.Post, "/api/finance/v2/accounting/reporting-entities", host.TenantA, "VC", "{}");
+        Assert.Equal(HttpStatusCode.Forbidden, mutation.StatusCode);
+    }
+
+    [Fact]
+    public async Task Department_Manager_Cannot_Read_Executive_Dashboard()
+    {
+        await using var host = await DashboardHost.CreateAsync();
+        using var response = await host.SendAsync(HttpMethod.Get, "/api/finance/v2/dashboard/executive", host.TenantA, "HOD");
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     private sealed class DashboardHost(WebApplication app, SqliteConnection connection) : IAsyncDisposable
     {
         public Guid TenantA { get; } = Guid.NewGuid();
@@ -74,6 +102,7 @@ public sealed class FinanceDashboardEndpointTests
             builder.Services.AddSingleton(Mock.Of<ISecretService>());
             builder.Services.AddSingleton(Mock.Of<IPqcSignatureService>());
             builder.Services.AddSingleton(Mock.Of<IR2StorageService>());
+            builder.Services.AddSingleton(Mock.Of<AegisCore.Application.Finance.IFinanceRealtimePublisher>());
             var app = builder.Build();
             app.UseAuthentication();
             app.UseMiddleware<TenantContextMiddleware>();
@@ -91,6 +120,15 @@ public sealed class FinanceDashboardEndpointTests
             request.Headers.Add("X-Test-Tenant", tenantId.ToString("D"));
             request.Headers.Add("X-Test-Role", role);
             if (claimedDepartment.HasValue) request.Headers.Add("X-Test-Department", claimedDepartment.Value.ToString("D"));
+            return await app.GetTestClient().SendAsync(request);
+        }
+
+        public async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, Guid tenantId, string role, string? json = null)
+        {
+            using var request = new HttpRequestMessage(method, path);
+            request.Headers.Add("X-Test-Tenant", tenantId.ToString("D"));
+            request.Headers.Add("X-Test-Role", role);
+            if (json is not null) request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             return await app.GetTestClient().SendAsync(request);
         }
 

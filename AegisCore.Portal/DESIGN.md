@@ -235,13 +235,19 @@ these filters." + "Clear filters".
 - **Legacy screens** (finance, examinations, wizard, apply, terminal, ~80 others) are restyled
   through `legacy.css`, not rewritten. They look like the same product but still carry their own
   inline layout and older copy; `nchart` axis labels clip at narrow widths as before.
-- **Home-page figures** now render only KPIs with a resolver in `src/lib/kpi-sources.ts`.
-  Wired: *Fee collection rate* (GET `/api/finance/v2/dashboard/executive`, `feeFunnel`); a 403 shows
-  "Not available to your role" — note the endpoint's `CanManageFinance` guard excludes VC.
-  Still need endpoints before they can appear (declared as `pending` in `roles.ts`): *Total enrolment*
-  (`GET /api/students/summary` counting by `EnrollmentStatus`), *Accreditation score*
-  (`GET /api/readiness/current`; the `/readiness` page's `GET /api/readiness/compute` also does not exist),
-  *Faculty to student ratio* (an active-faculty count; nothing reads the `Faculty` table).
+- **Home-page figures** render only KPIs with a resolver in `src/lib/kpi-sources.ts`; a 403
+  shows "Not available to your role", a network failure "Not reachable right now", never a number.
+  All four Admin/VC figures are now wired: *Total enrolment* (`GET /api/students/summary`),
+  *Fee collection rate* (`GET /api/finance/v2/dashboard/executive`, read-only for VC via
+  `CanViewExecutiveFinance`), *Accreditation score* (`GET /api/readiness/current`) and
+  *Faculty to student ratio* (`GET /api/faculty/summary` + students summary; teaching ranks only).
+  Two data caveats for production: (1) `ReadinessMeterService.ComputeScoreAsync` is a stub that
+  never saves, so `/readiness/current` returns "not assessed" until a real scoring engine writes
+  `ReadinessScores` rows — and a row with no `CriterionScoresJson` is shown as "unevidenced", not
+  as a score; (2) the pilot's fees live in `StudentFeeDues`, while the executive dashboard reads
+  `FeeDemands`, so that tenant sees "no fee demands raised yet" until one ledger is chosen.
+- **`/readiness`** is rebuilt on the register vocabulary and reads `/api/readiness/current`
+  (its previous `GET /api/readiness/compute` and `POST check-evidence-freshness` never existed).
 - **Masthead search** filters the rail in place; it does not yet search records.
 - **"Keep me signed in"** on the login form is not wired to the auth API (it was not before either).
 - **Dark scheme** was checked visually, not by axe; brass in dark mode is `#C9A551` (4.6:1 on `#1E1D1A`).

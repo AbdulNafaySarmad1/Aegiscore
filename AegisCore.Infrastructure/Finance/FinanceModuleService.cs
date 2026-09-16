@@ -518,11 +518,12 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
             where line.TenantId == tenantId && entry.TenantId == tenantId && account.TenantId == tenantId &&
                   entry.IsPosted && !entry.IsSandbox && entry.EntryDate <= reportDate && account.AccountCode.StartsWith("10")
             group line by new { account.AccountCode, account.AccountName } into grouped
-            let balance = grouped.Sum(x => x.Debit - x.Credit)
             orderby grouped.Key.AccountCode
-            select new CashPositionLine(grouped.Key.AccountCode, grouped.Key.AccountName, balance)
+            // Aggregate inside the projection: a `let` over the group is not translatable to SQL.
+            select new { grouped.Key.AccountCode, grouped.Key.AccountName, Balance = grouped.Sum(x => x.Debit - x.Credit) }
         ).ToListAsync(ct);
-        return new CashPositionReport(reportDate, lines, lines.Sum(x => x.Balance));
+        var cashLines = lines.Select(x => new CashPositionLine(x.AccountCode, x.AccountName, x.Balance)).ToList();
+        return new CashPositionReport(reportDate, cashLines, cashLines.Sum(x => x.Balance));
     }
 
     public async Task<FinancialPositionReport> GetFinancialPositionAsync(Guid tenantId, DateTime asOf, CancellationToken ct)

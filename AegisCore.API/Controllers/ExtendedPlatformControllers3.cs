@@ -3,6 +3,7 @@ using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.API.Controllers;
 
@@ -13,7 +14,59 @@ namespace AegisCore.API.Controllers;
 [ApiController][Route("api/visiting-faculty")] [Authorize] public class VisitingFacultyController : ControllerBase { private IVisitingFacultyService _s; public VisitingFacultyController(IVisitingFacultyService s) => _s = s; [HttpPost] public async Task<IActionResult> Register([FromBody] VisitingFacultyProfile profile, CancellationToken ct) => Ok(await _s.RegisterFacultyAsync(profile, ct)); [HttpPost("match/{openSlotId:guid}")] public async Task<IActionResult> Match(Guid openSlotId, CancellationToken ct) { var m = await _s.MatchFacultyToSlotsAsync(openSlotId, ct); return Ok(new { total = m.Count, matches = m }); } [HttpPost("contracts")] public async Task<IActionResult> GenerateContract([FromQuery] Guid facultyProfileId, [FromQuery] Guid courseId, CancellationToken ct) => Ok(await _s.GenerateContractAsync(facultyProfileId, courseId, ct)); [HttpGet("eligible")] public async Task<IActionResult> Eligible(CancellationToken ct) { var f = await _s.GetEligibleFacultyAsync(ct); return Ok(new { total = f.Count, faculty = f }); } [HttpPost("contracts/{contractId:guid}/rate")] public async Task<IActionResult> Rate(Guid contractId, [FromQuery] double rating, [FromQuery] string details, CancellationToken ct) { await _s.RateFacultyPerformanceAsync(contractId, rating, details, ct); return Ok(new { message = "Performance rated." }); } }
 
 // P121 Accreditation Readiness Score
-[ApiController][Route("api/readiness")] [Authorize] public class ReadinessController : ControllerBase { private IReadinessMeterService _s; public ReadinessController(IReadinessMeterService s) => _s = s; [HttpPost("compute/{frameworkId:guid}")] public async Task<IActionResult> Compute(Guid frameworkId, CancellationToken ct) => Ok(await _s.ComputeScoreAsync(frameworkId, ct)); [HttpGet("{scoreId:guid}/gaps")] public async Task<IActionResult> GetGaps(Guid scoreId, CancellationToken ct) { var g = await _s.GetGapsAsync(scoreId, ct); return Ok(new { total = g.Count, gaps = g }); } [HttpGet("{scoreId:guid}/alerts")] public async Task<IActionResult> GetAlerts(Guid scoreId, CancellationToken ct) { var a = await _s.GetAlertsAsync(scoreId, ct); return Ok(new { total = a.Count, alerts = a }); } [HttpPost("gaps/{gapId:guid}/close")] public async Task<IActionResult> CloseGap(Guid gapId, CancellationToken ct) => Ok(await _s.CloseGapAsync(gapId, ct)); [HttpPost("predict/{frameworkId:guid}")] public async Task<IActionResult> Predict(Guid frameworkId, [FromQuery] DateTime targetDate, CancellationToken ct) => Ok(await _s.PredictReadinessAsync(frameworkId, targetDate, ct)); [HttpPost("check-freshness")] public async Task<IActionResult> CheckFreshness(CancellationToken ct) { await _s.CheckEvidenceFreshnessAsync(ct); return Ok(new { message = "Evidence freshness checked." }); } }
+[ApiController][Route("api/readiness")] [Authorize] public class ReadinessController : ControllerBase { private IReadinessMeterService _s; public ReadinessController(IReadinessMeterService s) => _s = s; [HttpPost("compute/{frameworkId:guid}")] public async Task<IActionResult> Compute(Guid frameworkId, CancellationToken ct) => Ok(await _s.ComputeScoreAsync(frameworkId, ct)); [HttpGet("{scoreId:guid}/gaps")] public async Task<IActionResult> GetGaps(Guid scoreId, CancellationToken ct) { var g = await _s.GetGapsAsync(scoreId, ct); return Ok(new { total = g.Count, gaps = g }); } [HttpGet("{scoreId:guid}/alerts")] public async Task<IActionResult> GetAlerts(Guid scoreId, CancellationToken ct) { var a = await _s.GetAlertsAsync(scoreId, ct); return Ok(new { total = a.Count, alerts = a }); } [HttpPost("gaps/{gapId:guid}/close")] public async Task<IActionResult> CloseGap(Guid gapId, CancellationToken ct) => Ok(await _s.CloseGapAsync(gapId, ct)); [HttpPost("predict/{frameworkId:guid}")] public async Task<IActionResult> Predict(Guid frameworkId, [FromQuery] DateTime targetDate, CancellationToken ct) => Ok(await _s.PredictReadinessAsync(frameworkId, targetDate, ct)); [HttpPost("check-freshness")] public async Task<IActionResult> CheckFreshness(CancellationToken ct) { await _s.CheckEvidenceFreshnessAsync(ct); return Ok(new { message = "Evidence freshness checked." }); }
+
+    /// <summary>
+    /// The latest persisted readiness score for each framework, with its open gaps and alerts.
+    /// Reads only; it never triggers a computation. Returns an empty <c>frameworks</c> list and a
+    /// null <c>overall</c> when no score has been recorded, so callers show "not computed" rather than a number.
+    /// </summary>
+    [HttpGet("current")]
+    public async Task<IActionResult> Current([FromServices] AegisCore.Infrastructure.AegisDbContext db, CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var frameworkIds = await db.ReadinessScores.AsNoTracking().Select(s => s.FrameworkId).Distinct().ToListAsync(ct);
+        var latest = new List<AegisCore.Domain.Entities.ReadinessScore>(frameworkIds.Count);
+        foreach (var frameworkId in frameworkIds)
+            latest.Add(await db.ReadinessScores.AsNoTracking().Where(s => s.FrameworkId == frameworkId)
+                .OrderByDescending(s => s.GeneratedAt).ThenByDescending(s => s.Id).FirstAsync(ct));
+        if (latest.Count == 0) return Ok(new { overall = (object?)null, frameworks = Array.Empty<object>(), asOf = now });
+
+        var scoreIds = latest.Select(s => s.Id).ToArray();
+        var gaps = await db.ReadinessGaps.AsNoTracking().Where(g => scoreIds.Contains(g.ScoreId) && !g.IsClosed)
+            .OrderBy(g => g.PriorityRank).ToListAsync(ct);
+        var alerts = await db.ReadinessAlerts.AsNoTracking().Where(a => scoreIds.Contains(a.ScoreId))
+            .OrderByDescending(a => a.TriggeredAt).ToListAsync(ct);
+
+        var frameworks = latest.OrderBy(s => s.FrameworkName).Select(s => new
+        {
+            scoreId = s.Id, s.FrameworkId, s.FrameworkName, s.OverallScore, status = s.Status.ToString(), s.GeneratedAt,
+            s.NextAuditDate,
+            daysUntilAudit = s.NextAuditDate is { } audit ? (int)Math.Ceiling((audit - now).TotalDays) : s.DaysUntilAudit,
+            s.ComplianceVelocity,
+            categoryScores = ParseJson(s.CategoryScoresJson),
+            criteria = ParseJson(s.CriterionScoresJson),
+            gaps = gaps.Where(g => g.ScoreId == s.Id).Select(g => new { g.Id, g.CriterionId, g.GapDescription, g.EvidenceNeeded, effort = g.Effort.ToString(), g.ImpactOnScore, g.PriorityRank, g.ResponsibleOwnerId }),
+            alerts = alerts.Where(a => a.ScoreId == s.Id).Select(a => new { a.Id, a.Title, a.Message, a.Category, a.IsAcknowledged, a.TriggeredAt })
+        }).ToList();
+
+        // Overall is the plain mean of the latest score per framework; a single-framework
+        // tenant sees its own score unchanged.
+        return Ok(new
+        {
+            overall = new { score = Math.Round(latest.Average(s => s.OverallScore), 1), frameworkCount = latest.Count, generatedAt = latest.Max(s => s.GeneratedAt) },
+            frameworks,
+            asOf = now
+        });
+    }
+
+    private static System.Text.Json.JsonElement? ParseJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try { return System.Text.Json.JsonDocument.Parse(json).RootElement.Clone(); }
+        catch (System.Text.Json.JsonException) { return null; }
+    }
+}
 
 // P122 Student Achievement Gamification
 [ApiController][Route("api/achievements")] [Authorize] public class AchievementsController : ControllerBase { private IAchievementService _s; public AchievementsController(IAchievementService s) => _s = s; [HttpPost("detect/{studentId:guid}")] public async Task<IActionResult> Detect(Guid studentId, CancellationToken ct) { var a = await _s.DetectAchievementsAsync(studentId, ct); return Ok(new { total = a.Count, achievements = a }); } [HttpPost("badges")] public async Task<IActionResult> IssueBadge([FromQuery] Guid studentId, [FromQuery] Guid badgeId, [FromQuery] string detail, CancellationToken ct) => Ok(await _s.IssueBadgeAsync(studentId, badgeId, detail, ct)); [HttpPost("deans-list")] public async Task<IActionResult> ProcessDeansList([FromQuery] string semester, CancellationToken ct) { var d = await _s.ProcessDeansListAsync(semester, ct); return Ok(new { total = d.Count, entries = d }); } [HttpPost("leaderboard")] public async Task<IActionResult> Leaderboard([FromQuery] string scope, [FromQuery] string scopeValue, [FromQuery] string semester, CancellationToken ct) { if (!Enum.TryParse<LeaderboardScope>(scope, true, out var s)) return BadRequest(); var l = await _s.GenerateLeaderboardAsync(s, scopeValue, semester, ct); return Ok(new { total = l.Count, entries = l }); } [HttpPost("roadmap/{studentId:guid}")] public async Task<IActionResult> Roadmap(Guid studentId, CancellationToken ct) => Ok(await _s.GenerateRoadmapAsync(studentId, ct)); [HttpGet("catalog")] public async Task<IActionResult> Catalog(CancellationToken ct) { var c = await _s.GetBadgeCatalogAsync(ct); return Ok(new { total = c.Count, badges = c }); } }

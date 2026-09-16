@@ -73,6 +73,31 @@ function dynamicRoute(method, pathname) {
   const clearance = pathname.match(/^\/api\/graduation\/student-1\/clearances\/(\w+)$/);
   if (clearance) { if (state.role!=='Admin') return [403,{error:'forbidden'}]; state.clearances.add(clearance[1]); return [200, graduation()]; }
   if (pathname === '/api/graduation/student-1/approve') { if (state.role!=='Admin') return [403,{error:'forbidden'}]; if (graduation().blockers.length) return [409,{error:'Outstanding requirements must be cleared before graduation can be approved.'}]; state.approved=true; return [200, graduation()]; }
+  // KPI summaries. state.readiness switches between 'none', 'stub' (score without criteria) and 'evidenced'.
+  if (pathname === '/__fixture/readiness/none') { state.readiness='none'; return [200,{}]; }
+  if (pathname === '/__fixture/readiness/stub') { state.readiness='stub'; return [200,{}]; }
+  if (pathname === '/__fixture/readiness/evidenced') { state.readiness='evidenced'; return [200,{}]; }
+  if (pathname === '/api/students/summary') { if (state.role==='Student') return [403,{error:'forbidden'}]; return [200, { enrolled: 4312, total: 5890, byStatus: { active:4312, inactive:118, graduated:1240, suspended:9, withdrawn:211 }, asOf:'2026-09-16T08:00:00Z' }]; }
+  if (pathname === '/api/faculty/summary') { if (state.role==='Student') return [403,{error:'forbidden'}]; return [200, { total: 231, active: 224, teaching: 206, byDesignation: { professor:31, associateProfessor:44, assistantProfessor:78, lecturer:47, teachingAssistant:6, dean:7, registrar:1, administrator:10 }, asOf:'2026-09-16T08:00:00Z' }]; }
+  if (pathname === '/api/readiness/check-freshness') return [200, { message:'Evidence freshness checked.' }];
+  if (pathname === '/api/readiness/current') {
+    if (state.role==='Student') return [403,{error:'forbidden'}];
+    const mode = state.readiness ?? 'evidenced';
+    if (mode==='none') return [200, { overall:null, frameworks:[], asOf:'2026-09-16T08:00:00Z' }];
+    const criteria = mode==='stub' ? [] : [
+      { id:'HEC-1', name:'Vision, mission and strategic planning', category:'Governance', score:9, maxScore:10, status:'Fully met' },
+      { id:'HEC-2', name:'Faculty qualifications and workload', category:'Faculty', score:6, maxScore:10, status:'Partially met' },
+      { id:'HEC-3', name:'Curriculum review cycle', category:'Academic', score:4, maxScore:10, status:'Not met' },
+      { id:'HEC-4', name:'Student support services', category:'Students', score:8, maxScore:10, status:'Substantially met' },
+    ];
+    const fw = { scoreId:'score-1', frameworkId:'fw-hec', frameworkName:'HEC General', overallScore: mode==='stub'?78.5:67.5, status: mode==='stub'?'Good':'NeedsImprovement', generatedAt:'2026-09-01T09:30:00Z', nextAuditDate:'2027-02-15T00:00:00Z', daysUntilAudit:152, complianceVelocity:2.3, categoryScores:{Governance:90,Faculty:60,Academic:40,Students:80}, criteria,
+      gaps: mode==='stub' ? [] : [
+        { id:'gap-1', criterionId:'HEC-3', gapDescription:'No documented curriculum review in the last three years.', evidenceNeeded:'Minutes of the Board of Studies review and revised course files.', effort:'MediumTerm', impactOnScore:6, priorityRank:1 },
+        { id:'gap-2', criterionId:'HEC-2', gapDescription:'Faculty CVs need updating.', evidenceNeeded:null, effort:'QuickWin', impactOnScore:2.5, priorityRank:2 },
+      ],
+      alerts: mode==='stub' ? [] : [ { id:'al-1', title:'Curriculum review overdue', message:'The three-year review window for two programmes has lapsed.', category:'CRITICAL', isAcknowledged:false, triggeredAt:'2026-09-01T09:31:00Z' } ] };
+    return [200, { overall:{ score: fw.overallScore, frameworkCount:1, generatedAt: fw.generatedAt }, frameworks:[fw], asOf:'2026-09-16T08:00:00Z' }];
+  }
   if (pathname === '/api/student-lifecycle/alumni/me') return state.approved ? [200, { alumniId:'ALM-2030-00017', graduationYear:2030, userId:'student-1' }] : [404, {error:'not graduated'}];
   return null;
 }

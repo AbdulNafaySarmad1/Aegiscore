@@ -359,10 +359,10 @@ const profiles: Record<string, RoleProfile> = {
       { id: "campus-geofences", label: "Campus Geofences", icon: "MapPin", route: "/admin/campus", color: "green", description: "Configure attendance campus boundaries.", priority: 13, domain: "operations" },
     ],
     kpis: [
-      { id: "enrollment", label: "Total enrolment", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue", pending: "Needs GET /api/students/summary (count by EnrollmentStatus); /api/students only lists the directory." },
+      { id: "enrollment", label: "Total enrolment", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue", source: "/api/students/summary" },
       { id: "collection", label: "Fee collection rate", value: "--", format: "percentage", icon: "CreditCard", iconColor: "green", source: "/api/finance/v2/dashboard/executive" },
-      { id: "accreditation", label: "Accreditation score", value: "--", format: "percentage", icon: "ShieldCheck", iconColor: "blue", pending: "Needs GET /api/readiness/current (latest ReadinessScore per framework); only POST compute/{frameworkId} exists." },
-      { id: "faculty-ratio", label: "Faculty to student ratio", value: "--", format: "text", icon: "UserRound", iconColor: "violet", pending: "Needs an active-faculty count (no endpoint reads the Faculty table) alongside /api/students/summary." },
+      { id: "accreditation", label: "Accreditation score", value: "--", format: "percentage", icon: "ShieldCheck", iconColor: "blue", source: "/api/readiness/current" },
+      { id: "faculty-ratio", label: "Faculty to student ratio", value: "--", format: "text", icon: "UserRound", iconColor: "violet", source: "/api/faculty/summary + /api/students/summary" },
     ],
     quickActions: [
       { id: "exec-report", label: "View Executive Report", icon: "FileText", route: "/" },
@@ -391,11 +391,11 @@ const profiles: Record<string, RoleProfile> = {
       { id: "transport", label: "Transport", icon: "Briefcase", route: "/transport", color: "amber", description: "Fleet status and route management.", priority: 12, domain: "operations" },
     ],
     kpis: [
-      { id: "enrollment", label: "Total enrolment", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue", pending: "Needs GET /api/students/summary; the previously declared /api/classes?summary does not exist." },
-      // Note: the finance executive dashboard admits Finance/CFO/Admin/SuperAdmin, not VC — a VC sees "Not available to your role" until CanManageFinance includes VC.
+      { id: "enrollment", label: "Total enrolment", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue", source: "/api/students/summary" },
+      // The executive dashboard admits VC read-only via CanViewExecutiveFinance; VC still cannot post or approve.
       { id: "collection", label: "Fee collection rate", value: "--", format: "percentage", icon: "CreditCard", iconColor: "green", source: "/api/finance/v2/dashboard/executive" },
-      { id: "accreditation", label: "Accreditation score", value: "--", format: "percentage", icon: "ShieldCheck", iconColor: "blue", pending: "Needs GET /api/readiness/current; the previously declared /api/readiness has no GET." },
-      { id: "faculty-ratio", label: "Faculty to student ratio", value: "--", format: "text", icon: "UserRound", iconColor: "violet", pending: "Needs an active-faculty count endpoint alongside /api/students/summary." },
+      { id: "accreditation", label: "Accreditation score", value: "--", format: "percentage", icon: "ShieldCheck", iconColor: "blue", source: "/api/readiness/current" },
+      { id: "faculty-ratio", label: "Faculty to student ratio", value: "--", format: "text", icon: "UserRound", iconColor: "violet", source: "/api/faculty/summary + /api/students/summary" },
     ],
     quickActions: [
       { id: "exec-report", label: "View Executive Report", icon: "FileText", route: "/" },

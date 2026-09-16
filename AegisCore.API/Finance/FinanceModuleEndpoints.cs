@@ -30,7 +30,7 @@ public static partial class FinanceModuleEndpoints
 
         group.MapGet("/dashboard/executive", async (HttpContext context, AegisDbContext db, IFinanceModuleService finance, CancellationToken ct) =>
         {
-            if (!CanManageFinance(context)) return Results.Forbid();
+            if (!CanViewExecutiveFinance(context)) return Results.Forbid();
             var tenantId = Tenant(context);
             var now = DateTime.UtcNow;
             var periodStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-11);
@@ -1782,6 +1782,10 @@ public static partial class FinanceModuleEndpoints
         => context.User.IsInRole("Finance") || context.User.IsInRole("Finance Controller") || context.User.IsInRole("CFO") || context.User.IsInRole("Admin") || context.User.IsInRole("SuperAdmin");
 
     private static bool CanAuditFinance(HttpContext context) => CanManageFinance(context) || context.User.IsInRole("Auditor");
+
+    // Read-only view of the executive dashboard. The VC reads collection figures but does not
+    // post, approve or sign anything, so this deliberately does not widen CanManageFinance.
+    private static bool CanViewExecutiveFinance(HttpContext context) => CanManageFinance(context) || context.User.IsInRole("VC");
 
     private static string? AuditorToken(HttpContext context) => context.Request.Headers["X-AegisCore-Auditor-Token"].FirstOrDefault();
 
