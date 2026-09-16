@@ -5,7 +5,8 @@ const course = { id: 'course-1', code: 'CS101', title: 'Programming Fundamentals
 const dashboard = { kpis: { revenue: 28500000, expenses: 19200000, cashPosition: 14300000 }, trend: ['Jan','Feb','Mar','Apr','May','Jun'].map((month,i) => ({month,revenue:3500000+i*480000,expenses:2400000+i*250000,postings:180+i*12})), feeFunnel:{demanded:32000000,collected:28500000,overdue:1000000,open:28,paid:640}, expenseCategories:[{category:'Academic salaries',amount:12500000},{category:'Campus operations',amount:4200000},{category:'Student services',amount:2500000}], budgetBurn:[{costCenterId:'cs',name:'Computer Science',allocated:18000000,spent:12400000,consumedPercent:69}], currencyExposure:[{currency:'PKR',foreignAmount:14300000,functionalAmount:14300000}],cashFlow:[{category:'Operating',amount:9300000}],unclassifiedCashFlow:0 };
 const fixtures = {
  '/health/ready': {status:'Healthy'},
- '/api/config/portal-preferences': {locale:'en-PK',currency:'PKR',paymentGateway:'demo',accreditorName:'Demo accreditor',identityDocumentName:'Student identity'},
+ '/api/config/portal-preferences': {locale:'en-PK',currency:'PKR',paymentGateway:'demo',accreditorName:'Demo accreditor',identityDocumentName:'Student identity',universityName:'Fictional National University',universityShortName:'FNU',sealUrl:'/aegiscore-logo.png'},
+ '/api/branding/client-logo': {logoUrl:'/aegiscore-logo.png'},
  '/api/session': {userId:'demo-user',tenantId:'demo-tenant',name:'Ali Hassan',roles:['Student'],studentId:'student-1',departmentId:'cs'},
  '/api/students': {items:students,total:students.length},
  '/api/admissions/enquiries': students.map(s=>({id:s.id,name:s.name,email:`${s.firstName.toLowerCase()}@example.invalid`,status:s.id==='student-1'?'Admitted · BSCS · Entry test 87/100':'Documents verified'})),

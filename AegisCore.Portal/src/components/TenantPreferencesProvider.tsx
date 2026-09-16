@@ -9,6 +9,14 @@ export type TenantPreferences = {
   paymentGateway: string;
   accreditorName: string;
   identityDocumentName: string;
+  /** Legal name of the institution (config key identity.university_name). Empty until loaded or if unset. */
+  universityName: string;
+  /** Short form used where space is tight (identity.university_short_name). */
+  universityShortName: string;
+  /** Institution crest/logo, from GET /api/branding/client-logo. Empty when none is configured. */
+  logoUrl: string;
+  /** Official seal image (Branding:SealUrl). Empty when none is configured. */
+  sealUrl: string;
 };
 
 const defaults: TenantPreferences = {
@@ -17,6 +25,10 @@ const defaults: TenantPreferences = {
   paymentGateway: "stripe",
   accreditorName: "Accreditor",
   identityDocumentName: "Identity document",
+  universityName: "",
+  universityShortName: "",
+  logoUrl: "",
+  sealUrl: "",
 };
 
 const TenantPreferencesContext = createContext<TenantPreferences>(defaults);
@@ -27,8 +39,11 @@ export function TenantPreferencesProvider({ children }: { children: React.ReactN
   useEffect(() => {
     const controller = new AbortController();
     apiGet<Partial<TenantPreferences>>("/api/config/portal-preferences", controller.signal)
-      .then(value => setPreferences(current => ({ ...current, ...value })))
+      .then(value => setPreferences(current => ({ ...current, ...stripEmpty(value) })))
       .catch(() => { /* Neutral defaults keep setup mode usable. */ });
+    apiGet<{ logoUrl?: string }>("/api/branding/client-logo", controller.signal)
+      .then(value => { if (value?.logoUrl) setPreferences(current => ({ ...current, logoUrl: value.logoUrl! })); })
+      .catch(() => { /* No crest configured. */ });
     return () => controller.abort();
   }, []);
 
@@ -36,7 +51,27 @@ export function TenantPreferencesProvider({ children }: { children: React.ReactN
   return <TenantPreferencesContext.Provider value={value}>{children}</TenantPreferencesContext.Provider>;
 }
 
+function stripEmpty<T extends object>(value: T): Partial<T> {
+  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== null && v !== undefined)) as Partial<T>;
+}
+
 export function useTenantPreferences() { return useContext(TenantPreferencesContext); }
+
+/**
+ * The institution as it should be named and marked everywhere: rail, gate pages, seals, PDFs.
+ * Falls back to neutral wording, never to a placeholder institution.
+ */
+export function useInstitution() {
+  const p = useTenantPreferences();
+  return {
+    name: p.universityName.trim(),
+    shortName: p.universityShortName.trim(),
+    /** Name for display, or a neutral descriptor while unset. */
+    displayName: p.universityName.trim() || "University register",
+    logoUrl: p.logoUrl.trim(),
+    sealUrl: p.sealUrl.trim(),
+  };
+}
 
 export function useTenantFormatter() {
   const preferences = useTenantPreferences();

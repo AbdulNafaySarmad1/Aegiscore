@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Notice } from "@/components/register";
+import { Notice, InstitutionMark } from "@/components/register";
 
 export default function ActivatePage() {
   const [token, setToken] = useState("");
@@ -36,8 +36,7 @@ export default function ActivatePage() {
     <main id="main-content" className="gate" tabIndex={-1}>
       <aside className="gate-register" aria-label="About activation">
         <div className="gate-brand">
-          <img src="/aegiscore-logo.png" alt="" />
-          <div><strong>AegisCore</strong><small>University register</small></div>
+          <InstitutionMark imgSize={36} />
         </div>
         <div className="gate-folio">
           <h1>Your account is created when you are admitted.</h1>

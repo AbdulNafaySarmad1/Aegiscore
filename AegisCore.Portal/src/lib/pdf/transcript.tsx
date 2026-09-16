@@ -1,15 +1,19 @@
 // Academic transcript rendered with @react-pdf/renderer. Same type system as the screen
 // (Libre Caslon Text for the title, IBM Plex Sans for text, IBM Plex Mono for identifiers),
 // set on A4 with the register's rules. Imported lazily by TranscriptDownload.
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, Font } from "@react-pdf/renderer";
 
 export type TranscriptCourse = { code: string; title: string; credits: number; grade: string | null; status: string };
+/** Institution identity from tenant config (see TenantPreferencesProvider). Images must be data URLs or same-origin. */
+export type TranscriptInstitution = { name: string; logoUrl?: string; sealUrl?: string };
 export type TranscriptData = {
-  institution?: string | null;
+  institution: TranscriptInstitution;
   student: { name: string; rollNumber: string; universityId?: string | null; program: string };
   academics: { cgpa: number; earnedCredits: number; requiredCredits: number; courses: TranscriptCourse[] };
   generatedAt: Date;
   reference: string;
+  /** Only an institution-issued copy carries the seal. Student self-service downloads never set this. */
+  official?: boolean;
 };
 
 let registered = false;
@@ -38,6 +42,9 @@ const INK = "#1B1A18", INK2 = "#5C5A55", RULE = "#C9C9C1", BRASS = "#7D6122", LA
 const s = StyleSheet.create({
   page: { paddingTop: 56, paddingBottom: 64, paddingHorizontal: 56, fontFamily: "Plex", fontSize: 9.5, color: INK, lineHeight: 1.45 },
   letterhead: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", borderBottomWidth: 2, borderBottomColor: BRASS, paddingBottom: 8, marginBottom: 10 },
+  letterheadLeft: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
+  crest: { width: 34, height: 34, objectFit: "contain" },
+  sealImage: { width: 64, height: 64, objectFit: "contain", marginBottom: 6 },
   office: { fontSize: 8.5, color: INK2 },
   institution: { fontFamily: "Caslon", fontSize: 13, marginTop: 2 },
   ref: { fontFamily: "PlexMono", fontSize: 8, color: INK2, textAlign: "right" },
@@ -64,7 +71,7 @@ const s = StyleSheet.create({
   // Anchored from the top: react-pdf drops bottom-anchored fixed views on paginated pages.
   footer: { position: "absolute", left: 56, right: 56, top: 794, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 0.5, borderTopColor: RULE, paddingTop: 6, fontSize: 7.5, color: INK2 },
   footerText: { fontSize: 7.5, color: INK2 },
-  sealLine: { marginTop: 26, flexDirection: "row", justifyContent: "space-between" },
+  sealLine: { marginTop: 26, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" },
   sealBox: { width: 150, borderTopWidth: 0.5, borderTopColor: INK, paddingTop: 4, fontSize: 8, color: INK2 },
 });
 
@@ -75,14 +82,21 @@ function formatDate(d: Date) {
 export function TranscriptDocument({ data }: { data: TranscriptData }) {
   const completed = data.academics.courses.filter(c => c.grade);
   const attempted = data.academics.courses.reduce((sum, c) => sum + c.credits, 0);
-  const institution = data.institution?.trim() || "University register";
+  // The institution's legal name comes from tenant config; until it is set the document says so
+  // plainly rather than inventing a name.
+  const institution = data.institution.name.trim() || "Institution name not configured";
+  const crest = data.institution.logoUrl?.trim() || null;
+  const seal = data.official ? data.institution.sealUrl?.trim() || null : null;
   return (
     <Document title={`Academic transcript — ${data.student.name}`} author={institution} subject="Academic transcript" creator="AegisCore">
       <Page size="A4" style={s.page}>
         <View style={s.letterhead} fixed>
-          <View>
-            <Text style={s.office}>Office of the Registrar</Text>
-            <Text style={s.institution}>{institution}</Text>
+          <View style={s.letterheadLeft}>
+            {crest && <Image style={s.crest} src={crest} />}
+            <View>
+              <Text style={s.office}>Office of the Registrar</Text>
+              <Text style={s.institution}>{institution}</Text>
+            </View>
           </View>
           <View>
             <Text style={s.ref}>Ref {data.reference}</Text>
@@ -92,7 +106,7 @@ export function TranscriptDocument({ data }: { data: TranscriptData }) {
 
         <View style={s.titleBlock}>
           <Text style={s.title}>Academic Transcript</Text>
-          <Text style={s.subtitle}>Student copy. An official copy bearing the university seal is issued by the Examinations office.</Text>
+          <Text style={s.subtitle}>{data.official ? "Official copy issued from the university record." : "Student copy. An official copy bearing the university seal is issued by the Examinations office."}</Text>
         </View>
 
         <View style={s.facts}>
@@ -136,6 +150,7 @@ export function TranscriptDocument({ data }: { data: TranscriptData }) {
 
         <View style={s.sealLine} wrap={false}>
           <View style={s.sealBox}><Text>Controller of Examinations</Text></View>
+          {seal && <Image style={s.sealImage} src={seal} />}
           <View style={s.sealBox}><Text>Registrar</Text></View>
         </View>
 

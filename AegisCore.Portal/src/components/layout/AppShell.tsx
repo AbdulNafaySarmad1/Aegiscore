@@ -13,7 +13,8 @@ import {
 import { apiGet } from "@/lib/api-client";
 import { getRoleProfile } from "@/lib/roles";
 import type { DashboardModule } from "@/lib/roles";
-import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
+import { useTenantFormatter, useInstitution } from "@/components/TenantPreferencesProvider";
+import { InstitutionMark } from "@/components/register";
 
 type Session = { userId: string; tenantId: string; studentId: string | null; departmentId: string | null; name: string; roles: string[] };
 
@@ -39,6 +40,7 @@ function writePref(key: string, value: string) { try { localStorage.setItem(key,
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { date } = useTenantFormatter();
+  const institution = useInstitution();
   const [session, setSession] = useState<Session | null>(null);
   const [failed, setFailed] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(() => readPref("aegis-theme", "light") === "dark" ? "dark" : "light");
@@ -97,7 +99,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!session) return (
     <main id="main-content" className="launch-screen" tabIndex={-1} aria-busy="true">
-      <span className="wordmark">AegisCore</span>
+      <span className="wordmark">{institution.name || "AegisCore"}</span>
       <div className="launch-pulse" aria-hidden="true" />
       <p role="status">{failed ? "Redirecting to sign in…" : "Opening the university register…"}</p>
     </main>
@@ -108,9 +110,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="shell" data-rail={narrow ? "narrow" : undefined}>
       <aside ref={railRef} id="primary-rail" className="rail" data-open={menuOpen ? "true" : undefined} aria-label="Application navigation">
-        <Link href="/" className="rail-brand" aria-label="AegisCore home">
-          <img src="/aegiscore-logo.png" alt="" />
-          <span className="rail-brand-text"><strong>AegisCore</strong><small>{profile?.displayName ?? "University register"}</small></span>
+        <Link href="/" className="rail-brand" aria-label={`${institution.displayName} home`}>
+          <InstitutionMark className="rail-brand-text" />
         </Link>
         <button type="button" className="icon-button masthead-menu-button" style={{ position: "absolute", top: 10, right: 10, color: "var(--on-ink)", borderColor: "var(--ink-rule)", background: "transparent" }} onClick={() => setMenuOpen(false)} aria-label="Close navigation" hidden={!menuOpen}><X size={18} aria-hidden="true" /></button>
 

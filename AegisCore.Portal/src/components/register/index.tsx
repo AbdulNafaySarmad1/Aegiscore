@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AlertTriangle, CircleAlert, Info, CircleCheck, RotateCw } from "lucide-react";
 import { FocusTrapDialog } from "@/components/FocusTrapDialog";
+import { useInstitution } from "@/components/TenantPreferencesProvider";
 
 export type Tone = "ink" | "brass" | "oxblood" | "laurel";
 
@@ -162,9 +163,19 @@ export function RuledLoading({ rows = 6, head = true, label = "Loading" }: { row
 }
 
 /* ── Seal ──────────────────────────────────────────────────── */
-export function Seal({ tone = "laurel", stamped, label = "University seal", size = 84 }: { tone?: Tone; stamped?: boolean; label?: string; size?: number }) {
+/** The institution's seal from tenant config (Branding:SealUrl); a neutral line-drawn rosette until one is configured. */
+export function Seal({ tone = "laurel", stamped, label, size = 84 }: { tone?: Tone; stamped?: boolean; label?: string; size?: number }) {
+  const { sealUrl, displayName } = useInstitution();
+  const name = label ?? `${displayName} seal`;
+  if (sealUrl) {
+    return (
+      <span className="seal" data-tone={tone} data-stamped={stamped ? "" : undefined} style={{ width: size, height: size }}>
+        <img src={sealUrl} alt={name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </span>
+    );
+  }
   return (
-    <span className="seal" data-tone={tone} data-stamped={stamped ? "" : undefined} role="img" aria-label={label} style={{ width: size, height: size }}>
+    <span className="seal" data-tone={tone} data-stamped={stamped ? "" : undefined} role="img" aria-label={name} style={{ width: size, height: size }}>
       <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true">
         <circle cx="50" cy="50" r="46" strokeWidth="1.5" />
         <circle cx="50" cy="50" r="41" strokeWidth=".75" />
@@ -174,6 +185,20 @@ export function Seal({ tone = "laurel", stamped, label = "University seal", size
         <path d="M22 50 h6 M72 50 h6" strokeWidth="1" />
       </svg>
     </span>
+  );
+}
+
+/* ── Institution mark (rail, gate pages) ───────────────────── */
+/** Crest + name from tenant config. The vendor wordmark is shown only until an institution is configured. */
+export function InstitutionMark({ className, imgSize = 28 }: { className?: string; imgSize?: number }) {
+  const { name, shortName, logoUrl } = useInstitution();
+  const primary = name || "AegisCore";
+  const secondary = name ? (shortName || "University register") : "University register";
+  return (
+    <>
+      <img src={logoUrl || "/aegiscore-logo.png"} alt="" width={imgSize} height={imgSize} style={{ width: imgSize, height: imgSize, objectFit: "contain" }} />
+      <span className={className}><strong>{primary}</strong><small>{secondary}</small></span>
+    </>
   );
 }
 

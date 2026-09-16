@@ -225,10 +225,13 @@ these filters." + "Clear filters".
 
 ### Rough — production needs these
 
-- **Institution name and seal on documents.** No endpoint returns the tenant's legal name or
-  crest; the transcript prints "University register" and a line-drawn seal. Wire
-  `/api/config/portal-preferences` (or the wizard's step-1 data) into `TranscriptData.institution`
-  and replace the SVG seal with the tenant's crest before this is filed anywhere.
+- **Institution identity is now config-driven** — `GET /api/config/portal-preferences` returns
+  `universityName`, `universityShortName` and `sealUrl`; `GET /api/branding/client-logo` returns the
+  crest. `useInstitution()` in `TenantPreferencesProvider` is the only place the portal reads them,
+  and the rail, gate pages, `<Seal>` and the transcript PDF all consume it. Two things remain for
+  the backend: nothing yet writes `identity.university_name` from the setup wizard (set it via
+  `POST /api/config`), and no upload path exists for `Branding:SealUrl` (set it in configuration).
+  The student self-service PDF never prints the seal; only an `official` copy does.
 - **Legacy screens** (finance, examinations, wizard, apply, terminal, ~80 others) are restyled
   through `legacy.css`, not rewritten. They look like the same product but still carry their own
   inline layout and older copy; `nchart` axis labels clip at narrow widths as before.

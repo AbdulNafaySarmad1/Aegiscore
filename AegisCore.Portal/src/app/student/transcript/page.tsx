@@ -5,6 +5,7 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import { CheckCircle, Send } from "lucide-react";
 import { RegisterHead, Panel, Figures, Mark, RuledLoading, ErrorNotice, Notice, useAnnounce } from "@/components/register";
 import { TranscriptDownload } from "@/components/documents/TranscriptDownload";
+import { useInstitution } from "@/components/TenantPreferencesProvider";
 
 type Course = { code: string; title: string; credits: number; grade: string | null; status: string };
 type Overview = { student: { id: string; name: string; rollNumber: string; universityId?: string }; academics: { program: string; cgpa: number; earnedCredits: number; requiredCredits: number; courses: Course[] } };
@@ -18,6 +19,7 @@ export default function TranscriptPage() {
   const [requestError, setRequestError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const { announce, region } = useAnnounce();
+  const institution = useInstitution();
 
   useEffect(() => {
     const abort = new AbortController();
@@ -65,6 +67,7 @@ export default function TranscriptPage() {
                   {requestState === "requested" ? <><CheckCircle aria-hidden="true" />Official copy requested</> : <><Send aria-hidden="true" />Request official copy</>}
                 </button>
                 <TranscriptDownload fileName={`transcript-${data.student.rollNumber}.pdf`} data={() => ({
+                  institution: { name: institution.name, logoUrl: institution.logoUrl, sealUrl: institution.sealUrl },
                   student: { name: data.student.name, rollNumber: data.student.rollNumber, universityId: data.student.universityId, program: data.academics.program },
                   academics: data.academics,
                 })} />

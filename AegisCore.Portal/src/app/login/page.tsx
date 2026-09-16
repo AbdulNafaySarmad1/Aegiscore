@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost } from "@/lib/api-client";
 import { Eye, EyeOff } from "lucide-react";
-import { Notice } from "@/components/register";
+import { Notice, InstitutionMark } from "@/components/register";
+import { useInstitution } from "@/components/TenantPreferencesProvider";
 
 // Demo accounts exist only when NEXT_PUBLIC_DEMO_MODE is set at build time; they never reach production.
 const demoAccounts = [
@@ -33,6 +34,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const institution = useInstitution();
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date());
 
   const handleSubmit = async (e: FormEvent) => {
@@ -63,8 +65,7 @@ export default function LoginPage() {
     <main id="main-content" className="gate" tabIndex={-1}>
       <aside className="gate-register" aria-label="About this register">
         <div className="gate-brand">
-          <img src="/aegiscore-logo.png" alt="" />
-          <div><strong>AegisCore</strong><small>University register</small></div>
+          <InstitutionMark imgSize={36} />
         </div>
 
         <div className="gate-folio">
@@ -129,7 +130,7 @@ export default function LoginPage() {
           )}
 
           <div className="gate-form-foot">
-            <span>AegisCore Portal</span>
+            <span>{institution.name ? `${institution.name}, on AegisCore` : "AegisCore Portal"}</span>
             <span>Need access? Ask your registrar&rsquo;s office.</span>
           </div>
         </div>

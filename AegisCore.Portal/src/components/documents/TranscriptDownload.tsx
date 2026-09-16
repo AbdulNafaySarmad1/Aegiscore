@@ -6,6 +6,18 @@ import type { TranscriptData } from "@/lib/pdf/transcript";
 
 type Status = "idle" | "preparing" | "done" | "error";
 
+async function inlineImage(url?: string): Promise<string | undefined> {
+  if (!url) return undefined;
+  if (url.startsWith("data:")) return url;
+  try {
+    const response = await fetch(url, { credentials: "same-origin" });
+    if (!response.ok) return undefined;
+    const blob = await response.blob();
+    if (!blob.type.startsWith("image/")) return undefined;
+    return await new Promise<string>((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result)); r.onerror = reject; r.readAsDataURL(blob); });
+  } catch { return undefined; }
+}
+
 /** Builds the transcript PDF in the browser on demand; the renderer is loaded only when clicked. */
 export function TranscriptDownload({ data, fileName, className = "btn btn-primary" }: { data: () => Omit<TranscriptData, "generatedAt" | "reference">; fileName: string; className?: string }) {
   const [status, setStatus] = useState<Status>("idle");
@@ -19,9 +31,17 @@ export function TranscriptDownload({ data, fileName, className = "btn btn-primar
         import("@/lib/pdf/transcript"),
       ]);
       registerFonts(window.location.origin);
+      const source = data();
+      // Crest and seal may live on object storage; inline them so the renderer never has to
+      // fetch cross-origin. A missing image degrades to "no image", never to a failed document.
+      const institution = {
+        ...source.institution,
+        logoUrl: await inlineImage(source.institution.logoUrl),
+        sealUrl: await inlineImage(source.institution.sealUrl),
+      };
       const generatedAt = new Date();
       const reference = `TR-${generatedAt.getFullYear()}${String(generatedAt.getMonth() + 1).padStart(2, "0")}${String(generatedAt.getDate()).padStart(2, "0")}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-      const blob = await pdf(<TranscriptDocument data={{ ...data(), generatedAt, reference }} />).toBlob();
+      const blob = await pdf(<TranscriptDocument data={{ ...source, institution, generatedAt, reference }} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url; link.download = fileName; link.rel = "noopener";
