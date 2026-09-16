@@ -241,11 +241,14 @@ these filters." + "Clear filters".
   *Fee collection rate* (`GET /api/finance/v2/dashboard/executive`, read-only for VC via
   `CanViewExecutiveFinance`), *Accreditation score* (`GET /api/readiness/current`) and
   *Faculty to student ratio* (`GET /api/faculty/summary` + students summary; teaching ranks only).
-  Two data caveats for production: (1) `ReadinessMeterService.ComputeScoreAsync` is a stub that
-  never saves, so `/readiness/current` returns "not assessed" until a real scoring engine writes
-  `ReadinessScores` rows — and a row with no `CriterionScoresJson` is shown as "unevidenced", not
-  as a score; (2) the pilot's fees live in `StudentFeeDues`, while the executive dashboard reads
-  `FeeDemands`, so that tenant sees "no fee demands raised yet" until one ledger is chosen.
+  Data notes for production: (1) the readiness engine is real — it scores a framework from the
+  evidence recorded against its criteria (`POST /api/readiness/frameworks…`, then
+  `POST /api/readiness/compute/{frameworkId}`) and refuses to score a framework with no criteria,
+  so `/readiness/current` says "not assessed" until the QEC enters the framework; a stored row with
+  no `CriterionScoresJson` is still shown as "unevidenced", never as a score; (2) the pilot's fees
+  live in `StudentFeeDues`, while the executive dashboard reads `FeeDemands` (the finance v2 model
+  that installments, payments and plans hang off), so that tenant sees "no fee demands raised yet"
+  until the two ledgers are unified — a product decision, recorded in the deploy-readiness report.
 - **`/readiness`** is rebuilt on the register vocabulary and reads `/api/readiness/current`
   (its previous `GET /api/readiness/compute` and `POST check-evidence-freshness` never existed).
 - **Masthead search** filters the rail in place; it does not yet search records.
