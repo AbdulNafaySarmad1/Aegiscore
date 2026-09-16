@@ -22,8 +22,40 @@ public sealed class EfWizardStateStore : IWizardStateStore
         _protector = protectionProvider.CreateProtector("AegisCore.WizardState.Payload.v1");
     }
 
+    /// <summary>
+    /// The wizard's own table is created by the migrations that the wizard itself applies in step 2.
+    /// On an empty database the first session request therefore finds no WizardSessions table; apply
+    /// the migration chain here, once, so installation can start with Database:AutoMigrate off (the
+    /// client compose default). Migrating an empty database is exactly what step 2 would do anyway.
+    /// </summary>
+    private static readonly SemaphoreSlim SchemaGate = new(1, 1);
+    private static bool _schemaEnsured;
+
+    private async Task EnsureSchemaAsync(CancellationToken ct)
+    {
+        if (_schemaEnsured) return;
+        await SchemaGate.WaitAsync(ct);
+        try
+        {
+            if (_schemaEnsured) return;
+            try
+            {
+                // Probe the table rather than the migration history: test databases are created with
+                // EnsureCreated and have the table without any history rows.
+                await _db.WizardSessions.IgnoreQueryFilters().AnyAsync(ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                await _db.Database.MigrateAsync(ct);
+            }
+            _schemaEnsured = true;
+        }
+        finally { SchemaGate.Release(); }
+    }
+
     public async Task<WizardStateDto?> LoadAsync(string bootstrapTokenHash, CancellationToken ct = default)
     {
+        await EnsureSchemaAsync(ct);
         var session = await _db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(item => item.BootstrapTokenHash == bootstrapTokenHash, ct);
         if (session is null) return null;
@@ -64,6 +96,7 @@ public sealed class EfWizardStateStore : IWizardStateStore
 
     public async Task SaveAsync(string bootstrapTokenHash, WizardStateDto state, CancellationToken ct = default)
     {
+        await EnsureSchemaAsync(ct);
         var session = await _db.WizardSessions.IgnoreQueryFilters()
             .SingleOrDefaultAsync(item => item.BootstrapTokenHash == bootstrapTokenHash, ct);
         if (session is null)

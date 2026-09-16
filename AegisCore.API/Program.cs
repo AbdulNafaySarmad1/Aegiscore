@@ -168,8 +168,11 @@ if (!isInstalled)
     app.UseAuthorization();
 
     app.MapControllers();
-    if (app.Configuration.GetValue<bool>("Database:AutoMigrate"))
-        await ApplyDatabaseMigrationsAsync(app);
+    // Installation mode always tries to bring an empty database up to the current schema: the
+    // wizard stores its own session in that database, so with the client default
+    // Database:AutoMigrate=false the first wizard request would otherwise fail on a missing
+    // table. An unreachable database is not fatal here; the wizard's database step retries.
+    await ApplyInstallationSchemaAsync(app);
     app.MapGet("/health", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/live", () => Results.Text("Healthy")).AllowAnonymous();
     app.MapGet("/health/ready", () => Results.Ok(new
@@ -330,4 +333,21 @@ static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
     await db.Database.MigrateAsync();
+}
+
+static async Task ApplyInstallationSchemaAsync(WebApplication app)
+{
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+        if (pending.Count == 0) return;
+        app.Logger.LogInformation("Installation mode: applying {Count} pending database migrations", pending.Count);
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Installation mode: the database is not ready yet; the wizard's database step will apply migrations");
+    }
 }

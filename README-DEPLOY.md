@@ -120,8 +120,8 @@ Answer these questions in order. When you reach a "Yes", follow the linked guide
 | `AEGISCORE_API_INTERNAL_URL`                     | Yes*                | Portal container   | Internal URL to the API (*only needed by the portal container)         | `http://api:8080`                                             |
 | `AEGISCORE_REQUIRE_EDGE_PQC`                     | No                  | Production         | Enforce post-quantum crypto at the edge                                | `true` / `false`                                              |
 | `AEGISCORE_EDGE_PQC_PROOF_KEY_BASE64`            | No                  | Production         | Edge PQC proof key (if enforcement enabled)                            | 32-byte base64                                                |
-| `AEGISCORE_DATA_PROTECTION_CERTIFICATE_PATH`     | No                  | Production         | Path to Data Protection certificate                                    | `/app/config/certs/dp.pfx`                                    |
-| `AEGISCORE_DATA_PROTECTION_CERTIFICATE_PASSWORD` | No                  | Production         | Password for Data Protection certificate                               | `<secure password>`                                           |
+| `AEGISCORE_DATA_PROTECTION_CERTIFICATE_PATH`     | Yes (Production)    | Production         | PKCS#12 certificate that encrypts the Data Protection key ring; Production refuses to start without it | `/app/config/certs/dp.pfx`                                    |
+| `AEGISCORE_DATA_PROTECTION_CERTIFICATE_PASSWORD` | Yes (Production)    | Production         | Password of that certificate (`DATA_PROTECTION_CERTIFICATE_PASSWORD` in docker-compose.client.yml) | `<secure password>`                                           |
 
 ---
 

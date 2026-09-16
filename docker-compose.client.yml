@@ -15,6 +15,11 @@ name: aegiscore-client
 # GOVERNANCE_FEEDBACK_KEY_BASE64=<32-byte base64 key>
 # AEGISCORE_SETUP_TOKEN=<installation setup token>
 # APP_SECRET=<application secret>
+# DATA_PROTECTION_CERTIFICATE_PASSWORD=<password of the PKCS#12 key-ring certificate>
+#   Place the certificate itself in the config volume as /app/config/data-protection.pfx
+#   (pre-populate the university_config volume or `docker cp` it in before first start).
+#   Production refuses to start without it: the Data Protection key ring is encrypted with it.
+# AEGISCORE_SEAL_URL=<optional https URL of the institution seal printed on the portal and documents>
 # AEGISCORE_PORT=8080  # bind behind university TLS ingress
 # AI_PROVIDER=ollama
 # AI_ENDPOINT=http://<university-ai-host>:11434/
@@ -53,6 +58,10 @@ x-application: &application
     AEGISCORE_STORAGE_PROVIDER: local
     AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
     DataProtection__KeyPath: /app/config/data-protection
+    # Production refuses to start without the PKCS#12 certificate that encrypts the key ring.
+    DataProtection__CertificatePath: /app/config/data-protection.pfx
+    DataProtection__CertificatePassword: ${DATA_PROTECTION_CERTIFICATE_PASSWORD:?Required}
+    Branding__SealUrl: ${AEGISCORE_SEAL_URL:-}
     CLIP_SERVICE_URL: http://aegiscore-clip:8100
   volumes:
     - university_storage:/app/storage
