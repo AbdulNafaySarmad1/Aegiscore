@@ -159,21 +159,6 @@ public class SmtpEmailService : IEmailService
     { foreach (var m in messages) SendAsync(m).Wait(); return Task.CompletedTask; }
 }
 
-public class MinioStorageService : IStorageService
-{
-    private readonly ILogger<MinioStorageService> _logger;
-    public MinioStorageService(IConfiguration configuration, ILogger<MinioStorageService> logger) { _logger = logger; }
-
-    public async Task<string> UploadAsync(string bucket, string key, Stream content, string contentType, StorageVisibility visibility = StorageVisibility.Private, CancellationToken ct = default)
-    { await Task.CompletedTask; _logger.LogInformation("MinIO upload: {Bucket}/{Key}", bucket, key); return $"http://minio:9000/{bucket}/{key}"; }
-
-    public async Task<Stream> DownloadAsync(string bucket, string key, CancellationToken ct = default) { await Task.CompletedTask; return new MemoryStream(); }
-    public Task DeleteAsync(string bucket, string key, CancellationToken ct = default) => Task.CompletedTask;
-    public Task<string> GetPresignedUrlAsync(string bucket, string key, TimeSpan expiry, CancellationToken ct = default) => Task.FromResult($"http://minio:9000/{bucket}/{key}?presigned=true");
-    public Task<bool> ExistsAsync(string bucket, string key, CancellationToken ct = default) => Task.FromResult(false);
-    public Task CreateBucketIfNotExistsAsync(string bucket, CancellationToken ct = default) => Task.CompletedTask;
-}
-
 public class NoOpCalendarService : ICalendarService
 {
     private readonly ILogger<NoOpCalendarService> _logger;

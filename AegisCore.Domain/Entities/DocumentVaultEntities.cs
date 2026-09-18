@@ -35,9 +35,13 @@ public class DocumentVaultEntry : ITenantScoped
     public Guid TierId { get; set; }
     public int TierLevel { get; set; }
 
-    // PQC verification
-    [MaxLength(200)] public string? PqcSignatureBase64 { get; set; }     // ML-DSA signature
-    [MaxLength(200)] public string? PqcPublicKeyBase64 { get; set; }     // Verification key
+    // Post-quantum signature over the content hash, made by the installation's registered signing
+    // key (see IPqcSignatureService). The algorithm and key id are recorded so a signature can be
+    // checked years later against the key registry, which is what makes it evidence.
+    [MaxLength(16000)] public string? PqcSignatureBase64 { get; set; }   // ML-DSA-65 or SLH-DSA-SHA2-128s
+    [MaxLength(8000)] public string? PqcPublicKeyBase64 { get; set; }    // Verification key, as registered
+    [MaxLength(40)] public string? PqcAlgorithm { get; set; }
+    [MaxLength(64)] public string? PqcKeyId { get; set; }
     [MaxLength(128)] public string Sha512Hash { get; set; } = "";        // Content hash before signature
     public bool IsPqcVerified { get; set; }
     public DateTime? PqcVerifiedAt { get; set; }

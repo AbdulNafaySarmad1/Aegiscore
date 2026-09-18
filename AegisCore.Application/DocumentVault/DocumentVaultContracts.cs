@@ -4,9 +4,9 @@ namespace AegisCore.Application.DocumentVault;
 
 public interface IDocumentVaultService
 {
-    Task<DocumentVaultEntry> UploadDocumentAsync(Stream content, string fileName, string contentType, string category, Guid uploadedByUserId, string uploadedByRole, CancellationToken ct);
+    Task<DocumentVaultEntry> UploadDocumentAsync(Guid tenantId, Stream content, string fileName, string contentType, string category, Guid uploadedByUserId, string uploadedByRole, CancellationToken ct);
     Task<Stream?> DownloadDocumentAsync(Guid documentId, Guid requestedByUserId, string requestedByRole, CancellationToken ct);
-    Task<bool> VerifyDocumentAsync(Guid documentId, Guid verifiedByUserId, CancellationToken ct);
+    Task<bool> VerifyDocumentAsync(Guid tenantId, Guid documentId, Guid verifiedByUserId, CancellationToken ct);
     Task<DocumentTier> GetTierForCategoryAsync(string category, CancellationToken ct);
     Task<List<DocumentVaultEntry>> GetDocumentsByTierAsync(int tierLevel, CancellationToken ct);
     Task<List<DocumentVaultEntry>> GetDocumentsByCategoryAsync(string category, CancellationToken ct);
@@ -45,6 +45,7 @@ public class DocumentVaultEntryDto
     public string TierName { get; set; } = "";
     public long FileSizeBytes { get; set; }
     public bool IsPqcVerified { get; set; }
+    public string? PqcAlgorithm { get; set; }
     public bool IsRetentionLocked { get; set; }
     public DateTime UploadedAt { get; set; }
     public DateTime RetentionExpiresAt { get; set; }

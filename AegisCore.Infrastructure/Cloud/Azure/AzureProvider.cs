@@ -73,26 +73,6 @@ public class AzureSecretService : ISecretService
     }
 }
 
-public class AzureStorageService : IStorageService
-{
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AzureStorageService> _logger;
-
-    public AzureStorageService(IConfiguration configuration, ILogger<AzureStorageService> logger)
-    { _configuration = configuration; _logger = logger; }
-
-    public async Task<string> UploadAsync(string bucket, string key, Stream content, string contentType, StorageVisibility visibility = StorageVisibility.Private, CancellationToken ct = default)
-    { await Task.CompletedTask; _logger.LogInformation("Azure Blob upload: {Bucket}/{Key}", bucket, key); return $"https://storage/{bucket}/{key}"; }
-
-    public async Task<Stream> DownloadAsync(string bucket, string key, CancellationToken ct = default)
-    { await Task.CompletedTask; return new MemoryStream(); }
-
-    public Task DeleteAsync(string bucket, string key, CancellationToken ct = default) => Task.CompletedTask;
-    public Task<string> GetPresignedUrlAsync(string bucket, string key, TimeSpan expiry, CancellationToken ct = default) => Task.FromResult($"https://sas-url/{bucket}/{key}");
-    public Task<bool> ExistsAsync(string bucket, string key, CancellationToken ct = default) => Task.FromResult(false);
-    public Task CreateBucketIfNotExistsAsync(string bucket, CancellationToken ct = default) => Task.CompletedTask;
-}
-
 public class MicrosoftGraphEmailService : IEmailService
 {
     private readonly ILogger<MicrosoftGraphEmailService> _logger;

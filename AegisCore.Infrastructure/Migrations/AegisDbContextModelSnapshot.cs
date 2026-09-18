@@ -7597,13 +7597,21 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("PqcAlgorithm")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("PqcKeyId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("PqcPublicKeyBase64")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<string>("PqcSignatureBase64")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
 
                     b.Property<DateTime?>("PqcVerifiedAt")
                         .HasColumnType("timestamp with time zone");

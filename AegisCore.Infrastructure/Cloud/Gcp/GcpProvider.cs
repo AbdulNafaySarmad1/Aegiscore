@@ -81,18 +81,6 @@ public class GcpSecretManagerService : ISecretService
     }
 }
 
-public class GcsStorageService : IStorageService
-{
-    private readonly ILogger<GcsStorageService> _logger;
-    public GcsStorageService(IConfiguration configuration, ILogger<GcsStorageService> logger) { _logger = logger; }
-    public async Task<string> UploadAsync(string bucket, string key, Stream content, string contentType, StorageVisibility visibility = StorageVisibility.Private, CancellationToken ct = default) { await Task.CompletedTask; _logger.LogInformation("GCS upload: {Bucket}/{Key}", bucket, key); return $"https://storage.googleapis.com/{bucket}/{key}"; }
-    public async Task<Stream> DownloadAsync(string bucket, string key, CancellationToken ct = default) { await Task.CompletedTask; return new MemoryStream(); }
-    public Task DeleteAsync(string bucket, string key, CancellationToken ct = default) => Task.CompletedTask;
-    public Task<string> GetPresignedUrlAsync(string bucket, string key, TimeSpan expiry, CancellationToken ct = default) => Task.FromResult($"https://signed/{bucket}/{key}");
-    public Task<bool> ExistsAsync(string bucket, string key, CancellationToken ct = default) => Task.FromResult(false);
-    public Task CreateBucketIfNotExistsAsync(string bucket, CancellationToken ct = default) => Task.CompletedTask;
-}
-
 public class GmailApiEmailService : IEmailService
 {
     private readonly ILogger<GmailApiEmailService> _logger;

@@ -13,15 +13,34 @@ public class StorageHealthCheck : IHealthCheck
     public StorageHealthCheck(IStorageService storage, ILogger<StorageHealthCheck> logger) { _storage = storage; _logger = logger; }
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken ct = default)
     {
+        // The check writes, reads back and compares. Writing alone proved nothing: the storage
+        // providers this replaced accepted every upload and kept none of them, and this check
+        // reported healthy throughout.
+        var testKey = $"health-check/{Guid.NewGuid():N}";
+        var probe = Guid.NewGuid().ToByteArray();
         try
         {
-            var testKey = $"health-check/{Guid.NewGuid():N}";
             await _storage.CreateBucketIfNotExistsAsync("aegis-health-check", ct);
-            await _storage.UploadAsync("aegis-health-check", testKey, new MemoryStream(new byte[] { 1 }), "application/octet-stream", cancellationToken: ct);
-            await _storage.DeleteAsync("aegis-health-check", testKey, ct);
-            return HealthCheckResult.Healthy("Storage read/write OK");
+            await _storage.UploadAsync("aegis-health-check", testKey, new MemoryStream(probe), "application/octet-stream", cancellationToken: ct);
+
+            await using var readBack = await _storage.DownloadAsync("aegis-health-check", testKey, ct);
+            using var buffer = new MemoryStream();
+            await readBack.CopyToAsync(buffer, ct);
+
+            if (!buffer.ToArray().SequenceEqual(probe))
+                return HealthCheckResult.Unhealthy($"Storage accepted a {probe.Length}-byte test object but returned {buffer.Length} bytes. Files written here are being lost — check the storage provider, its credentials and, for local storage, that the volume is mounted and writable.");
+
+            return HealthCheckResult.Healthy($"Storage round trip OK via {_storage.GetType().Name}");
         }
-        catch (Exception ex) { _logger.LogWarning(ex, "Storage health check failed"); return HealthCheckResult.Unhealthy("Storage unavailable", ex); }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Storage health check failed");
+            return HealthCheckResult.Unhealthy($"Storage is not usable: {ex.Message}", ex);
+        }
+        finally
+        {
+            try { await _storage.DeleteAsync("aegis-health-check", testKey, ct); } catch { /* the probe is disposable */ }
+        }
     }
 }
 

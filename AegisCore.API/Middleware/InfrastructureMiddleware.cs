@@ -1,4 +1,4 @@
-using AegisCore.Application.ApiGateway;
+﻿using AegisCore.Application.ApiGateway;
 using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -104,6 +104,9 @@ public class GlobalExceptionMiddleware
         // EF wraps a dead connection in its retry exception; the cause underneath is what the operator needs.
         Microsoft.EntityFrameworkCore.Storage.RetryLimitExceededException { InnerException: { } inner } => Describe(inner),
         AegisCore.Infrastructure.Licensing.LicenseReadOnlyException => (StatusCodes.Status403Forbidden, "license_read_only", ex.Message),
+        // A stored document that no longer matches its recorded hash is a conflict with what the
+        // installation attested to, not an internal error.
+        InvalidDataException => (StatusCodes.Status409Conflict, "integrity_check_failed", ex.Message),
         KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", string.IsNullOrWhiteSpace(ex.Message) ? "The requested record was not found." : ex.Message),
         ArgumentException => (StatusCodes.Status400BadRequest, "invalid_request", ex.Message),
         NotSupportedException => (StatusCodes.Status501NotImplemented, "not_available", ex.Message),

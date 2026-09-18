@@ -12,6 +12,8 @@ public class DocumentVaultController : ControllerBase
     private readonly IDocumentVaultService _svc;
     public DocumentVaultController(IDocumentVaultService svc) => _svc = svc;
 
+    private Guid TenantId => HttpContext.Items["TenantId"] as Guid? ?? Guid.Empty;
+
     [HttpGet("dashboard")]
     public async Task<IActionResult> Dashboard(CancellationToken ct)
     {
@@ -38,7 +40,7 @@ public class DocumentVaultController : ControllerBase
         {
             Id = d.Id, FileName = d.FileName, Category = d.DocumentCategory, TierLevel = d.TierLevel,
             TierName = tiers.FirstOrDefault(t => t.TierLevel == d.TierLevel)?.Name ?? "",
-            FileSizeBytes = d.FileSizeBytes, IsPqcVerified = d.IsPqcVerified, IsRetentionLocked = d.IsRetentionLocked,
+            FileSizeBytes = d.FileSizeBytes, IsPqcVerified = d.IsPqcVerified, PqcAlgorithm = d.PqcAlgorithm, IsRetentionLocked = d.IsRetentionLocked,
             UploadedAt = d.UploadedAt, RetentionExpiresAt = d.RetentionExpiresAt,
             YearsRemaining = Math.Max(0, (int)(d.RetentionExpiresAt - DateTime.UtcNow).TotalDays / 365)
         }).ToList();
@@ -53,7 +55,7 @@ public class DocumentVaultController : ControllerBase
         using var ms = new MemoryStream();
         await Request.Body.CopyToAsync(ms, ct);
         ms.Position = 0;
-        var entry = await _svc.UploadDocumentAsync(ms, fileName, contentType, category, uploadedByUserId, uploadedByRole, ct);
+        var entry = await _svc.UploadDocumentAsync(TenantId, ms, fileName, contentType, category, uploadedByUserId, uploadedByRole, ct);
         return Ok(new { id = entry.Id, tier = entry.TierLevel, retentionYears = (int)(entry.RetentionExpiresAt - DateTime.UtcNow).TotalDays / 365, pqcVerified = entry.IsPqcVerified, sha512 = entry.Sha512Hash[..16] });
     }
 
@@ -61,14 +63,14 @@ public class DocumentVaultController : ControllerBase
     public async Task<IActionResult> Download(Guid id, [FromQuery] Guid requestedByUserId, [FromQuery] string requestedByRole, CancellationToken ct)
     {
         var stream = await _svc.DownloadDocumentAsync(id, requestedByUserId, requestedByRole, ct);
-        if (stream == null) return NotFound(new { error = "Document not found or PQC verification failed." });
+        if (stream == null) return NotFound(new { error = "That document is not in the vault. It was either never stored, has been deleted, or its stored copy is missing — the access log records which." });
         var doc = await _svc.GetDocumentAsync(id, ct);
         return File(stream, doc?.ContentType ?? "application/octet-stream", doc?.FileName ?? "document");
     }
 
     [HttpPost("verify/{id:guid}")]
     public async Task<IActionResult> Verify(Guid id, [FromQuery] Guid verifiedByUserId, CancellationToken ct)
-        => Ok(new { documentId = id, verified = await _svc.VerifyDocumentAsync(id, verifiedByUserId, ct) });
+        => Ok(new { documentId = id, verified = await _svc.VerifyDocumentAsync(TenantId, id, verifiedByUserId, ct) });
 
     [HttpGet("tiers")]
     public async Task<IActionResult> Tiers(CancellationToken ct) => Ok(await _svc.GetTiersAsync(ct));
@@ -78,7 +80,7 @@ public class DocumentVaultController : ControllerBase
 
     [HttpPost("seed-tiers")]
     public async Task<IActionResult> SeedTiers(CancellationToken ct)
-    { await _svc.SeedDefaultTiersAsync(Guid.Empty, ct); return Ok(new { message = "Default tiers and retention policies seeded." }); }
+    { await _svc.SeedDefaultTiersAsync(TenantId, ct); return Ok(new { message = "Default tiers and retention policies seeded." }); }
 
     [HttpGet("documents/tier/{tierLevel:int}")]
     public async Task<IActionResult> GetByTier(int tierLevel, CancellationToken ct)

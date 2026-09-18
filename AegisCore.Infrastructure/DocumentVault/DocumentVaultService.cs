@@ -1,8 +1,9 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.DocumentVault;
 using AegisCore.Domain.Entities;
+using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.Extensions.Logging;
 
 namespace AegisCore.Infrastructure.DocumentVault;
@@ -14,6 +15,7 @@ public class DocumentVaultService : IDocumentVaultService
     private readonly IRepository<DocumentTier> _tierRepo;
     private readonly IRepository<DocumentAccessLog> _logRepo;
     private readonly IRepository<DocumentRetentionPolicy> _policyRepo;
+    private readonly IPqcSignatureService _signatures;
     private readonly ILogger<DocumentVaultService> _logger;
     private readonly string _defaultBucket;
 
@@ -23,10 +25,11 @@ public class DocumentVaultService : IDocumentVaultService
         IRepository<DocumentTier> tierRepo,
         IRepository<DocumentAccessLog> logRepo,
         IRepository<DocumentRetentionPolicy> policyRepo,
+        IPqcSignatureService signatures,
         ILogger<DocumentVaultService> logger)
     {
         _storage = storage; _docRepo = docRepo; _tierRepo = tierRepo;
-        _logRepo = logRepo; _policyRepo = policyRepo; _logger = logger;
+        _logRepo = logRepo; _policyRepo = policyRepo; _signatures = signatures; _logger = logger;
         _defaultBucket = Environment.GetEnvironmentVariable("STORAGE_BUCKET") ?? Environment.GetEnvironmentVariable("R2_BUCKET_NAME") ?? Environment.GetEnvironmentVariable("R2:BucketName") ?? "aegiscore-vault";
     }
 
@@ -69,7 +72,7 @@ public class DocumentVaultService : IDocumentVaultService
         return tiers.FirstOrDefault() ?? (await _tierRepo.FindAsync(t => t.TierLevel == 3 && t.IsActive, ct)).First();
     }
 
-    public async Task<DocumentVaultEntry> UploadDocumentAsync(Stream content, string fileName, string contentType, string category, Guid uploadedByUserId, string uploadedByRole, CancellationToken ct)
+    public async Task<DocumentVaultEntry> UploadDocumentAsync(Guid tenantId, Stream content, string fileName, string contentType, string category, Guid uploadedByUserId, string uploadedByRole, CancellationToken ct)
     {
         var tier = await GetTierForCategoryAsync(category, ct);
 
@@ -79,8 +82,10 @@ public class DocumentVaultService : IDocumentVaultService
         var hashHex = Convert.ToHexString(hash).ToLowerInvariant();
         content.Position = 0;
 
-        // Generate PQC signature (ML-DSA simulation — replace with actual ML-DSA when PQC lib is available)
-        var (signature, publicKey) = GeneratePqcSignature(hash);
+        // Sign the content hash with the installation's registered post-quantum key. Tier 1 keeps
+        // documents for fifty years, which outlives an ML-DSA key's rotation window, so those are
+        // signed with the stateless archival algorithm instead.
+        var signed = await _signatures.SignAsync(tenantId, "document-vault", hash, archival: tier.TierLevel == 1, ct);
 
         // Upload to storage provider (works with: local MinIO, AWS S3, Azure Blob, GCP Cloud Storage, Cloudflare R2)
         var storageKey = $"{tier.StoragePrefix}{DateTime.UtcNow:yyyy/MM/dd}/{Guid.NewGuid():N}/{fileName}";
@@ -96,14 +101,16 @@ public class DocumentVaultService : IDocumentVaultService
             Id = Guid.NewGuid(), FileName = fileName, ContentType = contentType,
             FileSizeBytes = content.Length, DocumentCategory = category,
             TierId = tier.Id, TierLevel = tier.TierLevel,
-            PqcSignatureBase64 = signature, PqcPublicKeyBase64 = publicKey,
+            PqcSignatureBase64 = Convert.ToBase64String(signed.Signature),
+            PqcPublicKeyBase64 = Convert.ToBase64String(signed.PublicKey),
+            PqcAlgorithm = signed.Algorithm, PqcKeyId = signed.KeyId,
             Sha512Hash = hashHex, IsPqcVerified = true, PqcVerifiedAt = DateTime.UtcNow,
             StorageBucket = tier.BucketName ?? _defaultBucket, StorageKey = storageKey,
             StorageUrl = storageUrl,
             UploadedAt = DateTime.UtcNow, RetentionExpiresAt = lockUntil,
             IsRetentionLocked = true, LockMode = tier.ObjectLockMode, LockedUntil = lockUntil,
             UploadedByUserId = uploadedByUserId, UploadedByRole = uploadedByRole,
-            TenantId = Guid.Empty
+            TenantId = tenantId
         };
         await _docRepo.AddAsync(entry, ct);
 
@@ -111,7 +118,7 @@ public class DocumentVaultService : IDocumentVaultService
         {
             Id = Guid.NewGuid(), DocumentId = entry.Id, AccessType = "Upload",
             AccessedByUserId = uploadedByUserId, AccessedByRole = uploadedByRole,
-            TenantId = Guid.Empty
+            TenantId = tenantId
         }, ct);
 
         _logger.LogInformation("Document vaulted: {File} ({Category}) → Tier {Tier} ({Retention}yr lock), PQC signed, SHA-512: {Hash}", fileName, category, tier.TierLevel, tier.RetentionYears, hashHex[..16]);
@@ -127,12 +134,13 @@ public class DocumentVaultService : IDocumentVaultService
             return null;
         }
 
-        // Verify PQC signature before serving
+        // A document that has failed verification stays withheld until someone restores it: serving
+        // it would hand out bytes this installation can no longer vouch for.
         if (!doc.IsPqcVerified)
         {
-            await _logRepo.AddAsync(new DocumentAccessLog { Id = Guid.NewGuid(), DocumentId = documentId, AccessType = "Download", AccessedByUserId = requestedByUserId, AccessedByRole = requestedByRole, WasDenied = true, DenialReason = "PQC verification required but document not verified", TenantId = Guid.Empty }, ct);
-            _logger.LogWarning("Download denied: document {Id} ({File}) not PQC verified", documentId, doc.FileName);
-            return null;
+            await _logRepo.AddAsync(new DocumentAccessLog { Id = Guid.NewGuid(), DocumentId = documentId, AccessType = "Download", AccessedByUserId = requestedByUserId, AccessedByRole = requestedByRole, WasDenied = true, DenialReason = "Withheld: the document is not verified", TenantId = doc.TenantId }, ct);
+            _logger.LogWarning("Download withheld: document {Id} ({File}) is not verified", documentId, doc.FileName);
+            throw new InvalidDataException($"'{doc.FileName}' is in the vault but is not verified, so it has been withheld. Its stored copy no longer matches the hash recorded when it was vaulted — restore it from a backup and verify it again.");
         }
 
         if (doc.StorageBucket != null && doc.StorageKey != null)
@@ -153,21 +161,36 @@ public class DocumentVaultService : IDocumentVaultService
                 await _logRepo.AddAsync(new DocumentAccessLog { Id = Guid.NewGuid(), DocumentId = documentId, AccessType = "Download", AccessedByUserId = requestedByUserId, AccessedByRole = requestedByRole, Notes = hashHex == doc.Sha512Hash ? "Hash verified" : "HASH MISMATCH — possible tampering", TenantId = Guid.Empty }, ct);
 
                 if (hashHex != doc.Sha512Hash)
-                    _logger.LogError("CRITICAL: Hash mismatch on document {Id} ({File}) — stored={StoredHash}, downloaded={DownloadedHash}", documentId, doc.FileName, doc.Sha512Hash, hashHex);
+                {
+                    // Serving bytes that do not match the recorded hash would hand someone a
+                    // corrupted or substituted document under a fifty-year retention lock.
+                    _logger.LogError("Hash mismatch on document {Id} ({File}) — stored={StoredHash}, downloaded={DownloadedHash}", documentId, doc.FileName, doc.Sha512Hash, hashHex);
+                    doc.IsPqcVerified = false;
+                    await _docRepo.UpdateAsync(doc, ct);
+                    await ms.DisposeAsync();
+                    throw new InvalidDataException($"'{doc.FileName}' does not match the hash recorded when it was vaulted, so it has been withheld and marked unverified. The stored copy has been altered or damaged; restore it from a backup.");
+                }
 
                 return ms;
+            }
+            catch (InvalidDataException) { throw; }
+            catch (FileNotFoundException ex)
+            {
+                _logger.LogError(ex, "Document {Id} is recorded in the vault but absent from storage at {Bucket}/{Key}", documentId, doc.StorageBucket, doc.StorageKey);
+                await _logRepo.AddAsync(new DocumentAccessLog { Id = Guid.NewGuid(), DocumentId = documentId, AccessType = "Download", AccessedByUserId = requestedByUserId, AccessedByRole = requestedByRole, WasDenied = true, DenialReason = "Recorded in the vault but absent from storage", TenantId = Guid.Empty }, ct);
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Download failed for document {Id} via {Provider}", documentId, _storage.GetType().Name);
-                return null;
+                throw;
             }
         }
 
         return null;
     }
 
-    public async Task<bool> VerifyDocumentAsync(Guid documentId, Guid verifiedByUserId, CancellationToken ct)
+    public async Task<bool> VerifyDocumentAsync(Guid tenantId, Guid documentId, Guid verifiedByUserId, CancellationToken ct)
     {
         var doc = await _docRepo.GetByIdAsync(documentId, ct);
         if (doc == null) return false;
@@ -184,16 +207,29 @@ public class DocumentVaultService : IDocumentVaultService
                 var hash = await SHA512.HashDataAsync(ms, ct);
                 var hashHex = Convert.ToHexString(hash).ToLowerInvariant();
 
-                doc.IsPqcVerified = hashHex == doc.Sha512Hash;
+                // Two separate questions: are these the bytes that were vaulted (hash), and did
+                // this installation's key sign them (signature)? Both must answer yes.
+                var hashMatches = hashHex == doc.Sha512Hash;
+                var signatureValid = hashMatches
+                    && doc.PqcAlgorithm is not null && doc.PqcSignatureBase64 is not null && doc.PqcPublicKeyBase64 is not null
+                    && _signatures.Verify(doc.PqcAlgorithm, hash, Convert.FromBase64String(doc.PqcSignatureBase64), Convert.FromBase64String(doc.PqcPublicKeyBase64));
+
+                doc.IsPqcVerified = hashMatches && signatureValid;
                 doc.PqcVerifiedAt = DateTime.UtcNow;
                 doc.VerifiedByUserId = verifiedByUserId;
                 await _docRepo.UpdateAsync(doc, ct);
 
-                await _logRepo.AddAsync(new DocumentAccessLog { Id = Guid.NewGuid(), DocumentId = documentId, AccessType = "Verify", AccessedByUserId = verifiedByUserId, Notes = doc.IsPqcVerified ? "PQC verification passed — hash matches" : "PQC verification FAILED — hash mismatch", TenantId = Guid.Empty }, ct);
+                var note = !hashMatches
+                    ? "Failed: the stored bytes no longer match the hash recorded at upload"
+                    : !signatureValid
+                        ? $"Failed: the {doc.PqcAlgorithm ?? "post-quantum"} signature over that hash did not verify"
+                        : $"Passed: hash matches and the {doc.PqcAlgorithm} signature verifies against key {doc.PqcKeyId}";
+                await _logRepo.AddAsync(new DocumentAccessLog { Id = Guid.NewGuid(), DocumentId = documentId, AccessType = "Verify", AccessedByUserId = verifiedByUserId, Notes = note, TenantId = Guid.Empty }, ct);
+                _logger.LogInformation("Vault verification of {File}: {Note}", doc.FileName, note);
 
                 return doc.IsPqcVerified;
             }
-            catch { }
+            catch (Exception ex) { _logger.LogError(ex, "Verification of document {Id} could not complete", documentId); throw; }
         }
         return false;
     }
@@ -232,12 +268,4 @@ public class DocumentVaultService : IDocumentVaultService
         return existing;
     }
 
-    private static (string signature, string publicKey) GeneratePqcSignature(byte[] hash)
-    {
-        // ML-DSA (FIPS 204) simulation — production should use BouncyCastle PQC or liboqs
-        using var rsa = RSA.Create(3072);
-        var sig = rsa.SignHash(hash, HashAlgorithmName.SHA512, RSASignaturePadding.Pss);
-        var pub = rsa.ExportSubjectPublicKeyInfo();
-        return (Convert.ToBase64String(sig), Convert.ToBase64String(pub));
-    }
 }

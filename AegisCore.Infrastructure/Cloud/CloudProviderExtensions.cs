@@ -30,14 +30,11 @@ public static class CloudProviderExtensions
                 _ => throw new InvalidOperationException("AEGISCORE_SECRET_PROVIDER must be INFISICAL, FILE, ENVIRONMENT, AZURE, AWS, or GCP.")
             });
 
+        // Checked here, at startup, so an unusable provider stops the process with a sentence an
+        // operator can act on rather than accepting uploads it will silently drop.
+        Storage.ObjectStorageFactory.Validate(configuration);
         services.AddSingleton<IStorageService>(sp =>
-            provider switch
-            {
-                "AZURE" or "R2" => new AzureStorageService(configuration, sp.GetRequiredService<ILogger<AzureStorageService>>()),
-                "AWS" => new S3StorageService(configuration, sp.GetRequiredService<ILogger<S3StorageService>>()),
-                "GCP" => new GcsStorageService(configuration, sp.GetRequiredService<ILogger<GcsStorageService>>()),
-                _ => new MinioStorageService(configuration, sp.GetRequiredService<ILogger<MinioStorageService>>())
-            });
+            Storage.ObjectStorageFactory.Create(configuration, sp.GetRequiredService<ILoggerFactory>()));
 
         services.AddScoped<IEmailService>(sp =>
             provider switch

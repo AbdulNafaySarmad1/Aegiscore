@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Sockets;
 using System.Reflection;
 using AegisCore.Infrastructure;
@@ -66,22 +66,29 @@ public sealed class ModuleHealthService(IServiceProvider services, ApplicationPa
         infrastructure.Add(await TcpAsync("smtp", configuration["Email:SmtpHost"], configuration.GetValue<int?>("Email:SmtpPort") ?? 587,
             "Outgoing e-mail (activation links, notifications) is configured with Email__SmtpHost/Email__SmtpPort.", ct));
 
-        var storage = configuration["AEGISCORE_STORAGE_LOCAL_PATH"];
-        if ((configuration["AEGISCORE_STORAGE_PROVIDER"] ?? "LOCAL").Equals("LOCAL", StringComparison.OrdinalIgnoreCase))
+        // Storage: written, read back and compared through the configured provider. Checking that a
+        // directory is writable proved nothing while the provider itself discarded every upload.
+        var objects = provider.GetRequiredService<AegisCore.Contracts.Abstractions.Cloud.IStorageService>();
+        var probeKey = $"health-probe/{Guid.NewGuid():N}";
+        var probeBytes = Guid.NewGuid().ToByteArray();
+        try
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(storage)) throw new InvalidOperationException("AEGISCORE_STORAGE_LOCAL_PATH is not set");
-                Directory.CreateDirectory(storage);
-                var probe = Path.Combine(storage, ".health-probe");
-                await File.WriteAllTextAsync(probe, DateTime.UtcNow.ToString("O"), ct);
-                File.Delete(probe);
-                infrastructure.Add(new("storage", "healthy", $"Local storage at {storage} is writable."));
-            }
-            catch (Exception ex)
-            {
-                infrastructure.Add(new("storage", "unavailable", $"Local storage is not writable: {Root(ex)}. Documents, uploads and exports need AEGISCORE_STORAGE_LOCAL_PATH to point at a writable directory (the storage volume)."));
-            }
+            await objects.CreateBucketIfNotExistsAsync("aegis-health-check", ct);
+            await objects.UploadAsync("aegis-health-check", probeKey, new MemoryStream(probeBytes), "application/octet-stream", cancellationToken: ct);
+            await using var stored = await objects.DownloadAsync("aegis-health-check", probeKey, ct);
+            using var readBack = new MemoryStream();
+            await stored.CopyToAsync(readBack, ct);
+            infrastructure.Add(readBack.ToArray().SequenceEqual(probeBytes)
+                ? new("storage", "healthy", $"A {probeBytes.Length}-byte object was written and read back unchanged via {objects.GetType().Name}.")
+                : new("storage", "unavailable", $"{objects.GetType().Name} accepted a {probeBytes.Length}-byte object and returned {readBack.Length} bytes. Documents uploaded here are being lost."));
+        }
+        catch (Exception ex)
+        {
+            infrastructure.Add(new("storage", "unavailable", $"Object storage is not usable: {Root(ex)}. Documents, uploads and exports need AEGISCORE_STORAGE_PROVIDER (local or s3) and, for local storage, AEGISCORE_STORAGE_LOCAL_PATH pointing at a writable mounted volume."));
+        }
+        finally
+        {
+            try { await objects.DeleteAsync("aegis-health-check", probeKey, ct); } catch { /* the probe is disposable */ }
         }
 
         var licenseUrl = configuration["License:HeartbeatUrl"] ?? configuration["LICENSE_SERVER_URL"] ?? configuration["License:ServerUrl"];
