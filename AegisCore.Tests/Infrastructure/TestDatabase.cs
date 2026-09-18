@@ -92,7 +92,9 @@ public sealed class TestDatabase : IAsyncDisposable
     {
         var options = new DbContextOptionsBuilder<AegisDbContext>();
         Configure(options);
-        return new AegisDbContext(options.Options, new HttpContextAccessor { HttpContext = http }, Adapter);
+        // A plain property, not HttpContextAccessor: that one keeps the context in an AsyncLocal, which does
+        // not flow out of an async helper, so a context created inside one silently lost its tenant.
+        return new AegisDbContext(options.Options, new FixedHttpContextAccessor(http), Adapter);
     }
 
     // Building the 600-table schema takes thousands of locks; a dozen in parallel exhausts the
@@ -128,6 +130,11 @@ public sealed class TestDatabase : IAsyncDisposable
             await drop.ExecuteNonQueryAsync();
         }
         finally { ServerGate.Release(); }
+    }
+
+    private sealed class FixedHttpContextAccessor(HttpContext context) : IHttpContextAccessor
+    {
+        public HttpContext? HttpContext { get; set; } = context;
     }
 }
 

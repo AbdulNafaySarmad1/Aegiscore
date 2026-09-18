@@ -101,8 +101,10 @@ public class GlobalExceptionMiddleware
     /// </summary>
     public static (int Status, string Code, string Message) Describe(Exception ex) => ex switch
     {
+        AegisCore.Infrastructure.Licensing.LicenseReadOnlyException => (StatusCodes.Status403Forbidden, "license_read_only", ex.Message),
         KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", string.IsNullOrWhiteSpace(ex.Message) ? "The requested record was not found." : ex.Message),
         ArgumentException => (StatusCodes.Status400BadRequest, "invalid_request", ex.Message),
+        NotSupportedException => (StatusCodes.Status501NotImplemented, "not_available", ex.Message),
         FormatException => (StatusCodes.Status400BadRequest, "invalid_request", "A value in the request has the wrong format: " + ex.Message),
         Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "concurrency_conflict", "Someone else changed this record first. Reload it and try again."),
         Microsoft.EntityFrameworkCore.DbUpdateException => (StatusCodes.Status500InternalServerError, "database_write_failed", "The database rejected this change. An administrator can find the details in the application log under the reference below."),

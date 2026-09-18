@@ -35,7 +35,7 @@ public class PostgresPilotTests
         var connection = Environment.GetEnvironmentVariable("PILOT_POSTGRES_CONNECTION")!;
         var parsed = new NpgsqlConnectionStringBuilder(connection);
         Assert.StartsWith("aegiscore_", parsed.Database, StringComparison.Ordinal);
-        Assert.Contains(parsed.Host, new[] { "127.0.0.1", "localhost" });
+        Assert.Contains(parsed.Host, new[] { "127.0.0.1", "localhost", "aegiscore-pilot-postgres" }); // the last is the pilot container, reached from the Linux test runner
         var tenant = Guid.Parse("eba35470-ad75-4cac-bb60-c8d4886ebfd7");
         // A throwaway database on the pilot server: the seeder never overwrites an existing account, so
         // running against the live pilot database would compare against whatever password it was seeded with.

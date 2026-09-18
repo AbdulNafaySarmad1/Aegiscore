@@ -83,6 +83,9 @@ public static class CoreServicesExtensions
             });
         });
         services.AddHealthChecks();
+        // Minimal-API endpoint groups (finance v2, board, achievements, ...) are described only with this;
+        // without it 244 endpoints were absent from the OpenAPI document and from every route sweep.
+        services.AddEndpointsApiExplorer();
         services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>(ServiceLifetime.Scoped);
         services.AddScoped<AsyncFluentValidationFilter>();
         services.AddControllers(options => options.Filters.AddService<AsyncFluentValidationFilter>());

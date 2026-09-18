@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
@@ -23,11 +24,26 @@ public class GradeAppealService : IGradeAppealService
 // P112 Grade Distribution Analysis
 public class GradeDistributionService : IGradeDistributionService
 {
-    private readonly IRepository<GradeDistribution> _dRepo; private readonly IRepository<DistributionAnomalyAlert> _aRepo;
-    public GradeDistributionService(IRepository<GradeDistribution> d, IRepository<DistributionAnomalyAlert> a) { _dRepo = d; _aRepo = a; }
+    private readonly IRepository<GradeDistribution> _dRepo; private readonly IRepository<DistributionAnomalyAlert> _aRepo; private readonly AegisDbContext _db;
+    public GradeDistributionService(IRepository<GradeDistribution> d, IRepository<DistributionAnomalyAlert> a, AegisDbContext db) { _dRepo = d; _aRepo = a; _db = db; }
+    // The statistics come from the marks recorded for the course; a course with no results has no
+    // distribution, and says so rather than answering with an invented one.
     public async Task<GradeDistribution> AnalyzeAsync(Guid courseId, string semester, Guid? sectionId, CancellationToken ct)
     {
-        var dist = new GradeDistribution { Id = Guid.NewGuid(), CourseId = courseId, Semester = semester, SectionId = sectionId, FacultyId = Guid.Empty, Mean = 72.5, Median = 74.0, Mode = 78.0, StdDev = 12.3, Variance = 151.3, Skewness = -0.45, Kurtosis = 2.1, PassRate = 0.88, DistinctionRate = 0.15, FailureRate = 0.12, EnrollmentCount = 45, CurveShape = GradeCurveShape.LeftSkewed };
+        var results = await _db.Results.AsNoTracking().Where(r => r.CourseId == courseId && r.TotalMarks > 0)
+            .Select(r => new { r.ObtainedMarks, r.TotalMarks, r.Enrollment.StudentId }).ToListAsync(ct);
+        if (results.Count == 0) throw new KeyNotFoundException($"No results are recorded for course {courseId}; a grade distribution cannot be computed until marks are entered.");
+        var facultyId = await _db.CourseAssignments.AsNoTracking().Where(a => a.CourseId == courseId).Select(a => (Guid?)a.FacultyId).FirstOrDefaultAsync(ct) ?? Guid.Empty;
+        var stats = DistributionStatistics.From(results.Select(r => (double)r.ObtainedMarks / (double)r.TotalMarks * 100).ToList());
+        var dist = new GradeDistribution
+        {
+            Id = Guid.NewGuid(), CourseId = courseId, Semester = semester, SectionId = sectionId, FacultyId = facultyId,
+            Mean = stats.Mean, Median = stats.Median, Mode = stats.Mode, StdDev = stats.StdDev, Variance = stats.Variance, Skewness = stats.Skewness, Kurtosis = stats.Kurtosis,
+            PassRate = stats.Share(p => p >= 50), DistinctionRate = stats.Share(p => p >= 80), FailureRate = stats.Share(p => p < 50),
+            EnrollmentCount = results.Select(r => r.StudentId).Distinct().Count(), CurveShape = stats.Shape,
+            LetterDistributionJson = System.Text.Json.JsonSerializer.Serialize(stats.Letters()),
+            PercentileBreakdownJson = System.Text.Json.JsonSerializer.Serialize(stats.Percentiles())
+        };
         await _dRepo.AddAsync(dist, ct);
         if (dist.FailureRate > 0.35) { var alert = new DistributionAnomalyAlert { Id = Guid.NewGuid(), DistributionId = dist.Id, AnomalyType = DistributionAnomaly.HighFailureRate, Description = "Failure rate exceeds 35% threshold", RecommendedAction = "Review assessment difficulty and consider remedial support" }; await _aRepo.AddAsync(alert, ct); }
         return dist;

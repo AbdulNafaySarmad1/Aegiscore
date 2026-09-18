@@ -93,8 +93,8 @@ public sealed class ClientLicenseTests
         await using var db = new AegisDbContext(options); await db.Database.EnsureCreatedAsync();
         db.LicenseStates.Add(new LicenseState { Status = "expired", UniversityName = "Client" }); await db.SaveChangesAsync();
         db.Students.Add(new Student { FirstName = "Test", LastName = "Learner" });
-        await Assert.ThrowsAsync<InvalidOperationException>(() => db.SaveChangesAsync());
-        Assert.Throws<InvalidOperationException>(() => db.SaveChanges());
+        await Assert.ThrowsAsync<AegisCore.Infrastructure.Licensing.LicenseReadOnlyException>(() => db.SaveChangesAsync());
+        Assert.Throws<AegisCore.Infrastructure.Licensing.LicenseReadOnlyException>(() => db.SaveChanges());
         Assert.Equal(0, await db.Students.CountAsync());
         Assert.Equal(1, await db.LicenseStates.CountAsync());
     }

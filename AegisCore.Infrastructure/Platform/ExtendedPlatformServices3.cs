@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
@@ -53,12 +54,44 @@ public class VisitingFacultyService : IVisitingFacultyService
 // P122 Student Achievement Gamification
 public class AchievementService : IAchievementService
 {
-    private readonly IRepository<StudentBadge> _bRepo; private readonly IRepository<AchievementBadge> _cRepo; private readonly IRepository<DeansListEntry> _dRepo; private readonly IRepository<LeaderboardEntry> _lRepo; private readonly IRepository<AchievementRoadmap> _rRepo;
-    public AchievementService(IRepository<StudentBadge> b, IRepository<AchievementBadge> c, IRepository<DeansListEntry> d, IRepository<LeaderboardEntry> l, IRepository<AchievementRoadmap> r) { _bRepo = b; _cRepo = c; _dRepo = d; _lRepo = l; _rRepo = r; }
+    private readonly IRepository<StudentBadge> _bRepo; private readonly IRepository<AchievementBadge> _cRepo; private readonly IRepository<DeansListEntry> _dRepo; private readonly IRepository<LeaderboardEntry> _lRepo; private readonly IRepository<AchievementRoadmap> _rRepo; private readonly AegisDbContext _db;
+    public AchievementService(IRepository<StudentBadge> b, IRepository<AchievementBadge> c, IRepository<DeansListEntry> d, IRepository<LeaderboardEntry> l, IRepository<AchievementRoadmap> r, AegisDbContext db) { _bRepo = b; _cRepo = c; _dRepo = d; _lRepo = l; _rRepo = r; _db = db; }
+    /// <summary>Each student's standing on the 4.0 scale, from the marks recorded against their enrolments.</summary>
+    private async Task<List<(Guid StudentId, decimal Gpa)>> StandingsAsync(CancellationToken ct)
+    {
+        var rows = await _db.Results.AsNoTracking().Where(r => r.TotalMarks > 0)
+            .Select(r => new { r.Enrollment.StudentId, Percent = r.ObtainedMarks * 100m / r.TotalMarks }).ToListAsync(ct);
+        return rows.GroupBy(r => r.StudentId).Select(g => (g.Key, Math.Round(Math.Min(4m, g.Average(x => x.Percent) / 25m), 2))).OrderByDescending(x => x.Item2).ToList();
+    }
     public async Task<List<StudentBadge>> DetectAchievementsAsync(Guid studentId, CancellationToken ct) { var badges = await _cRepo.FindAsync(b => b.IsActive, ct); return badges.Select(b => new StudentBadge { Id = Guid.NewGuid(), StudentId = studentId, BadgeId = b.Id, AchievementDetail = $"Earned {b.Name}", VerificationHash = Guid.NewGuid().ToString()[..16] }).ToList(); }
     public async Task<StudentBadge> IssueBadgeAsync(Guid studentId, Guid badgeId, string detail, CancellationToken ct) { var badge = new StudentBadge { Id = Guid.NewGuid(), StudentId = studentId, BadgeId = badgeId, AchievementDetail = detail, VerificationHash = Guid.NewGuid().ToString()[..16] }; await _bRepo.AddAsync(badge, ct); return badge; }
-    public async Task<List<DeansListEntry>> ProcessDeansListAsync(string semester, CancellationToken ct) { var entry = new DeansListEntry { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Cgpa = 3.85M, Status = DeansListStatus.Nominated.ToString() }; await _dRepo.AddAsync(entry, ct); return new List<DeansListEntry> { entry }; }
-    public async Task<List<LeaderboardEntry>> GenerateLeaderboardAsync(LeaderboardScope scope, string scopeValue, string semester, CancellationToken ct) { var entry = new LeaderboardEntry { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), Scope = scope.ToString(), Rank = 1, Score = 95.5M }; await _lRepo.AddAsync(entry, ct); return new List<LeaderboardEntry> { entry }; }
+    // Dean's list: students at or above 3.50 on the results recorded; none qualify, none are listed.
+    public async Task<List<DeansListEntry>> ProcessDeansListAsync(string semester, CancellationToken ct)
+    {
+        var listed = new List<DeansListEntry>();
+        foreach (var (studentId, gpa) in await StandingsAsync(ct))
+        {
+            if (gpa < 3.5m) break;
+            var entry = new DeansListEntry { Id = Guid.NewGuid(), StudentId = studentId, Cgpa = gpa, Status = DeansListStatus.Nominated.ToString() };
+            await _dRepo.AddAsync(entry, ct);
+            listed.Add(entry);
+        }
+        return listed;
+    }
+    public async Task<List<LeaderboardEntry>> GenerateLeaderboardAsync(LeaderboardScope scope, string scopeValue, string semester, CancellationToken ct)
+    {
+        var scopeName = scope.ToString();
+        foreach (var stale in await _lRepo.FindAsync(l => l.Scope == scopeName, ct)) await _lRepo.DeleteAsync(stale, ct);
+        var entries = new List<LeaderboardEntry>();
+        var rank = 0;
+        foreach (var (studentId, gpa) in (await StandingsAsync(ct)).Take(100))
+        {
+            var entry = new LeaderboardEntry { Id = Guid.NewGuid(), StudentId = studentId, Scope = scopeName, Metric = "cgpa", Rank = ++rank, Score = gpa };
+            await _lRepo.AddAsync(entry, ct);
+            entries.Add(entry);
+        }
+        return entries;
+    }
     public async Task<AchievementRoadmap> GenerateRoadmapAsync(Guid studentId, CancellationToken ct) { var roadmap = new AchievementRoadmap { Id = Guid.NewGuid(), StudentId = studentId }; await _rRepo.AddAsync(roadmap, ct); return roadmap; }
     public async Task<List<AchievementBadge>> GetBadgeCatalogAsync(CancellationToken ct) { var all = await _cRepo.FindAsync(b => b.IsActive, ct); return all.ToList(); }
 }

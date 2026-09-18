@@ -42,10 +42,11 @@ public sealed class JwtProductionKeyTests
     [Fact]
     public void Production_Names_The_Missing_Key_File()
     {
+        var missing = Path.Combine(Path.GetTempPath(), "aegis-missing-" + Guid.NewGuid().ToString("N"));
         var configuration = Config(("ASPNETCORE_ENVIRONMENT", "Production"),
-            (JwtKeyMaterial.PrivateKeyPathKey, "/app/config/jwt-signing.key"), (JwtKeyMaterial.PublicKeyPathKey, "/app/config/jwt-signing.pub"));
+            (JwtKeyMaterial.PrivateKeyPathKey, Path.Combine(missing, "jwt-signing.key")), (JwtKeyMaterial.PublicKeyPathKey, Path.Combine(missing, "jwt-signing.pub")));
         var problem = JwtKeyMaterial.ProductionKeyProblem(configuration)!;
-        Assert.Contains("/app/config/jwt-signing.key", problem);
+        Assert.Contains(Path.Combine(missing, "jwt-signing.key"), problem);
         Assert.Contains("restore it from backup", problem);
     }
 

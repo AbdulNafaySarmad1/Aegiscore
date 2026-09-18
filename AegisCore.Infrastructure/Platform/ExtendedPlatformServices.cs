@@ -45,7 +45,9 @@ public class HealthAnalyzerService : IHealthAnalyzerService
 {
     private readonly IHealthScoreRepository _repo; private readonly ILogger<HealthAnalyzerService> _logger;
     public HealthAnalyzerService(IHealthScoreRepository r, ILogger<HealthAnalyzerService> l) { _repo = r; _logger = l; }
-    public async Task<HealthScore> GenerateReportAsync(CancellationToken ct) { var score = new HealthScore { Id = Guid.NewGuid(), OverallScore = 85, PerformanceScore = 80, SecurityScore = 90, AvailabilityScore = 95, ComplianceScore = 75, StorageScore = 88, DatabaseScore = 82, IntegrationScore = 85, Grade = HealthScoreGrade.B, GeneratedAt = DateTime.UtcNow }; await _repo.AddAsync(score, ct); return score; }
+    // There is no measurement behind these eight scores in this build; /health/deep and /health/schema report what is actually checked.
+    public Task<HealthScore> GenerateReportAsync(CancellationToken ct)
+        => throw new NotSupportedException("The health score report is not available: this installation has no telemetry collector for the eight sub-scores. Use /health/deep and /health/schema for the checks that are performed.");
     public async Task<HealthScore?> GetLatestReportAsync(CancellationToken ct) => await _repo.GetLatestAsync(ct);
 }
 
@@ -62,7 +64,9 @@ public class BenchmarkService : IBenchmarkService
 {
     private readonly IBenchmarkRunRepository _repo;
     public BenchmarkService(IBenchmarkRunRepository r) { _repo = r; }
-    public async Task<BenchmarkRun> StartBenchmarkAsync(string scenario, BenchmarkTier tier, CancellationToken ct) { var run = new BenchmarkRun { Id = Guid.NewGuid(), ScenarioName = scenario, Tier = tier, Status = BenchmarkStatus.Completed, CompletedAt = DateTime.UtcNow, RequestsPerSecond = 500, P95LatencyMs = 120, ErrorRate = 0.01 }; await _repo.AddAsync(run, ct); return run; }
+    // No load generator runs inside the application; a benchmark is run from outside (see the load-test scripts) and its result recorded.
+    public Task<BenchmarkRun> StartBenchmarkAsync(string scenario, BenchmarkTier tier, CancellationToken ct)
+        => throw new NotSupportedException("Benchmarks are not started from inside the application. Run the load-test scripts against the deployment and record the run through the benchmark results endpoint.");
     public async Task<BenchmarkRun?> GetLatestRunAsync(CancellationToken ct) { var runs = await _repo.GetRecentAsync(1, ct); return runs.FirstOrDefault(); }
 }
 

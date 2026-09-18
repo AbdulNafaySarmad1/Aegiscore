@@ -28,8 +28,9 @@ public sealed class LicenseWriteInterceptor(IConfiguration configuration, IHostE
     {
         var validOverride = state?.OverrideUntil > DateTimeOffset.UtcNow;
         if (validOverride) return;
-        if (state is null || state.Status is "expired" or "invalid" or "revoked" || state.LockedAt is not null || state.FailedHeartbeatCount >= 2)
-            throw new InvalidOperationException("The installation license is read-only. No business records were changed.");
+        if (state is null) throw new LicenseReadOnlyException("no licence has been activated");
+        if (state.Status is "expired" or "invalid" or "revoked") throw new LicenseReadOnlyException("the licence is " + state.Status);
+        if (state.LockedAt is not null || state.FailedHeartbeatCount >= 2) throw new LicenseReadOnlyException(state.LockReason == "heartbeat_failed" || state.FailedHeartbeatCount >= 2 ? "the licence authority could not be reached for two consecutive heartbeats" : "the licence is locked (" + (state.LockReason ?? "unknown reason") + ")");
     }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)

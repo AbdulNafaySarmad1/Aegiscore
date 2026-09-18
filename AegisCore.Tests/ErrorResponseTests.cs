@@ -8,8 +8,10 @@ namespace AegisCore.Tests;
 public sealed class ErrorResponseTests
 {
     [Theory]
+    [InlineData(typeof(AegisCore.Infrastructure.Licensing.LicenseReadOnlyException), 403, "license_read_only")]
     [InlineData(typeof(KeyNotFoundException), 404, "not_found")]
     [InlineData(typeof(ArgumentException), 400, "invalid_request")]
+    [InlineData(typeof(NotSupportedException), 501, "not_available")]
     [InlineData(typeof(ArgumentOutOfRangeException), 400, "invalid_request")]
     [InlineData(typeof(FormatException), 400, "invalid_request")]
     [InlineData(typeof(DbUpdateConcurrencyException), 409, "concurrency_conflict")]

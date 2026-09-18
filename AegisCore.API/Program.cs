@@ -239,6 +239,18 @@ else
             statusCode: StatusCodes.Status503ServiceUnavailable);
     }).AllowAnonymous();
     app.MapHealthChecks("/health/detail").RequireAuthorization();
+    // What the live database lacks relative to the code, by name: pending migrations, missing tables, missing columns.
+    app.MapGet("/health/schema", async (AegisDbContext db, CancellationToken ct) =>
+    {
+        var verification = await AegisCore.Infrastructure.Database.SchemaVerifier.VerifyAsync(db, ct);
+        return Results.Json(new
+        {
+            status = verification.IsCurrent ? "current" : "drift",
+            summary = verification.Describe(),
+            verification.PendingMigrations, verification.MissingTables, verification.MissingColumns, verification.MistypedColumns,
+            verification.ModelTables, verification.ModelColumns, verification.Note
+        }, statusCode: verification.IsCurrent ? 200 : 503);
+    }).RequireAuthorization();
 
     app.MapGet("/health/deep", async (AegisDbContext db, IConnectionMultiplexer redis, IConfiguration config, CancellationToken ct) =>
     {

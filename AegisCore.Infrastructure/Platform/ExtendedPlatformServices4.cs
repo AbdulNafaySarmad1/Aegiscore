@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
@@ -24,7 +25,9 @@ public class VoiceAssistantService : IVoiceAssistantService
 {
     private readonly IRepository<VoiceSession> _repo;
     public VoiceAssistantService(IRepository<VoiceSession> r) { _repo = r; }
-    public async Task<VoiceSession> ProcessAudioAsync(string audioInput, Guid? userId, CancellationToken ct) { var session = new VoiceSession { Id = Guid.NewGuid(), UserId = userId, DetectedLanguage = VoiceLanguage.English.ToString(), AsrConfidence = (decimal)SpeechConfidence.High, Transcript = "Processed audio transcript", Intent = VoiceIntentType.QueryResults.ToString() }; await _repo.AddAsync(session, ct); return session; }
+    // No speech recogniser is wired into this build; a fixed "transcript" would be a lie.
+    public Task<VoiceSession> ProcessAudioAsync(string audioInput, Guid? userId, CancellationToken ct)
+        => throw new NotSupportedException("Audio transcription is not available: no speech-recognition provider is configured for this installation. Text queries are supported.");
     public async Task<VoiceSession> ProcessTextAsync(string textInput, Guid? userId, VoiceLanguage language, CancellationToken ct) { var intent = textInput.Contains("result") ? VoiceIntentType.QueryResults : textInput.Contains("fee") ? VoiceIntentType.QueryOutstandingFees : textInput.Contains("schedule") ? VoiceIntentType.QueryTimetable : VoiceIntentType.GeneralInquiry; var session = new VoiceSession { Id = Guid.NewGuid(), UserId = userId, DetectedLanguage = language.ToString(), Transcript = textInput, Intent = intent.ToString(), AsrConfidence = (decimal)SpeechConfidence.High, ResponseText = $"Response to: {textInput}" }; await _repo.AddAsync(session, ct); return session; }
     public async Task<VoiceSession> ExecuteActionAsync(Guid sessionId, CancellationToken ct) { var s = await _repo.GetByIdAsync(sessionId, ct) ?? throw new KeyNotFoundException("Session not found."); s.ResponseText = $"Action executed for intent: {s.Intent}"; await _repo.UpdateAsync(s, ct); return s; }
     public async Task<VoiceSession> GetSessionAsync(Guid sessionId, CancellationToken ct) => await _repo.GetByIdAsync(sessionId, ct) ?? throw new KeyNotFoundException("Session not found.");
@@ -33,10 +36,75 @@ public class VoiceAssistantService : IVoiceAssistantService
 // P126 Board Portal (BoardView)
 public class BoardPortalService : IBoardPortalService
 {
-    private readonly IRepository<ExecutiveDashboard> _dRepo; private readonly IRepository<BoardMeetingPack> _pRepo; private readonly IRepository<BoardAlert> _aRepo; private readonly IRepository<StrategicPlanGoal> _gRepo; private readonly IRepository<BenchmarkComparison> _bRepo;
-    public BoardPortalService(IRepository<ExecutiveDashboard> d, IRepository<BoardMeetingPack> p, IRepository<BoardAlert> a, IRepository<StrategicPlanGoal> g, IRepository<BenchmarkComparison> b) { _dRepo = d; _pRepo = p; _aRepo = a; _gRepo = g; _bRepo = b; }
-    public async Task<ExecutiveDashboard> GenerateDashboardAsync(string userRole, string fiscalYear, CancellationToken ct) { var dashboard = new ExecutiveDashboard { Id = Guid.NewGuid(), UserRole = userRole, FiscalYear = fiscalYear, AcademicExcellenceScore = 82.5, FinancialStabilityScore = 78.0, AccreditationScore = 85.0, StudentSuccessScore = 76.5, FacultyQualityScore = 80.0, CompositeRankingScore = 80.4 }; await _dRepo.AddAsync(dashboard, ct); return dashboard; }
-    public async Task<BoardMeetingPack> GenerateBoardPackAsync(string title, DateTime meetingDate, CancellationToken ct) { var pack = new BoardMeetingPack { Id = Guid.NewGuid(), Title = title, MeetingDate = meetingDate, ExecutiveSummary = "Since last meeting, enrollment increased by 3.2% and fee collection reached 94% of target.", IsDistributed = false }; await _pRepo.AddAsync(pack, ct); return pack; }
+    private readonly IRepository<ExecutiveDashboard> _dRepo; private readonly IRepository<BoardMeetingPack> _pRepo; private readonly IRepository<BoardAlert> _aRepo; private readonly IRepository<StrategicPlanGoal> _gRepo; private readonly IRepository<BenchmarkComparison> _bRepo; private readonly AegisDbContext _db;
+    public BoardPortalService(IRepository<ExecutiveDashboard> d, IRepository<BoardMeetingPack> p, IRepository<BoardAlert> a, IRepository<StrategicPlanGoal> g, IRepository<BenchmarkComparison> b, AegisDbContext db) { _dRepo = d; _pRepo = p; _aRepo = a; _gRepo = g; _bRepo = b; _db = db; }
+
+    /// <summary>
+    /// The figures behind the dashboard, each from its register. An index with no data source in
+    /// this installation is reported as unmeasured (0 in the stored row, named in KPIsJson) rather
+    /// than filled with a plausible number.
+    /// </summary>
+    private async Task<InstitutionFigures> FiguresAsync(CancellationToken ct)
+    {
+        var students = await _db.Students.CountAsync(ct);
+        var faculty = await _db.Faculties.CountAsync(ct);
+        var publications = await _db.ResearchPublications.CountAsync(ct);
+        var marks = await _db.Results.AsNoTracking().Where(r => r.TotalMarks > 0).Select(r => r.ObtainedMarks * 100m / r.TotalMarks).ToListAsync(ct);
+        var dues = await _db.StudentFeeDues.AsNoTracking().GroupBy(_ => 1).Select(g => new { Total = g.Sum(x => x.TotalDue - x.ScholarshipDeduction), Paid = g.Sum(x => x.PaidAmount) }).FirstOrDefaultAsync(ct);
+        var demands = await _db.FeeDemands.AsNoTracking().GroupBy(_ => 1).Select(g => new { Total = g.Sum(x => x.TotalAmount), Paid = g.Sum(x => x.PaidAmount) }).FirstOrDefaultAsync(ct);
+        var billed = (dues?.Total ?? 0m) + (demands?.Total ?? 0m);
+        var collected = (dues?.Paid ?? 0m) + (demands?.Paid ?? 0m);
+        var readiness = await _db.ReadinessScores.AsNoTracking().OrderByDescending(s => s.GeneratedAt).Select(s => (decimal?)s.OverallScore).FirstOrDefaultAsync(ct);
+        return new InstitutionFigures(students, faculty, publications,
+            marks.Count > 0 ? (double)marks.Average() : null,
+            marks.Count > 0 ? (double)marks.Count(m => m >= 50m) / marks.Count : null,
+            billed > 0 ? (double)(collected / billed) : null,
+            readiness is null ? null : (double)readiness.Value);
+    }
+    private sealed record InstitutionFigures(int Students, int Faculty, int Publications, double? AverageMarksPercent, double? PassRate, double? FeeCollectionRate, double? ReadinessScore);
+
+    public async Task<ExecutiveDashboard> GenerateDashboardAsync(string userRole, string fiscalYear, CancellationToken ct)
+    {
+        var f = await FiguresAsync(ct);
+        var measured = new Dictionary<string, double>();
+        var unmeasured = new List<string>();
+        void Index(string name, double? value) { if (value is { } v) measured[name] = Math.Round(v, 1); else unmeasured.Add(name); }
+        Index("academicExcellence", f.AverageMarksPercent);
+        Index("financialStability", f.FeeCollectionRate is { } c ? c * 100 : null);
+        Index("accreditation", f.ReadinessScore);
+        Index("studentSuccess", f.PassRate is { } p ? p * 100 : null);
+        unmeasured.Add("facultyQuality"); // no qualification register in this build
+        var dashboard = new ExecutiveDashboard
+        {
+            Id = Guid.NewGuid(), UserRole = userRole, FiscalYear = fiscalYear,
+            AcademicExcellenceScore = measured.GetValueOrDefault("academicExcellence"),
+            FinancialStabilityScore = measured.GetValueOrDefault("financialStability"),
+            AccreditationScore = measured.GetValueOrDefault("accreditation"),
+            StudentSuccessScore = measured.GetValueOrDefault("studentSuccess"),
+            FacultyQualityScore = 0,
+            CompositeRankingScore = measured.Count == 0 ? 0 : Math.Round(measured.Values.Average(), 1),
+            KPIsJson = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                enrolment = f.Students, faculty = f.Faculty, researchPublications = f.Publications,
+                facultyToStudentRatio = f.Students == 0 ? (double?)null : Math.Round((double)f.Faculty / f.Students, 4),
+                feeCollectionRate = f.FeeCollectionRate, averageMarksPercent = f.AverageMarksPercent, passRate = f.PassRate, readinessScore = f.ReadinessScore,
+                measured = measured.Keys, unmeasured, note = "Indices are computed from this installation's registers; an unmeasured index has no data source here and is not estimated."
+            })
+        };
+        await _dRepo.AddAsync(dashboard, ct);
+        return dashboard;
+    }
+    public async Task<BoardMeetingPack> GenerateBoardPackAsync(string title, DateTime meetingDate, CancellationToken ct)
+    {
+        var f = await FiguresAsync(ct);
+        var summary = $"As of {DateTime.UtcNow:d MMMM yyyy}: {f.Students} students and {f.Faculty} faculty on the registers"
+            + (f.FeeCollectionRate is { } c ? $"; {c * 100:0.#}% of billed fees collected" : "; no fees billed yet")
+            + (f.ReadinessScore is { } r ? $"; accreditation readiness {r:0.#}%" : "; accreditation readiness not assessed")
+            + (f.AverageMarksPercent is { } m ? $"; average marks {m:0.#}%." : "; no results recorded yet.");
+        var pack = new BoardMeetingPack { Id = Guid.NewGuid(), Title = title, MeetingDate = meetingDate, ExecutiveSummary = summary, IsDistributed = false };
+        await _pRepo.AddAsync(pack, ct);
+        return pack;
+    }
     public async Task<List<BoardAlert>> GetAlertsAsync(CancellationToken ct) { var all = await _aRepo.FindAsync(a => !a.IsAcknowledged, ct); return all.ToList(); }
     public async Task<List<StrategicPlanGoal>> GetStrategicGoalsAsync(CancellationToken ct) { var all = await _gRepo.FindAsync(g => g.Status != StrategicGoalStatus.Completed, ct); return all.ToList(); }
     public async Task<List<BenchmarkComparison>> GetBenchmarksAsync(string academicYear, CancellationToken ct) { var all = await _bRepo.FindAsync(b => b.AcademicYear == academicYear, ct); return all.ToList(); }
@@ -51,7 +119,10 @@ public class ElectionService : IElectionService
     public async Task<CandidateNomination> NominateCandidateAsync(Guid electionId, Guid studentId, string position, CancellationToken ct) { var nom = new CandidateNomination { Id = Guid.NewGuid(), ElectionId = electionId, StudentId = studentId, PositionName = position, Status = NominationStatus.Submitted, RequiredEndorsements = 10 }; await _nRepo.AddAsync(nom, ct); return nom; }
     public async Task<VoterToken> IssueVoterTokenAsync(Guid electionId, Guid studentId, CancellationToken ct) { var token = new VoterToken { Id = Guid.NewGuid(), ElectionId = electionId, StudentId = studentId, TokenHash = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24))[..32] }; await _vRepo.AddAsync(token, ct); return token; }
     public async Task<EncryptedBallot> CastVoteAsync(Guid electionId, string voterToken, string encryptedVote, CancellationToken ct) { var ballot = new EncryptedBallot { Id = Guid.NewGuid(), ElectionId = electionId, VoterTokenHash = voterToken, EncryptedVoteData = encryptedVote, Status = BallotStatus.Cast, VerificationHash = Guid.NewGuid().ToString()[..16] }; await _bRepo.AddAsync(ballot, ct); return ballot; }
-    public async Task<List<ElectionResult>> TallyResultsAsync(Guid electionId, CancellationToken ct) { var result = new ElectionResult { Id = Guid.NewGuid(), ElectionId = electionId, PositionId = Guid.NewGuid(), CandidateId = Guid.NewGuid(), VoteCount = 150, IsElected = false }; await _rRepo.AddAsync(result, ct); return new List<ElectionResult> { result }; }
+    // Ballots are stored encrypted and this build has no tallying key: a count cannot be produced, and
+    // an invented one is worse than none.
+    public Task<List<ElectionResult>> TallyResultsAsync(Guid electionId, CancellationToken ct)
+        => throw new NotSupportedException("Tallying is not available: ballots are stored encrypted and this installation has no tallying key configured. Cast ballots are retained; contact the vendor to enable counting.");
     public async Task<ElectionResult> CertifyResultsAsync(Guid resultId, CancellationToken ct) { var r = await _rRepo.GetByIdAsync(resultId, ct) ?? throw new KeyNotFoundException("Result not found."); r.IsElected = true; await _rRepo.UpdateAsync(r, ct); return r; }
 }
 
