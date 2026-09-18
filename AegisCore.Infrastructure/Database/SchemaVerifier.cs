@@ -30,7 +30,9 @@ public sealed record SchemaVerification(
         if (MissingTables.Count > 0) parts.Add($"{MissingTables.Count} table(s) missing ({string.Join(", ", MissingTables.Take(5))}{(MissingTables.Count > 5 ? ", …" : "")})");
         if (MissingColumns.Count > 0) parts.Add($"{MissingColumns.Count} column(s) missing ({string.Join(", ", MissingColumns.Take(5))}{(MissingColumns.Count > 5 ? ", …" : "")})");
         if (MistypedColumns.Count > 0) parts.Add($"{MistypedColumns.Count} column(s) of the wrong type ({string.Join(", ", MistypedColumns.Take(5))}{(MistypedColumns.Count > 5 ? ", …" : "")})");
-        return "Schema is not current: " + string.Join("; ", parts) + ". Apply the migrations (Database__AutoMigrate=true for one start, or `dotnet AegisCore.API.dll migrate`) before serving requests.";
+        return "Schema is not current: " + string.Join("; ", parts) + (PendingMigrations.Count > 0
+            ? ". Apply the migrations (Database__AutoMigrate=true for one start, or `dotnet AegisCore.API.dll migrate`) before serving requests."
+            : ". No migration is pending: the difference was made outside the migration history.");
     }
 }
 
