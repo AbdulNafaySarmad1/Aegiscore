@@ -151,33 +151,26 @@ public sealed class ApplicantTokenService(IConfiguration configuration, IConnect
     /// <summary>Shared with the JWT bearer validation for the applicant scheme.</summary>
     public static (SecurityKey Key, string Algorithm) ResolveSigningKey(IConfiguration configuration)
     {
-        var privateKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PrivateKeyPem(configuration);
-        var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
-        if (!string.IsNullOrWhiteSpace(privateKeyPem) && !string.IsNullOrWhiteSpace(publicKeyPem))
-        {
-            var rsa = RSA.Create();
-            rsa.ImportFromPem(privateKeyPem.ToCharArray());
-            return (new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
-        }
+        var problem = AegisCore.Infrastructure.Security.JwtKeyMaterial.ProductionKeyProblem(configuration);
+        if (problem is not null) throw new InvalidOperationException(problem);
+        var signingKey = AegisCore.Infrastructure.Security.JwtKeyMaterial.SigningKey(configuration);
+        if (signingKey is not null) return (signingKey, SecurityAlgorithms.RsaSha256);
 
         var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"]
             ?? throw new InvalidOperationException("Applicant token signing key is not configured.");
         return (new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)), SecurityAlgorithms.HmacSha256);
     }
 
-    public static SecurityKey ResolveValidationKey(IConfiguration configuration)
+    public static IReadOnlyList<SecurityKey> ResolveValidationKeys(IConfiguration configuration)
     {
-        var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
-        if (!string.IsNullOrWhiteSpace(publicKeyPem))
-        {
-            var rsa = RSA.Create();
-            rsa.ImportFromPem(publicKeyPem.ToCharArray());
-            return new RsaSecurityKey(rsa);
-        }
+        var problem = AegisCore.Infrastructure.Security.JwtKeyMaterial.ProductionKeyProblem(configuration);
+        if (problem is not null) throw new InvalidOperationException(problem);
+        var keys = AegisCore.Infrastructure.Security.JwtKeyMaterial.ValidationKeys(configuration);
+        if (keys.Count > 0) return keys;
 
         var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"]
             ?? throw new InvalidOperationException("Applicant token validation key is not configured.");
-        return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        return [new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))];
     }
 }
 

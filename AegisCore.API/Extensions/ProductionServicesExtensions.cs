@@ -205,31 +205,25 @@ public static class AuthenticationServicesExtensions
                 };
                 return;
             }
-            var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
-            var isProduction = string.Equals(configuration["ASPNETCORE_ENVIRONMENT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
-            var publicKeyPem = AegisCore.Infrastructure.Security.JwtKeyMaterial.PublicKeyPem(configuration);
-            if (isProduction && string.IsNullOrWhiteSpace(publicKeyPem)
-                && !configuration.GetValue<bool>("DemoSeed:Enabled"))
-                throw new InvalidOperationException("Production requires an RSA JWT authority or Jwt:PublicKey.");
-            if (string.IsNullOrWhiteSpace(secret))
-            {
-                if (isProduction)
-                    throw new InvalidOperationException("AEGISCORE_JWT_SECRET must be configured in production.");
-                secret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-            }
+            // Production validates RSA signatures only. There is no demo flag that relaxes this: the
+            // installation generates the pair, so a container without one is misconfigured, and says so.
+            var problem = AegisCore.Infrastructure.Security.JwtKeyMaterial.ProductionKeyProblem(configuration);
+            if (problem is not null) throw new InvalidOperationException(problem);
             options.RequireHttpsMetadata = false;
-            if (!string.IsNullOrWhiteSpace(publicKeyPem))
+            var validationKeys = AegisCore.Infrastructure.Security.JwtKeyMaterial.ValidationKeys(configuration);
+            if (validationKeys.Count > 0)
             {
-                var publicKey = RSA.Create();
-                publicKey.ImportFromPem(publicKeyPem.ToCharArray());
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true, ValidIssuer = "https://aegiscore.pk", ValidateAudience = true, ValidAudience = audience,
-                    ValidateLifetime = true, ValidateIssuerSigningKey = true, IssuerSigningKey = new RsaSecurityKey(publicKey),
+                    ValidateLifetime = true, ValidateIssuerSigningKey = true, IssuerSigningKeys = validationKeys,
                     ClockSkew = TimeSpan.FromMinutes(2), ValidAlgorithms = [SecurityAlgorithms.RsaSha256]
                 };
                 return;
             }
+            // Development only: a shared secret, generated if absent so a dev box needs no setup.
+            var secret = configuration["AEGISCORE_JWT_SECRET"] ?? configuration["Jwt:Secret"];
+            if (string.IsNullOrWhiteSpace(secret)) secret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = false, ValidateAudience = true, ValidAudience = audience, ValidateLifetime = true,
@@ -240,7 +234,7 @@ public static class AuthenticationServicesExtensions
         .AddJwtBearer(AegisCore.Infrastructure.Admissions.ApplicantAuth.Scheme, options =>
         {
             // Applicant portal tokens: distinct audience so they can never satisfy staff/student routes.
-            var validationKey = AegisCore.Infrastructure.Admissions.ApplicantTokenService.ResolveValidationKey(configuration);
+            var validationKeys = AegisCore.Infrastructure.Admissions.ApplicantTokenService.ResolveValidationKeys(configuration);
             options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -250,9 +244,9 @@ public static class AuthenticationServicesExtensions
                 ValidAudience = AegisCore.Infrastructure.Admissions.ApplicantAuth.Audience,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = validationKey,
+                IssuerSigningKeys = validationKeys,
                 ClockSkew = TimeSpan.FromMinutes(2),
-                ValidAlgorithms = validationKey is RsaSecurityKey
+                ValidAlgorithms = validationKeys[0] is RsaSecurityKey
                     ? [SecurityAlgorithms.RsaSha256]
                     : [SecurityAlgorithms.HmacSha256]
             };

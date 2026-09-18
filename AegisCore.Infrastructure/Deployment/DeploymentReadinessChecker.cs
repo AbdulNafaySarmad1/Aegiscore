@@ -124,12 +124,24 @@ public class DeploymentReadinessChecker
         var audience = _configuration["Auth:Audience"] ?? "aegiscore-api";
         var symmetricSecret = _configuration["AEGISCORE_JWT_SECRET"] ?? _configuration["Jwt:Secret"];
 
-        if (!string.IsNullOrWhiteSpace(symmetricSecret))
-            _checks.Add(new ReadinessCheck(name, true, $"Local signing key configured for audience {audience}."));
-        else if (string.IsNullOrEmpty(authority))
-            _checks.Add(new ReadinessCheck(name, false, "Configure Auth:Authority or AEGISCORE_JWT_SECRET."));
-        else
+        if (!string.IsNullOrEmpty(authority))
+        {
             _checks.Add(new ReadinessCheck(name, true, $"Authority={authority}, Audience={audience}"));
+            return;
+        }
+        var problem = Security.JwtKeyMaterial.ProductionKeyProblem(_configuration);
+        if (problem is not null)
+        {
+            _checks.Add(new ReadinessCheck(name, false, problem));
+            return;
+        }
+        var keys = Security.JwtKeyMaterial.ValidationKeys(_configuration);
+        if (keys.Count > 0)
+            _checks.Add(new ReadinessCheck(name, true, $"RSA signing key {keys[0].KeyId} for audience {audience}" + (keys.Count > 1 ? $"; previous key {keys[1].KeyId} still accepted." : ".")));
+        else if (!string.IsNullOrWhiteSpace(symmetricSecret))
+            _checks.Add(new ReadinessCheck(name, true, $"Development HMAC secret for audience {audience}; production requires RSA keys."));
+        else
+            _checks.Add(new ReadinessCheck(name, false, "Configure Jwt:PrivateKeyPath/PublicKeyPath (RSA) or Auth:Authority."));
     }
 
     private void CheckCloudProvider()

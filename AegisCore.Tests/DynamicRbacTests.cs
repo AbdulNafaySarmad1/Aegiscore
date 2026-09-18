@@ -158,6 +158,7 @@ public sealed class DynamicRbacTests
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
+            ["ASPNETCORE_ENVIRONMENT"] = "Development", // an HMAC secret is accepted in Development only
             ["AEGISCORE_JWT_SECRET"] = new string('s', 64),
             ["SESSION_LIFETIME"] = "1234"
         }).Build();

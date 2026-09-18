@@ -54,6 +54,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvironmentSubstitution();
 
+// Operator command: `dotnet AegisCore.API.dll rotate-jwt-keys` rotates the token-signing pair on the
+// config volume and exits; restart the application afterwards.
+if (args.Contains("rotate-jwt-keys", StringComparer.OrdinalIgnoreCase))
+{
+    Console.WriteLine(AegisCore.Infrastructure.Security.JwtKeyMaterial.Rotate(builder.Configuration));
+    return;
+}
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxConcurrentConnections = 1000;

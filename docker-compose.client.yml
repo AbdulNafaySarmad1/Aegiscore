@@ -20,7 +20,9 @@ name: aegiscore-client
 #   (pre-populate the university_config volume or `docker cp` it in before first start).
 #   Production refuses to start without it: the Data Protection key ring is encrypted with it.
 # AEGISCORE_SEAL_URL=<optional https URL of the institution seal printed on the portal and documents>
-# Access-token RSA keys are generated into the config volume on first start (Jwt__PrivateKeyPath/PublicKeyPath);
+# Access-token RSA keys are generated into the config volume on first start (Jwt__PrivateKeyPath/PublicKeyPath) and
+#   every token carries the key id. To rotate: `docker compose exec app dotnet /app/AegisCore.API.dll rotate-jwt-keys`, then
+#   restart the app; tokens signed by the previous key stay valid until they expire, after which jwt-signing.previous.pub can go.
 #   supply Jwt__PrivateKey / Jwt__PublicKey (PEM) instead only if the university manages its own key pair.
 # PQC_MLKEM_PUBLIC_KEY / PQC_MLKEM_PRIVATE_KEY / PQC_MLDSA_PUBLIC_KEY / PQC_MLDSA_PRIVATE_KEY=<post-quantum key pairs; scripts/bootstrap-env.sh generates them>
 # SESSION_LIFETIME=900  # seconds; optional

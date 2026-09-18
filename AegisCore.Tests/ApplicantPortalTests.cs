@@ -260,6 +260,7 @@ public sealed class ApplicantPortalTests
     {
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
+            ["ASPNETCORE_ENVIRONMENT"] = "Development", // an HMAC secret is accepted in Development only
             ["AEGISCORE_JWT_SECRET"] = "unit-test-signing-secret-value-that-is-long-enough"
         }).Build();
 
