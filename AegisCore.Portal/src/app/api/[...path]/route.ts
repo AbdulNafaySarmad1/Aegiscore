@@ -17,6 +17,8 @@ async function proxy(request: NextRequest) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }
+  // The API rate-limits per client address; behind this proxy it would otherwise see one address for everyone.
+  headers.set("x-forwarded-for", request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "portal");
   const access = request.cookies.get(accessCookie)?.value;
   if (access) headers.set("authorization", `Bearer ${access}`);
   const binding = request.cookies.get("__Host-session-id")?.value;

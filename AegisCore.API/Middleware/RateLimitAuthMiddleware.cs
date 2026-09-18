@@ -12,7 +12,7 @@ public class RateLimitAuthMiddleware
     private readonly RequestDelegate _next;
     private static readonly ConcurrentDictionary<string, SlidingWindow> _windows = new();
 
-    private const int MaxRequests = 10;
+    private const int MaxRequests = 20; // sign-in attempts per client address per minute; the brute-force service limits per account
     private const int WindowSeconds = 60;
     private const int LockoutMinutes = 5;
 
@@ -26,7 +26,7 @@ public class RateLimitAuthMiddleware
             return;
         }
 
-        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var key = ClientAddress.Of(context);
         var window = _windows.GetOrAdd(key, _ => new SlidingWindow());
 
         lock (window)
