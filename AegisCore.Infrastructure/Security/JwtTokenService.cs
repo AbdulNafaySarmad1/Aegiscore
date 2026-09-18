@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
@@ -56,7 +56,7 @@ public class JwtTokenService : IJwtTokenService
     }
 
     /// <inheritdoc />
-    public string GenerateAccessToken(User user)
+    public string GenerateAccessToken(User user, IReadOnlyDictionary<string, string>? extraClaims = null)
     {
         var credentials = new SigningCredentials(
             _signingKey,
@@ -70,6 +70,12 @@ public class JwtTokenService : IJwtTokenService
             new("tenant_id", user.TenantId.ToString())
         };
         claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
+        // student_id and department_id are read by the session endpoint and by every student-facing
+        // screen, and nothing ever issued them: every student was told their account was not linked
+        // to a student record, which made the student half of the portal unreachable.
+        if (extraClaims is not null)
+            foreach (var claim in extraClaims)
+                if (!string.IsNullOrWhiteSpace(claim.Value)) claims.Add(new Claim(claim.Key, claim.Value));
 
         var token = new JwtSecurityToken(
             issuer: "https://aegiscore.pk",

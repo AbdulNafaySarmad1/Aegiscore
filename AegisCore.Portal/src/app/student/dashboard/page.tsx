@@ -10,7 +10,7 @@ import { FileText, GraduationCap, UserRound, Award } from "lucide-react";
 
 type Overview = {
   student: { id: string; name: string; universityId: string; rollNumber: string; status: string };
-  admission: { applicationNumber: string; status: string; approvedDocuments: number; testScore: number; testPassed: boolean } | null;
+  admission: { applicationNumber: string; status: string; approvedDocuments: number; testScore: number | null; testPassed: boolean } | null;
   academics: { program: string; cgpa: number; earnedCredits: number; requiredCredits: number; completedCourses: number; totalCourses: number; courses: { code: string; title: string; credits: number; grade: string | null; status: string }[] };
   attendance: { course: string; total: number; present: number; percentage: number }[];
   finance: { demanded: number; paid: number; outstanding: number; status: string };
@@ -113,7 +113,14 @@ export default function StudentDashboard() {
                   <Facts items={[
                     { label: "Application", value: data.admission?.applicationNumber ?? "Not on record", mono: Boolean(data.admission) },
                     { label: "Documents", value: data.admission ? `${data.admission.approvedDocuments} verified` : "—" },
-                    { label: "Entry test", value: data.admission ? <Mark tone={data.admission.testPassed ? "laurel" : "oxblood"}>{data.admission.testScore}%, {data.admission.testPassed ? "passed" : "not passed"}</Mark> : "—" },
+                    {
+                      label: "Entry test",
+                      // A student admitted without sitting the test has no score; "%, not passed"
+                      // read like a failure they had never been given the chance to avoid.
+                      value: !data.admission ? "—"
+                        : data.admission.testScore == null ? "Not sat"
+                          : <Mark tone={data.admission.testPassed ? "laurel" : "oxblood"}>{data.admission.testScore}%, {data.admission.testPassed ? "passed" : "not passed"}</Mark>,
+                    },
                     { label: "Student number", value: data.student.universityId, mono: true },
                   ]} />
                 </Panel>

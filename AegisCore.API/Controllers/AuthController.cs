@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using AegisCore.Application.Common.Interfaces;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.API.Authorization;
@@ -23,6 +23,40 @@ public sealed class AuthController(
     IConnectionMultiplexer redis,
     ICasbinPolicySyncService? casbin = null) : ControllerBase
 {
+    /// <summary>
+    /// What this account is, beyond its name: a student's own record id, and the department they
+    /// belong to. A student account is created with the same id as its student record (see the
+    /// admissions enrolment step), so the link needs no column — but the claim has to be issued, and
+    /// until now none was, so /api/session answered "studentId: null" for every student alive.
+    /// </summary>
+    private async Task<Dictionary<string, string>> IdentityClaimsAsync(AegisCore.Domain.Entities.User user, CancellationToken ct)
+    {
+        var claims = new Dictionary<string, string>(StringComparer.Ordinal);
+        // Sign-in has no ambient tenant yet, so the tenant filter would hide every row: the user's
+        // own tenant is the scope here.
+        var student = await db.Students.IgnoreQueryFilters().AsNoTracking()
+            .Where(s => s.Id == user.Id && s.TenantId == user.TenantId)
+            .Select(s => new { s.Id, s.BatchId })
+            .SingleOrDefaultAsync(ct);
+        if (student is not null)
+        {
+            claims["student_id"] = student.Id.ToString();
+            var department = await db.Batches.IgnoreQueryFilters().AsNoTracking()
+                .Where(b => b.Id == student.BatchId && b.TenantId == user.TenantId)
+                .Select(b => (Guid?)b.DepartmentId)
+                .SingleOrDefaultAsync(ct);
+            if (department is { } departmentId && departmentId != Guid.Empty) claims["department_id"] = departmentId.ToString();
+            return claims;
+        }
+
+        var faculty = await db.Faculties.IgnoreQueryFilters().AsNoTracking()
+            .Where(f => f.Id == user.Id && f.TenantId == user.TenantId)
+            .Select(f => (Guid?)f.DepartmentId)
+            .SingleOrDefaultAsync(ct);
+        if (faculty is { } facultyDepartment && facultyDepartment != Guid.Empty) claims["department_id"] = facultyDepartment.ToString();
+        return claims;
+    }
+
     private const string RefreshTokenKeyPrefix = "aegiscore:auth:refresh:token:";
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(7);
 
@@ -63,7 +97,7 @@ public sealed class AuthController(
         user.LastLoginAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
-        var accessToken = tokens.GenerateAccessToken(user);
+        var accessToken = tokens.GenerateAccessToken(user, await IdentityClaimsAsync(user, ct));
         var refreshToken = tokens.GenerateRefreshToken();
         var familyId = await tokens.GenerateRefreshTokenFamilyAsync(user.Id);
         var expiresAt = DateTime.UtcNow.AddDays(7);
@@ -122,7 +156,7 @@ public sealed class AuthController(
             return Unauthorized(new { error = "Invalid or expired refresh token." });
 
         if (casbin is not null) await casbin.SyncTenantAsync(tenantId, ct);
-        var accessToken = tokens.GenerateAccessToken(user);
+        var accessToken = tokens.GenerateAccessToken(user, await IdentityClaimsAsync(user, ct));
         var newRefreshToken = tokens.GenerateRefreshToken();
         var newFamilyId = await tokens.GenerateRefreshTokenFamilyAsync(user.Id);
         var expiresAt = DateTime.UtcNow.AddDays(7);

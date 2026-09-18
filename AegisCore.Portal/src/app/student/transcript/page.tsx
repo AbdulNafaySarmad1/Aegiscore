@@ -51,7 +51,14 @@ export default function TranscriptPage() {
         {error ? (
           <>
             <RegisterHead title="Academic transcript" crumbs={[{ label: "Student" }, { label: "Transcript" }]} reveal={false} />
-            <ErrorNotice message={error} hint="Check your connection and try again." onRetry={() => setRetry(n => n + 1)} />
+            <ErrorNotice
+              message={error}
+              // "Check your connection" is wrong advice when the account simply is not a student's.
+              hint={/not linked to a student/i.test(error)
+                ? "A transcript belongs to a student. Sign in with the student's own account, or ask the registrar to look it up for you."
+                : "Check your connection and try again."}
+              onRetry={() => setRetry(n => n + 1)}
+            />
           </>
         ) : !data ? (
           <RuledLoading label="Loading your verified record" rows={8} />

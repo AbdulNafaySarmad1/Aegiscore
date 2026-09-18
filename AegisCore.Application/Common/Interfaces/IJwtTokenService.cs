@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using AegisCore.Domain.Entities;
 
 namespace AegisCore.Application.Common.Interfaces;
@@ -13,7 +13,10 @@ public interface IJwtTokenService
     /// </summary>
     /// <param name="user">The user entity.</param>
     /// <returns>The JWT access token.</returns>
-    string GenerateAccessToken(User user);
+    /// <param name="extraClaims">
+    /// Claims the caller knows and the token service cannot — a student's own id, their department.
+    /// </param>
+    string GenerateAccessToken(User user, IReadOnlyDictionary<string, string>? extraClaims = null);
 
     /// <summary>
     /// Generates a refresh token.
