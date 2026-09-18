@@ -27,7 +27,8 @@ export const viewport: Viewport = {
 // Applies the viewer's saved scheme, text size and contrast before first paint so the
 // shell never flashes the wrong theme or reflows when the client hydrates.
 const preferenceScript = `(function(){try{var d=document.documentElement,s=localStorage;
-var t=s.getItem("aegis-theme");if(t==="dark"||t==="light")d.dataset.theme=t;
+var t=s.getItem("aegis-theme");
+d.dataset.theme=(t==="dark"||t==="light")?t:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 var f=s.getItem("aegis-font-scale");if(f&&f!=="medium")d.dataset.fontScale=f;
 if(s.getItem("aegis-high-contrast")==="true")d.dataset.highContrast="true";}catch(e){}})();`;
 

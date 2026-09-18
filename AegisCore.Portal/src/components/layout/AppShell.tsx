@@ -48,7 +48,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // place and told them nothing true.
   const [sessionProblem, setSessionProblem] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [theme, setTheme] = useState<"light" | "dark">(() => readPref("aegis-theme", "light") === "dark" ? "dark" : "light");
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const chosen = readPref("aegis-theme", "");
+    if (chosen === "dark" || chosen === "light") return chosen;
+    // Nobody has chosen yet: follow the machine rather than assuming daylight.
+    try { return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } catch { return "light"; }
+  });
   const [fontScale, setFontScale] = useState(() => readPref("aegis-font-scale", "medium"));
   const [highContrast, setHighContrast] = useState(() => readPref("aegis-high-contrast", "false") === "true");
   const [narrow, setNarrow] = useState(() => readPref("aegis-rail", "wide") === "narrow");
