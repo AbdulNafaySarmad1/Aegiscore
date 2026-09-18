@@ -288,3 +288,9 @@
 /* Sub-headings and stacked notices inside a panel (readiness record) */
 .panel-subtitle { font-family: var(--font-sans); font-size: var(--t-13); font-weight: 600; letter-spacing: 0; color: var(--ink-2); margin: var(--s-2) 0 calc(-1 * var(--s-2)); }
 .notice-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+
+/* ── Module pages: forms inside panels, inline toolbar controls ── */
+.panel-form { display: grid; gap: var(--s-3); }
+.panel-form .btn { justify-self: start; }
+.toolbar-inline { display: inline-grid; }
+.toolbar-inline select { min-height: 36px; font-size: var(--t-13); }

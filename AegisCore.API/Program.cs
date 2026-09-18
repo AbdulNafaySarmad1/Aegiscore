@@ -369,6 +369,7 @@ else
     app.MapHub<FinanceHub>("/hubs/finance");
     app.MapControllers();
     app.MapSealedWizard();
+    app.MapModuleReadEndpoints();
     // Startup check per module: once the host is listening, report what is not wired or not reachable,
     // in the log an operator reads, before the first user finds out from a broken screen.
     app.Lifetime.ApplicationStarted.Register(() => _ = Task.Run(async () =>
