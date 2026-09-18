@@ -27,7 +27,33 @@ public sealed record ModuleHealthReport(string Status, IReadOnlyList<Infrastruct
 
 public sealed class ModuleHealthService(IServiceProvider services, ApplicationPartManager parts, IConfiguration configuration, ILogger<ModuleHealthService> logger)
 {
+    // The report reads 618 tables out of information_schema, writes and reads back a file, pings
+    // Redis and opens two sockets — about two seconds of work. A monitor polling it every few
+    // seconds would keep the database and the disk busy answering the same question, so the answer
+    // is kept for a moment. Long enough to absorb a monitor's polling, short enough that an
+    // administrator watching a service come back sees it within a breath.
+    private static readonly TimeSpan Freshness = TimeSpan.FromSeconds(10);
+    private static readonly SemaphoreSlim Gate = new(1, 1);
+    private static ModuleHealthReport? _last;
+    private static DateTimeOffset _lastAt = DateTimeOffset.MinValue;
+
     public async Task<ModuleHealthReport> ReportAsync(CancellationToken ct)
+    {
+        if (_last is { } cached && DateTimeOffset.UtcNow - _lastAt < Freshness) return cached;
+
+        await Gate.WaitAsync(ct);
+        try
+        {
+            if (_last is { } fresh && DateTimeOffset.UtcNow - _lastAt < Freshness) return fresh;
+            var report = await BuildAsync(ct);
+            _last = report;
+            _lastAt = DateTimeOffset.UtcNow;
+            return report;
+        }
+        finally { Gate.Release(); }
+    }
+
+    private async Task<ModuleHealthReport> BuildAsync(CancellationToken ct)
     {
         using var scope = services.CreateScope();
         var provider = scope.ServiceProvider;
