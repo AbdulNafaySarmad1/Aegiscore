@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
@@ -337,14 +337,19 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
     public async Task RateLimit_Exceeded_Returns429()
     {
         var calledCount = 0;
+        // The limit is configurable; the default is 600 a minute, which ordinary browsing does not reach.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["RateLimit:PerAddressPerMinute"] = "100" })
+            .Build();
         var middleware = new GlobalRateLimitMiddleware(ctx =>
         {
             Interlocked.Increment(ref calledCount);
             ctx.Response.StatusCode = StatusCodes.Status200OK;
             return Task.CompletedTask;
-        });
+        }, configuration);
 
-        var ip = "192.168.1.100";
+        // A distinct address per run: the windows are static, so a shared one would carry between tests.
+        var ip = $"192.168.{Random.Shared.Next(1, 250)}.{Random.Shared.Next(1, 250)}";
         var responses = new List<int>();
 
         for (var i = 0; i < 110; i++)

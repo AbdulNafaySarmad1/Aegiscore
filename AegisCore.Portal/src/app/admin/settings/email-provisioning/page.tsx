@@ -1,75 +1,105 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
+import { useState, type FormEvent } from "react";
 import { apiGet, apiPut } from "@/lib/api-client";
+import { Panel, Notice, Mark } from "@/components/register";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
-type ConfigView = { mode: "GoogleWorkspace" | "Microsoft365" | "Manual"; domainName: string | null; hasCredentials: boolean; updatedAt: string };
+type Mode = "GoogleWorkspace" | "Microsoft365" | "Manual";
+type ConfigView = { mode: Mode; domainName: string | null; hasCredentials: boolean; updatedAt: string };
 
+const MODES: { value: Mode; label: string; detail: string }[] = [
+  { value: "Manual", label: "By hand", detail: "Someone types each student's institutional address when they are admitted. Nothing is created for you." },
+  { value: "GoogleWorkspace", label: "Google Workspace", detail: "An account is created in your Workspace domain through the Admin SDK when a student is admitted." },
+  { value: "Microsoft365", label: "Microsoft 365", detail: "An account is created in your Microsoft tenant through Graph when a student is admitted." },
+];
+
+/** Where a student's institutional email address comes from when they are admitted. */
 export default function EmailProvisioningPage() {
-  const [mode, setMode] = useState<"GoogleWorkspace" | "Microsoft365" | "Manual">("Manual");
-  const [domain, setDomain] = useState("");
-  const [credentials, setCredentials] = useState("");
-  const [hasCreds, setHasCreds] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { state, reload } = useModuleData<ConfigView | "">(signal => apiGet<ConfigView | "">("/api/admin/settings/email-provisioning", signal));
+  const action = useAction();
+  const [draft, setDraft] = useState<{ mode: Mode; domain: string; credentials: string } | null>(null);
 
-  useEffect(() => {
-    apiGet<ConfigView | "">("/api/admin/settings/email-provisioning")
-      .then(v => { if (v) { setMode(v.mode); setDomain(v.domainName ?? ""); setHasCreds(v.hasCredentials); } })
-      .catch(() => {});
-  }, []);
-
-  const save = async () => {
-    setError(null); setMsg(null);
-    try {
-      const body: Record<string, unknown> = { mode, domainName: domain || null };
-      if (credentials.trim()) body.credentialsJson = credentials.trim();
-      const v = await apiPut<ConfigView>("/api/admin/settings/email-provisioning", body);
-      setHasCreds(v.hasCredentials);
-      setCredentials("");
-      setMsg("Saved.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed.");
-    }
-  };
+  async function save(e: FormEvent, current: ConfigView | "") {
+    e.preventDefault();
+    const chosen = draft ?? { mode: (current || { mode: "Manual" as Mode }).mode, domain: (current || { domainName: "" }).domainName ?? "", credentials: "" };
+    await action.run("save", async () => {
+      const body: Record<string, unknown> = { mode: chosen.mode, domainName: chosen.domain || null };
+      if (chosen.credentials.trim()) body.credentialsJson = chosen.credentials.trim();
+      const saved = await apiPut<ConfigView>("/api/admin/settings/email-provisioning", body);
+      setDraft({ mode: saved.mode, domain: saved.domainName ?? "", credentials: "" });
+      return saved.mode === "Manual"
+        ? "Saved. Addresses will be entered by hand when a student is admitted."
+        : `Saved. An account will be created in ${chosen.domain || "your domain"} when a student is admitted.`;
+    }, reload);
+  }
 
   return (
-    <AppShell>
-      <div className="content-page">
-        <div className="page-header"><div><Link href="/admin/settings">← University settings</Link><h1>Institutional email provisioning</h1></div></div>
-        {error && <div className="error-state">{error}</div>}
-        {msg && <div className="form-notice">{msg}</div>}
+    <ModulePage
+      title="Institutional email"
+      crumbs={[{ label: "Settings", href: "/admin/settings" }, { label: "Institutional email" }]}
+      meta={<span>Where a student&apos;s university address comes from on the day they are admitted.</span>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {config => {
+        const current = config || null;
+        const form = draft ?? { mode: current?.mode ?? "Manual", domain: current?.domainName ?? "", credentials: "" };
+        const chosen = MODES.find(m => m.value === form.mode)!;
+        return (
+          <div className="record">
+            <div className="record-body">
+              <Panel title="How addresses are made">
+                <form className="panel-form" onSubmit={e => save(e, config)}>
+                  <label><span>Provisioning</span>
+                    <select value={form.mode} onChange={e => setDraft({ ...form, mode: e.target.value as Mode })}>
+                      {MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                    </select>
+                  </label>
+                  <p className="field-hint">{chosen.detail}</p>
 
-        <div className="card">
-          <div className="card-body" style={{ display: "grid", gap: 14, maxWidth: 560 }}>
-            <label>Provisioning mode
-              <select value={mode} onChange={e => setMode(e.target.value as typeof mode)} style={{ width: "100%" }}>
-                <option value="Manual">Manual — admin enters each student email</option>
-                <option value="GoogleWorkspace">Google Workspace — Admin SDK Directory API</option>
-                <option value="Microsoft365">Microsoft 365 — MS Graph API</option>
-              </select>
-            </label>
+                  {form.mode !== "Manual" && (
+                    <>
+                      <label><span>Your domain</span><input value={form.domain} onChange={e => setDraft({ ...form, domain: e.target.value })} placeholder="university.edu.pk" /></label>
+                      <label>
+                        <span>{form.mode === "GoogleWorkspace" ? "Service account credentials (JSON, including adminEmail)" : "App registration (JSON: tenantId, clientId, clientSecret)"}</span>
+                        <textarea value={form.credentials} onChange={e => setDraft({ ...form, credentials: e.target.value })} rows={7}
+                          placeholder={current?.hasCredentials ? "Credentials are stored. Paste new JSON only to replace them." : "{ … }"} />
+                      </label>
+                      <p className="field-hint">
+                        Credentials are encrypted before they are written down and are never sent back to a browser,
+                        which is why the box above is empty even when credentials are held.
+                      </p>
+                    </>
+                  )}
 
-            {mode !== "Manual" && (
-              <>
-                <label>University domain
-                  <input value={domain} onChange={e => setDomain(e.target.value)} placeholder="university.edu.pk" style={{ width: "100%" }} />
-                </label>
-                <label>
-                  {mode === "GoogleWorkspace" ? "Service account credentials JSON (with adminEmail)" : "App registration JSON (tenantId, clientId, clientSecret)"}
-                  <textarea value={credentials} onChange={e => setCredentials(e.target.value)} rows={6} style={{ width: "100%" }}
-                    placeholder={hasCreds ? "•••••• stored — paste new JSON to replace" : "{ ... }"} />
-                </label>
-                <p style={{ fontSize: 12, color: "var(--muted,#667)", margin: 0 }}>Credentials are encrypted at rest and never returned to the browser.</p>
-              </>
-            )}
+                  <button type="submit" className={`btn btn-primary${action.busy === "save" ? " btn-loading" : ""}`} disabled={action.busy !== null}>Save</button>
+                </form>
+              </Panel>
+            </div>
 
-            <div><button className="btn btn-primary" onClick={save}>Save</button></div>
+            <aside className="record-margin">
+              <Panel title="As it stands">
+                {current ? (
+                  <ul className="notice-list">
+                    <li><Mark tone="ink">{MODES.find(m => m.value === current.mode)?.label}</Mark></li>
+                    <li>{current.domainName ? `Domain: ${current.domainName}` : "No domain set"}</li>
+                    <li>{current.hasCredentials ? <Mark tone="laurel">Credentials held</Mark> : <Mark tone="brass">No credentials</Mark>}</li>
+                  </ul>
+                ) : (
+                  <p>Nothing has been configured, so addresses are entered by hand.</p>
+                )}
+              </Panel>
+
+              {form.mode !== "Manual" && !current?.hasCredentials && (
+                <Notice tone="brass" title="Credentials are needed before this works.">
+                  Until they are saved, admitting a student will not create an account, and whoever admits
+                  them will be asked for an address instead.
+                </Notice>
+              )}
+            </aside>
           </div>
-        </div>
-      </div>
-    </AppShell>
+        );
+      }}
+    </ModulePage>
   );
 }

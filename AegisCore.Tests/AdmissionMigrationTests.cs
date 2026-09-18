@@ -1,4 +1,4 @@
-using AegisCore.Application.Admissions;
+﻿using AegisCore.Application.Admissions;
 using AegisCore.Application.Workflow;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
@@ -212,15 +212,21 @@ public sealed class AdmissionMigrationTests
         var service = new EmailProvisioningConfigService(db, protector);
 
         const string creds = "{\"tenantId\":\"t\",\"clientId\":\"c\",\"clientSecret\":\"s\"}";
-        var view = await service.SetAsync(new EmailProvisioningConfigInput(EmailProvisioningMode.Microsoft365, "univ.edu.pk", creds), Guid.NewGuid());
+        var view = await service.SetAsync(new EmailProvisioningConfigInput("Microsoft365", "univ.edu.pk", creds), Guid.NewGuid());
 
-        Assert.Equal(EmailProvisioningMode.Microsoft365, view.Mode);
+        // The mode travels as its name: as a number it read "Manual" on the settings screen
+        // whatever was configured.
+        Assert.Equal("Microsoft365", view.Mode);
         Assert.True(view.HasCredentials);
 
         var stored = await db.EmailProvisioningConfigs.IgnoreQueryFilters().SingleAsync();
         Assert.NotNull(stored.CredentialsCipher);
         Assert.DoesNotContain("clientSecret", stored.CredentialsCipher!);
         Assert.Equal(creds, protector.Unprotect(stored.CredentialsCipher!));
+
+        var refused = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.SetAsync(new EmailProvisioningConfigInput("Hotmail", "univ.edu.pk", null), Guid.NewGuid()));
+        Assert.Contains("GoogleWorkspace", refused.Message);
     }
 
     [Fact]

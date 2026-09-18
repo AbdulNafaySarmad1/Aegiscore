@@ -265,12 +265,13 @@ public sealed class EmailProvisioningConfigService(AegisDbContext db, IEmailCred
     public async Task<EmailProvisioningConfigView?> GetAsync(CancellationToken ct = default)
     {
         var row = await db.EmailProvisioningConfigs.FirstOrDefaultAsync(c => c.TenantId == TenantId, ct);
-        return row is null ? null : new EmailProvisioningConfigView(row.Mode, row.DomainName, !string.IsNullOrEmpty(row.CredentialsCipher), row.UpdatedAt);
+        return row is null ? null : new EmailProvisioningConfigView(row.Mode.ToString(), row.DomainName, !string.IsNullOrEmpty(row.CredentialsCipher), row.UpdatedAt);
     }
 
     public async Task<EmailProvisioningConfigView> SetAsync(EmailProvisioningConfigInput input, Guid actorId, CancellationToken ct = default)
     {
-        if (input.Mode != EmailProvisioningMode.Manual && string.IsNullOrWhiteSpace(input.DomainName))
+        var mode = input.ParseMode();
+        if (mode != EmailProvisioningMode.Manual && string.IsNullOrWhiteSpace(input.DomainName))
         {
             throw new InvalidOperationException("Google Workspace and Microsoft 365 modes require a domain name.");
         }
@@ -282,13 +283,13 @@ public sealed class EmailProvisioningConfigService(AegisDbContext db, IEmailCred
             db.EmailProvisioningConfigs.Add(row);
         }
 
-        row.Mode = input.Mode;
+        row.Mode = mode;
         row.DomainName = input.DomainName?.Trim();
         if (!string.IsNullOrWhiteSpace(input.CredentialsJson))
         {
             row.CredentialsCipher = protector.Protect(input.CredentialsJson);
         }
-        else if (input.Mode == EmailProvisioningMode.Manual)
+        else if (mode == EmailProvisioningMode.Manual)
         {
             row.CredentialsCipher = null;
         }
@@ -296,7 +297,7 @@ public sealed class EmailProvisioningConfigService(AegisDbContext db, IEmailCred
         row.UpdatedAt = DateTimeOffset.UtcNow;
         row.UpdatedBy = actorId;
         await db.SaveChangesAsync(ct);
-        return new EmailProvisioningConfigView(row.Mode, row.DomainName, !string.IsNullOrEmpty(row.CredentialsCipher), row.UpdatedAt);
+        return new EmailProvisioningConfigView(row.Mode.ToString(), row.DomainName, !string.IsNullOrEmpty(row.CredentialsCipher), row.UpdatedAt);
     }
 }
 

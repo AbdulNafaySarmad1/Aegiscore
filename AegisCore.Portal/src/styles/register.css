@@ -336,3 +336,11 @@
 .options li[data-correct] { box-shadow: inset 3px 0 0 var(--laurel); padding-left: var(--s-3); }
 .options li[data-correct] b { color: var(--laurel); }
 .options em { font-style: italic; font-family: var(--font-serif); font-size: var(--t-13); color: var(--laurel); white-space: nowrap; }
+
+/* ── Coordinate plotter: a boundary drawn without contacting a map service ── */
+.plotter { position: relative; aspect-ratio: 1; max-width: 520px; width: 100%; overflow: hidden; border: 1px solid var(--rule); background: var(--paper-2); }
+.plotter img { position: absolute; width: 33.34%; height: 33.34%; transform: translate(-50%, -50%); margin-left: 16.67%; margin-top: 16.67%; }
+.plotter-surface { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: crosshair; }
+.plotter-surface svg { width: 100%; height: 100%; display: block; }
+.vertex-list { list-style: decimal; margin: 0; padding-left: var(--s-6); display: grid; gap: var(--s-1); font-size: var(--t-13); }
+.vertex-list li { display: flex; align-items: center; gap: var(--s-3); justify-content: space-between; border-bottom: 1px solid var(--rule); padding: var(--s-1) 0; }

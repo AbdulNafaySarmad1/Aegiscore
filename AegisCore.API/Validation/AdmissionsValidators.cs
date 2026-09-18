@@ -1,4 +1,4 @@
-using AegisCore.API.Controllers;
+﻿using AegisCore.API.Controllers;
 using AegisCore.Application.Admissions;
 using AegisCore.Domain.Entities;
 using FluentValidation;
@@ -225,13 +225,17 @@ public sealed class EmailProvisioningConfigInputValidator : SecureValidator<Emai
 {
     public EmailProvisioningConfigInputValidator()
     {
-        RuleFor(x => x.Mode).IsInEnum();
+        // The mode arrives as a name, so it is checked as one.
+        RuleFor(x => x.Mode).Must(BeAMode!)
+            .WithMessage("Provisioning must be one of GoogleWorkspace, Microsoft365 or Manual.");
         RuleFor(x => x.DomainName).NotEmpty().MaximumLength(255)
-            .When(x => x.Mode != Domain.EmailProvisioningMode.Manual)
+            .When(x => BeAMode(x.Mode) && !string.Equals(x.Mode, nameof(Domain.EmailProvisioningMode.Manual), StringComparison.OrdinalIgnoreCase))
             .WithMessage("Google Workspace and Microsoft 365 modes require a domain name.");
         RuleFor(x => x.CredentialsJson).Must(BeJson!).When(x => !string.IsNullOrWhiteSpace(x.CredentialsJson))
             .WithMessage("Credentials must be a valid JSON document.");
     }
+
+    private static bool BeAMode(string value) => Enum.TryParse<Domain.EmailProvisioningMode>(value, ignoreCase: true, out _);
 
     private static bool BeJson(string value)
     {

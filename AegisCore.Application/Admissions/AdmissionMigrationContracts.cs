@@ -50,8 +50,20 @@ public interface IInstitutionalEmailProvisionerFactory
     IInstitutionalEmailProvisioner Resolve(EmailProvisioningMode mode);
 }
 
-public sealed record EmailProvisioningConfigInput(EmailProvisioningMode Mode, string? DomainName, string? CredentialsJson);
-public sealed record EmailProvisioningConfigView(EmailProvisioningMode Mode, string? DomainName, bool HasCredentials, DateTimeOffset UpdatedAt);
+/// <summary>
+/// Mode is the name of an <see cref="EmailProvisioningMode"/> — "GoogleWorkspace", "Microsoft365"
+/// or "Manual". It used to be the enum itself, which serialised as a number while the screen and
+/// this contract both described a name, so the screen showed "Manual" whatever was configured.
+/// </summary>
+public sealed record EmailProvisioningConfigInput(string Mode, string? DomainName, string? CredentialsJson)
+{
+    public EmailProvisioningMode ParseMode() =>
+        Enum.TryParse<EmailProvisioningMode>(Mode, ignoreCase: true, out var parsed)
+            ? parsed
+            : throw new InvalidOperationException("Provisioning must be one of GoogleWorkspace, Microsoft365 or Manual.");
+}
+
+public sealed record EmailProvisioningConfigView(string Mode, string? DomainName, bool HasCredentials, DateTimeOffset UpdatedAt);
 
 public interface IEmailProvisioningConfigService
 {

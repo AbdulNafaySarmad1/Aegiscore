@@ -57,13 +57,14 @@ public class PlagiarismDetectionService : IPlagiarismDetectionService
 {
     private readonly IRepository<PlagiarismScan> _repo;
     public PlagiarismDetectionService(IRepository<PlagiarismScan> r) { _repo = r; }
-    public async Task<PlagiarismScan> ScanSubmissionAsync(Guid submissionId, Guid studentId, Guid assignmentId, Guid courseId, string semester, string submissionText, CancellationToken ct)
-    {
-        var sim = Math.Min(submissionText.Length * 0.01 + Random.Shared.NextDouble() * 0.3, 0.85);
-        var tier = sim < 0.15 ? SimilarityTier.Tier1_Administrative : sim < 0.40 ? SimilarityTier.Tier2_AcademicMisconduct : sim < 0.60 ? SimilarityTier.Tier3_SevereMisconduct : SimilarityTier.Tier4_CollusionRing;
-        var scan = new PlagiarismScan { Id = Guid.NewGuid(), SubmissionId = submissionId, StudentId = studentId, AssignmentId = assignmentId, CourseId = courseId, Semester = semester, OverallSimilarity = sim, Tier = tier, RequiresReview = sim > 0.15, CaseRecommendation = sim > 0.15 ? "Refer to Academic Integrity Officer" : "No action required" };
-        await _repo.AddAsync(scan, ct); return scan;
-    }
+    /// <summary>
+    /// A similarity score is evidence in a misconduct case. This installation keeps no corpus of
+    /// past submissions to compare against, so there is nothing from which to compute one: the
+    /// scan is refused rather than answered with a number that means nothing. Two texts can be
+    /// compared directly — see IPlagiarismEngineService.ComputeCosineSimilarityAsync.
+    /// </summary>
+    public Task<PlagiarismScan> ScanSubmissionAsync(Guid submissionId, Guid studentId, Guid assignmentId, Guid courseId, string semester, string submissionText, CancellationToken ct)
+        => throw new NotSupportedException("Similarity scanning is not available: this installation stores no corpus of submissions to compare against, and a similarity score without one would be meaningless. Two texts can be compared directly through the text-comparison endpoint.");
     public async Task<List<PlagiarismScan>> GetByAssignmentAsync(Guid assignmentId, CancellationToken ct) { var all = await _repo.FindAsync(s => s.AssignmentId == assignmentId, ct); return all.ToList(); }
     public async Task<PlagiarismScan?> GetByIdAsync(Guid scanId, CancellationToken ct) => await _repo.GetByIdAsync(scanId, ct);
 }

@@ -59,7 +59,9 @@ public class PlagiarismEngineService : IPlagiarismEngineService
     private readonly ILogger<PlagiarismEngineService> _logger;
     public PlagiarismEngineService(ILogger<PlagiarismEngineService> l) { _logger = l; }
     public async Task<double> ComputeCosineSimilarityAsync(string textA, string textB, CancellationToken ct) { var wordsA = new HashSet<string>(textA.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(w => w.ToLowerInvariant())); var wordsB = new HashSet<string>(textB.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(w => w.ToLowerInvariant())); if (wordsA.Count == 0 || wordsB.Count == 0) return 0; var intersection = wordsA.Intersect(wordsB).Count(); return (double)intersection / Math.Sqrt(wordsA.Count * wordsB.Count); }
-    public async Task<List<Guid>> DetectCollusionRingsAsync(Guid assignmentId, CancellationToken ct) { _logger.LogInformation("Scanning collusion rings for assignment {AssignmentId}", assignmentId); return new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }; }
+    // Collusion is found by comparing submissions with each other; this installation stores none.
+    public Task<List<Guid>> DetectCollusionRingsAsync(Guid assignmentId, CancellationToken ct)
+        => throw new NotSupportedException("Collusion detection is not available: it compares an assignment's submissions with each other, and this installation stores no submission text.");
     public async Task<double> ComputeAiProbabilityAsync(string text, CancellationToken ct) { var avgSentenceLength = text.Split('.', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length).DefaultIfEmpty(0).Average(); var burstiness = avgSentenceLength > 0 ? Math.Min(0.5 + Random.Shared.NextDouble() * 0.3, 0.98) : 0.1; _logger.LogInformation("AI probability: {Burstiness} (burstiness-based)", burstiness); return burstiness; }
     public async Task<double> ComputeStyleConsistencyAsync(Guid studentId, string text, CancellationToken ct) { var avgWordLen = text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(w => (double)w.Length).DefaultIfEmpty(0).Average(); var consistency = Math.Min(avgWordLen / 6.0, 1.0); _logger.LogInformation("Style consistency for student {StudentId}: {Consistency}", studentId, consistency); return consistency; }
 }
@@ -69,8 +71,13 @@ public class ProctoringIntegrationService : IProctoringIntegrationService
 {
     private readonly ILogger<ProctoringIntegrationService> _logger;
     public ProctoringIntegrationService(ILogger<ProctoringIntegrationService> l) { _logger = l; }
-    public async Task<bool> ValidateBrowserLockdownAsync(Guid sessionId, CancellationToken ct) { _logger.LogInformation("Validating browser lockdown for session {SessionId}", sessionId); return true; }
-    public async Task<string> AnalyzeFacialFeaturesAsync(byte[] imageData, CancellationToken ct) { var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(imageData))[..16]; _logger.LogInformation("Face analysis complete — hash {Hash}", hash); return $"face-{hash}"; }
+    // Nothing here can observe the candidate's browser; answering "locked down" would be a false assurance.
+    public Task<bool> ValidateBrowserLockdownAsync(Guid sessionId, CancellationToken ct)
+        => throw new NotSupportedException("Browser lockdown cannot be validated from the server: it is enforced and reported by the invigilation client, which this installation does not have.");
+    // A hash of the image is not face analysis; no vision model is configured here.
+    public Task<string> AnalyzeFacialFeaturesAsync(byte[] imageData, CancellationToken ct)
+        => throw new NotSupportedException("Face analysis is not available: no vision provider is configured for this installation.");
+
     public async Task<bool> DetectMultipleFacesAsync(byte[] imageData, CancellationToken ct) { _logger.LogInformation("Multi-face detection on {Size} bytes", imageData.Length); return false; }
     public async Task<double> EstimateGazeDirectionAsync(byte[] imageData, CancellationToken ct) { var deviation = 5.0 + Random.Shared.NextDouble() * 15.0; _logger.LogInformation("Gaze deviation: {Deviation} degrees", deviation); return deviation; }
 }
