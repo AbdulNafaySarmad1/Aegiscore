@@ -360,3 +360,12 @@
 .scheme-list li:last-child { border-bottom: 0; }
 .scheme-list span { font-size: var(--t-13); color: var(--ink-2); }
 .mark-input { width: 5.5em; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Chips: a set of names to pick one from (tables in a database, filters) ── */
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chip { font-family: var(--font-mono); font-size: var(--t-13); padding: var(--s-2) var(--s-3); border: 1px solid var(--rule); background: var(--paper); color: var(--ink-2); border-radius: var(--r-panel); cursor: pointer; }
+.chip:hover { border-color: var(--ink-3); color: var(--ink); }
+.chip-on { border-color: var(--ink); color: var(--ink); box-shadow: inset 3px 0 0 var(--brass); }
+
+/* A report this screen has no reading for yet is shown as it came, rather than not at all. */
+.report-raw { font-family: var(--font-mono); font-size: var(--t-12); white-space: pre-wrap; overflow-x: auto; margin: 0; color: var(--ink-2); }

@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using AegisCore.Application.Finance;
 using AegisCore.Domain.Entities;
@@ -13,7 +13,8 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
         RequireTenant(tenantId);
         await EnsureCatalogAsync(tenantId, ct);
         var config = await db.TenantFinanceConfigurations.SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
-            ?? throw new InvalidOperationException("Tenant finance configuration is required.");
+            ?? throw new AegisCore.Infrastructure.Deployment.ConfigurationRequiredException(
+                "This institution has no finance configuration yet, so no accounting standard applies and no financial statement can be drawn. Set the accounting standard in the finance settings first.");
         var policy = await PolicyAsync(tenantId, config.PrimaryStandard, ct);
         return new AccountingStandardContext(Normalize(config.PrimaryStandard), ParsePolicy(policy.ValueJson));
     }
@@ -88,7 +89,8 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
         RequireTenant(tenantId);
         await EnsureCatalogAsync(tenantId, ct);
         var config = await db.TenantFinanceConfigurations.SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
-            ?? throw new InvalidOperationException("Tenant finance configuration is required.");
+            ?? throw new AegisCore.Infrastructure.Deployment.ConfigurationRequiredException(
+                "This institution has no finance configuration yet, so no accounting standard applies and no financial statement can be drawn. Set the accounting standard in the finance settings first.");
         var source = Normalize(config.PrimaryStandard);
         var target = Normalize(command.TargetStandard);
         if (source == target) throw new InvalidOperationException("Target standard is already active.");

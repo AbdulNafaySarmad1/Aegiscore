@@ -18,6 +18,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-aegiscore}
       POSTGRES_USER: ${POSTGRES_USER:-aegiscore}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aegiscore-change-me}
+    # The schema is 618 tables, and applying it takes one lock per object in a single
+    # transaction. At PostgreSQL's default of 64 locks per transaction a migration run
+    # alongside anything else fails with "53200: out of shared memory".
+    command: [postgres, "-c", "max_locks_per_transaction=256"]
     volumes:
       - postgres:/var/lib/postgresql/data
     healthcheck:

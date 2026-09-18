@@ -1,4 +1,4 @@
-using AegisCore.Application.Replication;
+﻿using AegisCore.Application.Replication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,13 @@ namespace AegisCore.API.Controllers;
 public class ReplicationController : ControllerBase
 {
     private readonly IReplicaManagerService _svc;
-    public ReplicationController(IReplicaManagerService svc) => _svc = svc;
+    private readonly AegisCore.Application.Backup.IDatabaseHealthService _health;
+
+    public ReplicationController(IReplicaManagerService svc, AegisCore.Application.Backup.IDatabaseHealthService health)
+    {
+        _svc = svc;
+        _health = health;
+    }
 
     [HttpGet("dashboard")]
     public async Task<IActionResult> Dashboard(CancellationToken ct)
@@ -18,9 +24,13 @@ public class ReplicationController : ControllerBase
         var config = await _svc.GetScalingConfigAsync(ct);
         var alerts = await _svc.GetActiveAlertsAsync(ct);
 
+        // Asked, not assumed: this read "true" whatever the primary was doing, on the one screen an
+        // operator opens to find out whether it is doing anything at all.
+        var primaryHealthy = await _health.IsPrimaryHealthyAsync(ct);
+
         var dto = new ReplicationDashboardDto
         {
-            PrimaryHealthy = true,
+            PrimaryHealthy = primaryHealthy,
             AutoScalingEnabled = config.AutoScalingEnabled,
             ReadRoutingEnabled = config.ReadRoutingEnabled,
             OnlineReplicas = replicas.Count(r => r.Status == Domain.ReplicaStatus.Online),

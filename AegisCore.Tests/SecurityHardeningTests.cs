@@ -289,7 +289,7 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
     [InlineData("TRUNCATE TABLE AuditLogs")]
     public void SqlInjection_DataImport_RejectsDangerousKeywords(string query)
     {
-        var controller = new DataImportController(Mock.Of<AegisCore.Application.DataImport.IDataImportService>())
+        var controller = new DataImportController(Mock.Of<AegisCore.Application.DataImport.IDataImportService>(), Mock.Of<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(e => e.ContentRootPath == AppContext.BaseDirectory))
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };
@@ -316,7 +316,7 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
             It.IsAny<Dictionary<string, string>>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DataImportJob { Id = Guid.NewGuid(), Status = "Queued" });
 
-        var controller = new DataImportController(mockService.Object)
+        var controller = new DataImportController(mockService.Object, Mock.Of<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(e => e.ContentRootPath == AppContext.BaseDirectory))
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };

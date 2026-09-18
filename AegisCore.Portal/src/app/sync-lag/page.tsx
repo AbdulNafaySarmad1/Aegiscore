@@ -2,150 +2,166 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost, apiPut } from "@/lib/api-client";
-import { usePersonalityTranslations } from "@/lib/personality-translator";
-import { AlertTriangle, CheckCircle, Clock, Edit3, Lock, RotateCcw, Send, Settings, X } from "lucide-react";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
+import { Panel, Figures, Mark, Notice } from "@/components/register";
+import { Ledger, toneOf, words } from "@/components/register/ledger";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
-type SyncEntry = { id: string; entityType: string; fieldName: string | null; originalValue: string | null; writtenValue: string | null; status: string; writtenAt: string; graceExpiresAt: string; secondsRemaining: number; isLocked: boolean; canCorrect: boolean };
+type SyncEntry = {
+  id: string; entityType: string; fieldName: string | null; originalValue: string | null; writtenValue: string | null;
+  status: string; writtenAt: string; graceExpiresAt: string; secondsRemaining: number; isLocked: boolean; canCorrect: boolean;
+};
 type Dashboard = { totalPending: number; expiringWithin5Min: number; committedToday: number; correctedToday: number; defaultGraceSeconds: number; autoCommitEnabled: boolean; recentEntries: SyncEntry[] };
 type SyncConfig = { id: string; defaultGracePeriodSeconds: number; maxGracePeriodSeconds: number; autoCommitOnGraceExpiry: boolean; requireAdminApprovalForCorrections: boolean; correctionPermission: string; notifyOwnerOnCorrection: boolean };
 
-const cardS = { background: "var(--surface)", borderRadius: 12, border: "1px solid var(--line)", padding: "1.5rem", marginBottom: "1.25rem" };
-const h3 = { color: "var(--ink)", fontSize: "1.1rem", fontWeight: 600, margin: "0 0 0.75rem 0" };
-const btn = (bg: string) => ({ padding: "0.5rem 1rem", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem", background: bg, color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.35rem" });
-const inp = { padding: "0.5rem 0.75rem", borderRadius: 8, border: "1px solid var(--line)", background: "var(--canvas)", color: "var(--ink)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" as const };
-const badge = (s: string) => ({
-  display: "inline-block", padding: "0.15rem 0.55rem", borderRadius: 20, fontSize: "0.7rem", fontWeight: 600,
-  background: s === "PendingSync" ? "var(--amber-soft)" : s === "Committed" ? "var(--green-soft)" : s === "Corrected" ? "var(--blue-light)" : s === "Reverted" ? "var(--red-soft)" : "var(--gray-100)",
-  color: s === "PendingSync" ? "var(--amber)" : s === "Committed" ? "var(--green)" : s === "Corrected" ? "var(--blue)" : s === "Reverted" ? "var(--red)" : "var(--muted)"
-});
+const remaining = (seconds: number) => seconds <= 0 ? "expired" : seconds < 60 ? `${seconds}s left` : `${Math.floor(seconds / 60)} min left`;
 
+/**
+ * Writes made through a replica wait here before they reach the central database. While one waits it
+ * can still be corrected or withdrawn; once it commits it is part of the record.
+ */
 export default function SyncLagPage() {
-  const t = usePersonalityTranslations("academic");
-  const [dash, setDash] = useState<Dashboard | null>(null);
-  const [config, setConfig] = useState<SyncConfig | null>(null);
-  const [msg, setMsg] = useState("");
-  const [corrections, setCorrections] = useState<Record<string, { value: string; reason: string }>>({});
-  const [showConfig, setShowConfig] = useState(false);
-
-  async function refresh() {
-    const [d, c] = await Promise.all([
-      apiGet<Dashboard>("/api/admin/sync-lag/dashboard").catch(() => null),
-      apiGet<SyncConfig>("/api/admin/sync-lag/config").catch(() => null),
+  const { dateTime } = useTenantFormatter();
+  const { state, reload } = useModuleData<{ dashboard: Dashboard | null; config: SyncConfig | null }>(async signal => {
+    const [dashboard, config] = await Promise.all([
+      apiGet<Dashboard>("/api/admin/sync-lag/dashboard", signal).catch(() => null),
+      apiGet<SyncConfig>("/api/admin/sync-lag/config", signal).catch(() => null),
     ]);
-    setDash(d); setConfig(c);
-  }
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- initial dashboard hydration and polling.
-  useEffect(() => { refresh(); const i = setInterval(refresh, 10000); return () => clearInterval(i); }, []);
+    return { dashboard, config };
+  });
+  const action = useAction();
+  const [editing, setEditing] = useState<{ entry: SyncEntry; value: string; reason: string } | null>(null);
 
-  async function correct(id: string) {
-    const c = corrections[id];
-    if (!c?.value) return;
-    try { await apiPost(`/api/admin/sync-lag/entries/${id}/correct?correctedValue=${c.value}&reason=${c.reason || "Manual correction"}&correctedByUserId=00000000-0000-0000-0000-000000000000`); setMsg("Corrected — will sync to central DB"); setCorrections(prev => { const n = { ...prev }; delete n[id]; return n; }); refresh(); } catch { setMsg("Correction failed"); }
+  // The window closes on its own, so the list is re-read while it is open.
+  useEffect(() => {
+    const id = window.setInterval(reload, 10000);
+    return () => window.clearInterval(id);
+  }, [reload]);
+
+  async function correct() {
+    const { entry, value, reason } = editing!;
+    setEditing(null);
+    await action.run("correct", async () => {
+      await apiPost(`/api/admin/sync-lag/entries/${entry.id}/correct?correctedValue=${encodeURIComponent(value)}&reason=${encodeURIComponent(reason)}`);
+      return `Corrected to “${value}”. That is what will reach the central database.`;
+    }, reload);
   }
 
-  async function revert(id: string) {
-    try { await apiPost(`/api/admin/sync-lag/entries/${id}/revert?revertedByUserId=00000000-0000-0000-0000-000000000000`); setMsg("Reverted"); refresh(); } catch { setMsg("Revert failed"); }
+  async function revert(entry: SyncEntry) {
+    await action.run(entry.id, async () => {
+      await apiPost(`/api/admin/sync-lag/entries/${entry.id}/revert`);
+      return "Withdrawn. Nothing will be sent for that write.";
+    }, reload);
   }
 
-  async function saveConfig() {
-    if (!config) return;
-    try { await apiPut("/api/admin/sync-lag/config", config); setMsg("Sync-lag configuration saved."); } catch { setMsg("Sync-lag configuration could not be saved — try again."); }
+  async function saveConfig(config: SyncConfig) {
+    await action.run("config", async () => { await apiPut("/api/admin/sync-lag/config", config); return "Saved."; }, reload);
   }
-
-  if (!dash || !config) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading sync-lag dashboard...</p></main>;
 
   return (
-    <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
-        <div>
-          <h1 style={{ color: "var(--ink)", fontSize: "1.5rem", fontWeight: 600, marginBottom: "0.25rem" }}>Sync-Lag Correction Window</h1>
-          <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>Data written through replicas is held in a correction window before committing to the central database. Fix mistakes before they lock.</p>
-        </div>
-        <button onClick={() => setShowConfig(!showConfig)} style={btn("var(--blue)")}><Settings size={16} /> {showConfig ? "Hide" : "Configure"}</button>
-      </div>
+    <ModulePage
+      title="Correction window"
+      crumbs={[{ label: "Operations" }, { label: "Correction window" }]}
+      meta={<span>Writes made at a replica, waiting to reach the central database. Until they do, they can still be put right.</span>}
+      ident={d => <><strong>{d.dashboard?.totalPending ?? 0}</strong><br />waiting</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {({ dashboard, config }) => !dashboard || !config ? (
+        <Notice tone="oxblood" title="The correction service did not answer." role="alert">
+          Whether any writes are waiting cannot be told from here. Check the application log.
+        </Notice>
+      ) : (
+        <div className="record">
+          <div className="record-body">
+            <Figures aria-label="Correction window figures" items={[
+              { label: "Waiting", value: dashboard.totalPending, tone: dashboard.totalPending > 0 ? "brass" : "laurel", note: "not yet in the central database" },
+              { label: "Closing within 5 min", value: dashboard.expiringWithin5Min, tone: dashboard.expiringWithin5Min > 0 ? "oxblood" : "ink", note: "correct these first" },
+              { label: "Committed today", value: dashboard.committedToday, note: "now part of the record" },
+              { label: "Corrected today", value: dashboard.correctedToday, note: "put right before committing" },
+            ]} />
 
-      {msg && <div onDoubleClick={() => setMsg("")} style={{ padding: "0.5rem 1rem", borderRadius: 8, background: "var(--blue-light)", color: "var(--blue)", marginBottom: "1rem", fontSize: "0.85rem", cursor: "pointer" }}>{msg}</div>}
+            {editing && (
+              <Panel tone="brass" title={`Correct this ${words(editing.entry.entityType).toLowerCase()}`}>
+                <div className="panel-form">
+                  <dl className="facts">
+                    <div><dt>Field</dt><dd>{editing.entry.fieldName ?? "the whole record"}</dd></div>
+                    <div><dt>Was</dt><dd className="mono">{editing.entry.originalValue ?? "—"}</dd></div>
+                    <div><dt>Written as</dt><dd className="mono">{editing.entry.writtenValue ?? "—"}</dd></div>
+                  </dl>
+                  <label><span>Correct it to</span><input value={editing.value} onChange={e => setEditing({ ...editing, value: e.target.value })} autoFocus /></label>
+                  <label><span>Why</span><input value={editing.reason} onChange={e => setEditing({ ...editing, reason: e.target.value })} placeholder="e.g. the invigilator read the wrong row" /></label>
+                  <p className="field-hint">The reason is kept with the entry, against your name.</p>
+                  <div className="btn-row">
+                    <button type="button" className="btn btn-primary" disabled={!editing.value.trim() || !editing.reason.trim()} onClick={correct}>Correct it</button>
+                    <button type="button" className="btn btn-ghost" onClick={() => setEditing(null)}>Leave it</button>
+                  </div>
+                </div>
+              </Panel>
+            )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
-        {[
-          ["Pending Sync", String(dash.totalPending || 0), "var(--amber)"],
-          ["Expiring in 5 min", String(dash.expiringWithin5Min || 0), dash.expiringWithin5Min > 0 ? "var(--red)" : "var(--green)"],
-          ["Grace Period", `${config.defaultGracePeriodSeconds}s`, "var(--blue)"],
-          ["Auto-Commit", config.autoCommitOnGraceExpiry ? "ON" : "OFF", config.autoCommitOnGraceExpiry ? "var(--green)" : "var(--muted)"],
-        ].map(([label, val, color]) => (
-          <div key={label} style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--line)", padding: "1rem" }}>
-            <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.25rem" }}>{label}</div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 700, color }}>{val}</div>
+            <Panel title="Waiting to commit" flush>
+              <Ledger rows={dashboard.recentEntries} keyOf={e => e.id} minWidth={880}
+                status={e => e.isLocked ? undefined : e.secondsRemaining < 300 ? "oxblood" : toneOf(e.status)}
+                empty={{ title: "Nothing is waiting", detail: "Every write made at a replica has reached the central database." }}
+                columns={[
+                  { key: "what", label: "Record", render: e => <>{words(e.entityType)}<br /><span className="text-muted">{e.fieldName ?? "whole record"}</span></> },
+                  { key: "was", label: "Was", render: e => e.originalValue ?? "—", mono: true },
+                  { key: "now", label: "Written as", render: e => e.writtenValue ?? "—", mono: true },
+                  { key: "status", label: "Status", render: e => <Mark tone={toneOf(e.status)}>{words(e.status)}</Mark> },
+                  { key: "written", label: "Written", render: e => dateTime(e.writtenAt), nowrap: true },
+                  { key: "left", label: "Window", render: e => e.isLocked ? "closed" : remaining(e.secondsRemaining), nowrap: true },
+                  {
+                    key: "act", label: "", nowrap: true, render: e => e.canCorrect ? (
+                      <span className="btn-row">
+                        <button type="button" className="btn btn-secondary btn-sm" disabled={action.busy !== null} onClick={() => setEditing({ entry: e, value: e.writtenValue ?? "", reason: "" })}>Correct</button>
+                        <button type="button" className="btn btn-ghost btn-sm" disabled={action.busy !== null} onClick={() => revert(e)}>Withdraw</button>
+                      </span>
+                    ) : <span className="text-muted">committed</span>,
+                  },
+                ]} />
+            </Panel>
           </div>
-        ))}
-      </div>
 
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem" }}>
-        <button onClick={() => apiPost("/api/admin/sync-lag/commit-expired").then(refresh)} style={btn("var(--green)")}><Send size={14} /> Commit Expired</button>
-      </div>
+          <aside className="record-margin">
+            <Panel title="Commit now">
+              <div className="panel-form">
+                <p className="field-hint">Sends every write whose window has closed to the central database, rather than waiting for the next sweep.</p>
+                <button type="button" className={`btn btn-secondary${action.busy === "commit" ? " btn-loading" : ""}`} disabled={action.busy !== null}
+                  onClick={() => action.run("commit", async () => {
+                    const r = await apiPost<{ committed: number }>("/api/admin/sync-lag/commit-expired");
+                    return r.committed === 0 ? "Nothing had expired; nothing was sent." : `${r.committed} write${r.committed === 1 ? "" : "s"} committed and locked.`;
+                  }, reload)}>
+                  Commit what has expired
+                </button>
+              </div>
+            </Panel>
 
-      {showConfig && (
-        <div style={cardS}>
-          <h3 style={h3}><Settings size={16} /> Sync-Lag Configuration</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.75rem" }}>
-            <div><div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Grace Period (seconds)</div><input type="number" step="1" min="1" style={inp} value={config.defaultGracePeriodSeconds} onChange={e => setConfig({ ...config, defaultGracePeriodSeconds: parseInt(e.target.value) || 300 })} /></div>
-            <div><div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Max Grace Period (seconds)</div><input type="number" step="1" min="1" style={inp} value={config.maxGracePeriodSeconds} onChange={e => setConfig({ ...config, maxGracePeriodSeconds: parseInt(e.target.value) || 86400 })} /></div>
-          </div>
-          <div style={{ marginTop: "0.75rem", display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.85rem", color: "var(--ink)", cursor: "pointer" }}>
-              <input type="checkbox" checked={config.autoCommitOnGraceExpiry} onChange={e => setConfig({ ...config, autoCommitOnGraceExpiry: e.target.checked })} /> Auto-Commit
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.85rem", color: "var(--ink)", cursor: "pointer" }}>
-              <input type="checkbox" checked={config.requireAdminApprovalForCorrections} onChange={e => setConfig({ ...config, requireAdminApprovalForCorrections: e.target.checked })} /> Require Admin for Corrections
-            </label>
-            <select style={{ ...inp, width: "auto" }} value={config.correctionPermission} onChange={e => setConfig({ ...config, correctionPermission: e.target.value })}>
-              <option value="AdminOnly">Admin Only</option>
-              <option value="OwnerOnly">Owner Only</option>
-              <option value="Anyone">Anyone</option>
-            </select>
-            <button onClick={saveConfig} style={btn("var(--green)")}>Save Config</button>
-          </div>
+            <Panel title="How long the window stays open">
+              <form className="panel-form" onSubmit={e => { e.preventDefault(); saveConfig(config); }}>
+                <label><span>Seconds</span><input type="number" min={1} value={config.defaultGracePeriodSeconds} onChange={e => saveConfig({ ...config, defaultGracePeriodSeconds: parseInt(e.target.value) || 300 })} /></label>
+                <label><span>Longest allowed</span><input type="number" min={1} value={config.maxGracePeriodSeconds} onChange={e => saveConfig({ ...config, maxGracePeriodSeconds: parseInt(e.target.value) || 86400 })} /></label>
+                <label className="check-row"><input type="checkbox" checked={config.autoCommitOnGraceExpiry} onChange={e => saveConfig({ ...config, autoCommitOnGraceExpiry: e.target.checked })} /><span>Commit automatically when the window closes</span></label>
+                <label className="check-row"><input type="checkbox" checked={config.requireAdminApprovalForCorrections} onChange={e => saveConfig({ ...config, requireAdminApprovalForCorrections: e.target.checked })} /><span>A correction needs an administrator</span></label>
+                <label><span>Who may correct</span>
+                  <select value={config.correctionPermission} onChange={e => saveConfig({ ...config, correctionPermission: e.target.value })}>
+                    <option value="AdminOnly">An administrator only</option>
+                    <option value="OwnerOnly">Whoever made the write</option>
+                    <option value="Anyone">Anyone with access</option>
+                  </select>
+                </label>
+                {!config.autoCommitOnGraceExpiry && (
+                  <p className="field-hint">With automatic commit off, writes wait until someone commits them here.</p>
+                )}
+              </form>
+            </Panel>
+
+            <Notice tone="ink">
+              A correction is recorded against the person who made it, with the reason given. Once a
+              write commits it is part of the record and can only be changed by a further entry.
+            </Notice>
+          </aside>
         </div>
       )}
-
-      <div style={cardS}>
-        <h3 style={h3}>Pending Sync Entries — Correction Window Open</h3>
-        <p style={{ color: "var(--muted)", fontSize: "0.8rem", marginBottom: "1rem" }}>
-          <Clock size={14} style={{ verticalAlign: "middle", marginRight: "0.25rem" }} />
-          These writes are not yet in the central database. You have until the grace period expires to correct mistakes. Once committed, the data is locked.
-        </p>
-        {dash.recentEntries.length === 0 ? (
-          <p style={{ color: "var(--muted)", textAlign: "center", padding: "2rem" }}>No pending sync entries. All replica writes have been committed to the central database.</p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
-            <thead><tr style={{ borderBottom: "1px solid var(--line)" }}>{["Entity","Field","Was","Written","Status","Expires In",""].map(h => <th key={h} style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "var(--muted)", fontWeight: 500, fontSize: "0.75rem" }}>{h}</th>)}</tr></thead>
-            <tbody>
-              {dash.recentEntries.map(e => (
-                <tr key={e.id} style={{ borderBottom: "1px solid var(--gray)" }}>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--ink)", fontWeight: 500 }}>{e.entityType}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.82rem" }}>{e.fieldName || "—"}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.82rem" }}>{e.originalValue || "—"}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--ink)", fontWeight: 600 }}>{e.writtenValue || "—"}</td>
-                  <td style={{ padding: "0.4rem 0.75rem" }}><span style={badge(e.status)}>{e.status}</span></td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: e.secondsRemaining < 60 ? "var(--red)" : e.secondsRemaining < 180 ? "var(--amber)" : "var(--muted)", fontWeight: 600 }}>{e.secondsRemaining}s</td>
-                  <td style={{ padding: "0.4rem 0.75rem", display: "flex", gap: "0.35rem" }}>
-                    {e.canCorrect && (
-                      <>
-                        <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
-                          <input style={{ ...inp, width: 60, fontSize: "0.8rem", padding: "0.25rem 0.4rem" }} placeholder="New value" value={corrections[e.id]?.value || ""} onChange={ev => setCorrections(prev => ({ ...prev, [e.id]: { ...prev[e.id], value: ev.target.value } }))} />
-                          <button onClick={() => correct(e.id)} style={btn("var(--blue)")} title="Correct"><Edit3 size={12} /></button>
-                          <button onClick={() => revert(e.id)} style={btn("var(--red)")} title="Revert"><RotateCcw size={12} /></button>
-                        </div>
-                      </>
-                    )}
-                    {e.isLocked && <Lock size={14} style={{ color: "var(--muted)" }} />}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </main>
+    </ModulePage>
   );
 }

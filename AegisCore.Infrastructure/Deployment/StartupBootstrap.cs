@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using AegisCore.Infrastructure.Database;
 using AegisCore.Infrastructure.Security;
@@ -98,7 +98,7 @@ public static class StartupBootstrap
         if (applied.Count == 0)
         {
             logger.LogInformation("[AEGISCORE] The database is empty: applying all {Count} migrations from zero.", pending.Count);
-            await db.Database.MigrateAsync(ct);
+            await MigrateAsync(db, ct);
             return new SchemaOutcome("initialised", $"Empty database initialised with {pending.Count} migrations.");
         }
         if (pending.Count > 0)
@@ -106,7 +106,7 @@ public static class StartupBootstrap
             if (!autoMigrate)
                 throw new BootstrapException($"The database is {pending.Count} migration(s) behind this version ({string.Join(", ", pending.Take(5))}{(pending.Count > 5 ? ", …" : "")}) and Database__AutoMigrate is false, so nothing was changed. Take a database backup, then either start once with Database__AutoMigrate=true or run `dotnet AegisCore.API.dll migrate`, and start again.");
             logger.LogInformation("[AEGISCORE] Applying {Count} pending migration(s): {Names}", pending.Count, string.Join(", ", pending));
-            await db.Database.MigrateAsync(ct);
+            await MigrateAsync(db, ct);
             var after = await SchemaVerifier.VerifyAsync(db, ct);
             if (!after.IsCurrent) throw new BootstrapException("Migrations were applied but the schema still differs from the code: " + after.Describe() + " This build's migrations do not describe its model; do not serve requests from it.");
             return new SchemaOutcome("migrated", $"{pending.Count} migration(s) applied: {string.Join(", ", pending)}.");
@@ -116,5 +116,26 @@ public static class StartupBootstrap
             throw new BootstrapException("The database schema differs from what this version expects, and no migration would fix it: " + verification.Describe()
                 + " This happens when a column was altered by hand or a migration was edited after it ran. Restore the database from a backup taken with the matching version, or contact the vendor with this message.");
         return new SchemaOutcome("verified", verification.Describe());
+    }
+
+    /// <summary>
+    /// Applies migrations, and explains the one failure this schema provokes on a default-configured
+    /// PostgreSQL: it is applied in one transaction, taking a lock for each object, and 618 tables is
+    /// an order of magnitude past the default of 64 locks per transaction.
+    /// </summary>
+    private static async Task MigrateAsync(DbContext db, CancellationToken ct)
+    {
+        try
+        {
+            await db.Database.MigrateAsync(ct);
+        }
+        catch (Exception ex) when (ex.GetBaseException() is Npgsql.PostgresException { SqlState: "53200" })
+        {
+            throw new BootstrapException(
+                "The database ran out of lock space while the schema was being applied (PostgreSQL 53200, \"out of shared memory\"). " +
+                "This schema is applied in one transaction and takes a lock for each of its objects, which is far past PostgreSQL's " +
+                "default of 64 locks per transaction. Start the database server with max_locks_per_transaction=256 — the shipped " +
+                "compose file does — and start this container again. Nothing was left half-applied: the migration transaction rolled back.");
+        }
     }
 }

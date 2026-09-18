@@ -107,6 +107,8 @@ public class GlobalExceptionMiddleware
         // A stored document that no longer matches its recorded hash is a conflict with what the
         // installation attested to, not an internal error.
         InvalidDataException => (StatusCodes.Status409Conflict, "integrity_check_failed", ex.Message),
+        // Not set up for this yet, as distinct from something going wrong: the sentence names the setting.
+        AegisCore.Infrastructure.Deployment.ConfigurationRequiredException => (StatusCodes.Status409Conflict, "not_configured", ex.Message),
         KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", string.IsNullOrWhiteSpace(ex.Message) ? "The requested record was not found." : ex.Message),
         ArgumentException => (StatusCodes.Status400BadRequest, "invalid_request", ex.Message),
         NotSupportedException => (StatusCodes.Status501NotImplemented, "not_available", ex.Message),

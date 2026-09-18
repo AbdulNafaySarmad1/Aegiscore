@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using AegisCore.Application.DataImport;
 using AegisCore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
 
-[ApiController][Route("api/data-import")] [Authorize] public class DataImportController : ControllerBase { private IDataImportService _s; public DataImportController(IDataImportService s) => _s = s;
+[ApiController][Route("api/data-import")] [Authorize] public class DataImportController : ControllerBase
+{
+    private readonly IDataImportService _s;
+    private readonly string _formats;
+
+    public DataImportController(IDataImportService s, Microsoft.AspNetCore.Hosting.IWebHostEnvironment environment)
+    {
+        _s = s;
+        _formats = Path.Combine(environment.ContentRootPath, "formats");
+    }
+
 
 [HttpPost("connections")] public async Task<IActionResult> AddConnection([FromBody] ExternalDbConnection conn, CancellationToken ct) => Ok(await _s.AddConnectionAsync(conn, ct));
 
@@ -16,7 +26,9 @@ namespace AegisCore.API.Controllers;
 
 [HttpGet("connections/{id:guid}/tables/{table}/columns")] public async Task<IActionResult> DiscoverColumns(Guid id, string table, [FromQuery] string? schema, CancellationToken ct) { var cols = await _s.DiscoverColumnsAsync(id, table, schema, ct); return Ok(new { connectionId = id, table, schema, total = cols.Count, columns = cols }); }
 
-[HttpPost("jobs")] public async Task<IActionResult> StartImport([FromBody] StartImportRequest req, CancellationToken ct) { if (!IsReadOnlySelect(req.SourceQuery)) return BadRequest(new { error = "SourceQuery contains prohibited syntax. It must be one read-only SELECT or WITH query using approved SQL syntax." }); var mappings = JsonSerializer.Deserialize<Dictionary<string, string>>(req.FieldMappingsJson ?? "{}") ?? new(); var job = await _s.StartImportAsync(req.ConnectionId, req.EntityType, req.SourceQuery, mappings, req.TriggeredByUserId, ct); return Ok(job); }
+[HttpPost("jobs")] public async Task<IActionResult> StartImport([FromBody] StartImportRequest req, CancellationToken ct) { if (!IsReadOnlySelect(req.SourceQuery)) return BadRequest(new { error = "SourceQuery contains prohibited syntax. It must be one read-only SELECT or WITH query using approved SQL syntax." }); var mappings = JsonSerializer.Deserialize<Dictionary<string, string>>(req.FieldMappingsJson ?? "{}") ?? new(); // An import rewrites the register; it is recorded against whoever started it, not whoever the caller names.
+    var startedBy = Guid.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var actor) ? actor : req.TriggeredByUserId;
+    var job = await _s.StartImportAsync(req.ConnectionId, req.EntityType, req.SourceQuery, mappings, startedBy, ct); return Ok(job); }
 
         public static bool IsReadOnlySelect(string query) => ReadOnlySqlQueryValidator.IsValid(query);
 
@@ -28,9 +40,37 @@ namespace AegisCore.API.Controllers;
 
 [HttpPost("templates")] public async Task<IActionResult> SaveTemplate([FromBody] FieldMappingTemplate tmpl, CancellationToken ct) => Ok(await _s.SaveMappingTemplateAsync(tmpl, ct));
 
-    [HttpGet("formats/{fileName}")] public IActionResult DownloadFormat(string fileName) { var path = Path.Combine(Directory.GetCurrentDirectory(), "formats", fileName); if (!System.IO.File.Exists(path)) return NotFound(new { error = $"Format file '{fileName}' not found. Available: students, faculty, courses, enrollments, grades, fees, timetable, attendance, exams, placements, alumni, transcripts, library, visitors" }); var stream = System.IO.File.OpenRead(path); return File(stream, "text/csv", fileName); }
+    /// <summary>
+    /// One of the CSV templates shipped with the application. The name is matched against the
+    /// templates on disk rather than joined onto a path: joined, a name of "../appsettings.json"
+    /// read a file that is none of this endpoint's business.
+    /// </summary>
+    [HttpGet("formats/{fileName}")]
+    public IActionResult DownloadFormat(string fileName)
+    {
+        var available = Available();
+        var match = available.FirstOrDefault(name => string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase));
+        if (match is null)
+        {
+            return NotFound(new { error = available.Count == 0
+                ? "No import templates are installed with this build."
+                : $"There is no template called '{fileName}'. The templates are: {string.Join(", ", available)}." });
+        }
 
-    [HttpGet("formats")] public IActionResult ListFormats() { var dir = Path.Combine(Directory.GetCurrentDirectory(), "formats"); if (!Directory.Exists(dir)) return Ok(new { formats = Array.Empty<string>() }); var files = Directory.GetFiles(dir, "*.csv").Select(Path.GetFileName).OrderBy(f => f).ToList(); return Ok(new { total = files.Count, formats = files }); }
+        return File(System.IO.File.OpenRead(Path.Combine(_formats, match)), "text/csv", match);
+    }
+
+    [HttpGet("formats")]
+    public IActionResult ListFormats()
+    {
+        var available = Available();
+        return Ok(new { total = available.Count, formats = available });
+    }
+
+    private List<string> Available()
+        => Directory.Exists(_formats)
+            ? Directory.GetFiles(_formats, "*.csv").Select(Path.GetFileName).OfType<string>().OrderBy(name => name, StringComparer.Ordinal).ToList()
+            : [];
 
     public class StartImportRequest { public Guid ConnectionId { get; set; } public string EntityType { get; set; } = ""; public string SourceQuery { get; set; } = ""; public string? FieldMappingsJson { get; set; } public Guid? TriggeredByUserId { get; set; } }
 }

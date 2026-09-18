@@ -1,4 +1,4 @@
-using AegisCore.Application.SyncLag;
+﻿using AegisCore.Application.SyncLag;
 using AegisCore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,19 +39,30 @@ public class SyncLagController : ControllerBase
     public async Task<IActionResult> RecordWrite([FromQuery] Guid replicaId, [FromQuery] string entityType, [FromQuery] Guid entityId, [FromQuery] string? fieldName, [FromQuery] string? originalValue, [FromQuery] string writtenValue, [FromQuery] Guid writtenByUserId, CancellationToken ct)
         => Ok(await _svc.RecordWriteAsync(replicaId, entityType, entityId, fieldName, originalValue, writtenValue, writtenByUserId, ct));
 
+    /// <summary>
+    /// Correcting a write before it commits. Who did it is taken from the signed-in user: it used to
+    /// be a query parameter, and the screen passed the all-zero id, so every correction on the record
+    /// was made by nobody.
+    /// </summary>
     [HttpPost("entries/{id:guid}/correct")]
-    public async Task<IActionResult> Correct(Guid id, [FromQuery] string correctedValue, [FromQuery] string reason, [FromQuery] Guid correctedByUserId, CancellationToken ct)
+    public async Task<IActionResult> Correct(Guid id, [FromQuery] string correctedValue, [FromQuery] string reason, CancellationToken ct)
     {
-        var ok = await _svc.CorrectEntryAsync(id, correctedValue, reason, correctedByUserId, ct);
-        return ok ? Ok(new { message = "Entry corrected — value updated, will sync to central." }) : BadRequest(new { error = "Cannot correct this entry. It may already be locked or committed." });
+        if (string.IsNullOrWhiteSpace(reason))
+            return BadRequest(new { error = "A correction needs a reason; it is kept with the entry." });
+
+        var ok = await _svc.CorrectEntryAsync(id, correctedValue, reason, Actor(), ct);
+        return ok ? Ok(new { message = "Corrected. The new value is what will reach the central database." }) : BadRequest(new { error = "That entry can no longer be corrected: its grace period has passed and it is committed." });
     }
 
     [HttpPost("entries/{id:guid}/revert")]
-    public async Task<IActionResult> Revert(Guid id, [FromQuery] Guid revertedByUserId, CancellationToken ct)
+    public async Task<IActionResult> Revert(Guid id, CancellationToken ct)
     {
-        var ok = await _svc.RevertEntryAsync(id, revertedByUserId, ct);
-        return ok ? Ok(new { message = "Entry reverted — sync cancelled." }) : BadRequest(new { error = "Cannot revert this entry." });
+        var ok = await _svc.RevertEntryAsync(id, Actor(), ct);
+        return ok ? Ok(new { message = "Reverted. Nothing will be sent to the central database for this write." }) : BadRequest(new { error = "That entry can no longer be reverted: its grace period has passed and it is committed." });
     }
+
+    private Guid Actor()
+        => Guid.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : Guid.Empty;
 
     [HttpPost("commit-expired")]
     public async Task<IActionResult> CommitExpired(CancellationToken ct)
