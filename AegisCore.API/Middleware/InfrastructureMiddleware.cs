@@ -101,6 +101,8 @@ public class GlobalExceptionMiddleware
     /// </summary>
     public static (int Status, string Code, string Message) Describe(Exception ex) => ex switch
     {
+        // EF wraps a dead connection in its retry exception; the cause underneath is what the operator needs.
+        Microsoft.EntityFrameworkCore.Storage.RetryLimitExceededException { InnerException: { } inner } => Describe(inner),
         AegisCore.Infrastructure.Licensing.LicenseReadOnlyException => (StatusCodes.Status403Forbidden, "license_read_only", ex.Message),
         KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", string.IsNullOrWhiteSpace(ex.Message) ? "The requested record was not found." : ex.Message),
         ArgumentException => (StatusCodes.Status400BadRequest, "invalid_request", ex.Message),

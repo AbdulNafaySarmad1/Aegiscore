@@ -239,6 +239,12 @@ else
             statusCode: StatusCodes.Status503ServiceUnavailable);
     }).AllowAnonymous();
     app.MapHealthChecks("/health/detail").RequireAuthorization();
+    // One row per module: wired, tables present, dependencies answering. Written for the person looking at a broken screen.
+    app.MapGet("/health/modules", async (AegisCore.API.Health.ModuleHealthService health, CancellationToken ct) =>
+    {
+        var report = await health.ReportAsync(ct);
+        return Results.Json(report, statusCode: report.Status == "unhealthy" ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status200OK);
+    }).RequireAuthorization();
     // What the live database lacks relative to the code, by name: pending migrations, missing tables, missing columns.
     app.MapGet("/health/schema", async (AegisDbContext db, CancellationToken ct) =>
     {
@@ -318,6 +324,20 @@ else
     app.MapHub<FinanceHub>("/hubs/finance");
     app.MapControllers();
     app.MapSealedWizard();
+    // Startup check per module: once the host is listening, report what is not wired or not reachable,
+    // in the log an operator reads, before the first user finds out from a broken screen.
+    app.Lifetime.ApplicationStarted.Register(() => _ = Task.Run(async () =>
+    {
+        try
+        {
+            var report = await app.Services.GetRequiredService<AegisCore.API.Health.ModuleHealthService>().ReportAsync(CancellationToken.None);
+            if (report.Status == "healthy") Log.Information("[AEGISCORE] Module health: {Summary}", report.Summary);
+            else Log.Warning("[AEGISCORE] Module health {Status}: {Summary}", report.Status, report.Summary);
+            foreach (var module in report.Modules.Where(m => m.Status != "healthy"))
+                Log.Warning("[AEGISCORE] Module '{Module}' unavailable: {Problem}", module.Module, string.Join(" ", module.Problems));
+        }
+        catch (Exception ex) { Log.Warning(ex, "[AEGISCORE] Module health check could not run."); }
+    }));
     app.MapFinanceModuleEndpoints();
     app.MapDefaultPredictionEndpoints();
     app.MapVisitingFacultyEndpoints();

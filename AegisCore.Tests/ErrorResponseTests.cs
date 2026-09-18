@@ -12,6 +12,7 @@ public sealed class ErrorResponseTests
     [InlineData(typeof(KeyNotFoundException), 404, "not_found")]
     [InlineData(typeof(ArgumentException), 400, "invalid_request")]
     [InlineData(typeof(NotSupportedException), 501, "not_available")]
+    [InlineData(typeof(Microsoft.EntityFrameworkCore.Storage.RetryLimitExceededException), 503, "database_unavailable")]
     [InlineData(typeof(ArgumentOutOfRangeException), 400, "invalid_request")]
     [InlineData(typeof(FormatException), 400, "invalid_request")]
     [InlineData(typeof(DbUpdateConcurrencyException), 409, "concurrency_conflict")]
@@ -26,6 +27,7 @@ public sealed class ErrorResponseTests
         var exception = exceptionType == typeof(StackExchange.Redis.RedisConnectionException)
             ? new StackExchange.Redis.RedisConnectionException(StackExchange.Redis.ConnectionFailureType.UnableToConnect, "no redis")
             : exceptionType == typeof(Npgsql.NpgsqlException) ? new Npgsql.NpgsqlException("no database")
+            : exceptionType == typeof(Microsoft.EntityFrameworkCore.Storage.RetryLimitExceededException) ? new Microsoft.EntityFrameworkCore.Storage.RetryLimitExceededException("retries exhausted", new Npgsql.NpgsqlException("no database"))
             : (Exception)Activator.CreateInstance(exceptionType, "boom")!;
         var (actualStatus, actualCode, message) = GlobalExceptionMiddleware.Describe(exception);
         Assert.Equal(status, actualStatus);

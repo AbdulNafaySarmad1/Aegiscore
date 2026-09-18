@@ -183,6 +183,7 @@ public static class ProductionServicesExtensions
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<EnhancedSetupService>();
         services.AddFinanceModule();
+        services.AddSingleton<AegisCore.API.Health.ModuleHealthService>();
         return services;
     }
 }
