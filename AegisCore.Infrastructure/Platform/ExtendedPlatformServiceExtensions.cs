@@ -1,4 +1,4 @@
-using AegisCore.Contracts.Common.Interfaces;
+﻿using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,6 +72,8 @@ public static class ExtendedPlatformServiceExtensions
         services.TryAddScoped<IGradeDistributionService, GradeDistributionService>();
         services.TryAddScoped<IPlagiarismDetectionService, PlagiarismDetectionService>();
         services.TryAddScoped<IPlagiarismApiService, PlagiarismApiService>();
+        // Convocation eligibility is decided by the same evaluation the graduation screen shows.
+        services.TryAddScoped<AegisCore.Infrastructure.StudentLifecycle.GraduationService>();
         services.TryAddScoped<IConvocationService, ConvocationService>();
         services.TryAddScoped<ISemesterFreezeService, SemesterFreezeService>();
         services.TryAddScoped<IProctoringService, ProctoringService>();

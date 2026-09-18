@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
@@ -83,10 +83,100 @@ public class PlagiarismApiService : IPlagiarismApiService
 public class ConvocationService : IConvocationService
 {
     private readonly IRepository<Convocation> _cRepo; private readonly IRepository<ConvocationEligibility> _eRepo; private readonly IRepository<DegreeCertificate> _dcRepo; private readonly IRepository<ConvocationAttendance> _aRepo;
-    public ConvocationService(IRepository<Convocation> c, IRepository<ConvocationEligibility> e, IRepository<DegreeCertificate> d, IRepository<ConvocationAttendance> a) { _cRepo = c; _eRepo = e; _dcRepo = d; _aRepo = a; }
+    private readonly AegisDbContext _db; private readonly AegisCore.Infrastructure.StudentLifecycle.GraduationService _graduation;
+    public ConvocationService(IRepository<Convocation> c, IRepository<ConvocationEligibility> e, IRepository<DegreeCertificate> d, IRepository<ConvocationAttendance> a, AegisDbContext db, AegisCore.Infrastructure.StudentLifecycle.GraduationService graduation) { _cRepo = c; _eRepo = e; _dcRepo = d; _aRepo = a; _db = db; _graduation = graduation; }
     public async Task<Convocation> CreateAsync(Convocation convocation, CancellationToken ct) { await _cRepo.AddAsync(convocation, ct); return convocation; }
-    public async Task<List<ConvocationEligibility>> CheckEligibilityAsync(Guid convocationId, CancellationToken ct) { var eligibility = new List<ConvocationEligibility> { new ConvocationEligibility { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), ConvocationId = convocationId, Status = ConvoEligibility.Eligible, CreditsCompleted = true, CgpaMet = true, DuesCleared = true, ThesisApproved = true, LibraryCleared = true, DisciplinaryCleared = true } }; foreach (var e in eligibility) await _eRepo.AddAsync(e, ct); return eligibility; }
-    public async Task<List<DegreeCertificate>> GenerateCertificatesAsync(Guid convocationId, CancellationToken ct) { var cert = new DegreeCertificate { Id = Guid.NewGuid(), StudentId = Guid.NewGuid(), ConvocationId = convocationId, SerialNumber = $"DEG-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString()[..6].ToUpper()}", DegreeTitle = "Bachelor of Science", Status = CertificateStatus.Queued }; await _dcRepo.AddAsync(cert, ct); return new List<DegreeCertificate> { cert }; }
+    /// <summary>
+    /// Who may graduate at this ceremony, decided by reading each candidate's record.
+    ///
+    /// This used to invent a single eligibility row for a student id it had just made up, with every
+    /// clearance — dues, thesis, library, discipline — ticked. A convocation office pressing "check
+    /// eligibility" was shown one fictional graduand who had cleared everything.
+    ///
+    /// The candidates are the students whose record is complete enough to be considered: everyone
+    /// not already certified for this ceremony who has finished their enrolment. Each one is put
+    /// through the same evaluation the graduation screen uses — credits, CGPA, the programme's own
+    /// requirements, outstanding fees, and each departmental clearance — and what blocks them is
+    /// written down beside them.
+    /// </summary>
+    public async Task<List<ConvocationEligibility>> CheckEligibilityAsync(Guid convocationId, CancellationToken ct)
+    {
+        var convocation = await _cRepo.GetByIdAsync(convocationId, ct)
+            ?? throw new KeyNotFoundException("That convocation is not on file.");
+
+        var certified = await _db.DegreeCertificates.Where(c => c.ConvocationId == convocationId).Select(c => c.StudentId).ToListAsync(ct);
+        var candidates = await _db.Students
+            .Where(s => s.EnrollmentStatus == EnrollmentStatus.Graduated || s.EnrollmentStatus == EnrollmentStatus.Active)
+            .Where(s => !certified.Contains(s.Id))
+            .Select(s => s.Id)
+            .ToListAsync(ct);
+
+        if (candidates.Count == 0) return [];
+
+        var existing = await _db.ConvocationEligibilities.Where(e => e.ConvocationId == convocationId).ToListAsync(ct);
+        var results = new List<ConvocationEligibility>();
+        foreach (var studentId in candidates)
+        {
+            var progress = await _graduation.EvaluateAsync(studentId, ct);
+            var blockers = progress.Blockers.ToList();
+            var row = existing.FirstOrDefault(e => e.StudentId == studentId) ?? new ConvocationEligibility
+            {
+                Id = Guid.NewGuid(), StudentId = studentId, ConvocationId = convocationId, TenantId = convocation.TenantId
+            };
+
+            row.Status = blockers.Count == 0 ? ConvoEligibility.Eligible : ConvoEligibility.Ineligible;
+            row.BlockingReason = blockers.Count == 0 ? null : Shorten(string.Join(" ", blockers), 1000);
+            row.CreditsCompleted = !blockers.Any(b => b.Contains("Earned credits", StringComparison.OrdinalIgnoreCase));
+            row.CgpaMet = !blockers.Any(b => b.Contains("CGPA", StringComparison.OrdinalIgnoreCase));
+            row.DuesCleared = !blockers.Any(b => b.Contains("fees", StringComparison.OrdinalIgnoreCase));
+            row.ThesisApproved = !blockers.Any(b => b.Contains("Requirement incomplete", StringComparison.OrdinalIgnoreCase));
+            row.LibraryCleared = !blockers.Any(b => b.StartsWith("Library", StringComparison.OrdinalIgnoreCase));
+            row.DisciplinaryCleared = !blockers.Any(b => b.StartsWith("Department", StringComparison.OrdinalIgnoreCase));
+
+            if (existing.Contains(row)) await _eRepo.UpdateAsync(row, ct); else await _eRepo.AddAsync(row, ct);
+            results.Add(row);
+        }
+        return results;
+    }
+
+    /// <summary>
+    /// A certificate for each student this ceremony has found eligible — with their own degree, from
+    /// their own programme. It used to make one certificate for a student id it invented, titled
+    /// "Bachelor of Science" whatever the student had read.
+    /// </summary>
+    public async Task<List<DegreeCertificate>> GenerateCertificatesAsync(Guid convocationId, CancellationToken ct)
+    {
+        var convocation = await _cRepo.GetByIdAsync(convocationId, ct)
+            ?? throw new KeyNotFoundException("That convocation is not on file.");
+
+        var eligible = await _db.ConvocationEligibilities
+            .Where(e => e.ConvocationId == convocationId && e.Status == ConvoEligibility.Eligible)
+            .Select(e => e.StudentId)
+            .ToListAsync(ct);
+
+        if (eligible.Count == 0)
+            throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("No student has been found eligible for this convocation, so there is no certificate to issue. Check eligibility first; a student who is blocked is listed with the reason.");
+
+        var already = await _db.DegreeCertificates.Where(c => c.ConvocationId == convocationId).Select(c => c.StudentId).ToListAsync(ct);
+        var issued = new List<DegreeCertificate>();
+        foreach (var studentId in eligible.Where(id => !already.Contains(id)))
+        {
+            var progress = await _graduation.EvaluateAsync(studentId, ct);
+            var certificate = new DegreeCertificate
+            {
+                Id = Guid.NewGuid(), TenantId = convocation.TenantId, StudentId = studentId, ConvocationId = convocationId,
+                SerialNumber = $"DEG-{convocation.CeremonyDate:yyyy}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}",
+                DegreeTitle = progress.Program,
+                Status = CertificateStatus.Queued,
+            };
+            await _dcRepo.AddAsync(certificate, ct);
+            issued.Add(certificate);
+        }
+        return issued;
+    }
+    /// <summary>The blocking reasons as they fit the column; the full list stays on the graduation screen.</summary>
+    private static string Shorten(string value, int max) => value.Length <= max ? value : value[..(max - 1)] + "…";
+
     public async Task<ConvocationAttendance> CheckInAsync(Guid convocationId, Guid studentId, CancellationToken ct) { var att = new ConvocationAttendance { Id = Guid.NewGuid(), StudentId = studentId, ConvocationId = convocationId, Status = CeremonyAttendance.CheckedIn, CheckInTime = DateTime.UtcNow }; await _aRepo.AddAsync(att, ct); return att; }
     public async Task<List<Convocation>> GetUpcomingAsync(CancellationToken ct) { var all = await _cRepo.FindAsync(c => c.CeremonyDate > DateTime.UtcNow, ct); return all.ToList(); }
 }
