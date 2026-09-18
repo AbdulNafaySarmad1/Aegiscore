@@ -109,6 +109,8 @@ public class GlobalExceptionMiddleware
         InvalidDataException => (StatusCodes.Status409Conflict, "integrity_check_failed", ex.Message),
         // Not set up for this yet, as distinct from something going wrong: the sentence names the setting.
         AegisCore.Infrastructure.Deployment.ConfigurationRequiredException => (StatusCodes.Status409Conflict, "not_configured", ex.Message),
+        // A rule of the institution's own refusing what was asked, not a fault: the rule's sentence is the answer.
+        AegisCore.Infrastructure.Deployment.BusinessRuleException => (StatusCodes.Status409Conflict, "not_allowed", ex.Message),
         KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", string.IsNullOrWhiteSpace(ex.Message) ? "The requested record was not found." : ex.Message),
         ArgumentException => (StatusCodes.Status400BadRequest, "invalid_request", ex.Message),
         NotSupportedException => (StatusCodes.Status501NotImplemented, "not_available", ex.Message),

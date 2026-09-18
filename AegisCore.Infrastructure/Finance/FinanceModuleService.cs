@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -29,47 +29,50 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         {
             var accountIds = command.Lines.Select(x => x.ChartOfAccountId).Distinct().ToArray();
             if (await db.ChartOfAccounts.AnyAsync(x => x.TenantId == tenantId && accountIds.Contains(x.Id) && EF.Functions.ILike(x.AccountName, "%interest%"), ct))
-                throw new InvalidOperationException("The tenant accounting policy prohibits interest accounts.");
+                throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("The tenant accounting policy prohibits interest accounts.");
         }
 
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var sequence = await db.Set<FinanceVoucherSequence>()
-            .SingleOrDefaultAsync(s => s.TenantId == tenantId && s.VoucherType == command.VoucherType && s.FiscalYear == DateTime.UtcNow.Year, ct);
-        if (sequence is null)
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            sequence = new FinanceVoucherSequence { Id = Guid.NewGuid(), TenantId = tenantId, VoucherType = command.VoucherType, FiscalYear = DateTime.UtcNow.Year };
-            db.Set<FinanceVoucherSequence>().Add(sequence);
-        }
-
-        var number = sequence.NextNumber++;
-        var voucher = new FinanceVoucher
-        {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
-            VoucherNumber = $"{command.VoucherType.ToUpperInvariant()}-FY{DateTime.UtcNow:yy}-{number:000000}",
-            VoucherType = command.VoucherType.ToUpperInvariant(),
-            Currency = NormalizeCurrency(command.Currency),
-            Description = command.Description,
-            CreatedByUserId = makerId,
-            TotalAmount = command.Lines.Sum(l => l.Debit),
-            Lines = command.Lines.Select(l => new FinanceVoucherLine
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var sequence = await db.Set<FinanceVoucherSequence>()
+                .SingleOrDefaultAsync(s => s.TenantId == tenantId && s.VoucherType == command.VoucherType && s.FiscalYear == DateTime.UtcNow.Year, ct);
+            if (sequence is null)
             {
-                Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = l.ChartOfAccountId,
-                CostCenterId = l.CostCenterId, ReportingEntityId = l.ReportingEntityId, CounterpartyReportingEntityId = l.CounterpartyReportingEntityId,
-                Debit = l.Debit, Credit = l.Credit, Description = l.Description
-            }).ToList()
-        };
-        db.Set<FinanceVoucher>().Add(voucher);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return voucher;
+                sequence = new FinanceVoucherSequence { Id = Guid.NewGuid(), TenantId = tenantId, VoucherType = command.VoucherType, FiscalYear = DateTime.UtcNow.Year };
+                db.Set<FinanceVoucherSequence>().Add(sequence);
+            }
+
+            var number = sequence.NextNumber++;
+            var voucher = new FinanceVoucher
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                VoucherNumber = $"{command.VoucherType.ToUpperInvariant()}-FY{DateTime.UtcNow:yy}-{number:000000}",
+                VoucherType = command.VoucherType.ToUpperInvariant(),
+                Currency = NormalizeCurrency(command.Currency),
+                Description = command.Description,
+                CreatedByUserId = makerId,
+                TotalAmount = command.Lines.Sum(l => l.Debit),
+                Lines = command.Lines.Select(l => new FinanceVoucherLine
+                {
+                    Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = l.ChartOfAccountId,
+                    CostCenterId = l.CostCenterId, ReportingEntityId = l.ReportingEntityId, CounterpartyReportingEntityId = l.CounterpartyReportingEntityId,
+                    Debit = l.Debit, Credit = l.Credit, Description = l.Description
+                }).ToList()
+            };
+            db.Set<FinanceVoucher>().Add(voucher);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return voucher;
+        });
     }
 
     public async Task<FinanceVoucher> SubmitVoucherAsync(Guid tenantId, Guid voucherId, Guid actorId, CancellationToken ct)
     {
         var voucher = await VoucherAsync(tenantId, voucherId, ct);
         EnsureState(voucher, FinanceStates.Draft);
-        if (voucher.Lines.Sum(l => l.Debit) != voucher.Lines.Sum(l => l.Credit)) throw new InvalidOperationException("Voucher is not balanced.");
+        if (voucher.Lines.Sum(l => l.Debit) != voucher.Lines.Sum(l => l.Credit)) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Voucher is not balanced.");
         voucher.Status = FinanceStates.PendingApproval;
         await db.SaveChangesAsync(ct);
         await PublishAsync(tenantId, "voucher-updated", new { voucher.Id, voucher.VoucherNumber, voucher.VoucherType, voucher.TotalAmount, voucher.Currency, voucher.Status }, ct);
@@ -146,34 +149,37 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
 
     public async Task<FinanceVoucher> PostVoucherAsync(Guid tenantId, Guid voucherId, Guid actorId, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var voucher = await VoucherAsync(tenantId, voucherId, ct);
-        EnsureState(voucher, FinanceStates.Approved);
-        if (voucher.Lines.Sum(l => l.Debit) != voucher.Lines.Sum(l => l.Credit)) throw new InvalidOperationException("Voucher is not balanced.");
-
-        var journal = new JournalEntry
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = voucher.VoucherNumber, EntryType = JournalEntryType.Manual,
-            Description = voucher.Description ?? voucher.VoucherNumber, EntryDate = DateTime.UtcNow,
-            TotalDebit = voucher.Lines.Sum(l => l.Debit), TotalCredit = voucher.Lines.Sum(l => l.Credit),
-            IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
-            Lines = voucher.Lines.Select(l => new JournalEntryLine
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var voucher = await VoucherAsync(tenantId, voucherId, ct);
+            EnsureState(voucher, FinanceStates.Approved);
+            if (voucher.Lines.Sum(l => l.Debit) != voucher.Lines.Sum(l => l.Credit)) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Voucher is not balanced.");
+
+            var journal = new JournalEntry
             {
-                Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = l.ChartOfAccountId,
-                CostCenterId = l.CostCenterId,
-                ReportingEntityId = l.ReportingEntityId, CounterpartyReportingEntityId = l.CounterpartyReportingEntityId,
-                Debit = l.Debit, Credit = l.Credit, Description = l.Description
-            }).ToList()
-        };
-        db.JournalEntries.Add(journal);
-        voucher.Status = FinanceStates.Posted;
-        voucher.PostedByUserId = actorId;
-        voucher.PostedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync(ct);
-        await controls.EvaluatePostingAsync(tenantId, voucher.Id, ct);
-        await transaction.CommitAsync(ct);
-        await PublishAsync(tenantId, "voucher-posted", new { voucher.Id, voucher.VoucherNumber, voucher.VoucherType, voucher.TotalAmount, voucher.Currency, voucher.Status, voucher.PostedAt }, ct);
-        return voucher;
+                Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = voucher.VoucherNumber, EntryType = JournalEntryType.Manual,
+                Description = voucher.Description ?? voucher.VoucherNumber, EntryDate = DateTime.UtcNow,
+                TotalDebit = voucher.Lines.Sum(l => l.Debit), TotalCredit = voucher.Lines.Sum(l => l.Credit),
+                IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
+                Lines = voucher.Lines.Select(l => new JournalEntryLine
+                {
+                    Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = l.ChartOfAccountId,
+                    CostCenterId = l.CostCenterId,
+                    ReportingEntityId = l.ReportingEntityId, CounterpartyReportingEntityId = l.CounterpartyReportingEntityId,
+                    Debit = l.Debit, Credit = l.Credit, Description = l.Description
+                }).ToList()
+            };
+            db.JournalEntries.Add(journal);
+            voucher.Status = FinanceStates.Posted;
+            voucher.PostedByUserId = actorId;
+            voucher.PostedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(ct);
+            await controls.EvaluatePostingAsync(tenantId, voucher.Id, ct);
+            await transaction.CommitAsync(ct);
+            await PublishAsync(tenantId, "voucher-posted", new { voucher.Id, voucher.VoucherNumber, voucher.VoucherType, voucher.TotalAmount, voucher.Currency, voucher.Status, voucher.PostedAt }, ct);
+            return voucher;
+        });
     }
 
     public async Task<FeeDemand> CreateFeeDemandAsync(Guid tenantId, CreateFeeDemandCommand command, CancellationToken ct)
@@ -205,39 +211,123 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (command.FeeDemandId == Guid.Empty || command.Amount <= 0m || string.IsNullOrWhiteSpace(command.IdempotencyKey)) throw new ArgumentException("Payment fields are invalid.");
-        if (!string.IsNullOrWhiteSpace(command.GatewaySlug)) throw new InvalidOperationException("Gateway payments must be confirmed by the gateway webhook.");
-        if (!string.Equals(command.Method, "MANUAL", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Only manually verified payments may use this endpoint.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var existing = await db.Set<FinancePayment>().SingleOrDefaultAsync(p => p.TenantId == tenantId && p.IdempotencyKey == command.IdempotencyKey, ct);
-        if (existing is not null) return existing;
-
-        var demand = await db.Set<FeeDemand>().Include(d => d.Installments)
-            .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
-            ?? throw new KeyNotFoundException("Fee demand was not found.");
-        if (command.Amount > demand.OutstandingAmount) throw new InvalidOperationException("Payment exceeds the outstanding demand.");
-        var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
-        if (command.FeeInstallmentId is not null && installment is null) throw new KeyNotFoundException("Fee installment was not found.");
-
-        var payment = new FinancePayment
+        if (!string.IsNullOrWhiteSpace(command.GatewaySlug)) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Gateway payments must be confirmed by the gateway webhook.");
+        if (!string.Equals(command.Method, "MANUAL", StringComparison.OrdinalIgnoreCase)) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Only manually verified payments may use this endpoint.");
+        var receipt = await PrepareFeeReceiptAsync(tenantId, ct);
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, FeeDemandId = demand.Id, FeeInstallmentId = installment?.Id,
-            IdempotencyKey = command.IdempotencyKey, Method = command.Method.Trim().ToUpperInvariant(),
-            GatewaySlug = command.GatewaySlug, ExternalReference = command.ExternalReference, Amount = command.Amount,
-            Status = "SETTLED", SettledAt = DateTime.UtcNow
-        };
-        demand.PaidAmount += command.Amount;
-        demand.OutstandingAmount -= command.Amount;
-        demand.Status = demand.OutstandingAmount == 0m ? "PAID" : "PARTIAL";
-        if (installment is not null)
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var existing = await db.Set<FinancePayment>().SingleOrDefaultAsync(p => p.TenantId == tenantId && p.IdempotencyKey == command.IdempotencyKey, ct);
+            if (existing is not null) return existing;
+
+            var demand = await db.Set<FeeDemand>().Include(d => d.Installments)
+                .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
+                ?? throw new KeyNotFoundException("Fee demand was not found.");
+            if (command.Amount > demand.OutstandingAmount) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Payment exceeds the outstanding demand.");
+            var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
+            if (command.FeeInstallmentId is not null && installment is null) throw new KeyNotFoundException("Fee installment was not found.");
+
+            var payment = new FinancePayment
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, FeeDemandId = demand.Id, FeeInstallmentId = installment?.Id,
+                IdempotencyKey = command.IdempotencyKey, Method = command.Method.Trim().ToUpperInvariant(),
+                GatewaySlug = command.GatewaySlug, ExternalReference = command.ExternalReference, Amount = command.Amount,
+                Status = "SETTLED", SettledAt = DateTime.UtcNow
+            };
+            demand.PaidAmount += command.Amount;
+            demand.OutstandingAmount -= command.Amount;
+            demand.Status = demand.OutstandingAmount == 0m ? "PAID" : "PARTIAL";
+            if (installment is not null)
+            {
+                installment.PaidAmount += command.Amount;
+                installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL";
+            }
+            db.Set<FinancePayment>().Add(payment);
+            await PostFeeReceiptAsync(tenantId, payment, demand.Currency, $"Fee receipt for demand {demand.DemandNumber} ({payment.Method})", isSandbox: false, receipt, ct);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            await PublishAsync(tenantId, "payment-settled", new { payment.Id, payment.FeeDemandId, payment.Amount, demand.Currency, payment.Status, payment.SettledAt }, ct);
+            return payment;
+        });
+    }
+
+    /// <summary>
+    /// Puts a settled fee payment into the books: debit bank, credit student fee revenue.
+    ///
+    /// Nothing did this before. A payment updated the student's demand and was written to
+    /// FinancePayments, and the general ledger never heard of it — so the trial balance, the
+    /// profit and loss, the statement of financial position and the cash position all omitted every
+    /// rupee the university had collected in fees. On the pilot database that was Rs 115,000
+    /// collected against a reported revenue and cash position of zero.
+    ///
+    /// Income is recognised when the money is received. An institution that recognises fee income
+    /// when the demand is raised instead needs a posting at demand time as well; this one does not
+    /// make that choice silently.
+    ///
+    /// The voucher is written already posted, with its journal entry, inside the caller's
+    /// transaction: the payment and its bookkeeping are one act or neither.
+    /// </summary>
+    private sealed record FeeReceiptAccounts(Guid BankId, Guid RevenueId, string VoucherNumber);
+
+    /// <summary>
+    /// Everything the receipt needs that has to be read or created first. It runs before the payment
+    /// transaction opens, because a query inside a user-initiated transaction is refused outright by
+    /// the retrying execution strategy this context uses.
+    /// </summary>
+    private async Task<FeeReceiptAccounts> PrepareFeeReceiptAsync(Guid tenantId, CancellationToken ct)
+    {
+        var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
+        var feeRevenue = await AccountAsync(tenantId, "4000", "Student fee revenue", AccountType.Revenue, ct);
+
+        var year = DateTime.UtcNow.Year;
+        var sequence = await db.Set<FinanceVoucherSequence>()
+            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.VoucherType == "RV" && x.FiscalYear == year, ct);
+        if (sequence is null)
         {
-            installment.PaidAmount += command.Amount;
-            installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL";
+            sequence = new FinanceVoucherSequence { Id = Guid.NewGuid(), TenantId = tenantId, VoucherType = "RV", FiscalYear = year };
+            db.Set<FinanceVoucherSequence>().Add(sequence);
         }
-        db.Set<FinancePayment>().Add(payment);
+        var number = sequence.NextNumber++;
         await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        await PublishAsync(tenantId, "payment-settled", new { payment.Id, payment.FeeDemandId, payment.Amount, demand.Currency, payment.Status, payment.SettledAt }, ct);
-        return payment;
+        return new FeeReceiptAccounts(bank.Id, feeRevenue.Id, $"RV-FY{DateTime.UtcNow:yy}-{number:000000}");
+    }
+
+    private async Task PostFeeReceiptAsync(Guid tenantId, FinancePayment payment, string currency, string description, bool isSandbox, FeeReceiptAccounts accounts, CancellationToken ct)
+    {
+        var bank = accounts.BankId;
+        var feeRevenue = accounts.RevenueId;
+        var voucherNumber = accounts.VoucherNumber;
+
+        var voucher = new FinanceVoucher
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, VoucherNumber = voucherNumber, VoucherType = "RV",
+            Currency = NormalizeCurrency(currency), Description = description,
+            CreatedByUserId = payment.Id,              // the payment is what made this entry; no person keyed it
+            TotalAmount = payment.Amount,
+            Lines =
+            [
+                new FinanceVoucherLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = bank, Debit = payment.Amount, Credit = 0m, Description = description },
+                new FinanceVoucherLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = feeRevenue, Debit = 0m, Credit = payment.Amount, Description = description },
+            ],
+        };
+        db.Set<FinanceVoucher>().Add(voucher);
+
+        db.JournalEntries.Add(new JournalEntry
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = voucherNumber, EntryType = JournalEntryType.AutoGenerated,
+            Description = description, EntryDate = payment.SettledAt ?? DateTime.UtcNow,
+            TotalDebit = payment.Amount, TotalCredit = payment.Amount, IsPosted = true, IsSandbox = isSandbox, PostedAt = DateTime.UtcNow,
+            Lines =
+            [
+                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = bank, Debit = payment.Amount, Credit = 0m, Description = description },
+                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = feeRevenue, Debit = 0m, Credit = payment.Amount, Description = description },
+            ],
+        });
+
+        // The lines must exist and balance before the database will accept the voucher as posted.
+        await db.SaveChangesAsync(ct);
+        voucher.Status = FinanceStates.Posted;
+        voucher.PostedAt = DateTime.UtcNow;
     }
 
     private async Task<ChartOfAccount> AccountAsync(Guid tenantId, string code, string name, AccountType type, CancellationToken ct)
@@ -258,61 +348,52 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
             throw new ArgumentException("Gateway payment fields are invalid.");
         if (command.SanitizedPayloadJson.Length > 20000) throw new ArgumentException("Gateway payload is too large.");
         var currency = NormalizeCurrency(command.Currency);
+        var receipt = await PrepareFeeReceiptAsync(tenantId, ct);
 
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var existing = await db.Set<FinancePayment>()
-            .SingleOrDefaultAsync(p => p.TenantId == tenantId && p.WebhookId == command.WebhookId, ct);
-        if (existing is not null) return existing;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var existing = await db.Set<FinancePayment>()
+                .SingleOrDefaultAsync(p => p.TenantId == tenantId && p.WebhookId == command.WebhookId, ct);
+            if (existing is not null) return existing;
 
-        var demand = await db.Set<FeeDemand>().Include(d => d.Installments)
-            .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
-            ?? throw new KeyNotFoundException("Fee demand was not found.");
-        if (!string.Equals(demand.Currency, currency, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Payment currency does not match the fee demand.");
-        if (command.Amount > demand.OutstandingAmount) throw new InvalidOperationException("Payment exceeds the outstanding demand.");
-        var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
-        if (command.FeeInstallmentId is not null && installment is null) throw new KeyNotFoundException("Fee installment was not found.");
+            var demand = await db.Set<FeeDemand>().Include(d => d.Installments)
+                .SingleOrDefaultAsync(d => d.Id == command.FeeDemandId && d.TenantId == tenantId, ct)
+                ?? throw new KeyNotFoundException("Fee demand was not found.");
+            if (!string.Equals(demand.Currency, currency, StringComparison.OrdinalIgnoreCase)) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Payment currency does not match the fee demand.");
+            if (command.Amount > demand.OutstandingAmount) throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("Payment exceeds the outstanding demand.");
+            var installment = command.FeeInstallmentId is null ? null : demand.Installments.SingleOrDefault(i => i.Id == command.FeeInstallmentId);
+            if (command.FeeInstallmentId is not null && installment is null) throw new KeyNotFoundException("Fee installment was not found.");
 
-        var payment = new FinancePayment
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, FeeDemandId = demand.Id, FeeInstallmentId = installment?.Id,
-            IdempotencyKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{gateway}:{command.WebhookId}"))).ToLowerInvariant(),
-            Method = "WEBHOOK", GatewaySlug = gateway, ExternalReference = command.ExternalReference,
-            Amount = command.Amount, Status = "SETTLED", WebhookId = command.WebhookId, SettledAt = DateTime.UtcNow
-        };
-        demand.PaidAmount += command.Amount;
-        demand.OutstandingAmount -= command.Amount;
-        demand.Status = demand.OutstandingAmount == 0m ? "PAID" : "PARTIAL";
-        if (installment is not null)
-        {
-            installment.PaidAmount += command.Amount;
-            installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL";
-        }
-        var bankAccount = await AccountAsync(tenantId, "1010", $"{gateway.ToUpperInvariant()} settlement bank", AccountType.Asset, ct);
-        var receivableAccount = await AccountAsync(tenantId, "1100", "Student fee receivable", AccountType.Asset, ct);
-        db.JournalEntries.Add(new JournalEntry
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"RV-{payment.Id:N}"[..20],
-            EntryType = JournalEntryType.AutoGenerated, Description = $"Gateway payment {payment.ExternalReference}",
-            EntryDate = DateTime.UtcNow, TotalDebit = command.Amount, TotalCredit = command.Amount,
-            IsPosted = true, IsSandbox = command.IsSandbox, PostedAt = DateTime.UtcNow,
-            Lines =
-            [
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = bankAccount.Id, Debit = command.Amount },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = receivableAccount.Id, Credit = command.Amount }
-            ]
+            var payment = new FinancePayment
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, FeeDemandId = demand.Id, FeeInstallmentId = installment?.Id,
+                IdempotencyKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{gateway}:{command.WebhookId}"))).ToLowerInvariant(),
+                Method = "WEBHOOK", GatewaySlug = gateway, ExternalReference = command.ExternalReference,
+                Amount = command.Amount, Status = "SETTLED", WebhookId = command.WebhookId, SettledAt = DateTime.UtcNow
+            };
+            demand.PaidAmount += command.Amount;
+            demand.OutstandingAmount -= command.Amount;
+            demand.Status = demand.OutstandingAmount == 0m ? "PAID" : "PARTIAL";
+            if (installment is not null)
+            {
+                installment.PaidAmount += command.Amount;
+                installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL";
+            }
+            db.Set<FinancePayment>().Add(payment);
+            await PostFeeReceiptAsync(tenantId, payment, currency, $"Fee receipt for demand {demand.DemandNumber} ({gateway} {command.ExternalReference})", command.IsSandbox, receipt, ct);
+            db.Set<PaymentGatewayEvent>().Add(new PaymentGatewayEvent
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, GatewaySlug = gateway, EventType = "PAYMENT_CONFIRMED",
+                ReferenceId = command.ExternalReference, FinancePaymentId = payment.Id, Amount = command.Amount,
+                Currency = currency, Status = "PROCESSED", IsSandbox = command.IsSandbox,
+                SanitizedPayloadJson = command.SanitizedPayloadJson
+            });
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            await PublishAsync(tenantId, "payment-settled", new { payment.Id, payment.FeeDemandId, payment.Amount, currency, payment.Status, payment.SettledAt, payment.GatewaySlug }, ct);
+            return payment;
         });
-        db.Set<FinancePayment>().Add(payment);
-        db.Set<PaymentGatewayEvent>().Add(new PaymentGatewayEvent
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, GatewaySlug = gateway, EventType = "PAYMENT_CONFIRMED",
-            ReferenceId = command.ExternalReference, FinancePaymentId = payment.Id, Amount = command.Amount,
-            Currency = currency, Status = "PROCESSED", IsSandbox = command.IsSandbox,
-            SanitizedPayloadJson = command.SanitizedPayloadJson
-        });
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        await PublishAsync(tenantId, "payment-settled", new { payment.Id, payment.FeeDemandId, payment.Amount, currency, payment.Status, payment.SettledAt, payment.GatewaySlug }, ct);
-        return payment;
     }
 
     public async Task<FinancePaymentPlanConfiguration> ConfigurePaymentPlanAsync(Guid tenantId, ConfigurePaymentPlanCommand command, CancellationToken ct)
@@ -677,51 +758,54 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         if (command.Lines.Any(x => Math.Round(x.GrossSalary - x.IncomeTax - x.Eobi - x.SocialSecurity - x.NetSalary, 4) != 0m))
             throw new ArgumentException("Each payroll line must reconcile gross salary to deductions and net salary.");
 
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var existing = await db.FinancePayrollPostings.Include(x => x.Lines)
-            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Period == command.Period, ct);
-        if (existing is not null) return existing;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var existing = await db.FinancePayrollPostings.Include(x => x.Lines)
+                .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Period == command.Period, ct);
+            if (existing is not null) return existing;
 
-        var salary = await AccountAsync(tenantId, "6000", "Salary expense", AccountType.Expense, ct);
-        var tax = await AccountAsync(tenantId, "2110", "Income tax payable", AccountType.Liability, ct);
-        var eobi = await AccountAsync(tenantId, "2111", "EOBI payable", AccountType.Liability, ct);
-        var social = await AccountAsync(tenantId, "2112", "Social security payable", AccountType.Liability, ct);
-        var gratuityExpense = await AccountAsync(tenantId, "6001", "Gratuity expense", AccountType.Expense, ct);
-        var gratuity = await AccountAsync(tenantId, "2113", "Gratuity payable", AccountType.Liability, ct);
-        var net = await AccountAsync(tenantId, "2114", "Net salaries payable", AccountType.Liability, ct);
-        var lines = command.Lines.Select(x => new FinancePayrollPostingLine
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, EmployeeId = x.EmployeeId, CostCenterId = x.CostCenterId,
-            GrossSalary = x.GrossSalary, IncomeTax = x.IncomeTax, Eobi = x.Eobi, SocialSecurity = x.SocialSecurity,
-            Gratuity = x.Gratuity, NetSalary = x.NetSalary
-        }).ToList();
-        var posting = new FinancePayrollPosting
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, Period = command.Period, Status = "POSTED", ImportedByUserId = actorId,
-            GrossSalary = lines.Sum(x => x.GrossSalary), NetSalary = lines.Sum(x => x.NetSalary), IncomeTax = lines.Sum(x => x.IncomeTax),
-            Eobi = lines.Sum(x => x.Eobi), SocialSecurity = lines.Sum(x => x.SocialSecurity), Gratuity = lines.Sum(x => x.Gratuity), Lines = lines
-        };
-        var total = posting.GrossSalary + posting.Gratuity;
-        var journal = new JournalEntry
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"PAY-{command.Period}-{Guid.NewGuid():N}"[..20], EntryType = JournalEntryType.AutoGenerated,
-            Description = $"Payroll posting {command.Period}", EntryDate = DateTime.UtcNow, TotalDebit = total, TotalCredit = total, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
-            Lines = [
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = salary.Id, Debit = posting.GrossSalary },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = gratuityExpense.Id, Debit = posting.Gratuity },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = tax.Id, Credit = posting.IncomeTax },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = eobi.Id, Credit = posting.Eobi },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = social.Id, Credit = posting.SocialSecurity },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = gratuity.Id, Credit = posting.Gratuity },
-                new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = net.Id, Credit = posting.NetSalary }
-            ]
-        };
-        posting.JournalEntryId = journal.Id;
-        db.FinancePayrollPostings.Add(posting);
-        db.JournalEntries.Add(journal);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return posting;
+            var salary = await AccountAsync(tenantId, "6000", "Salary expense", AccountType.Expense, ct);
+            var tax = await AccountAsync(tenantId, "2110", "Income tax payable", AccountType.Liability, ct);
+            var eobi = await AccountAsync(tenantId, "2111", "EOBI payable", AccountType.Liability, ct);
+            var social = await AccountAsync(tenantId, "2112", "Social security payable", AccountType.Liability, ct);
+            var gratuityExpense = await AccountAsync(tenantId, "6001", "Gratuity expense", AccountType.Expense, ct);
+            var gratuity = await AccountAsync(tenantId, "2113", "Gratuity payable", AccountType.Liability, ct);
+            var net = await AccountAsync(tenantId, "2114", "Net salaries payable", AccountType.Liability, ct);
+            var lines = command.Lines.Select(x => new FinancePayrollPostingLine
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, EmployeeId = x.EmployeeId, CostCenterId = x.CostCenterId,
+                GrossSalary = x.GrossSalary, IncomeTax = x.IncomeTax, Eobi = x.Eobi, SocialSecurity = x.SocialSecurity,
+                Gratuity = x.Gratuity, NetSalary = x.NetSalary
+            }).ToList();
+            var posting = new FinancePayrollPosting
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, Period = command.Period, Status = "POSTED", ImportedByUserId = actorId,
+                GrossSalary = lines.Sum(x => x.GrossSalary), NetSalary = lines.Sum(x => x.NetSalary), IncomeTax = lines.Sum(x => x.IncomeTax),
+                Eobi = lines.Sum(x => x.Eobi), SocialSecurity = lines.Sum(x => x.SocialSecurity), Gratuity = lines.Sum(x => x.Gratuity), Lines = lines
+            };
+            var total = posting.GrossSalary + posting.Gratuity;
+            var journal = new JournalEntry
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"PAY-{command.Period}-{Guid.NewGuid():N}"[..20], EntryType = JournalEntryType.AutoGenerated,
+                Description = $"Payroll posting {command.Period}", EntryDate = DateTime.UtcNow, TotalDebit = total, TotalCredit = total, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
+                Lines = [
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = salary.Id, Debit = posting.GrossSalary },
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = gratuityExpense.Id, Debit = posting.Gratuity },
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = tax.Id, Credit = posting.IncomeTax },
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = eobi.Id, Credit = posting.Eobi },
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = social.Id, Credit = posting.SocialSecurity },
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = gratuity.Id, Credit = posting.Gratuity },
+                    new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = net.Id, Credit = posting.NetSalary }
+                ]
+            };
+            posting.JournalEntryId = journal.Id;
+            db.FinancePayrollPostings.Add(posting);
+            db.JournalEntries.Add(journal);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return posting;
+        });
     }
 
     public async Task<IReadOnlyList<FinanceBankFeedTransaction>> ImportBankFeedAsync(Guid tenantId, ImportFinanceBankFeedCommand command, CancellationToken ct)
@@ -730,34 +814,37 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         if (command.BankAccountId == Guid.Empty || command.Rows.Count == 0) throw new ArgumentException("Bank account and feed rows are required.");
         if (command.Rows.Any(x => string.IsNullOrWhiteSpace(x.ExternalId) || x.ExternalId.Length > 160 || x.BookingDate == default || x.Amount == 0m || string.IsNullOrWhiteSpace(x.Narration) || x.Narration.Length > 1000))
             throw new ArgumentException("Bank feed rows are invalid.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var account = await db.FinanceBankAccounts.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.BankAccountId && x.IsActive, ct)
-            ?? throw new KeyNotFoundException("Bank account was not found.");
-        var rows = new List<FinanceBankFeedTransaction>();
-        var matchedJournalIds = new HashSet<Guid>();
-        foreach (var row in command.Rows)
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            if (await db.FinanceBankFeedTransactions.AnyAsync(x => x.TenantId == tenantId && x.FinanceBankAccountId == account.Id && x.ExternalId == row.ExternalId, ct)) continue;
-            var item = new FinanceBankFeedTransaction { Id = Guid.NewGuid(), TenantId = tenantId, FinanceBankAccountId = account.Id, ExternalId = row.ExternalId.Trim(), BookingDate = row.BookingDate, Amount = row.Amount, Narration = row.Narration.Trim() };
-            var candidates = await (from line in db.JournalEntryLines.AsNoTracking()
-                                    join entry in db.JournalEntries.AsNoTracking() on line.JournalEntryId equals entry.Id
-                                    where line.TenantId == tenantId && entry.TenantId == tenantId && entry.IsPosted && line.ChartOfAccountId == account.ChartOfAccountId
-                                        && entry.EntryDate >= row.BookingDate.AddDays(-2) && entry.EntryDate <= row.BookingDate.AddDays(2)
-                                    select new { entry, movement = line.Debit - line.Credit }).ToListAsync(ct);
-            var candidate = candidates.Where(x => x.movement == row.Amount && !matchedJournalIds.Contains(x.entry.Id))
-                .OrderByDescending(x => Similarity(x.entry.Description, row.Narration)).ThenBy(x => Math.Abs((x.entry.EntryDate - row.BookingDate).TotalDays)).FirstOrDefault();
-            if (candidate is not null)
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var account = await db.FinanceBankAccounts.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.BankAccountId && x.IsActive, ct)
+                ?? throw new KeyNotFoundException("Bank account was not found.");
+            var rows = new List<FinanceBankFeedTransaction>();
+            var matchedJournalIds = new HashSet<Guid>();
+            foreach (var row in command.Rows)
             {
-                item.Status = "MATCHED";
-                item.MatchedJournalEntryId = candidate.entry.Id;
-                matchedJournalIds.Add(candidate.entry.Id);
+                if (await db.FinanceBankFeedTransactions.AnyAsync(x => x.TenantId == tenantId && x.FinanceBankAccountId == account.Id && x.ExternalId == row.ExternalId, ct)) continue;
+                var item = new FinanceBankFeedTransaction { Id = Guid.NewGuid(), TenantId = tenantId, FinanceBankAccountId = account.Id, ExternalId = row.ExternalId.Trim(), BookingDate = row.BookingDate, Amount = row.Amount, Narration = row.Narration.Trim() };
+                var candidates = await (from line in db.JournalEntryLines.AsNoTracking()
+                                        join entry in db.JournalEntries.AsNoTracking() on line.JournalEntryId equals entry.Id
+                                        where line.TenantId == tenantId && entry.TenantId == tenantId && entry.IsPosted && line.ChartOfAccountId == account.ChartOfAccountId
+                                            && entry.EntryDate >= row.BookingDate.AddDays(-2) && entry.EntryDate <= row.BookingDate.AddDays(2)
+                                        select new { entry, movement = line.Debit - line.Credit }).ToListAsync(ct);
+                var candidate = candidates.Where(x => x.movement == row.Amount && !matchedJournalIds.Contains(x.entry.Id))
+                    .OrderByDescending(x => Similarity(x.entry.Description, row.Narration)).ThenBy(x => Math.Abs((x.entry.EntryDate - row.BookingDate).TotalDays)).FirstOrDefault();
+                if (candidate is not null)
+                {
+                    item.Status = "MATCHED";
+                    item.MatchedJournalEntryId = candidate.entry.Id;
+                    matchedJournalIds.Add(candidate.entry.Id);
+                }
+                db.FinanceBankFeedTransactions.Add(item);
+                rows.Add(item);
             }
-            db.FinanceBankFeedTransactions.Add(item);
-            rows.Add(item);
-        }
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return rows;
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return rows;
+        });
     }
 
     public async Task<FinanceGrant> CreateGrantAsync(Guid tenantId, CreateFinanceGrantCommand command, CancellationToken ct)
@@ -777,22 +864,25 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.GrantId == Guid.Empty || command.Amount <= 0m || string.IsNullOrWhiteSpace(command.ExternalReference) || command.ExternalReference.Length > 200)
             throw new ArgumentException("Grant receipt fields are invalid.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct)
-            ?? throw new KeyNotFoundException("Grant was not found.");
-        if (grant.ReceivedAmount + command.Amount > grant.AwardAmount) throw new InvalidOperationException("Receipt exceeds the grant award.");
-        var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
-        var deferred = await AccountAsync(tenantId, "2201", "Deferred scholarship income", AccountType.Liability, ct);
-        db.JournalEntries.Add(new JournalEntry
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"GRANT-{tenantId:N}-{command.ExternalReference}"[..Math.Min(50, $"GRANT-{tenantId:N}-{command.ExternalReference}".Length)], EntryType = JournalEntryType.AutoGenerated,
-            Description = $"Grant receipt {command.ExternalReference}", EntryDate = DateTime.UtcNow, TotalDebit = command.Amount, TotalCredit = command.Amount, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
-            Lines = [new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = bank.Id, Debit = command.Amount }, new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = deferred.Id, Credit = command.Amount }]
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct)
+                ?? throw new KeyNotFoundException("Grant was not found.");
+            if (grant.ReceivedAmount + command.Amount > grant.AwardAmount) throw new InvalidOperationException("Receipt exceeds the grant award.");
+            var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
+            var deferred = await AccountAsync(tenantId, "2201", "Deferred scholarship income", AccountType.Liability, ct);
+            db.JournalEntries.Add(new JournalEntry
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"GRANT-{tenantId:N}-{command.ExternalReference}"[..Math.Min(50, $"GRANT-{tenantId:N}-{command.ExternalReference}".Length)], EntryType = JournalEntryType.AutoGenerated,
+                Description = $"Grant receipt {command.ExternalReference}", EntryDate = DateTime.UtcNow, TotalDebit = command.Amount, TotalCredit = command.Amount, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
+                Lines = [new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = bank.Id, Debit = command.Amount }, new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = deferred.Id, Credit = command.Amount }]
+            });
+            grant.ReceivedAmount += command.Amount;
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return grant;
         });
-        grant.ReceivedAmount += command.Amount;
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return grant;
     }
 
     public async Task<FinanceScholarshipAward> AwardScholarshipAsync(Guid tenantId, Guid actorId, AwardFinanceScholarshipCommand command, CancellationToken ct)
@@ -800,41 +890,44 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         RequireTenant(tenantId);
         var method = command.DisbursementMethod.Trim().ToUpperInvariant();
         if (actorId == Guid.Empty || command.StudentId == Guid.Empty || command.Amount <= 0m || method is not ("FEE_CREDIT" or "CASH_STIPEND")) throw new ArgumentException("Scholarship award fields are invalid.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        FinanceGrant? grant = null;
-        if (command.GrantId is not null)
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct) ?? throw new KeyNotFoundException("Grant was not found.");
-            if (grant.ReceivedAmount - grant.SpentAmount < command.Amount) throw new InvalidOperationException("Scholarship exceeds the available grant balance.");
-        }
-        var awardExpense = await AccountAsync(tenantId, method == "FEE_CREDIT" ? "6200" : "6201", method == "FEE_CREDIT" ? "Scholarship expense" : "Stipend expense", AccountType.Expense, ct);
-        var credit = await AccountAsync(tenantId, method == "FEE_CREDIT" ? "1100" : "1010", method == "FEE_CREDIT" ? "Student fee receivable" : "Bank", method == "FEE_CREDIT" ? AccountType.Asset : AccountType.Asset, ct);
-        var award = new FinanceScholarshipAward { Id = Guid.NewGuid(), TenantId = tenantId, StudentId = command.StudentId, GrantId = command.GrantId, ScholarshipType = command.ScholarshipType.Trim(), CoverageType = command.CoverageType.Trim().ToUpperInvariant(), Amount = command.Amount, DisbursementMethod = method, Grant = grant };
-        var lines = new List<JournalEntryLine>
-        {
-            new() { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = awardExpense.Id, Debit = command.Amount },
-            new() { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = credit.Id, Credit = command.Amount }
-        };
-        if (grant is not null)
-        {
-            var deferred = await AccountAsync(tenantId, "2201", "Deferred scholarship income", AccountType.Liability, ct);
-            var grantIncome = await AccountAsync(tenantId, "4200", "Released scholarship grant income", AccountType.Revenue, ct);
-            lines.Add(new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = deferred.Id, Debit = command.Amount });
-            lines.Add(new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = grantIncome.Id, Credit = command.Amount });
-        }
-        var journalTotal = command.Amount * (grant is null ? 1m : 2m);
-        var journal = new JournalEntry
-        {
-            Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"AID-{award.Id:N}"[..20], EntryType = JournalEntryType.AutoGenerated, Description = $"Scholarship award {award.Id:N}", EntryDate = DateTime.UtcNow, TotalDebit = journalTotal, TotalCredit = journalTotal, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
-            Lines = lines
-        };
-        award.JournalEntryId = journal.Id;
-        if (grant is not null) grant.SpentAmount += command.Amount;
-        db.FinanceScholarshipAwards.Add(award);
-        db.JournalEntries.Add(journal);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return award;
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            FinanceGrant? grant = null;
+            if (command.GrantId is not null)
+            {
+                grant = await db.FinanceGrants.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.GrantId, ct) ?? throw new KeyNotFoundException("Grant was not found.");
+                if (grant.ReceivedAmount - grant.SpentAmount < command.Amount) throw new InvalidOperationException("Scholarship exceeds the available grant balance.");
+            }
+            var awardExpense = await AccountAsync(tenantId, method == "FEE_CREDIT" ? "6200" : "6201", method == "FEE_CREDIT" ? "Scholarship expense" : "Stipend expense", AccountType.Expense, ct);
+            var credit = await AccountAsync(tenantId, method == "FEE_CREDIT" ? "1100" : "1010", method == "FEE_CREDIT" ? "Student fee receivable" : "Bank", method == "FEE_CREDIT" ? AccountType.Asset : AccountType.Asset, ct);
+            var award = new FinanceScholarshipAward { Id = Guid.NewGuid(), TenantId = tenantId, StudentId = command.StudentId, GrantId = command.GrantId, ScholarshipType = command.ScholarshipType.Trim(), CoverageType = command.CoverageType.Trim().ToUpperInvariant(), Amount = command.Amount, DisbursementMethod = method, Grant = grant };
+            var lines = new List<JournalEntryLine>
+            {
+                new() { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = awardExpense.Id, Debit = command.Amount },
+                new() { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = credit.Id, Credit = command.Amount }
+            };
+            if (grant is not null)
+            {
+                var deferred = await AccountAsync(tenantId, "2201", "Deferred scholarship income", AccountType.Liability, ct);
+                var grantIncome = await AccountAsync(tenantId, "4200", "Released scholarship grant income", AccountType.Revenue, ct);
+                lines.Add(new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = deferred.Id, Debit = command.Amount });
+                lines.Add(new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = grantIncome.Id, Credit = command.Amount });
+            }
+            var journalTotal = command.Amount * (grant is null ? 1m : 2m);
+            var journal = new JournalEntry
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"AID-{award.Id:N}"[..20], EntryType = JournalEntryType.AutoGenerated, Description = $"Scholarship award {award.Id:N}", EntryDate = DateTime.UtcNow, TotalDebit = journalTotal, TotalCredit = journalTotal, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow,
+                Lines = lines
+            };
+            award.JournalEntryId = journal.Id;
+            if (grant is not null) grant.SpentAmount += command.Amount;
+            db.FinanceScholarshipAwards.Add(award);
+            db.JournalEntries.Add(journal);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return award;
+        });
     }
 
     public async Task<FinanceUtilityBill> CreateUtilityBillAsync(Guid tenantId, CreateFinanceUtilityBillCommand command, CancellationToken ct)
@@ -980,68 +1073,77 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ItemId == Guid.Empty || command.Quantity <= 0m || command.UnitCost <= 0m || string.IsNullOrWhiteSpace(command.Reference)) throw new ArgumentException("Inventory receipt fields are invalid.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
-        var total = command.Quantity * command.UnitCost;
-        var oldValue = item.OnHandQuantity * item.WeightedAverageCost;
-        item.OnHandQuantity += command.Quantity;
-        item.WeightedAverageCost = Math.Round((oldValue + total) / item.OnHandQuantity, 4, MidpointRounding.AwayFromZero);
-        var inventory = await AccountAsync(tenantId, "1500", "Inventory", AccountType.Asset, ct);
-        var payable = await AccountAsync(tenantId, "2105", "Inventory payable", AccountType.Liability, ct);
-        var movement = new FinanceInventoryMovement { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInventoryItemId = item.Id, MovementType = "RECEIPT", Quantity = command.Quantity, UnitCost = command.UnitCost, TotalCost = total, Reference = command.Reference.Trim() };
-        var journal = InventoryJournal(tenantId, actorId, $"INV-R-{movement.Id:N}"[..20], $"Inventory receipt {item.ItemCode}", total, inventory.Id, payable.Id);
-        movement.JournalEntryId = journal.Id;
-        db.FinanceInventoryMovements.Add(movement);
-        db.JournalEntries.Add(journal);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return movement;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
+            var total = command.Quantity * command.UnitCost;
+            var oldValue = item.OnHandQuantity * item.WeightedAverageCost;
+            item.OnHandQuantity += command.Quantity;
+            item.WeightedAverageCost = Math.Round((oldValue + total) / item.OnHandQuantity, 4, MidpointRounding.AwayFromZero);
+            var inventory = await AccountAsync(tenantId, "1500", "Inventory", AccountType.Asset, ct);
+            var payable = await AccountAsync(tenantId, "2105", "Inventory payable", AccountType.Liability, ct);
+            var movement = new FinanceInventoryMovement { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInventoryItemId = item.Id, MovementType = "RECEIPT", Quantity = command.Quantity, UnitCost = command.UnitCost, TotalCost = total, Reference = command.Reference.Trim() };
+            var journal = InventoryJournal(tenantId, actorId, $"INV-R-{movement.Id:N}"[..20], $"Inventory receipt {item.ItemCode}", total, inventory.Id, payable.Id);
+            movement.JournalEntryId = journal.Id;
+            db.FinanceInventoryMovements.Add(movement);
+            db.JournalEntries.Add(journal);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return movement;
+        });
     }
 
     public async Task<FinanceInventoryMovement> IssueInventoryAsync(Guid tenantId, Guid actorId, IssueFinanceInventoryCommand command, CancellationToken ct)
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ItemId == Guid.Empty || command.Quantity <= 0m || command.CostCenterId == Guid.Empty || string.IsNullOrWhiteSpace(command.Reference)) throw new ArgumentException("Inventory issue fields are invalid.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
-        if (command.Quantity > item.OnHandQuantity) throw new InvalidOperationException("Inventory quantity is insufficient.");
-        var unitCost = item.CostMethod == "FIFO" ? await FifoIssueUnitCostAsync(tenantId, item.Id, command.Quantity, ct) : item.WeightedAverageCost;
-        var total = Math.Round(command.Quantity * unitCost, 4, MidpointRounding.AwayFromZero);
-        item.OnHandQuantity -= command.Quantity;
-        var inventory = await AccountAsync(tenantId, "1500", "Inventory", AccountType.Asset, ct);
-        var expense = await AccountAsync(tenantId, "6301", "Stationery and consumables expense", AccountType.Expense, ct);
-        var movement = new FinanceInventoryMovement { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInventoryItemId = item.Id, MovementType = "ISSUE", Quantity = -command.Quantity, UnitCost = unitCost, TotalCost = total, CostCenterId = command.CostCenterId, Reference = command.Reference.Trim() };
-        var journal = InventoryJournal(tenantId, actorId, $"INV-I-{movement.Id:N}"[..20], $"Inventory issue {item.ItemCode}", total, expense.Id, inventory.Id);
-        movement.JournalEntryId = journal.Id;
-        db.FinanceInventoryMovements.Add(movement);
-        db.JournalEntries.Add(journal);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return movement;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
+            if (command.Quantity > item.OnHandQuantity) throw new InvalidOperationException("Inventory quantity is insufficient.");
+            var unitCost = item.CostMethod == "FIFO" ? await FifoIssueUnitCostAsync(tenantId, item.Id, command.Quantity, ct) : item.WeightedAverageCost;
+            var total = Math.Round(command.Quantity * unitCost, 4, MidpointRounding.AwayFromZero);
+            item.OnHandQuantity -= command.Quantity;
+            var inventory = await AccountAsync(tenantId, "1500", "Inventory", AccountType.Asset, ct);
+            var expense = await AccountAsync(tenantId, "6301", "Stationery and consumables expense", AccountType.Expense, ct);
+            var movement = new FinanceInventoryMovement { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInventoryItemId = item.Id, MovementType = "ISSUE", Quantity = -command.Quantity, UnitCost = unitCost, TotalCost = total, CostCenterId = command.CostCenterId, Reference = command.Reference.Trim() };
+            var journal = InventoryJournal(tenantId, actorId, $"INV-I-{movement.Id:N}"[..20], $"Inventory issue {item.ItemCode}", total, expense.Id, inventory.Id);
+            movement.JournalEntryId = journal.Id;
+            db.FinanceInventoryMovements.Add(movement);
+            db.JournalEntries.Add(journal);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return movement;
+        });
     }
 
     public async Task<FinanceInventoryMovement> CountInventoryAsync(Guid tenantId, Guid actorId, CountFinanceInventoryCommand command, CancellationToken ct)
     {
         RequireTenant(tenantId);
         if (actorId == Guid.Empty || command.ItemId == Guid.Empty || command.PhysicalQuantity < 0m || string.IsNullOrWhiteSpace(command.Reference)) throw new ArgumentException("Inventory count fields are invalid.");
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
-        var difference = command.PhysicalQuantity - item.OnHandQuantity;
-        var total = Math.Round(Math.Abs(difference) * item.WeightedAverageCost, 4, MidpointRounding.AwayFromZero);
-        item.OnHandQuantity = command.PhysicalQuantity;
-        var inventory = await AccountAsync(tenantId, "1500", "Inventory", AccountType.Asset, ct);
-        var variance = await AccountAsync(tenantId, difference < 0m ? "6501" : "4501", difference < 0m ? "Inventory shrinkage" : "Inventory count gain", difference < 0m ? AccountType.Expense : AccountType.Revenue, ct);
-        var movement = new FinanceInventoryMovement { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInventoryItemId = item.Id, MovementType = "COUNT_ADJUSTMENT", Quantity = difference, UnitCost = item.WeightedAverageCost, TotalCost = total, Reference = command.Reference.Trim() };
-        if (total > 0m)
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            var journal = InventoryJournal(tenantId, actorId, $"INV-C-{movement.Id:N}"[..20], $"Inventory count {item.ItemCode}", total, difference > 0m ? inventory.Id : variance.Id, difference > 0m ? variance.Id : inventory.Id);
-            movement.JournalEntryId = journal.Id;
-            db.JournalEntries.Add(journal);
-        }
-        db.FinanceInventoryMovements.Add(movement);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return movement;
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var item = await db.FinanceInventoryItems.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == command.ItemId && x.Status == "ACTIVE", ct) ?? throw new KeyNotFoundException("Inventory item was not found.");
+            var difference = command.PhysicalQuantity - item.OnHandQuantity;
+            var total = Math.Round(Math.Abs(difference) * item.WeightedAverageCost, 4, MidpointRounding.AwayFromZero);
+            item.OnHandQuantity = command.PhysicalQuantity;
+            var inventory = await AccountAsync(tenantId, "1500", "Inventory", AccountType.Asset, ct);
+            var variance = await AccountAsync(tenantId, difference < 0m ? "6501" : "4501", difference < 0m ? "Inventory shrinkage" : "Inventory count gain", difference < 0m ? AccountType.Expense : AccountType.Revenue, ct);
+            var movement = new FinanceInventoryMovement { Id = Guid.NewGuid(), TenantId = tenantId, FinanceInventoryItemId = item.Id, MovementType = "COUNT_ADJUSTMENT", Quantity = difference, UnitCost = item.WeightedAverageCost, TotalCost = total, Reference = command.Reference.Trim() };
+            if (total > 0m)
+            {
+                var journal = InventoryJournal(tenantId, actorId, $"INV-C-{movement.Id:N}"[..20], $"Inventory count {item.ItemCode}", total, difference > 0m ? inventory.Id : variance.Id, difference > 0m ? variance.Id : inventory.Id);
+                movement.JournalEntryId = journal.Id;
+                db.JournalEntries.Add(journal);
+            }
+            db.FinanceInventoryMovements.Add(movement);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return movement;
+        });
     }
 
     public async Task<FinanceFleetCostPosting> PostFleetCostAsync(Guid tenantId, Guid actorId, PostFinanceFleetCostCommand command, CancellationToken ct)
@@ -1172,19 +1274,22 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
         if (rule is null) throw new InvalidOperationException("No active tax rule applies to this withholding.");
         var rate = filer == "NON_FILER" ? rule.FilerRatePercent * rule.NonFilerMultiplier : rule.FilerRatePercent;
         var withheld = Math.Round(command.GrossAmount * rate / 100m, 4, MidpointRounding.AwayFromZero);
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        if (await db.FinanceWithholdingRecords.AnyAsync(x => x.TenantId == tenantId && x.PaymentReference == command.PaymentReference.Trim(), ct)) throw new InvalidOperationException("Payment reference already has a withholding record.");
-        var expense = await AccountAsync(tenantId, "6100", "Vendor expense", AccountType.Expense, ct);
-        var taxPayable = await AccountAsync(tenantId, "2120", "Withholding tax payable", AccountType.Liability, ct);
-        var vendorPayable = await AccountAsync(tenantId, "2100", "Vendor payable", AccountType.Liability, ct);
-        var record = new FinanceWithholdingRecord { Id = Guid.NewGuid(), TenantId = tenantId, VendorId = command.VendorId, TaxRuleId = rule.Id, TaxType = taxType, FilingPeriod = command.FilingPeriod, PaymentReference = command.PaymentReference.Trim(), GrossAmount = command.GrossAmount, AppliedRatePercent = rate, WithheldAmount = withheld, FilerStatus = filer, WithheldAt = command.WithheldAt };
-        var journal = new JournalEntry { Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"WHT-{record.Id:N}"[..20], EntryType = JournalEntryType.AutoGenerated, Description = $"Withholding {record.PaymentReference}", EntryDate = command.WithheldAt, TotalDebit = command.GrossAmount, TotalCredit = command.GrossAmount, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow, Lines = [new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = expense.Id, Debit = command.GrossAmount }, new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = taxPayable.Id, Credit = withheld }, new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = vendorPayable.Id, Credit = command.GrossAmount - withheld }] };
-        record.JournalEntryId = journal.Id;
-        db.FinanceWithholdingRecords.Add(record);
-        db.JournalEntries.Add(journal);
-        await db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return record;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            if (await db.FinanceWithholdingRecords.AnyAsync(x => x.TenantId == tenantId && x.PaymentReference == command.PaymentReference.Trim(), ct)) throw new InvalidOperationException("Payment reference already has a withholding record.");
+            var expense = await AccountAsync(tenantId, "6100", "Vendor expense", AccountType.Expense, ct);
+            var taxPayable = await AccountAsync(tenantId, "2120", "Withholding tax payable", AccountType.Liability, ct);
+            var vendorPayable = await AccountAsync(tenantId, "2100", "Vendor payable", AccountType.Liability, ct);
+            var record = new FinanceWithholdingRecord { Id = Guid.NewGuid(), TenantId = tenantId, VendorId = command.VendorId, TaxRuleId = rule.Id, TaxType = taxType, FilingPeriod = command.FilingPeriod, PaymentReference = command.PaymentReference.Trim(), GrossAmount = command.GrossAmount, AppliedRatePercent = rate, WithheldAmount = withheld, FilerStatus = filer, WithheldAt = command.WithheldAt };
+            var journal = new JournalEntry { Id = Guid.NewGuid(), TenantId = tenantId, EntryNumber = $"WHT-{record.Id:N}"[..20], EntryType = JournalEntryType.AutoGenerated, Description = $"Withholding {record.PaymentReference}", EntryDate = command.WithheldAt, TotalDebit = command.GrossAmount, TotalCredit = command.GrossAmount, IsPosted = true, PostedByUserId = actorId, PostedAt = DateTime.UtcNow, Lines = [new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = expense.Id, Debit = command.GrossAmount }, new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = taxPayable.Id, Credit = withheld }, new JournalEntryLine { Id = Guid.NewGuid(), TenantId = tenantId, ChartOfAccountId = vendorPayable.Id, Credit = command.GrossAmount - withheld }] };
+            record.JournalEntryId = journal.Id;
+            db.FinanceWithholdingRecords.Add(record);
+            db.JournalEntries.Add(journal);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return record;
+        });
     }
 
     private static JournalEntry InvestmentJournal(Guid tenantId, Guid actorId, string entryNumber, string description, decimal amount, Guid debitAccount, Guid creditAccount)

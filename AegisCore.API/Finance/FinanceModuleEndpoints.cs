@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -739,7 +739,27 @@ public static partial class FinanceModuleEndpoints
         group.MapPost("/fee-demands", async (HttpContext context, CreateFeeDemandCommand command, IFinanceModuleService finance, CancellationToken ct) =>
         {
             if (!CanManageFinance(context)) return Results.Forbid();
-            return Results.Ok(await finance.CreateFeeDemandAsync(Tenant(context), command, ct));
+            var demand = await finance.CreateFeeDemandAsync(Tenant(context), command, ct);
+            // Answered as a shape rather than the entity: an installment holds a reference back to
+            // its demand, so serialising the entity walked the cycle and died partway through the
+            // response — a 200 with a truncated body, after the demand had already been written.
+            return Results.Ok(new
+            {
+                demand.Id,
+                demand.StudentId,
+                demand.DemandNumber,
+                demand.Currency,
+                demand.TotalAmount,
+                demand.PaidAmount,
+                demand.OutstandingAmount,
+                demand.Status,
+                demand.IssuedAt,
+                demand.DueDate,
+                Installments = demand.Installments
+                    .OrderBy(i => i.Sequence)
+                    .Select(i => new { i.Id, i.Sequence, i.Amount, i.PaidAmount, i.DueDate, i.Status })
+                    .ToList(),
+            });
         });
 
         group.MapPut("/payment-plans/configurations", async (HttpContext context, ConfigurePaymentPlanCommand command, IFinanceModuleService finance, CancellationToken ct) =>
