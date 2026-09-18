@@ -1,3 +1,4 @@
+﻿using Microsoft.EntityFrameworkCore;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Platform;
 using AegisCore.Domain;
@@ -167,18 +168,155 @@ public class FacultyWorkloadService : IFacultyWorkloadService
 
 public class DegreeVerificationService : IDegreeVerificationService
 {
-    private readonly IDegreeVerificationRepository _repo;
-    public DegreeVerificationService(IDegreeVerificationRepository r) { _repo = r; }
+    private readonly IDegreeVerificationRepository _repo; private readonly AegisDbContext _db;
+    public DegreeVerificationService(IDegreeVerificationRepository r, AegisDbContext db) { _repo = r; _db = db; }
     public async Task<string> GenerateVerificationTokenAsync(Guid studentId, CancellationToken ct) { var token = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)); var v = new DegreeVerification { Id = Guid.NewGuid(), StudentId = studentId, VerificationToken = token, Status = VerificationStatus.Pending, ExpiresAt = DateTime.UtcNow.AddDays(30) }; await _repo.AddAsync(v, ct); return token; }
-    public async Task<VerificationResultDto> VerifyAsync(string token, CancellationToken ct) { var v = await _repo.GetByTokenAsync(token, ct); if (v == null || true /* VerificationStatus.Expired */) return new VerificationResultDto { IsValid = false, Status = "Not Found" }; v.Status = VerificationStatus.Verified; v.VerifiedAt = DateTime.UtcNow; await _repo.UpdateAsync(v, ct); return new VerificationResultDto { IsValid = true, StudentName = "Verified Student", Degree = "BS Computer Science", GraduationYear = "2025", Status = "Verified" }; }
+    /// <summary>
+    /// Answers an employer's check of a degree.
+    ///
+    /// This used to read "if (v == null || true)" and answer "Not Found" for every token ever
+    /// issued; the unreachable line beneath it would have answered with a hard-coded "Verified
+    /// Student — BS Computer Science — 2025" for whoever asked. It now answers from the graduate's
+    /// own record, and says plainly when a token is unknown, expired, or already withdrawn.
+    /// </summary>
+    public async Task<VerificationResultDto> VerifyAsync(string token, CancellationToken ct)
+    {
+        var verification = await _repo.GetByTokenAsync(token, ct);
+        if (verification is null)
+            return new VerificationResultDto { IsValid = false, Status = "No such verification code" };
+        if (verification.ExpiresAt < DateTime.UtcNow)
+            return new VerificationResultDto { IsValid = false, Status = $"This code expired on {verification.ExpiresAt:d MMMM yyyy}" };
+        if (verification.Status == VerificationStatus.Discrepancy)
+            return new VerificationResultDto { IsValid = false, Status = "This code is under query by the university" };
+
+        var graduate = await _db.Students.IgnoreQueryFilters().AsNoTracking()
+            .Where(s => s.Id == verification.StudentId)
+            .Select(s => new { s.FirstName, s.LastName, s.AdmissionApplicantProfileId, s.EnrollmentStatus })
+            .SingleOrDefaultAsync(ct);
+        if (graduate is null)
+            return new VerificationResultDto { IsValid = false, Status = "The record this code refers to is no longer held" };
+
+        var certificate = await _db.DegreeCertificates.IgnoreQueryFilters().AsNoTracking()
+            .Where(c => c.StudentId == verification.StudentId)
+            .OrderByDescending(c => c.SerialNumber)
+            .FirstOrDefaultAsync(ct);
+        if (certificate is null)
+            return new VerificationResultDto { IsValid = false, Status = "No degree has been conferred on this person" };
+
+        verification.Status = VerificationStatus.Verified;
+        verification.VerifiedAt = DateTime.UtcNow;
+        await _repo.UpdateAsync(verification, ct);
+
+        return new VerificationResultDto
+        {
+            IsValid = true,
+            StudentName = $"{graduate.FirstName} {graduate.LastName}",
+            Degree = certificate.DegreeTitle ?? "Degree",
+            GraduationYear = certificate.SerialNumber.Split('-').ElementAtOrDefault(1) ?? "",
+            Status = "Verified",
+        };
+    }
 }
 
 public class RegistrationService : IRegistrationService
 {
-    private readonly IRegistrationWindowRepository _wRepo; private readonly IRegistrationEnrollmentRepository _eRepo;
-    public RegistrationService(IRegistrationWindowRepository w, IRegistrationEnrollmentRepository e) { _wRepo = w; _eRepo = e; }
+    private readonly IRegistrationWindowRepository _wRepo; private readonly IRegistrationEnrollmentRepository _eRepo; private readonly AegisDbContext _db;
+    public RegistrationService(IRegistrationWindowRepository w, IRegistrationEnrollmentRepository e, AegisDbContext db) { _wRepo = w; _eRepo = e; _db = db; }
     public async Task<RegistrationWindow> OpenWindowAsync(RegistrationWindow w, CancellationToken ct) { await _wRepo.AddAsync(w, ct); return w; }
-    public async Task<RegistrationEnrollment> EnrollAsync(Guid windowId, Guid studentId, Guid courseId, CancellationToken ct) { var e = new RegistrationEnrollment { Id = Guid.NewGuid(), WindowId = windowId, StudentId = studentId, CourseId = courseId }; await _eRepo.AddAsync(e, ct); return e; }
+    /// <summary>
+    /// Registers a student on a course, or puts them on the waiting list when the seats are gone.
+    ///
+    /// This used to write the row and nothing else: no check that the window was open, that the
+    /// student was not already registered, that they were within the courses they are allowed, or
+    /// that a seat existed. A registration spike — the one moment this code exists for — could put
+    /// three hundred students into a room of thirty, twice each.
+    ///
+    /// The seat is claimed with a single conditional update, so two students clicking at the same
+    /// instant cannot both take the last one, and no transaction has to be serialised to make that
+    /// true. Fifty students racing for ten seats settles as ten and forty, with nothing refused for
+    /// a reason the student cannot understand.
+    /// </summary>
+    public async Task<RegistrationEnrollment> EnrollAsync(Guid windowId, Guid studentId, Guid courseId, CancellationToken ct)
+    {
+        var window = await _db.RegistrationWindows.AsNoTracking().SingleOrDefaultAsync(w => w.Id == windowId, ct)
+            ?? throw new KeyNotFoundException("That registration window is not on file.");
+        var now = DateTime.UtcNow;
+        if (window.Status != RegistrationStatus.Open || now < window.OpensAt || now > window.ClosesAt)
+            throw new AegisCore.Infrastructure.Deployment.BusinessRuleException(
+                $"Registration for {window.Name} is not open. It runs from {window.OpensAt:d MMMM yyyy} to {window.ClosesAt:d MMMM yyyy}.");
+
+        if (await _db.RegistrationEnrollments.AnyAsync(e => e.WindowId == windowId && e.StudentId == studentId && e.CourseId == courseId, ct))
+            throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("This student is already registered on that course for this window.");
+
+        var held = await _db.RegistrationEnrollments.CountAsync(e => e.WindowId == windowId && e.StudentId == studentId && !e.IsWaitlisted, ct);
+        if (held >= window.MaxCoursesPerStudent)
+            throw new AegisCore.Infrastructure.Deployment.BusinessRuleException(
+                $"This student already holds {held} course(s) this window, which is the most {window.Name} allows.");
+
+        // Claim a seat atomically where the course has an offering with a capacity. Nothing is read
+        // and then written: the database decides, once, whether a seat was still free.
+        var offering = await _db.CourseOfferings.AsNoTracking()
+            .Where(o => o.CourseId == courseId && (window.Semester == null || o.Semester == window.Semester))
+            .OrderByDescending(o => o.Capacity)
+            .Select(o => new { o.Id, o.Capacity })
+            .FirstOrDefaultAsync(ct);
+
+        var seated = true;
+        if (offering is { Capacity: > 0 })
+        {
+            var claimed = await _db.Database.ExecuteSqlInterpolatedAsync(
+                $@"UPDATE ""CourseOfferings"" SET ""EnrolledCount"" = ""EnrolledCount"" + 1
+                   WHERE ""Id"" = {offering.Id} AND ""EnrolledCount"" < ""Capacity""", ct);
+            seated = claimed == 1;
+        }
+
+        var enrollment = new RegistrationEnrollment
+        {
+            Id = Guid.NewGuid(),
+            TenantId = window.TenantId,
+            WindowId = windowId,
+            StudentId = studentId,
+            CourseId = courseId,
+            IsWaitlisted = !seated,
+            Status = seated ? RegistrationStatus.InProgress : RegistrationStatus.Waitlisted,
+        };
+
+        try
+        {
+            _db.RegistrationEnrollments.Add(enrollment);
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.GetBaseException() is Npgsql.PostgresException { SqlState: "23505" })
+        {
+            // Two clicks at the same instant: the first one registered them. Give back the seat this
+            // attempt claimed, and say so rather than recording the student twice.
+            _db.Entry(enrollment).State = EntityState.Detached;
+            if (seated && offering is not null)
+                await _db.Database.ExecuteSqlInterpolatedAsync(
+                    $@"UPDATE ""CourseOfferings"" SET ""EnrolledCount"" = GREATEST(""EnrolledCount"" - 1, 0) WHERE ""Id"" = {offering.Id}", ct);
+            throw new AegisCore.Infrastructure.Deployment.BusinessRuleException("This student is already registered on that course for this window.");
+        }
+
+        if (!seated)
+        {
+            // Where a student stands on the waiting list is the order they joined it. Counting the
+            // list and storing the count gave forty students eighteen distinct positions when they
+            // all arrived at once, so the whole list is numbered in one statement instead — which is
+            // also what puts it right after somebody leaves it.
+            await _db.Database.ExecuteSqlInterpolatedAsync(
+                $@"UPDATE ""RegistrationEnrollments"" r
+                   SET ""WaitlistPosition"" = ordered.position
+                   FROM (SELECT ""Id"", ROW_NUMBER() OVER (ORDER BY ""CreatedAt"", ""Id"") AS position
+                         FROM ""RegistrationEnrollments""
+                         WHERE ""CourseId"" = {courseId} AND ""WindowId"" = {windowId} AND ""IsWaitlisted"") ordered
+                   WHERE r.""Id"" = ordered.""Id""", ct);
+            enrollment.WaitlistPosition = await _db.RegistrationEnrollments.AsNoTracking()
+                .Where(e => e.Id == enrollment.Id).Select(e => e.WaitlistPosition).SingleAsync(ct);
+        }
+
+        return enrollment;
+    }
+
     public async Task<bool> IsOpenForRegistrationAsync(CancellationToken ct) { var w = await _wRepo.GetActiveAsync(ct); return w != null; }
 }
 

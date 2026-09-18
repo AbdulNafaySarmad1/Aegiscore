@@ -1,64 +1,77 @@
 using System.Collections.Concurrent;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.API.Middleware;
 
 /// <summary>
-/// In-memory rate limiter for authentication endpoints.
-/// Uses sliding window: max 10 requests per IP per minute on /api/auth/*
+/// Slows down guessing at the sign-in endpoints, without slowing down a university.
+///
+/// This used to count every attempt from a client address and lock the address out for five
+/// minutes past twenty a minute. A cohort arriving at nine o'clock shares one public address, so a
+/// class signing in together locked itself out: thirty students signing in at once were refused
+/// twelve times in a load test, and a real campus behind one NAT would fare worse.
+///
+/// Only failures are counted now. A successful sign-in is not an attack and costs nothing here;
+/// the per-address ceiling for everything else is the global limiter's job, and guessing at one
+/// person's password is the brute-force service's, which counts per account. The limits are
+/// configurable because a campus of forty thousand is not a campus of four hundred.
 /// </summary>
-public class RateLimitAuthMiddleware
+public class RateLimitAuthMiddleware(RequestDelegate next, IConfiguration configuration)
 {
-    private readonly RequestDelegate _next;
-    private static readonly ConcurrentDictionary<string, SlidingWindow> _windows = new();
+    private static readonly ConcurrentDictionary<string, SlidingWindow> Windows = new();
 
-    private const int MaxRequests = 20; // sign-in attempts per client address per minute; the brute-force service limits per account
+    private readonly int _maxFailures = configuration.GetValue<int?>("RateLimit:SignInFailuresPerMinute") ?? 20;
+    private readonly int _lockoutMinutes = configuration.GetValue<int?>("RateLimit:SignInLockoutMinutes") ?? 5;
     private const int WindowSeconds = 60;
-    private const int LockoutMinutes = 5;
-
-    public RateLimitAuthMiddleware(RequestDelegate next) => _next = next;
 
     public async Task InvokeAsync(HttpContext context)
     {
         if (!context.Request.Path.StartsWithSegments("/api/auth"))
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
         var key = ClientAddress.Of(context);
-        var window = _windows.GetOrAdd(key, _ => new SlidingWindow());
+        var window = Windows.GetOrAdd(key, _ => new SlidingWindow());
+        var now = DateTime.UtcNow;
 
         lock (window)
         {
-            var now = DateTime.UtcNow;
-            window.Timestamps.RemoveAll(t => (now - t).TotalSeconds > WindowSeconds);
-            window.Timestamps.Add(now);
-
+            window.Failures.RemoveAll(t => (now - t).TotalSeconds > WindowSeconds);
             if (window.LockedUntil > now)
             {
                 context.Response.StatusCode = 429;
+                context.Response.Headers["Retry-After"] = ((int)(window.LockedUntil - now).TotalSeconds).ToString();
                 context.Response.ContentType = "application/json";
-                context.Response.WriteAsJsonAsync(new { error = "Too many requests. Please wait before trying again." });
-                return;
-            }
-
-            if (window.Timestamps.Count > MaxRequests)
-            {
-                window.LockedUntil = now.AddMinutes(LockoutMinutes);
-                context.Response.StatusCode = 429;
-                context.Response.ContentType = "application/json";
-                context.Response.WriteAsJsonAsync(new { error = "Rate limit exceeded. Your IP has been temporarily blocked from authentication." });
+                context.Response.WriteAsJsonAsync(new
+                {
+                    error = $"Too many failed sign-in attempts from this connection. Try again in {Math.Max(1, (int)(window.LockedUntil - now).TotalMinutes)} minute(s).",
+                    code = "sign_in_rate_limited",
+                });
                 return;
             }
         }
 
-        await _next(context);
+        await next(context);
+
+        // What matters is how many attempts went wrong, which is knowable only now.
+        if (context.Response.StatusCode is not (401 or 403)) return;
+
+        lock (window)
+        {
+            window.Failures.Add(DateTime.UtcNow);
+            if (window.Failures.Count > _maxFailures)
+            {
+                window.LockedUntil = DateTime.UtcNow.AddMinutes(_lockoutMinutes);
+                window.Failures.Clear();
+            }
+        }
     }
 
-    private class SlidingWindow
+    private sealed class SlidingWindow
     {
-        public List<DateTime> Timestamps { get; } = new();
+        public List<DateTime> Failures { get; } = [];
         public DateTime LockedUntil { get; set; } = DateTime.MinValue;
     }
 }

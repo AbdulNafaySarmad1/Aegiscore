@@ -1,4 +1,4 @@
-using AegisCore.Domain;
+﻿using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
@@ -75,7 +75,19 @@ public sealed class AttendanceController(AegisDbContext db) : ControllerBase
             created++;
         }
 
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.GetBaseException() is Npgsql.PostgresException { SqlState: "23505" })
+        {
+            // Another submission of the same roll got there between the read above and this write —
+            // a double click, or two devices. The roll is already marked; that is not a failure.
+            foreach (var entry in db.ChangeTracker.Entries<Attendance>().Where(e => e.State == EntityState.Added).ToList())
+                entry.State = EntityState.Detached;
+            return Ok(new { message = "This roll was already recorded.", entriesCreated = 0, entriesAlreadyMarked = request.Entries.Count });
+        }
+
         var marker = await db.Faculties.Where(f => f.Id == markedBy).Select(f => f.FirstName + " " + f.LastName).FirstOrDefaultAsync(ct);
         return Ok(new { message = "Attendance recorded.", entriesCreated = created, entriesAlreadyMarked = updated, markedBy, markedByName = marker });
     }

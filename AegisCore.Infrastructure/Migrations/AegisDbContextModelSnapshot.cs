@@ -2548,6 +2548,10 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.HasIndex("GeofenceId");
 
+                    b.HasIndex("TenantId", "CourseId", "EnrollmentId", "Date")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Attendances_OncePerStudentPerDay");
+
                     b.ToTable("Attendances");
                 });
 
@@ -21420,6 +21424,10 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "WindowId", "StudentId", "CourseId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RegistrationEnrollments_OncePerStudentPerCourse");
 
                     b.ToTable("RegistrationEnrollments");
                 });

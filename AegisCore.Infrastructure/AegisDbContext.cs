@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using AegisCore.Domain;
@@ -2021,6 +2021,15 @@ public class AegisDbContext : DbContext
             }
         }
 
+        modelBuilder.Entity<RegistrationEnrollment>(entity =>
+        {
+            // One registration per student per course per window. Without this, two clicks at the
+            // same instant both passed the "already registered?" read and both inserted.
+            entity.HasIndex(item => new { item.TenantId, item.WindowId, item.StudentId, item.CourseId })
+                .IsUnique()
+                .HasDatabaseName("IX_RegistrationEnrollments_OncePerStudentPerCourse");
+        });
+
         modelBuilder.Entity<Attendance>(entity =>
         {
             entity.Property(item => item.LatitudeEncrypted).HasColumnName("Latitude").HasColumnType("bytea");
@@ -2028,6 +2037,13 @@ public class AegisDbContext : DbContext
             entity.Property(item => item.LocationStatus).HasConversion<string>().HasMaxLength(24).HasDefaultValue(LocationStatus.Unverifiable);
             entity.HasOne(item => item.Geofence).WithMany().HasForeignKey(item => item.GeofenceId)
                 .OnDelete(DeleteBehavior.SetNull);
+            // A student is present once on a day in a course. Two roll calls submitted at the same
+            // instant both passed the "is it already marked?" read and both inserted, so a teacher
+            // double-clicking doubled every student's attendance — which is what exam eligibility
+            // is calculated from. The database is the only place that can settle this race.
+            entity.HasIndex(item => new { item.TenantId, item.CourseId, item.EnrollmentId, item.Date })
+                .IsUnique()
+                .HasDatabaseName("IX_Attendances_OncePerStudentPerDay");
         });
 
         modelBuilder.Entity<CampusPolygon>(entity =>
