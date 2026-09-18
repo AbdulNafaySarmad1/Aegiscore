@@ -112,6 +112,7 @@ public sealed class LicenseServiceTests
             UniversityName = "SSUET",
             LicenseJson = "{}",
             FailedHeartbeatCount = 2,
+            LockedAt = DateTimeOffset.UtcNow.AddDays(-1), LockReason = "heartbeat_failed", // the lock engaged after the grace period
             OverrideUntil = DateTimeOffset.UtcNow.AddMinutes(-1)
         });
         await db.SaveChangesAsync();

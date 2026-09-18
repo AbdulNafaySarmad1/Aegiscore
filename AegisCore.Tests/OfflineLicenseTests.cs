@@ -122,3 +122,61 @@ public sealed class OfflineLicenseTests
         Assert.NotEqual("demo-local", heartbeat.Status);
     }
 }
+
+public sealed class LicenseGracePeriodTests
+{
+    private static async Task<(TestDatabase Database, AegisCore.Infrastructure.AegisDbContext Db, LicenseService Service, AegisCore.Domain.Entities.LicenseState State)> ArrangeAsync(DateTimeOffset lastSuccess, int graceDays = 7)
+    {
+        var tenant = Guid.NewGuid();
+        var database = await TestDatabase.CreateAsync(postgres: false);
+        await database.EnsureSchemaAsync(tenant);
+        var db = database.CreateContext(tenant);
+        var state = new AegisCore.Domain.Entities.LicenseState
+        {
+            Id = Guid.NewGuid(), TenantId = tenant, UniversityId = Guid.NewGuid(), UniversityName = "Fictional National University", LicenseKey = "{}", LicenseJson = "{\"expiry_date\":\"2027-09-30\"}",
+            Status = "active", CreatedAt = lastSuccess, ActivatedAt = lastSuccess, LastHeartbeatAt = lastSuccess
+        };
+        db.LicenseStates.Add(state);
+        await db.SaveChangesAsync();
+        var factory = new Mock<IHttpClientFactory>(MockBehavior.Strict); // the authority is unreachable: no client is ever built
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["TENANT_ID"] = tenant.ToString(), ["LICENSE_SERVER_URL"] = "http://license.invalid/heartbeat", ["License:GracePeriodDays"] = graceDays.ToString()
+        }).Build();
+        return (database, db, new LicenseService(db, configuration, factory.Object, Mock.Of<AegisCore.Application.Foundation.IAuditService>(), NullLogger<LicenseService>.Instance), state);
+    }
+
+    [Fact]
+    public async Task Failing_Heartbeats_Warn_And_Stay_Writable_Until_The_Grace_Period_Ends()
+    {
+        var (database, db, service, _) = await ArrangeAsync(DateTimeOffset.UtcNow.AddDays(-1));
+        await using var _1 = database; await using var _2 = db;
+        await service.SendHeartbeatAsync(CancellationToken.None);
+        await service.SendHeartbeatAsync(CancellationToken.None);
+        var status = await service.GetStatusAsync(CancellationToken.None);
+        Assert.False(status.IsLocked);
+        Assert.Equal("warning", status.Severity);
+        Assert.Equal(2, status.FailedHeartbeatCount);
+        Assert.Contains("stays fully usable until", status.Message);
+        Assert.Contains("offline licence key", status.NextStep);
+        Assert.NotNull(status.GraceUntil);
+        Assert.Equal(status.UniversityName, "Fictional National University");
+    }
+
+    [Fact]
+    public async Task After_The_Grace_Period_The_Installation_Locks_With_An_Explanation()
+    {
+        var (database, db, service, _) = await ArrangeAsync(DateTimeOffset.UtcNow.AddDays(-8));
+        await using var _1 = database; await using var _2 = db;
+        await service.SendHeartbeatAsync(CancellationToken.None);
+        Assert.False((await service.GetStatusAsync(CancellationToken.None)).IsLocked); // one failure never locks
+        await service.SendHeartbeatAsync(CancellationToken.None);
+        var status = await service.GetStatusAsync(CancellationToken.None);
+        Assert.True(status.IsLocked);
+        Assert.Equal("locked", status.Severity);
+        Assert.Contains("read-only because the licence authority could not be reached", status.Message);
+        Assert.Contains("still sign in, read and export", status.Message);
+        Assert.Contains("offline licence key", status.NextStep);
+        Assert.NotNull(status.UniversityId);
+    }
+}

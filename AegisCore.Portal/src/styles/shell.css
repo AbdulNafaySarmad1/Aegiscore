@@ -58,6 +58,12 @@
 .shell-content { flex: 1; min-width: 0; }
 .demo-banner { display: flex; gap: var(--s-3); align-items: center; padding: var(--s-2) var(--s-8); background: var(--brass-tint); border-bottom: 1px solid var(--brass); font-size: var(--t-13); color: var(--ink); }
 .demo-banner strong { font-family: var(--font-mono); font-weight: 500; color: var(--brass); }
+/* Licence standing: the same band as the demo notice, brass while heartbeats fail, oxblood once the installation is read-only. */
+.license-banner { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; padding: var(--s-2) var(--s-8); background: var(--warning-soft); border-bottom: 1px solid var(--warning); font-size: var(--t-13); color: var(--ink); }
+.license-banner[data-severity="locked"] { background: var(--danger-soft); border-bottom-color: var(--danger); }
+.license-banner strong { font-family: var(--font-mono); font-weight: 500; color: var(--warning); }
+.license-banner[data-severity="locked"] strong { color: var(--danger); }
+.license-banner-link { margin-left: auto; font-weight: 500; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── Scrim ── */
 .rail-scrim { display: none; }

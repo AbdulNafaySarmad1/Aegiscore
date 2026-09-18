@@ -30,7 +30,8 @@ public sealed class LicenseWriteInterceptor(IConfiguration configuration, IHostE
         if (validOverride) return;
         if (state is null) throw new LicenseReadOnlyException("no licence has been activated");
         if (state.Status is "expired" or "invalid" or "revoked") throw new LicenseReadOnlyException("the licence is " + state.Status);
-        if (state.LockedAt is not null || state.FailedHeartbeatCount >= 2) throw new LicenseReadOnlyException(state.LockReason == "heartbeat_failed" || state.FailedHeartbeatCount >= 2 ? "the licence authority could not be reached for two consecutive heartbeats" : "the licence is locked (" + (state.LockReason ?? "unknown reason") + ")");
+        // Only an engaged lock (LicenseService decides, after the grace period) makes writes fail; failing heartbeats alone warn.
+        if (state.LockedAt is not null) throw new LicenseReadOnlyException(state.LockReason == "heartbeat_failed" ? "the licence authority could not be reached for " + state.FailedHeartbeatCount + " consecutive heartbeats and the grace period has ended" : "the licence is locked (" + (state.LockReason ?? "unknown reason") + ")");
     }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)

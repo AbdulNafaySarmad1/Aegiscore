@@ -31,7 +31,20 @@ public sealed record LicenseRuntimeStatus(
     DateTimeOffset? LastHeartbeatAt,
     int FailedHeartbeatCount,
     DateTimeOffset? OverrideUntil,
-    LicenseTier Tier = LicenseTier.Basic);
+    LicenseTier Tier = LicenseTier.Basic,
+    /// <summary>The university the licence is bound to; an offline key must be issued for this id.</summary>
+    Guid? UniversityId = null,
+    string? UniversityName = null,
+    /// <summary>"ok", "warning" (heartbeats failing, still writable) or "locked".</summary>
+    string Severity = "ok",
+    /// <summary>What is happening, in a sentence an IT administrator reads.</summary>
+    string? Message = null,
+    /// <summary>Exactly what to do about it.</summary>
+    string? NextStep = null,
+    /// <summary>While heartbeats fail, the moment the installation becomes read-only unless one succeeds.</summary>
+    DateTimeOffset? GraceUntil = null,
+    bool IsOffline = false,
+    DateOnly? ExpiryDate = null);
 
 public enum LicenseValidationFailureReason
 {

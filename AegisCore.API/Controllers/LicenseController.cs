@@ -38,6 +38,15 @@ public sealed class AegisCoreLicenseController(
         return Ok(new { activated = true, heartbeat = heartbeat.Status, message = heartbeat.Message, status });
     }
 
+    /// <summary>"Check now" on the licence page: a heartbeat on demand, so a restored connection or a new key shows at once.</summary>
+    [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
+    [HttpPost("/api/admin/license/heartbeat")]
+    public async Task<IActionResult> CheckNow(CancellationToken ct)
+    {
+        var heartbeat = await licenses.SendHeartbeatAsync(ct);
+        return Ok(new { heartbeat.Success, heartbeat.Status, heartbeat.Message, status = await licenses.GetStatusAsync(ct) });
+    }
+
     [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
     [HttpPost("/api/admin/license/override")]
     public async Task<IActionResult> Override([FromBody] LicenseOverrideRequest request, CancellationToken ct)

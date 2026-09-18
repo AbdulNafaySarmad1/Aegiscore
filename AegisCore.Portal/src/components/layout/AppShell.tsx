@@ -11,6 +11,7 @@ import {
   Contrast, ALargeSmall,
 } from "lucide-react";
 import { apiGet } from "@/lib/api-client";
+import { loadLicenseStatus, type LicenseStatus } from "@/lib/license";
 import { getRoleProfile } from "@/lib/roles";
 import type { DashboardModule } from "@/lib/roles";
 import { useTenantFormatter, useInstitution } from "@/components/TenantPreferencesProvider";
@@ -49,6 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [narrow, setNarrow] = useState(() => readPref("aegis-rail", "wide") === "narrow");
   const [menuOpen, setMenuOpen] = useState(false);
   const [demo, setDemo] = useState<{ isDemo: boolean; remainingDays: number } | null>(null);
+  const [license, setLicense] = useState<LicenseStatus | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const railRef = useRef<HTMLElement>(null);
   const [query, setQuery] = useState("");
@@ -56,6 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadSession().then(setSession).catch(() => { setFailed(true); window.location.assign("/login"); });
     apiGet<{ isDemo: boolean; remainingDays: number }>("/api/wizard/demo-status").then(setDemo).catch(() => {});
+    loadLicenseStatus().then(setLicense).catch(() => {});
   }, []);
   useEffect(() => { document.documentElement.dataset.theme = theme; writePref("aegis-theme", theme); }, [theme]);
   useEffect(() => {
@@ -173,6 +176,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
+        {license && license.severity !== "ok" && (
+          <div className="license-banner" data-severity={license.severity} role={license.isLocked ? "alert" : "status"}>
+            <strong>{license.isLocked ? "Read-only" : "Licence warning"}</strong>
+            <span>{license.message}</span>
+            <Link href="/admin/license" className="license-banner-link">{license.isLocked ? "Restore access" : "Open licence page"}</Link>
+          </div>
+        )}
         {demo?.isDemo && (
           <div className="demo-banner" role="status">
             <strong>Demo instance</strong>

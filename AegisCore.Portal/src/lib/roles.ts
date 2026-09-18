@@ -262,7 +262,7 @@ const profiles: Record<string, RoleProfile> = {
     displayName: "IT Head",
     allowedRoutes: [
       "/portal-health", "/sync-lag", "/replication",
-      "/audit", "/data-import", "/imports", "/setup",
+      "/audit", "/data-import", "/imports", "/setup", "/admin/license",
     ],
     dashboardModules: [
       { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health, uptime, and performance metrics.", priority: 1, domain: "operations", badge: "MONITOR" },
@@ -271,6 +271,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "audit", label: "Audit Logs", icon: "ShieldCheck", route: "/audit", color: "red", description: "Security audit logs and access trails.", priority: 4, domain: "compliance" },
       { id: "import-jobs", label: "Import Jobs", icon: "FileSearch", route: "/imports", color: "amber", description: "Data import job status and history.", priority: 5, domain: "operations" },
       { id: "setup", label: "Setup", icon: "Settings", route: "/setup", color: "blue", description: "System configuration and installation.", priority: 6, domain: "operations" },
+      { id: "license", label: "Licence", icon: "ShieldCheck", route: "/admin/license", color: "amber", description: "Licence standing and offline licence keys.", priority: 7, domain: "operations" },
     ],
     kpis: [
       { id: "uptime", label: "System Uptime %", value: "--", format: "percentage", icon: "ShieldCheck", iconColor: "green", source: "/api/portal-health" },
@@ -357,6 +358,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health monitoring.", priority: 11, domain: "operations" },
       { id: "data-import", label: "Data Import", icon: "FileSearch", route: "/data-import", color: "amber", description: "Bulk data import management.", priority: 12, domain: "operations" },
       { id: "campus-geofences", label: "Campus Geofences", icon: "MapPin", route: "/admin/campus", color: "green", description: "Configure attendance campus boundaries.", priority: 13, domain: "operations" },
+      { id: "license", label: "Licence", icon: "ShieldCheck", route: "/admin/license", color: "amber", description: "Licence standing and offline licence keys.", priority: 14, domain: "operations" },
     ],
     kpis: [
       { id: "enrollment", label: "Total enrolment", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue", source: "/api/students/summary" },

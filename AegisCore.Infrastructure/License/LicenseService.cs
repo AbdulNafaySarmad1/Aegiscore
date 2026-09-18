@@ -223,10 +223,14 @@ public sealed class LicenseService(
         var state = await CurrentAsync(ct);
         if (state is null)
         {
-            return new LicenseRuntimeStatus("pending_activation", true, "License is not activated.", null, null, 0, null);
+            return new LicenseRuntimeStatus("pending_activation", true, "pending_activation", null, null, 0, null, LicenseTier.Basic,
+                UniversityId: InstallationTenantId(), Severity: "locked",
+                Message: "No licence has been activated on this installation, so it is read-only.",
+                NextStep: "Paste the licence key the vendor issued for this university id below.");
         }
 
         var locked = IsLocked(state);
+        var (severity, message, nextStep, graceUntil) = Explain(state, locked);
         return new LicenseRuntimeStatus(
             state.Status,
             locked,
@@ -236,7 +240,9 @@ public sealed class LicenseService(
             state.FailedHeartbeatCount,
             state.OverrideUntil,
             OfflineLicense.IsOfflineKey(state.LicenseKey) ? (TryTier(OfflineLicense.Tier(state.LicenseKey), out var offlineTier) ? offlineTier : LicenseTier.Basic)
-                : ReadTier(OfflineModeEnabled() ? state.LicenseKey : state.LicenseJson));
+                : ReadTier(OfflineModeEnabled() ? state.LicenseKey : state.LicenseJson),
+            UniversityId: state.UniversityId, UniversityName: state.UniversityName, Severity: severity, Message: message, NextStep: nextStep,
+            GraceUntil: graceUntil, IsOffline: OfflineLicense.IsOfflineKey(state.LicenseKey), ExpiryDate: ExpiryOf(state));
     }
 
     public async Task ManualOverrideAsync(Guid actorId, string reason, DateTimeOffset validUntil, CancellationToken ct = default)
@@ -271,7 +277,10 @@ public sealed class LicenseService(
 
         state.LastHeartbeatStatus = status;
         state.FailedHeartbeatCount++;
-        if (state.FailedHeartbeatCount >= 2)
+        // Graceful degradation: the first failure warns; the lock engages once failures have persisted
+        // for the grace period (License:GracePeriodDays, default 7) since the last successful heartbeat,
+        // and never before a second consecutive failure. Every read still works after the lock.
+        if (state.FailedHeartbeatCount >= 2 && GraceUntil(state) <= DateTimeOffset.UtcNow)
         {
             state.LockedAt = DateTimeOffset.UtcNow;
             state.LockReason = "heartbeat_failed";
@@ -314,9 +323,64 @@ public sealed class LicenseService(
         catch (JsonException) { return LicenseTier.Basic; }
     }
 
-    private static bool IsLocked(LicenseState state)
-        => (state.Status is "expired" or "invalid" or "revoked" || state.LockedAt is not null || state.FailedHeartbeatCount >= 2)
+    private bool IsLocked(LicenseState state)
+        => (state.Status is "expired" or "invalid" or "revoked" || state.LockedAt is not null
+                || (state.FailedHeartbeatCount >= 2 && GraceUntil(state) <= DateTimeOffset.UtcNow))
             && (state.OverrideUntil is null || state.OverrideUntil <= DateTimeOffset.UtcNow);
+
+    private int GracePeriodDays => int.TryParse(configuration["License:GracePeriodDays"], out var days) && days >= 0 ? days : 7;
+
+    /// <summary>When failing heartbeats turn into a lock: the grace period after the last success (or after activation, if none).</summary>
+    private DateTimeOffset GraceUntil(LicenseState state)
+        => (state.LastHeartbeatAt ?? state.ActivatedAt ?? state.CreatedAt).AddDays(GracePeriodDays);
+
+    /// <summary>The sentence and the next step for the person looking at the licence page.</summary>
+    private (string Severity, string Message, string NextStep, DateTimeOffset? GraceUntil) Explain(LicenseState state, bool locked)
+    {
+        var offline = OfflineLicense.IsOfflineKey(state.LicenseKey);
+        var expiry = ExpiryOf(state);
+        if (state.OverrideUntil > DateTimeOffset.UtcNow)
+            return ("warning", $"A manual override keeps this installation writable until {state.OverrideUntil:d MMMM yyyy HH:mm} UTC ({state.OverrideReason}).",
+                "Before the override ends, enter a valid licence key on this page or restore the connection to the licence authority.", null);
+        if (locked)
+        {
+            var cause = state.LockReason switch
+            {
+                "heartbeat_failed" => "the licence authority could not be reached for " + state.FailedHeartbeatCount + " consecutive daily heartbeats",
+                "expired" => "the licence expired" + (expiry is { } e ? $" on {e:d MMMM yyyy}" : ""),
+                "revoked" => "the vendor revoked the licence",
+                "invalid" => "the licence key failed verification",
+                _ => "the licence is " + (state.LockReason ?? state.Status)
+            };
+            return ("locked", $"This installation is read-only because {cause}. Everyone can still sign in, read and export; nothing can be changed.",
+                offline || state.LockReason is "expired" or "revoked" or "invalid"
+                    ? "Ask the vendor for a new offline licence key issued for this university id and paste it below. Access is restored the moment it is accepted."
+                    : "If this network can reach the vendor, restore the connection (LICENSE_SERVER_URL) and press \"Check now\". If it cannot — most campus networks cannot — ask the vendor for an offline licence key issued for this university id and paste it below. Either restores write access immediately.", null);
+        }
+        if (state.FailedHeartbeatCount > 0 && !offline)
+        {
+            var until = GraceUntil(state);
+            return ("warning", $"The last {state.FailedHeartbeatCount} heartbeat(s) to the licence authority failed (\"{state.LastHeartbeatStatus}\"). The installation stays fully usable until {until:d MMMM yyyy HH:mm} UTC; after that it becomes read-only unless a heartbeat succeeds.",
+                "Check that this server can reach the licence authority, or enter an offline licence key from the vendor below to stop depending on the connection.", until);
+        }
+        if (expiry is { } d && d <= DateOnly.FromDateTime(DateTime.UtcNow).AddDays(30))
+            return ("warning", $"The licence expires on {d:d MMMM yyyy}.", "Ask the vendor for a renewed key before that date and paste it below.", null);
+        return ("ok", offline
+                ? $"Offline licence for {state.UniversityName} is active" + (expiry is { } x ? $" until {x:d MMMM yyyy}" : "") + "; it is verified locally and no authority is contacted."
+                : $"Licence for {state.UniversityName} is active; the last heartbeat succeeded" + (state.LastHeartbeatAt is { } h ? $" at {h:d MMMM yyyy HH:mm} UTC" : "") + ".",
+            "Nothing to do.", null);
+    }
+
+    private static DateOnly? ExpiryOf(LicenseState state)
+    {
+        try
+        {
+            var json = OfflineLicense.IsOfflineKey(state.LicenseKey) ? OfflineLicense.PayloadJson(state.LicenseKey) : state.LicenseJson;
+            var value = JsonNode.Parse(json)?["expiry_date"]?.ToString();
+            return DateOnly.TryParse(value, out var d) ? d : null;
+        }
+        catch { return null; }
+    }
 
     private static LicenseValidationResult Fail(string message, LicenseValidationFailureReason reason)
         => new(false, message, null, reason);
