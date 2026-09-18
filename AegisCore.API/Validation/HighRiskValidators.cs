@@ -35,7 +35,7 @@ public static class HighRiskEndpointRegistry
         new("POST", "/api/identity/users", typeof(CreateUserRequest), typeof(CreateUserRequestValidator)),
         new("POST", "/api/identity/roles", typeof(CreateRoleRequest), typeof(CreateRoleRequestValidator)),
         new("POST", "/api/identity/users/assign-role", typeof(AssignRoleRequest), typeof(AssignRoleRequestValidator)),
-        new("POST", "/api/examination/schemes", typeof(AssessmentScheme), typeof(AssessmentSchemeValidator)),
+        new("POST", "/api/examination/schemes", typeof(S3ExaminationController.AssessmentSchemeInput), typeof(AssessmentSchemeValidator)),
         new("PUT", "/api/examination/marks", typeof(MarksEntryRequest), typeof(MarksEntryRequestValidator)),
         new("POST", "/api/examination/moderation/submit", typeof(ModerationSubmitRequest), typeof(ModerationSubmitRequestValidator)),
         new("POST", "/api/examination/moderation/{id}/review", typeof(ModerationReviewRequest), typeof(ModerationReviewRequestValidator)),
@@ -249,7 +249,9 @@ public sealed class AssignRoleRequestValidator : SecureValidator<AssignRoleReque
     }
 }
 
-public sealed class AssessmentSchemeValidator : SecureValidator<AssessmentScheme>
+// The scheme is described by a request record now, not by the entity: the entity carries a required
+// navigation from each component back to its scheme, which no caller can supply.
+public sealed class AssessmentSchemeValidator : SecureValidator<S3ExaminationController.AssessmentSchemeInput>
 {
     public AssessmentSchemeValidator(AegisDbContext db)
     {
@@ -274,7 +276,6 @@ public sealed class MarksEntryRequestValidator : SecureValidator<MarksEntryReque
         RuleFor(x => x.CourseId).NotEmpty().MustAsync((id, ct) => ExistsAsync<Course>(db, id, ct)).WithMessage("Course {PropertyValue} does not exist.");
         RuleFor(x => x.StudentId).NotEmpty().MustAsync((id, ct) => ExistsAsync<Student>(db, id, ct)).WithMessage("Student {PropertyValue} does not exist.");
         RuleFor(x => x.AssessmentComponentId).NotEmpty().MustAsync((id, ct) => ExistsAsync<AssessmentComponent>(db, id, ct)).WithMessage("Assessment component {PropertyValue} does not exist.");
-        RuleFor(x => x.EnteredBy).NotEmpty().MustAsync((id, ct) => ExistsAsync<User>(db, id, ct)).WithMessage("User {PropertyValue} does not exist.");
         RuleFor(x => x.ObtainedMarks).GreaterThanOrEqualTo(0);
         RuleFor(x => x).MustAsync(async (request, ct) => await db.AssessmentComponents.AnyAsync(component => component.Id == request.AssessmentComponentId && request.ObtainedMarks <= component.TotalMarks, ct)).WithMessage("Obtained marks exceed the assessment component total.");
     }
@@ -337,7 +338,10 @@ public sealed class MarkAttendanceRequestValidator : SecureValidator<MarkAttenda
     public MarkAttendanceRequestValidator(AegisDbContext db)
     {
         RuleFor(x => x.CourseId).NotEmpty().MustAsync((id, ct) => ExistsAsync<Course>(db, id, ct)).WithMessage("Course {PropertyValue} does not exist.");
-        RuleFor(x => x.MarkedByFacultyId).NotEmpty().MustAsync((id, ct) => ExistsAsync<Faculty>(db, id, ct)).WithMessage("Faculty {PropertyValue} does not exist.");
+        // Optional: left out, the controller records the roll against whoever teaches the course.
+        RuleFor(x => x.MarkedByFacultyId!.Value).MustAsync((id, ct) => ExistsAsync<Faculty>(db, id, ct))
+            .When(x => x.MarkedByFacultyId is { } id && id != Guid.Empty)
+            .WithMessage("Faculty {PropertyValue} does not exist.");
         RuleFor(x => x.SessionDate).Must(date => date > DateTime.UtcNow.AddYears(-1) && date <= DateTime.UtcNow.AddDays(1));
         RuleFor(x => x.Entries).NotNull().NotEmpty().Must(items => items.Count <= 10000 && items.Select(item => item.EnrollmentId).Distinct().Count() == items.Count);
         RuleForEach(x => x.Entries).ChildRules(entry =>

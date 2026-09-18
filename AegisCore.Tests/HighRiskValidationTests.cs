@@ -93,7 +93,7 @@ public sealed class HighRiskValidationTests
     {
         await using var fixture = await ValidatorFixture.CreateAsync();
         var result = await new MarksEntryRequestValidator(fixture.Db).ValidateAsync(
-            new MarksEntryRequest(Guid.Empty, Guid.Empty, Guid.Empty, 101, Guid.Empty));
+            new MarksEntryRequest(Guid.Empty, Guid.Empty, Guid.Empty, 101));
 
         Assert.Contains(result.Errors, error => error.ErrorMessage.Contains("exceed", StringComparison.OrdinalIgnoreCase));
     }
@@ -133,8 +133,8 @@ public sealed class HighRiskValidationTests
         12 => new CreateUserRequest(),
         13 => new CreateRoleRequest(),
         14 => new AssignRoleRequest(),
-        15 => new AssessmentScheme(),
-        16 => new MarksEntryRequest(Guid.Empty, Guid.Empty, Guid.Empty, -1, Guid.Empty),
+        15 => new AegisCore.API.Controllers.S3ExaminationController.AssessmentSchemeInput(Guid.Empty, Guid.Empty, Guid.Empty, []),
+        16 => new MarksEntryRequest(Guid.Empty, Guid.Empty, Guid.Empty, -1),
         17 => new ModerationSubmitRequest(Guid.Empty, Guid.Empty, Guid.Empty),
         18 => new ModerationReviewRequest("", Guid.Empty, null),
         19 => new GraceMarksRequest([], Guid.Empty),

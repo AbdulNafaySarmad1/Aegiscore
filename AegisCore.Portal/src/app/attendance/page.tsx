@@ -1,181 +1,194 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { AppShell } from "@/components/layout/AppShell";
-import { FocusTrapDialog } from "@/components/FocusTrapDialog";
+import { useState } from "react";
 import { CheckInButton } from "@/components/attendance/CheckInButton";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { ClipboardCheck, CheckCircle, XCircle } from "lucide-react";
+import { Panel, Mark, Notice } from "@/components/register";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
 type Course = { id: string; title: string; code: string };
-type Student = { enrollmentId: string; name: string; universityId: string; attendanceId: string | null; locationStatus: "ON_CAMPUS" | "OFF_CAMPUS" | "UNVERIFIABLE" | null; isManualOverride: boolean };
+type Student = {
+  enrollmentId: string; name: string; universityId: string; attendanceId: string | null;
+  locationStatus: "ON_CAMPUS" | "OFF_CAMPUS" | "UNVERIFIABLE" | null; isManualOverride: boolean;
+};
 type Roster = { students: Student[] };
 
+const PLACE: Record<string, { label: string; tone: "laurel" | "oxblood" | "brass" }> = {
+  ON_CAMPUS: { label: "On campus", tone: "laurel" },
+  OFF_CAMPUS: { label: "Off campus", tone: "oxblood" },
+  UNVERIFIABLE: { label: "Location unknown", tone: "brass" },
+};
+
+/**
+ * Marking the roll. Everyone starts as present — the convention of a roll call — and the teacher
+ * marks the exceptions, so the screen says so plainly rather than letting a silent default decide.
+ */
 export default function AttendancePage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string>("");
-  const [roster, setRoster] = useState<Student[]>([]);
-  const [checkInStudent, setCheckInStudent] = useState("");
-  const [statuses, setStatuses] = useState<Record<string, "present" | "absent">>({});
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { state, reload } = useModuleData<Course[]>(signal => apiGet<Course[]>("/api/courses/my", signal));
+  const action = useAction();
+  const [courseId, setCourseId] = useState("");
+  const [absent, setAbsent] = useState<Set<string>>(new Set());
   const [offCampusOnly, setOffCampusOnly] = useState(false);
-  const [overrideTarget, setOverrideTarget] = useState<Student | null>(null);
-  const [overrideReason, setOverrideReason] = useState("");
+  const [checkInStudent, setCheckInStudent] = useState("");
+  const [override, setOverride] = useState<{ student: Student; reason: string } | null>(null);
 
-  useEffect(() => {
-    apiGet<Course[]>("/api/courses/my").then(c => { setCourses(c); setLoading(false); }).catch(() => setLoading(false));
-  }, []);
+  const roster = useModuleData<Roster>(
+    signal => courseId ? apiGet<Roster>(`/api/attendance/roster/${courseId}`, signal) : Promise.resolve({ students: [] }),
+    courseId
+  );
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing dependent data is intentional.
-    if (!selectedCourse) { setRoster([]); return; }
-    apiGet<Roster>(`/api/attendance/roster/${selectedCourse}`).then(r => {
-      setRoster(r.students ?? []);
-      const initial: Record<string, "present" | "absent"> = {};
-      for (const s of r.students ?? []) initial[s.enrollmentId] = "present";
-      setStatuses(initial);
-    }).catch(() => {});
-  }, [selectedCourse]);
-
-  const toggle = (id: string) => {
-    setStatuses(prev => ({ ...prev, [id]: prev[id] === "present" ? "absent" : "present" }));
-  };
-
-  const submit = async () => {
-    if (!selectedCourse) return;
-    setSaving(true); setMessage("");
-    try {
-      await apiPost("/api/attendance/mark", {
-        courseId: selectedCourse,
-        markedByFacultyId: "00000000-0000-0000-0000-000000000000",
+  async function submit(students: Student[]) {
+    await action.run("mark", async () => {
+      const result = await apiPost<{ entriesCreated: number; entriesAlreadyMarked: number; markedByName: string | null }>("/api/attendance/mark", {
+        courseId,
         sessionDate: new Date().toISOString(),
-        entries: Object.entries(statuses).map(([enrollmentId, status]) => ({
-          enrollmentId, status: status === "present" ? 0 : 1,
-        })),
+        entries: students.map(s => ({ enrollmentId: s.enrollmentId, status: absent.has(s.enrollmentId) ? 1 : 0 })),
       });
-      setMessage("Attendance recorded successfully.");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Failed to record attendance.");
-    } finally {
-      setSaving(false);
-    }
-  };
-  const submitOverride = async () => {
-    if (!overrideTarget?.attendanceId || !overrideReason.trim()) return;
-    setSaving(true);
-    try {
-      await apiPost(`/api/attendance/${overrideTarget.attendanceId}/override`, { reason: overrideReason.trim() });
-      setRoster(current => current.map(student => student.enrollmentId === overrideTarget.enrollmentId
-        ? { ...student, isManualOverride: true }
-        : student));
-      setMessage(`Location review approved for ${overrideTarget.name}.`);
-      setOverrideTarget(null);
-      setOverrideReason("");
-    } catch (reason) {
-      setMessage(reason instanceof Error ? reason.message : "The location override could not be saved.");
-    } finally {
-      setSaving(false);
-    }
-  };
+      const who = result.markedByName ? ` against ${result.markedByName}` : "";
+      return result.entriesAlreadyMarked > 0
+        ? `${result.entriesCreated} recorded${who}; ${result.entriesAlreadyMarked} were already marked for today and were left as they were.`
+        : `Today's roll is recorded${who}: ${students.length - absent.size} present, ${absent.size} absent.`;
+    }, roster.reload);
+  }
 
-
-  const present = Object.values(statuses).filter(s => s === "present").length;
-  const visibleRoster = offCampusOnly ? roster.filter(student => student.locationStatus === "OFF_CAMPUS" && !student.isManualOverride) : roster;
-  const total = Object.keys(statuses).length;
+  async function approve() {
+    const { student, reason } = override!;
+    setOverride(null);
+    await action.run("override", async () => {
+      await apiPost(`/api/attendance/${student.attendanceId}/override`, { reason: reason.trim() });
+      return `${student.name}'s attendance stands, with your reason on the record.`;
+    }, roster.reload);
+  }
 
   return (
-    <AppShell>
-      <div className="content-page">
-        <div className="page-header">
-          <div>
-            <div className="page-header-breadcrumb"><span>Academic</span><span>/</span><span>Attendance</span></div>
-            <h1>Attendance Marking</h1>
-            <p>Mark present/absent for today&apos;s session.</p>
-          </div>
-        </div>
+    <ModulePage
+      title="Attendance"
+      crumbs={[{ label: "Academic" }, { label: "Attendance" }]}
+      meta={<span>Today&apos;s roll for one of your courses. It is recorded against the faculty member the course is assigned to.</span>}
+      ident={(courses: Course[]) => <><strong>{courses.length}</strong><br />{courses.length === 1 ? "course" : "courses"}</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {courses => {
+        const students = roster.state.kind === "ready" ? roster.state.data.students : [];
+        const shown = offCampusOnly ? students.filter(s => s.locationStatus === "OFF_CAMPUS" && !s.isManualOverride) : students;
+        const present = students.length - students.filter(s => absent.has(s.enrollmentId)).length;
+        return (
+          <div className="record">
+            <div className="record-body">
+              <Panel title="Which course">
+                <div className="panel-form">
+                  <label><span>Course</span>
+                    <select value={courseId} onChange={e => { setCourseId(e.target.value); setAbsent(new Set()); setCheckInStudent(""); }}>
+                      <option value="">Choose a course</option>
+                      {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
+                    </select>
+                  </label>
+                  {courses.length === 0 && <p className="field-hint">No course is assigned to you, so there is no roll to mark.</p>}
+                </div>
+              </Panel>
 
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-body">
-            {loading ? <div className="skeleton" style={{ height: 40 }} /> : (
-              <select aria-label="Course" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14, background: "var(--surface)", color: "var(--ink)" }}>
-                <option value="">Select a course...</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
-              </select>
-            )}
-          </div>
-        </div>
-
-        {roster.length > 0 && <section className="card" style={{ padding: 20, marginBottom: 20 }}>
-          <h2>Geolocation check-in</h2><p>Record a student check-in using this device’s location.</p>
-          <label>Student for check-in <select value={checkInStudent} onChange={event => setCheckInStudent(event.target.value)}>
-            <option value="">Select a student</option>{roster.map(student => <option key={student.enrollmentId} value={student.universityId}>{student.name}</option>)}
-          </select></label>
-          {checkInStudent && roster.some(student => student.universityId === checkInStudent) && <CheckInButton key={`${selectedCourse}:${checkInStudent}`} courseId={selectedCourse} studentId={checkInStudent} />}
-        </section>}
-        {roster.length > 0 && (
-          <>
-            <div style={{ marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, fontSize: 13, color: "var(--muted)" }}>
-              <span>{present} of {total} present ({total > 0 ? Math.round(present / total * 100) : 0}%)</span>
-              <label style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <input type="checkbox" checked={offCampusOnly} onChange={event => setOffCampusOnly(event.target.checked)} />
-                Show only off-campus
-              </label>
-            </div>
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-body" style={{ display: "grid", gap: 4, padding: 0 }}>
-                {visibleRoster.length === 0 ? <p style={{ padding: 16 }}>No off-campus check-ins need review.</p> : visibleRoster.map(s => (
-                  <div key={s.enrollmentId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
-                    <button type="button" aria-label={`Mark ${s.name} ${statuses[s.enrollmentId] === "present" ? "absent" : "present"}`} aria-pressed={statuses[s.enrollmentId] === "present"} onClick={() => toggle(s.enrollmentId)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", fontSize: 13, minHeight: 48 }}>
-                      <span><strong>{s.name}</strong><small style={{ display: "block", color: "var(--muted)", fontSize: 11 }}>{s.universityId}</small></span>
-                      <span className={`badge ${statuses[s.enrollmentId] === "present" ? "badge-success" : "badge-danger"}`}>
-                        {statuses[s.enrollmentId] === "present" ? <><CheckCircle size={14} />Present</> : <><XCircle size={14} />Absent</>}
-                      </span>
-                    </button>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span className={`badge ${s.isManualOverride || s.locationStatus === "ON_CAMPUS" ? "badge-success" : s.locationStatus === "OFF_CAMPUS" ? "badge-danger" : "badge-warning"}`}>
-                        {s.isManualOverride ? "MANUAL OVERRIDE" : s.locationStatus?.replaceAll("_", " ") ?? "NOT CHECKED IN"}
-                      </span>
-                      {s.locationStatus === "OFF_CAMPUS" && !s.isManualOverride && s.attendanceId && (
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setOverrideTarget(s); setOverrideReason(""); }}>Override</button>
-                      )}
+              {override && (
+                <Panel tone="brass" title={`Let ${override.student.name}'s attendance stand?`}>
+                  <div className="panel-form">
+                    <p>
+                      This student checked in from outside the campus boundary. Approving keeps the
+                      attendance and records your reason against it. Their coordinates are not shown
+                      to you here.
+                    </p>
+                    <label><span>Why</span><textarea value={override.reason} maxLength={500} rows={3} onChange={e => setOverride({ ...override, reason: e.target.value })} placeholder="e.g. teaching practice at the partner school today" /></label>
+                    <div className="btn-row">
+                      <button type="button" className="btn btn-primary" disabled={!override.reason.trim()} onClick={approve}>Approve and record the reason</button>
+                      <button type="button" className="btn btn-ghost" onClick={() => setOverride(null)}>Cancel</button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-            <button className="btn btn-primary btn-lg" style={{ width: "100%" }} onClick={submit} disabled={saving}>
-              {saving ? <span className="btn-loading">Saving...</span> : "Submit Attendance"}
-            </button>
-          </>
-        )}
-        {overrideTarget && (
-          <FocusTrapDialog labelledBy="override-title" onClose={() => setOverrideTarget(null)}>
-            <div className="wizard-card">
-              <h2 id="override-title">Override off-campus check-in</h2>
-              <p>Approve {overrideTarget.name}&apos;s attendance without viewing or exposing their coordinates.</p>
-              <label className="wizard-field">
-                <span>Reason *</span>
-                <textarea value={overrideReason} maxLength={500} rows={4} onChange={event => setOverrideReason(event.target.value)} placeholder="Explain why this check-in is being approved" />
-              </label>
-              <div className="wizard-footer">
-                <button type="button" className="wizard-secondary" onClick={() => setOverrideTarget(null)}>Cancel</button>
-                <button type="button" className="wizard-primary" disabled={saving || !overrideReason.trim()} onClick={() => void submitOverride()}>{saving ? "Saving override…" : "Approve attendance"}</button>
-              </div>
-            </div>
-          </FocusTrapDialog>
-        )}
+                </Panel>
+              )}
 
+              {courseId && (
+                <Panel
+                  title="The roll"
+                  aside={<>
+                    <span>{present} of {students.length} present</span>
+                    <label className="check-row"><input type="checkbox" checked={offCampusOnly} onChange={e => setOffCampusOnly(e.target.checked)} /><span>only those off campus</span></label>
+                  </>}
+                  flush
+                >
+                  {roster.state.kind === "loading" ? (
+                    <p className="field-hint" style={{ padding: "1rem 1.5rem" }}>Reading the roster…</p>
+                  ) : roster.state.kind === "error" ? (
+                    <p className="field-hint" style={{ padding: "1rem 1.5rem" }}>{roster.state.message}</p>
+                  ) : shown.length === 0 ? (
+                    <p className="field-hint" style={{ padding: "1rem 1.5rem" }}>
+                      {students.length === 0 ? "Nobody is enrolled on this course." : "Nobody checked in from off campus."}
+                    </p>
+                  ) : (
+                    <ul className="roll">
+                      {shown.map(s => {
+                        const isAbsent = absent.has(s.enrollmentId);
+                        const place = s.isManualOverride ? { label: "Approved by you", tone: "laurel" as const } : s.locationStatus ? PLACE[s.locationStatus] : null;
+                        return (
+                          <li key={s.enrollmentId}>
+                            <button
+                              type="button"
+                              className="roll-name"
+                              aria-pressed={!isAbsent}
+                              onClick={() => setAbsent(a => { const n = new Set(a); if (n.has(s.enrollmentId)) n.delete(s.enrollmentId); else n.add(s.enrollmentId); return n; })}
+                            >
+                              <span><strong>{s.name}</strong><small>{s.universityId}</small></span>
+                              <Mark tone={isAbsent ? "oxblood" : "laurel"}>{isAbsent ? "Absent" : "Present"}</Mark>
+                            </button>
+                            <span className="roll-place">
+                              {place ? <Mark tone={place.tone}>{place.label}</Mark> : <span className="text-muted">did not check in</span>}
+                              {s.locationStatus === "OFF_CAMPUS" && !s.isManualOverride && s.attendanceId && (
+                                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOverride({ student: s, reason: "" })}>Review</button>
+                              )}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </Panel>
+              )}
 
-        {message && (
-          <div role={message.includes("success") ? "status" : "alert"} className="error-state" style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
-            <ClipboardCheck size={20} />
-            <p>{message}</p>
+              {courseId && students.length > 0 && (
+                <div className="btn-row">
+                  <button type="button" className={`btn btn-primary${action.busy === "mark" ? " btn-loading" : ""}`} disabled={action.busy !== null} onClick={() => submit(students)}>
+                    Record today&apos;s roll
+                  </button>
+                  <span className="text-muted">{present} present, {absent.size} absent</span>
+                </div>
+              )}
+            </div>
+
+            <aside className="record-margin">
+              {courseId && students.length > 0 && (
+                <Panel title="Check a student in">
+                  <div className="panel-form">
+                    <label><span>Student</span>
+                      <select value={checkInStudent} onChange={e => setCheckInStudent(e.target.value)}>
+                        <option value="">Choose a student</option>
+                        {students.map(s => <option key={s.enrollmentId} value={s.universityId}>{s.name}</option>)}
+                      </select>
+                    </label>
+                    {checkInStudent && <CheckInButton key={`${courseId}:${checkInStudent}`} courseId={courseId} studentId={checkInStudent} />}
+                    <p className="field-hint">
+                      This uses the location of the device you are holding. The coordinates are stored
+                      encrypted against the check-in; this screen shows only whether they fell inside
+                      the campus boundary.
+                    </p>
+                  </div>
+                </Panel>
+              )}
+
+              <Notice tone="ink">
+                Everyone is present until you mark them absent, which is how a roll call is read aloud.
+                A student already marked today is left alone rather than overwritten.
+              </Notice>
+            </aside>
           </div>
-        )}
-      </div>
-    </AppShell>
+        );
+      }}
+    </ModulePage>
   );
 }

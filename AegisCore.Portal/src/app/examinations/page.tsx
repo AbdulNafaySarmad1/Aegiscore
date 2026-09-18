@@ -1,161 +1,175 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { AppShell } from "@/components/layout/AppShell";
-import { apiGet, apiPost, apiPut } from "@/lib/api-client";
-import { ClipboardCheck, FileText } from "lucide-react";
+import { useState } from "react";
+import { apiGet, apiPut } from "@/lib/api-client";
+import { Panel, Notice, Mark } from "@/components/register";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
 type Course = { id: string; title: string; code: string };
-type Scheme = { id: string; components: { id: string; name: string; totalMarks: number; weightPercentage: number }[] };
+type Component = { id: string; componentType: string; totalMarks: number; weightPercentage: number };
+type Scheme = { id: string; components: Component[] };
 type Student = { enrollmentId: string; studentId: string; name: string; universityId: string };
-type MarksEntry = { courseId: string; studentId: string; assessmentComponentId: string; obtainedMarks: number; enteredBy: string };
 
-export default function GradeEntry() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [scheme, setScheme] = useState<Scheme | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [marks, setMarks] = useState<Record<string, Record<string, number>>>({});
-  const [saving, setSaving] = useState(false);
-  const [edited, setEdited] = useState<Set<string>>(new Set());
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+/**
+ * Entering marks. A mark is recorded against the person signed in, and only the boxes actually
+ * changed are sent, so opening the screen and closing it again writes nothing.
+ */
+export default function GradeEntryPage() {
+  const { state, reload } = useModuleData<Course[]>(signal => apiGet<Course[]>("/api/courses/my", signal));
+  const action = useAction();
+  const [courseId, setCourseId] = useState("");
+  const [marks, setMarks] = useState<Record<string, number>>({});   // "enrollmentId:componentId" → mark
 
-  useEffect(() => { apiGet<Course[]>("/api/courses/my").then(setCourses).catch(()=>{}).finally(()=>setLoading(false)); }, []);
+  const sheet = useModuleData<{ scheme: Scheme | null; students: Student[] }>(
+    async signal => {
+      if (!courseId) return { scheme: null, students: [] };
+      const [scheme, roster] = await Promise.all([
+        apiGet<Scheme>(`/api/examination/schemes/by-course/${courseId}`, signal).catch(() => null),
+        apiGet<{ students: Student[] }>(`/api/attendance/roster/${courseId}`, signal).catch(() => ({ students: [] })),
+      ]);
+      return { scheme, students: roster.students ?? [] };
+    },
+    courseId
+  );
 
-  useEffect(() => {
-    if (!selectedCourse) return;
-    Promise.all([
-      apiGet<Scheme>(`/api/examination/schemes/${selectedCourse}`).catch(() => null),
-      apiGet<{students: Student[]}>(`/api/attendance/roster/${selectedCourse}`).catch(() => null),
-    ]).then(([s, r]) => {
-      setScheme(s);
-      setStudents(r?.students ?? []);
-      const initial: Record<string, Record<string, number>> = {};
-      for (const st of r?.students ?? []) {
-        initial[st.enrollmentId] = {};
-        for (const c of s?.components ?? []) {
-          initial[st.enrollmentId][c.id] = 0;
-        }
+  async function submit(scheme: Scheme, students: Student[]) {
+    const entries = Object.entries(marks);
+    await action.run("save", async () => {
+      let written = 0;
+      for (const [key, value] of entries) {
+        const [enrollmentId, componentId] = key.split(":");
+        const student = students.find(s => s.enrollmentId === enrollmentId);
+        if (!student) continue;
+        await apiPut("/api/examination/marks", {
+          courseId,
+          studentId: student.studentId,
+          assessmentComponentId: componentId,
+          obtainedMarks: value,
+        });
+        written++;
       }
-      setMarks(initial);
-      setEdited(new Set());
-    });
-  }, [selectedCourse]);
-
-  const setMark = (enrollmentId: string, componentId: string, value: number) => {
-    setEdited(previous => new Set(previous).add(`${enrollmentId}:${componentId}`));
-    setMarks(prev => ({
-      ...prev,
-      [enrollmentId]: { ...prev[enrollmentId], [componentId]: Math.max(0, Math.min(value, scheme?.components.find(c=>c.id===componentId)?.totalMarks ?? 100)) }
-    }));
-  };
-
-  const submitAll = async () => {
-    if (!selectedCourse) return;
-    setSaving(true); setMessage("");
-    try {
-      for (const enrollmentId of Object.keys(marks)) {
-        for (const componentId of Object.keys(marks[enrollmentId] ?? {})) {
-          if (!edited.has(`${enrollmentId}:${componentId}`)) continue;
-          await apiPut("/api/examination/marks", {
-            courseId: selectedCourse,
-            studentId: students.find(s => s.enrollmentId === enrollmentId)?.studentId ?? "",
-            assessmentComponentId: componentId,
-            obtainedMarks: marks[enrollmentId]?.[componentId] ?? 0,
-            enteredBy: "00000000-0000-0000-0000-000000000000",
-          });
-        }
-      }
-      setMessage("All marks submitted successfully.");
-      setEdited(new Set());
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Failed to submit marks.");
-    } finally { setSaving(false); }
-  };
+      setMarks({});
+      return `${written} mark${written === 1 ? "" : "s"} recorded against your name. Nothing else on the sheet was touched.`;
+    }, sheet.reload);
+  }
 
   return (
-    <AppShell>
-      <div className="content-page">
-        <div className="page-header">
-          <div>
-            <div className="page-header-breadcrumb"><span>Academic</span><span>/</span><span>Grade Entry</span></div>
-            <h1>Grade Entry</h1>
-            <p>Enter marks for assignments, quizzes, and midterm.</p>
-          </div>
-        </div>
-
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-body">
-            {loading ? <div className="skeleton" style={{ height: 40 }} /> : (
-              <select aria-label="Course" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} style={{ width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--border)", padding: "0 12px", fontSize: 14 }}>
-                <option value="">Select a course...</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
-              </select>
-            )}
-          </div>
-        </div>
-
-        {scheme && students.length > 0 && (
+    <ModulePage
+      title="Marks"
+      crumbs={[{ label: "Academic" }, { label: "Marks" }]}
+      meta={<span>Marks for one of your courses, component by component. Only what you change is written.</span>}
+      ident={(courses: Course[]) => <><strong>{courses.length}</strong><br />{courses.length === 1 ? "course" : "courses"}</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {courses => {
+        const data = sheet.state.kind === "ready" ? sheet.state.data : { scheme: null, students: [] };
+        const { scheme, students } = data;
+        const changed = Object.keys(marks).length;
+        return (
           <>
-            <div className="card" style={{ marginBottom: 12 }}>
-              <div className="card-header"><h3 style={{ fontSize: 14 }}>Assessment Breakdown</h3></div>
-              <div className="card-body" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                {scheme.components.map(c => (
-                  <div key={c.id} className="badge badge-primary" style={{ padding: "8px 12px" }}>
-                    {c.name}: {c.totalMarks} marks ({c.weightPercentage}%)
-                  </div>
-                ))}
+            <Panel title="Which course">
+              <div className="panel-form">
+                <label><span>Course</span>
+                  <select value={courseId} onChange={e => { setCourseId(e.target.value); setMarks({}); }}>
+                    <option value="">Choose a course</option>
+                    {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
+                  </select>
+                </label>
+                {courses.length === 0 && <p className="field-hint">No course is assigned to you, so there are no marks to enter.</p>}
               </div>
-            </div>
+            </Panel>
 
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Student</th>
-                    <th scope="col">ID</th>
-                    {scheme.components.map(c => <th scope="col" key={c.id}>{c.name}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map(s => (
-                    <tr key={s.enrollmentId}>
-                      <td style={{ fontWeight: 600 }}>{s.name}</td>
-                      <td style={{ color: "var(--muted)", fontSize: 12 }}>{s.universityId}</td>
-                      {scheme.components.map(c => (
-                        <td key={c.id}>
-                          <input
-                            type="number"
-                            aria-label={`${s.name} ${c.name} marks out of ${c.totalMarks}`}
-                            min={0}
-                            max={c.totalMarks}
-                            value={marks[s.enrollmentId]?.[c.id] ?? 0}
-                            onChange={e => setMark(s.enrollmentId, c.id, parseInt(e.target.value) || 0)}
-                            style={{ width: 70, textAlign: "center", minHeight: 36, borderRadius: 6, border: "1px solid var(--border)", padding: "2px 8px", fontSize: 13 }}
-                          />
-                          <small style={{ display: "block", color: "var(--muted)", fontSize: 10 }}>/ {c.totalMarks}</small>
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {courseId && sheet.state.kind === "loading" && <Panel><p>Reading the marks sheet…</p></Panel>}
 
-            <button className="btn btn-primary btn-lg" style={{ width: "100%", marginTop: 16 }} onClick={submitAll} disabled={saving}>
-              {saving ? <span className="btn-loading">Saving...</span> : "Submit All Marks"}
-            </button>
+            {courseId && sheet.state.kind === "ready" && !scheme && (
+              <Notice tone="brass" title="This course has no assessment scheme.">
+                Until someone sets out its components — what the quizzes, assignments and papers are
+                worth — there is nothing to enter marks against.
+              </Notice>
+            )}
+
+            {courseId && scheme && students.length === 0 && (
+              <Notice tone="brass" title="Nobody is enrolled on this course.">
+                There is no one to give a mark to yet.
+              </Notice>
+            )}
+
+            {scheme && students.length > 0 && (
+              <>
+                <Panel title="How this course is assessed">
+                  <ul className="scheme-list">
+                    {scheme.components.map(c => (
+                      <li key={c.id}>
+                        <strong>{c.componentType}</strong>
+                        <span>{c.totalMarks} marks</span>
+                        <span>{c.weightPercentage}% of the course</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {scheme.components.reduce((n, c) => n + c.weightPercentage, 0) !== 100 && (
+                    <p className="field-hint">
+                      These components add to {scheme.components.reduce((n, c) => n + c.weightPercentage, 0)}% of the course, not 100%.
+                    </p>
+                  )}
+                </Panel>
+
+                <Panel title="Marks" aside={changed > 0 ? <Mark tone="brass">{changed} unsaved</Mark> : <span className="text-muted">nothing changed</span>} flush>
+                  <div className="ledger-wrap">
+                    <table className="ledger" style={{ minWidth: 640 }}>
+                      <thead>
+                        <tr>
+                          <th scope="col">Student</th>
+                          <th scope="col">Number</th>
+                          {scheme.components.map(c => <th key={c.id} scope="col" className="num">{c.componentType}<br /><span className="text-muted">out of {c.totalMarks}</span></th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map(s => (
+                          <tr key={s.enrollmentId}>
+                            <td>{s.name}</td>
+                            <td className="mono">{s.universityId}</td>
+                            {scheme.components.map(c => {
+                              const key = `${s.enrollmentId}:${c.id}`;
+                              return (
+                                <td key={c.id} className="num">
+                                  <input
+                                    type="number" min={0} max={c.totalMarks} inputMode="numeric"
+                                    aria-label={`${s.name}, ${c.componentType}, out of ${c.totalMarks}`}
+                                    value={marks[key] ?? ""}
+                                    placeholder="—"
+                                    onChange={e => {
+                                      const raw = e.target.value;
+                                      if (raw === "") { const next = { ...marks }; delete next[key]; setMarks(next); return; }
+                                      setMarks({ ...marks, [key]: Math.max(0, Math.min(Number(raw), c.totalMarks)) });
+                                    }}
+                                    className="mark-input"
+                                  />
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Panel>
+
+                <div className="btn-row">
+                  <button type="button" className={`btn btn-primary${action.busy === "save" ? " btn-loading" : ""}`} disabled={action.busy !== null || changed === 0} onClick={() => submit(scheme, students)}>
+                    Record {changed === 0 ? "marks" : changed === 1 ? "one mark" : `${changed} marks`}
+                  </button>
+                  {changed > 0 && <button type="button" className="btn btn-ghost" onClick={() => setMarks({})}>Discard what I typed</button>}
+                </div>
+
+                <Notice tone="ink">
+                  A blank box is not a zero: it is left alone. Marks are locked once moderation has
+                  been submitted for the course, and an attempt to change them then is refused.
+                </Notice>
+              </>
+            )}
           </>
-        )}
-
-        {message && (
-          <div role={message.includes("success") ? "status" : "alert"} className="error-state" style={{ marginTop: 12, background: message.includes("success") ? "var(--success-soft)" : "var(--danger-soft)", border: message.includes("success") ? "1px solid var(--success)" : "1px solid var(--danger)", color: message.includes("success") ? "var(--success)" : "var(--danger)" }}>
-            <ClipboardCheck size={20} /><p>{message}</p>
-          </div>
-        )}
-      </div>
-    </AppShell>
+        );
+      }}
+    </ModulePage>
   );
 }

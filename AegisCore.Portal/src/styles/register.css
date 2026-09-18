@@ -344,3 +344,19 @@
 .plotter-surface svg { width: 100%; height: 100%; display: block; }
 .vertex-list { list-style: decimal; margin: 0; padding-left: var(--s-6); display: grid; gap: var(--s-1); font-size: var(--t-13); }
 .vertex-list li { display: flex; align-items: center; gap: var(--s-3); justify-content: space-between; border-bottom: 1px solid var(--rule); padding: var(--s-1) 0; }
+
+/* ── Roll call: a name, its mark, and where the student was when they checked in ── */
+.roll { list-style: none; margin: 0; padding: 0; }
+.roll li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-4); align-items: center; border-bottom: 1px solid var(--rule); padding-right: var(--s-6); }
+.roll li:last-child { border-bottom: 0; }
+.roll-name { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); width: 100%; min-height: 52px; padding: var(--s-2) var(--s-6); border: 0; background: transparent; color: var(--ink); text-align: left; cursor: pointer; font-size: var(--t-15); }
+.roll-name:hover { background: var(--paper-2); }
+.roll-name small { display: block; font-family: var(--font-mono); font-size: var(--t-12); color: var(--ink-2); }
+.roll-place { display: flex; align-items: center; gap: var(--s-3); font-size: var(--t-13); white-space: nowrap; }
+
+/* ── Assessment scheme and mark entry ── */
+.scheme-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.scheme-list li { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-6); align-items: baseline; padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); font-size: var(--t-15); }
+.scheme-list li:last-child { border-bottom: 0; }
+.scheme-list span { font-size: var(--t-13); color: var(--ink-2); }
+.mark-input { width: 5.5em; text-align: right; font-variant-numeric: tabular-nums; }

@@ -1,3 +1,4 @@
+﻿using System.Security.Claims;
 using AegisCore.Application.Examination;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure;
@@ -12,36 +13,100 @@ namespace AegisCore.API.Controllers;
 [AegisCore.API.Authorization.RequirePermission("Grades", "Read")]
 public sealed class S3ExaminationController(AegisDbContext db, IGradingService grading, ITranscriptService transcripts) : ControllerBase
 {
+    /// <summary>
+    /// The scheme as a caller describes it. The entity could not be bound from a request: its
+    /// component carries a required navigation back to the scheme, so model binding demanded a
+    /// "scheme" field inside every component and refused every well-formed payload. No assessment
+    /// scheme could be created through the API at all.
+    /// </summary>
+    public sealed record AssessmentSchemeInput(Guid CourseId, Guid SemesterId, Guid ExamControllerId, List<AssessmentComponentInput> Components);
+    public sealed record AssessmentComponentInput(string ComponentType, int WeightPercentage, int TotalMarks, int? PassingMarks, bool IsMandatory, int OrderIndex);
+
+    /// <summary>
+    /// The scheme as it is read back. The entity itself cannot be written to a response: a component
+    /// holds a reference back to its scheme, so serialising one walked the cycle and failed halfway
+    /// through, after the response had already begun — a 500 with a truncated body.
+    /// </summary>
+    public sealed record AssessmentSchemeView(Guid Id, Guid CourseId, Guid SemesterId, Guid ExamControllerId, DateTimeOffset CreatedAt, List<AssessmentComponentView> Components);
+    public sealed record AssessmentComponentView(Guid Id, string ComponentType, int WeightPercentage, int TotalMarks, int? PassingMarks, bool IsMandatory, int OrderIndex);
+
+    private static AssessmentSchemeView Describe(AssessmentScheme scheme) => new(
+        scheme.Id, scheme.CourseId, scheme.SemesterId, scheme.ExamControllerId, scheme.CreatedAt,
+        scheme.Components.OrderBy(c => c.OrderIndex)
+            .Select(c => new AssessmentComponentView(c.Id, c.ComponentType, c.WeightPercentage, c.TotalMarks, c.PassingMarks, c.IsMandatory, c.OrderIndex))
+            .ToList());
+
     [AegisCore.API.Authorization.RequirePermission("Grades", "Write")]
     [HttpPost("schemes")]
-    public async Task<ActionResult<AssessmentScheme>> CreateScheme([FromBody] AssessmentScheme scheme, CancellationToken ct)
+    public async Task<ActionResult<AssessmentSchemeView>> CreateScheme([FromBody] AssessmentSchemeInput input, CancellationToken ct)
     {
-        if (scheme.Components.Count == 0 || scheme.Components.Any(c => c.TotalMarks <= 0 || c.WeightPercentage < 0)
-            || scheme.Components.Sum(c => c.WeightPercentage) != 100)
+        if (input.Components.Count == 0 || input.Components.Any(c => c.TotalMarks <= 0 || c.WeightPercentage < 0)
+            || input.Components.Sum(c => c.WeightPercentage) != 100)
         {
-            return BadRequest("Assessment component weights must total 100 and marks must be positive.");
+            return BadRequest(new { error = "An assessment scheme's components must add to 100% of the course, and each must be marked out of a positive number." });
         }
 
-        scheme.Id = scheme.Id == Guid.Empty ? Guid.NewGuid() : scheme.Id;
+        if (!await db.Courses.AnyAsync(c => c.Id == input.CourseId, ct))
+        {
+            return NotFound(new { error = "That course is not on file." });
+        }
+
+        var scheme = new AssessmentScheme
+        {
+            Id = Guid.NewGuid(),
+            CourseId = input.CourseId,
+            SemesterId = input.SemesterId,
+            ExamControllerId = input.ExamControllerId,
+            Components = input.Components.Select(c => new AssessmentComponent
+            {
+                Id = Guid.NewGuid(),
+                ComponentType = c.ComponentType,
+                WeightPercentage = c.WeightPercentage,
+                TotalMarks = c.TotalMarks,
+                PassingMarks = c.PassingMarks,
+                IsMandatory = c.IsMandatory,
+                OrderIndex = c.OrderIndex,
+            }).ToList(),
+        };
+
         foreach (var component in scheme.Components)
         {
-            component.Id = component.Id == Guid.Empty ? Guid.NewGuid() : component.Id;
             component.SchemeId = scheme.Id;
         }
 
         db.AssessmentSchemes.Add(scheme);
         await db.SaveChangesAsync(ct);
-        return CreatedAtAction(nameof(GetScheme), new { id = scheme.Id }, scheme);
+        return CreatedAtAction(nameof(GetScheme), new { id = scheme.Id }, Describe(scheme));
     }
 
     [HttpGet("schemes/{id:guid}")]
-    public async Task<ActionResult<AssessmentScheme>> GetScheme(Guid id, CancellationToken ct)
-        => await db.AssessmentSchemes.Include(s => s.Components).FirstOrDefaultAsync(s => s.Id == id, ct) is { } scheme
-            ? scheme : NotFound();
+    public async Task<ActionResult<AssessmentSchemeView>> GetScheme(Guid id, CancellationToken ct)
+        => await db.AssessmentSchemes.Include(s => s.Components).AsNoTracking().FirstOrDefaultAsync(s => s.Id == id, ct) is { } scheme
+            ? Describe(scheme) : NotFound(new { error = "No assessment scheme with that id." });
+
+    /// <summary>
+    /// A course's scheme. The marks screen knows which course it is entering marks for, not which
+    /// scheme id that is; it used to ask for the scheme by the course id and always got nothing.
+    /// </summary>
+    [HttpGet("schemes/by-course/{courseId:guid}")]
+    public async Task<ActionResult<AssessmentSchemeView>> GetSchemeForCourse(Guid courseId, CancellationToken ct)
+        => await db.AssessmentSchemes.Include(s => s.Components).AsNoTracking()
+            .OrderByDescending(s => s.CreatedAt)
+            .FirstOrDefaultAsync(s => s.CourseId == courseId, ct) is { } scheme
+            ? Describe(scheme)
+            : NotFound(new { error = "This course has no assessment scheme yet, so there is nothing to enter marks against." });
 
     [HttpPut("marks")]
     public async Task<IActionResult> EnterMarks([FromBody] MarksEntryRequest request, CancellationToken ct)
     {
+        // A mark is signed by whoever is signed in. It used to be whoever the caller said, and the
+        // portal said the all-zero id, so the validator refused every entry from the grade screen
+        // and no mark could be entered through it at all.
+        if (!Guid.TryParse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier), out var enteredBy))
+        {
+            return Unauthorized(new { error = "Marks are recorded against the person entering them; sign in again." });
+        }
+
         var activeModeration = await db.MarkModerations.FirstOrDefaultAsync(m => m.CourseId == request.CourseId && (m.Status == "submitted" || m.Status == "approved"), ct);
         if (activeModeration is not null)
         {
@@ -69,7 +134,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
         }
 
         mark.ObtainedMarks = request.ObtainedMarks;
-        mark.EnteredBy = request.EnteredBy;
+        mark.EnteredBy = enteredBy;
         mark.EntryDate = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync(ct);
         return NoContent();
@@ -162,7 +227,7 @@ public sealed class S3ExaminationController(AegisDbContext db, IGradingService g
     public Task<bool> VerifyTranscript(string hash, CancellationToken ct) => transcripts.VerifyTranscriptAsync(hash, ct);
 }
 
-public sealed record MarksEntryRequest(Guid CourseId, Guid StudentId, Guid AssessmentComponentId, int ObtainedMarks, Guid EnteredBy);
+public sealed record MarksEntryRequest(Guid CourseId, Guid StudentId, Guid AssessmentComponentId, int ObtainedMarks);
 public sealed record GraceMarksRequest(IReadOnlyList<GracemarkEntry> Entries, Guid ActorId);
 public sealed record PublishResultsRequest(Guid SemesterId, Guid ActorId);
 public sealed record TranscriptRequest(Guid RequestedBy, string Reason);

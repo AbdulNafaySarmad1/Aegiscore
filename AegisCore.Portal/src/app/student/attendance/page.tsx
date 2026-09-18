@@ -1,61 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AppShell } from "@/components/layout/AppShell";
+import { useState } from "react";
 import { CheckInButton } from "@/components/attendance/CheckInButton";
 import { apiGet } from "@/lib/api-client";
-import { ClipboardCheck } from "lucide-react";
 import { loadSession } from "@/lib/session";
+import { Panel, Notice } from "@/components/register";
+import { ModulePage, useModuleData } from "@/components/register/module-page";
 
 type Course = { id: string; code: string | null; title: string };
+type Enrolled = { studentId: string; courses: Course[] };
 
+/** A student marking themselves present for a class they are sitting in. */
 export default function StudentAttendancePage() {
-  const [studentId, setStudentId] = useState("");
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { state, reload } = useModuleData<Enrolled>(async signal => {
+    const session = await loadSession();
+    if (!session.studentId) return { studentId: "", courses: [] };
+    const courses = await apiGet<Course[]>(`/api/attendance/student-courses/${encodeURIComponent(session.studentId)}`, signal);
+    return { studentId: session.studentId, courses };
+  });
   const [courseId, setCourseId] = useState("");
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadSession().then(session => setStudentId(session.studentId ?? "")).catch(() => setLoading(false));
-  }, []);
-
-
-  useEffect(() => {
-    if (!studentId) { Promise.resolve().then(() => setLoading(false)); return; }
-    apiGet<Course[]>(`/api/attendance/student-courses/${encodeURIComponent(studentId)}`)
-      .then(setCourses)
-      .finally(() => setLoading(false));
-  }, [studentId]);
 
   return (
-    <AppShell>
-      <div className="content-page">
-        <header className="page-header">
-          <div>
-            <div className="page-header-breadcrumb"><span>Academic</span><span>/</span><span>Attendance</span></div>
-            <h1>Mark Attendance</h1>
-            <p>Select today&apos;s course. Location is used only to classify the check-in and is encrypted at rest.</p>
-          </div>
-          <ClipboardCheck aria-hidden="true" />
-        </header>
-        <section className="card">
-          <div className="card-body" style={{ display: "grid", gap: 16 }}>
-            {loading ? <p>Loading your enrolled courses…</p> : courses.length === 0 ? (
-              <div className="empty-state"><strong>No enrolled courses are available.</strong><p>Contact the registrar if an active course is missing.</p></div>
-            ) : (
-              <>
-                <label style={{ display: "grid", gap: 6 }}>
-                  <span>Course</span>
-                  <select value={courseId} onChange={event => setCourseId(event.target.value)}>
-                    <option value="">Select a course…</option>
-                    {courses.map(course => <option key={course.id} value={course.id}>{course.code ? `${course.code} — ` : ""}{course.title}</option>)}
+    <ModulePage
+      title="Check in"
+      crumbs={[{ label: "My record" }, { label: "Check in" }]}
+      meta={<span>Marking yourself present for a class you are in now.</span>}
+      state={state} reload={reload}
+    >
+      {({ studentId, courses }) => (
+        <div className="page-narrow">
+          {!studentId ? (
+            <Notice tone="brass" title="This account is not a student record.">
+              Checking in is for students. If you teach this class, the roll is on the attendance screen.
+            </Notice>
+          ) : courses.length === 0 ? (
+            <Notice tone="brass" title="You are not enrolled on any course.">
+              Ask the registrar if a course you are attending is missing.
+            </Notice>
+          ) : (
+            <Panel title="Which class">
+              <div className="panel-form">
+                <label><span>Course</span>
+                  <select value={courseId} onChange={e => setCourseId(e.target.value)}>
+                    <option value="">Choose a course</option>
+                    {courses.map(c => <option key={c.id} value={c.id}>{c.code ? `${c.code} — ` : ""}{c.title}</option>)}
                   </select>
                 </label>
                 {courseId && <CheckInButton studentId={studentId} courseId={courseId} />}
-              </>
-            )}
-          </div>
-        </section>
-      </div>
-    </AppShell>
+                <p className="field-hint">
+                  Your device is asked where it is. The answer decides whether you are inside the
+                  campus boundary, and is then stored encrypted against this check-in. Staff screens
+                  show only whether it was inside or outside, never the coordinates.
+                </p>
+              </div>
+            </Panel>
+          )}
+        </div>
+      )}
+    </ModulePage>
   );
 }
