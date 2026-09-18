@@ -1,6 +1,6 @@
 "use client";
 
-import { HubConnectionBuilder, HttpTransportType } from "@microsoft/signalr";
+import { HubConnectionBuilder, HttpTransportType, LogLevel } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -13,6 +13,9 @@ export function FinanceRealtimeRefresh() {
     const connection = new HubConnectionBuilder()
       .withUrl("/hubs/finance", { transport: HttpTransportType.WebSockets | HttpTransportType.LongPolling, withCredentials: true })
       .withAutomaticReconnect()
+      // Live updates are an improvement on the screen, not a condition of it: a hub that cannot
+      // be reached should leave the page working and the console quiet, not log on every retry.
+      .configureLogging(LogLevel.None)
       .build();
     connection.on("FinanceEvent", (event: { eventName?: string }) => {
       if (event.eventName && refreshEvents.has(event.eventName)) router.refresh();

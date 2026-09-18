@@ -214,6 +214,23 @@ public static class AuthenticationServicesExtensions
             var problem = AegisCore.Infrastructure.Security.JwtKeyMaterial.ProductionKeyProblem(configuration);
             if (problem is not null) throw new InvalidOperationException(problem);
             options.RequireHttpsMetadata = false;
+
+            // A browser cannot put an Authorization header on a WebSocket, and the portal keeps the
+            // access token in an http-only cookie the page's own script cannot read. Live updates
+            // were therefore refused with 401 on every connection attempt, on every finance screen,
+            // in every deployment. For hub connections the token is read from that cookie instead.
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    if (string.IsNullOrEmpty(context.Token) && context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                    {
+                        var fromCookie = context.Request.Cookies["aegiscore_access"];
+                        if (!string.IsNullOrEmpty(fromCookie)) context.Token = fromCookie;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
             var validationKeys = AegisCore.Infrastructure.Security.JwtKeyMaterial.ValidationKeys(configuration);
             if (validationKeys.Count > 0)
             {

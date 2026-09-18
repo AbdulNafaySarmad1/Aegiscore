@@ -63,6 +63,8 @@ const en = {
     month: "Month", postings: "Postings", category: "Category", amount: "Amount", feeFunnel: "Fee collection funnel",
     feeFunnelDetail: "Demanded, collected, and overdue balances", demanded: "Demanded", collected: "Collected",
     overdue: "Overdue", openDemands: "Open demands", securityPosture: "Security posture",
+    // The chain state read as a colour beside a tick, so "red" arrived looking like good news.
+    chain_green: "Every entry verifies", chain_amber: "Some entries are unverified", chain_red: "The chain does not verify",
     securityDetail: "Ledger chain and audit seal status", lastSeal: "Last seal", notSealed: "Not sealed",
     merkleRoot: "Merkle root", key: "Key", unavailableValue: "unavailable", verifySignature: "Verify voucher signature",
     verifyDetail: "Retrieve its stored ML-DSA proof.", voucherId: "Voucher ID", verify: "Verify", voucher: "Voucher",
