@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { release } from "@/lib/api-client";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { RegisterHead, Panel, Facts, Seal, RuledLoading, Notice, ErrorNotice, Mark } from "@/components/register";
@@ -18,9 +19,10 @@ export default function AlumniPage() {
     setState({ kind: "loading" });
     fetch("/api/student-lifecycle/alumni/me", { credentials: "include", cache: "no-store" })
       .then(async response => {
-        if (response.status === 404) return { kind: "not-graduated" } as const;
-        if (response.status === 401) return { kind: "signed-out" } as const;
-        if (!response.ok) return { kind: "error", message: "Your alumni record could not be loaded." } as const;
+        // Every branch that does not read the body releases it; an unread body holds its connection.
+        if (response.status === 404) { await release(response); return { kind: "not-graduated" } as const; }
+        if (response.status === 401) { await release(response); return { kind: "signed-out" } as const; }
+        if (!response.ok) { await release(response); return { kind: "error", message: "Your alumni record could not be loaded." } as const; }
         return { kind: "ready", profile: await response.json() as Profile } as const;
       })
       .catch(() => ({ kind: "error", message: "The university API is not reachable." } as const))

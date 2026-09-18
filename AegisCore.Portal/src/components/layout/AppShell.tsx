@@ -10,7 +10,7 @@ import {
   LogOut, Menu, Moon, Scale, Search, Settings, ShieldCheck, Sun, UserRound, Utensils, Vote, X,
   Contrast, ALargeSmall,
 } from "lucide-react";
-import { apiGet } from "@/lib/api-client";
+import { apiGet, ApiError } from "@/lib/api-client";
 import { loadLicenseStatus, type LicenseStatus } from "@/lib/license";
 import { getRoleProfile } from "@/lib/roles";
 import type { DashboardModule } from "@/lib/roles";
@@ -43,7 +43,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { date } = useTenantFormatter();
   const institution = useInstitution();
   const [session, setSession] = useState<Session | null>(null);
-  const [failed, setFailed] = useState(false);
+  // Only a 401 means "you are not signed in". Everything else — a rate limit, a restart, a dropped
+  // connection — used to sign the viewer out and throw them at the login screen, which lost their
+  // place and told them nothing true.
+  const [sessionProblem, setSessionProblem] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [theme, setTheme] = useState<"light" | "dark">(() => readPref("aegis-theme", "light") === "dark" ? "dark" : "light");
   const [fontScale, setFontScale] = useState(() => readPref("aegis-font-scale", "medium"));
   const [highContrast, setHighContrast] = useState(() => readPref("aegis-high-contrast", "false") === "true");
@@ -56,10 +60,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    loadSession().then(setSession).catch(() => { setFailed(true); window.location.assign("/login"); });
+    loadSession()
+      .then(loaded => { setSession(loaded); setSessionProblem(null); })
+      .catch((reason: unknown) => {
+        if (reason instanceof ApiError && reason.status === 401) { window.location.assign("/login"); return; }
+        setSessionProblem(reason instanceof ApiError ? reason.message : "The register did not answer.");
+      });
     apiGet<{ isDemo: boolean; remainingDays: number }>("/api/wizard/demo-status").then(setDemo).catch(() => {});
     loadLicenseStatus().then(setLicense).catch(() => {});
-  }, []);
+  }, [attempt]);
   useEffect(() => { document.documentElement.dataset.theme = theme; writePref("aegis-theme", theme); }, [theme]);
   useEffect(() => {
     if (fontScale === "medium") delete document.documentElement.dataset.fontScale; else document.documentElement.dataset.fontScale = fontScale;
@@ -101,10 +110,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const title = (pathname ?? "/") === "/" ? "Register" : current?.label ?? titleFromPath(pathname ?? "/");
 
   if (!session) return (
-    <main id="main-content" className="launch-screen" tabIndex={-1} aria-busy="true">
+    <main id="main-content" className="launch-screen" tabIndex={-1} aria-busy={sessionProblem === null}>
       <span className="wordmark">{institution.name || "AegisCore"}</span>
-      <div className="launch-pulse" aria-hidden="true" />
-      <p role="status">{failed ? "Redirecting to sign in…" : "Opening the university register…"}</p>
+      {sessionProblem === null ? (
+        <>
+          <div className="launch-pulse" aria-hidden="true" />
+          <p role="status">Opening the university register…</p>
+        </>
+      ) : (
+        <div className="launch-problem" role="alert">
+          <p className="launch-problem-line">{sessionProblem}</p>
+          <p>You are still signed in — this is the register not answering, not your session ending.</p>
+          <div className="btn-row">
+            <button type="button" className="btn btn-primary" onClick={() => setAttempt(n => n + 1)}>Try again</button>
+            <button type="button" className="btn btn-ghost" onClick={() => void logout()}>Sign out</button>
+          </div>
+        </div>
+      )}
     </main>
   );
 

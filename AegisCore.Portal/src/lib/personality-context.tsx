@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { apiGet } from "@/lib/api-client";
+import { apiGet, release } from "@/lib/api-client";
 
 type PersonalityContextValue = {
   isActive: boolean;
@@ -39,7 +39,7 @@ export function PersonalityModeProvider({ children, userId }: { children: React.
   const togglePersonality = useCallback(async () => {
     if (!userId) return;
     const newVal = !isActive;
-    await fetch(`/api/personality/users/${userId}/preference?isActive=${newVal}`, { method: "PUT" });
+    await release(await fetch(`/api/personality/users/${userId}/preference?isActive=${newVal}`, { method: "PUT" }));
     setIsActive(newVal);
   }, [userId, isActive]);
 

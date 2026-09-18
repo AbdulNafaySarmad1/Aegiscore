@@ -206,6 +206,13 @@
 @keyframes launch-rule { 0% { transform: scaleX(0); } 60% { transform: scaleX(1); } 100% { transform: scaleX(1); opacity: 0; } }
 .launch-screen p { color: var(--ink-2); font-size: var(--t-13); }
 
+/* The register answered with something other than 'not signed in'. The viewer keeps their
+   session and is told what happened, rather than being bounced to the sign-in screen. */
+.launch-problem { max-width: 460px; display: grid; gap: var(--s-3); justify-items: center; border-top: 2px solid var(--oxblood); background: var(--paper); padding: var(--s-6); border-radius: var(--r-panel); }
+.launch-problem p { font-size: var(--t-15); color: var(--ink-2); margin: 0; }
+.launch-problem .launch-problem-line { font-family: var(--font-serif); font-size: var(--t-17); color: var(--ink); }
+.launch-problem .btn-row { margin-top: var(--s-2); }
+
 /* ── Seal ── */
 .seal { display: inline-grid; place-items: center; width: 84px; height: 84px; color: var(--laurel); }
 .seal svg { width: 100%; height: 100%; }
@@ -294,3 +301,38 @@
 .panel-form .btn { justify-self: start; }
 .toolbar-inline { display: inline-grid; }
 .toolbar-inline select { min-height: 36px; font-size: var(--t-13); }
+.goal-row { display: grid; gap: var(--s-2); padding-bottom: var(--s-4); border-bottom: 1px solid var(--rule); }
+.goal-row:last-child { padding-bottom: 0; border-bottom: 0; }
+.goal-row p { margin: 2px 0 0; font-size: var(--t-13); }
+
+/* ── Board: applicants in columns, moved by dragging or by selecting several ── */
+/* Columns wrap rather than scrolling out of sight, and a column with a whole cohort in it
+   scrolls within itself instead of making the page five thousand pixels tall. */
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: var(--s-4); align-items: start; }
+.board-column { background: var(--paper); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule); padding: var(--s-3); display: grid; gap: var(--s-2); align-content: start; min-height: 120px; max-height: 70vh; overflow-y: auto; }
+.board-column[data-drop] { border-top-color: var(--brass); background: var(--brass-tint); }
+.board-column-head { position: sticky; top: calc(-1 * var(--s-3)); background: var(--paper); display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); font-family: var(--font-serif); font-style: italic; font-size: var(--t-15); font-weight: 400; padding-bottom: var(--s-2); border-bottom: 1px solid var(--rule); }
+.board-column-head span { font-family: var(--font-mono); font-style: normal; font-size: var(--t-13); color: var(--ink-2); }
+.board-empty { font-size: var(--t-13); color: var(--ink-3); margin: 0; }
+.board-card { display: grid; gap: 2px; padding: var(--s-2) var(--s-2) var(--s-3); border-bottom: 1px solid var(--rule); cursor: grab; }
+.board-card:last-child { border-bottom: 0; }
+.board-card[data-selected] { box-shadow: inset 3px 0 0 var(--brass); padding-left: var(--s-3); }
+.board-card:active { cursor: grabbing; }
+.board-card-id { display: flex; align-items: center; gap: var(--s-2); font-size: var(--t-13); margin: 0; }
+.board-card-id input { min-height: auto; margin: 0; }
+.board-card-name { margin: 0; font-size: var(--t-15); }
+.board-card-when { margin: 0; font-size: var(--t-12); color: var(--ink-2); }
+
+/* ── Filter row: two or three controls above a list ── */
+.filter-row { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: end; }
+.filter-row label { display: grid; gap: 2px; }
+.filter-row span { font-size: var(--t-13); color: var(--ink-2); font-weight: 500; }
+
+/* ── Multiple-choice options, as they are read when a question is approved ── */
+.options { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.options li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--s-3); align-items: baseline; padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); }
+.options li:last-child { border-bottom: 0; }
+.options b { font-family: var(--font-mono); font-size: var(--t-13); font-weight: 500; color: var(--ink-2); }
+.options li[data-correct] { box-shadow: inset 3px 0 0 var(--laurel); padding-left: var(--s-3); }
+.options li[data-correct] b { color: var(--laurel); }
+.options em { font-style: italic; font-family: var(--font-serif); font-size: var(--t-13); color: var(--laurel); white-space: nowrap; }

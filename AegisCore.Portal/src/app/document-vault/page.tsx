@@ -1,150 +1,191 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiGet, apiPost, apiPut } from "@/lib/api-client";
-import { usePersonalityTranslations } from "@/lib/personality-translator";
-import { Archive, Download, FileText, Lock, Shield, ShieldCheck, Upload, CheckCircle } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { apiGet, apiPost, ApiError } from "@/lib/api-client";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
+import { Panel, Figures, Mark, Notice } from "@/components/register";
+import { Ledger } from "@/components/register/ledger";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
 type Tier = { id: string; name: string; level: number; retentionYears: number; documentCount: number; totalSizeBytes: number };
-type VaultDoc = { id: string; fileName: string; category: string; tierLevel: number; tierName: string; fileSizeBytes: number; isPqcVerified: boolean; isRetentionLocked: boolean; uploadedAt: string; retentionExpiresAt: string; yearsRemaining: number };
+type VaultDoc = {
+  id: string; fileName: string; category: string; tierLevel: number; tierName: string; fileSizeBytes: number;
+  isPqcVerified: boolean; pqcAlgorithm: string | null; isRetentionLocked: boolean;
+  uploadedAt: string; retentionExpiresAt: string; yearsRemaining: number;
+};
 type Dashboard = { totalDocuments: number; totalSizeBytes: number; pqcVerifiedCount: number; lockedCount: number; tiers: Tier[]; recentUploads: VaultDoc[] };
 
-const cardS = { background: "var(--surface)", borderRadius: 12, border: "1px solid var(--line)", padding: "1.5rem", marginBottom: "1.25rem" };
-const h3 = { color: "var(--ink)", fontSize: "1.1rem", fontWeight: 600, margin: "0 0 0.75rem 0", display: "flex", alignItems: "center", gap: "0.4rem" };
-const btn = (bg: string) => ({ padding: "0.5rem 1rem", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem", background: bg, color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.35rem" });
-const tierColors: Record<number, string> = { 1: "var(--red)", 2: "var(--amber)", 3: "var(--blue)" };
-const tierBg: Record<number, string> = { 1: "var(--red-soft)", 2: "var(--amber-soft)", 3: "var(--blue-light)" };
+/** Categories decide the tier, and the tier decides how long the document is kept. */
+const CATEGORIES: { value: string; label: string; years: number }[] = [
+  { value: "Degree", label: "Degree", years: 50 },
+  { value: "Certification", label: "Certification", years: 50 },
+  { value: "FinancialBilling", label: "Financial billing", years: 50 },
+  { value: "FeeChallan", label: "Fee challan", years: 20 },
+  { value: "GradeAssessment", label: "Grade assessment", years: 20 },
+  { value: "Quiz", label: "Quiz", years: 20 },
+  { value: "AcademicNotice", label: "Academic notice", years: 20 },
+  { value: "Attendance", label: "Attendance", years: 5 },
+  { value: "ProfilePicture", label: "Profile picture", years: 5 },
+  { value: "General", label: "General", years: 5 },
+];
 
-function fmtBytes(bytes: number): string {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-  if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + " MB";
-  return (bytes / 1073741824).toFixed(2) + " GB";
+function bytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1048576) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1073741824) return `${(n / 1048576).toFixed(1)} MB`;
+  return `${(n / 1073741824).toFixed(2)} GB`;
 }
 
+/**
+ * The document vault: what is kept, for how long, and whether the stored copy is still the one
+ * that was signed. Verification re-reads the bytes, so it answers a real question.
+ */
 export default function DocumentVaultPage() {
-  const t = usePersonalityTranslations("academic");
-  const [dash, setDash] = useState<Dashboard | null>(null);
-  const [msg, setMsg] = useState("");
-  const [upload, setUpload] = useState({ file: null as File | null, category: "General" });
+  const { date } = useTenantFormatter();
+  const { state, reload } = useModuleData<Dashboard>(signal => apiGet<Dashboard>("/api/document-vault/dashboard", signal));
+  const action = useAction();
+  const [file, setFile] = useState<File | null>(null);
+  const [category, setCategory] = useState("General");
 
-  async function refresh() {
-    const d = await apiGet<Dashboard>("/api/document-vault/dashboard").catch(() => null);
-    setDash(d);
+  async function upload(e: FormEvent) {
+    e.preventDefault();
+    if (!file) return;
+    await action.run("upload", async () => {
+      const query = new URLSearchParams({
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+        category,
+        uploadedByUserId: "00000000-0000-0000-0000-000000000000",
+        uploadedByRole: "Admin",
+      });
+      const response = await fetch(`/api/document-vault/upload?${query}`, { method: "POST", body: file, credentials: "include" });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new ApiError(body.error ?? `The upload did not complete (${response.status}).`, response.status);
+      setFile(null);
+      return `${file.name} is in tier ${body.tier}, locked for ${body.retentionYears} years, signed over content hash ${body.sha512}…`;
+    }, reload);
   }
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- initial dashboard hydration.
-  useEffect(() => { refresh(); }, []);
 
-  async function handleUpload() {
-    if (!upload.file) return;
-    const form = new FormData(); form.append("file", upload.file);
-    try {
-      const resp = await fetch(`/api/document-vault/upload?fileName=${upload.file.name}&contentType=${upload.file.type}&category=${upload.category}&uploadedByUserId=00000000-0000-0000-0000-000000000000&uploadedByRole=Admin`, { method: "POST", body: upload.file });
-      const data = await resp.json();
-      setMsg(`Uploaded → Tier ${data.tier} (${data.retentionYears}yr lock), PQC: ${data.pqcVerified ? "✓" : "✗"}`);
-      setUpload({ file: null, category: "General" }); refresh();
-    } catch { setMsg("Upload failed"); }
+  async function verify(doc: VaultDoc) {
+    await action.run(`verify-${doc.id}`, async () => {
+      const result = await apiPost<{ verified: boolean }>(`/api/document-vault/verify/${doc.id}?verifiedByUserId=00000000-0000-0000-0000-000000000000`);
+      return result.verified
+        ? `${doc.fileName} still matches the hash recorded when it was vaulted, and its signature verifies.`
+        : `${doc.fileName} no longer matches what was vaulted. It has been withheld from download — restore it from a backup.`;
+    }, reload);
   }
 
-  async function seedTiers() { await apiPost("/api/document-vault/seed-tiers"); setMsg("Tiers seeded"); refresh(); }
-
-  if (!dash) return <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}><p style={{ color: "var(--muted)" }}>Loading document vault...</p></main>;
+  async function seedTiers() {
+    await action.run("tiers", async () => {
+      await apiPost("/api/document-vault/seed-tiers");
+      return "The three retention tiers and their category rules are in place.";
+    }, reload);
+  }
 
   return (
-    <main style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
-        <div>
-          <h1 style={{ color: "var(--ink)", fontSize: "1.5rem", fontWeight: 600, marginBottom: "0.25rem" }}>Document Vault</h1>
-          <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>Tiered PQC-verified storage on Cloudflare R2 with retention locks — 50yr / 20yr / 5yr</p>
-        </div>
-        <button onClick={seedTiers} style={btn("var(--blue)")}><Shield size={14} /> Seed Tiers</button>
-      </div>
+    <ModulePage
+      title="Document vault"
+      crumbs={[{ label: "Records" }, { label: "Document vault" }]}
+      meta={<span>Documents held under a retention lock, each signed over its content hash so a later reading can tell whether the stored copy is still the one that was filed.</span>}
+      ident={(d: Dashboard) => <><strong>{d.totalDocuments}</strong><br />{d.totalDocuments === 1 ? "document" : "documents"}</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {dash => (
+        <div className="record">
+          <div className="record-body">
+            <Figures aria-label="Vault figures" items={[
+              { label: "Documents held", value: dash.totalDocuments, note: bytes(dash.totalSizeBytes) + " in all" },
+              { label: "Signature verified", value: dash.pqcVerifiedCount, tone: dash.pqcVerifiedCount === dash.totalDocuments ? "laurel" : "oxblood", note: dash.pqcVerifiedCount === dash.totalDocuments ? "every document" : `${dash.totalDocuments - dash.pqcVerifiedCount} withheld` },
+              { label: "Under retention lock", value: dash.lockedCount, note: "cannot be deleted before their term" },
+              { label: "Longest term", value: `${Math.max(0, ...dash.tiers.map(t => t.retentionYears))} yr`, note: "tier 1, degrees and financial records" },
+            ]} />
 
-      {msg && <div onDoubleClick={() => setMsg("")} style={{ padding: "0.5rem 1rem", borderRadius: 8, background: "var(--blue-light)", color: "var(--blue)", marginBottom: "1rem", fontSize: "0.85rem", cursor: "pointer" }}>{msg}</div>}
+            <Panel title="Retention tiers" aside={<span className="text-muted">a category decides the tier</span>}>
+              <Ledger rows={dash.tiers} keyOf={t => t.id} minWidth={640}
+                empty={{
+                  title: "No tiers defined yet",
+                  detail: "Until the tiers exist there is nothing to file a document against.",
+                  action: <button type="button" className={`btn btn-primary${action.busy === "tiers" ? " btn-loading" : ""}`} onClick={seedTiers} disabled={action.busy !== null}>Create the standard tiers</button>,
+                }}
+                columns={[
+                  { key: "level", label: "Tier", render: t => `Tier ${t.level}`, nowrap: true },
+                  { key: "name", label: "Holds", render: t => t.name },
+                  { key: "years", label: "Kept for", render: t => `${t.retentionYears} years`, num: true, nowrap: true },
+                  { key: "count", label: "Documents", render: t => t.documentCount, num: true },
+                  { key: "size", label: "Size", render: t => bytes(t.totalSizeBytes), num: true, nowrap: true },
+                ]} />
+            </Panel>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
-        {[ ["Total Documents", dash.totalDocuments, "var(--ink)"], ["Total Size", fmtBytes(dash.totalSizeBytes), "var(--muted)"], ["PQC Verified", dash.pqcVerifiedCount, "var(--green)"], ["Retention Locked", dash.lockedCount, "var(--blue)"] ].map(([l,v,c]) => (
-          <div key={l} style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--line)", padding: "1rem" }}>
-            <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.25rem" }}>{l}</div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: c as string }}>{v}</div>
+            <Panel title="Recently filed" aside={<span className="text-muted">most recent first</span>} flush>
+              <Ledger rows={dash.recentUploads} keyOf={d => d.id} minWidth={900}
+                status={d => d.isPqcVerified ? undefined : "oxblood"}
+                empty={{ title: "Nothing filed yet", detail: "A document filed here is stored, signed over its content hash and locked for its tier's term." }}
+                columns={[
+                  { key: "file", label: "Document", render: d => d.fileName },
+                  { key: "category", label: "Category", render: d => d.category },
+                  { key: "tier", label: "Tier", render: d => <>Tier {d.tierLevel}<br /><span className="text-muted">{d.tierName}</span></>, nowrap: true },
+                  { key: "size", label: "Size", render: d => bytes(d.fileSizeBytes), num: true, nowrap: true },
+                  { key: "filed", label: "Filed", render: d => date(d.uploadedAt), nowrap: true },
+                  { key: "kept", label: "Kept until", render: d => <>{date(d.retentionExpiresAt)}<br /><span className="text-muted">{d.yearsRemaining} yr remaining</span></>, nowrap: true },
+                  {
+                    key: "signature", label: "Signature", render: d => d.isPqcVerified
+                      ? <><Mark tone="laurel">Verified</Mark><br /><span className="text-muted">{d.pqcAlgorithm ?? "signed"}</span></>
+                      : <><Mark tone="oxblood">Withheld</Mark><br /><span className="text-muted">does not match</span></>,
+                  },
+                  {
+                    key: "act", label: "", render: d => (
+                      <button type="button" className={`btn btn-ghost btn-sm${action.busy === `verify-${d.id}` ? " btn-loading" : ""}`} onClick={() => verify(d)} disabled={action.busy !== null}>
+                        Check
+                      </button>
+                    ), nowrap: true,
+                  },
+                ]} />
+            </Panel>
           </div>
-        ))}
-      </div>
 
-      <div style={cardS}>
-        <h3 style={h3}><Upload size={18} /> Upload Document to Vault</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "0.75rem", alignItems: "end" }}>
-          <div>
-            <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Select File</div>
-            <input type="file" onChange={e => setUpload(prev => ({ ...prev, file: e.target.files?.[0] || null }))} style={{ padding: "0.5rem", borderRadius: 8, border: "1px solid var(--line)", background: "var(--canvas)", color: "var(--ink)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
-          </div>
-          <div>
-            <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.2rem" }}>Category</div>
-            <select value={upload.category} onChange={e => setUpload(prev => ({ ...prev, category: e.target.value }))} style={{ padding: "0.5rem 0.75rem", borderRadius: 8, border: "1px solid var(--line)", background: "var(--canvas)", color: "var(--ink)", fontSize: "0.85rem" }}>
-              <option value="Degree">Degree (50yr)</option>
-              <option value="Certification">Certification (50yr)</option>
-              <option value="FinancialBilling">Financial Billing (50yr)</option>
-              <option value="FeeChallan">Fee Challan (20yr)</option>
-              <option value="GradeAssessment">Grade Assessment (20yr)</option>
-              <option value="Quiz">Quiz (20yr)</option>
-              <option value="AcademicNotice">Academic Notice (20yr)</option>
-              <option value="Attendance">Attendance (5yr)</option>
-              <option value="ProfilePicture">Profile Picture (5yr)</option>
-              <option value="General">General (5yr)</option>
-            </select>
-          </div>
-          <button onClick={handleUpload} disabled={!upload.file} style={btn(upload.file ? "var(--green)" : "var(--line)")}><Upload size={14} /> Upload &amp; Lock</button>
-        </div>
-      </div>
+          <aside className="record-margin">
+            <Panel title="File a document">
+              <form className="panel-form" onSubmit={upload}>
+                <label><span>Document</span>
+                  <input type="file" onChange={e => setFile(e.target.files?.[0] ?? null)} required />
+                </label>
+                <label><span>Category</span>
+                  <select value={category} onChange={e => setCategory(e.target.value)}>
+                    {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label} — {c.years} years</option>)}
+                  </select>
+                </label>
+                <p className="field-hint">
+                  The category sets the retention term, and the term cannot be shortened afterwards.
+                  {file && <> This file is {bytes(file.size)}.</>}
+                </p>
+                <button type="submit" className={`btn btn-primary${action.busy === "upload" ? " btn-loading" : ""}`} disabled={action.busy !== null || !file}>
+                  File and lock
+                </button>
+              </form>
+            </Panel>
 
-      <div style={cardS}>
-        <h3 style={h3}><Archive size={18} /> Storage Tiers</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "0.75rem" }}>
-          {(dash.tiers.length === 0 ? [{ id: "1", name: "Critical", level: 1, retentionYears: 50, documentCount: 0, totalSizeBytes: 0 }, { id: "2", name: "Important", level: 2, retentionYears: 20, documentCount: 0, totalSizeBytes: 0 }, { id: "3", name: "Standard", level: 3, retentionYears: 5, documentCount: 0, totalSizeBytes: 0 }] : dash.tiers).map(tier => (
-            <div key={tier.id} style={{ background: tierBg[tier.level], borderRadius: 12, border: `1px solid ${tierColors[tier.level]}`, padding: "1.25rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>
-                <div>
-                  <div style={{ fontSize: "0.75rem", color: tierColors[tier.level], fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Tier {tier.level}</div>
-                  <div style={{ fontSize: "1.15rem", fontWeight: 700, color: "var(--ink)" }}>{tier.name}</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <Lock size={14} style={{ color: tier.level === 1 ? "var(--red)" : tier.level === 2 ? "var(--amber)" : "var(--blue)" }} />
-                  <span style={{ fontWeight: 700, fontSize: "1.25rem", color: tierColors[tier.level] }}>{tier.retentionYears}</span>
-                  <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>years</span>
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: "1.5rem", fontSize: "0.85rem" }}>
-                <div><span style={{ color: "var(--muted)" }}>Docs: </span><strong style={{ color: "var(--ink)" }}>{tier.documentCount}</strong></div>
-                <div><span style={{ color: "var(--muted)" }}>Size: </span><strong style={{ color: "var(--ink)" }}>{fmtBytes(tier.totalSizeBytes)}</strong></div>
-                <div><ShieldCheck size={14} style={{ color: "var(--green)" }} /></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            <Panel title="What a check proves">
+              <p>
+                Checking a document re-reads the stored bytes, hashes them again, and verifies the
+                signature this installation made when the document was filed. It answers one
+                question: is this still the document that was filed?
+              </p>
+              <p>
+                It is not a check that the document is genuine, correct, or the right document —
+                only that nothing has altered it since. A document that fails is{" "}
+                <Mark tone="oxblood">withheld</Mark> from download until someone restores it.
+              </p>
+            </Panel>
 
-      {dash.recentUploads.length > 0 && (
-        <div style={cardS}>
-          <h3 style={h3}><FileText size={18} /> Recent Uploads</h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
-            <thead><tr style={{ borderBottom: "1px solid var(--line)" }}>{["File","Category","Tier","Lock","Size","Uploaded","Expires",""].map(h => <th key={h} style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "var(--muted)", fontWeight: 500, fontSize: "0.75rem" }}>{h}</th>)}</tr></thead>
-            <tbody>
-              {dash.recentUploads.map(doc => (
-                <tr key={doc.id} style={{ borderBottom: "1px solid var(--gray)" }}>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--ink)", fontWeight: 500 }}>{doc.fileName}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.82rem" }}>{doc.category}</td>
-                  <td style={{ padding: "0.4rem 0.75rem" }}><span style={{ padding: "0.1rem 0.5rem", borderRadius: 20, fontSize: "0.7rem", fontWeight: 600, background: tierBg[doc.tierLevel], color: tierColors[doc.tierLevel] }}>T{doc.tierLevel} · {doc.tierName}</span></td>
-                  <td style={{ padding: "0.4rem 0.75rem" }}>{doc.isRetentionLocked ? <Lock size={12} style={{ color: "var(--green)" }} /> : "—"}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.82rem" }}>{fmtBytes(doc.fileSizeBytes)}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: "var(--muted)", fontSize: "0.78rem" }}>{new Date(doc.uploadedAt).toLocaleDateString()}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", color: doc.yearsRemaining < 1 ? "var(--red)" : "var(--muted)", fontSize: "0.78rem", fontWeight: 600 }}>{doc.yearsRemaining}yr left</td>
-                  <td style={{ padding: "0.4rem 0.75rem" }}>{doc.isPqcVerified && <ShieldCheck size={14} style={{ color: "var(--green)" }} />}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            {dash.tiers.length > 0 && dash.totalDocuments > dash.pqcVerifiedCount && (
+              <Notice tone="oxblood" title="Some documents are withheld" role="alert">
+                {dash.totalDocuments - dash.pqcVerifiedCount} stored {dash.totalDocuments - dash.pqcVerifiedCount === 1 ? "document does" : "documents do"} not match the hash recorded when
+                they were filed. Restore them from a backup and check them again.
+              </Notice>
+            )}
+          </aside>
         </div>
       )}
-    </main>
+    </ModulePage>
   );
 }

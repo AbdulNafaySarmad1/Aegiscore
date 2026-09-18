@@ -1,435 +1,139 @@
 "use client";
 
-import { PageErrorDisplay } from "@/components/ErrorDisplay";
-import { useEffect, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { usePersonalityTranslations } from "@/lib/personality-translator";
-import {
-  AlertCircle, Award, Calendar, CheckCircle2, ClipboardCheck, Download,
-  FileText, GraduationCap, MapPin, PlusCircle, QrCode, Search, Send,
-  Ticket, Upload, Users, XCircle
-} from "lucide-react";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
+import { Panel, Figures, Mark } from "@/components/register";
+import { Ledger, toneOf, words } from "@/components/register/ledger";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
-type CeremonyStatus = "Scheduled" | "InProgress" | "Completed" | "Cancelled";
-type Eligibility = "Eligible" | "ConditionallyEligible" | "Ineligible";
-type CertificateStatus = "Queued" | "Printing" | "Ready" | "Dispatched";
-type AttendeeStatus = "Registered" | "CheckedIn" | "Absent";
+type Ceremony = { id: string; title: string; academicYear: string; ceremonyDate: string; venue: string; guestTicketsPerStudent: number; status: string; eligible: number; attendees: number; certificates: number };
+type Eligibility = { id: string; studentId: string; studentName: string; convocationId: string; status: string; blockingReason: string | null; creditsCompleted: boolean; cgpaMet: boolean; duesCleared: boolean; thesisApproved: boolean; libraryCleared: boolean; disciplinaryCleared: boolean };
+type Certificate = { id: string; serialNumber: string; studentName: string; studentId: string; degreeTitle: string; status: string; attestationStatus: string; hecReference: string | null };
+type Attendee = { id: string; studentName: string; studentId: string; status: string; checkInTime: string | null; guestCount: number; certificateCollected: boolean };
+type Data = { ceremonies: Ceremony[]; eligibility: Eligibility[]; certificates: Certificate[]; attendees: Attendee[] };
 
-type Ceremony = {
-  id: string; title: string; date: string; venue: string;
-  guestTickets: number; status: CeremonyStatus; attendees: number;
-};
-
-type StudentEligibility = {
-  studentId: string; studentName: string; program: string;
-  eligibility: Eligibility; reason: string | null;
-};
-
-type Certificate = {
-  id: string; studentId: string; studentName: string; ceremonyId: string;
-  certificateType: string; status: CertificateStatus; trackingNumber: string;
-};
-
-type Attendee = {
-  id: string; studentId: string; studentName: string; ceremonyId: string;
-  registrationTime: string; checkInTime: string | null; status: AttendeeStatus;
-  seatingSection: string;
-};
-
-const eligibilityBadge = (s: Eligibility) => {
-  const map: Record<Eligibility, { c: string; bg: string }> = {
-    Eligible: { c: "var(--green)", bg: "var(--green-soft)" },
-    ConditionallyEligible: { c: "var(--amber)", bg: "var(--amber-soft)" },
-    Ineligible: { c: "var(--red)", bg: "var(--red-soft)" }
-  };
-  const v = map[s];
-  return <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: v.bg, color: v.c }}>{s === "ConditionallyEligible" ? "Conditional" : s}</span>;
-};
-
-const certStatusBadge = (s: CertificateStatus) => {
-  const map: Record<CertificateStatus, { c: string; bg: string }> = {
-    Queued: { c: "var(--muted)", bg: "var(--surface-soft)" },
-    Printing: { c: "var(--blue-600)", bg: "var(--blue-100)" },
-    Ready: { c: "var(--amber)", bg: "var(--amber-soft)" },
-    Dispatched: { c: "var(--green)", bg: "var(--green-soft)" }
-  };
-  const v = map[s];
-  return <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: v.bg, color: v.c }}>{s}</span>;
-};
-
-const ceremonyStatusBadge = (s: CeremonyStatus) => {
-  const map: Record<CeremonyStatus, { c: string; bg: string }> = {
-    Scheduled: { c: "var(--blue-600)", bg: "var(--blue-100)" },
-    InProgress: { c: "var(--amber)", bg: "var(--amber-soft)" },
-    Completed: { c: "var(--green)", bg: "var(--green-soft)" },
-    Cancelled: { c: "var(--red)", bg: "var(--red-soft)" }
-  };
-  const v = map[s];
-  return <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: v.bg, color: v.c }}>{s}</span>;
-};
-
-const attendeeBadge = (s: AttendeeStatus) => {
-  const map: Record<AttendeeStatus, { c: string; bg: string }> = {
-    Registered: { c: "var(--muted)", bg: "var(--surface-soft)" },
-    CheckedIn: { c: "var(--green)", bg: "var(--green-soft)" },
-    Absent: { c: "var(--red)", bg: "var(--red-soft)" }
-  };
-  const v = map[s];
-  return <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: v.bg, color: v.c }}>{s}</span>;
-};
-
-const inputS: React.CSSProperties = { minHeight: 42, padding: "0 11px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)", background: "var(--canvas)", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" };
-const labelS: React.CSSProperties = { display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 };
-
+/** Convocations: the ceremony, who may walk, the certificates printed and who arrived. */
 export default function ConvocationsPage() {
-  const t = usePersonalityTranslations("academic");
+  const { date } = useTenantFormatter();
+  const { state, reload } = useModuleData<Data>(async signal => {
+    const [ceremonies, eligibility, certificates, attendees] = await Promise.all([
+      apiGet<Ceremony[]>("/api/convocations", signal),
+      apiGet<Eligibility[]>("/api/convocations/eligibility", signal),
+      apiGet<Certificate[]>("/api/convocations/certificates", signal),
+      apiGet<Attendee[]>("/api/convocations/attendees", signal),
+    ]);
+    return { ceremonies, eligibility, certificates, attendees };
+  });
+  const action = useAction();
+  const [selected, setSelected] = useState("");
 
-  const [ceremonies, setCeremonies] = useState<Ceremony[]>([]);
-  const [eligibility, setEligibility] = useState<StudentEligibility[]>([]);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-
-  const [newTitle, setNewTitle] = useState("");
-  const [newDate, setNewDate] = useState("");
-  const [newVenue, setNewVenue] = useState("");
-  const [newTickets, setNewTickets] = useState("2");
-  const [creating, setCreating] = useState(false);
-
-  const [eligibilityFilter, setEligibilityFilter] = useState("");
-  const [searchStudentId, setSearchStudentId] = useState("");
-
-  const [checkinId, setCheckinId] = useState("");
-  const [checkinStudent, setCheckinStudent] = useState("");
-  const [checking, setChecking] = useState(false);
-
-  const [generatingCert, setGeneratingCert] = useState<string | null>(null);
-
-  useEffect(() => {
-    const ctrl = new AbortController();
-    Promise.all([
-      apiGet<Ceremony[]>("/api/convocations", ctrl.signal).catch(() => [] as Ceremony[]),
-      apiGet<StudentEligibility[]>("/api/convocations/eligibility", ctrl.signal).catch(() => [] as StudentEligibility[]),
-      apiGet<Certificate[]>("/api/convocations/certificates", ctrl.signal).catch(() => [] as Certificate[]),
-      apiGet<Attendee[]>("/api/convocations/attendees", ctrl.signal).catch(() => [] as Attendee[])
-    ]).then(([ce, el, ct, at]) => {
-      setCeremonies(ce); setEligibility(el); setCertificates(ct); setAttendees(at);
-      setError(null); setLoading(false);
-    }).catch(() => { setError("Convocation records are temporarily unavailable."); setLoading(false); });
-    return () => { ctrl.abort(); };
-  }, []);
-
-  const refreshAll = () => {
-    Promise.all([
-      apiGet<Ceremony[]>("/api/convocations").catch(() => [] as Ceremony[]),
-      apiGet<StudentEligibility[]>("/api/convocations/eligibility").catch(() => [] as StudentEligibility[]),
-      apiGet<Certificate[]>("/api/convocations/certificates").catch(() => [] as Certificate[]),
-      apiGet<Attendee[]>("/api/convocations/attendees").catch(() => [] as Attendee[])
-    ]).then(([ce, el, ct, at]) => { setCeremonies(ce); setEligibility(el); setCertificates(ct); setAttendees(at); });
-  };
-
-  async function createCeremony(e: React.FormEvent) {
+  async function check(e: FormEvent) {
     e.preventDefault();
-    if (!newTitle || !newDate || !newVenue) return;
-    setCreating(true); setMessage(null);
-    try {
-      await apiPost("/api/convocations", { title: newTitle, date: newDate, venue: newVenue, guestTickets: Number(newTickets) });
-      setMessage("success: Ceremony created");
-      setNewTitle(""); setNewDate(""); setNewVenue(""); setNewTickets("2");
-      refreshAll();
-    } catch { setMessage("error: Failed to create ceremony"); }
-    finally { setCreating(false); }
+    await action.run("check", async () => {
+      const result = await apiPost<{ total?: number }>(`/api/convocations/${selected}/check-eligibility`);
+      return `Eligibility checked${result?.total !== undefined ? ` for ${result.total} students` : ""}.`;
+    }, reload);
   }
-
-  async function generateCertificate(studentId: string, ceremonyId: string) {
-    setGeneratingCert(studentId);
-    try {
-      await apiPost("/api/convocations/certificates/generate", { studentId, ceremonyId });
-      setMessage("success: Certificate generation started");
-      refreshAll();
-    } catch { setMessage("error: Certificate generation failed"); }
-    finally { setGeneratingCert(null); }
+  async function generate(e: FormEvent) {
+    e.preventDefault();
+    await action.run("generate", async () => {
+      const result = await apiPost<{ total?: number }>(`/api/convocations/${selected}/generate-certificates`);
+      return `Certificates generated${result?.total !== undefined ? `: ${result.total}` : ""}.`;
+    }, reload);
   }
-
-  async function checkInAttendee() {
-    if (!checkinId || !checkinStudent) return;
-    setChecking(true);
-    try {
-      await apiPost(`/api/convocations/attendees/${checkinId}/checkin`, { studentId: checkinStudent });
-      setMessage("success: Check-in recorded");
-      setCheckinId(""); setCheckinStudent("");
-      refreshAll();
-    } catch { setMessage("error: Check-in failed"); }
-    finally { setChecking(false); }
-  }
-
-  const filteredEligibility = eligibilityFilter
-    ? eligibility.filter(e => e.eligibility === eligibilityFilter)
-    : eligibility;
-  const scheduledCeremonies = ceremonies.filter(c => c.status === "Scheduled" || c.status === "InProgress");
-  const nextCeremony = scheduledCeremonies[0];
-
-  if (loading) return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", gap: 16, color: "var(--muted)" }}>
-      <div style={{ width: 40, height: 4, borderRadius: 99, overflow: "hidden", background: "var(--line)" }}>
-        <div style={{ width: "50%", height: "100%", borderRadius: "inherit", background: "var(--blue-500)", animation: "launch 1s ease-in-out infinite alternate" }} />
-      </div>
-      Loading convocation management...
-    </main>
-  );
-
-  if (error) return <PageErrorDisplay message={error} onRetry={() => void refreshAll()} />;
 
   return (
-    <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
-      <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
-        <div>
-          <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Academic Governance</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("convocations") ?? "Convocation Management"}</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>Eligibility checks, ceremony organization, certificate generation, and attendance tracking</span>
-        </div>
-      </header>
+    <ModulePage
+      title="Convocation"
+      crumbs={[{ label: "Registrar" }, { label: "Convocation" }]}
+      meta={<span>Ceremonies, eligibility, degree certificates and attendance.</span>}
+      ident={(d: Data) => <><strong>{d.ceremonies.length}</strong><br />ceremonies</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {({ ceremonies, eligibility, certificates, attendees }) => (
+        <>
+          <Figures aria-label="Convocation figures" items={[
+            { label: "Ceremonies", value: ceremonies.length, note: ceremonies.find(c => c.status !== "Completed") ? `next ${date(ceremonies.filter(c => c.status !== "Completed").sort((a, b) => a.ceremonyDate.localeCompare(b.ceremonyDate))[0].ceremonyDate)}` : "none scheduled" },
+            { label: "Eligible to walk", value: eligibility.filter(e => e.status === "Eligible").length, note: `${eligibility.length} assessed` },
+            { label: "Certificates", value: certificates.length, note: `${certificates.filter(c => c.status === "Dispatched").length} dispatched` },
+            { label: "Checked in", value: attendees.filter(a => a.status === "CheckedIn").length, note: `${attendees.length} registered` },
+          ]} />
 
-      {message && (
-        <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "11px 14px", marginBottom: 18, border: message.startsWith("error") ? "1px solid #ecc0c6" : "1px solid #aaddc9", borderRadius: 10, color: message.startsWith("error") ? "var(--red)" : "var(--green)", background: message.startsWith("error") ? "var(--red-soft)" : "var(--green-soft)", fontSize: 11 }}>
-          {message.startsWith("error") ? <AlertCircle /> : <CheckCircle2 />}{message.replace(/^[^:]+: /, "")}
-        </div>
+          <div className="record">
+            <div className="record-body">
+              <Panel title="Ceremonies" flush>
+                <Ledger rows={ceremonies} keyOf={c => c.id} minWidth={680} status={c => toneOf(c.status)}
+                  empty={{ title: "No ceremony recorded", detail: "The registrar creates a convocation with its date, venue and guest allowance." }}
+                  columns={[
+                    { key: "title", label: "Ceremony", render: c => <strong>{c.title}</strong> },
+                    { key: "year", label: "Academic year", render: c => c.academicYear },
+                    { key: "date", label: "Date", render: c => date(c.ceremonyDate), nowrap: true },
+                    { key: "venue", label: "Venue", render: c => c.venue || "—" },
+                    { key: "tickets", label: "Guest tickets", render: c => c.guestTicketsPerStudent, num: true },
+                    { key: "status", label: "Status", render: c => <Mark tone={toneOf(c.status)}>{words(c.status)}</Mark> },
+                  ]} />
+              </Panel>
+
+              <Panel title="Eligibility" aside={<span className="text-muted">{eligibility.length} assessed</span>} flush>
+                <Ledger rows={eligibility} keyOf={e => e.id} minWidth={760} status={e => toneOf(e.status)}
+                  empty={{ title: "No eligibility assessed", detail: "Run the check for a ceremony to test every graduating student against credits, CGPA, dues, thesis, library and discipline." }}
+                  columns={[
+                    { key: "student", label: "Student", render: e => e.studentName },
+                    { key: "id", label: "Student number", render: e => e.studentId, mono: true },
+                    { key: "status", label: "Standing", render: e => <Mark tone={toneOf(e.status)}>{words(e.status)}</Mark> },
+                    { key: "blockers", label: "Outstanding", render: e => e.blockingReason ?? ([!e.creditsCompleted && "credits", !e.cgpaMet && "CGPA", !e.duesCleared && "dues", !e.thesisApproved && "thesis", !e.libraryCleared && "library", !e.disciplinaryCleared && "discipline"].filter(Boolean).join(", ") || "nothing") },
+                  ]} />
+              </Panel>
+
+              <Panel title="Degree certificates" aside={<span className="text-muted">{certificates.length} issued</span>} flush>
+                <Ledger rows={certificates} keyOf={c => c.id} minWidth={720} status={c => toneOf(c.status)}
+                  empty={{ title: "No certificates generated", detail: "Certificates are generated for a ceremony once eligibility is settled." }}
+                  columns={[
+                    { key: "serial", label: "Serial", render: c => c.serialNumber, mono: true },
+                    { key: "student", label: "Student", render: c => c.studentName },
+                    { key: "degree", label: "Degree", render: c => c.degreeTitle || "—" },
+                    { key: "status", label: "Status", render: c => <Mark tone={toneOf(c.status)}>{words(c.status)}</Mark> },
+                    { key: "attestation", label: "Attestation", render: c => words(c.attestationStatus) },
+                    { key: "hec", label: "HEC reference", render: c => c.hecReference ?? "—", mono: true },
+                  ]} />
+              </Panel>
+
+              <Panel title="Attendance" aside={<span className="text-muted">{attendees.length} registered</span>} flush>
+                <Ledger rows={attendees} keyOf={a => a.id} minWidth={640} status={a => toneOf(a.status)}
+                  empty={{ title: "Nobody registered yet", detail: "Students register for the ceremony and are checked in on the day." }}
+                  columns={[
+                    { key: "student", label: "Student", render: a => a.studentName },
+                    { key: "id", label: "Student number", render: a => a.studentId, mono: true },
+                    { key: "status", label: "Status", render: a => <Mark tone={toneOf(a.status)}>{words(a.status)}</Mark> },
+                    { key: "checkin", label: "Checked in", render: a => a.checkInTime ? date(a.checkInTime) : "—", nowrap: true },
+                    { key: "guests", label: "Guests", render: a => a.guestCount, num: true },
+                    { key: "collected", label: "Certificate", render: a => a.certificateCollected ? "collected" : "not collected" },
+                  ]} />
+              </Panel>
+            </div>
+
+            <aside className="record-margin">
+              <Panel title="Run a ceremony">
+                <form className="panel-form" onSubmit={check}>
+                  <label><span>Ceremony</span>
+                    <select value={selected} onChange={e => setSelected(e.target.value)} required>
+                      <option value="">Choose a ceremony</option>
+                      {ceremonies.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                    </select>
+                  </label>
+                  <p className="field-hint">Checks every graduating student against credits, CGPA, dues, thesis, library and discipline.</p>
+                  <button type="submit" className={`btn btn-primary${action.busy === "check" ? " btn-loading" : ""}`} disabled={action.busy !== null || !selected}>Check eligibility</button>
+                </form>
+                <form className="panel-form" onSubmit={generate}>
+                  <p className="field-hint">Generates a numbered certificate for every eligible student in the chosen ceremony.</p>
+                  <button type="submit" className={`btn btn-secondary${action.busy === "generate" ? " btn-loading" : ""}`} disabled={action.busy !== null || !selected}>Generate certificates</button>
+                </form>
+              </Panel>
+            </aside>
+          </div>
+        </>
       )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 18 }}>
-        <article style={{ minHeight: 110, position: "relative", display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)", overflow: "hidden" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Total Ceremonies</span>
-          <strong style={{ margin: "7px 0 3px", fontSize: 28 }}>{ceremonies.length}</strong>
-          <small style={{ color: "var(--muted)" }}>{scheduledCeremonies.length} upcoming</small>
-        </article>
-        <article style={{ minHeight: 110, position: "relative", display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)", overflow: "hidden" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Eligible Students</span>
-          <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--green)" }}>{eligibility.filter(e => e.eligibility === "Eligible").length}</strong>
-          <small style={{ color: "var(--muted)" }}>of {eligibility.length} total</small>
-        </article>
-        <article style={{ minHeight: 110, position: "relative", display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)", overflow: "hidden" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Certificates Issued</span>
-          <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--blue-600)" }}>{certificates.filter(c => c.status === "Dispatched").length}</strong>
-          <small style={{ color: "var(--muted)" }}>{certificates.length} in pipeline</small>
-        </article>
-        <article style={{ minHeight: 110, position: "relative", display: "grid", alignContent: "center", padding: 20, border: "1px solid var(--line)", borderRadius: 14, background: "var(--surface)", boxShadow: "var(--shadow)", overflow: "hidden" }}>
-          <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Checked In</span>
-          <strong style={{ margin: "7px 0 3px", fontSize: 28, color: "var(--green)" }}>{attendees.filter(a => a.status === "CheckedIn").length}</strong>
-          <small style={{ color: "var(--muted)" }}>of {attendees.length} registered</small>
-        </article>
-      </div>
-
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(380px, 0.8fr)", gap: 18, marginBottom: 18 }}>
-        <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Create Ceremony</h2><p>Schedule a new convocation ceremony</p></div><PlusCircle /></div>
-          <form onSubmit={createCeremony} style={{ display: "grid", gap: 12, padding: 18 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              <label style={labelS}>
-                Ceremony Title <b style={{ color: "var(--red)" }}>*</b>
-                <input placeholder="e.g. Class of 2025 Commencement" value={newTitle} onChange={e => setNewTitle(e.target.value)} style={inputS} required />
-              </label>
-              <label style={labelS}>
-                Date <b style={{ color: "var(--red)" }}>*</b>
-                <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} style={inputS} required />
-              </label>
-              <label style={labelS}>
-                Venue <b style={{ color: "var(--red)" }}>*</b>
-                <input placeholder="e.g. Jinnah Convention Centre" value={newVenue} onChange={e => setNewVenue(e.target.value)} style={inputS} required />
-              </label>
-              <label style={labelS}>
-                Guest Tickets per Student
-                <input type="number" min="1" max="5" value={newTickets} onChange={e => setNewTickets(e.target.value)} style={inputS} />
-              </label>
-            </div>
-            <button type="submit" disabled={creating} style={{ padding: "0.7rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: creating ? 0.6 : 1, justifySelf: "start", minWidth: 180 }}>
-              {creating ? "Creating..." : <><Send style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Create Ceremony</>}
-            </button>
-          </form>
-        </div>
-
-        <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Quick Check-in</h2><p>Record student attendance at ceremony</p></div><QrCode /></div>
-          <div style={{ display: "grid", gap: 12, padding: 18 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              <label style={labelS}>
-                Ceremony ID
-                <input placeholder="e.g. CER-2025" value={checkinId} onChange={e => setCheckinId(e.target.value)} style={inputS} />
-              </label>
-              <label style={labelS}>
-                Student ID
-                <input placeholder="e.g. STU-2024-001" value={checkinStudent} onChange={e => setCheckinStudent(e.target.value)} style={inputS} />
-              </label>
-            </div>
-            <button onClick={checkInAttendee} disabled={checking || !checkinId || !checkinStudent} style={{ padding: "0.7rem", background: "var(--green)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: checking ? 0.6 : 1, justifySelf: "start", minWidth: 160 }}>
-              {checking ? "Checking in..." : <><ClipboardCheck style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />Check In</>}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(380px, 0.7fr)", gap: 18, marginBottom: 18 }}>
-        <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Upcoming Ceremonies</h2><p>{scheduledCeremonies.length} scheduled</p></div><Calendar /></div>
-          {scheduledCeremonies.length === 0 ? (
-            <div style={{ minHeight: 180, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
-              <Calendar style={{ width: 28, color: "var(--muted)" }} />
-              <strong>No upcoming ceremonies</strong>
-              <span>Create a new ceremony to get started</span>
-            </div>
-          ) : (
-            <div style={{ overflow: "auto" }}>
-              <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "var(--surface-soft)" }}>
-                    {["Title", "Date", "Venue", "Tickets", "Attendees", "Status"].map(h => (
-                      <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {scheduledCeremonies.map(c => (
-                    <tr key={c.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                      <td style={{ padding: "10px 14px", fontSize: 12, fontWeight: 600 }}>{c.title}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{new Date(c.date).toLocaleDateString()}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{c.venue}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 11 }}>{c.guestTickets}/person</td>
-                      <td style={{ padding: "10px 14px", fontSize: 11 }}>{c.attendees}</td>
-                      <td style={{ padding: "10px 14px" }}>{ceremonyStatusBadge(c.status)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>Certificate Pipeline</h2><p>Track generation and dispatch</p></div><Award /></div>
-          {certificates.length === 0 ? (
-            <div style={{ minHeight: 180, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
-              <Award style={{ width: 28 }} />
-              <strong>No certificates in pipeline</strong>
-              <span>Generate certificates from the eligibility grid below</span>
-            </div>
-          ) : (
-            <div style={{ overflow: "auto" }}>
-              <table style={{ width: "100%", minWidth: 500, borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "var(--surface-soft)" }}>
-                    {["Student", "Type", "Status", "Tracking", "Action"].map(h => (
-                      <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {certificates.map(ct => (
-                    <tr key={ct.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                      <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{ct.studentName}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{ct.certificateType}</td>
-                      <td style={{ padding: "10px 14px" }}>{certStatusBadge(ct.status)}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace", color: "var(--muted)" }}>{ct.trackingNumber || "—"}</td>
-                      <td style={{ padding: "10px 14px" }}>
-                        {ct.status === "Ready" && (
-                          <button style={{ padding: "4px 8px", border: "1px solid var(--line)", borderRadius: 6, color: "var(--green)", background: "var(--surface)", cursor: "pointer", fontSize: 10, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                            <Download style={{ width: 12 }} /> Download
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="surface" style={{ overflow: "hidden", marginBottom: 18 }}>
-        <div className="surface-heading">
-          <div><h2>Eligibility Status</h2><p>{eligibility.length} students assessed</p></div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <select aria-label="Eligibility status" value={eligibilityFilter} onChange={e => setEligibilityFilter(e.target.value)} style={{ minHeight: 33, padding: "0 9px", border: "1px solid var(--line)", borderRadius: 7, color: "var(--ink)", background: "var(--surface)", fontSize: 11 }}>
-              <option value="">All Statuses</option>
-              <option value="Eligible">Eligible</option>
-              <option value="ConditionallyEligible">Conditionally Eligible</option>
-              <option value="Ineligible">Ineligible</option>
-            </select>
-          </div>
-        </div>
-        {filteredEligibility.length === 0 ? (
-          <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
-            <Users style={{ width: 28 }} />
-            <strong>No eligibility records found</strong>
-            <span>Upload student data to assess convocation eligibility</span>
-          </div>
-        ) : (
-          <div style={{ overflow: "auto" }}>
-            <table style={{ width: "100%", minWidth: 700, borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "var(--surface-soft)" }}>
-                  {["Student ID", "Name", "Program", "Eligibility", "Reason", "Generate"].map(h => (
-                    <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEligibility.map(e => (
-                  <tr key={e.studentId} style={{ borderBottom: "1px solid var(--line)" }}>
-                    <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace", color: "var(--muted)" }}>{e.studentId}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{e.studentName}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{e.program}</td>
-                    <td style={{ padding: "10px 14px" }}>{eligibilityBadge(e.eligibility)}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", maxWidth: 200 }}>{e.reason || "—"}</td>
-                    <td style={{ padding: "10px 14px" }}>
-                      {e.eligibility !== "Ineligible" && nextCeremony && (
-                        <button onClick={() => generateCertificate(e.studentId, nextCeremony.id)} disabled={generatingCert === e.studentId} style={{ padding: "4px 10px", border: "1px solid var(--line)", borderRadius: 6, color: "var(--blue-600)", background: "var(--surface)", cursor: "pointer", fontSize: 10, fontWeight: 700 }}>
-                          {generatingCert === e.studentId ? "..." : "Generate"}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>Attendance Registry</h2><p>{attendees.length} registered attendees</p></div><Users /></div>
-        {attendees.length === 0 ? (
-          <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
-            <QrCode style={{ width: 28 }} />
-            <strong>No attendance records</strong>
-            <span>Use the check-in form to start registering attendees</span>
-          </div>
-        ) : (
-          <div style={{ overflow: "auto" }}>
-            <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "var(--surface-soft)" }}>
-                  {["Student", "Registration", "Check-in", "Section", "Status"].map(h => (
-                    <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {attendees.map(a => (
-                  <tr key={a.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                    <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{a.studentName}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{new Date(a.registrationTime).toLocaleString()}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{a.checkInTime ? new Date(a.checkInTime).toLocaleString() : "—"}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{a.seatingSection}</td>
-                    <td style={{ padding: "10px 14px" }}>{attendeeBadge(a.status)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-    </main>
+    </ModulePage>
   );
 }

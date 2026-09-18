@@ -1,262 +1,109 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { AlertCircle, CheckCircle2, FileSearch, FileText, FolderOpen, Scale, Send, Upload } from "lucide-react";
-import { usePersonalityTranslations } from "@/lib/personality-translator";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
+import { Panel, Figures, Mark } from "@/components/register";
+import { Ledger, toneOf, words } from "@/components/register/ledger";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
-import { ErrorDisplay, toWizardError } from "@/components/ErrorDisplay";
-type AppealStatus = "Pending" | "UnderReview" | "Resolved" | "Rejected";
 type Appeal = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  courseId: string;
-  courseName: string;
-  semester: string;
-  submittedGrade: string;
-  appealGrounds: string;
-  status: AppealStatus;
-  filedAt: string;
-  committeeNotes: string | null;
-};
-type CommitteeBrief = {
-  appealId: string;
-  classification: string;
-  recommendation: string;
-  evidenceStrength: "Strong" | "Moderate" | "Weak";
-  generatedAt: string;
+  id: string; studentId: string; studentName: string; courseCode: string; courseTitle: string; semester: string;
+  submittedGrade: string; groundType: string; groundStrength: string; status: string; committeeDecision: string | null;
+  adjustedGrade: string | null; submissionDate: string; deadline: string | null; resolvedAt: string | null; isEligible: boolean;
 };
 
-function statusBadge(status: AppealStatus) {
-  const color =
-    status === "Resolved" ? "var(--green)" :
-    status === "Rejected" ? "var(--red)" :
-    status === "UnderReview" ? "var(--amber)" : "var(--muted)";
-  const bg =
-    status === "Resolved" ? "var(--green-soft)" :
-    status === "Rejected" ? "var(--red-soft)" :
-    status === "UnderReview" ? "var(--amber-soft)" : "var(--surface-soft)";
-  return <span style={{ display: "inline-flex", padding: "3px 8px", borderRadius: 99, background: bg, color, fontSize: 10, fontWeight: 700 }}>{status}</span>;
-}
-
-const inputS: React.CSSProperties = { padding: "0.55rem 0.7rem", borderRadius: 8, border: "1px solid var(--line)", background: "var(--canvas)", color: "var(--ink)", fontSize: "0.82rem", width: "100%", boxSizing: "border-box" };
-
+/** Grade appeals: what was appealed, on what ground, and what the committee decided. */
 export default function GradeAppealsPage() {
-  const t = usePersonalityTranslations("academic");
-  const [appeals, setAppeals] = useState<Appeal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const { date } = useTenantFormatter();
+  const { state, reload } = useModuleData<Appeal[]>(signal => apiGet<Appeal[]>("/api/grade-appeals", signal));
+  const action = useAction();
+  const [selected, setSelected] = useState("");
+  const [decision, setDecision] = useState("upheld");
+  const [adjusted, setAdjusted] = useState("");
 
-  const [studentId, setStudentId] = useState("");
-  const [courseId, setCourseId] = useState("");
-  const [semester, setSemester] = useState("");
-  const [grade, setGrade] = useState("");
-  const [grounds, setGrounds] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  const [brief, setBrief] = useState<CommitteeBrief | null>(null);
-  const [generatingBrief, setGeneratingBrief] = useState(false);
-  const [processingId, setProcessingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const ctrl = new AbortController();
-    apiGet<Appeal[]>("/api/grade-appeals", ctrl.signal)
-      .then(d => { if (!ctrl.signal.aborted) { setAppeals(d); setError(null); } })
-      .catch(() => { if (!ctrl.signal.aborted) setError("Grade appeal records are temporarily unavailable."); })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
-    return () => ctrl.abort();
-  }, []);
-
-  const refreshAppeals = () => {
-    apiGet<Appeal[]>("/api/grade-appeals")
-      .then(d => { setAppeals(d); setError(null); })
-      .catch(() => setError("Grade appeal records are temporarily unavailable."));
-  };
-
-  async function submitAppeal(e: React.FormEvent) {
+  async function classify(e: FormEvent) {
     e.preventDefault();
-    setSubmitting(true); setMessage(null);
-    try {
-      const body: Record<string, unknown> = { studentId, courseId, semester, submittedGrade: grade, appealGrounds: grounds, facultyRespondentId: "00000000-0000-0000-0000-000000000000" };
-      if (file) {
-        const form = new FormData();
-        form.append("file", file);
-        Object.entries(body).forEach(([k, v]) => form.append(k, String(v)));
-        await apiPost("/api/grade-appeals", form);
-      } else {
-        await apiPost("/api/grade-appeals", body);
-      }
-      setMessage("success: Appeal submitted");
-      setStudentId(""); setCourseId(""); setSemester(""); setGrade(""); setGrounds(""); setFile(null);
-      refreshAppeals();
-    } catch { setMessage("error: Submission failed"); }
-    finally { setSubmitting(false); }
+    await action.run("classify", async () => { await apiPost(`/api/grade-appeals/${selected}/classify`); return "Appeal classified against the policy."; }, reload);
   }
-
-  async function classifyGrounds(id: string) {
-    setProcessingId(id);
-    try { await apiPost(`/api/grade-appeals/${id}/classify`); refreshAppeals(); } catch { /* ignore */ }
-    finally { setProcessingId(null); }
+  async function brief(e: FormEvent) {
+    e.preventDefault();
+    await action.run("brief", async () => { await apiPost(`/api/grade-appeals/${selected}/committee-brief`); return "Committee brief prepared."; }, reload);
   }
-
-  async function generateBrief(id: string) {
-    setGeneratingBrief(true); setBrief(null);
-    try {
-      const result = await apiPost<CommitteeBrief>(`/api/grade-appeals/${id}/brief`);
-      setBrief(result);
-    } catch { setBrief(null); }
-    finally { setGeneratingBrief(false); }
+  async function decide(e: FormEvent) {
+    e.preventDefault();
+    await action.run("decide", async () => {
+      await apiPost(`/api/grade-appeals/${selected}/decision?decision=${encodeURIComponent(decision)}${adjusted.trim() ? `&adjustedGrade=${encodeURIComponent(adjusted.trim())}` : ""}`);
+      return `Decision recorded: ${decision}${adjusted.trim() ? `, grade adjusted to ${adjusted.trim()}` : ""}.`;
+    }, reload);
   }
-
-  async function processDecision(id: string) {
-    setProcessingId(id);
-    try { await apiPost(`/api/grade-appeals/${id}/process`); refreshAppeals(); } catch { /* ignore */ }
-    finally { setProcessingId(null); }
-  }
-
-  const resolved = appeals.filter(a => a.status === "Resolved").length;
-  const rejectionRate = appeals.length > 0 ? Math.round((appeals.filter(a => a.status === "Rejected").length / appeals.length) * 100) : 0;
 
   return (
-    <main style={{ minHeight: "100vh", maxWidth: 1480, margin: "0 auto", padding: "42px 34px 64px", background: "var(--canvas)" }}>
-      <header style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 28 }}>
-        <div>
-          <p style={{ margin: "0 0 7px", color: "var(--blue-600)", fontSize: 11, fontWeight: 800, letterSpacing: ".8px", textTransform: "uppercase" }}>Academic Governance</p>
-          <h1 style={{ margin: 0, fontSize: "clamp(27px, 3vw, 36px)", lineHeight: 1.15, letterSpacing: "-1px" }}>{t("gradeAppeals")}</h1>
-          <span style={{ display: "block", marginTop: 9, color: "var(--muted)" }}>{t("gradeAppealsDesc")}</span>
-        </div>
-      </header>
+    <ModulePage
+      title="Grade appeals"
+      crumbs={[{ label: "Academic" }, { label: "Grade appeals" }]}
+      meta={<span>Appeals against a recorded grade, their ground, and the committee&apos;s decision.</span>}
+      ident={(d: Appeal[]) => <><strong>{d.filter(a => !a.resolvedAt).length}</strong><br />open appeals</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {appeals => (
+        <div className="record">
+          <div className="record-body">
+            <Figures aria-label="Appeal figures" items={[
+              { label: "Appeals", value: appeals.length, note: appeals.length === 0 ? "none filed" : `latest ${date(appeals[0].submissionDate)}` },
+              { label: "Open", value: appeals.filter(a => !a.resolvedAt).length, tone: "brass", note: "awaiting the committee" },
+              { label: "Grades adjusted", value: appeals.filter(a => a.adjustedGrade).length, tone: "laurel", note: "appeals upheld" },
+              { label: "Out of time", value: appeals.filter(a => !a.isEligible).length, note: "filed after the deadline" },
+            ]} />
 
-      {message && (
-        <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "11px 14px", marginBottom: 18, border: message.startsWith("error") ? "1px solid #ecc0c6" : "1px solid #aaddc9", borderRadius: 10, color: message.startsWith("error") ? "var(--red)" : "var(--green)", background: message.startsWith("error") ? "var(--red-soft)" : "var(--green-soft)", fontSize: 11 }}>
-          {message.startsWith("error") ? <AlertCircle /> : <CheckCircle2 />}{message.replace(/^[^:]+: /, "")}
+            <Panel title="Appeals" flush>
+              <Ledger rows={appeals} keyOf={a => a.id} minWidth={900} status={a => toneOf(a.status)}
+                empty={{ title: "No appeal filed", detail: "A student files an appeal against a recorded grade, citing a ground from the policy." }}
+                columns={[
+                  { key: "student", label: "Student", render: a => a.studentName },
+                  { key: "id", label: "Student number", render: a => a.studentId, mono: true },
+                  { key: "course", label: "Course", render: a => `${a.courseCode} ${a.courseTitle}` },
+                  { key: "semester", label: "Semester", render: a => a.semester },
+                  { key: "grade", label: "Grade", render: a => a.submittedGrade, mono: true },
+                  { key: "ground", label: "Ground", render: a => <>{words(a.groundType)}<br /><span className="text-muted">{words(a.groundStrength)} evidence</span></> },
+                  { key: "status", label: "Status", render: a => <Mark tone={toneOf(a.status)}>{words(a.status)}</Mark> },
+                  { key: "decision", label: "Decision", render: a => a.committeeDecision ?? (a.isEligible ? "—" : "out of time") },
+                  { key: "adjusted", label: "Adjusted to", render: a => a.adjustedGrade ?? "—", mono: true },
+                  { key: "filed", label: "Filed", render: a => date(a.submissionDate), nowrap: true },
+                ]} />
+            </Panel>
+          </div>
+
+          <aside className="record-margin">
+            <Panel title="Work an appeal">
+              <form className="panel-form" onSubmit={classify}>
+                <label><span>Appeal</span>
+                  <select value={selected} onChange={e => setSelected(e.target.value)} required>
+                    <option value="">Choose an appeal</option>
+                    {appeals.filter(a => !a.resolvedAt).map(a => <option key={a.id} value={a.id}>{a.studentName} — {a.courseCode}</option>)}
+                  </select>
+                </label>
+                <p className="field-hint">Classification tests the ground against the policy and records the clause it cites.</p>
+                <button type="submit" className={`btn btn-secondary${action.busy === "classify" ? " btn-loading" : ""}`} disabled={action.busy !== null || !selected}>Classify</button>
+              </form>
+              <form className="panel-form" onSubmit={brief}>
+                <p className="field-hint">The brief assembles the evidence for the committee to read.</p>
+                <button type="submit" className={`btn btn-secondary${action.busy === "brief" ? " btn-loading" : ""}`} disabled={action.busy !== null || !selected}>Prepare committee brief</button>
+              </form>
+              <form className="panel-form" onSubmit={decide}>
+                <label><span>Decision</span>
+                  <select value={decision} onChange={e => setDecision(e.target.value)}>
+                    <option value="upheld">Upheld</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </label>
+                <label><span>Adjusted grade</span><input value={adjusted} onChange={e => setAdjusted(e.target.value)} placeholder="only if upheld" /></label>
+                <button type="submit" className={`btn btn-primary${action.busy === "decide" ? " btn-loading" : ""}`} disabled={action.busy !== null || !selected}>Record decision</button>
+              </form>
+            </Panel>
+          </aside>
         </div>
       )}
-
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(380px, 0.8fr)", gap: 18, marginBottom: 18 }}>
-        <div className="surface" style={{ overflow: "hidden" }}>
-          <div className="surface-heading"><div><h2>{t("appealSubmissions")}</h2><p>File a new grade appeal with supporting documentation</p></div><Scale /></div>
-          <form onSubmit={submitAppeal} style={{ display: "grid", gap: 12, padding: 18 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
-                Student ID
-                <input placeholder="e.g. STU-2024-001" value={studentId} onChange={e => setStudentId(e.target.value)} style={inputS} required />
-              </label>
-              <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
-                Course ID
-                <input placeholder="e.g. CS-401" value={courseId} onChange={e => setCourseId(e.target.value)} style={inputS} required />
-              </label>
-              <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
-                Semester
-                <input placeholder="e.g. Fall 2025" value={semester} onChange={e => setSemester(e.target.value)} style={inputS} required />
-              </label>
-              <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
-                Submitted Grade
-                <input placeholder="e.g. C+" value={grade} onChange={e => setGrade(e.target.value)} style={inputS} required />
-              </label>
-            </div>
-            <label style={{ display: "grid", gap: 5, color: "var(--muted)", fontSize: 10, fontWeight: 700 }}>
-              Appeal Grounds
-              <textarea placeholder="Explain the basis for this appeal in detail..." value={grounds} onChange={e => setGrounds(e.target.value)} rows={3} style={{ ...inputS, resize: "vertical" }} required />
-            </label>
-            <label style={{ minHeight: 39, display: "grid", placeItems: "center", border: "1px dashed var(--line-strong)", borderRadius: 8, color: "var(--blue-600)", cursor: "pointer", fontSize: 10, fontWeight: 700, padding: "10px" }}>
-              <Upload style={{ marginRight: 6 }} /> {file ? file.name : t("attachDoc")}
-              <input type="file" accept=".pdf,.doc,.docx" style={{ display: "none" }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
-            </label>
-            <button type="submit" disabled={submitting} style={{ padding: "0.7rem", background: "var(--blue-600)", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12, opacity: submitting ? 0.6 : 1 }}>
-              {submitting ? t("submitting") : <><Send style={{ width: 14, verticalAlign: "middle", marginRight: 6 }} />{t("submitAppeal")}</>}
-            </button>
-          </form>
-        </div>
-
-        <div style={{ display: "grid", gap: 18 }}>
-          <div className="surface" style={{ padding: 20 }}>
-            <h3 style={{ margin: "0 0 16px", fontSize: 13, color: "var(--ink)" }}>{t("appealPipeline")}</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-              <div style={{ padding: 14, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)", textAlign: "center" }}>
-                <div style={{ fontSize: 28, fontWeight: 800, color: "var(--green)" }}>{resolved}</div>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>{t("resolved")}</small>
-              </div>
-              <div style={{ padding: 14, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-soft)", textAlign: "center" }}>
-                <div style={{ fontSize: 28, fontWeight: 800, color: rejectionRate > 30 ? "var(--red)" : "var(--amber)" }}>{rejectionRate}%</div>
-                <small style={{ color: "var(--muted)", fontSize: 10 }}>Rejection Rate</small>
-              </div>
-            </div>
-          </div>
-
-          {brief && (
-            <div className="surface" style={{ padding: 18 }}>
-              <h3 style={{ margin: "0 0 10px", fontSize: 13, color: "var(--ink)", display: "flex", alignItems: "center", gap: 8 }}><FileSearch style={{ width: 16 }} /> Committee Brief</h3>
-              <div style={{ display: "grid", gap: 8, fontSize: 11 }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "var(--muted)" }}>Classification</span><strong>{brief.classification}</strong></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "var(--muted)" }}>Recommendation</span><strong style={{ color: "var(--green)" }}>{brief.recommendation}</strong></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--muted)" }}>Evidence</span>
-                  <span style={{ padding: "2px 7px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: brief.evidenceStrength === "Strong" ? "var(--green-soft)" : brief.evidenceStrength === "Moderate" ? "var(--amber-soft)" : "var(--red-soft)", color: brief.evidenceStrength === "Strong" ? "var(--green)" : brief.evidenceStrength === "Moderate" ? "var(--amber)" : "var(--red)" }}>{brief.evidenceStrength}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "var(--muted)" }}>Generated</span><span>{new Date(brief.generatedAt).toLocaleString()}</span></div>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="surface" style={{ overflow: "hidden" }}>
-        <div className="surface-heading"><div><h2>{t("appealsRegistry")}</h2><p>{appeals.length} records</p></div><FileText /></div>
-        {loading ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "var(--muted)" }}>{t("loadingAppeals")}</div>
-        ) : error ? (
-          <div style={{ padding: 18 }}><ErrorDisplay error={toWizardError(error, "Grade appeals could not be loaded.")} onRetry={refreshAppeals} /></div>
-        ) : appeals.length === 0 ? (
-          <div style={{ minHeight: 200, display: "grid", placeItems: "center", alignContent: "center", gap: 8, padding: 30, color: "var(--muted)", textAlign: "center" }}>
-            <FolderOpen style={{ width: 28, color: "var(--green)" }} />
-            <strong>{t("noAppealsFiled")}</strong>
-            <span>{t("noAppealsDesc")}</span>
-          </div>
-        ) : (
-          <div style={{ overflow: "auto" }}>
-            <table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "var(--surface-soft)" }}>
-                  {["ID", "Student", "Course", "Semester", "Grade", "Status", "Grounds", "Date", "Actions"].map(h => (
-                    <th key={h} style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", textAlign: "left", borderBottom: "1px solid var(--line)" }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {appeals.map(a => (
-                  <tr key={a.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                    <td style={{ padding: "10px 14px", fontSize: 10, fontFamily: "monospace", color: "var(--muted)" }}>{a.id.slice(0, 8)}...</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, fontWeight: 600 }}>{a.studentName}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11 }}>{a.courseName}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--muted)" }}>{a.semester}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 12, fontWeight: 700 }}>{a.submittedGrade}</td>
-                    <td style={{ padding: "10px 14px" }}>{statusBadge(a.status)}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.appealGrounds}</td>
-                    <td style={{ padding: "10px 14px", fontSize: 10, color: "var(--muted)", whiteSpace: "nowrap" }}>{new Date(a.filedAt).toLocaleDateString()}</td>
-                    <td style={{ padding: "10px 14px" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => classifyGrounds(a.id)} disabled={processingId === a.id} style={actionBtnS} title="Classify Grounds"><FileSearch style={{ width: 13 }} /></button>
-                        <button onClick={() => generateBrief(a.id)} disabled={generatingBrief} style={actionBtnS} title="Generate Brief"><FileText style={{ width: 13 }} /></button>
-                        <button onClick={() => processDecision(a.id)} disabled={processingId === a.id || a.status === "Resolved"} style={{ ...actionBtnS, color: a.status === "Resolved" ? "var(--muted)" : "var(--green)" }} title="Process Decision"><CheckCircle2 style={{ width: 13 }} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {generatingBrief && <div style={{ padding: "10px 14px", color: "var(--muted)", fontSize: 11 }}>{t("generatingBrief")}</div>}
-          </div>
-        )}
-      </section>
-    </main>
+    </ModulePage>
   );
 }
-
-const actionBtnS: React.CSSProperties = {
-  width: 30, height: 30, display: "grid", placeItems: "center", border: "1px solid var(--line)", borderRadius: 6,
-  background: "var(--surface)", color: "var(--blue-600)", cursor: "pointer"
-};

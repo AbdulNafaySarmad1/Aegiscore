@@ -8,11 +8,13 @@
 
 /* ── Rail ── */
 .rail { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; background: var(--rail-bg); color: var(--on-ink); z-index: 30; overflow: hidden; }
-.rail-brand { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) var(--s-4) var(--s-3); border-bottom: 1px solid var(--ink-rule); min-height: var(--head-h); color: var(--on-ink); }
+.rail-brand { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) var(--s-4) var(--s-3); border-bottom: 1px solid var(--ink-rule); min-height: var(--head-h); color: var(--on-ink); overflow: hidden; }
 .rail-brand:hover { text-decoration: none; }
 .rail-brand img { width: 28px; height: 28px; flex-shrink: 0; }
 .rail-brand-text { display: grid; line-height: 1.1; min-width: 0; }
-.rail-brand-text strong { font-family: var(--font-serif); font-weight: 400; font-size: var(--t-17); color: var(--on-ink); white-space: nowrap; }
+/* An institution's name is as long as it is: "Fictional National University" overflowed the
+   rail on every screen in the portal. It wraps within the rail instead of spilling out of it. */
+.rail-brand-text strong { font-family: var(--font-serif); font-weight: 400; font-size: var(--t-17); color: var(--on-ink); overflow-wrap: break-word; }
 .rail-brand-text small { font-size: var(--t-12); color: var(--on-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rail-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: var(--s-3) 0; scrollbar-width: thin; scrollbar-color: var(--ink-rule) transparent; }
 .rail-group { padding-bottom: var(--s-3); }

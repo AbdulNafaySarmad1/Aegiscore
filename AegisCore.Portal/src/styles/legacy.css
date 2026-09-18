@@ -322,6 +322,12 @@ progress { accent-color: var(--laurel); height: 6px; }
 .apply-card { width: 100%; max-width: 760px; display: grid; gap: var(--s-4); align-content: start; }
 .apply-card > h1 { font-size: var(--t-33); }
 .apply-stepper { display: flex; flex-wrap: wrap; gap: 0; margin-bottom: var(--s-2); font-size: var(--t-13); border-bottom: 1px solid var(--rule-strong); }
+.apply-stepper { list-style: none; padding: 0; }
+.apply-stepper li { padding: var(--s-2) var(--s-3); border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--ink-2); font-weight: 500; }
+.apply-stepper li.active { color: var(--ink); border-bottom-color: var(--brass); }
+.apply-stepper li.done { color: var(--laurel); }
+.apply-doc-meta { font-size: var(--t-13); color: var(--ink-2); margin-top: 2px; }
+.apply-file { cursor: pointer; }
 .apply-stepper span { padding: var(--s-2) var(--s-3); border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; border-radius: 0; background: transparent; color: var(--ink-2); font-weight: 500; }
 .apply-stepper span.active { background: transparent; color: var(--ink); border-bottom-color: var(--brass); }
 .apply-stepper span.done { opacity: 1; color: var(--laurel); }

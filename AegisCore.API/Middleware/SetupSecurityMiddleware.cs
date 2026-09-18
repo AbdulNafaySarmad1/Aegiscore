@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -84,7 +84,9 @@ public sealed class SetupRateLimitMiddleware
         var supplied = Encoding.UTF8.GetBytes(context.Request.Headers[SetupBootstrapToken.HeaderName].ToString());
         var authenticated = supplied.Length == _expected.Length && CryptographicOperations.FixedTimeEquals(supplied, _expected);
         var limit = authenticated ? AuthenticatedLimit : UnauthenticatedLimit;
-        var key = $"{(authenticated ? "valid" : "invalid")}:{context.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
+        // The forwarded address, not the socket: behind the portal proxy every operator would
+        // otherwise share one bucket of ten attempts a minute.
+        var key = $"{(authenticated ? "valid" : "invalid")}:{ClientAddress.Of(context)}";
         var attempts = Attempts.GetOrAdd(key, _ => new Queue<DateTimeOffset>());
         var now = DateTimeOffset.UtcNow;
         lock (attempts)

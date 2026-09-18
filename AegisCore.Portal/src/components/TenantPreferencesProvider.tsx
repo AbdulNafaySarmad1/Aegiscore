@@ -85,5 +85,8 @@ export function useTenantFormatter() {
       new Intl.DateTimeFormat(preferences.locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)),
     longDate: (value: string | number | Date) =>
       new Intl.DateTimeFormat(preferences.locale, { dateStyle: "long" }).format(new Date(value)),
+    // Clock time alone, for screens about what is happening now — an invigilation list, a deadline.
+    time: (value: string | number | Date) =>
+      new Intl.DateTimeFormat(preferences.locale, { timeStyle: "short" }).format(new Date(value)),
   };
 }

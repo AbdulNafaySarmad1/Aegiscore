@@ -1,3 +1,14 @@
+/**
+ * Release a response whose body we are not going to read. A fetch response holds its connection
+ * until the body is consumed or cancelled; the browser allows six connections per host, so leaving
+ * bodies unread stalls every later request on the page. The alumni record page leaked one on every
+ * 404 — the ordinary case for a student who has not graduated — and the screen never settled.
+ */
+export async function release(response: Response): Promise<Response> {
+  try { await response.body?.cancel(); } catch { /* already consumed or aborted */ }
+  return response;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -24,7 +35,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (response.status === 401 && !path.startsWith("/api/auth/")) {
     refreshing ??= fetch("/api/auth/refresh", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: "{}" })
-      .then(result => result.ok).catch(() => false).finally(() => { refreshing = undefined; });
+      .then(async result => { await release(result); return result.ok; }).catch(() => false).finally(() => { refreshing = undefined; });
     if (await refreshing) response = await fetch(path, { credentials: "include", ...init, headers });
   }
   const contentType = response.headers.get("content-type") ?? "";

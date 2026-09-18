@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { apiGet, apiPost, apiPut, apiPostForm } from "@/lib/api-client";
+import { apiGet, apiPost, apiPut, apiPostForm, release } from "@/lib/api-client";
 
 type Subject = { id: string; name: string; code: string; isActive: boolean };
 type Slot = { subjectId: string; questionCount: number; marksPerQuestion: number };
@@ -79,7 +79,7 @@ export default function TestConfigPage() {
                 <tr key={s.id} style={{ borderTop: "1px solid var(--border,#eee)" }}>
                   <td>{s.name}</td><td>{s.code}</td><td>{s.isActive ? "Yes" : "No"}</td>
                   <td><button className="btn btn-sm btn-ghost" onClick={() => guard(async () => {
-                    await fetch(`/api/admissions/subjects/${s.id}/active`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !s.isActive }) });
+                    await release(await fetch(`/api/admissions/subjects/${s.id}/active`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !s.isActive }) }));
                     await loadSubjects();
                   })}>{s.isActive ? "Deactivate" : "Activate"}</button></td>
                 </tr>

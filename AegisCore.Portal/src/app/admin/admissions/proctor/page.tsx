@@ -1,68 +1,115 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
+import { useTenantFormatter } from "@/components/TenantPreferencesProvider";
+import { Panel, Notice } from "@/components/register";
+import { Ledger } from "@/components/register/ledger";
+import { ModulePage, useAction, useModuleData } from "@/components/register/module-page";
 
 type Row = {
   applicantTestId: string; applicantId: string; applicantName: string;
   startedAt: string | null; expiresAt: string; status: string; proctorNote: string | null;
 };
 
+/**
+ * What an invigilator sees while tests are running: who is sitting, when their time runs out, and
+ * the two things an invigilator can do about it. Questions and answers are deliberately absent.
+ */
 export default function ProctorPage() {
-  const [rows, setRows] = useState<Row[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { time } = useTenantFormatter();
+  const { state, reload } = useModuleData<Row[]>(signal => apiGet<Row[]>("/api/admissions/proctor", signal));
+  const action = useAction();
+  const [flagging, setFlagging] = useState<Row | null>(null);
+  const [note, setNote] = useState("");
+  const [ending, setEnding] = useState<Row | null>(null);
 
-  const load = useCallback(async () => {
-    try { setRows(await apiGet<Row[]>("/api/admissions/proctor")); }
-    catch (e) { setError(e instanceof Error ? e.message : "Failed to load."); }
-  }, []);
-
+  // The list is what is happening now, so it refreshes itself.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- poll the live proctor list.
-    load();
-    const id = window.setInterval(load, 10000);
+    const id = window.setInterval(reload, 10000);
     return () => window.clearInterval(id);
-  }, [load]);
+  }, [reload]);
 
-  const act = (path: string, body?: unknown) => (async () => {
-    setError(null);
-    try { await apiPost(path, body ?? {}); await load(); }
-    catch (e) { setError(e instanceof Error ? e.message : "Action failed."); }
-  })();
+  async function flag() {
+    const row = flagging!;
+    setFlagging(null);
+    await action.run("flag", async () => {
+      await apiPost(`/api/admissions/proctor/${row.applicantTestId}/flag`, { note: note.trim() });
+      setNote("");
+      return `${row.applicantName} has been flagged: “${note.trim()}”.`;
+    }, reload);
+  }
+
+  async function forceSubmit() {
+    const row = ending!;
+    setEnding(null);
+    await action.run("end", async () => {
+      await apiPost(`/api/admissions/proctor/${row.applicantTestId}/force-submit`);
+      return `${row.applicantName}'s test was handed in as it stood.`;
+    }, reload);
+  }
 
   return (
-    <div className="content-page">
-      <div className="page-header">
-        <div><Link href="/admin/admissions">← Applicants</Link><h1>Proctor — live tests</h1><p>{rows.length} in progress</p></div>
-      </div>
-      {error && <div className="error-state">{error}</div>}
-      <p style={{ color: "var(--muted,#667)" }}>Questions and answers are never shown here.</p>
+    <ModulePage
+      title="Invigilation"
+      crumbs={[{ label: "Admissions", href: "/admin/admissions" }, { label: "Invigilation" }]}
+      meta={<span>Tests being sat right now. The list refreshes itself every ten seconds.</span>}
+      ident={(rows: Row[]) => <><strong>{rows.length}</strong><br />{rows.length === 1 ? "candidate" : "candidates"}</>}
+      state={state} reload={reload} notice={action.outcome}
+    >
+      {rows => (
+        <>
+          {flagging && (
+            <Panel tone="brass" title={`Flag ${flagging.applicantName}?`}>
+              <div className="panel-form">
+                <p>A flag is recorded against this candidate&apos;s test for the admissions office to read afterwards. It does not end the test.</p>
+                <label><span>What did you see?</span><input value={note} onChange={e => setNote(e.target.value)} autoFocus placeholder="e.g. left the desk twice" /></label>
+                <div className="btn-row">
+                  <button type="button" className="btn btn-primary" disabled={!note.trim()} onClick={flag}>Record the flag</button>
+                  <button type="button" className="btn btn-ghost" onClick={() => { setFlagging(null); setNote(""); }}>Cancel</button>
+                </div>
+              </div>
+            </Panel>
+          )}
 
-      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
-        <thead><tr style={{ textAlign: "left", borderBottom: "1px solid var(--border,#e2e4e9)" }}>
-          <th>APP ID</th><th>Name</th><th>Started</th><th>Deadline</th><th>Flag</th><th></th>
-        </tr></thead>
-        <tbody>
-          {rows.map(r => (
-            <tr key={r.applicantTestId} style={{ borderBottom: "1px solid var(--border,#eee)" }}>
-              <td>{r.applicantId}</td>
-              <td>{r.applicantName}</td>
-              <td>{r.startedAt ? new Date(r.startedAt).toLocaleTimeString() : "—"}</td>
-              <td>{new Date(r.expiresAt).toLocaleTimeString()}</td>
-              <td>{r.proctorNote ?? "—"}</td>
-              <td style={{ display: "flex", gap: 6 }}>
-                <button className="btn btn-sm btn-ghost" onClick={() => {
-                  const note = window.prompt("Flag note");
-                  if (note) act(`/api/admissions/proctor/${r.applicantTestId}/flag`, { note });
-                }}>Flag</button>
-                <button className="btn btn-sm btn-danger" onClick={() => act(`/api/admissions/proctor/${r.applicantTestId}/force-submit`)}>Force submit</button>
-              </td>
-            </tr>
-          ))}
-          {rows.length === 0 && <tr><td colSpan={6} style={{ padding: 24, textAlign: "center", color: "var(--muted,#667)" }}>No tests are currently in progress.</td></tr>}
-        </tbody>
-      </table>
-    </div>
+          {ending && (
+            <Panel tone="oxblood" title={`End ${ending.applicantName}'s test now?`}>
+              <div className="panel-form">
+                <p>The test is handed in exactly as it stands and marked. The candidate cannot go back to it.</p>
+                <div className="btn-row">
+                  <button type="button" className="btn btn-primary" onClick={forceSubmit}>Hand it in</button>
+                  <button type="button" className="btn btn-ghost" onClick={() => setEnding(null)}>Let them carry on</button>
+                </div>
+              </div>
+            </Panel>
+          )}
+
+          <Panel title="Sitting now" flush>
+            <Ledger rows={rows} keyOf={r => r.applicantTestId} minWidth={840} status={r => r.proctorNote ? "brass" : undefined}
+              empty={{ title: "No test is being sat", detail: "Candidates appear here from the moment they begin until they hand in." }}
+              columns={[
+                { key: "id", label: "Applicant", render: r => r.applicantId, mono: true },
+                { key: "name", label: "Name", render: r => r.applicantName },
+                { key: "started", label: "Began", render: r => r.startedAt ? time(r.startedAt) : "not yet", nowrap: true },
+                { key: "deadline", label: "Time runs out", render: r => time(r.expiresAt), nowrap: true },
+                { key: "flag", label: "Flagged", render: r => r.proctorNote ?? "—" },
+                {
+                  key: "act", label: "", nowrap: true, render: r => (
+                    <span className="btn-row">
+                      <button type="button" className="btn btn-ghost btn-sm" disabled={action.busy !== null} onClick={() => { setFlagging(r); setNote(r.proctorNote ?? ""); }}>Flag</button>
+                      <button type="button" className="btn btn-danger btn-sm" disabled={action.busy !== null} onClick={() => setEnding(r)}>End test</button>
+                    </span>
+                  ),
+                },
+              ]} />
+          </Panel>
+
+          <Notice tone="ink">
+            Questions and answers are never shown on this screen. An invigilator can see that someone
+            is sitting a test and how long is left, not what they are answering.
+          </Notice>
+        </>
+      )}
+    </ModulePage>
   );
 }

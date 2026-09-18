@@ -1,5 +1,6 @@
 "use client";
 
+import { release } from "@/lib/api-client";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadSession } from "@/lib/session";
@@ -27,10 +28,10 @@ export default function GraduationPage({ params }: { params: Promise<{ studentId
       fetch(`/api/graduation/${encodeURIComponent(studentId)}`, { credentials: "include", cache: "no-store" }),
       loadSession()
     ]);
-    if (!response.ok) throw new Error(response.status === 403
+    if (!response.ok) { await release(response); throw new Error(response.status === 403
       ? "You do not have access to this student's graduation record."
       : response.status === 404 ? "No graduation record exists for this student."
-      : "The graduation record could not be loaded.");
+      : "The graduation record could not be loaded."); }
     setProgress(await response.json());
     setCanApprove(session.roles.some(role => APPROVER_ROLES.includes(role.toLowerCase())));
   }, [studentId]);

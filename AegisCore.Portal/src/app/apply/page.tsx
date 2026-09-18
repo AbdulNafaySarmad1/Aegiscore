@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { RegisterHead, Panel, Notice, Mark } from "@/components/register";
 
 type OpenProgram = { programId: string; name: string; code: string };
 type OpenIntake = { intakeId: string; year: number; semester: string; name: string; programs: OpenProgram[] };
@@ -60,7 +61,7 @@ export default function ApplyPage() {
     try {
       return await fn();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(e instanceof Error ? e.message : "That step did not complete. Check your connection and try again.");
       return undefined;
     } finally {
       setBusy(false);
@@ -86,44 +87,34 @@ export default function ApplyPage() {
 
   return (
     <main className="apply-shell">
-      <style>{`
-        .apply-shell{min-height:100vh;background:var(--bg,#f5f6f8);padding:32px 16px;display:flex;justify-content:center}
-        .apply-card{width:100%;max-width:720px}
-        .apply-stepper{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;font-size:12px}
-        .apply-stepper span{padding:4px 10px;border-radius:999px;background:var(--surface,#fff);border:1px solid var(--border,#e2e4e9)}
-        .apply-stepper span.active{background:var(--primary,#17233f);color:#fff;border-color:transparent}
-        .apply-stepper span.done{opacity:.6}
-        .apply-row{display:grid;gap:12px;margin:12px 0}
-        .apply-actions{display:flex;justify-content:space-between;margin-top:20px;gap:12px}
-        .apply-doc{display:flex;align-items:center;gap:12px;justify-content:space-between;border:1px solid var(--border,#e2e4e9);border-radius:8px;padding:12px;margin:8px 0}
-        .apply-appid{font-size:22px;font-weight:700;letter-spacing:1px;padding:12px 16px;background:var(--primary-soft,#eef1f6);border-radius:8px;text-align:center;margin:16px 0}
-      `}</style>
       <div className="apply-card">
-        <h1 style={{ marginBottom: 4 }}>Apply to the University</h1>
-        <p style={{ color: "var(--muted,#667)", marginTop: 0 }}>No account needed — sign up with your personal email.</p>
+        <RegisterHead
+          title="Apply to the university"
+          meta={<span>No account is needed: you sign up with your own email address, and the applicant number you are given at the end is what carries you through admission.</span>}
+          ident={<><strong>Step {step + 1}</strong><br />of {STEPS.length}</>}
+        />
 
-        <div className="apply-stepper">
+        <ol className="apply-stepper" aria-label="Application steps">
           {STEPS.map((s, i) => (
-            <span key={s} className={i === step ? "active" : i < step ? "done" : ""}>{i + 1}. {s}</span>
+            <li key={s} className={i === step ? "active" : i < step ? "done" : ""} aria-current={i === step ? "step" : undefined}>{i + 1}. {s}</li>
           ))}
-        </div>
+        </ol>
 
-        {error && <div className="error-state" style={{ marginBottom: 12 }}>{error}</div>}
+        {error && <Notice tone="oxblood" role="alert">{error}</Notice>}
 
-        <div className="card">
-          <div className="card-body">
+        <Panel title={STEPS[step]}>
+          <div className="panel-form">
             {step === 0 && (
               <>
-                <h3>Choose your intake and program</h3>
                 <div className="apply-row">
                   <label>Intake
-                    <select value={intakeId} onChange={e => { setIntakeId(e.target.value); setProgramId(""); }} style={{ width: "100%" }}>
+                    <select value={intakeId} onChange={e => { setIntakeId(e.target.value); setProgramId(""); }}>
                       <option value="">Select an intake…</option>
                       {intakes.map(i => <option key={i.intakeId} value={i.intakeId}>{i.name} ({i.year}{i.semester})</option>)}
                     </select>
                   </label>
                   <label>Program
-                    <select value={programId} onChange={e => setProgramId(e.target.value)} disabled={!selectedIntake} style={{ width: "100%" }}>
+                    <select value={programId} onChange={e => setProgramId(e.target.value)} disabled={!selectedIntake}>
                       <option value="">Select a program…</option>
                       {selectedIntake?.programs.map(p => <option key={p.programId} value={p.programId}>{p.name} — {p.code}</option>)}
                     </select>
@@ -139,10 +130,9 @@ export default function ApplyPage() {
 
             {step === 1 && (
               <>
-                <h3>Verify your email</h3>
                 <div className="apply-row">
                   <label>Personal email (Gmail, Outlook, any provider)
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" style={{ width: "100%" }} />
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" />
                   </label>
                   {!otpSent ? (
                     <button className="btn btn-secondary" disabled={busy || !email}
@@ -153,7 +143,7 @@ export default function ApplyPage() {
                   ) : (
                     <>
                       <label>Enter the 6-digit code we emailed you
-                        <input inputMode="numeric" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} style={{ width: "100%" }} />
+                        <input inputMode="numeric" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} />
                       </label>
                       <button className="btn btn-primary" disabled={busy || otp.length !== 6}
                         onClick={() => run(async () => {
@@ -177,17 +167,16 @@ export default function ApplyPage() {
 
             {step === 2 && (
               <>
-                <h3>Your details</h3>
                 <div className="apply-row">
-                  <label>Full name<input value={details.fullName} onChange={e => setDetails({ ...details, fullName: e.target.value })} style={{ width: "100%" }} /></label>
-                  <label>Date of birth<input type="date" value={details.dateOfBirth} onChange={e => setDetails({ ...details, dateOfBirth: e.target.value })} style={{ width: "100%" }} /></label>
+                  <label>Full name<input value={details.fullName} onChange={e => setDetails({ ...details, fullName: e.target.value })} /></label>
+                  <label>Date of birth<input type="date" value={details.dateOfBirth} onChange={e => setDetails({ ...details, dateOfBirth: e.target.value })} /></label>
                   <label>Gender
-                    <select value={details.gender} onChange={e => setDetails({ ...details, gender: e.target.value })} style={{ width: "100%" }}>
+                    <select value={details.gender} onChange={e => setDetails({ ...details, gender: e.target.value })}>
                       <option value="">Select…</option><option>Male</option><option>Female</option><option>Other</option>
                     </select>
                   </label>
-                  <label>Nationality<input value={details.nationality} onChange={e => setDetails({ ...details, nationality: e.target.value })} style={{ width: "100%" }} /></label>
-                  <label>Phone<input value={details.phone} onChange={e => setDetails({ ...details, phone: e.target.value })} style={{ width: "100%" }} /></label>
+                  <label>Nationality<input value={details.nationality} onChange={e => setDetails({ ...details, nationality: e.target.value })} /></label>
+                  <label>Phone<input value={details.phone} onChange={e => setDetails({ ...details, phone: e.target.value })} /></label>
                 </div>
                 <div className="apply-actions">
                   <button className="btn btn-ghost" onClick={() => setStep(1)}>Back</button>
@@ -234,7 +223,6 @@ export default function ApplyPage() {
 
             {step === 5 && profile && (
               <>
-                <h3>Review &amp; submit</h3>
                 <div className="apply-row">
                   <div><strong>Applicant ID:</strong> {profile.applicantId}</div>
                   <div><strong>Name:</strong> {profile.fullName}</div>
@@ -253,14 +241,16 @@ export default function ApplyPage() {
 
             {step === 6 && profile && (
               <>
-                <h3>Application submitted 🎉</h3>
-                <p>Save your Applicant ID — you will need it for admission tests and to check your status.</p>
+                <p>
+                  Your application is with the admissions office. Keep the applicant number below:
+                  it identifies you at the admission test and whenever you ask after your application.
+                </p>
                 <div className="apply-appid">{profile.applicantId}</div>
-                <p>We have also emailed it to <strong>{profile.email}</strong>.</p>
+                <p>It has also been sent to <strong>{profile.email}</strong>.</p>
               </>
             )}
           </div>
-        </div>
+        </Panel>
       </div>
     </main>
   );
@@ -275,19 +265,18 @@ function DocumentsStep({ profile, busy, onUpload, onBack, onNext }: {
   const requiredMissing = certs.some(d => d.isRequired && (!d.uploadStatus || d.uploadStatus === "Rejected"));
   return (
     <>
-      <h3>Upload your documents</h3>
-      <p style={{ color: "var(--muted,#667)" }}>Only the documents your program requires are shown.</p>
+      <p className="field-hint">Only the documents your programme requires are listed. One marked with an asterisk must be uploaded before you can go on.</p>
       {certs.map(d => (
         <div key={d.id} className="apply-doc">
           <div>
             <strong>{d.documentType.replace(/_/g, " ")}</strong>{d.isRequired ? " *" : " (optional)"}
-            <div style={{ fontSize: 12, color: "var(--muted,#667)" }}>
+            <div className="apply-doc-meta">
               {d.acceptedFormat === "Pdf" ? "PDF" : "JPEG/PNG"} · max {d.maxFileSizeMb} MB
-              {d.uploadStatus && <> · <span className={`badge badge-${d.uploadStatus === "Approved" ? "success" : d.uploadStatus === "Rejected" ? "danger" : "warning"}`}>{d.uploadStatus}</span></>}
+              {d.uploadStatus && <> · <Mark tone={d.uploadStatus === "Approved" ? "laurel" : d.uploadStatus === "Rejected" ? "oxblood" : "brass"}>{d.uploadStatus}</Mark></>}
               {d.rejectionReason && <> · {d.rejectionReason}</>}
             </div>
           </div>
-          <label className="btn btn-secondary btn-sm" style={{ cursor: "pointer" }}>
+          <label className="btn btn-secondary btn-sm apply-file">
             {d.uploadStatus ? "Replace" : "Upload"}
             <input hidden type="file" accept={d.acceptedFormat === "Pdf" ? "application/pdf" : "image/jpeg,image/png"}
               onChange={e => e.target.files?.[0] && onUpload(d.documentType, e.target.files[0])} />
@@ -312,23 +301,21 @@ function PhotoStep({ profile, busy, onUpload, onBack, onNext }: {
   const status = result?.validationStatus ?? photo?.uploadStatus ?? null;
   return (
     <>
-      <h3>Passport-style photo</h3>
-      <p style={{ color: "var(--muted,#667)" }}>
-        Plain, unfiltered photo of your face. No Snapchat/beauty filters, cartoon effects, or AI-generated images.
+      <p className="field-hint">
+        A plain photograph of your face, as you would use on a passport. Filters, cartoon effects and
+        generated images are rejected, because this photograph is what identifies you at the test centre.
       </p>
-      <label className="btn btn-secondary" style={{ cursor: "pointer" }}>
-        {photo?.uploadStatus ? "Replace photo" : "Upload photo"}
+      <label className="btn btn-secondary apply-file">
+        {photo?.uploadStatus ? "Replace photograph" : "Upload photograph"}
         <input hidden type="file" accept="image/jpeg,image/png"
           onChange={async e => { if (e.target.files?.[0]) { const r = await onUpload(e.target.files[0]); if (r) setResult(r); } }} />
       </label>
       {status && (
-        <div className={`form-notice`} style={{ marginTop: 12 }}>
-          <span className={`badge badge-${status === "Approved" ? "success" : status === "Rejected" ? "danger" : "warning"}`}>{status}</span>{" "}
-          {status === "Approved" && "Photo accepted."}
-          {status === "Rejected" && (result?.rejectionReason ?? photo?.rejectionReason ?? "Photo did not pass the filter check. Please upload a plain photo.")}
-          {status === "ManualReview" && "The automated check is unavailable — an admissions officer will review your photo. You can continue."}
-          {result?.confidence != null && <> ({Math.round(result.confidence * 100)}% confidence)</>}
-        </div>
+        <Notice tone={status === "Approved" ? "laurel" : status === "Rejected" ? "oxblood" : "brass"} role="status">
+          {status === "Approved" && "Your photograph has been accepted."}
+          {status === "Rejected" && (result?.rejectionReason ?? photo?.rejectionReason ?? "This photograph did not pass the check. Upload a plain, unedited photograph of your face.")}
+          {status === "ManualReview" && "The automatic check could not run, so an admissions officer will look at your photograph. You can carry on in the meantime."}
+        </Notice>
       )}
       <div className="apply-actions">
         <button className="btn btn-ghost" onClick={onBack}>Back</button>
