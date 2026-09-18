@@ -69,7 +69,7 @@ public class PostgresPilotTests
         Assert.Equal(50, await db.Students.CountAsync());
         Assert.True(await db.Students.AnyAsync(s => s.Id == student.Id));
         Assert.True(await db.UserRoles.AnyAsync(r => r.UserId == student.Id));
-        Assert.True(await db.StudentFeeDues.AnyAsync(d => d.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"due:{focal.AccountKey}") && d.OutstandingAmount == 0));
+        Assert.True(await db.FeeDemands.AnyAsync(d => d.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"due:{focal.AccountKey}") && d.OutstandingAmount == 0));
         Assert.True(await db.ApplicantProfiles.AnyAsync(a => a.Id == DemoSeeder.RecordId(tenant, scenario.Version, $"applicant:{focal.AccountKey}") && a.ConvertedStudentId == student.Id));
         http.User = new ClaimsPrincipal(new ClaimsIdentity(
             [new Claim(ClaimTypes.Role, "Admin")], "pilot-test"));

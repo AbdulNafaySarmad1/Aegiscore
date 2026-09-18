@@ -68,14 +68,11 @@ public sealed class GraduationService(AegisDbContext db)
 
     public async Task<bool> HasOutstandingFeesAsync(Guid studentId, CancellationToken ct = default)
     {
-        var dues = await db.StudentFeeDues.Where(d => d.StudentId == studentId).ToListAsync(ct);
-        var dueIds = dues.Select(d => d.Id).ToList();
-        var payments = await db.StudentFeePayments.Where(p => dueIds.Contains(p.FeeDueId) && p.VerifiedBy != null && p.VerificationDate != null).ToListAsync(ct);
-        if (dues.Any(d => d.TotalDue - d.ScholarshipDeduction > payments.Where(p => p.FeeDueId == d.Id).Sum(p => p.Amount))) return true;
         var demands = await db.FeeDemands.Where(d => d.StudentId == studentId).ToListAsync(ct);
         var demandIds = demands.Select(d => d.Id).ToList();
         var settled = await db.FinancePayments.Where(p => demandIds.Contains(p.FeeDemandId) && p.Status == "SETTLED" && p.SettledAt != null).ToListAsync(ct);
-        if (demands.Any(d => d.TotalAmount > settled.Where(p => p.FeeDemandId == d.Id).Sum(p => p.Amount))) return true;
+        // Settled payments, scholarships and waivers all discharge a demand; anything else is outstanding.
+        if (demands.Any(d => d.TotalAmount - d.ScholarshipDeduction - d.WaivedAmount > settled.Where(p => p.FeeDemandId == d.Id).Sum(p => p.Amount))) return true;
         var legacy = await db.StudentFees.Include(f => f.Payments).Where(f => f.StudentId == studentId).ToListAsync(ct);
         return legacy.Any(f => f.Amount > f.Payments.Sum(p => p.Amount));
     }

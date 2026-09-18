@@ -1811,8 +1811,7 @@ public class AegisDbContext : DbContext
     public DbSet<Payslip> Payslips => Set<Payslip>();
     public DbSet<FeeStructure> FeeStructures => Set<FeeStructure>();
     public DbSet<FeeComponent> FeeComponents => Set<FeeComponent>();
-    public DbSet<StudentFeeDue> StudentFeeDues => Set<StudentFeeDue>();
-    public DbSet<StudentFeePayment> StudentFeePayments => Set<StudentFeePayment>();
+    // StudentFeeDues / StudentFeePayments were folded into FeeDemands / FinancePayments (UnifyFeeLedger migration).
     public DbSet<CostCenter> CostCenters => Set<CostCenter>();
     public DbSet<FinanceVoucher> FinanceVouchers => Set<FinanceVoucher>();
     public DbSet<FinanceVoucherLine> FinanceVoucherLines => Set<FinanceVoucherLine>();
@@ -2570,18 +2569,6 @@ public class AegisDbContext : DbContext
         modelBuilder.Entity<FeeComponent>(entity =>
         {
             entity.HasIndex(e => new { e.FeeStructureId, e.OrderIndex }).IsUnique();
-        });
-
-        modelBuilder.Entity<StudentFeeDue>(entity =>
-        {
-            entity.HasIndex(e => new { e.StudentId, e.SemesterId }).IsUnique();
-            entity.HasIndex(e => e.Status);
-        });
-
-        modelBuilder.Entity<StudentFeePayment>(entity =>
-        {
-            entity.HasIndex(e => e.FeeDueId);
-            entity.HasIndex(e => e.ReferenceNumber);
         });
 
         modelBuilder.Entity<FinanceVoucher>(entity =>

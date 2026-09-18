@@ -9902,6 +9902,9 @@ namespace AegisCore.Infrastructure.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("FeeStructureId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("IssuedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -9910,6 +9913,12 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("PaidAmount")
                         .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("ScholarshipDeduction")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -9924,6 +9933,16 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric(19,4)");
+
+                    b.Property<decimal>("WaivedAmount")
+                        .HasColumnType("numeric(19,4)");
+
+                    b.Property<Guid?>("WaivedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("WaivedReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
 
@@ -23900,105 +23919,6 @@ namespace AegisCore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StudentFees");
-                });
-
-            modelBuilder.Entity("AegisCore.Domain.Entities.StudentFeeDue", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("FeeStructureId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("OutstandingAmount")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.Property<decimal>("ScholarshipDeduction")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.Property<Guid>("SemesterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("TotalDue")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.Property<Guid?>("WaivedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("WaivedReason")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("StudentId", "SemesterId")
-                        .IsUnique();
-
-                    b.ToTable("StudentFeeDues");
-                });
-
-            modelBuilder.Entity("AegisCore.Domain.Entities.StudentFeePayment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("FeeDueId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("ReferenceNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("VerificationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("VerifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FeeDueId");
-
-                    b.HasIndex("ReferenceNumber");
-
-                    b.ToTable("StudentFeePayments");
                 });
 
             modelBuilder.Entity("AegisCore.Domain.Entities.StudentGuardian", b =>

@@ -125,6 +125,13 @@ public sealed class FeeDemand : ITenantScoped
     [Required, MaxLength(20)] public string Status { get; set; } = "OPEN";
     public DateTime IssuedAt { get; set; } = DateTime.UtcNow;
     public DateTime DueDate { get; set; }
+    // The demand is the single fee ledger: what the v1 StudentFeeDue carried lives here now.
+    public Guid? SemesterId { get; set; }
+    public Guid? FeeStructureId { get; set; }
+    [Column(TypeName = "numeric(19,4)")] public decimal ScholarshipDeduction { get; set; }
+    [Column(TypeName = "numeric(19,4)")] public decimal WaivedAmount { get; set; }
+    public Guid? WaivedBy { get; set; }
+    [MaxLength(500)] public string? WaivedReason { get; set; }
     public Guid TenantId { get; set; }
     public FinancePaymentPlan? PaymentPlan { get; set; }
     public ICollection<FeeInstallment> Installments { get; set; } = [];

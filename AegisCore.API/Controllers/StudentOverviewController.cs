@@ -29,7 +29,7 @@ public sealed class StudentOverviewController(AegisDbContext db) : ControllerBas
         var credits = passing.Sum(e => e.Course.CreditHours);
         var cgpa = AcademicRecordMath.Cgpa(enrollments, courses);
         var attendance = await db.Attendances.AsNoTracking().Where(a => a.Enrollment.StudentId == studentId).Include(a => a.Course).ToListAsync(ct);
-        var dues = await db.StudentFeeDues.AsNoTracking().Where(d => d.StudentId == studentId).ToListAsync(ct);
+        var dues = await db.FeeDemands.AsNoTracking().Where(d => d.StudentId == studentId).ToListAsync(ct);
         var test = applicant is null ? null : await db.ApplicantTests.AsNoTracking().SingleOrDefaultAsync(t => t.ApplicantId == applicant.Id, ct);
         var documents = applicant is null ? 0 : await db.ApplicantDocuments.AsNoTracking().CountAsync(d => d.ApplicantId == applicant.Id && d.ValidationStatus == AdmissionDocumentValidationStatus.Approved, ct);
         var timetable = await db.Timetables.AsNoTracking().Where(t => t.BatchId == student.BatchId).Include(t => t.Course)
@@ -43,7 +43,7 @@ public sealed class StudentOverviewController(AegisDbContext db) : ControllerBas
                 completedCourses = passing.Count, totalCourses = enrollments.Count,
                 courses = enrollments.Select(e => new { e.Course.Code, title = e.Course.Title, credits = e.Course.CreditHours, grade = e.Grade, status = e.EnrollmentStatus.ToString() }) },
             attendance = attendance.GroupBy(a => new { a.CourseId, a.Course.Title }).Select(g => new { course = g.Key.Title, total = g.Count(), present = g.Count(a => a.Status == AttendanceStatus.Present), percentage = Math.Round(g.Count(a => a.Status == AttendanceStatus.Present) * 100m / g.Count(), 1) }),
-            finance = new { demanded = dues.Sum(d => d.TotalDue), paid = dues.Sum(d => d.PaidAmount), outstanding = dues.Sum(d => d.OutstandingAmount), status = dues.Sum(d => d.OutstandingAmount) == 0 ? "Paid" : "Outstanding" },
+            finance = new { demanded = dues.Sum(d => d.TotalAmount), paid = dues.Sum(d => d.PaidAmount), scholarships = dues.Sum(d => d.ScholarshipDeduction), waived = dues.Sum(d => d.WaivedAmount), outstanding = dues.Sum(d => d.OutstandingAmount), status = dues.Count == 0 ? "No demands" : dues.Sum(d => d.OutstandingAmount) == 0 ? "Paid" : "Outstanding" },
             timetable
         });
     }

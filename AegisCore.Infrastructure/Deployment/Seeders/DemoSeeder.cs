@@ -199,15 +199,17 @@ public sealed class DemoSeeder(AegisDbContext db, ILogger<DemoSeeder> logger,
                 {
                     var isFocal = member.Number == focal.Number;
                     var dueId = Id($"due:{member.AccountKey}");
-                    await Add(new StudentFeeDue { Id = dueId, TenantId = tenantId, StudentId = Id(member.AccountKey), SemesterId = Id(scenario.Semester.Key),
-                        FeeStructureId = Id(scenario.Fee.Key), TotalDue = scenario.Fee.StudentDue,
+                    var dueDate = new DateTime(2026, 9, 30, 0, 0, 0, DateTimeKind.Utc);
+                    await Add(new FeeDemand { Id = dueId, TenantId = tenantId, StudentId = Id(member.AccountKey), SemesterId = Id(scenario.Semester.Key),
+                        FeeStructureId = Id(scenario.Fee.Key), DemandNumber = $"FD-DEMO-{member.Number:0000}", Currency = "PKR", TotalAmount = scenario.Fee.StudentDue,
                         PaidAmount = isFocal ? scenario.Fee.StudentDue : 0, OutstandingAmount = isFocal ? 0 : scenario.Fee.StudentDue,
-                        Status = isFocal ? "paid" : "pending" }, dueId);
+                        Status = isFocal ? "PAID" : "OPEN", IssuedAt = new DateTime(2026, 8, 15, 0, 0, 0, DateTimeKind.Utc), DueDate = dueDate }, dueId);
+                    await Add(new FeeInstallment { Id = Id($"installment:{member.AccountKey}"), TenantId = tenantId, FeeDemandId = dueId, Sequence = 1,
+                        Amount = scenario.Fee.StudentDue, PaidAmount = isFocal ? scenario.Fee.StudentDue : 0, Status = isFocal ? "PAID" : "PENDING", DueDate = dueDate }, Id($"installment:{member.AccountKey}"));
                     if (isFocal)
-                        await Add(new StudentFeePayment { Id = Id($"payment:{member.AccountKey}"), TenantId = tenantId, FeeDueId = dueId,
-                            PaymentMethod = "manual", Amount = scenario.Fee.StudentDue, ReferenceNumber = "FNU-DEMO-PAID-0001",
-                            PaymentDate = new DateTimeOffset(2026, 8, 20, 5, 0, 0, TimeSpan.Zero), VerifiedBy = Id("account.administrator"),
-                            VerificationDate = new DateTimeOffset(2026, 8, 20, 5, 5, 0, TimeSpan.Zero) }, Id($"payment:{member.AccountKey}"));
+                        await Add(new FinancePayment { Id = Id($"payment:{member.AccountKey}"), TenantId = tenantId, FeeDemandId = dueId, FeeInstallmentId = Id($"installment:{member.AccountKey}"),
+                            IdempotencyKey = "demo:FNU-DEMO-PAID-0001", Method = "MANUAL", Amount = scenario.Fee.StudentDue, ExternalReference = "FNU-DEMO-PAID-0001",
+                            Status = "SETTLED", CreatedAt = new DateTime(2026, 8, 20, 5, 0, 0, DateTimeKind.Utc), SettledAt = new DateTime(2026, 8, 20, 5, 5, 0, DateTimeKind.Utc) }, Id($"payment:{member.AccountKey}"));
                 }
             await db.SaveChangesAsync(ct);
 

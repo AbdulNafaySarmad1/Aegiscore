@@ -245,10 +245,7 @@ these filters." + "Clear filters".
   evidence recorded against its criteria (`POST /api/readiness/frameworks…`, then
   `POST /api/readiness/compute/{frameworkId}`) and refuses to score a framework with no criteria,
   so `/readiness/current` says "not assessed" until the QEC enters the framework; a stored row with
-  no `CriterionScoresJson` is still shown as "unevidenced", never as a score; (2) the pilot's fees
-  live in `StudentFeeDues`, while the executive dashboard reads `FeeDemands` (the finance v2 model
-  that installments, payments and plans hang off), so that tenant sees "no fee demands raised yet"
-  until the two ledgers are unified — a product decision, recorded in the deploy-readiness report.
+  no `CriterionScoresJson` is still shown as "unevidenced", never as a score; (2) there is one fee ledger, `FeeDemands` (the finance v2 model that installments, payments and plans hang off): the earlier `StudentFeeDues` ledger was folded into it, so the executive dashboard, the student finance line and graduation clearance all read the same rows.
 - **`/readiness`** is rebuilt on the register vocabulary and reads `/api/readiness/current`
   (its previous `GET /api/readiness/compute` and `POST check-evidence-freshness` never existed).
 - **Masthead search** filters the rail in place; it does not yet search records.

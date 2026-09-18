@@ -4,7 +4,8 @@ namespace AegisCore.Application.Finance;
 
 public interface IFeeService
 {
-    Task<StudentFeeDue> CalculateFeeAsync(Guid studentId, Guid semesterId, Guid feeStructureId, CancellationToken ct = default);
+    /// <summary>Raises the fee demand for a student's semester from the fee structure. The demand is the fee ledger.</summary>
+    Task<FeeDemand> CalculateFeeAsync(Guid studentId, Guid semesterId, Guid feeStructureId, CancellationToken ct = default);
     Task RecordPaymentAsync(Guid feeDueId, PaymentRequest payment, CancellationToken ct = default);
     Task<decimal> CalculateLateFeeAsync(Guid feeDueId, CancellationToken ct = default);
     Task ApplyScholarshipAsync(Guid feeDueId, decimal amount, Guid scholarshipId, CancellationToken ct = default);
@@ -12,7 +13,7 @@ public interface IFeeService
 
 public interface IAccountingService
 {
-    Task PostFeePaymentAsync(StudentFeePayment payment, Guid postedBy, CancellationToken ct = default);
+    Task PostFeePaymentAsync(FinancePayment payment, Guid postedBy, CancellationToken ct = default);
     Task<string> ExportPifraAsync(DateOnly from, DateOnly to, CancellationToken ct = default);
 }
 

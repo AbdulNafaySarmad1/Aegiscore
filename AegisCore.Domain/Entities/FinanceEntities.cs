@@ -32,39 +32,6 @@ public class FeeComponent : ITenantScoped
     public FeeStructure FeeStructure { get; set; } = null!;
 }
 
-[Table("StudentFeeDues")]
-public class StudentFeeDue : ITenantScoped
-{
-    public Guid TenantId { get; set; }
-    [Key] public Guid Id { get; set; }
-    public Guid StudentId { get; set; }
-    public Guid SemesterId { get; set; }
-    public Guid FeeStructureId { get; set; }
-    [Column(TypeName = "decimal(12,2)")] public decimal TotalDue { get; set; }
-    [Column(TypeName = "decimal(12,2)")] public decimal PaidAmount { get; set; }
-    [Column(TypeName = "decimal(12,2)")] public decimal ScholarshipDeduction { get; set; }
-    [Column(TypeName = "decimal(12,2)")] public decimal OutstandingAmount { get; set; }
-    [Required, MaxLength(20)] public string Status { get; set; } = "pending";
-    public Guid? WaivedBy { get; set; }
-    public string? WaivedReason { get; set; }
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-}
-
-[Table("StudentFeePayments")]
-public class StudentFeePayment : ITenantScoped
-{
-    public Guid TenantId { get; set; }
-    [Key] public Guid Id { get; set; }
-    public Guid FeeDueId { get; set; }
-    [Required, MaxLength(50)] public string PaymentMethod { get; set; } = string.Empty;
-    [Column(TypeName = "decimal(12,2)")] public decimal Amount { get; set; }
-    [MaxLength(100)] public string? ReferenceNumber { get; set; }
-    public DateTimeOffset PaymentDate { get; set; } = DateTimeOffset.UtcNow;
-    public Guid? VerifiedBy { get; set; }
-    public DateTimeOffset? VerificationDate { get; set; }
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-}
-
 [Table("CostCenters")]
 public class CostCenter : ITenantScoped
 {

@@ -50,10 +50,9 @@ public class BoardPortalService : IBoardPortalService
         var faculty = await _db.Faculties.CountAsync(ct);
         var publications = await _db.ResearchPublications.CountAsync(ct);
         var marks = await _db.Results.AsNoTracking().Where(r => r.TotalMarks > 0).Select(r => r.ObtainedMarks * 100m / r.TotalMarks).ToListAsync(ct);
-        var dues = await _db.StudentFeeDues.AsNoTracking().GroupBy(_ => 1).Select(g => new { Total = g.Sum(x => x.TotalDue - x.ScholarshipDeduction), Paid = g.Sum(x => x.PaidAmount) }).FirstOrDefaultAsync(ct);
-        var demands = await _db.FeeDemands.AsNoTracking().GroupBy(_ => 1).Select(g => new { Total = g.Sum(x => x.TotalAmount), Paid = g.Sum(x => x.PaidAmount) }).FirstOrDefaultAsync(ct);
-        var billed = (dues?.Total ?? 0m) + (demands?.Total ?? 0m);
-        var collected = (dues?.Paid ?? 0m) + (demands?.Paid ?? 0m);
+        var demands = await _db.FeeDemands.AsNoTracking().GroupBy(_ => 1).Select(g => new { Total = g.Sum(x => x.TotalAmount - x.ScholarshipDeduction - x.WaivedAmount), Paid = g.Sum(x => x.PaidAmount) }).FirstOrDefaultAsync(ct);
+        var billed = demands?.Total ?? 0m;
+        var collected = demands?.Paid ?? 0m;
         var readiness = await _db.ReadinessScores.AsNoTracking().OrderByDescending(s => s.GeneratedAt).Select(s => (decimal?)s.OverallScore).FirstOrDefaultAsync(ct);
         return new InstitutionFigures(students, faculty, publications,
             marks.Count > 0 ? (double)marks.Average() : null,

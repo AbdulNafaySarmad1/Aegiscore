@@ -9,11 +9,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 {
     public async Task<DefaultRiskAssessmentDto> AssessStudentRiskAsync(Guid studentId, Guid semesterId, CancellationToken ct = default)
     {
-        var payments = await db.StudentFeePayments
-            .Where(p => p.FeeDueId != Guid.Empty)
-            .ToListAsync(ct);
-
-        var feeDues = await db.StudentFeeDues
+        var feeDues = await db.FeeDemands
             .Where(d => d.StudentId == studentId && d.SemesterId == semesterId)
             .ToListAsync(ct);
 
@@ -23,11 +19,13 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
         var totalOutstanding = feeDues.Sum(d => d.OutstandingAmount);
         var scholarshipTotal = scholarships.Where(s => s.Status == ScholarshipStatus.Active).Sum(s => s.Amount);
-        var totalDue = feeDues.Sum(d => d.TotalDue);
+        var totalDue = feeDues.Sum(d => d.TotalAmount);
         var scholarshipCoverage = totalDue > 0 ? scholarshipTotal / totalDue : 0m;
 
-        var daysLateAvg = feeDues.Where(d => d.Status == "overdue").Count() * 15;
-        var daysLateMax = daysLateAvg * 2;
+        var now = DateTime.UtcNow;
+        var overdue = feeDues.Where(d => d.OutstandingAmount > 0m && d.DueDate < now).Select(d => (int)(now - d.DueDate).TotalDays).ToList();
+        var daysLateAvg = overdue.Count == 0 ? 0 : (int)overdue.Average();
+        var daysLateMax = overdue.Count == 0 ? 0 : overdue.Max();
 
         var score = ComputeDefaultProbability(totalOutstanding, daysLateAvg, scholarshipCoverage);
         var riskTier = DetermineRiskTier(score);
@@ -54,7 +52,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
                 KeyRiskDrivers = score > 0.5m ? "high_outstanding,late_payments" : null,
                 PredictionConfidence = 0.85m, OutstandingAmount = totalOutstanding,
                 AverageDaysLate = daysLateAvg, MaxDaysLate = daysLateMax,
-                PartialPaymentCount = feeDues.Count(d => d.PaidAmount > 0 && d.PaidAmount < d.TotalDue),
+                PartialPaymentCount = feeDues.Count(d => d.PaidAmount > 0 && d.PaidAmount < d.TotalAmount),
                 PaymentTrendScore = 0.5m, ScholarshipCoveragePercent = scholarshipCoverage,
                 IsHostelStudent = await db.StudentHostels.AnyAsync(h => h.StudentId == studentId, ct),
                 TenantId = await GetTenantIdAsync(ct)
@@ -68,7 +66,7 @@ public sealed class DefaultPredictionService(AegisDbContext db, ILogger<DefaultP
 
     public async Task<IReadOnlyList<DefaultRiskAssessmentDto>> AssessAllStudentsAsync(Guid semesterId, CancellationToken ct = default)
     {
-        var feeDues = await db.StudentFeeDues
+        var feeDues = await db.FeeDemands
             .Where(d => d.SemesterId == semesterId)
             .GroupBy(d => d.StudentId)
             .ToListAsync(ct);

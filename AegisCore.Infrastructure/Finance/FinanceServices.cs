@@ -7,76 +7,87 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AegisCore.Infrastructure.Finance;
 
+/// <summary>
+/// The lifecycle fee operations (raise a semester's demand from the fee structure, record a verified
+/// payment, apply a scholarship) on the one fee ledger, FeeDemands. StudentFeeDues, the earlier
+/// ledger, was folded into it; there is no second place a student's balance can live.
+/// </summary>
 public sealed class FeeService(AegisDbContext db, IPolicyService policies, IAccountingService accounting) : IFeeService
 {
-    public async Task<StudentFeeDue> CalculateFeeAsync(Guid studentId, Guid semesterId, Guid feeStructureId, CancellationToken ct = default)
+    public static readonly string[] PaymentMethods = ["bank_transfer", "jazzcash", "easypaisa", "cheque", "cash", "manual"];
+
+    public async Task<FeeDemand> CalculateFeeAsync(Guid studentId, Guid semesterId, Guid feeStructureId, CancellationToken ct = default)
     {
         if (studentId == Guid.Empty || semesterId == Guid.Empty || feeStructureId == Guid.Empty) throw new ArgumentException("Student, semester, and fee structure are required.");
         var structure = await db.FeeStructures.Include(f => f.Components).FirstOrDefaultAsync(f => f.Id == feeStructureId, ct)
             ?? throw new KeyNotFoundException("Fee structure was not found.");
         var total = structure.Components.Count == 0 ? structure.TotalFee : structure.Components.Where(c => c.IsMandatory).Sum(c => c.Amount);
         if (total < 0) throw new InvalidOperationException("Fee structure total cannot be negative.");
-        if (await db.StudentFeeDues.AnyAsync(d => d.StudentId == studentId && d.SemesterId == semesterId && d.FeeStructureId == feeStructureId, ct)) throw new InvalidOperationException("Fee due already exists for this student and semester.");
-        var due = new StudentFeeDue
+        if (await db.FeeDemands.AnyAsync(d => d.StudentId == studentId && d.SemesterId == semesterId && d.FeeStructureId == feeStructureId, ct)) throw new InvalidOperationException("A fee demand already exists for this student, semester and fee structure.");
+        var semester = await db.Semesters.AsNoTracking().FirstOrDefaultAsync(s => s.Id == semesterId, ct) ?? throw new KeyNotFoundException("Semester was not found.");
+        var dueDays = await policies.GetAsync("finance", "fee_due_days", 30, ct);
+        var now = DateTime.UtcNow;
+        var demand = new FeeDemand
         {
-            Id = Guid.NewGuid(),
-            StudentId = studentId,
-            SemesterId = semesterId,
-            FeeStructureId = feeStructureId,
-            TotalDue = total,
-            OutstandingAmount = total
+            Id = Guid.NewGuid(), StudentId = studentId, SemesterId = semesterId, FeeStructureId = feeStructureId,
+            DemandNumber = $"FD-{now:yyyyMMdd}-{Guid.NewGuid():N}"[..21], Currency = "PKR",
+            TotalAmount = total, OutstandingAmount = total, Status = total == 0m ? "PAID" : "OPEN", IssuedAt = now,
+            DueDate = (semester.StartDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc) is var start && start > now ? start : now).AddDays(dueDays),
         };
-
-        db.StudentFeeDues.Add(due);
+        demand.Installments.Add(new FeeInstallment { Id = Guid.NewGuid(), Sequence = 1, Amount = total, DueDate = demand.DueDate });
+        db.FeeDemands.Add(demand);
         await db.SaveChangesAsync(ct);
-        return due;
+        return demand;
     }
 
-    public async Task RecordPaymentAsync(Guid feeDueId, PaymentRequest payment, CancellationToken ct = default)
+    public async Task RecordPaymentAsync(Guid feeDemandId, PaymentRequest payment, CancellationToken ct = default)
     {
-        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new KeyNotFoundException("Fee due was not found.");
-        if (payment.Amount <= 0 || payment.Amount > due.OutstandingAmount || string.IsNullOrWhiteSpace(payment.Method) || !new[] { "bank_transfer", "jazzcash", "easypaisa", "cheque" }.Contains(payment.Method.Trim().ToLowerInvariant()))
-        {
-            throw new InvalidOperationException("Payment amount is outside outstanding balance.");
-        }
+        var demand = await db.FeeDemands.Include(d => d.Installments).FirstOrDefaultAsync(d => d.Id == feeDemandId, ct) ?? throw new KeyNotFoundException("Fee demand was not found.");
+        if (payment.Amount <= 0 || payment.Amount > demand.OutstandingAmount || string.IsNullOrWhiteSpace(payment.Method) || !PaymentMethods.Contains(payment.Method.Trim().ToLowerInvariant()))
+            throw new InvalidOperationException("Payment amount is outside the outstanding balance, or the payment method is not one of: " + string.Join(", ", PaymentMethods) + ".");
 
-        var row = new StudentFeePayment
+        var row = new FinancePayment
         {
-            Id = Guid.NewGuid(),
-            FeeDueId = feeDueId,
-            PaymentMethod = payment.Method,
-            Amount = payment.Amount,
-            ReferenceNumber = payment.ReferenceNumber
+            Id = Guid.NewGuid(), FeeDemandId = demand.Id, IdempotencyKey = string.IsNullOrWhiteSpace(payment.ReferenceNumber) ? Guid.NewGuid().ToString("N") : $"ref:{payment.ReferenceNumber.Trim()}"[..Math.Min(40, 4 + payment.ReferenceNumber.Trim().Length)],
+            Method = payment.Method.Trim().ToUpperInvariant(), ExternalReference = payment.ReferenceNumber, Amount = payment.Amount, Status = "SETTLED", SettledAt = DateTime.UtcNow
         };
-        due.PaidAmount += payment.Amount;
-        due.OutstandingAmount = Math.Max(0m, due.TotalDue - due.PaidAmount - due.ScholarshipDeduction);
-        due.Status = due.OutstandingAmount == 0m ? "paid" : "partial";
-        db.StudentFeePayments.Add(row);
+        if (await db.FinancePayments.AnyAsync(p => p.IdempotencyKey == row.IdempotencyKey, ct)) throw new InvalidOperationException($"A payment with reference '{payment.ReferenceNumber}' was already recorded.");
+        Apply(demand, paid: payment.Amount);
+        var installment = demand.Installments.OrderBy(i => i.Sequence).FirstOrDefault(i => i.PaidAmount < i.Amount);
+        if (installment is not null) { row.FeeInstallmentId = installment.Id; installment.PaidAmount += payment.Amount; installment.Status = installment.PaidAmount >= installment.Amount ? "PAID" : "PARTIAL"; }
+        db.FinancePayments.Add(row);
         await db.SaveChangesAsync(ct);
         await accounting.PostFeePaymentAsync(row, Guid.Empty, ct);
     }
 
-    public async Task<decimal> CalculateLateFeeAsync(Guid feeDueId, CancellationToken ct = default)
+    public async Task<decimal> CalculateLateFeeAsync(Guid feeDemandId, CancellationToken ct = default)
     {
-        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new KeyNotFoundException("Fee due was not found.");
+        var demand = await db.FeeDemands.FindAsync([feeDemandId], ct) ?? throw new KeyNotFoundException("Fee demand was not found.");
         var graceDays = await policies.GetAsync("finance", "late_fee_grace_days", 3, ct);
-        return due.Status == "paid" ? 0m : Math.Round(due.OutstandingAmount * 0.01m * graceDays, 2);
+        return demand.Status == "PAID" || demand.DueDate.AddDays(graceDays) > DateTime.UtcNow ? 0m : Math.Round(demand.OutstandingAmount * 0.01m * graceDays, 2);
     }
 
-    public async Task ApplyScholarshipAsync(Guid feeDueId, decimal amount, Guid scholarshipId, CancellationToken ct = default)
+    public async Task ApplyScholarshipAsync(Guid feeDemandId, decimal amount, Guid scholarshipId, CancellationToken ct = default)
     {
-        var due = await db.StudentFeeDues.FindAsync([feeDueId], ct) ?? throw new KeyNotFoundException("Fee due was not found.");
-        if (scholarshipId == Guid.Empty || amount <= 0 || amount > due.OutstandingAmount) throw new InvalidOperationException("Scholarship amount is outside the outstanding balance.");
-        due.ScholarshipDeduction += amount;
-        due.OutstandingAmount = Math.Max(0m, due.TotalDue - due.PaidAmount - due.ScholarshipDeduction);
-        due.Status = due.OutstandingAmount == 0m ? "paid" : due.Status;
+        var demand = await db.FeeDemands.FindAsync([feeDemandId], ct) ?? throw new KeyNotFoundException("Fee demand was not found.");
+        if (scholarshipId == Guid.Empty || amount <= 0 || amount > demand.OutstandingAmount) throw new InvalidOperationException("Scholarship amount is outside the outstanding balance.");
+        demand.ScholarshipDeduction += amount;
+        Apply(demand, paid: 0m);
         await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Outstanding = total − paid − scholarship − waived; the status follows from it.</summary>
+    public static void Apply(FeeDemand demand, decimal paid)
+    {
+        demand.PaidAmount += paid;
+        demand.OutstandingAmount = Math.Max(0m, demand.TotalAmount - demand.PaidAmount - demand.ScholarshipDeduction - demand.WaivedAmount);
+        demand.Status = demand.OutstandingAmount == 0m ? (demand.WaivedAmount > 0m && demand.PaidAmount == 0m ? "WAIVED" : "PAID") : demand.PaidAmount > 0m || demand.ScholarshipDeduction > 0m ? "PARTIAL" : "OPEN";
     }
 }
 
 public sealed class AccountingService(AegisDbContext db) : IAccountingService
 {
-    public async Task PostFeePaymentAsync(StudentFeePayment payment, Guid postedBy, CancellationToken ct = default)
+    public async Task PostFeePaymentAsync(FinancePayment payment, Guid postedBy, CancellationToken ct = default)
     {
         if (payment.Amount <= 0) throw new InvalidOperationException("Journal amount must be positive.");
         if (await db.JournalEntries.AnyAsync(j => j.Description == $"Fee payment {payment.Id:N}", ct)) return;
@@ -86,7 +97,7 @@ public sealed class AccountingService(AegisDbContext db) : IAccountingService
         {
             Id = Guid.NewGuid(),
             EntryNumber = $"FEE-{payment.Id:N}"[..20],
-            EntryDate = payment.PaymentDate.UtcDateTime,
+            EntryDate = payment.SettledAt ?? payment.CreatedAt,
             EntryType = JournalEntryType.AutoGenerated,
             Description = $"Fee payment {payment.Id:N}",
             TotalDebit = payment.Amount,
