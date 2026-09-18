@@ -26,6 +26,9 @@ public sealed class LicenseService(
             return Fail("License key is required.", LicenseValidationFailureReason.InvalidSignature);
         }
 
+        if (OfflineLicense.IsOfflineKey(licenseKey))
+            return OfflineLicense.Validate(licenseKey.Trim(), OfflineLicense.IssuerPublicKeyPem(configuration), DateOnly.FromDateTime(DateTime.UtcNow));
+
         var secret = configuration["License:HmacSecret"];
         if (string.IsNullOrWhiteSpace(secret))
         {
@@ -89,8 +92,12 @@ public sealed class LicenseService(
         state.UniversityId = validation.License.UniversityId;
         state.UniversityName = validation.License.UniversityName;
         state.Status = "active";
-        state.LicenseJson = RedactSignature(licenseKey);
+        state.LicenseJson = OfflineLicense.IsOfflineKey(licenseKey) ? OfflineLicense.PayloadJson(licenseKey.Trim()) : RedactSignature(licenseKey);
+        if (OfflineLicense.IsOfflineKey(licenseKey)) state.LicenseKey = licenseKey.Trim();
         state.ActivatedAt ??= DateTimeOffset.UtcNow;
+        // A newly activated key starts clean: the failures that locked the previous key do not carry over.
+        state.FailedHeartbeatCount = 0;
+        state.LastHeartbeatStatus = null;
         state.LockedAt = null;
         state.LockReason = null;
         state.UpdatedAt = DateTimeOffset.UtcNow;
@@ -111,23 +118,9 @@ public sealed class LicenseService(
             return await FailHeartbeatAsync(null, "pending_activation", "License is not activated.", ct);
         }
 
-        // Demo seeding is an explicit local opt-in. Its trial key is intentionally
-        // not a license-authority artifact, so do not send it to an authority or
-        // lock the dedicated rehearsal tenant on the periodic heartbeat.
-        if (configuration.GetValue<bool>("DemoSeed:Enabled"))
-        {
-            state.Status = "active";
-            state.LastHeartbeatAt = DateTimeOffset.UtcNow;
-            state.LastHeartbeatStatus = "demo-local";
-            state.FailedHeartbeatCount = 0;
-            state.LockedAt = null;
-            state.LockReason = null;
-            state.UpdatedAt = DateTimeOffset.UtcNow;
-            await db.SaveChangesAsync(ct);
-            return new HeartbeatResult(true, "demo-local", "Explicit local demo mode; no license authority was contacted.");
-        }
-
-        if (OfflineModeEnabled())
+        // An offline licence is the authority: it is re-verified against the vendor's public key on
+        // every heartbeat and nothing is transmitted. There is no demo flag that skips this.
+        if (OfflineModeEnabled() || OfflineLicense.IsOfflineKey(state.LicenseKey))
         {
             var validation = await ValidateAsync(state.LicenseKey, ct);
             if (!validation.IsValid)
@@ -153,7 +146,7 @@ public sealed class LicenseService(
             return new HeartbeatResult(
                 true,
                 "offline",
-                "Offline licence mode is enabled; the locally signed licence was validated and no heartbeat data was transmitted.");
+                "The offline licence was verified locally against the vendor public key; nothing was transmitted.");
         }
 
         var endpoint = configuration["License:HeartbeatUrl"] ?? configuration["License:ServerUrl"] ?? configuration["LICENSE_SERVER_URL"];
@@ -242,7 +235,8 @@ public sealed class LicenseService(
             state.LastHeartbeatAt,
             state.FailedHeartbeatCount,
             state.OverrideUntil,
-            ReadTier(OfflineModeEnabled() ? state.LicenseKey : state.LicenseJson));
+            OfflineLicense.IsOfflineKey(state.LicenseKey) ? (TryTier(OfflineLicense.Tier(state.LicenseKey), out var offlineTier) ? offlineTier : LicenseTier.Basic)
+                : ReadTier(OfflineModeEnabled() ? state.LicenseKey : state.LicenseJson));
     }
 
     public async Task ManualOverrideAsync(Guid actorId, string reason, DateTimeOffset validUntil, CancellationToken ct = default)

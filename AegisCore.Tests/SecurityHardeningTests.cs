@@ -125,7 +125,7 @@ m = r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 
         context.Response.Body.Position = 0;
         var body = await System.Text.Json.JsonSerializer.DeserializeAsync<System.Text.Json.JsonElement>(context.Response.Body);
-        Assert.Contains("System License Invalid", body.GetProperty("error").GetString(), StringComparison.Ordinal);
+        Assert.Contains("This installation is read-only", body.GetProperty("error").GetString(), StringComparison.Ordinal);
     }
 
     // 4 ─ Oversized file upload → rejected at boundary (>10MB)

@@ -90,7 +90,7 @@ public sealed class LicenseServiceTests
 
         Assert.True(result.Success);
         Assert.Equal("offline", result.Status);
-        Assert.Contains("no heartbeat data was transmitted", result.Message, StringComparison.Ordinal);
+        Assert.Contains("nothing was transmitted", result.Message, StringComparison.Ordinal);
         var state = await db.LicenseStates.SingleAsync();
         Assert.Equal("offline", state.LastHeartbeatStatus);
         Assert.Equal(0, state.FailedHeartbeatCount);

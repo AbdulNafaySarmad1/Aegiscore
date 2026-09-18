@@ -56,6 +56,7 @@ builder.Configuration.AddEnvironmentSubstitution();
 
 // Operator command: `dotnet AegisCore.API.dll rotate-jwt-keys` rotates the token-signing pair on the
 // config volume and exits; restart the application afterwards.
+if (AegisCore.API.Health.VendorCommands.TryRun(args, out var vendorExit)) { Environment.ExitCode = vendorExit; return; }
 if (args.Contains("rotate-jwt-keys", StringComparer.OrdinalIgnoreCase))
 {
     Console.WriteLine(AegisCore.Infrastructure.Security.JwtKeyMaterial.Rotate(builder.Configuration));

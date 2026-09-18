@@ -23,8 +23,19 @@ public sealed class AegisCoreLicenseController(
     [HttpPost("/api/admin/license/activate")]
     public async Task<IActionResult> Activate([FromBody] ActivateLicenseRequest request, CancellationToken ct)
     {
-        await licenses.ActivateAsync(request.LicenseKey, request.UniversityId, ct);
-        return NoContent();
+        try
+        {
+            await licenses.ActivateAsync(request.LicenseKey, request.UniversityId, ct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // The validation message names what is wrong with the key (signature, expiry, university).
+            return UnprocessableEntity(new { error = ex.Message, code = "license_rejected" });
+        }
+        // A heartbeat straight away, so the status page shows the new key's standing rather than the old key's failures.
+        var heartbeat = await licenses.SendHeartbeatAsync(ct);
+        var status = await licenses.GetStatusAsync(ct);
+        return Ok(new { activated = true, heartbeat = heartbeat.Status, message = heartbeat.Message, status });
     }
 
     [AegisCore.API.Authorization.RequirePermission("System", "Approve")]
