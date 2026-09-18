@@ -1,0 +1,97 @@
+# AegisCore quick start — one command, one machine, nothing to edit inside a container.
+#
+#   AEGISCORE_RELEASE_IMAGE=<image:tag> docker compose -f docker-compose.quickstart.yml up -d
+#   docker compose -f docker-compose.quickstart.yml logs app | grep "Setup token"
+#   open http://localhost:8080/setup and type the setup token
+#
+# Everything else — the tenant id, the setup token, encryption keys, the key-ring certificate, the
+# RSA token-signing keys — is generated on the first start into the `config` volume and reused on
+# every restart. Set POSTGRES_PASSWORD before the first start on anything but a laptop; the
+# database is not reachable from outside the compose network.
+#
+# For a hardened two-replica deployment behind the university ingress use docker-compose.client.yml.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aegiscore}
+      POSTGRES_USER: ${POSTGRES_USER:-aegiscore}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aegiscore-change-me}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U ${POSTGRES_USER:-aegiscore} -d ${POSTGRES_DB:-aegiscore}']
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: [redis-server, --save, '60', '1', --loglevel, warning]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  app:
+    image: ${AEGISCORE_RELEASE_IMAGE:?Set AEGISCORE_RELEASE_IMAGE to the image and tag you were given}
+    init: true
+    stop_grace_period: 35s
+    environment:
+      AEGISCORE_COMPONENT: application
+      ASPNETCORE_ENVIRONMENT: Production
+      APP_ENV: Production
+      Runtime__DemoMode: 'false'
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      DB_DIALECT: postgres
+      AEGISCORE_DB_CONNECTION: Host=postgres;Port=5432;Database=${POSTGRES_DB:-aegiscore};Username=${POSTGRES_USER:-aegiscore};Password=${POSTGRES_PASSWORD:-aegiscore-change-me}
+      AEGISCORE_REDIS_CONNECTION: redis:6379
+      Database__AutoMigrate: ${AEGISCORE_AUTO_MIGRATE:-true}
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-900}
+      License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.aegiscore.systems}
+      License__OfflineMode: 'false'
+      AEGISCORE_SECRET_PROVIDER: FILE
+      AEGISCORE_LOCAL_SECRET_PATH: /app/config/secrets/vault.bin
+      AEGISCORE_STORAGE_PROVIDER: local
+      AEGISCORE_STORAGE_LOCAL_PATH: /app/storage
+      DataProtection__KeyPath: /app/config/data-protection
+      DataProtection__CertificatePath: /app/config/data-protection.pfx
+      Jwt__PrivateKeyPath: /app/config/jwt-signing.key
+      Jwt__PublicKeyPath: /app/config/jwt-signing.pub
+      Jwt__PreviousPublicKeyPath: /app/config/jwt-signing.previous.pub
+      AI_PROVIDER: ${AI_PROVIDER:-disabled}
+      Branding__SealUrl: ${AEGISCORE_SEAL_URL:-}
+      # Supply any of these to override the generated value; leave empty to let the first start generate it.
+      TENANT_ID: ${TENANT_ID:-}
+      AEGISCORE_SETUP_TOKEN: ${AEGISCORE_SETUP_TOKEN:-}
+      DATA_PROTECTION_CERTIFICATE_PASSWORD: ${DATA_PROTECTION_CERTIFICATE_PASSWORD:-}
+      DataProtection__CertificatePassword: ${DATA_PROTECTION_CERTIFICATE_PASSWORD:-}
+    ports:
+      - '${AEGISCORE_PORT:-8080}:8080'
+    volumes:
+      - config:/app/config
+      - storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1:8081/health']
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 90s
+    restart: unless-stopped
+
+volumes:
+  postgres:
+  redis:
+  config:
+  storage:

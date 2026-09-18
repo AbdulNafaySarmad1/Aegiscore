@@ -56,11 +56,37 @@ builder.Configuration.AddEnvironmentSubstitution();
 
 // Operator command: `dotnet AegisCore.API.dll rotate-jwt-keys` rotates the token-signing pair on the
 // config volume and exits; restart the application afterwards.
-if (AegisCore.API.Health.VendorCommands.TryRun(args, out var vendorExit)) { Environment.ExitCode = vendorExit; return; }
+if (AegisCore.API.Health.VendorCommands.TryRun(args, out var vendorExit)) { Environment.ExitCode = vendorExit; return 0; }
+// Operator command: `dotnet AegisCore.API.dll migrate` applies pending migrations (or initialises an empty
+// database) with the same policy the startup uses, prints the outcome and exits.
+if (args.Contains("migrate", StringComparer.OrdinalIgnoreCase))
+{
+    var migrateServices = new ServiceCollection();
+    migrateServices.AddLogging(l => l.AddConsole());
+    migrateServices.AddAegisDbContext(builder.Configuration);
+    await using var migrateProvider = migrateServices.BuildServiceProvider();
+    using var migrateScope = migrateProvider.CreateScope();
+    var migrateLogger = migrateScope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("migrate");
+    try
+    {
+        var outcome = await AegisCore.Infrastructure.Deployment.StartupBootstrap.SchemaPolicyAsync(
+            migrateScope.ServiceProvider.GetRequiredService<AegisDbContext>(),
+            new ConfigurationBuilder().AddConfiguration(builder.Configuration).AddInMemoryCollection(new Dictionary<string, string?> { ["Database:AutoMigrate"] = "true" }).Build(),
+            migrateLogger);
+        Console.WriteLine($"{outcome.Action}: {outcome.Detail}");
+    }
+    catch (AegisCore.Infrastructure.Deployment.StartupBootstrap.BootstrapException ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        Environment.ExitCode = 1;
+    }
+    return 0;
+}
+
 if (args.Contains("rotate-jwt-keys", StringComparer.OrdinalIgnoreCase))
 {
     Console.WriteLine(AegisCore.Infrastructure.Security.JwtKeyMaterial.Rotate(builder.Configuration));
-    return;
+    return 0;
 }
 
 builder.WebHost.ConfigureKestrel(options =>
@@ -100,15 +126,32 @@ builder.Services.AddInstallationState();
 
 var isInstalled = InstallationStateService.HasPersistentMarker(builder.Configuration, builder.Environment.ContentRootPath);
 
+// First-start bootstrap, both modes: secrets nobody should invent by hand (setup token, encryption keys,
+// tenant id, certificate password, ...), the key-ring certificate and the token-signing pair are generated
+// once into the config volume when the environment does not supply them, and reused on every restart.
+try
+{
+    var secretsLogger = LoggerFactory.Create(l => l.AddSerilog()).CreateLogger("bootstrap");
+    var configDirectory = AegisCore.Infrastructure.Deployment.GeneratedSecrets.ConfigDirectory(builder.Configuration, builder.Environment.ContentRootPath);
+    // One replica provisions at a time; the other finds the artefacts in place.
+    using var bootstrapLock = AegisCore.Infrastructure.Deployment.ConfigVolumeLock.Acquire(configDirectory);
+    AegisCore.Infrastructure.Deployment.GeneratedSecrets.Ensure(builder.Configuration, builder.Configuration, configDirectory, secretsLogger);
+    AegisCore.Infrastructure.Deployment.StartupBootstrap.EnsureDataProtectionCertificate(builder.Configuration, secretsLogger);
+    AegisCore.Infrastructure.Deployment.StartupBootstrap.EnsureTokenSigningKeys(builder.Configuration, secretsLogger);
+}
+catch (AegisCore.Infrastructure.Deployment.StartupBootstrap.BootstrapException ex)
+{
+    Log.Fatal("[AEGISCORE] STARTUP BLOCKED: {Message}", ex.Message);
+    Log.CloseAndFlush();
+    return 1;
+}
+
+
 if (!isInstalled)
 {
     var setupToken = SetupBootstrapToken.RequireValid(builder.Configuration);
     var setupUrl = (builder.Configuration["APP_URL"] ?? "http://localhost:3000").TrimEnd('/');
     Log.Information("AegisCore starting in installation mode - no external dependencies required");
-    // Production validates access tokens with RSA only. Provision the pair into the config volume
-    // now, so the installed runtime finds it on every restart.
-    if (AegisCore.Infrastructure.Security.JwtKeyMaterial.EnsureGenerated(builder.Configuration))
-        Log.Information("[AEGISCORE] Generated the RSA token-signing key pair at {Path}", builder.Configuration[AegisCore.Infrastructure.Security.JwtKeyMaterial.PrivateKeyPathKey]);
     Log.Warning("[AEGISCORE] Setup token: {SetupToken}", setupToken);
     Log.Information("[AEGISCORE] Navigate to {SetupUrl}/setup to begin installation.", setupUrl);
 
@@ -196,6 +239,7 @@ if (!isInstalled)
     })).AllowAnonymous();
 
     app.Run();
+    return 0;
 }
 else
 {
@@ -355,10 +399,23 @@ else
     try
     {
         Log.Information("Starting AegisCore API...");
-        await ApplyDatabaseMigrationsAsync(app);
+        try
+        {
+            using var schemaScope = app.Services.CreateScope();
+            var outcome = await AegisCore.Infrastructure.Deployment.StartupBootstrap.SchemaPolicyAsync(
+                schemaScope.ServiceProvider.GetRequiredService<AegisDbContext>(), app.Configuration, app.Logger);
+            Log.Information("[AEGISCORE] Database schema {Action}: {Detail}", outcome.Action, outcome.Detail);
+        }
+        catch (AegisCore.Infrastructure.Deployment.StartupBootstrap.BootstrapException ex)
+        {
+            Log.Fatal("[AEGISCORE] STARTUP BLOCKED: {Message}", ex.Message);
+            Log.CloseAndFlush();
+            return 1;
+        }
         await app.RunDeploymentReadinessCheckAsync();
         Log.Information("AegisCore API started successfully.");
         app.Run();
+        return 0;
     }
     catch (Exception ex)
     {
@@ -372,15 +429,6 @@ else
 }
 
 
-static async Task ApplyDatabaseMigrationsAsync(WebApplication app)
-{
-    if (!app.Configuration.GetValue("Database:AutoMigrate", false))
-        return;
-
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
-    await db.Database.MigrateAsync();
-}
 
 static async Task ApplyInstallationSchemaAsync(WebApplication app)
 {

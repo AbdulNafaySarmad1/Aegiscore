@@ -44,30 +44,34 @@ x-application: &application
     AEGISCORE_COMPONENT: application
     ASPNETCORE_ENVIRONMENT: Production
     Runtime__DemoMode: 'false'
-    Database__AutoMigrate: 'false'
-    TENANT_ID: ${TENANT_ID:?Required}
+    # An empty database is always initialised. Pending migrations on an existing database are applied on start
+    # unless this is false, in which case the app refuses to start and names them (run `dotnet /app/AegisCore.API.dll migrate`).
+    Database__AutoMigrate: ${AEGISCORE_AUTO_MIGRATE:-true}
+    # Left empty, the tenant id, setup token, secrets, PQC material and the certificate password are
+    # generated into the config volume on first start (generated-secrets.env) and reused afterwards.
+    TENANT_ID: ${TENANT_ID:-}
     DB_DIALECT: ${DB_DIALECT:-postgres}
     AEGISCORE_DB_CONNECTION: ${AEGISCORE_DB_CONNECTION:?Required}
     AEGISCORE_REDIS_CONNECTION: ${AEGISCORE_REDIS_CONNECTION:?Required}
-    License__ServerUrl: ${LICENSE_SERVER_URL:?Required}
-    License__HmacSecret: ${LICENSE_HMAC_SECRET:?Required}
-    License__HeartbeatServerToken: ${LICENSE_HEARTBEAT_TOKEN:?Required}
+    License__ServerUrl: ${LICENSE_SERVER_URL:-https://license.aegiscore.systems}
+    License__HmacSecret: ${LICENSE_HMAC_SECRET:-}
+    License__HeartbeatServerToken: ${LICENSE_HEARTBEAT_TOKEN:-}
     License__OfflineMode: 'false'
-    AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:?Required}
-    AEGISCORE_PQC_KEY_BASE64: ${AEGISCORE_PQC_KEY_BASE64:?Required}
-    AEGISCORE_JWT_SECRET: ${AEGISCORE_JWT_SECRET:?Required}
-    Governance__FeedbackEncryptionKeyBase64: ${GOVERNANCE_FEEDBACK_KEY_BASE64:?Required}
+    AEGISCORE_ENCRYPTION_KEY: ${AEGISCORE_ENCRYPTION_KEY:-}
+    AEGISCORE_PQC_KEY_BASE64: ${AEGISCORE_PQC_KEY_BASE64:-}
+    AEGISCORE_JWT_SECRET: ${AEGISCORE_JWT_SECRET:-}
+    Governance__FeedbackEncryptionKeyBase64: ${GOVERNANCE_FEEDBACK_KEY_BASE64:-}
     APP_URL: ${APP_URL:?Required}
-    APP_SECRET: ${APP_SECRET:?Required}
-    AEGISCORE_SETUP_TOKEN: ${AEGISCORE_SETUP_TOKEN:?Required}
+    APP_SECRET: ${APP_SECRET:-}
+    AEGISCORE_SETUP_TOKEN: ${AEGISCORE_SETUP_TOKEN:-}
     # Startup readiness contract (AegisCore.Infrastructure/Deployment/EnvironmentValidator.cs):
     # the installed runtime refuses to start when any of these is missing.
     APP_ENV: Production
     SESSION_LIFETIME: ${SESSION_LIFETIME:-900}
-    PQC_MLKEM_PUBLIC_KEY: ${PQC_MLKEM_PUBLIC_KEY:?Required}
-    PQC_MLKEM_PRIVATE_KEY: ${PQC_MLKEM_PRIVATE_KEY:?Required}
-    PQC_MLDSA_PUBLIC_KEY: ${PQC_MLDSA_PUBLIC_KEY:?Required}
-    PQC_MLDSA_PRIVATE_KEY: ${PQC_MLDSA_PRIVATE_KEY:?Required}
+    PQC_MLKEM_PUBLIC_KEY: ${PQC_MLKEM_PUBLIC_KEY:-}
+    PQC_MLKEM_PRIVATE_KEY: ${PQC_MLKEM_PRIVATE_KEY:-}
+    PQC_MLDSA_PUBLIC_KEY: ${PQC_MLDSA_PUBLIC_KEY:-}
+    PQC_MLDSA_PRIVATE_KEY: ${PQC_MLDSA_PRIVATE_KEY:-}
     CF_TURNSTILE_SITE_KEY: ${CF_TURNSTILE_SITE_KEY:-}
     CF_TURNSTILE_SECRET_KEY: ${CF_TURNSTILE_SECRET_KEY:-}
     AEGISCORE_SECRET_PROVIDER: FILE
@@ -80,7 +84,7 @@ x-application: &application
     Jwt__PublicKeyPath: /app/config/jwt-signing.pub
     # Production refuses to start without the PKCS#12 certificate that encrypts the key ring.
     DataProtection__CertificatePath: /app/config/data-protection.pfx
-    DataProtection__CertificatePassword: ${DATA_PROTECTION_CERTIFICATE_PASSWORD:?Required}
+    DataProtection__CertificatePassword: ${DATA_PROTECTION_CERTIFICATE_PASSWORD:-}
     Branding__SealUrl: ${AEGISCORE_SEAL_URL:-}
     CLIP_SERVICE_URL: http://aegiscore-clip:8100
   volumes:
