@@ -261,11 +261,11 @@ const profiles: Record<string, RoleProfile> = {
     role: "IT",
     displayName: "IT Head",
     allowedRoutes: [
-      "/portal-health", "/sync-lag", "/replication",
+      "/admin/health", "/sync-lag", "/replication",
       "/audit", "/data-import", "/imports", "/setup", "/admin/license",
     ],
     dashboardModules: [
-      { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health, uptime, and performance metrics.", priority: 1, domain: "operations", badge: "MONITOR" },
+      { id: "portal-health", label: "System health", icon: "ShieldCheck", route: "/admin/health", color: "green", description: "Whether the database, cache, storage and every module are answering.", priority: 1, domain: "operations", badge: "MONITOR" },
       { id: "sync-lag", label: "Sync Lag Monitor", icon: "FileSearch", route: "/sync-lag", color: "amber", description: "Data synchronization lag across replicas.", priority: 2, domain: "operations" },
       { id: "replication", label: "Data Replication", icon: "FileSearch", route: "/replication", color: "amber", description: "Replica status and failover management.", priority: 3, domain: "operations" },
       { id: "audit", label: "Audit Logs", icon: "ShieldCheck", route: "/audit", color: "red", description: "Security audit logs and access trails.", priority: 4, domain: "compliance" },
@@ -274,8 +274,8 @@ const profiles: Record<string, RoleProfile> = {
       { id: "license", label: "Licence", icon: "ShieldCheck", route: "/admin/license", color: "amber", description: "Licence standing and offline licence keys.", priority: 7, domain: "operations" },
     ],
     kpis: [
-      { id: "uptime", label: "System Uptime %", value: "--", format: "percentage", icon: "ShieldCheck", iconColor: "green", source: "/api/portal-health" },
-      { id: "latency", label: "API Response (ms)", value: "--", format: "number", icon: "FileSearch", iconColor: "blue", source: "/api/portal-health" },
+      { id: "register-health", label: "Register health", value: "--", format: "text", icon: "ShieldCheck", iconColor: "green", source: "/health/modules" },
+      { id: "database-round-trip", label: "Database round trip", value: "--", format: "text", icon: "FileSearch", iconColor: "blue", source: "/health/modules" },
       { id: "sessions", label: "Active Sessions", value: "--", format: "number", icon: "UserRound", iconColor: "violet" },
       { id: "failed-jobs", label: "Failed Jobs", value: "--", format: "number", icon: "FileSearch", iconColor: "red", source: "/api/imports?status=failed" },
     ],
@@ -283,7 +283,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "audit", label: "View Audit Log", icon: "ShieldCheck", route: "/audit" },
       { id: "sync", label: "Check Sync Status", icon: "FileSearch", route: "/sync-lag" },
       { id: "import", label: "Run Import", icon: "FileSearch", route: "/data-import" },
-      { id: "health", label: "System Health", icon: "ShieldCheck", route: "/portal-health" },
+      { id: "health", label: "System Health", icon: "ShieldCheck", route: "/admin/health" },
     ],
   },
 
@@ -355,7 +355,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "placement", label: "Placement", icon: "Briefcase", route: "/placement", color: "violet", description: "Internship and placement tracking.", priority: 8, domain: "welfare" },
       { id: "mental-health", label: "Mental Health", icon: "ShieldCheck", route: "/mental-health", color: "violet", description: "Counselor queue and crisis management.", priority: 9, domain: "welfare" },
       { id: "achievements", label: "Achievements", icon: "GraduationCap", route: "/achievements", color: "violet", description: "Student achievement tracking.", priority: 10, domain: "welfare" },
-      { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health monitoring.", priority: 11, domain: "operations" },
+      { id: "portal-health", label: "System health", icon: "ShieldCheck", route: "/admin/health", color: "green", description: "Whether the database, cache, storage and every module are answering.", priority: 11, domain: "operations" },
       { id: "data-import", label: "Data Import", icon: "FileSearch", route: "/data-import", color: "amber", description: "Bulk data import management.", priority: 12, domain: "operations" },
       { id: "campus-geofences", label: "Campus Geofences", icon: "MapPin", route: "/admin/campus", color: "green", description: "Configure attendance campus boundaries.", priority: 13, domain: "operations" },
       { id: "license", label: "Licence", icon: "ShieldCheck", route: "/admin/license", color: "amber", description: "Licence standing and offline licence keys.", priority: 14, domain: "operations" },
@@ -370,7 +370,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "exec-report", label: "View Executive Report", icon: "FileText", route: "/" },
       { id: "board", label: "Board Portal", icon: "LayoutDashboard", route: "/board" },
       { id: "accreditation", label: "Accreditation Status", icon: "ShieldCheck", route: "/readiness" },
-      { id: "health", label: "System Health", icon: "ShieldCheck", route: "/portal-health" },
+      { id: "health", label: "System Health", icon: "ShieldCheck", route: "/admin/health" },
     ],
   },
 
@@ -389,7 +389,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "placements", label: "Placement", icon: "Briefcase", route: "/placement", color: "violet", description: "Placement rates and partner companies.", priority: 8, domain: "welfare" },
       { id: "achievements", label: "Achievements", icon: "GraduationCap", route: "/achievements", color: "violet", description: "Student and faculty achievements.", priority: 9, domain: "welfare" },
       { id: "mental-health", label: "Mental Health", icon: "ShieldCheck", route: "/mental-health", color: "violet", description: "Crisis monitoring and counselor load.", priority: 10, domain: "welfare" },
-      { id: "portal-health", label: "Portal Health", icon: "ShieldCheck", route: "/portal-health", color: "green", description: "System health and performance.", priority: 11, domain: "operations" },
+      { id: "portal-health", label: "System health", icon: "ShieldCheck", route: "/admin/health", color: "green", description: "Whether the database, cache, storage and every module are answering.", priority: 11, domain: "operations" },
       { id: "transport", label: "Transport", icon: "Briefcase", route: "/transport", color: "amber", description: "Fleet status and route management.", priority: 12, domain: "operations" },
     ],
     kpis: [
@@ -403,7 +403,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "exec-report", label: "View Executive Report", icon: "FileText", route: "/" },
       { id: "board", label: "Board Portal", icon: "LayoutDashboard", route: "/board" },
       { id: "accreditation", label: "Accreditation Status", icon: "ShieldCheck", route: "/readiness" },
-      { id: "health", label: "System Health", icon: "ShieldCheck", route: "/portal-health" },
+      { id: "health", label: "System Health", icon: "ShieldCheck", route: "/admin/health" },
     ],
   },
 

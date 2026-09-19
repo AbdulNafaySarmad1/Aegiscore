@@ -157,9 +157,15 @@ public sealed class ModuleHealthService(IServiceProvider services, ApplicationPa
         var infrastructureDown = infrastructure.Where(i => i.Status == "unavailable").ToList();
         var modulesDown = modules.Where(m => m.Status != "healthy").ToList();
         var status = infrastructureDown.Count > 0 || modulesDown.Count > 0 ? "unhealthy" : infrastructure.Any(i => i.Status == "degraded") ? "degraded" : "healthy";
+        // The summary is the one sentence an operator reads. "Degraded" with nothing after it — which
+        // is what every fresh installation said, having no mail host and no licence authority yet —
+        // tells them nothing, so the degraded lines are named too.
+        var infrastructureDegraded = infrastructure.Where(i => i.Status == "degraded").ToList();
         var summary = status == "healthy"
             ? $"All {modules.Count} modules are wired and every dependency answers."
-            : string.Join(" ", infrastructureDown.Select(i => $"{i.Name}: {i.Detail}").Concat(modulesDown.Select(m => $"Module '{m.Module}': {m.Problems[0]}")));
+            : string.Join(" ", infrastructureDown.Select(i => $"{i.Name}: {i.Detail}")
+                .Concat(modulesDown.Select(m => $"Module '{m.Module}': {m.Problems[0]}"))
+                .Concat(infrastructureDegraded.Select(i => $"{i.Name}: {i.Detail}")));
         if (status != "healthy") logger.LogWarning("Module health {Status}: {Summary}", status, summary);
         return new ModuleHealthReport(status, infrastructure, modules, summary);
     }

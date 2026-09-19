@@ -181,6 +181,7 @@
 .notice[data-tone="laurel"] svg { color: var(--laurel); }
 .notice details { grid-column: 1 / -1; font-size: var(--t-13); }
 .notice summary { cursor: pointer; color: var(--ink-2); }
+.code-block { margin: 0; padding: var(--s-3); background: var(--ink); color: var(--on-ink); font-family: var(--mono); font-size: var(--t-12); white-space: pre-wrap; overflow: auto; }
 .notice pre { margin-top: var(--s-2); padding: var(--s-3); background: var(--ink); color: var(--on-ink); font-size: var(--t-12); white-space: pre-wrap; overflow: auto; max-height: 200px; }
 
 /* ── Empty state ── */

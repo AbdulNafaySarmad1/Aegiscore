@@ -70,7 +70,45 @@ async function facultyStudentRatio(signal: AbortSignal): Promise<KpiReading> {
   return { state: "value", value: `1 : ${perFaculty}`, note: `${integer(teaching)} teaching faculty to ${integer(enrolled)} active students` };
 }
 
+type HealthReport = { status: string; infrastructure: Array<{ name: string; status: string; detail: string }>; modules: Array<{ status: string }> };
+
+/** The report answers 503 with the same body when something is down; the body is what we want. */
+async function healthReport(signal: AbortSignal): Promise<HealthReport> {
+  try {
+    return await apiGet<HealthReport>("/health/modules", signal);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 503 && error.payload && typeof error.payload === "object") return error.payload as HealthReport;
+    throw error;
+  }
+}
+
+// "Register health" → GET /health/modules: the overall word, with what is not answering.
+async function registerHealth(signal: AbortSignal): Promise<KpiReading> {
+  const report = await healthReport(signal);
+  const down = report.infrastructure.filter(i => i.status === "unavailable").map(i => i.name);
+  const unconfigured = report.infrastructure.filter(i => i.status === "degraded").map(i => i.name);
+  const modules = report.modules.filter(m => m.status !== "healthy").length;
+  const word = report.status === "healthy" ? "Healthy" : report.status === "degraded" ? "Degraded" : "Unhealthy";
+  const note = down.length > 0 ? `${down.join(", ")} not answering`
+    : modules > 0 ? `${modules} module${modules === 1 ? "" : "s"} with a problem`
+    : unconfigured.length > 0 ? `${unconfigured.join(", ")} not configured`
+    : `${report.modules.length} modules answering`;
+  return { state: "value", value: word, note };
+}
+
+// "Database round trip" → GET /health/modules, the database line's measured time.
+async function databaseRoundTrip(signal: AbortSignal): Promise<KpiReading> {
+  const report = await healthReport(signal);
+  const database = report.infrastructure.find(i => i.name === "database");
+  const ms = database?.detail.match(/(\d+)\s*ms/)?.[1];
+  if (!database || database.status === "unavailable") return { state: "value", value: "—", note: "the database did not answer" };
+  return { state: "value", value: ms ? `${ms} ms` : "answering", note: "measured on the last health check" };
+}
+
 const resolvers: Record<string, Resolver> = {
+  // IT admin "Register health" and "Database round trip" → GET /health/modules
+  "register-health": registerHealth,
+  "database-round-trip": databaseRoundTrip,
   // Admin, VC and SuperAdmin "Fee collection rate" → GET /api/finance/v2/dashboard/executive
   collection: feeCollectionRate,
   "collection-rate": feeCollectionRate,

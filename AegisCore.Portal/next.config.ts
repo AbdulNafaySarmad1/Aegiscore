@@ -21,7 +21,9 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const api = process.env.AEGISCORE_API_INTERNAL_URL ?? "http://api:8080";
     return [
-      { source: "/health/:path*", destination: `${api}/health/:path*` },
+      // Only the bare liveness probe. Everything under /health/ goes through app/health/[...path],
+      // which carries the signed-in session to the API.
+      { source: "/health", destination: `${api}/health` },
       { source: "/hubs/:path*", destination: `${api}/hubs/:path*` }
     ];
   }
