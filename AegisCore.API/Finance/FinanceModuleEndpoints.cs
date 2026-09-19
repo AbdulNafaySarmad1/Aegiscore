@@ -874,22 +874,25 @@ public static partial class FinanceModuleEndpoints
 
         group.MapPost("/petty-cash/funds/{fundId:guid}/expenses", async (Guid fundId, HttpContext context, RecordFinancePettyCashExpenseCommand command, AegisDbContext db, CancellationToken ct) =>
         {
-            var tenantId = Tenant(context);
-            var actorId = UserId(context);
-            await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-            var fund = await db.FinancePettyCashFunds.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == fundId && x.IsActive, ct);
-            if (fund is null) return Results.NotFound();
-            if (fund.CustodianUserId != actorId && !CanManageFinance(context)) return Results.Forbid();
-            if (command.Amount <= 0m || string.IsNullOrWhiteSpace(command.Category) || string.IsNullOrWhiteSpace(command.Description) || command.Amount > fund.CurrentBalance)
-                return Results.UnprocessableEntity(new { success = false, error = "Expense details are invalid or exceed the available petty-cash balance." });
-            var expense = new FinancePettyCashExpense { Id = Guid.NewGuid(), TenantId = tenantId, FinancePettyCashFundId = fund.Id, Category = command.Category.Trim(), Description = command.Description.Trim(), VendorName = command.VendorName?.Trim(), Amount = decimal.Round(command.Amount, 4, MidpointRounding.AwayFromZero), ReceiptHash = command.ReceiptHash?.Trim(), SpentAt = command.SpentAt.ToUniversalTime(), CreatedByUserId = actorId };
-            fund.CurrentBalance -= expense.Amount;
-            fund.UpdatedAt = DateTime.UtcNow;
-            db.FinancePettyCashExpenses.Add(expense);
-            await db.SaveChangesAsync(ct);
-            await transaction.CommitAsync(ct);
-            var threshold = fund.FloatAmount * 0.20m;
-            return Results.Created($"/api/finance/v2/petty-cash/expenses/{expense.Id}", new { expense, replenishmentRequired = fund.CurrentBalance < threshold, threshold });
+            return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                var tenantId = Tenant(context);
+                var actorId = UserId(context);
+                await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+                var fund = await db.FinancePettyCashFunds.SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == fundId && x.IsActive, ct);
+                if (fund is null) return Results.NotFound();
+                if (fund.CustodianUserId != actorId && !CanManageFinance(context)) return Results.Forbid();
+                if (command.Amount <= 0m || string.IsNullOrWhiteSpace(command.Category) || string.IsNullOrWhiteSpace(command.Description) || command.Amount > fund.CurrentBalance)
+                    return Results.UnprocessableEntity(new { success = false, error = "Expense details are invalid or exceed the available petty-cash balance." });
+                var expense = new FinancePettyCashExpense { Id = Guid.NewGuid(), TenantId = tenantId, FinancePettyCashFundId = fund.Id, Category = command.Category.Trim(), Description = command.Description.Trim(), VendorName = command.VendorName?.Trim(), Amount = decimal.Round(command.Amount, 4, MidpointRounding.AwayFromZero), ReceiptHash = command.ReceiptHash?.Trim(), SpentAt = command.SpentAt.ToUniversalTime(), CreatedByUserId = actorId };
+                fund.CurrentBalance -= expense.Amount;
+                fund.UpdatedAt = DateTime.UtcNow;
+                db.FinancePettyCashExpenses.Add(expense);
+                await db.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+                var threshold = fund.FloatAmount * 0.20m;
+                return Results.Created($"/api/finance/v2/petty-cash/expenses/{expense.Id}", new { expense, replenishmentRequired = fund.CurrentBalance < threshold, threshold });
+            });
         });
 
         group.MapPost("/petty-cash/funds/{fundId:guid}/counts", async (Guid fundId, HttpContext context, ConfirmFinancePettyCashCountCommand command, AegisDbContext db, CancellationToken ct) =>
@@ -1113,21 +1116,24 @@ public static partial class FinanceModuleEndpoints
 
         group.MapPost("/standing-purchase-orders/spend", async (HttpContext context, RecordStandingPurchaseOrderSpendCommand command, AegisDbContext db, CancellationToken ct) =>
         {
-            if (!CanManageFinance(context)) return Results.Forbid();
-            if (command.StandingPurchaseOrderId == Guid.Empty || command.Amount <= 0m || string.IsNullOrWhiteSpace(command.Description))
-                return Results.UnprocessableEntity(new { success = false, error = "Spend fields are invalid." });
-            await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-            var order = await db.FinanceStandingPurchaseOrders.SingleOrDefaultAsync(p => p.TenantId == Tenant(context) && p.Id == command.StandingPurchaseOrderId, ct);
-            if (order is null) return Results.NotFound();
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            if (order.Status != "ACTIVE" || today < order.StartsOn || today > order.EndsOn) return Results.UnprocessableEntity(new { success = false, error = "Standing purchase order is not active for the current date." });
-            if (order.UsedAmount + command.Amount > order.LimitAmount) return Results.UnprocessableEntity(new { success = false, error = "Standing purchase order limit would be exceeded." });
-            order.UsedAmount += command.Amount;
-            var spend = new FinanceStandingPurchaseOrderSpend { Id = Guid.NewGuid(), TenantId = Tenant(context), StandingPurchaseOrderId = order.Id, Amount = command.Amount, Description = command.Description.Trim() };
-            db.FinanceStandingPurchaseOrderSpend.Add(spend);
-            await db.SaveChangesAsync(ct);
-            await transaction.CommitAsync(ct);
-            return Results.Ok(new { spendId = spend.Id, orderId = order.Id, order.UsedAmount, order.LimitAmount, remaining = order.LimitAmount - order.UsedAmount });
+            return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                if (!CanManageFinance(context)) return Results.Forbid();
+                if (command.StandingPurchaseOrderId == Guid.Empty || command.Amount <= 0m || string.IsNullOrWhiteSpace(command.Description))
+                    return Results.UnprocessableEntity(new { success = false, error = "Spend fields are invalid." });
+                await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+                var order = await db.FinanceStandingPurchaseOrders.SingleOrDefaultAsync(p => p.TenantId == Tenant(context) && p.Id == command.StandingPurchaseOrderId, ct);
+                if (order is null) return Results.NotFound();
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                if (order.Status != "ACTIVE" || today < order.StartsOn || today > order.EndsOn) return Results.UnprocessableEntity(new { success = false, error = "Standing purchase order is not active for the current date." });
+                if (order.UsedAmount + command.Amount > order.LimitAmount) return Results.UnprocessableEntity(new { success = false, error = "Standing purchase order limit would be exceeded." });
+                order.UsedAmount += command.Amount;
+                var spend = new FinanceStandingPurchaseOrderSpend { Id = Guid.NewGuid(), TenantId = Tenant(context), StandingPurchaseOrderId = order.Id, Amount = command.Amount, Description = command.Description.Trim() };
+                db.FinanceStandingPurchaseOrderSpend.Add(spend);
+                await db.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+                return Results.Ok(new { spendId = spend.Id, orderId = order.Id, order.UsedAmount, order.LimitAmount, remaining = order.LimitAmount - order.UsedAmount });
+            });
         });
 
         group.MapPost("/exchange-rates/snapshots", async (HttpContext context, StoreExchangeRateCommand command, AegisDbContext db, CancellationToken ct) =>

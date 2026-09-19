@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using AegisCore.Domain.Entities;
@@ -37,29 +37,32 @@ public sealed class PqcKeyCeremonyService(AegisDbContext db, IPqcSignatureServic
 
     public async Task<FinancePqcKeyCeremony> ApproveAsync(Guid tenantId, Guid ceremonyId, Guid approverId, CancellationToken ct = default)
     {
-        if (approverId == Guid.Empty) throw new ArgumentException("Approver is required.");
-        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var ceremony = await db.FinancePqcKeyCeremonies.Include(x => x.Approvals)
-            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == ceremonyId, ct)
-            ?? throw new KeyNotFoundException("PQC key ceremony was not found.");
-        if (ceremony.Status != "PENDING" || ceremony.ExpiresAt <= DateTime.UtcNow) throw new InvalidOperationException("PQC key ceremony is not active.");
-        if (ceremony.RequestedByUserId == approverId) throw new InvalidOperationException("The requester cannot approve the same key ceremony.");
-        if (ceremony.Approvals.Any(x => x.ApprovedByUserId == approverId)) throw new InvalidOperationException("This user has already approved the key ceremony.");
-        var approvedAt = DateTime.UtcNow;
-        ceremony.Approvals.Add(new FinancePqcKeyCeremonyApproval
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, CeremonyId = ceremony.Id, ApprovedByUserId = approverId,
-            ApprovedAt = approvedAt, ApprovalDigest = Digest(ceremony, approverId, approvedAt)
+            if (approverId == Guid.Empty) throw new ArgumentException("Approver is required.");
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var ceremony = await db.FinancePqcKeyCeremonies.Include(x => x.Approvals)
+                .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == ceremonyId, ct)
+                ?? throw new KeyNotFoundException("PQC key ceremony was not found.");
+            if (ceremony.Status != "PENDING" || ceremony.ExpiresAt <= DateTime.UtcNow) throw new InvalidOperationException("PQC key ceremony is not active.");
+            if (ceremony.RequestedByUserId == approverId) throw new InvalidOperationException("The requester cannot approve the same key ceremony.");
+            if (ceremony.Approvals.Any(x => x.ApprovedByUserId == approverId)) throw new InvalidOperationException("This user has already approved the key ceremony.");
+            var approvedAt = DateTime.UtcNow;
+            ceremony.Approvals.Add(new FinancePqcKeyCeremonyApproval
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, CeremonyId = ceremony.Id, ApprovedByUserId = approverId,
+                ApprovedAt = approvedAt, ApprovalDigest = Digest(ceremony, approverId, approvedAt)
+            });
+            if (ceremony.Approvals.Count >= ceremony.RequiredApprovals)
+            {
+                ceremony.ActivatedKeyId = await signatures.RotateAsync(tenantId, ceremony.Purpose, ceremony.Algorithm == "SLH-DSA-SHA2-128s", ct);
+                ceremony.Status = "COMPLETED";
+                ceremony.CompletedAt = DateTime.UtcNow;
+            }
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            return ceremony;
         });
-        if (ceremony.Approvals.Count >= ceremony.RequiredApprovals)
-        {
-            ceremony.ActivatedKeyId = await signatures.RotateAsync(tenantId, ceremony.Purpose, ceremony.Algorithm == "SLH-DSA-SHA2-128s", ct);
-            ceremony.Status = "COMPLETED";
-            ceremony.CompletedAt = DateTime.UtcNow;
-        }
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
-        return ceremony;
     }
 
     private static byte[] Digest(FinancePqcKeyCeremony ceremony, Guid approverId, DateTime approvedAt)

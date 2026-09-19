@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -112,121 +112,124 @@ public sealed class PrivacyComplianceService(
 
     public async Task ProcessErasureAsync(Guid requestId, CancellationToken cancellationToken = default)
     {
-        var request = await db.ErasureRequests.IgnoreQueryFilters().SingleOrDefaultAsync(
-            item => item.Id == requestId, cancellationToken)
-            ?? throw new KeyNotFoundException("Erasure request was not found.");
-        if (request.Status == ErasureRequestStatus.Completed) return;
-
-        request.Status = ErasureRequestStatus.InProgress;
-        request.FailureReason = null;
-        await db.SaveChangesAsync(cancellationToken);
-
-        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        try
+        await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            var tenantId = request.TenantId;
-            var userId = request.UserId;
-            var erasedName = $"ERASED_USER_{userId:N}";
-            var user = await db.Users.IgnoreQueryFilters().SingleOrDefaultAsync(
-                item => item.TenantId == tenantId && item.Id == userId, cancellationToken);
-            var originalEmail = user?.Email;
+            var request = await db.ErasureRequests.IgnoreQueryFilters().SingleOrDefaultAsync(
+                item => item.Id == requestId, cancellationToken)
+                ?? throw new KeyNotFoundException("Erasure request was not found.");
+            if (request.Status == ErasureRequestStatus.Completed) return;
 
-            if (user is not null)
-            {
-                user.Username = erasedName;
-                user.Email = $"{userId:N}@erased.invalid";
-                user.FirstName = erasedName;
-                user.LastName = string.Empty;
-                user.PasswordHash = null;
-                user.ExternalId = null;
-                user.ExternalClaimsJson = null;
-                user.RefreshToken = null;
-                user.RefreshTokenExpiry = null;
-                user.DeactivatedAt = DateTime.UtcNow;
-            }
-
-            var student = await db.Students.IgnoreQueryFilters().SingleOrDefaultAsync(
-                item => item.TenantId == tenantId && item.Id == userId, cancellationToken);
-            if (student is not null)
-            {
-                student.FirstName = erasedName;
-                student.LastName = string.Empty;
-                student.UniversityId = erasedName;
-                student.DirectoryOptOut = true;
-
-                var profiles = await db.StudentProfiles.IgnoreQueryFilters()
-                    .Where(item => item.TenantId == tenantId && item.StudentId == student.Id)
-                    .ToListAsync(cancellationToken);
-                foreach (var profile in profiles) profile.ProfileJson = "{}";
-
-                var guardians = await db.StudentGuardians.IgnoreQueryFilters()
-                    .Where(item => item.TenantId == tenantId && item.StudentId == student.Id)
-                    .ToListAsync(cancellationToken);
-                foreach (var guardian in guardians)
-                {
-                    guardian.Name = "ERASED";
-                    guardian.Phone = null;
-                    guardian.Email = null;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(originalEmail))
-            {
-                var applications = await db.AdmissionApplications.IgnoreQueryFilters()
-                    .Where(item => item.TenantId == tenantId && item.Email == originalEmail)
-                    .ToListAsync(cancellationToken);
-                foreach (var application in applications)
-                {
-                    application.StudentName = erasedName;
-                    application.Email = $"{userId:N}@erased.invalid";
-                    application.Phone = string.Empty;
-                    application.Cnic = "00000-0000000-0";
-                    application.DateOfBirth = default;
-                }
-            }
-
-            var audits = await db.FerpaAuditLogs.IgnoreQueryFilters()
-                .Where(item => item.TenantId == tenantId && (item.UserId == userId || item.StudentId == userId))
-                .ToListAsync(cancellationToken);
-            foreach (var audit in audits) audit.EraseIdentifiers(userId);
-
-            var consents = await db.ConsentLedgers.IgnoreQueryFilters()
-                .Where(item => item.TenantId == tenantId && item.UserId == userId)
-                .ToListAsync(cancellationToken);
-            foreach (var consent in consents) consent.Revoke(DateTime.UtcNow);
-
-            var sessions = await db.SsoSessions.IgnoreQueryFilters()
-                .Where(item => item.TenantId == tenantId && item.UserId == userId)
-                .ToListAsync(cancellationToken);
-            db.SsoSessions.RemoveRange(sessions);
-
-            var pictures = await db.ProfilePictureRecords.IgnoreQueryFilters()
-                .Where(item => item.TenantId == tenantId && item.UserId == userId)
-                .ToListAsync(cancellationToken);
-            foreach (var picture in pictures)
-            {
-                if (!string.IsNullOrWhiteSpace(picture.StorageKey))
-                    await storage.DeleteAsync(_profileBucket, $"{picture.StorageKey}.jpg", cancellationToken);
-            }
-            db.ProfilePictureRecords.RemoveRange(pictures);
-
-            request.Status = ErasureRequestStatus.Completed;
-            request.ErasedAt = DateTime.UtcNow;
+            request.Status = ErasureRequestStatus.InProgress;
             request.FailureReason = null;
             await db.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            logger.LogInformation("Completed GDPR erasure request {RequestId} for tenant {TenantId}.", request.Id, tenantId);
-        }
-        catch (Exception exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            db.ChangeTracker.Clear();
-            var failed = await db.ErasureRequests.IgnoreQueryFilters().SingleAsync(item => item.Id == requestId, cancellationToken);
-            failed.Status = ErasureRequestStatus.Failed;
-            failed.FailureReason = exception.Message.Length <= 4000 ? exception.Message : exception.Message[..4000];
-            await db.SaveChangesAsync(cancellationToken);
-            logger.LogError(exception, "GDPR erasure request {RequestId} failed.", requestId);
-        }
+
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                var tenantId = request.TenantId;
+                var userId = request.UserId;
+                var erasedName = $"ERASED_USER_{userId:N}";
+                var user = await db.Users.IgnoreQueryFilters().SingleOrDefaultAsync(
+                    item => item.TenantId == tenantId && item.Id == userId, cancellationToken);
+                var originalEmail = user?.Email;
+
+                if (user is not null)
+                {
+                    user.Username = erasedName;
+                    user.Email = $"{userId:N}@erased.invalid";
+                    user.FirstName = erasedName;
+                    user.LastName = string.Empty;
+                    user.PasswordHash = null;
+                    user.ExternalId = null;
+                    user.ExternalClaimsJson = null;
+                    user.RefreshToken = null;
+                    user.RefreshTokenExpiry = null;
+                    user.DeactivatedAt = DateTime.UtcNow;
+                }
+
+                var student = await db.Students.IgnoreQueryFilters().SingleOrDefaultAsync(
+                    item => item.TenantId == tenantId && item.Id == userId, cancellationToken);
+                if (student is not null)
+                {
+                    student.FirstName = erasedName;
+                    student.LastName = string.Empty;
+                    student.UniversityId = erasedName;
+                    student.DirectoryOptOut = true;
+
+                    var profiles = await db.StudentProfiles.IgnoreQueryFilters()
+                        .Where(item => item.TenantId == tenantId && item.StudentId == student.Id)
+                        .ToListAsync(cancellationToken);
+                    foreach (var profile in profiles) profile.ProfileJson = "{}";
+
+                    var guardians = await db.StudentGuardians.IgnoreQueryFilters()
+                        .Where(item => item.TenantId == tenantId && item.StudentId == student.Id)
+                        .ToListAsync(cancellationToken);
+                    foreach (var guardian in guardians)
+                    {
+                        guardian.Name = "ERASED";
+                        guardian.Phone = null;
+                        guardian.Email = null;
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(originalEmail))
+                {
+                    var applications = await db.AdmissionApplications.IgnoreQueryFilters()
+                        .Where(item => item.TenantId == tenantId && item.Email == originalEmail)
+                        .ToListAsync(cancellationToken);
+                    foreach (var application in applications)
+                    {
+                        application.StudentName = erasedName;
+                        application.Email = $"{userId:N}@erased.invalid";
+                        application.Phone = string.Empty;
+                        application.Cnic = "00000-0000000-0";
+                        application.DateOfBirth = default;
+                    }
+                }
+
+                var audits = await db.FerpaAuditLogs.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && (item.UserId == userId || item.StudentId == userId))
+                    .ToListAsync(cancellationToken);
+                foreach (var audit in audits) audit.EraseIdentifiers(userId);
+
+                var consents = await db.ConsentLedgers.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.UserId == userId)
+                    .ToListAsync(cancellationToken);
+                foreach (var consent in consents) consent.Revoke(DateTime.UtcNow);
+
+                var sessions = await db.SsoSessions.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.UserId == userId)
+                    .ToListAsync(cancellationToken);
+                db.SsoSessions.RemoveRange(sessions);
+
+                var pictures = await db.ProfilePictureRecords.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.UserId == userId)
+                    .ToListAsync(cancellationToken);
+                foreach (var picture in pictures)
+                {
+                    if (!string.IsNullOrWhiteSpace(picture.StorageKey))
+                        await storage.DeleteAsync(_profileBucket, $"{picture.StorageKey}.jpg", cancellationToken);
+                }
+                db.ProfilePictureRecords.RemoveRange(pictures);
+
+                request.Status = ErasureRequestStatus.Completed;
+                request.ErasedAt = DateTime.UtcNow;
+                request.FailureReason = null;
+                await db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                logger.LogInformation("Completed GDPR erasure request {RequestId} for tenant {TenantId}.", request.Id, tenantId);
+            }
+            catch (Exception exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                db.ChangeTracker.Clear();
+                var failed = await db.ErasureRequests.IgnoreQueryFilters().SingleAsync(item => item.Id == requestId, cancellationToken);
+                failed.Status = ErasureRequestStatus.Failed;
+                failed.FailureReason = exception.Message.Length <= 4000 ? exception.Message : exception.Message[..4000];
+                await db.SaveChangesAsync(cancellationToken);
+                logger.LogError(exception, "GDPR erasure request {RequestId} failed.", requestId);
+            }
+        });
     }
 
     public async Task<DsarArchive> CreateDsarArchiveAsync(Guid userId, CancellationToken cancellationToken = default)

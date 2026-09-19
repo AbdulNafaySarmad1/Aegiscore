@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using AegisCore.Application.Finance;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
@@ -46,34 +46,37 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
 
     public async Task<FinanceAssetAccountingEvent> DisposeAsync(Guid tenantId, Guid actorId, Guid assetId, DisposeFinanceAssetCommand command, CancellationToken ct)
     {
-        var asset = await AssetAsync(tenantId, assetId, ct);
-        if (actorId == Guid.Empty || command.Proceeds < 0m || !Enum.TryParse<DisposalMethod>(command.Method, true, out var method)) throw new ArgumentException("Disposal fields are invalid.");
-        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
-        var assetAccount = await AccountAsync(tenantId, "1500", "Property plant and equipment", AccountType.Asset, ct);
-        var accumulatedAccount = await AccountAsync(tenantId, "1590", "Accumulated depreciation", AccountType.Asset, ct);
-        var gainAccount = await AccountAsync(tenantId, "4210", "Gain on asset disposal", AccountType.Revenue, ct);
-        var lossAccount = await AccountAsync(tenantId, "6112", "Loss on asset disposal", AccountType.Expense, ct);
-        var carrying = asset.CurrentValue;
-        var accumulated = Math.Max(0m, asset.PurchaseCost - carrying);
-        var difference = command.Proceeds - carrying;
-        var lines = new List<JournalEntryLine>();
-        if (command.Proceeds > 0m) lines.Add(Line(tenantId, bank.Id, command.Proceeds, 0m));
-        if (accumulated > 0m) lines.Add(Line(tenantId, accumulatedAccount.Id, accumulated, 0m));
-        if (difference < 0m) lines.Add(Line(tenantId, lossAccount.Id, -difference, 0m));
-        lines.Add(Line(tenantId, assetAccount.Id, 0m, asset.PurchaseCost));
-        if (difference > 0m) lines.Add(Line(tenantId, gainAccount.Id, 0m, difference));
-        var total = lines.Sum(x => x.Debit);
-        var journal = Journal(tenantId, actorId, $"FA-DIS-{asset.Id:N}", $"Asset disposal: {asset.Name}", total, lines);
-        db.JournalEntries.Add(journal);
-        db.AssetDisposals.Add(new AssetDisposal { Id = Guid.NewGuid(), TenantId = tenantId, AssetId = asset.Id, Method = method, Status = DisposalStatus.Completed, SaleValue = command.Proceeds, DisposalDate = DateTime.UtcNow });
-        asset.CurrentValue = 0m;
-        asset.Status = method == DisposalMethod.WriteOff ? AssetStatus.WrittenOff : AssetStatus.Disposed;
-        var accountingEvent = Event(tenantId, actorId, asset.Id, "DISPOSAL", carrying, 0m, command.Proceeds, command.Reason, journal.Id);
-        db.FinanceAssetAccountingEvents.Add(accountingEvent);
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
-        return accountingEvent;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            var asset = await AssetAsync(tenantId, assetId, ct);
+            if (actorId == Guid.Empty || command.Proceeds < 0m || !Enum.TryParse<DisposalMethod>(command.Method, true, out var method)) throw new ArgumentException("Disposal fields are invalid.");
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var bank = await AccountAsync(tenantId, "1010", "Bank", AccountType.Asset, ct);
+            var assetAccount = await AccountAsync(tenantId, "1500", "Property plant and equipment", AccountType.Asset, ct);
+            var accumulatedAccount = await AccountAsync(tenantId, "1590", "Accumulated depreciation", AccountType.Asset, ct);
+            var gainAccount = await AccountAsync(tenantId, "4210", "Gain on asset disposal", AccountType.Revenue, ct);
+            var lossAccount = await AccountAsync(tenantId, "6112", "Loss on asset disposal", AccountType.Expense, ct);
+            var carrying = asset.CurrentValue;
+            var accumulated = Math.Max(0m, asset.PurchaseCost - carrying);
+            var difference = command.Proceeds - carrying;
+            var lines = new List<JournalEntryLine>();
+            if (command.Proceeds > 0m) lines.Add(Line(tenantId, bank.Id, command.Proceeds, 0m));
+            if (accumulated > 0m) lines.Add(Line(tenantId, accumulatedAccount.Id, accumulated, 0m));
+            if (difference < 0m) lines.Add(Line(tenantId, lossAccount.Id, -difference, 0m));
+            lines.Add(Line(tenantId, assetAccount.Id, 0m, asset.PurchaseCost));
+            if (difference > 0m) lines.Add(Line(tenantId, gainAccount.Id, 0m, difference));
+            var total = lines.Sum(x => x.Debit);
+            var journal = Journal(tenantId, actorId, $"FA-DIS-{asset.Id:N}", $"Asset disposal: {asset.Name}", total, lines);
+            db.JournalEntries.Add(journal);
+            db.AssetDisposals.Add(new AssetDisposal { Id = Guid.NewGuid(), TenantId = tenantId, AssetId = asset.Id, Method = method, Status = DisposalStatus.Completed, SaleValue = command.Proceeds, DisposalDate = DateTime.UtcNow });
+            asset.CurrentValue = 0m;
+            asset.Status = method == DisposalMethod.WriteOff ? AssetStatus.WrittenOff : AssetStatus.Disposed;
+            var accountingEvent = Event(tenantId, actorId, asset.Id, "DISPOSAL", carrying, 0m, command.Proceeds, command.Reason, journal.Id);
+            db.FinanceAssetAccountingEvents.Add(accountingEvent);
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            return accountingEvent;
+        });
     }
 
     public async Task<VerificationCycle> CreateVerificationCycleAsync(Guid tenantId, CreateAssetVerificationCycleCommand command, CancellationToken ct)
@@ -106,16 +109,19 @@ public sealed class FinanceAssetLifecycleService(AegisDbContext db)
 
     private async Task<FinanceAssetAccountingEvent> PostEventAsync(Guid tenantId, Guid actorId, Asset asset, string type, decimal newValue, decimal proceeds, string reason, decimal amount, Guid debitId, Guid creditId, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var previous = asset.CurrentValue;
-        var journal = Journal(tenantId, actorId, $"FA-{type[..3]}-{asset.Id:N}-{DateTime.UtcNow:yyyyMMddHHmmss}", $"{type}: {asset.Name}", amount, [Line(tenantId, debitId, amount, 0m), Line(tenantId, creditId, 0m, amount)]);
-        db.JournalEntries.Add(journal);
-        asset.CurrentValue = newValue;
-        var accountingEvent = Event(tenantId, actorId, asset.Id, type, previous, newValue, proceeds, reason, journal.Id);
-        db.FinanceAssetAccountingEvents.Add(accountingEvent);
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
-        return accountingEvent;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var previous = asset.CurrentValue;
+            var journal = Journal(tenantId, actorId, $"FA-{type[..3]}-{asset.Id:N}-{DateTime.UtcNow:yyyyMMddHHmmss}", $"{type}: {asset.Name}", amount, [Line(tenantId, debitId, amount, 0m), Line(tenantId, creditId, 0m, amount)]);
+            db.JournalEntries.Add(journal);
+            asset.CurrentValue = newValue;
+            var accountingEvent = Event(tenantId, actorId, asset.Id, type, previous, newValue, proceeds, reason, journal.Id);
+            db.FinanceAssetAccountingEvents.Add(accountingEvent);
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            return accountingEvent;
+        });
     }
 
     private async Task<Asset> AssetAsync(Guid tenantId, Guid id, CancellationToken ct)

@@ -86,22 +86,25 @@ public sealed class AccountingStandardsEngine(AegisDbContext db) : IAccountingSt
 
     public async Task<FinanceRestatementRun> SwitchStandardAsync(Guid tenantId, Guid actorId, SwitchAccountingStandardCommand command, CancellationToken ct)
     {
-        RequireTenant(tenantId);
-        await EnsureCatalogAsync(tenantId, ct);
-        var config = await db.TenantFinanceConfigurations.SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
-            ?? throw new AegisCore.Infrastructure.Deployment.ConfigurationRequiredException(
-                "This institution has no finance configuration yet, so no accounting standard applies and no financial statement can be drawn. Set the accounting standard in the finance settings first.");
-        var source = Normalize(config.PrimaryStandard);
-        var target = Normalize(command.TargetStandard);
-        if (source == target) throw new InvalidOperationException("Target standard is already active.");
-        await PolicyAsync(tenantId, target, ct);
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        var run = await RunRestatementAsync(tenantId, actorId, new RunRestatementCommand(source, target, command.ComparativeFrom, command.ComparativeTo), ct);
-        config.PrimaryStandard = target;
-        config.UpdatedAt = command.EffectiveAt.ToUniversalTime();
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
-        return run;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            RequireTenant(tenantId);
+            await EnsureCatalogAsync(tenantId, ct);
+            var config = await db.TenantFinanceConfigurations.SingleOrDefaultAsync(x => x.TenantId == tenantId, ct)
+                ?? throw new AegisCore.Infrastructure.Deployment.ConfigurationRequiredException(
+                    "This institution has no finance configuration yet, so no accounting standard applies and no financial statement can be drawn. Set the accounting standard in the finance settings first.");
+            var source = Normalize(config.PrimaryStandard);
+            var target = Normalize(command.TargetStandard);
+            if (source == target) throw new InvalidOperationException("Target standard is already active.");
+            await PolicyAsync(tenantId, target, ct);
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
+            var run = await RunRestatementAsync(tenantId, actorId, new RunRestatementCommand(source, target, command.ComparativeFrom, command.ComparativeTo), ct);
+            config.PrimaryStandard = target;
+            config.UpdatedAt = command.EffectiveAt.ToUniversalTime();
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            return run;
+        });
     }
 
     public async Task<FinanceConsolidationGroup> CreateConsolidationGroupAsync(Guid tenantId, CreateConsolidationGroupCommand command, CancellationToken ct)
