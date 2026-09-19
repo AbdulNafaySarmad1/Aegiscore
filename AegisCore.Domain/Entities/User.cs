@@ -37,8 +37,21 @@ public class User : ITenantScoped
 
     public AuthProvider AuthProvider { get; set; } = AuthProvider.Local;
 
+    /// <summary>
+    /// The identity provider's subject for this person (Entra "oid", Google "sub", Okta "sub").
+    /// Meaningful only together with <see cref="ExternalIssuer"/> and the tenant: two directories
+    /// can hand out the same subject value for two different people.
+    /// </summary>
     [MaxLength(500)]
     public string? ExternalId { get; set; }
+
+    /// <summary>
+    /// The issuer that vouched for <see cref="ExternalId"/>, as it appears in the ID token's "iss"
+    /// claim (for Entra that includes the directory id). An external identity is looked up by
+    /// (tenant, issuer, subject), never by subject alone.
+    /// </summary>
+    [MaxLength(500)]
+    public string? ExternalIssuer { get; set; }
 
     [MaxLength(1000)]
     public string? ExternalClaimsJson { get; set; }

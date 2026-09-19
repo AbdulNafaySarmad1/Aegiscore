@@ -8,6 +8,13 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
     Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<User?> GetByExternalIdAsync(string provider, string externalId, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// The person an identity provider vouched for, by (tenant, issuer, subject). Sign-in has no
+    /// ambient tenant, so the tenant is a parameter and the query filter is bypassed. Roles are loaded.
+    /// </summary>
+    Task<User?> GetByExternalIdentityAsync(Guid tenantId, string issuer, string subject, CancellationToken cancellationToken = default);
+    /// <summary>A tenant's person by email, roles loaded, query filter bypassed (for sign-in).</summary>
+    Task<User?> GetByTenantAndEmailAsync(Guid tenantId, string email, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<User>> GetByStatusAsync(UserStatus status, CancellationToken cancellationToken = default);
     Task<User?> GetWithRolesAsync(Guid userId, CancellationToken cancellationToken = default);
 }

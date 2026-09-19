@@ -1,9 +1,11 @@
 using System.Security.Cryptography;
 using System.Text.Json.Nodes;
 using AegisCore.Application.Finance;
+using AegisCore.Domain;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Security.Pqc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Infrastructure.Onboarding;
 
@@ -12,10 +14,13 @@ public sealed class WizardProvisioningService
     private readonly AegisDbContext _db;
     private readonly IPqcSignatureService _pqc;
 
-    public WizardProvisioningService(AegisDbContext db, IPqcSignatureService pqc, IAccountingStandardsEngine accounting)
+    private readonly IConfiguration? _configuration;
+
+    public WizardProvisioningService(AegisDbContext db, IPqcSignatureService pqc, IAccountingStandardsEngine accounting, IConfiguration? configuration = null)
     {
         _db = db;
         _pqc = pqc;
+        _configuration = configuration;
         _ = accounting;
     }
 
@@ -61,6 +66,7 @@ public sealed class WizardProvisioningService
         campus.Language = Text(university, "language", "English");
 
         await PersistPermissionTreeAsync(tenantId, permissionStep, ct);
+        await PersistIdentityProvidersAsync(tenantId, root["step3"]?.AsObject(), ct);
 
         var license = await _db.Licenses.IgnoreQueryFilters().SingleOrDefaultAsync(item => item.TenantId == tenantId, ct);
         if (license is null)
@@ -159,6 +165,64 @@ public sealed class WizardProvisioningService
                     });
             }
         }
+    }
+
+    /// <summary>
+    /// The sign-in methods chosen in step 3 become the tenant's provider rows: what the login screen
+    /// lists and what the SSO handler reads. The secret stays where the wizard put it — in the vault
+    /// under the tenant's name — and the row carries only that name.
+    /// </summary>
+    private async Task PersistIdentityProvidersAsync(Guid tenantId, JsonObject? step, CancellationToken ct)
+    {
+        if (step is null) return;
+        var entries = step["providers"] is JsonArray list
+            ? list.OfType<JsonObject>().ToList()
+            : step["provider"] is not null ? [step] : [];
+        if (entries.Count == 0) return;
+
+        var existing = await _db.IdentityProviderConfigurations.IgnoreQueryFilters().Where(r => r.TenantId == tenantId).ToListAsync(ct);
+        var order = 0;
+        var kept = new HashSet<IdentityProviderType>();
+        foreach (var entry in entries)
+        {
+            var name = entry["provider"]?.GetValue<string>()?.Trim().ToLowerInvariant();
+            if (!Identity.ExternalSignInService.TryParseType(name, out var type)) continue; // SAML is outside this table
+            kept.Add(type);
+            var row = existing.FirstOrDefault(r => r.ProviderType == type);
+            if (row is null)
+            {
+                row = new IdentityProviderConfiguration { Id = Guid.NewGuid(), TenantId = tenantId, ProviderType = type, CreatedAt = DateTime.UtcNow };
+                _db.IdentityProviderConfigurations.Add(row);
+            }
+            row.DisplayName = Identity.ExternalSignInService.Display(type);
+            row.IsEnabled = true;
+            row.SortOrder = order++;
+            row.UpdatedAt = DateTime.UtcNow;
+            if (type == IdentityProviderType.Local) continue;
+
+            row.ClientId = Text(entry, "clientId");
+            row.ClientSecretName = Text(entry, "clientSecretName", WizardProviderConfigurationService.SsoSecretName(tenantId, name!));
+            row.ExternalTenantId = type == IdentityProviderType.Entra ? Text(entry, "tenantId") : null;
+            row.AllowedDomain = Text(entry, "domain") is { Length: > 0 } domain ? domain : null;
+            row.Authority = type switch
+            {
+                IdentityProviderType.Entra => EntraSsoProvider.AuthorityFor(Required(entry, "tenantId")),
+                IdentityProviderType.Google => GoogleWorkspaceSsoProvider.GoogleAuthority,
+                _ => Required(entry, "authority").TrimEnd('/')
+            };
+            row.RedirectUri = _configuration is null ? null : Identity.ExternalSignInService.RedirectUri(_configuration);
+            row.Scopes = Text(entry, "scopes", type == IdentityProviderType.Okta ? "openid profile email groups" : "openid profile email");
+            row.GroupClaimName = "groups";
+            row.DefaultRole = Text(entry, "defaultRole") is { Length: > 0 } role ? role : null;
+            var mapping = new JsonObject();
+            if (entry["groupRoleMapping"] is JsonObject map)
+                foreach (var pair in map)
+                    if (pair.Value is JsonValue value && value.TryGetValue<string>(out var target) && !string.IsNullOrWhiteSpace(pair.Key) && !string.IsNullOrWhiteSpace(target))
+                        mapping[pair.Key.Trim()] = target.Trim();
+            row.GroupRoleMappingJson = mapping.ToJsonString();
+        }
+        // A method the person un-ticked before go-live is not offered.
+        foreach (var row in existing.Where(r => !kept.Contains(r.ProviderType))) row.IsEnabled = false;
     }
 
     private static string Required(JsonObject value, string fieldName)

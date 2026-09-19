@@ -150,9 +150,13 @@ public static class SetupServicesExtensions
         services.AddScoped<WizardGatewayService>();
         services.AddScoped<SetupImportService>();
         services.AddTransient<AzureAdIdentityService>();
+        // The wizard's "Test connection" runs the same discovery the login path will, so passing it means sign-in can start.
+        services.AddHttpClient(AegisCore.Infrastructure.Identity.Oidc.OidcClient.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(20));
+        services.AddSingleton<AegisCore.Infrastructure.Identity.Oidc.IOidcClient, AegisCore.Infrastructure.Identity.Oidc.OidcClient>();
         services.AddTransient<ISsoProvider, LocalSsoProvider>();
         services.AddTransient<ISsoProvider, EntraSsoProvider>();
         services.AddTransient<ISsoProvider, GoogleWorkspaceSsoProvider>();
+        services.AddTransient<ISsoProvider, OktaSsoProvider>();
         services.AddTransient<ISsoProvider, GenericSamlSsoProvider>();
         services.AddTransient<IAiSetupProvider, OllamaLocalSetupProvider>();
         services.AddTransient<IAiSetupProvider, OllamaCloudSetupProvider>();

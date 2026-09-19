@@ -20,6 +20,12 @@ public static class IdentityServiceExtensions
         services.TryAddScoped<IIdentityService, IdentityService>();
         services.TryAddScoped<ISamlService, SamlService>();
 
+        // Sign-in through Entra, Google or Okta: one OpenID Connect handler, configured per tenant.
+        services.AddHttpClient(Oidc.OidcClient.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(20));
+        services.TryAddSingleton<Oidc.IOidcClient, Oidc.OidcClient>();
+        services.TryAddScoped<IExternalSignInService, ExternalSignInService>();
+        services.TryAddSingleton<ISignInHandoffService, SignInHandoffService>();
+
         return services;
     }
 }

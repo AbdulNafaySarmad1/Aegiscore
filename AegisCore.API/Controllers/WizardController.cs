@@ -94,11 +94,39 @@ public sealed class WizardController(
         catch (ArgumentException ex) { return UnprocessableEntity(new { success = false, error = ex.Message }); }
     }
 
+    /// <summary>
+    /// Tests one configured method. The handshake reaches the provider's discovery document through
+    /// the same client sign-in will use; a pass means a real sign-in can begin.
+    /// </summary>
     [HttpPost("step3/test")]
-    public async Task<IActionResult> TestSso(CancellationToken ct)
+    public async Task<IActionResult> TestSso([FromBody] SsoTestRequest? request, CancellationToken ct)
     {
-        var result = await providerConfiguration.TestSsoAsync(SetupToken(), ct);
-        return result.Success ? Ok(result) : UnprocessableEntity(result);
+        try
+        {
+            var result = await providerConfiguration.TestSsoAsync(SetupToken(), request?.Provider, ct);
+            return result.Success ? Ok(result) : UnprocessableEntity(result);
+        }
+        catch (InvalidOperationException ex) { return UnprocessableEntity(new HandshakeResult(false, ex.Message)); }
+    }
+
+    [HttpPost("step3/remove")]
+    public async Task<IActionResult> RemoveSso([FromBody] SsoTestRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Provider)) return UnprocessableEntity(new { success = false, error = "Name the sign-in method to remove." });
+        await providerConfiguration.RemoveSsoAsync(SetupToken(), request.Provider, ct);
+        return Ok(new { success = true });
+    }
+
+    /// <summary>The list as the server holds it, so the screen shows what was actually tested.</summary>
+    [HttpGet("step3/providers")]
+    public async Task<IActionResult> SsoProviders(CancellationToken ct)
+    {
+        var providers = WizardProviderConfigurationService.SsoProviders(await state.ResumeWizardAsync(SetupToken(), ct));
+        return Ok(new
+        {
+            redirectUri = AegisCore.Infrastructure.Identity.ExternalSignInService.RedirectUri(configuration),
+            providers = JsonSerializer.SerializeToElement(new JsonArray(providers.ToArray()), JsonOptions)
+        });
     }
 
     [HttpPost("step5/configure")]
@@ -269,8 +297,17 @@ public sealed class WizardController(
         if (step is < 1 or > 7) return BadRequest(new { success = false, error = "Invalid wizard step." });
         if (Encoding.UTF8.GetByteCount(request.Data.GetRawText()) > MaxStepPayloadBytes)
             return StatusCode(StatusCodes.Status413PayloadTooLarge, new { success = false, error = "Wizard step payload exceeds the 128 KiB limit." });
-        if (!ValidateStep(step, request.Data, out var error)) return UnprocessableEntity(new { success = false, error });
-        var data = step is 3 or 5 ? RemoveSensitiveConfiguration(request.Data) : request.Data;
+        var payload = request.Data;
+        if (step == 3)
+        {
+            // Step 3 is what /step3/configure and /step3/test recorded — the tested providers and the
+            // vault names of their secrets — never the browser's copy of it. The person's checkboxes
+            // become configure/remove calls; saving only confirms the list.
+            var providers = WizardProviderConfigurationService.SsoProviders(await state.ResumeWizardAsync(token, ct));
+            payload = JsonSerializer.SerializeToElement(new JsonObject { ["providers"] = new JsonArray(providers.ToArray()) }, JsonOptions);
+        }
+        if (!ValidateStep(step, payload, out var error)) return UnprocessableEntity(new { success = false, error });
+        var data = step is 3 or 5 ? RemoveSensitiveConfiguration(payload) : payload;
         try
         {
             var session = await sessions.SaveAsync(token, request.SessionId, step, data, ct);
@@ -628,11 +665,8 @@ public sealed class WizardController(
                 error = "Enter a valid contact email."; return false;
             case 2 when !Has("host", "databaseName", "username") || !data.TryGetProperty("connectionTested", out var tested) || tested.ValueKind != JsonValueKind.True:
                 error = "Test and confirm the database connection."; return false;
-            case 3 when !Has("provider"):
-                error = "Choose an SSO provider."; return false;
-            case 3 when data.GetProperty("provider").GetString() != "local" &&
-                             (!data.TryGetProperty("connectionTested", out var ssoTested) || ssoTested.ValueKind != JsonValueKind.True):
-                error = "Test and confirm the SSO connection, or choose Local."; return false;
+            case 3 when !SignInMethodsAcceptable(data, out var signInError):
+                error = signInError; return false;
             case 4 when !HasDynamicRoles(data):
                 error = "Add at least one role and permission selection."; return false;
             case 5 when data.TryGetProperty("provider", out var aiProvider) && aiProvider.GetString() == "disabled":
@@ -645,6 +679,43 @@ public sealed class WizardController(
                 error = "Upload validated data or explicitly skip data import."; return false;
             case 7 when !data.TryGetProperty("confirmed", out var confirmed) || confirmed.ValueKind != JsonValueKind.True || !HasAdministratorAccounts(data):
                 error = "Confirm the review and configure the required administrators."; return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// At least one way to sign in; every provider other than Local tested since it last changed,
+    /// holding a secret, and able to give people a role (a mapping or a default) — otherwise the
+    /// first person through it lands on an empty portal.
+    /// </summary>
+    private static bool SignInMethodsAcceptable(JsonElement data, out string error)
+    {
+        error = "";
+        if (!data.TryGetProperty("providers", out var providers) || providers.ValueKind != JsonValueKind.Array || providers.GetArrayLength() == 0)
+        {
+            error = "Choose at least one way for people to sign in."; return false;
+        }
+        foreach (var provider in providers.EnumerateArray())
+        {
+            var name = provider.TryGetProperty("provider", out var p) && p.ValueKind == JsonValueKind.String ? p.GetString()?.Trim().ToLowerInvariant() : null;
+            if (string.IsNullOrWhiteSpace(name)) { error = "A sign-in method has no provider name."; return false; }
+            if (name == "local") continue;
+            var label = AegisCore.Infrastructure.Identity.ExternalSignInService.TryParseType(name, out var type) ? AegisCore.Infrastructure.Identity.ExternalSignInService.Display(type) : name;
+            if (!provider.TryGetProperty("connectionTested", out var tested) || tested.ValueKind != JsonValueKind.True)
+            {
+                error = $"Test and confirm the {label} connection, or remove it."; return false;
+            }
+            if (!provider.TryGetProperty("hasSecret", out var hasSecret) || hasSecret.ValueKind != JsonValueKind.True)
+            {
+                error = $"Enter the client secret for {label}."; return false;
+            }
+            if (name == "saml") continue;
+            var hasDefault = provider.TryGetProperty("defaultRole", out var d) && d.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(d.GetString());
+            var hasMapping = provider.TryGetProperty("groupRoleMapping", out var m) && m.ValueKind == JsonValueKind.Object && m.EnumerateObject().Any(e => e.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(e.Value.GetString()));
+            if (!hasDefault && !hasMapping)
+            {
+                error = $"Map at least one {label} group to a role, or set a default role, so people who sign in through it get access."; return false;
+            }
         }
         return true;
     }
@@ -789,6 +860,7 @@ public sealed class WizardController(
 public sealed record ValidateLicenseRequest(string LicenseKey);
 public sealed record ChangeWizardModeRequest(Guid SessionId, string Mode, string? LicenseKey);
 public sealed record SaveStepRequest(Guid SessionId, JsonElement Data);
+public sealed record SsoTestRequest(string? Provider);
 public sealed record CompleteWizardRequest(Guid SessionId, string ConfirmedBy, DateTimeOffset Timestamp);
 public sealed record DemoImportRequest(string ConnectionString, string DbType);
 public sealed record WizardDatabaseRequest(string Host, int Port, string DatabaseName, string Username, string Password, bool SslEnabled = true, string Dialect = "postgres");

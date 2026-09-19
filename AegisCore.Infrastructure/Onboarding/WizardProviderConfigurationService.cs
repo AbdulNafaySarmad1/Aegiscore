@@ -6,7 +6,7 @@ using System.Text.Json.Nodes;
 using System.Xml;
 using AegisCore.Application.Onboarding;
 using AegisCore.Contracts.Abstractions.Cloud;
-using AegisCore.Infrastructure.Cloud.Azure;
+using Microsoft.Extensions.Configuration;
 
 namespace AegisCore.Infrastructure.Onboarding;
 
@@ -18,27 +18,48 @@ public sealed class WizardProviderConfigurationService(
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
+    /// <summary>
+    /// Step 3 holds a list: {"providers":[{provider, ...fields, hasSecret, connectionTested, clientSecretName}]}.
+    /// The client secret goes straight to the vault under the tenant's own name — the same name the
+    /// provider row will carry after go-live — and never into the wizard payload.
+    /// </summary>
     public async Task ConfigureSsoAsync(string token, SsoConfigDto config, CancellationToken ct = default)
     {
         var provider = Find(ssoProviders, config.Provider);
         await provider.ConfigureAsync(config, ct);
         var state = await states.ResumeWizardAsync(token, ct);
-        var secretName = SecretName(token, "sso-client-secret");
+        if (state.TenantId == Guid.Empty) throw new InvalidOperationException("Complete wizard Step 1 before configuring sign-in.");
+        var name = Normalize(config.Provider);
+        var secretName = SsoSecretName(state.TenantId, name);
         if (!string.IsNullOrWhiteSpace(config.ClientSecret))
             await secrets.SetSecretAsync(secretName, config.ClientSecret, ct);
+        var hasSecret = !string.IsNullOrWhiteSpace(config.ClientSecret) || await secrets.SecretExistsAsync(secretName, ct);
 
-        SetStep(state, 3, JsonSerializer.SerializeToNode(config with { ClientSecret = null }, JsonOptions)!.AsObject(),
-            hasSecret: !string.IsNullOrWhiteSpace(config.ClientSecret) || await secrets.SecretExistsAsync(secretName, ct));
+        var entry = JsonSerializer.SerializeToNode(config with { Provider = name, ClientSecret = null }, JsonOptions)!.AsObject();
+        entry["hasSecret"] = hasSecret;
+        entry["clientSecretName"] = hasSecret ? secretName : null;
+        // Local needs no handshake; everything else must be tested again after any change.
+        entry["connectionTested"] = name == "local";
+        var providers = SsoProviders(state);
+        var index = IndexOf(providers, item => ProviderName(item) == name);
+        if (index >= 0) providers[index] = entry; else providers.Add(entry);
+        PutSsoProviders(state, providers);
         await states.SaveState(token, state, ct);
     }
 
-    public async Task<HandshakeResult> TestSsoAsync(string token, CancellationToken ct = default)
+    public async Task<HandshakeResult> TestSsoAsync(string token, string? providerName = null, CancellationToken ct = default)
     {
         var state = await states.ResumeWizardAsync(token, ct);
-        var node = GetStep(state, 3);
+        var providers = SsoProviders(state);
+        var wanted = providerName is null ? null : Normalize(providerName);
+        var index = wanted is null
+            ? (providers.Count == 1 ? 0 : IndexOf(providers, item => ProviderName(item) != "local"))
+            : IndexOf(providers, item => ProviderName(item) == wanted);
+        if (index < 0) throw new InvalidOperationException("Configure a sign-in method before testing it.");
+        var node = providers[index].AsObject();
         var config = node.Deserialize<SsoConfigDto>(JsonOptions)
-            ?? throw new InvalidOperationException("Configure SSO before testing the handshake.");
-        var secretName = SecretName(token, "sso-client-secret");
+            ?? throw new InvalidOperationException("Configure a sign-in method before testing it.");
+        var secretName = node["clientSecretName"]?.GetValue<string>() ?? SsoSecretName(state.TenantId, config.Provider);
         if (await secrets.SecretExistsAsync(secretName, ct))
             config = config with { ClientSecret = await secrets.GetSecretAsync(secretName, ct) };
         var provider = Find(ssoProviders, config.Provider);
@@ -46,9 +67,58 @@ public sealed class WizardProviderConfigurationService(
         var result = await provider.TestHandshakeAsync(ct);
         node["connectionTested"] = result.Success;
         node["clientSecret"] = null;
-        PutStep(state, 3, node);
+        providers[index] = node;
+        PutSsoProviders(state, providers);
         await states.SaveState(token, state, ct);
         return result;
+    }
+
+    public async Task RemoveSsoAsync(string token, string providerName, CancellationToken ct = default)
+    {
+        var state = await states.ResumeWizardAsync(token, ct);
+        var name = Normalize(providerName);
+        var providers = SsoProviders(state);
+        var index = IndexOf(providers, item => ProviderName(item) == name);
+        if (index < 0) return;
+        var secretName = providers[index].AsObject()["clientSecretName"]?.GetValue<string>();
+        providers.RemoveAt(index);
+        PutSsoProviders(state, providers);
+        await states.SaveState(token, state, ct);
+        if (!string.IsNullOrWhiteSpace(secretName))
+        {
+            try { await secrets.DeleteSecretAsync(secretName, ct); }
+            catch (KeyNotFoundException) { /* already gone */ }
+        }
+    }
+
+    public static string SsoSecretName(Guid tenantId, string provider)
+        => $"/tenants/{tenantId:D}/identity/{Normalize(provider)}/client-secret";
+
+    private static string Normalize(string provider) => provider.Trim().ToLowerInvariant();
+
+    private static string ProviderName(JsonNode? node)
+        => node?["provider"]?.GetValue<string>() is { } name ? Normalize(name) : string.Empty;
+
+    /// <summary>
+    /// The step-3 list. A session written before step 3 held a list carries one object with a
+    /// "provider" key; it is read as a list of one so nothing in flight is lost.
+    /// </summary>
+    public static List<JsonNode> SsoProviders(WizardStateDto state)
+    {
+        var root = JsonNode.Parse(state.StepData)?.AsObject() ?? new JsonObject();
+        var step = root["step3"]?.AsObject();
+        if (step is null) return [];
+        if (step["providers"] is JsonArray array)
+            return array.Where(item => item is JsonObject).Select(item => item!.DeepClone()).ToList();
+        return step["provider"] is not null ? [step.DeepClone()] : [];
+    }
+
+    private static void PutSsoProviders(WizardStateDto state, List<JsonNode> providers)
+    {
+        var root = JsonNode.Parse(state.StepData)?.AsObject() ?? new JsonObject();
+        var step = new JsonObject { ["providers"] = new JsonArray(providers.Select(item => item.DeepClone()).ToArray()) };
+        root["step3"] = step;
+        state.StepData = root.ToJsonString(JsonOptions);
     }
 
     public async Task ConfigureAiAsync(string token, AiConfigDto config, CancellationToken ct = default)
@@ -82,6 +152,12 @@ public sealed class WizardProviderConfigurationService(
         PutStep(state, 5, node);
         await states.SaveState(token, state, ct);
         return result;
+    }
+
+    private static int IndexOf(List<JsonNode> items, Func<JsonNode, bool> predicate)
+    {
+        for (var i = 0; i < items.Count; i++) if (predicate(items[i])) return i;
+        return -1;
     }
 
     private static T Find<T>(IEnumerable<T> providers, string name) where T : class
@@ -137,54 +213,74 @@ public sealed class LocalSsoProvider() : SsoProviderBase("local")
         => Task.FromResult(new HandshakeResult(true));
 }
 
-public sealed class EntraSsoProvider(IHttpClientFactory clients, AzureAdIdentityService azureAd) : SsoProviderBase("entra")
+/// <summary>
+/// The OpenID Connect providers share one handshake: the discovery document must be fetchable and
+/// complete, through the same client that will validate ID tokens at sign-in — not a bare HTTP GET
+/// that would pass a URL the login path then chokes on. The login URL returned is the real
+/// authorization endpoint, so the administrator can see where people will be sent.
+/// </summary>
+public abstract class OidcSsoProvider(string name, AegisCore.Infrastructure.Identity.Oidc.IOidcClient oidc, IConfiguration configuration) : SsoProviderBase(name)
 {
+    protected abstract string? Authority(SsoConfigDto config);
+    protected abstract HandshakeResult? MissingFields(SsoConfigDto config);
+    protected virtual string FixHint => "Verify DNS, outbound HTTPS access and the values copied from the provider.";
+
     public override async Task<HandshakeResult> TestHandshakeAsync(CancellationToken ct = default)
     {
         var config = RequiredConfig();
-        if (string.IsNullOrWhiteSpace(config.TenantId) || string.IsNullOrWhiteSpace(config.ClientId) || string.IsNullOrWhiteSpace(config.ClientSecret))
-            return new(false, "Tenant ID, client ID and client secret are required.", "Copy the values from the Microsoft Entra app registration.");
+        if (MissingFields(config) is { } missing) return missing;
+        if (string.IsNullOrWhiteSpace(config.ClientSecret))
+            return new(false, "Client secret is required.", "Create a client secret at the provider and paste its value (not its id).");
+        var authority = Authority(config);
+        if (!Uri.TryCreate(authority, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+            return new(false, "The authority must be an HTTPS URL.", FixHint);
         try
         {
-            var discovery = $"https://login.microsoftonline.com/{Uri.EscapeDataString(config.TenantId)}/v2.0/.well-known/openid-configuration";
-            using var response = await clients.CreateClient("wizard-providers").GetAsync(discovery, ct);
-            if (!response.IsSuccessStatusCode)
-                return new(false, $"Microsoft discovery returned HTTP {(int)response.StatusCode}.", "Verify the tenant ID and outbound HTTPS access.");
-            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
-            if (!json.RootElement.TryGetProperty("authorization_endpoint", out _))
-                return new(false, "Microsoft discovery response is incomplete.", "Verify the tenant is an active Microsoft Entra tenant.");
-            var loginUrl = await azureAd.GetSsoLoginUrlAsync(config.TenantId, config.AcsUrl ?? "/api/identity/entra/callback", ct);
-            return new(true, LoginUrl: loginUrl);
+            var discovery = await oidc.DiscoverAsync(authority!, ct);
+            if (string.IsNullOrWhiteSpace(discovery.AuthorizationEndpoint) || string.IsNullOrWhiteSpace(discovery.TokenEndpoint) || string.IsNullOrWhiteSpace(discovery.JwksUri))
+                return new(false, "The provider's discovery document is incomplete (no authorization, token or JWKS endpoint).", FixHint);
+            if (discovery.SigningKeys.Count == 0)
+                return new(false, "The provider published no signing keys; ID tokens could not be verified.", FixHint);
+            var redirect = AegisCore.Infrastructure.Identity.ExternalSignInService.RedirectUri(configuration);
+            return new(true, LoginUrl: discovery.AuthorizationEndpoint, FixHint: $"Register {redirect} as the redirect URI at the provider.");
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        catch (AegisCore.Application.Identity.ExternalSignInException ex)
         {
-            return new(false, ex.Message, "Verify DNS, outbound HTTPS access, and the Entra tenant ID.");
+            return new(false, ex.Message, FixHint);
         }
     }
 }
 
-public sealed class GoogleWorkspaceSsoProvider(IHttpClientFactory clients) : SsoProviderBase("google")
+public sealed class EntraSsoProvider(AegisCore.Infrastructure.Identity.Oidc.IOidcClient oidc, IConfiguration configuration) : OidcSsoProvider("entra", oidc, configuration)
 {
-    public override async Task<HandshakeResult> TestHandshakeAsync(CancellationToken ct = default)
-    {
-        var config = RequiredConfig();
-        if (string.IsNullOrWhiteSpace(config.ClientId) || string.IsNullOrWhiteSpace(config.ClientSecret) || string.IsNullOrWhiteSpace(config.Domain))
-            return new(false, "Client ID, client secret and Workspace domain are required.", "Create an OAuth 2.0 web application in Google Cloud Console.");
-        try
-        {
-            using var response = await clients.CreateClient("wizard-providers").GetAsync("https://accounts.google.com/.well-known/openid-configuration", ct);
-            if (!response.IsSuccessStatusCode)
-                return new(false, $"Google discovery returned HTTP {(int)response.StatusCode}.", "Verify outbound HTTPS access.");
-            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
-            return json.RootElement.TryGetProperty("authorization_endpoint", out var endpoint)
-                ? new(true, LoginUrl: endpoint.GetString())
-                : new(false, "Google discovery response is incomplete.", "Retry after checking Google service availability.");
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
-        {
-            return new(false, ex.Message, "Verify DNS and outbound HTTPS access.");
-        }
-    }
+    public static string AuthorityFor(string tenantId) => $"https://login.microsoftonline.com/{Uri.EscapeDataString(tenantId.Trim())}/v2.0";
+    protected override string? Authority(SsoConfigDto config) => string.IsNullOrWhiteSpace(config.TenantId) ? null : AuthorityFor(config.TenantId);
+    protected override string FixHint => "Verify the directory (tenant) ID, the application (client) ID and the client secret in the Microsoft Entra app registration.";
+    protected override HandshakeResult? MissingFields(SsoConfigDto config)
+        => string.IsNullOrWhiteSpace(config.TenantId) || string.IsNullOrWhiteSpace(config.ClientId)
+            ? new(false, "Directory (tenant) ID and application (client) ID are required.", "Copy both from the app registration's Overview page in Microsoft Entra.")
+            : null;
+}
+
+public sealed class GoogleWorkspaceSsoProvider(AegisCore.Infrastructure.Identity.Oidc.IOidcClient oidc, IConfiguration configuration) : OidcSsoProvider("google", oidc, configuration)
+{
+    public const string GoogleAuthority = "https://accounts.google.com";
+    protected override string? Authority(SsoConfigDto config) => GoogleAuthority;
+    protected override string FixHint => "Verify outbound HTTPS access and the OAuth client in Google Cloud Console.";
+    protected override HandshakeResult? MissingFields(SsoConfigDto config)
+        => string.IsNullOrWhiteSpace(config.ClientId) || string.IsNullOrWhiteSpace(config.Domain)
+            ? new(false, "Client ID and Workspace domain are required.", "Create an OAuth 2.0 web client in Google Cloud Console and enter your Workspace domain (e.g. university.edu.pk).")
+            : null;
+}
+
+public sealed class OktaSsoProvider(AegisCore.Infrastructure.Identity.Oidc.IOidcClient oidc, IConfiguration configuration) : OidcSsoProvider("okta", oidc, configuration)
+{
+    protected override string? Authority(SsoConfigDto config) => config.Authority?.Trim().TrimEnd('/');
+    protected override string FixHint => "Verify the Okta org URL (https://{org}.okta.com, or https://{org}.okta.com/oauth2/default), the client ID and the client secret of the OIDC web application.";
+    protected override HandshakeResult? MissingFields(SsoConfigDto config)
+        => string.IsNullOrWhiteSpace(config.Authority) || string.IsNullOrWhiteSpace(config.ClientId)
+            ? new(false, "Okta org URL (authority) and client ID are required.", "Create an OIDC Web Application in Okta and copy its client ID; the org URL is at the top right of the Okta admin console.")
+            : null;
 }
 
 public sealed class GenericSamlSsoProvider(IHttpClientFactory clients) : SsoProviderBase("saml")

@@ -37,12 +37,49 @@ public sealed class WizardProviderAndTemplateTests
         await service.ConfigureSsoAsync(Token, new SsoConfigDto("test-sso", ClientId: "client", ClientSecret: "sso-secret"));
         var persisted = await fixture.States.ResumeWizardAsync(Token);
         Assert.DoesNotContain("sso-secret", persisted.StepData, StringComparison.Ordinal);
-        Assert.Equal("sso-secret", await fixture.Secrets.GetSecretAsync(SecretName("sso-client-secret")));
+        // The secret lives under the tenant's own name from the start: the provider row written at
+        // go-live refers to that same name, so nothing has to be copied or re-entered.
+        var secretName = WizardProviderConfigurationService.SsoSecretName(persisted.TenantId, "test-sso");
+        Assert.Equal("sso-secret", await fixture.Secrets.GetSecretAsync(secretName));
+        Assert.Contains(secretName, persisted.StepData, StringComparison.Ordinal);
 
-        var result = await service.TestSsoAsync(Token);
+        var result = await service.TestSsoAsync(Token, "test-sso");
         Assert.True(result.Success);
         Assert.Equal("sso-secret", sso.LastConfig?.ClientSecret);
-        Assert.Contains("\"connectionTested\":true", (await fixture.States.ResumeWizardAsync(Token)).StepData, StringComparison.Ordinal);
+        var entries = WizardProviderConfigurationService.SsoProviders(await fixture.States.ResumeWizardAsync(Token));
+        var entry = Assert.Single(entries).AsObject();
+        Assert.True(entry["connectionTested"]!.GetValue<bool>());
+        Assert.True(entry["hasSecret"]!.GetValue<bool>());
+        Assert.Null(entry["clientSecret"]);
+    }
+
+    [Fact]
+    public async Task Step3_HoldsSeveralProviders_AndRemovingOneDeletesItsSecret()
+    {
+        await using var fixture = await WizardFixture.CreateAsync();
+        var service = new WizardProviderConfigurationService(fixture.States, fixture.Secrets, [new RecordingSsoProvider(), new NamedSsoProvider("local"), new NamedSsoProvider("other")], [new RecordingAiProvider()]);
+
+        await service.ConfigureSsoAsync(Token, new SsoConfigDto("local"));
+        await service.ConfigureSsoAsync(Token, new SsoConfigDto("test-sso", ClientId: "client", ClientSecret: "sso-secret"));
+        await service.ConfigureSsoAsync(Token, new SsoConfigDto("other", ClientId: "client-2", ClientSecret: "other-secret"));
+        var state = await fixture.States.ResumeWizardAsync(Token);
+        var names = WizardProviderConfigurationService.SsoProviders(state).Select(item => item["provider"]!.GetValue<string>()).ToList();
+        Assert.Equal(["local", "test-sso", "other"], names);
+
+        // Re-configuring one replaces it in place and does not lose the secret when none is sent.
+        await service.ConfigureSsoAsync(Token, new SsoConfigDto("test-sso", ClientId: "client-renamed"));
+        state = await fixture.States.ResumeWizardAsync(Token);
+        var entries = WizardProviderConfigurationService.SsoProviders(state);
+        Assert.Equal(3, entries.Count);
+        var renamed = entries.Single(item => item["provider"]!.GetValue<string>() == "test-sso").AsObject();
+        Assert.Equal("client-renamed", renamed["clientId"]!.GetValue<string>());
+        Assert.True(renamed["hasSecret"]!.GetValue<bool>());
+        Assert.False(renamed["connectionTested"]!.GetValue<bool>());
+
+        await service.RemoveSsoAsync(Token, "other");
+        state = await fixture.States.ResumeWizardAsync(Token);
+        Assert.DoesNotContain(WizardProviderConfigurationService.SsoProviders(state), item => item["provider"]!.GetValue<string>() == "other");
+        Assert.False(await fixture.Secrets.SecretExistsAsync(WizardProviderConfigurationService.SsoSecretName(state.TenantId, "other")));
     }
 
     [Fact]
@@ -112,6 +149,8 @@ public sealed class WizardProviderAndTemplateTests
     private static string SecretName(string suffix)
         => $"/wizard/{WizardStateService.HashToken(Token).ToLowerInvariant()}/{suffix}";
 
+    internal static string WizardToken => Token;
+
     private sealed class RecordingSsoProvider : ISsoProvider
     {
         public string Name => "test-sso";
@@ -119,6 +158,13 @@ public sealed class WizardProviderAndTemplateTests
         public Task ConfigureAsync(SsoConfigDto config, CancellationToken ct = default) { LastConfig = config; return Task.CompletedTask; }
         public Task<HandshakeResult> TestHandshakeAsync(CancellationToken ct = default)
             => Task.FromResult(new HandshakeResult(LastConfig?.ClientSecret == "sso-secret"));
+    }
+
+    private sealed class NamedSsoProvider(string name) : ISsoProvider
+    {
+        public string Name => name;
+        public Task ConfigureAsync(SsoConfigDto config, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<HandshakeResult> TestHandshakeAsync(CancellationToken ct = default) => Task.FromResult(new HandshakeResult(true));
     }
 
     private sealed class RecordingAiProvider : IAiSetupProvider

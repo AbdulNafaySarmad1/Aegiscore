@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost } from "@/lib/api-client";
-import { Eye, EyeOff } from "lucide-react";
+import { loadLoginMethods, type LoginMethods } from "@/lib/session";
+import { Eye, EyeOff, KeyRound } from "lucide-react";
 import { Notice, InstitutionMark } from "@/components/register";
 import { useInstitution } from "@/components/TenantPreferencesProvider";
 
@@ -33,6 +34,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Which doors this university opened in the setup wizard. Until the answer arrives — and if it
+  // never does — the password form is shown, as it always was.
+  const [methods, setMethods] = useState<LoginMethods>({ localEnabled: true, providers: [] });
+  const [methodsLoaded, setMethodsLoaded] = useState(isDemo);
+
+  useEffect(() => {
+    // A sign-in that went through an identity provider and failed comes back here with the reason.
+    const params = new URLSearchParams(window.location.search);
+    const ssoError = params.get("sso_error");
+    if (ssoError) {
+      const carried = params.get("message") || "Sign-in through your identity provider did not complete. Try again.";
+      window.history.replaceState(null, "", "/login");
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the reason arrives in the URL, not from a render
+      setError(carried);
+    }
+    if (isDemo) return;
+    loadLoginMethods()
+      .then(value => setMethods(value))
+      .catch(() => setMethods({ localEnabled: true, providers: [] }))
+      .finally(() => setMethodsLoaded(true));
+  }, [isDemo]);
 
   const institution = useInstitution();
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date());
@@ -87,9 +109,27 @@ export default function LoginPage() {
         <div className="gate-form">
           <div className="gate-form-head">
             <h1>Sign in to the register</h1>
-            <p>Use your university email and password.</p>
+            <p>{methods.localEnabled
+              ? methods.providers.length > 0 ? "Use your university account, or your email and password." : "Use your university email and password."
+              : "Use your university account."}</p>
           </div>
 
+          {methods.providers.length > 0 && (
+            <div className="gate-sso" aria-label="Sign in with your university account">
+              {methods.providers.map(provider => (
+                // A plain link, not a fetch: the API answers with a redirect to the identity
+                // provider, and the browser has to follow it.
+                <a key={provider.type} className="btn btn-secondary btn-lg btn-block gate-sso-button" href={provider.startPath}>
+                  <KeyRound size={18} aria-hidden="true" /> Continue with {provider.displayName}
+                </a>
+              ))}
+              {methods.localEnabled && <div className="gate-sso-divider" aria-hidden="true"><span>or</span></div>}
+            </div>
+          )}
+
+          {!methods.localEnabled && error && <div id="login-error"><Notice tone="oxblood" title={error} /></div>}
+
+          {(methods.localEnabled || !methodsLoaded) && (
           <form onSubmit={handleSubmit} noValidate={false} aria-describedby={error ? "login-error" : undefined}>
             <div className="field">
               <label htmlFor="login-email" className="field-label">University email</label>
@@ -114,6 +154,7 @@ export default function LoginPage() {
 
             <button type="submit" className={`btn btn-primary btn-lg btn-block${busy ? " btn-loading" : ""}`} disabled={busy}>Sign in</button>
           </form>
+          )}
 
           {isDemo && (
             <div className="gate-demo">

@@ -48,6 +48,7 @@
     
     <!-- CVE-2024-21319: Force safe version of Microsoft.IdentityModel.Tokens -->
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.18.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.18.0" />
   </ItemGroup>
 
   <ItemGroup>

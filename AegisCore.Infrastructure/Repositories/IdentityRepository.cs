@@ -24,6 +24,20 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _dbSet.FirstOrDefaultAsync(u => u.AuthProvider.ToString() == provider && u.ExternalId == externalId, cancellationToken);
     }
 
+    public async Task<User?> GetByExternalIdentityAsync(Guid tenantId, string issuer, string subject, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.IgnoreQueryFilters()
+            .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.TenantId == tenantId && u.ExternalIssuer == issuer && u.ExternalId == subject, cancellationToken);
+    }
+
+    public async Task<User?> GetByTenantAndEmailAsync(Guid tenantId, string email, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.IgnoreQueryFilters()
+            .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.TenantId == tenantId && u.Email == email, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<User>> GetByStatusAsync(UserStatus status, CancellationToken cancellationToken = default)
     {
         return await _dbSet.Where(u => u.Status == status).ToListAsync(cancellationToken);

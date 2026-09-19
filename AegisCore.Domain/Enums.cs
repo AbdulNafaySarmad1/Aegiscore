@@ -1422,6 +1422,19 @@ public enum AuthProvider
     Ldap = 6
 }
 
+/// <summary>
+/// How a tenant's people sign in, as chosen in the setup wizard. A tenant may enable several at once
+/// (Local for a few administrator accounts, Entra for everyone else). Entra, Google and Okta are all
+/// OpenID Connect; the values differ only in what the wizard asks for and which issuer is accepted.
+/// </summary>
+public enum IdentityProviderType
+{
+    Local = 1,
+    Entra = 2,
+    Google = 3,
+    Okta = 4
+}
+
 public enum SessionStatus
 {
     Active = 1,

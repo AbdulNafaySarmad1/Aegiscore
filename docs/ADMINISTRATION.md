@@ -32,6 +32,14 @@ record behind it, and the student screens will tell its owner so.
 Every password an administrator sets is recorded in the audit log against that administrator's
 name, with the account it was set on.
 
+### Signing in with Entra, Google Workspace or Okta
+
+The setup wizard's third step chooses how people sign in: email and password, Microsoft Entra ID,
+Google Workspace, Okta, or several of these at once. The login screen offers exactly what was
+chosen; a person who signs in through a provider is matched by (tenant, issuer, subject) and given
+roles from the provider's group mapping. The full account — setup, what happens at sign-in, and
+the checklist for proving it with a real directory account — is in [SSO.md](SSO.md).
+
 ### Roles and permissions
 
 A permission is a pair: a module and an action (`Attendance` + `Read`, `System` + `Write`). A role

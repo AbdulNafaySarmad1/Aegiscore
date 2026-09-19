@@ -14,6 +14,24 @@ export async function loadSession(): Promise<Session> {
   return apiGet<Session>("/api/session");
 }
 
+/**
+ * Finish a sign-in that arrived by redirect. An identity provider's callback lands on the API,
+ * which hands the browser a one-time code rather than tokens in a URL; exchanging it through the
+ * portal's proxy sets the same HttpOnly cookies a password login sets. Resolves when the session
+ * is usable; throws with the API's sentence when the code is stale or the account is not active.
+ */
+export async function completeSsoSignIn(code: string): Promise<void> {
+  await apiPost("/api/auth/sso/exchange", { code });
+  localStorage.removeItem("aegiscore_demo_session");
+}
+
+/** The sign-in methods the login screen should offer this university. */
+export type LoginProvider = { type: string; displayName: string; startPath: string };
+export type LoginMethods = { localEnabled: boolean; providers: LoginProvider[] };
+export function loadLoginMethods(): Promise<LoginMethods> {
+  return apiGet<LoginMethods>("/api/auth/sso/providers");
+}
+
 export async function logout() {
   await apiPost("/api/auth/logout");
   localStorage.removeItem("aegiscore_demo_session");

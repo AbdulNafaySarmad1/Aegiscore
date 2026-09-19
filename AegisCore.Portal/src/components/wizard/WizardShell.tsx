@@ -11,6 +11,26 @@ type RoleConfig = { name: string; permissions: string[] };
 type ImportResult = { isValid: boolean; totalRows: number; errors: string[]; warnings: string[] };
 type DatabaseResult = { success: boolean; message: string; error?: { userMessage?: string } };
 type HandshakeResult = { success: boolean; error?: string; fixHint?: string; loginUrl?: string };
+type SsoProviderEntry = {
+  provider: string; tenantId?: string; clientId?: string; clientSecret?: string; domain?: string; authority?: string; scopes?: string;
+  groupRoleMapping?: Record<string, string>; defaultRole?: string; hasSecret?: boolean; connectionTested?: boolean; clientSecretName?: string;
+};
+const SSO_METHODS: Array<{ type: string; label: string; note: string }> = [
+  { type: "local", label: "Email and password", note: "Accounts held in this register. Keep it for a few administrators even when SSO is on." },
+  { type: "entra", label: "Microsoft Entra ID", note: "Staff and students sign in with their Microsoft 365 account." },
+  { type: "google", label: "Google Workspace", note: "Sign in with a Google account in your Workspace domain." },
+  { type: "okta", label: "Okta", note: "Sign in through your Okta org (OpenID Connect)." },
+];
+function ssoProviders(value: WizardData): SsoProviderEntry[] {
+  const list = value.providers;
+  if (Array.isArray(list)) return list as SsoProviderEntry[];
+  // A session saved before step 3 held a list: one provider object at the top level.
+  return typeof value.provider === "string" ? [value as unknown as SsoProviderEntry] : [];
+}
+function ssoReady(value: WizardData) {
+  const list = ssoProviders(value);
+  return list.length > 0 && list.every(entry => entry.provider === "local" || entry.connectionTested === true);
+}
 type AiConnectionResult = { success: boolean; response?: string; error?: string; fixHint?: string };
 type TemplateResult = { id: string; name: string; previewHtml: string; extractedPalette: string[]; extractedFonts: string[]; logoUrl?: string };
 
@@ -125,10 +145,10 @@ export function WizardShell() {
 
   const current = useMemo<WizardData>(() => ({
     ...(step === 1 ? { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }
-      : step === 3 ? { provider: "local" } : step === 4 ? { roles: DEFAULT_ROLES } : {}),
+      : step === 3 ? { providers: [] } : step === 4 ? { roles: DEFAULT_ROLES } : {}),
     ...data[`step${step}`],
   }), [data, step]);
-  const canContinue = (step !== 3 || text(current, "provider", "local") === "local" || current.connectionTested === true)
+  const canContinue = (step !== 3 || ssoReady(current))
     && (step !== 5 || current.provider === "disabled" || current.connectionTested === true);
   const update = (patch: WizardData) => setData(existing => ({
     ...existing,
@@ -286,7 +306,7 @@ export function WizardShell() {
         </header>
         {step === 1 && <IdentityStep value={current} update={update} />}
         {step === 2 && <DatabaseStep value={current} update={update} />}
-        {step === 3 && <SsoStep value={current} update={update} />}
+        {step === 3 && <SsoStep value={current} update={update} roleNames={((data.step4?.roles as RoleConfig[] | undefined) ?? DEFAULT_ROLES).map(role => role.name).filter(Boolean)} />}
         {step === 4 && <PermissionStep value={current} update={update} />}
         {step === 5 && <AiStep value={current} update={update} />}
         {step === 6 && <ImportStep value={current} update={update} />}
@@ -424,34 +444,158 @@ function DatabaseStep({ value, update }: { value: WizardData; update: (patch: Wi
   );
 }
 
-function SsoStep({ value, update }: { value: WizardData; update: (patch: WizardData) => void }) {
-  const provider = text(value, "provider", "local");
-  const [testing, setTesting] = useState(false);
-  const [message, setMessage] = useState("");
-  async function testConnection() {
-    setTesting(true); setMessage(""); update({ connectionTested: false });
+function SsoStep({ value, update, roleNames }: { value: WizardData; update: (patch: WizardData) => void; roleNames: string[] }) {
+  const providers = ssoProviders(value);
+  const [redirectUri, setRedirectUri] = useState("");
+  const [busyProvider, setBusyProvider] = useState("");
+  const [messages, setMessages] = useState<Record<string, string>>({});
+  const [loaded, setLoaded] = useState(false);
+
+  const setProviders = (next: SsoProviderEntry[]) => update({ providers: next });
+  const patch = (type: string, changes: Partial<SsoProviderEntry>) =>
+    setProviders(providers.map(entry => entry.provider === type ? { ...entry, ...changes, connectionTested: type === "local" } : entry));
+  const say = (type: string, message: string) => setMessages(existing => ({ ...existing, [type]: message }));
+
+  async function enable(type: string) {
+    if (providers.some(entry => entry.provider === type)) return;
+    const entry: SsoProviderEntry = { provider: type, connectionTested: type === "local", hasSecret: false, scopes: type === "okta" ? "openid profile email groups" : "openid profile email" };
+    setProviders([...providers, entry]);
+    if (type === "local") {
+      try { await apiPost("/api/wizard/step3/configure", { provider: "local" }); }
+      catch (error) { say("local", error instanceof Error ? error.message : "Could not enable password sign-in."); }
+    }
+  }
+
+  async function disable(type: string) {
+    setProviders(providers.filter(entry => entry.provider !== type));
+    try { await apiPost("/api/wizard/step3/remove", { provider: type }); }
+    catch (error) { say(type, error instanceof Error ? error.message : "Could not remove this sign-in method."); }
+  }
+
+  async function saveAndTest(entry: SsoProviderEntry) {
+    setBusyProvider(entry.provider); say(entry.provider, "");
     try {
       await apiPost("/api/wizard/step3/configure", {
-        provider, tenantId: text(value, "tenantId"), clientId: text(value, "clientId"), clientSecret: text(value, "clientSecret"),
-        domain: text(value, "domain"), metadataUrl: text(value, "metadataUrl"), metadataXml: text(value, "metadataXml"),
-        entityId: text(value, "entityId"), acsUrl: text(value, "acsUrl"),
+        provider: entry.provider, tenantId: entry.tenantId, clientId: entry.clientId, clientSecret: entry.clientSecret || undefined,
+        domain: entry.domain, authority: entry.authority, scopes: entry.scopes, defaultRole: entry.defaultRole,
+        groupRoleMapping: Object.fromEntries(Object.entries(entry.groupRoleMapping ?? {}).filter(([group, role]) => group.trim() && role.trim())),
       });
-      const result = await apiPost<HandshakeResult>("/api/wizard/step3/test");
-      update({ connectionTested: result.success, clientSecret: "" });
-      setMessage(result.success ? `SSO handshake successful — ${provider} connected` : `${result.error ?? "Handshake failed."} ${result.fixHint ?? ""}`);
-    } catch (error) { setMessage(error instanceof Error ? error.message : "SSO handshake failed."); }
-    finally { setTesting(false); }
+      const result = await apiPost<HandshakeResult>("/api/wizard/step3/test", { provider: entry.provider });
+      setProviders(providers.map(item => item.provider === entry.provider
+        ? { ...item, clientSecret: "", hasSecret: item.hasSecret || Boolean(entry.clientSecret), connectionTested: result.success }
+        : item));
+      say(entry.provider, result.success
+        ? `Connected. People will be sent to ${result.loginUrl ?? "the provider"} to sign in. ${result.fixHint ?? ""}`
+        : `${result.error ?? "The connection test failed."} ${result.fixHint ?? ""}`);
+    } catch (error) {
+      setProviders(providers.map(item => item.provider === entry.provider ? { ...item, connectionTested: false } : item));
+      say(entry.provider, error instanceof Error ? error.message : "The connection test failed.");
+    } finally { setBusyProvider(""); }
   }
+
+  // The server's list is the one that gets saved — it holds what was actually tested and where each
+  // secret lives — so the screen starts from it rather than from whatever the browser remembered.
+  useEffect(() => {
+    if (loaded) return;
+    apiGet<{ redirectUri: string; providers: SsoProviderEntry[] }>("/api/wizard/step3/providers")
+      .then(result => {
+        setRedirectUri(result.redirectUri);
+        if (result.providers.length > 0) update({ providers: result.providers });
+        else void enable("local");
+      })
+      .catch(() => { /* the step still works; the list is empty until a method is enabled */ })
+      .finally(() => setLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
+  }, []);
+
+  const localEnabled = providers.some(entry => entry.provider === "local");
+  const roleOptions = Array.from(new Set([...roleNames, ...DEFAULT_ROLES.map(role => role.name)]));
+
   return (
-    <div className="wizard-sections"><div className="wizard-form-grid">
-      <SelectField label="SSO provider" value={provider} onChange={next => update({ provider: next, connectionTested: next === "local" })} options={[
-        { value: "local", label: "Local email and password" }, { value: "entra", label: "Microsoft Entra ID" },
-        { value: "google", label: "Google Workspace" }, { value: "saml", label: "SAML 2.0" },
-      ]} />
-      {provider === "entra" && <><Field label="Tenant ID" value={text(value, "tenantId")} onChange={tenantId => update({ tenantId, connectionTested: false })} /><Field label="Client ID" value={text(value, "clientId")} onChange={clientId => update({ clientId, connectionTested: false })} /><Field label="Client secret" value={text(value, "clientSecret")} onChange={clientSecret => update({ clientSecret, connectionTested: false })} type="password" /></>}
-      {provider === "google" && <><Field label="Client ID" value={text(value, "clientId")} onChange={clientId => update({ clientId, connectionTested: false })} /><Field label="Client secret" value={text(value, "clientSecret")} onChange={clientSecret => update({ clientSecret, connectionTested: false })} type="password" /><Field label="Workspace domain" value={text(value, "domain")} onChange={domain => update({ domain, connectionTested: false })} /></>}
-      {provider === "saml" && <><Field label="Metadata URL" required={false} value={text(value, "metadataUrl")} onChange={metadataUrl => update({ metadataUrl, connectionTested: false })} /><label className="wizard-field"><span>Or metadata XML</span><textarea rows={6} value={text(value, "metadataXml")} onChange={event => update({ metadataXml: event.target.value, connectionTested: false })} /></label><label className="wizard-field"><span>Upload metadata XML</span><input type="file" accept=".xml,text/xml,application/xml" onChange={event => { const file = event.target.files?.[0]; if (file) void file.text().then(metadataXml => update({ metadataXml, metadataUrl: "", connectionTested: false })); }} /></label><Field label="Entity ID" value={text(value, "entityId")} onChange={entityId => update({ entityId, connectionTested: false })} /><Field label="ACS URL" value={text(value, "acsUrl")} onChange={acsUrl => update({ acsUrl, connectionTested: false })} /></>}
-    </div><button className="wizard-secondary" type="button" disabled={testing} onClick={testConnection}>{testing ? "Testing..." : "Test Connection"}</button>{message && <p aria-live="polite">{message}</p>}</div>
+    <div className="wizard-sections">
+      <h3>How will people sign in?</h3>
+      <p className="wizard-muted">Choose one or more. Each provider is tested against its live discovery document before you can continue, and its client secret is kept in the installation&rsquo;s secret vault, never in this page.</p>
+      {redirectUri && (
+        <div className="wizard-card" style={{ cursor: "default" }}>
+          <strong>Redirect URI to register at each provider</strong>
+          <code style={{ userSelect: "all", wordBreak: "break-all" }}>{redirectUri}</code>
+          <p>Paste this exactly into the app registration (Entra: Authentication, Web redirect URI. Google: Authorised redirect URIs. Okta: Sign-in redirect URIs).</p>
+        </div>
+      )}
+      <div className="wizard-form-grid">
+        {SSO_METHODS.map(method => {
+          const enabled = providers.some(entry => entry.provider === method.type);
+          return (
+            <label key={method.type} className="check-row" style={{ alignItems: "flex-start" }}>
+              <input type="checkbox" checked={enabled} onChange={event => { if (event.target.checked) void enable(method.type); else void disable(method.type); }} />
+              <span><strong>{method.label}</strong><br /><small className="wizard-muted">{method.note}</small></span>
+            </label>
+          );
+        })}
+      </div>
+      {!localEnabled && providers.length > 0 && (
+        <p className="wizard-error" role="alert">Password sign-in is off. The administrator account you set in the last step will not be able to sign in with its password; map the administrator&rsquo;s group to the Admin role below, or keep &ldquo;Email and password&rdquo; on.</p>
+      )}
+      {messages.local && <p className="wizard-error" role="alert">{messages.local}</p>}
+      {providers.filter(entry => entry.provider !== "local").map(entry => (
+        <SsoProviderCard key={entry.provider} entry={entry} roleOptions={roleOptions} busy={busyProvider === entry.provider}
+          message={messages[entry.provider] ?? ""} patch={changes => patch(entry.provider, changes)} test={() => saveAndTest(entry)} />
+      ))}
+    </div>
+  );
+}
+
+function SsoProviderCard({ entry, roleOptions, busy, message, patch, test }: {
+  entry: SsoProviderEntry; roleOptions: string[]; busy: boolean; message: string;
+  patch: (changes: Partial<SsoProviderEntry>) => void; test: () => void;
+}) {
+  const label = SSO_METHODS.find(method => method.type === entry.provider)?.label ?? entry.provider;
+  const mapping = Object.entries(entry.groupRoleMapping ?? {});
+  const setMapping = (rows: Array<[string, string]>) => patch({ groupRoleMapping: Object.fromEntries(rows) });
+  const hint = entry.provider === "entra"
+    ? "A group's object ID or display name, as it appears in the ID token's groups claim (or an app role value)."
+    : entry.provider === "google"
+      ? "A group's email address or name from the Workspace directory (needs the admin.directory.group.readonly scope)."
+      : "A group name as your Okta authorization server puts it in the groups claim.";
+  return (
+    <section className="wizard-card" style={{ cursor: "default" }}>
+      <div className="wizard-row"><h3>{label}</h3>{entry.connectionTested && <small><Check size={14} /> Connection tested</small>}</div>
+      <div className="wizard-form-grid">
+        {entry.provider === "entra" && <>
+          <Field label="Directory (tenant) ID" value={entry.tenantId ?? ""} onChange={tenantId => patch({ tenantId })} placeholder="00000000-0000-0000-0000-000000000000" />
+          <Field label="Application (client) ID" value={entry.clientId ?? ""} onChange={clientId => patch({ clientId })} />
+        </>}
+        {entry.provider === "google" && <>
+          <Field label="OAuth client ID" value={entry.clientId ?? ""} onChange={clientId => patch({ clientId })} placeholder="....apps.googleusercontent.com" />
+          <Field label="Workspace domain" value={entry.domain ?? ""} onChange={domain => patch({ domain })} placeholder="university.edu.pk" />
+        </>}
+        {entry.provider === "okta" && <>
+          <Field label="Okta org URL (authority)" value={entry.authority ?? ""} onChange={authority => patch({ authority })} placeholder="https://your-org.okta.com/oauth2/default" />
+          <Field label="Client ID" value={entry.clientId ?? ""} onChange={clientId => patch({ clientId })} />
+        </>}
+        <Field label={entry.hasSecret ? "Client secret (stored; enter to replace)" : "Client secret"} value={entry.clientSecret ?? ""} onChange={clientSecret => patch({ clientSecret })} type="password" required={!entry.hasSecret} />
+        <Field label="Scopes" value={entry.scopes ?? ""} onChange={scopes => patch({ scopes })} required={false} placeholder="openid profile email" />
+        <label className="wizard-field">
+          <span>Default role (for people in no mapped group)</span>
+          <input list="sso-role-options" value={entry.defaultRole ?? ""} onChange={event => patch({ defaultRole: event.target.value })} placeholder="e.g. Faculty" />
+        </label>
+      </div>
+      <h4>Group to role mapping</h4>
+      <p className="wizard-muted">{hint} Roles are the ones you define in the next step.</p>
+      {mapping.map(([group, role], index) => (
+        <div className="wizard-row" key={index}>
+          <Field label="Provider group" value={group} onChange={next => setMapping(mapping.map((row, i) => i === index ? [next, row[1]] : row))} />
+          <label className="wizard-field"><span>AegisCore role *</span>
+            <input list="sso-role-options" value={role} onChange={event => setMapping(mapping.map((row, i) => i === index ? [row[0], event.target.value] : row))} />
+          </label>
+          <button className="icon-button" type="button" aria-label="Remove mapping" onClick={() => setMapping(mapping.filter((_, i) => i !== index))}><Trash2 size={16} /></button>
+        </div>
+      ))}
+      <datalist id="sso-role-options">{roleOptions.map(role => <option key={role} value={role} />)}</datalist>
+      <button className="link-button" type="button" onClick={() => setMapping([...mapping, ["", ""]])}><Plus size={16} /> Add mapping</button>
+      <button className="wizard-secondary" type="button" disabled={busy} onClick={test}>{busy ? "Testing..." : "Save and test connection"}</button>
+      {message && <p aria-live="polite">{message}</p>}
+    </section>
   );
 }
 

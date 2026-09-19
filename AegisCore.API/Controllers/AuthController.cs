@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AegisCore.Application.Common.Interfaces;
+using AegisCore.Application.Identity;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.API.Authorization;
 using AegisCore.Infrastructure;
@@ -21,44 +22,13 @@ public sealed class AuthController(
     IConfiguration configuration,
     IBruteForceProtectionService bruteForce,
     IConnectionMultiplexer redis,
-    ICasbinPolicySyncService? casbin = null) : ControllerBase
+    ICasbinPolicySyncService? casbin = null,
+    IExternalSignInService? signInMethods = null) : ControllerBase
 {
-    /// <summary>
-    /// What this account is, beyond its name: a student's own record id, and the department they
-    /// belong to. A student account is created with the same id as its student record (see the
-    /// admissions enrolment step), so the link needs no column — but the claim has to be issued, and
-    /// until now none was, so /api/session answered "studentId: null" for every student alive.
-    /// </summary>
-    private async Task<Dictionary<string, string>> IdentityClaimsAsync(AegisCore.Domain.Entities.User user, CancellationToken ct)
-    {
-        var claims = new Dictionary<string, string>(StringComparer.Ordinal);
-        // Sign-in has no ambient tenant yet, so the tenant filter would hide every row: the user's
-        // own tenant is the scope here.
-        var student = await db.Students.IgnoreQueryFilters().AsNoTracking()
-            .Where(s => s.Id == user.Id && s.TenantId == user.TenantId)
-            .Select(s => new { s.Id, s.BatchId })
-            .SingleOrDefaultAsync(ct);
-        if (student is not null)
-        {
-            claims["student_id"] = student.Id.ToString();
-            var department = await db.Batches.IgnoreQueryFilters().AsNoTracking()
-                .Where(b => b.Id == student.BatchId && b.TenantId == user.TenantId)
-                .Select(b => (Guid?)b.DepartmentId)
-                .SingleOrDefaultAsync(ct);
-            if (department is { } departmentId && departmentId != Guid.Empty) claims["department_id"] = departmentId.ToString();
-            return claims;
-        }
+    private const string RefreshTokenKeyPrefix = SessionTokenIssuer.RefreshTokenKeyPrefix;
 
-        var faculty = await db.Faculties.IgnoreQueryFilters().AsNoTracking()
-            .Where(f => f.Id == user.Id && f.TenantId == user.TenantId)
-            .Select(f => (Guid?)f.DepartmentId)
-            .SingleOrDefaultAsync(ct);
-        if (faculty is { } facultyDepartment && facultyDepartment != Guid.Empty) claims["department_id"] = facultyDepartment.ToString();
-        return claims;
-    }
-
-    private const string RefreshTokenKeyPrefix = "aegiscore:auth:refresh:token:";
-    private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(7);
+    // The same tail as the SSO callback: whichever door the person came through, the token is built here.
+    private SessionTokenIssuer Issuer => new(db, tokens, redis, configuration, casbin);
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
@@ -77,6 +47,19 @@ public sealed class AuthController(
         var tenantId = ResolveTenantId();
         if (tenantId == Guid.Empty) return Unauthorized(new { error = "Invalid credentials." });
 
+        // A university that chose SSO without Local in the wizard has turned this form off; saying
+        // so is kinder than "invalid credentials" to someone whose password is perfectly good.
+        if (signInMethods is not null)
+        {
+            var methods = await signInMethods.GetLoginMethodsAsync(tenantId, ct);
+            if (!methods.LocalEnabled)
+                return StatusCode(403, new
+                {
+                    error = "Password sign-in is turned off for this university. Sign in with " + string.Join(" or ", methods.Providers.Select(p => p.DisplayName)) + ".",
+                    code = "local_sign_in_disabled"
+                });
+        }
+
         var matchingUsers = await db.Users.IgnoreQueryFilters()
             .AsSplitQuery()
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
@@ -93,28 +76,8 @@ public sealed class AuthController(
         }
 
         await bruteForce.ClearFailedAttemptsAsync(email);
-        if (casbin is not null) await casbin.SyncTenantAsync(tenantId, ct);
-        user.LastLoginAt = DateTime.UtcNow;
-        await db.SaveChangesAsync(ct);
-
-        var accessToken = tokens.GenerateAccessToken(user, await IdentityClaimsAsync(user, ct));
-        var refreshToken = tokens.GenerateRefreshToken();
-        var familyId = await tokens.GenerateRefreshTokenFamilyAsync(user.Id);
-        var expiresAt = DateTime.UtcNow.AddDays(7);
-
-        var tokenData = new
-        {
-            family_id = familyId.ToString(),
-            user_id = user.Id.ToString(),
-            expires_at = expiresAt.ToString("O")
-        };
-        await redis.GetDatabase().StringSetAsync($"{RefreshTokenKeyPrefix}{refreshToken}", JsonSerializer.Serialize(tokenData), RefreshTokenTtl);
-
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiry = expiresAt;
-        await db.SaveChangesAsync(ct);
-
-        return Ok(new { accessToken, refreshToken, tokenType = "Bearer", expiresIn = SessionLifetimeSeconds() });
+        var issued = await Issuer.IssueAsync(user, ct);
+        return Ok(new { accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
     }
 
     [HttpPost("refresh")]
@@ -147,34 +110,13 @@ public sealed class AuthController(
         await tokens.InvalidateRefreshTokenFamilyAsync(familyId);
         await db2.KeyDeleteAsync(tokenKey);
 
-        var user = await db.Users.IgnoreQueryFilters()
-            .AsSplitQuery()
-            .Include(x => x.UserRoles).ThenInclude(x => x.Role)
-            .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == userId, ct);
-
+        var issuer = Issuer;
+        var user = await issuer.LoadForSignInAsync(tenantId, userId, ct);
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active)
             return Unauthorized(new { error = "Invalid or expired refresh token." });
 
-        if (casbin is not null) await casbin.SyncTenantAsync(tenantId, ct);
-        var accessToken = tokens.GenerateAccessToken(user, await IdentityClaimsAsync(user, ct));
-        var newRefreshToken = tokens.GenerateRefreshToken();
-        var newFamilyId = await tokens.GenerateRefreshTokenFamilyAsync(user.Id);
-        var expiresAt = DateTime.UtcNow.AddDays(7);
-
-        var newTokenData = new
-        {
-            family_id = newFamilyId.ToString(),
-            user_id = user.Id.ToString(),
-            expires_at = expiresAt.ToString("O")
-        };
-        await db2.StringSetAsync($"{RefreshTokenKeyPrefix}{newRefreshToken}", JsonSerializer.Serialize(newTokenData), RefreshTokenTtl);
-
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiry = expiresAt;
-        user.LastLoginAt = DateTime.UtcNow;
-        await db.SaveChangesAsync(ct);
-
-        return Ok(new { accessToken, refreshToken = newRefreshToken, tokenType = "Bearer", expiresIn = SessionLifetimeSeconds() });
+        var issued = await issuer.IssueAsync(user, ct);
+        return Ok(new { accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
     }
 
     [HttpPost("logout")]
@@ -203,9 +145,6 @@ public sealed class AuthController(
     {
         return Guid.TryParse(configuration["TENANT_ID"], out var configured) ? configured : Guid.Empty;
     }
-
-    private int SessionLifetimeSeconds()
-        => int.TryParse(configuration["SESSION_LIFETIME"], out var seconds) && seconds is >= 60 and <= 86_400 ? seconds : 900;
 
     public sealed record LoginRequest(string Email, string Password);
     public sealed record RefreshRequest(string RefreshToken);

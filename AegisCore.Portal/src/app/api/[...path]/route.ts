@@ -40,7 +40,9 @@ async function proxy(request: NextRequest) {
       method: request.method, headers, body, cache: "no-store", redirect: "manual",
       signal: AbortSignal.timeout(60_000),
     });
-    const authenticate = ["/api/auth/login", "/api/auth/refresh"].includes(path);
+    // The three answers that carry tokens: a password login, a refresh, and the exchange of the
+    // one-time code an identity provider's callback handed the browser. All three become cookies here.
+    const authenticate = ["/api/auth/login", "/api/auth/refresh", "/api/auth/sso/exchange"].includes(path);
     if (authenticate && upstream.ok) {
       const tokens = await upstream.json();
       if (typeof tokens.accessToken !== "string" || typeof tokens.refreshToken !== "string")
@@ -53,7 +55,9 @@ async function proxy(request: NextRequest) {
       return response;
     }
     const response = new NextResponse(upstream.body, { status: upstream.status });
-    for (const name of ["content-type", "content-disposition", "retry-after"]) {
+    // An SSO start or callback answers with a redirect — to the identity provider, or back to the
+    // login screen with a one-time code or a reason. The browser must follow it, so Location passes through.
+    for (const name of ["content-type", "content-disposition", "retry-after", "location"]) {
       const value = upstream.headers.get(name);
       if (value) response.headers.set(name, value);
     }

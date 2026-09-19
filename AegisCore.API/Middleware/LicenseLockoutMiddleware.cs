@@ -40,16 +40,9 @@ public sealed class LicenseLockoutMiddleware(RequestDelegate next)
             return;
         }
 
-        // The same sentence the write interceptor uses, so the person sees one explanation wherever the lock bites.
-        var why = status.LockReason switch
-        {
-            "heartbeat_failed" => "the licence authority could not be reached for two consecutive heartbeats",
-            "expired" => "the licence has expired",
-            "revoked" => "the licence was revoked by the vendor",
-            "invalid" => "the licence key is not valid",
-            "pending_activation" => "no licence has been activated yet",
-            _ => "the licence is locked (" + (status.LockReason ?? status.Status) + ")"
-        };
+        // The same sentence the write interceptor and the SSO first sign-in use, so the person sees one
+        // explanation wherever the lock bites.
+        var why = AegisCore.Infrastructure.Licensing.LicenseLockDescription.Why(status);
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
         await context.Response.WriteAsJsonAsync(new
         {

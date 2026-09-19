@@ -96,14 +96,21 @@ public sealed class WizardDatabaseRequestValidator : SecureValidator<WizardDatab
 
 public sealed class SsoConfigDtoValidator : SecureValidator<SsoConfigDto>
 {
-    private static readonly string[] Providers = ["entra", "google", "saml", "local"];
+    private static readonly string[] Providers = ["entra", "google", "okta", "saml", "local"];
     public SsoConfigDtoValidator()
     {
-        RuleFor(x => x.Provider).NotEmpty().Must(value => Providers.Contains(value, StringComparer.OrdinalIgnoreCase)).WithMessage("Provider must be entra, google, saml, or local.");
-        RuleFor(x => x.ClientId).NotEmpty().MaximumLength(500).When(x => ValidationRules.IsProvider(x.Provider, "entra", "google"));
-        RuleFor(x => x.ClientSecret).NotEmpty().MaximumLength(4096).When(x => ValidationRules.IsProvider(x.Provider, "entra", "google"));
+        RuleFor(x => x.Provider).NotEmpty().Must(value => Providers.Contains(value, StringComparer.OrdinalIgnoreCase)).WithMessage("Provider must be entra, google, okta, saml, or local.");
+        RuleFor(x => x.ClientId).NotEmpty().MaximumLength(500).When(x => ValidationRules.IsProvider(x.Provider, "entra", "google", "okta"));
+        // The secret is required to pass the step, not to save a change to the mapping: the vault
+        // keeps the one entered earlier, and the step-3 check refuses to continue without one.
+        RuleFor(x => x.ClientSecret).MaximumLength(4096);
         RuleFor(x => x.TenantId).NotEmpty().MaximumLength(200).When(x => ValidationRules.IsProvider(x.Provider, "entra"));
         RuleFor(x => x.Domain).NotEmpty().MaximumLength(253).Matches("^[A-Za-z0-9.-]+$").When(x => ValidationRules.IsProvider(x.Provider, "google"));
+        RuleFor(x => x.Authority).NotEmpty().MaximumLength(500).Must(ValidationRules.IsHttpsUrl).WithMessage("The Okta org URL must be an HTTPS URL.").When(x => ValidationRules.IsProvider(x.Provider, "okta"));
+        RuleFor(x => x.Scopes).MaximumLength(500).Matches("^[A-Za-z0-9:/._ -]*$").When(x => x.Scopes is not null);
+        RuleFor(x => x.DefaultRole).MaximumLength(100);
+        RuleFor(x => x.GroupRoleMapping).Must(mapping => mapping is null || (mapping.Count <= 100 && mapping.All(pair => pair.Key.Length is > 0 and <= 300 && pair.Value.Length <= 100)))
+            .WithMessage("The group-to-role mapping may hold up to 100 entries; group names up to 300 characters, role names up to 100.");
         RuleFor(x => x.EntityId).NotEmpty().MaximumLength(1000).When(x => ValidationRules.IsProvider(x.Provider, "saml"));
         RuleFor(x => x.AcsUrl).NotEmpty().MaximumLength(2048).Must(ValidationRules.IsHttpsUrl).When(x => ValidationRules.IsProvider(x.Provider, "saml"));
         RuleFor(x => x).Must(x => !ValidationRules.IsProvider(x.Provider, "saml") || !string.IsNullOrWhiteSpace(x.MetadataXml) || ValidationRules.IsHttpsUrl(x.MetadataUrl)).WithMessage("SAML metadata XML or an HTTPS metadata URL is required.");

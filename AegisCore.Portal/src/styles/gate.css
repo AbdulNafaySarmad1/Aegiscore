@@ -32,6 +32,10 @@
 .password-toggle:hover { color: var(--ink); }
 .gate-options { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-13); }
 .gate-options a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.gate-sso { display: grid; gap: var(--s-3); }
+.gate-sso-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); min-height: 44px; text-decoration: none; }
+.gate-sso-divider { display: flex; align-items: center; gap: var(--s-3); color: var(--ink-2); font-size: var(--t-12); }
+.gate-sso-divider::before, .gate-sso-divider::after { content: ""; flex: 1; border-top: 1px solid var(--rule-strong); }
 .gate-demo { display: grid; gap: var(--s-3); padding-top: var(--s-4); border-top: 1px solid var(--rule-strong); }
 .gate-demo-title { font-size: var(--t-13); color: var(--ink-2); display: flex; gap: var(--s-2); align-items: baseline; }
 .gate-demo-title strong { color: var(--ink); font-weight: 500; }

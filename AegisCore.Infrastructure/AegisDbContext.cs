@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using AegisCore.Domain;
@@ -1171,6 +1171,7 @@ public class AegisDbContext : DbContext
     /// SAML configurations.
     /// </summary>
     public DbSet<SamlConfiguration> SamlConfigurations => Set<SamlConfiguration>();
+    public DbSet<IdentityProviderConfiguration> IdentityProviderConfigurations => Set<IdentityProviderConfiguration>();
 
     // Disaster Recovery
     /// <summary>
@@ -2241,6 +2242,22 @@ public class AegisDbContext : DbContext
         {
             entity.HasIndex(e => e.Status);
             entity.HasOne(e => e.Permission).WithMany().HasForeignKey(e => e.PermissionId);
+        });
+
+        modelBuilder.Entity<IdentityProviderConfiguration>(entity =>
+        {
+            // One row per way of signing in per tenant; the login screen is a list of these rows.
+            entity.HasIndex(e => new { e.TenantId, e.ProviderType }).IsUnique();
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            // An external identity is (tenant, issuer, subject). The database refuses the collision
+            // that matching on subject alone would allow: the same "oid" from two directories.
+            entity.HasIndex(e => new { e.TenantId, e.ExternalIssuer, e.ExternalId })
+                .IsUnique()
+                .HasFilter("\"ExternalIssuer\" IS NOT NULL AND \"ExternalId\" IS NOT NULL")
+                .HasDatabaseName("IX_Users_ExternalIdentity");
         });
 
         modelBuilder.Entity<LicenseState>(entity =>
