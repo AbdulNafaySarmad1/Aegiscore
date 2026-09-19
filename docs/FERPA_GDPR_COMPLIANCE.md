@@ -33,3 +33,7 @@ For a disconnected installation, set either `License__OfflineMode=true` or `LICE
 The setup service no longer assumes Cloudflare Tunnel. `ProvisionDomain(..., useCloudflareTunnel: false)` leaves all tunnel identifiers unset and instructs the institution to point DNS at its own ingress, load balancer, or public IP. Passing `useCloudflareTunnel: true` explicitly creates the Cloudflare CNAME plan. Generated environment output includes a tunnel ID only for that explicit choice.
 
 All infrastructure remains institution-owned. These options do not introduce an AegisCore- or Nocturne-hosted data dependency.
+
+## Compliance programme
+
+The evidence-based data inventory, data-flow map, residency statement and NIST CSF gap assessment that supersede the claims in `06-security-architecture-document.md` are in [`compliance/`](compliance/00-PROGRAM.md).
