@@ -69,6 +69,11 @@ public class JwtTokenService : IJwtTokenService
             new(ClaimTypes.Email, user.Email),
             new("tenant_id", user.TenantId.ToString())
         };
+        // The person's own name, so that every screen and every audit line attributes work to a
+        // person rather than to an email address. Absent when an account was created without one,
+        // and the session endpoint falls back to the email then rather than inventing a name.
+        var fullName = $"{user.FirstName} {user.LastName}".Trim();
+        if (!string.IsNullOrWhiteSpace(fullName)) claims.Add(new Claim(ClaimTypes.Name, fullName));
         claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name)));
         // student_id and department_id are read by the session endpoint and by every student-facing
         // screen, and nothing ever issued them: every student was told their account was not linked

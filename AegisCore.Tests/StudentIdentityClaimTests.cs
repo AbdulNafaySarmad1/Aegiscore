@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using AegisCore.Domain.Entities;
 using AegisCore.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
@@ -63,5 +64,27 @@ public class StudentIdentityClaimTests
         var token = new JwtSecurityTokenHandler().ReadJwtToken(
             Service().GenerateAccessToken(Someone(), new Dictionary<string, string> { ["student_id"] = "" }));
         Assert.DoesNotContain(token.Claims, c => c.Type == "student_id");
+    }
+
+    /// <summary>
+    /// The token carries the person's name, because /api/session reads it and every screen greets
+    /// and attributes by it. Without it the register addressed its first administrator as
+    /// "registrar@northfield.example.edu" on the first screen of a fresh installation.
+    /// </summary>
+    [Fact]
+    public void The_Persons_Name_Travels_In_Their_Token()
+    {
+        var token = new JwtSecurityTokenHandler().ReadJwtToken(Service().GenerateAccessToken(Someone()));
+        Assert.Equal("A B", token.Claims.Single(c => c.Type == ClaimTypes.Name).Value);
+    }
+
+    [Fact]
+    public void An_Account_With_No_Name_Carries_No_Name_Claim()
+    {
+        var anonymous = Someone();
+        anonymous.FirstName = "";
+        anonymous.LastName = "";
+        var token = new JwtSecurityTokenHandler().ReadJwtToken(Service().GenerateAccessToken(anonymous));
+        Assert.DoesNotContain(token.Claims, c => c.Type == ClaimTypes.Name || c.Type == "unique_name");
     }
 }
