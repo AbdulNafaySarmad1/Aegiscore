@@ -303,13 +303,28 @@ public class RegistrationService : IRegistrationService
             // list and storing the count gave forty students eighteen distinct positions when they
             // all arrived at once, so the whole list is numbered in one statement instead — which is
             // also what puts it right after somebody leaves it.
-            await _db.Database.ExecuteSqlInterpolatedAsync(
-                $@"UPDATE ""RegistrationEnrollments"" r
-                   SET ""WaitlistPosition"" = ordered.position
-                   FROM (SELECT ""Id"", ROW_NUMBER() OVER (ORDER BY ""CreatedAt"", ""Id"") AS position
-                         FROM ""RegistrationEnrollments""
-                         WHERE ""CourseId"" = {courseId} AND ""WindowId"" = {windowId} AND ""IsWaitlisted"") ordered
-                   WHERE r.""Id"" = ordered.""Id""", ct);
+            //
+            // One statement is still not enough on its own. Fifty callers renumber at once, each on
+            // its own snapshot, and a row that is not yet visible to its neighbour gets numbered
+            // twice — the list came back with 39 distinct positions for 40 people, about one run in
+            // three. So a course's renumbering is serialised on a lock the database holds for the
+            // length of the transaction: the callers queue, and the last one through has every
+            // committed row in front of it.
+            await _db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                await using var numbering = await _db.Database.BeginTransactionAsync(ct);
+                if (_db.Database.IsNpgsql())
+                    await _db.Database.ExecuteSqlInterpolatedAsync(
+                        $@"SELECT pg_advisory_xact_lock(hashtextextended({courseId}::text || {windowId}::text, 0))", ct);
+                await _db.Database.ExecuteSqlInterpolatedAsync(
+                    $@"UPDATE ""RegistrationEnrollments"" r
+                       SET ""WaitlistPosition"" = ordered.position
+                       FROM (SELECT ""Id"", ROW_NUMBER() OVER (ORDER BY ""CreatedAt"", ""Id"") AS position
+                             FROM ""RegistrationEnrollments""
+                             WHERE ""CourseId"" = {courseId} AND ""WindowId"" = {windowId} AND ""IsWaitlisted"") ordered
+                       WHERE r.""Id"" = ordered.""Id""", ct);
+                await numbering.CommitAsync(ct);
+            });
             enrollment.WaitlistPosition = await _db.RegistrationEnrollments.AsNoTracking()
                 .Where(e => e.Id == enrollment.Id).Select(e => e.WaitlistPosition).SingleAsync(ct);
         }
