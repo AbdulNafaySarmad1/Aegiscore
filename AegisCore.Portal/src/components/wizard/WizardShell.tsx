@@ -60,6 +60,31 @@ function SelectField({ label, value, onChange, options }: {
   );
 }
 
+/**
+ * Poll until the application answers as ready again. `/api/runtime/ready` is served by the portal
+ * and asks the API's own readiness check, so a 200 means the process that was restarted is back and
+ * every startup check passed — not merely that a port is open. It gives up after two minutes so the
+ * screen can say so instead of spinning for ever.
+ */
+async function waitUntilAnswering(timeoutMs = 120_000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  // Give the supervisor time to begin the restart; answering "ready" from the process that is about
+  // to go down would be the same lie by a different route.
+  await new Promise(resolve => setTimeout(resolve, 5_000));
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch("/api/runtime/ready", { cache: "no-store", signal: AbortSignal.timeout(4_000) });
+      if (response.ok) {
+        await response.body?.cancel();
+        return true;
+      }
+      await response.body?.cancel();
+    } catch { /* still down */ }
+    await new Promise(resolve => setTimeout(resolve, 2_000));
+  }
+  return false;
+}
+
 export function WizardShell() {
   const [token, setToken] = useState("");
   const [tokenAccepted, setTokenAccepted] = useState(false);
@@ -69,6 +94,8 @@ export function WizardShell() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [activated, setActivated] = useState(false);
+  const [restarting, setRestarting] = useState(false);
+  const [restartNote, setRestartNote] = useState("");
 
   const loadSession = useCallback(async () => {
     setBusy(true);
@@ -172,7 +199,19 @@ export function WizardShell() {
         timestamp: new Date().toISOString(),
       });
       window.sessionStorage.removeItem("aegiscore_setup_token");
+      // Activation changes how the application routes requests, so the container restarts itself a
+      // few seconds after this answer (docker/client/application.cjs). Until it is answering again,
+      // every request — including the first sign-in — fails. Wait for it rather than handing the
+      // person a link that errors.
+      setRestarting(true);
+      setBusy(false);
+      const ready = await waitUntilAnswering();
+      setRestarting(false);
+      if (!ready) {
+        setRestartNote("The register has not finished restarting. It is applying the installation; wait a moment and reload this page. If it does not come back, check the container log.");
+      }
       setActivated(true);
+      return;
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Activation failed.");
     } finally {
@@ -195,12 +234,25 @@ export function WizardShell() {
     );
   }
 
+  if (restarting) {
+    return (
+      <main id="main-content" className="wizard-loading" tabIndex={-1}>
+        <ShieldCheck size={38} />
+        <h1>Applying the installation</h1>
+        <p aria-live="polite">The register is restarting so that it comes up configured. This takes a few seconds; nothing is lost and there is nothing to do. You will be able to sign in when it finishes.</p>
+      </main>
+    );
+  }
+
   if (activated) {
     return (
       <main id="main-content" className="wizard-success" tabIndex={-1}>
         <Check size={54} />
         <p>AEGISCORE IS READY</p>
         <h1>Your university instance is live.</h1>
+        {restartNote
+          ? <p className="wizard-error" role="alert">{restartNote}</p>
+          : <p>Sign in with the administrator email and password you set in the last step. There is no other account.</p>}
         <Link className="wizard-primary" href="/">Open dashboard <ChevronRight size={18} /></Link>
       </main>
     );

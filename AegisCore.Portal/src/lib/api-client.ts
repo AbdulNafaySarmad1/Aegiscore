@@ -19,6 +19,37 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * A response body with no sentence in it. Rather than showing a bare status code, say what that
+ * code means for the person reading it. The one that matters most is 502/503: the register is
+ * restarting — which is exactly what it does for a few seconds once, immediately after the
+ * installation wizard finishes — and the only useful instruction is to wait and try again.
+ */
+function whenTheServerSaysNothing(status: number): string {
+  if (status === 0) return "The register did not answer. Check that it is running, then try again.";
+  if (status === 502 || status === 503 || status === 504)
+    return "The register is not answering yet. It restarts for a few seconds after an installation or an upgrade; wait a moment and try again.";
+  if (status === 401) return "Your session has ended. Sign in again.";
+  if (status === 403) return "You do not have permission to do that.";
+  if (status === 404) return "That record no longer exists.";
+  if (status === 429) return "Too many requests from this connection. Wait a minute and try again.";
+  return `The register refused the request (${status}).`;
+}
+
+/**
+ * fetch throws rather than answering when the connection itself fails — the API restarting, the
+ * network gone. Turn that into an ApiError like any other, so every caller has one thing to catch
+ * and one message to show instead of the browser's "Failed to fetch".
+ */
+async function send(path: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(path, init);
+  } catch (reason) {
+    if (reason instanceof DOMException && reason.name === "AbortError") throw reason;
+    throw new ApiError(whenTheServerSaysNothing(0), 0, undefined);
+  }
+}
+
 let refreshing: Promise<boolean> | undefined;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -28,15 +59,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (setupToken) headers.set("X-Setup-Token", setupToken);
   if (!(init?.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  let response = await fetch(path, {
-    credentials: "include",
-    ...init,
-    headers,
-  });
+  let response = await send(path, { credentials: "include", ...init, headers });
   if (response.status === 401 && !path.startsWith("/api/auth/")) {
     refreshing ??= fetch("/api/auth/refresh", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: "{}" })
       .then(async result => { await release(result); return result.ok; }).catch(() => false).finally(() => { refreshing = undefined; });
-    if (await refreshing) response = await fetch(path, { credentials: "include", ...init, headers });
+    if (await refreshing) response = await send(path, { credentials: "include", ...init, headers });
   }
   const contentType = response.headers.get("content-type") ?? "";
   const payload = contentType.includes("json")
@@ -47,14 +74,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       error?: string | { userMessage?: string };
       userMessage?: string;
       message?: string;
+      detail?: string;
       errors?: string[];
     };
     const message =
       (typeof body?.error === "string" ? body.error : body?.error?.userMessage) ??
       body?.userMessage ??
       body?.message ??
+      // ASP.NET problem+json puts the sentence in `detail`; the setup gate answers in that shape.
+      body?.detail ??
       body?.errors?.join(" ") ??
-      `Request failed (${response.status})`;
+      whenTheServerSaysNothing(response.status);
     throw new ApiError(message, response.status, payload);
   }
   return payload as T;
