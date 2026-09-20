@@ -41,7 +41,7 @@ public sealed class ComplianceRetentionWorker(
                 .ToListAsync(cancellationToken);
             var configs = await db.ConfigurationEntries.IgnoreQueryFilters()
                 .Where(item => tenantIds.Contains(item.TenantId)
-                    && (item.Key == "locale.timezone" || item.Key == "compliance.audit_retention_years"))
+                    && (item.Key == "locale.timezone" || RetentionSettings.Keys.Contains(item.Key)))
                 .Select(item => new { item.TenantId, item.Key, item.ValueJson })
                 .ToListAsync(cancellationToken);
 
@@ -61,12 +61,21 @@ public sealed class ComplianceRetentionWorker(
                 if (localNow.Hour != 2 || _lastRetentionRun.TryGetValue(tenantId, out var lastRun) && lastRun == localDate)
                     continue;
 
-                var yearsText = ConfigValue(configs.FirstOrDefault(item =>
-                    item.TenantId == tenantId && item.Key == "compliance.audit_retention_years")?.ValueJson);
-                var years = int.TryParse(yearsText, out var configuredYears)
-                    ? configuredYears
-                    : DefaultTenantConfigTemplate.DefaultAuditRetentionYears;
-                var deleted = await service.ApplyRetentionAsync(tenantId, nowUtc, years, cancellationToken);
+                string? Setting(string key) => ConfigValue(configs.FirstOrDefault(item => item.TenantId == tenantId && item.Key == key)?.ValueJson);
+                int Number(string key, int fallback) => int.TryParse(Setting(key), out var value) ? value : fallback;
+                var holds = (Setting(RetentionSettings.LegalHoldsKey) ?? string.Empty)
+                    .Split([',', ';', ' ', '[', ']', '"'], StringSplitOptions.RemoveEmptyEntries)
+                    .Select(text => Guid.TryParse(text, out var id) ? id : Guid.Empty)
+                    .Where(id => id != Guid.Empty)
+                    .ToHashSet();
+                var settings = new RetentionSettings(
+                    Number(RetentionSettings.AuditYearsKey, DefaultTenantConfigTemplate.DefaultAuditRetentionYears),
+                    Number(RetentionSettings.WriteAuditYearsKey, 6),
+                    Number(RetentionSettings.LoginAuditDaysKey, 365),
+                    Number(RetentionSettings.VisitorDaysKey, 90),
+                    Number(RetentionSettings.ApplicantYearsKey, 2),
+                    holds);
+                var deleted = await service.ApplyRetentionAsync(tenantId, nowUtc, settings, cancellationToken);
                 _lastRetentionRun[tenantId] = localDate;
                 logger.LogInformation("Applied compliance retention for tenant {TenantId}; removed {DeletedCount} records.", tenantId, deleted);
             }

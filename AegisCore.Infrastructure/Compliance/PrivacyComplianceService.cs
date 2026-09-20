@@ -18,7 +18,8 @@ public sealed class PrivacyComplianceService(
     IPqcCryptographyService encryption,
     IStorageService storage,
     IConfiguration configuration,
-    ILogger<PrivacyComplianceService> logger) : IPrivacyComplianceService
+    ILogger<PrivacyComplianceService> logger,
+    AegisCore.Application.Foundation.IStorageProvider? files = null) : IPrivacyComplianceService
 {
     private static readonly Regex CategoryPattern = new("^[a-z0-9_]{2,80}$", RegexOptions.Compiled);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
@@ -99,6 +100,7 @@ public sealed class PrivacyComplianceService(
 
     public async Task ProcessPendingErasureRequestsAsync(CancellationToken cancellationToken = default)
     {
+        await RequeueRestoredSubjectsAsync(cancellationToken);
         var ids = await db.ErasureRequests.IgnoreQueryFilters()
             .Where(request => request.Status == ErasureRequestStatus.Pending || request.Status == ErasureRequestStatus.InProgress)
             .OrderBy(request => request.RequestedAt)
@@ -201,6 +203,68 @@ public sealed class PrivacyComplianceService(
                     .Where(item => item.TenantId == tenantId && item.UserId == userId)
                     .ToListAsync(cancellationToken);
                 db.SsoSessions.RemoveRange(sessions);
+
+                // Welfare and conduct (docs/compliance/09 §3): the notes are about the person and go;
+                // the institutional fact that a disciplinary case existed stays, without its narrative.
+                var counselings = await db.StudentCounselings.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.StudentId == userId)
+                    .ToListAsync(cancellationToken);
+                db.StudentCounselings.RemoveRange(counselings);
+                var disciplines = await db.StudentDisciplines.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.StudentId == userId)
+                    .ToListAsync(cancellationToken);
+                foreach (var discipline in disciplines) discipline.Description = null;
+                var documents = await db.StudentDocuments.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.StudentId == userId)
+                    .ToListAsync(cancellationToken);
+                foreach (var document in documents) await DeleteFileAsync(document.FileUrl, cancellationToken);
+                db.StudentDocuments.RemoveRange(documents);
+
+                // Applicant-portal identity and the documents it uploaded.
+                var applicantProfiles = await db.ApplicantProfiles.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId
+                        && (item.ConvertedStudentId == userId || (originalEmail != null && item.Email == originalEmail)))
+                    .ToListAsync(cancellationToken);
+                foreach (var profile in applicantProfiles)
+                {
+                    profile.FullName = erasedName;
+                    profile.Email = $"{userId:N}@erased.invalid";
+                    profile.DateOfBirth = null;
+                    profile.Gender = null;
+                    profile.Nationality = null;
+                    profile.Phone = null;
+                    profile.DecisionNote = null;
+                }
+                var applicantIds = applicantProfiles.Select(item => item.Id).ToList();
+                var applicantDocuments = await db.ApplicantDocuments.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && applicantIds.Contains(item.ApplicantId))
+                    .ToListAsync(cancellationToken);
+                foreach (var document in applicantDocuments) await DeleteFileAsync(document.StoragePath, cancellationToken);
+                db.ApplicantDocuments.RemoveRange(applicantDocuments);
+
+                // Travel documents: the registry row stays for the visa-compliance history, the numbers go.
+                var registries = await db.ForeignStudentRegistries.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && item.StudentId == userId)
+                    .ToListAsync(cancellationToken);
+                foreach (var registry in registries)
+                {
+                    registry.PassportNumber = null;
+                    registry.VisaNumber = null;
+                    registry.MoraRegistrationNumber = null;
+                }
+                var registryIds = registries.Select(item => item.Id).ToList();
+                var visaDocuments = await db.VisaDocuments.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId && registryIds.Contains(item.RegistryId))
+                    .ToListAsync(cancellationToken);
+                foreach (var document in visaDocuments) await DeleteFileAsync(document.FileUrl, cancellationToken);
+                db.VisaDocuments.RemoveRange(visaDocuments);
+
+                // Where the person signed in from.
+                var logins = await db.LoginAuditRecords.IgnoreQueryFilters()
+                    .Where(item => item.TenantId == tenantId
+                        && (item.UserId == userId || (originalEmail != null && item.UserEmail == originalEmail)))
+                    .ToListAsync(cancellationToken);
+                db.LoginAuditRecords.RemoveRange(logins);
 
                 var pictures = await db.ProfilePictureRecords.IgnoreQueryFilters()
                     .Where(item => item.TenantId == tenantId && item.UserId == userId)
@@ -313,6 +377,101 @@ public sealed class PrivacyComplianceService(
         db.RemoveRange(erasures);
         await db.SaveChangesAsync(cancellationToken);
         return audits.Count + consents.Count + erasures.Count;
+    }
+
+    /// <summary>
+    /// A restore from a backup older than an erasure brings the person back. Any completed request
+    /// whose subject is identifiable again is re-queued, so the next cycle erases them again
+    /// (docs/compliance/09-retention-policy.md §4).
+    /// </summary>
+    private async Task RequeueRestoredSubjectsAsync(CancellationToken cancellationToken)
+    {
+        var completed = await db.ErasureRequests.IgnoreQueryFilters()
+            .Where(item => item.Status == ErasureRequestStatus.Completed)
+            .Select(item => new { item.Id, item.TenantId, item.UserId })
+            .ToListAsync(cancellationToken);
+        if (completed.Count == 0) return;
+
+        var userIds = completed.Select(item => item.UserId).ToList();
+        var identifiable = await db.Users.IgnoreQueryFilters()
+            .Where(user => userIds.Contains(user.Id) && !user.Username.StartsWith("ERASED_USER_"))
+            .Select(user => user.Id)
+            .Union(db.Students.IgnoreQueryFilters()
+                .Where(student => userIds.Contains(student.Id) && !student.FirstName.StartsWith("ERASED_USER_"))
+                .Select(student => student.Id))
+            .ToListAsync(cancellationToken);
+        if (identifiable.Count == 0) return;
+
+        var requests = await db.ErasureRequests.IgnoreQueryFilters()
+            .Where(item => item.Status == ErasureRequestStatus.Completed && identifiable.Contains(item.UserId))
+            .ToListAsync(cancellationToken);
+        foreach (var request in requests)
+        {
+            request.Status = ErasureRequestStatus.Pending;
+            request.FailureReason = "Subject was identifiable again after a restore; erasure re-queued.";
+        }
+        await db.SaveChangesAsync(cancellationToken);
+        logger.LogWarning("{Count} completed erasure request(s) re-queued because their subjects were restored from a backup.", requests.Count);
+    }
+
+    private async Task DeleteFileAsync(string? pathOrUrl, CancellationToken cancellationToken)
+    {
+        if (files is null || string.IsNullOrWhiteSpace(pathOrUrl)) return;
+        if (pathOrUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || pathOrUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Erasure: stored file reference is an external URL and was not deleted: {Url}", pathOrUrl);
+            return;
+        }
+        try { await files.DeleteAsync(pathOrUrl, cancellationToken); }
+        catch (Exception exception) { logger.LogWarning(exception, "Erasure: could not delete stored file {Path}", pathOrUrl); }
+    }
+
+    public async Task<int> ApplyRetentionAsync(Guid tenantId, DateTime nowUtc, RetentionSettings settings, CancellationToken cancellationToken = default)
+    {
+        var deleted = await ApplyRetentionAsync(tenantId, nowUtc, settings.AuditRetentionYears, cancellationToken);
+        var holds = settings.LegalHolds.ToList();
+
+        // Sign-in records: where a person was (docs/compliance/09, "Login audit").
+        var loginCutoff = nowUtc.AddDays(-Math.Clamp(settings.LoginAuditRetentionDays, 30, 3650));
+        var logins = await db.LoginAuditRecords.IgnoreQueryFilters()
+            .Where(item => item.TenantId == tenantId && item.OccurredAt < loginCutoff && (item.UserId == null || !holds.Contains(item.UserId.Value)))
+            .ToListAsync(cancellationToken);
+        db.LoginAuditRecords.RemoveRange(logins);
+
+        // Write audit: accountability records, kept as long as the access audit.
+        var writeCutoff = nowUtc.AddYears(-Math.Clamp(settings.WriteAuditRetentionYears, 1, 100));
+        var writes = await db.AuditLogs.IgnoreQueryFilters()
+            .Where(item => item.TenantId == tenantId && item.Timestamp < writeCutoff && !holds.Contains(item.ResourceId))
+            .ToListAsync(cancellationToken);
+        db.AuditLogs.RemoveRange(writes);
+
+        // Visitors: CNICs at the gate.
+        var visitorCutoff = nowUtc.AddDays(-Math.Clamp(settings.VisitorRetentionDays, 7, 3650));
+        var visitorLogs = await db.VisitorLogs.IgnoreQueryFilters()
+            .Where(item => item.TenantId == tenantId && item.EntryTime < visitorCutoff && !holds.Contains(item.Id))
+            .ToListAsync(cancellationToken);
+        db.VisitorLogs.RemoveRange(visitorLogs);
+
+        // Unsuccessful and withdrawn applicants: the portal profile and its documents.
+        var applicantCutoff = nowUtc.AddYears(-Math.Clamp(settings.ApplicantRetentionYears, 1, 20));
+        var closedStatuses = new[] { ApplicantStatus.Rejected, ApplicantStatus.Withdrawn };
+        // The date filter runs in memory: UpdatedAt is a DateTimeOffset, which SQLite (the test
+        // provider) cannot compare in SQL, and closed applicants are a small set per tenant.
+        var applicants = (await db.ApplicantProfiles.IgnoreQueryFilters()
+            .Where(item => item.TenantId == tenantId && closedStatuses.Contains(item.Status) && !holds.Contains(item.Id))
+            .ToListAsync(cancellationToken))
+            .Where(item => item.UpdatedAt < applicantCutoff)
+            .ToList();
+        var applicantIds = applicants.Select(item => item.Id).ToList();
+        var applicantDocuments = await db.ApplicantDocuments.IgnoreQueryFilters()
+            .Where(item => item.TenantId == tenantId && applicantIds.Contains(item.ApplicantId))
+            .ToListAsync(cancellationToken);
+        foreach (var document in applicantDocuments) await DeleteFileAsync(document.StoragePath, cancellationToken);
+        db.ApplicantDocuments.RemoveRange(applicantDocuments);
+        db.ApplicantProfiles.RemoveRange(applicants);
+
+        await db.SaveChangesAsync(cancellationToken);
+        return deleted + logins.Count + writes.Count + visitorLogs.Count + applicantDocuments.Count + applicants.Count;
     }
 
     private Guid RequireTenant() => db.CurrentTenantId != Guid.Empty
