@@ -36,6 +36,17 @@ jobs:
       - name: Restore
         run: dotnet restore AegisCore.slnx
 
+      # Compliance AC-13: any package with a known advisory (direct or transitive) fails the build.
+      # Exceptions are recorded, with a review date, in docs/compliance/12-vulnerability-register.md.
+      - name: Dependency vulnerability audit (NuGet)
+        run: |
+          dotnet list AegisCore.slnx package --vulnerable --include-transitive > nuget-audit.txt
+          cat nuget-audit.txt
+          if grep -q "has the following vulnerable packages" nuget-audit.txt; then
+            echo "::error::Vulnerable NuGet packages found — see docs/compliance/12-vulnerability-register.md"
+            exit 1
+          fi
+
       - name: Build
         run: dotnet build AegisCore.slnx -c Release
 
@@ -62,6 +73,10 @@ jobs:
         working-directory: AegisCore.Portal
         run: npm ci
 
+      - name: Dependency vulnerability audit (npm, production dependencies)
+        working-directory: AegisCore.Portal
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Typecheck
         working-directory: AegisCore.Portal
         run: npx tsc --noEmit
@@ -84,6 +99,23 @@ jobs:
 
       - name: Build Portal image
         run: docker build -t aegiscore-portal:ci-test AegisCore.Portal
+
+      # Compliance AC-13: the shipped images are scanned for OS and library CVEs. Critical and
+      # high findings with a fix available fail the build; unfixable ones are reported only.
+      - name: Scan images (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: aegiscore-api:ci-test
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Scan Portal image (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: aegiscore-portal:ci-test
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
   database-migrations:
     name: Database Migration (${{ matrix.dialect }})
     runs-on: ubuntu-latest

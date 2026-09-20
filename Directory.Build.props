@@ -1,5 +1,10 @@
 <Project>
   <PropertyGroup>
-    <NuGetAudit>false</NuGetAudit>
+    <!-- Compliance AC-13: dependency vulnerability audit runs on every restore. Direct and
+         transitive packages with a known advisory of the configured level or above are reported;
+         CI fails the build on them (dotnet list package \-\-vulnerable in ci.yml). -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 </Project>
