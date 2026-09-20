@@ -5,6 +5,7 @@ using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.API.Authorization;
 using AegisCore.Infrastructure;
 using AegisCore.Infrastructure.Security;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,8 @@ public sealed class AuthController(
     IBruteForceProtectionService bruteForce,
     IConnectionMultiplexer redis,
     ICasbinPolicySyncService? casbin = null,
-    IExternalSignInService? signInMethods = null) : ControllerBase
+    IExternalSignInService? signInMethods = null,
+    Infrastructure.Security.Mfa.MfaService? mfa = null) : ControllerBase
 {
     private const string RefreshTokenKeyPrefix = SessionTokenIssuer.RefreshTokenKeyPrefix;
 
@@ -76,9 +78,125 @@ public sealed class AuthController(
         }
 
         await bruteForce.ClearFailedAttemptsAsync(email);
+
+        // A person with an authenticator enrolled gets a challenge, not a session: the password
+        // alone opens nothing. The challenge is single-use and short-lived (compliance AC-27).
+        if (mfa is not null && await mfa.HasEnabledFactorAsync(user, ct))
+        {
+            var challenge = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+            await redis.GetDatabase().StringSetAsync($"{MfaChallengePrefix}{challenge}", $"{user.TenantId:N}:{user.Id:N}", MfaChallengeTtl);
+            return Ok(new { mfaRequired = true, challengeToken = challenge, expiresIn = (int)MfaChallengeTtl.TotalSeconds });
+        }
+
         var issued = await Issuer.IssueAsync(user, ct);
         return Ok(new { accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
     }
+
+    private const string MfaChallengePrefix = "mfa:challenge:";
+    private static readonly TimeSpan MfaChallengeTtl = TimeSpan.FromMinutes(5);
+
+    /// <summary>Second step of a local sign-in: the challenge from <c>login</c> plus an authenticator or backup code.</summary>
+    [HttpPost("login/mfa")]
+    public async Task<IActionResult> LoginMfa([FromBody] MfaLoginRequest request, CancellationToken ct)
+    {
+        if (mfa is null || string.IsNullOrWhiteSpace(request.ChallengeToken) || string.IsNullOrWhiteSpace(request.Code))
+            return Unauthorized(new { error = "Invalid code." });
+
+        var key = $"{MfaChallengePrefix}{request.ChallengeToken}";
+        var redisDb = redis.GetDatabase();
+        var subject = await redisDb.StringGetAsync(key);
+        if (!subject.HasValue) return Unauthorized(new { error = "The sign-in challenge has expired. Sign in again." });
+
+        var parts = subject.ToString().Split(':');
+        var tenantId = Guid.ParseExact(parts[0], "N");
+        var userId = Guid.ParseExact(parts[1], "N");
+        var user = await Issuer.LoadForSignInAsync(tenantId, userId, ct);
+        if (user is null || user.Status != AegisCore.Domain.UserStatus.Active) return Unauthorized(new { error = "Invalid code." });
+
+        if (await bruteForce.IsLockedOutAsync(user.Email))
+            return StatusCode(429, new { error = "Account temporarily locked due to too many failed attempts. Please try again in 15 minutes." });
+        if (!await mfa.VerifyAsync(user, request.Code, ct))
+        {
+            await bruteForce.RecordFailedAttemptAsync(user.Email);
+            return Unauthorized(new { error = "Invalid code." });
+        }
+
+        await redisDb.KeyDeleteAsync(key);
+        await bruteForce.ClearFailedAttemptsAsync(user.Email);
+        var issued = await Issuer.IssueAsync(user, ct, SessionTokenIssuer.AmrMfa);
+        return Ok(new { accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
+    }
+
+    [Authorize]
+    [HttpGet("mfa/status")]
+    public async Task<IActionResult> MfaStatus(CancellationToken ct)
+    {
+        if (mfa is null) return NotFound();
+        var user = await CurrentUserAsync(ct);
+        if (user is null) return Unauthorized();
+        return Ok(await mfa.StatusAsync(user, CurrentRoles(), RequiredRoles(), ct));
+    }
+
+    [Authorize]
+    [HttpPost("mfa/enroll")]
+    public async Task<IActionResult> MfaEnroll(CancellationToken ct)
+    {
+        if (mfa is null) return NotFound();
+        var user = await CurrentUserAsync(ct);
+        if (user is null) return Unauthorized();
+        try
+        {
+            var enrolment = await mfa.EnrollAsync(user, ct);
+            // The QR is drawn here, on the server: the otpauth URI carries the secret and must never
+            // be handed to an external QR service.
+            var png = new QRCoder.PngByteQRCode(new QRCoder.QRCodeGenerator().CreateQrCode(enrolment.OtpAuthUri, QRCoder.QRCodeGenerator.ECCLevel.M)).GetGraphic(5);
+            return Ok(new { enrolment.Secret, enrolment.OtpAuthUri, enrolment.BackupCodes, qrPngDataUri = "data:image/png;base64," + Convert.ToBase64String(png) });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [Authorize]
+    [HttpPost("mfa/confirm")]
+    public async Task<IActionResult> MfaConfirm([FromBody] MfaCodeRequest request, CancellationToken ct)
+    {
+        if (mfa is null) return NotFound();
+        var user = await CurrentUserAsync(ct);
+        if (user is null) return Unauthorized();
+        try
+        {
+            await mfa.ConfirmAsync(user, request.Code ?? string.Empty, ct);
+            // The session that enrolled now counts as verified: no second sign-in to reach the rest of the portal.
+            var issued = await Issuer.IssueAsync(user, ct, SessionTokenIssuer.AmrMfa);
+            return Ok(new { enabled = true, accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [Authorize]
+    [HttpPost("mfa/disable")]
+    public async Task<IActionResult> MfaDisable([FromBody] MfaCodeRequest request, CancellationToken ct)
+    {
+        if (mfa is null) return NotFound();
+        var user = await CurrentUserAsync(ct);
+        if (user is null) return Unauthorized();
+        if (Infrastructure.Security.Mfa.MfaService.RoleRequiresMfa(CurrentRoles(), RequiredRoles()))
+            return BadRequest(new { error = "An authenticator is required for your role and cannot be disabled." });
+        try { await mfa.DisableAsync(user, request.Code ?? string.Empty, ct); return Ok(new { enabled = false }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    private async Task<AegisCore.Domain.Entities.User?> CurrentUserAsync(CancellationToken ct)
+    {
+        var tenantId = ResolveTenantId();
+        return Guid.TryParse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier), out var userId)
+            ? await Issuer.LoadForSignInAsync(tenantId, userId, ct)
+            : null;
+    }
+
+    private string[] CurrentRoles() => User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)
+        .Concat(User.FindAll("role").Select(c => c.Value)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+
+    private string[]? RequiredRoles() => configuration.GetSection("Security:MfaRequiredRoles").Get<string[]>();
 
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest request, CancellationToken ct)
@@ -115,7 +233,9 @@ public sealed class AuthController(
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active)
             return Unauthorized(new { error = "Invalid or expired refresh token." });
 
-        var issued = await issuer.IssueAsync(user, ct);
+        // A refreshed session keeps how it was authenticated: a password-only session cannot become a verified one by refreshing.
+        var amr = root.TryGetProperty("amr", out var amrElement) ? amrElement.GetString() ?? SessionTokenIssuer.AmrPassword : SessionTokenIssuer.AmrPassword;
+        var issued = await issuer.IssueAsync(user, ct, amr);
         return Ok(new { accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
     }
 
@@ -147,5 +267,7 @@ public sealed class AuthController(
     }
 
     public sealed record LoginRequest(string Email, string Password);
+    public sealed record MfaLoginRequest(string ChallengeToken, string Code);
+    public sealed record MfaCodeRequest(string? Code);
     public sealed record RefreshRequest(string RefreshToken);
 }

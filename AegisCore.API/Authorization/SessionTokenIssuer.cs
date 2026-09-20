@@ -33,12 +33,20 @@ public sealed class SessionTokenIssuer(
             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
             .SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == userId, ct);
 
-    public async Task<IssuedTokens> IssueAsync(User user, CancellationToken ct)
+    /// <summary>How the session was authenticated: password only, password plus a second factor, or an external identity provider.</summary>
+    public const string AmrClaim = "amr";
+    public const string AmrPassword = "pwd";
+    public const string AmrMfa = "mfa";
+    public const string AmrSso = "sso";
+
+    public async Task<IssuedTokens> IssueAsync(User user, CancellationToken ct, string amr = AmrPassword)
     {
         if (casbin is not null) await casbin.SyncTenantAsync(user.TenantId, ct);
         user.LastLoginAt = DateTime.UtcNow;
 
-        var accessToken = tokens.GenerateAccessToken(user, await IdentityClaimsAsync(user, ct));
+        var claims = await IdentityClaimsAsync(user, ct);
+        claims[AmrClaim] = amr;
+        var accessToken = tokens.GenerateAccessToken(user, claims);
         var refreshToken = tokens.GenerateRefreshToken();
         var familyId = await tokens.GenerateRefreshTokenFamilyAsync(user.Id);
         var expiresAt = DateTime.UtcNow.AddDays(7);
@@ -47,7 +55,8 @@ public sealed class SessionTokenIssuer(
         {
             family_id = familyId.ToString(),
             user_id = user.Id.ToString(),
-            expires_at = expiresAt.ToString("O")
+            expires_at = expiresAt.ToString("O"),
+            amr
         };
         await redis.GetDatabase().StringSetAsync($"{RefreshTokenKeyPrefix}{refreshToken}", JsonSerializer.Serialize(tokenData), RefreshTokenTtl);
 

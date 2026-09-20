@@ -281,6 +281,7 @@ else
     app.UseMiddleware<GlobalRateLimitMiddleware>();
     app.UseMiddleware<LicenseLockoutMiddleware>();
     app.UseMiddleware<TenantContextMiddleware>();
+    app.UseMiddleware<MfaEnforcementMiddleware>();
     app.UseAuthorization();
 
     app.UseMiddleware<TurnstileMiddleware>();

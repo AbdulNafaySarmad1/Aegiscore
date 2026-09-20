@@ -165,6 +165,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="rail-foot">
+          <Link href="/account/security" className="rail-link" aria-current={pathname === "/account/security" ? "page" : undefined} title={narrow ? "Account security" : undefined}><ShieldCheck size={18} aria-hidden="true" /><span>Account security</span></Link>
           <button type="button" className="rail-link" onClick={() => void logout()}><LogOut size={18} aria-hidden="true" /><span>Sign out</span></button>
           <button type="button" className="rail-link" onClick={() => setNarrow(v => !v)} aria-label={narrow ? "Expand navigation" : "Collapse navigation"} aria-expanded={!narrow}>
             {narrow ? <ChevronRight size={18} aria-hidden="true" /> : <ChevronLeft size={18} aria-hidden="true" />}

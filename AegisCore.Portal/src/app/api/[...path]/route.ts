@@ -42,12 +42,19 @@ async function proxy(request: NextRequest) {
     });
     // The three answers that carry tokens: a password login, a refresh, and the exchange of the
     // one-time code an identity provider's callback handed the browser. All three become cookies here.
-    const authenticate = ["/api/auth/login", "/api/auth/refresh", "/api/auth/sso/exchange"].includes(path);
+    const authenticate = ["/api/auth/login", "/api/auth/refresh", "/api/auth/sso/exchange", "/api/auth/login/mfa", "/api/auth/mfa/confirm"].includes(path);
     if (authenticate && upstream.ok) {
       const tokens = await upstream.json();
+      // A password login may answer with a second-factor challenge instead of tokens; the
+      // challenge goes to the browser as it is, and the code comes back through /api/auth/login/mfa.
+      if (path === "/api/auth/login" && tokens.mfaRequired === true) {
+        const challenge = NextResponse.json({ mfaRequired: true, challengeToken: tokens.challengeToken, expiresIn: tokens.expiresIn });
+        challenge.headers.set("Cache-Control", "no-store");
+        return challenge;
+      }
       if (typeof tokens.accessToken !== "string" || typeof tokens.refreshToken !== "string")
         return NextResponse.json({ error: "Invalid authentication response" }, { status: 502 });
-      const response = NextResponse.json({ authenticated: true });
+      const response = NextResponse.json({ authenticated: true, enabled: tokens.enabled });
       const options = { httpOnly: true, secure: expectedOrigin.startsWith("https:"), sameSite: "lax" as const, path: "/" };
       response.cookies.set(accessCookie, tokens.accessToken, { ...options, maxAge: tokens.expiresIn ?? 900 });
       response.cookies.set(refreshCookie, tokens.refreshToken, { ...options, maxAge: 7 * 86400 });

@@ -54,6 +54,18 @@ That is the sentence to search for when somebody says a screen is empty.
 
 ---
 
+### Authenticator apps (second factor)
+
+Anyone can add an authenticator app under **Account security** in the sidebar; administrators
+(`Admin`, `SuperAdmin`) must. Until they have, the API answers every request from their session
+with `403 mfa_required` and the portal sends them to the set-up page. A password sign-in for an
+account with an authenticator returns a five-minute challenge instead of a session; the code (or
+one of ten single-use backup codes) completes it. Sessions from an identity provider (Entra ID,
+Google, Okta) count as verified — the provider applies its own second-factor policy.
+
+Which roles must have one is `Security__MfaRequiredRoles__0=Admin`, `…__1=SuperAdmin`, and so on.
+Secrets are stored encrypted under the master key; backup codes are stored hashed.
+
 ## The licence
 
 **Licence** (`/admin/license`) shows what the installation is licensed to do, when the last

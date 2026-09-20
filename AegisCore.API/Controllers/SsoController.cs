@@ -111,7 +111,7 @@ public sealed class SsoController(
         var user = await issuer.LoadForSignInAsync(result.TenantId, result.UserId, ct);
         if (user is null || user.Status != AegisCore.Domain.UserStatus.Active)
             return Unauthorized(new { error = "Your account here is not active. Ask your registrar's office." });
-        var issued = await issuer.IssueAsync(user, ct);
+        var issued = await issuer.IssueAsync(user, ct, SessionTokenIssuer.AmrSso);
         return Ok(new { accessToken = issued.AccessToken, refreshToken = issued.RefreshToken, tokenType = issued.TokenType, expiresIn = issued.ExpiresIn });
     }
 

@@ -34,6 +34,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Second step of a password sign-in for accounts with an authenticator app.
+  const [challenge, setChallenge] = useState<string | null>(null);
+  const [code, setCode] = useState("");
   // Which doors this university opened in the setup wizard. Until the answer arrives — and if it
   // never does — the password form is shown, as it always was.
   const [methods, setMethods] = useState<LoginMethods>({ localEnabled: true, providers: [] });
@@ -64,7 +67,12 @@ export default function LoginPage() {
     setError(""); setBusy(true);
     try {
       if (!isDemo) {
-        await apiPost("/api/auth/login", { email, password });
+        if (challenge) {
+          await apiPost("/api/auth/login/mfa", { challengeToken: challenge, code });
+        } else {
+          const result = await apiPost<{ mfaRequired?: boolean; challengeToken?: string }>("/api/auth/login", { email, password });
+          if (result?.mfaRequired && result.challengeToken) { setChallenge(result.challengeToken); setCode(""); return; }
+        }
         localStorage.removeItem("aegiscore_demo_session");
         router.push("/"); router.refresh();
         return;
@@ -131,6 +139,15 @@ export default function LoginPage() {
 
           {(methods.localEnabled || !methodsLoaded) && (
           <form onSubmit={handleSubmit} noValidate={false} aria-describedby={error ? "login-error" : undefined}>
+            {challenge ? (
+              <div className="field">
+                <label htmlFor="login-code" className="field-label">Code from your authenticator app</label>
+                <input id="login-code" inputMode="numeric" autoComplete="one-time-code" required autoFocus value={code}
+                  onChange={e => setCode(e.target.value.trim())} aria-invalid={error ? true : undefined}
+                  placeholder="6-digit code, or a backup code" />
+                <p className="field-hint">Signed in as {email}. <button type="button" className="btn-link" onClick={() => { setChallenge(null); setCode(""); setError(""); }}>Use a different account</button></p>
+              </div>
+            ) : (<>
             <div className="field">
               <label htmlFor="login-email" className="field-label">University email</label>
               <input id="login-email" type="email" placeholder="name@university.edu.pk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} aria-invalid={error ? true : undefined} />
@@ -149,10 +166,11 @@ export default function LoginPage() {
               <label className="check-row"><input type="checkbox" name="remember" /><span>Keep me signed in on this device</span></label>
               <Link href="/activate">Activate a new account</Link>
             </div>
+            </>)}
 
             {error && <div id="login-error"><Notice tone="oxblood" title={error} /></div>}
 
-            <button type="submit" className={`btn btn-primary btn-lg btn-block${busy ? " btn-loading" : ""}`} disabled={busy}>Sign in</button>
+            <button type="submit" className={`btn btn-primary btn-lg btn-block${busy ? " btn-loading" : ""}`} disabled={busy}>{challenge ? "Verify code" : "Sign in"}</button>
           </form>
           )}
 

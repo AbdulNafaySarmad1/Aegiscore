@@ -77,6 +77,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       detail?: string;
       errors?: string[];
     };
+    // The API closes the register to an administrator without an authenticator app; take them to
+    // the page that sets one up rather than showing the same refusal on every screen.
+    if (response.status === 403 && (body as { code?: string })?.code === "mfa_required"
+      && typeof window !== "undefined" && !window.location.pathname.startsWith("/account/security")) {
+      window.location.assign("/account/security");
+    }
     const message =
       (typeof body?.error === "string" ? body.error : body?.error?.userMessage) ??
       body?.userMessage ??
