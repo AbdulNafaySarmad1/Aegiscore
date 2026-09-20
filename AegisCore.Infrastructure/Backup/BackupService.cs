@@ -4,7 +4,9 @@ using AegisCore.Application.Backup;
 using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using AegisCore.Contracts.Abstractions.Cloud;
 using AegisCore.Infrastructure.Config;
+using AegisCore.Infrastructure.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -17,17 +19,22 @@ public class BackupService : IBackupService
     private readonly IBackupRecordRepository _recordRepo;
     private readonly IConfiguration _configuration;
     private readonly ILogger<BackupService> _logger;
+    private readonly ISecretService? _secrets;
+
+    public const string EncryptionKeyName = "BACKUP_ENCRYPTION_KEY";
 
     public BackupService(
         IBackupConfigurationRepository configRepo,
         IBackupRecordRepository recordRepo,
         IConfiguration configuration,
-        ILogger<BackupService> logger)
+        ILogger<BackupService> logger,
+        ISecretService? secrets = null)
     {
         _configRepo = configRepo;
         _recordRepo = recordRepo;
         _configuration = configuration;
         _logger = logger;
+        _secrets = secrets;
     }
 
     public async Task<BackupRecord> RunBackupAsync(Guid configurationId, string triggeredBy, CancellationToken cancellationToken = default)
@@ -41,7 +48,7 @@ public class BackupService : IBackupService
             ConfigurationId = configurationId,
             BackupType = config.BackupType,
             Status = BackupStatus.Running,
-            IsEncrypted = config.EncryptBackup,
+            IsEncrypted = true,
             RetentionTier = BackupRetentionTier.Hot,
             StartedAt = DateTime.UtcNow,
             TriggeredBy = triggeredBy,
@@ -52,18 +59,27 @@ public class BackupService : IBackupService
 
         try
         {
-            var dbName = config.DatabaseName ?? _configuration.GetConnectionString("PostgresDatabase") ?? DefaultTenantConfigTemplate.DefaultDatabaseName;
+            // The key is resolved before pg_dump runs: a backup this service cannot encrypt is a
+            // backup it refuses to write, so a missing key never leaves a plaintext dump on disk.
+            var passphrase = await ResolveEncryptionKeyAsync(cancellationToken);
+            var connectionString = ResolveConnectionString();
+            var dbName = config.DatabaseName ?? new NpgsqlConnectionStringBuilder(connectionString).Database ?? DefaultTenantConfigTemplate.DefaultDatabaseName;
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            var fileName = $"{dbName}_{config.BackupType}_{timestamp}.sql.gz";
-            var filePath = Path.Combine(config.StoragePath, fileName);
+            var fileName = $"{dbName}_{config.BackupType}_{timestamp}.dump";
+            var plaintextPath = Path.Combine(config.StoragePath, fileName);
+            var filePath = plaintextPath + ".enc";
 
             Directory.CreateDirectory(config.StoragePath);
 
-            var connectionString = _configuration.GetConnectionString("SupabasePostgres")
-                ?? _configuration["Postgres:ConnectionString"]
-                ?? DefaultTenantConfigTemplate.DefaultPostgresConnectionString;
-
-            await ExecutePgDumpAsync(connectionString, dbName, filePath, config.BackupType, cancellationToken);
+            await ExecutePgDumpAsync(connectionString, dbName, plaintextPath, config.BackupType, cancellationToken);
+            try
+            {
+                await BackupCipher.EncryptFileAsync(plaintextPath, filePath, passphrase, cancellationToken);
+            }
+            finally
+            {
+                if (File.Exists(plaintextPath)) File.Delete(plaintextPath);
+            }
 
             var fileInfo = new FileInfo(filePath);
             record.FilePath = filePath;
@@ -185,17 +201,26 @@ public class BackupService : IBackupService
             await VerifyBackupAsync(recordId, cancellationToken);
         }
 
-        var connectionString = _configuration.GetConnectionString("SupabasePostgres")
-            ?? _configuration["Postgres:ConnectionString"]
-            ?? DefaultTenantConfigTemplate.DefaultPostgresConnectionString;
+        var connectionString = ResolveConnectionString();
 
         if (pointInTime.HasValue)
+            throw new NotSupportedException("Point-in-time restore requires WAL archive orchestration outside pg_restore. Use docs/dcr-runbook.md for PITR.");
+
+        // The decrypted dump exists only for the duration of pg_restore, next to the encrypted file
+        // (same volume, same permissions), and is removed whether or not the restore succeeds.
+        var plaintextPath = record.IsEncrypted ? record.FilePath + ".restore-" + Guid.NewGuid().ToString("N")[..8] : record.FilePath;
+        try
         {
-            await ExecutePitrRestoreAsync(connectionString, record.FilePath, pointInTime.Value, cancellationToken);
+            if (record.IsEncrypted)
+            {
+                var passphrase = await ResolveEncryptionKeyAsync(cancellationToken);
+                await BackupCipher.DecryptFileAsync(record.FilePath, plaintextPath, passphrase, cancellationToken);
+            }
+            await ExecutePgRestoreAsync(connectionString, plaintextPath, cancellationToken);
         }
-        else
+        finally
         {
-            await ExecutePgRestoreAsync(connectionString, record.FilePath, cancellationToken);
+            if (record.IsEncrypted && File.Exists(plaintextPath)) File.Delete(plaintextPath);
         }
 
         _logger.LogInformation("Restore completed from backup {RecordId} (PITR: {Pitr})", recordId, pointInTime);
@@ -225,9 +250,31 @@ public class BackupService : IBackupService
         await ExecutePostgresToolAsync(tool, args, connectionString, ct);
     }
 
-    private Task ExecutePitrRestoreAsync(string connectionString, string filePath, DateTime pointInTime, CancellationToken ct)
+    /// <summary>
+    /// The passphrase comes from configuration (<c>Backup:EncryptionKey</c> or the
+    /// <c>BACKUP_ENCRYPTION_KEY</c> variable) or, failing that, from the installation's secret
+    /// vault under the same name. It is never generated here: a generated key that is not stored
+    /// somewhere the operator controls would make every backup unrecoverable.
+    /// </summary>
+    private async Task<string> ResolveEncryptionKeyAsync(CancellationToken ct)
     {
-        throw new NotSupportedException("Point-in-time restore requires WAL archive orchestration outside pg_restore. Use the disaster recovery runbook for PITR.");
+        var key = _configuration["Backup:EncryptionKey"] ?? _configuration[EncryptionKeyName];
+        if (string.IsNullOrWhiteSpace(key) && _secrets is not null)
+        {
+            try { key = await _secrets.GetSecretAsync(EncryptionKeyName, ct); }
+            catch (KeyNotFoundException) { key = null; }
+        }
+        if (string.IsNullOrWhiteSpace(key))
+            throw new InvalidOperationException($"{EncryptionKeyName} is not set in the environment or the secret vault; refusing to write or read an unencrypted backup.");
+        return key;
+    }
+
+    private string ResolveConnectionString()
+    {
+        var adapter = DbDialectAdapterResolver.FromConfiguration(_configuration);
+        if (adapter.Dialect != DbDialects.Postgres)
+            throw new NotSupportedException($"The built-in backup service supports PostgreSQL only; this installation uses {adapter.Dialect}. Use the database's own backup tooling.");
+        return DbConnectionStringFactory.Build(_configuration, adapter);
     }
 
     private string Tool(string name) => _configuration[$"PostgresTools:{name}"] ?? name;

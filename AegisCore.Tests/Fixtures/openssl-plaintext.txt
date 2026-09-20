@@ -1,0 +1,1 @@
+AegisCore backup interop fixture: produced by openssl enc -aes-256-cbc -salt -pbkdf2

@@ -1,0 +1,2 @@
+AegisCore.Tests/Fixtures/** -text
+*.sh text eol=lf
