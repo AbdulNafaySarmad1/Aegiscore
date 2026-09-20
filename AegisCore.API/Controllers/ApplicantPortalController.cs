@@ -98,9 +98,17 @@ public sealed class ApplicantPortalController(IApplicantPortalService portal, IA
     }
 
     [Authorize(AuthenticationSchemes = ApplicantAuth.Scheme)]
+    [HttpGet("consent")]
+    public async Task<ActionResult<ApplicantConsentTexts>> ConsentTexts(CancellationToken ct)
+        => await Guarded(() => portal.GetConsentTextsAsync(ApplicantProfileId, ct));
+
+    [Authorize(AuthenticationSchemes = ApplicantAuth.Scheme)]
     [HttpPost("submit")]
-    public async Task<ActionResult<ApplicantProfileView>> Submit(CancellationToken ct)
-        => await Guarded(() => portal.SubmitAsync(ApplicantProfileId, ct));
+    public async Task<ActionResult<ApplicantProfileView>> Submit([FromBody] ApplicantSubmission? submission, CancellationToken ct)
+        => await Guarded(() => portal.SubmitAsync(
+            ApplicantProfileId,
+            (submission ?? new ApplicantSubmission(false)) with { IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() },
+            ct));
 
     private async Task<ActionResult<T>> Guarded<T>(Func<Task<T>> action)
     {

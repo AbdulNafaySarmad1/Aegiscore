@@ -14,6 +14,10 @@ type DocRequirement = {
   uploadStatus: string | null;
   rejectionReason: string | null;
 };
+type ConsentTexts = {
+  processingText: string; processingVersion: string; guardianText: string; guardianVersion: string;
+  guardianRequired: boolean; ageOfMajority: number;
+};
 type ProfileView = {
   applicantId: string;
   email: string;
@@ -54,6 +58,11 @@ export default function ApplyPage() {
 
   const [profile, setProfile] = useState<ProfileView | null>(null);
   const [details, setDetails] = useState({ fullName: "", dateOfBirth: "", gender: "", nationality: "", phone: "" });
+  // Consent is explicit: the exact text comes from the server, the boxes start unticked, and a
+  // minor's guardian must be named and consent before the application can be submitted.
+  const [consent, setConsent] = useState<ConsentTexts | null>(null);
+  const [acceptProcessing, setAcceptProcessing] = useState(false);
+  const [guardian, setGuardian] = useState({ name: "", relationship: "", phone: "", email: "", consents: false });
 
   const run = useCallback(async <T,>(fn: () => Promise<T>): Promise<T | undefined> => {
     setBusy(true);
@@ -222,21 +231,26 @@ export default function ApplyPage() {
             )}
 
             {step === 5 && profile && (
-              <>
-                <div className="apply-row">
-                  <div><strong>Applicant ID:</strong> {profile.applicantId}</div>
-                  <div><strong>Name:</strong> {profile.fullName}</div>
-                  <div><strong>Email:</strong> {profile.email}</div>
-                  <div><strong>Documents:</strong> {profile.documents.filter(d => d.uploadStatus).length} / {profile.documents.length} uploaded</div>
-                </div>
-                <div className="apply-actions">
-                  <button className="btn btn-ghost" onClick={() => setStep(4)}>Back</button>
-                  <button className="btn btn-primary" disabled={busy}
-                    onClick={() => run(async () => { await api("/api/applicant/submit", { method: "POST" }); await refreshProfile(); setStep(6); })}>
-                    Submit application
-                  </button>
-                </div>
-              </>
+              <ConsentStep
+                profile={profile}
+                consent={consent}
+                load={() => run(async () => setConsent(await api<ConsentTexts>("/api/applicant/consent")))}
+                acceptProcessing={acceptProcessing}
+                setAcceptProcessing={setAcceptProcessing}
+                guardian={guardian}
+                setGuardian={setGuardian}
+                busy={busy}
+                onBack={() => setStep(4)}
+                onSubmit={() => run(async () => {
+                  const body = {
+                    acceptProcessing,
+                    guardian: consent?.guardianRequired ? guardian : null,
+                  };
+                  await api("/api/applicant/submit", { method: "POST", body: JSON.stringify(body) });
+                  await refreshProfile();
+                  setStep(6);
+                })}
+              />
             )}
 
             {step === 6 && profile && (
@@ -320,6 +334,62 @@ function PhotoStep({ profile, busy, onUpload, onBack, onNext }: {
       <div className="apply-actions">
         <button className="btn btn-ghost" onClick={onBack}>Back</button>
         <button className="btn btn-primary" disabled={busy || !status || status === "Rejected"} onClick={onNext}>Continue</button>
+      </div>
+    </>
+  );
+}
+
+type GuardianForm = { name: string; relationship: string; phone: string; email: string; consents: boolean };
+
+function ConsentStep(props: {
+  profile: ProfileView;
+  consent: ConsentTexts | null;
+  load: () => void;
+  acceptProcessing: boolean;
+  setAcceptProcessing: (v: boolean) => void;
+  guardian: GuardianForm;
+  setGuardian: (v: GuardianForm) => void;
+  busy: boolean;
+  onBack: () => void;
+  onSubmit: () => void;
+}) {
+  const { profile, consent, load, acceptProcessing, setAcceptProcessing, guardian, setGuardian, busy, onBack, onSubmit } = props;
+  useEffect(() => { if (!consent) load(); }, [consent, load]);
+  const guardianComplete = !consent?.guardianRequired
+    || (guardian.name.trim() && guardian.relationship.trim() && guardian.phone.trim() && guardian.email.trim() && guardian.consents);
+  const canSubmit = !!consent && acceptProcessing && !!guardianComplete && !busy;
+  return (
+    <>
+      <div className="apply-row">
+        <div><strong>Applicant ID:</strong> {profile.applicantId}</div>
+        <div><strong>Name:</strong> {profile.fullName}</div>
+        <div><strong>Email:</strong> {profile.email}</div>
+        <div><strong>Documents:</strong> {profile.documents.filter(d => d.uploadStatus).length} / {profile.documents.length} uploaded</div>
+      </div>
+      {consent && (
+        <div className="apply-row">
+          <label style={{ display: "flex", gap: "var(--s-2)", alignItems: "flex-start" }}>
+            <input type="checkbox" checked={acceptProcessing} onChange={e => setAcceptProcessing(e.target.checked)} />
+            <span>{consent.processingText}</span>
+          </label>
+          {consent.guardianRequired && (
+            <fieldset className="apply-row" style={{ border: "1px solid var(--line)", padding: "var(--s-3)" }}>
+              <legend>Parent or guardian (required — you are under {consent.ageOfMajority})</legend>
+              <label>Full name<input value={guardian.name} onChange={e => setGuardian({ ...guardian, name: e.target.value })} /></label>
+              <label>Relationship<input value={guardian.relationship} placeholder="Mother, father, legal guardian" onChange={e => setGuardian({ ...guardian, relationship: e.target.value })} /></label>
+              <label>Phone<input value={guardian.phone} onChange={e => setGuardian({ ...guardian, phone: e.target.value })} /></label>
+              <label>Email<input type="email" value={guardian.email} onChange={e => setGuardian({ ...guardian, email: e.target.value })} /></label>
+              <label style={{ display: "flex", gap: "var(--s-2)", alignItems: "flex-start" }}>
+                <input type="checkbox" checked={guardian.consents} onChange={e => setGuardian({ ...guardian, consents: e.target.checked })} />
+                <span>{consent.guardianText}</span>
+              </label>
+            </fieldset>
+          )}
+        </div>
+      )}
+      <div className="apply-actions">
+        <button className="btn btn-ghost" onClick={onBack}>Back</button>
+        <button className="btn btn-primary" disabled={!canSubmit} onClick={onSubmit}>Submit application</button>
       </div>
     </>
   );

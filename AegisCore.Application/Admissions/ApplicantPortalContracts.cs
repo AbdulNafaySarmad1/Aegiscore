@@ -75,6 +75,32 @@ public sealed record ApplicantProfileView(
     string? Phone,
     IReadOnlyList<ApplicantDocumentRequirementView> Documents);
 
+/// <summary>
+/// What the applicant confirms at submission. <see cref="AcceptProcessing"/> must be true. When the
+/// applicant is under 18 on the day of submission, <see cref="Guardian"/> is required and the
+/// guardian's <see cref="ApplicantGuardianConsent.Consents"/> must be true.
+/// </summary>
+public sealed record ApplicantSubmission(
+    bool AcceptProcessing,
+    ApplicantGuardianConsent? Guardian = null,
+    string? IpAddress = null);
+
+public sealed record ApplicantGuardianConsent(
+    string Name,
+    string Relationship,
+    string Phone,
+    string Email,
+    bool Consents);
+
+/// <summary>The exact texts shown; each is copied verbatim into the consent ledger when accepted.</summary>
+public sealed record ApplicantConsentTexts(
+    string ProcessingText,
+    string ProcessingVersion,
+    string GuardianText,
+    string GuardianVersion,
+    bool GuardianRequired,
+    int AgeOfMajority);
+
 public sealed record ApplicantPersonalDetails(
     string FullName,
     DateOnly DateOfBirth,
@@ -102,7 +128,9 @@ public interface IApplicantPortalService
     Task<ApplicantDocumentUploadResult> UploadPhotoAsync(
         Guid applicantProfileId, Stream content, string fileName, string contentType, long length, CancellationToken ct = default);
 
-    Task<ApplicantProfileView> SubmitAsync(Guid applicantProfileId, CancellationToken ct = default);
+    Task<ApplicantProfileView> SubmitAsync(Guid applicantProfileId, ApplicantSubmission? submission = null, CancellationToken ct = default);
+    /// <summary>The consent texts the applicant (and, for a minor, the guardian) must see before submitting.</summary>
+    Task<ApplicantConsentTexts> GetConsentTextsAsync(Guid applicantProfileId, CancellationToken ct = default);
 }
 
 // ---- Open intake catalogue (public) ----

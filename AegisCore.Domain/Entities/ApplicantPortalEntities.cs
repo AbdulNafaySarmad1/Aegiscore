@@ -60,6 +60,14 @@ public class ApplicantProfile : ITenantScoped
     public ApplicantStatus Status { get; set; } = ApplicantStatus.Draft;
 
     [MaxLength(200)] public string? FullName { get; set; }
+
+    // Guardian of an applicant who was under 18 at submission (docs/compliance/10-minors-and-consent.md).
+    // Phone and email are column-encrypted; the consent itself is a ConsentLedger row keyed by this profile's id.
+    [MaxLength(200)] public string? GuardianName { get; set; }
+    [MaxLength(50)] public string? GuardianRelationship { get; set; }
+    [MaxLength(400)] public string? GuardianPhone { get; set; }
+    [MaxLength(400)] public string? GuardianEmail { get; set; }
+    public DateTimeOffset? GuardianConsentAt { get; set; }
     public DateOnly? DateOfBirth { get; set; }
     [MaxLength(20)] public string? Gender { get; set; }
     [MaxLength(100)] public string? Nationality { get; set; }

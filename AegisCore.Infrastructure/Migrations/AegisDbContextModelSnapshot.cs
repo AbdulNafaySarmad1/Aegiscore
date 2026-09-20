@@ -1979,6 +1979,25 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<DateTimeOffset?>("GuardianConsentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("GuardianEmail")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<string>("GuardianName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("GuardianPhone")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<string>("GuardianRelationship")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<Guid>("IntakeId")
                         .HasColumnType("uuid");
 

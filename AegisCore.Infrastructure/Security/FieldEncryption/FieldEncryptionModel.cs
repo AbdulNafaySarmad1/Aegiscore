@@ -31,6 +31,8 @@ public static class FieldEncryptionModel
         // contact details of applicants and guardians
         new(typeof(AdmissionApplication), nameof(AdmissionApplication.Phone), Deterministic: false, IdentifierLength),
         new(typeof(ApplicantProfile), nameof(ApplicantProfile.Phone), Deterministic: false, IdentifierLength),
+        new(typeof(ApplicantProfile), nameof(ApplicantProfile.GuardianPhone), Deterministic: false, IdentifierLength),
+        new(typeof(ApplicantProfile), nameof(ApplicantProfile.GuardianEmail), Deterministic: false, IdentifierLength),
         new(typeof(StudentGuardian), nameof(StudentGuardian.Phone), Deterministic: false, IdentifierLength),
         new(typeof(StudentGuardian), nameof(StudentGuardian.Email), Deterministic: false, IdentifierLength),
         // welfare and conduct free text

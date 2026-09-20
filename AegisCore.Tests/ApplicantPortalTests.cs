@@ -169,9 +169,110 @@ public sealed class ApplicantPortalTests
         Assert.Equal("failopen", doc.ValidationMethod);
 
         // Applicant can still submit — a fail-open photo does not block the pipeline.
-        var view = await service.SubmitAsync(profile.Id);
+        var view = await service.SubmitAsync(profile.Id, new ApplicantSubmission(AcceptProcessing: true));
         Assert.Equal(ApplicantStatus.Submitted, view.Status);
     }
+
+    // docs/compliance/10-minors-and-consent.md §5 — acceptance tests 1, 2, 4, 5.
+
+    private static async Task<(AegisDbContext Db, ApplicantPortalService Service, ApplicantProfile Profile, Guid Tenant)> SubmittableAsync(SqliteConnection connection, DateOnly dateOfBirth)
+    {
+        var db = await NewDbAsync(connection);
+        var tenantId = Guid.NewGuid();
+        var (intake, program) = SeedIntakeProgram(db, tenantId);
+        var profile = new ApplicantProfile
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, ApplicantId = "APP-2025F-BCS-MINOR001", Email = "m@example.com",
+            IntakeId = intake.Id, ProgramId = program.Id, Status = ApplicantStatus.Draft, FullName = "Minor Applicant", DateOfBirth = dateOfBirth
+        };
+        db.ApplicantProfiles.Add(profile);
+        await db.SaveChangesAsync();
+        var service = new ApplicantPortalService(db, new StubTenant(tenantId), new ApplicantIdGenerator(db), otp: null!, new NoOpTokens(),
+            new StubPhoto(new PhotoValidationResult(true, null, null, false)), new FakeStorage(), new NoOpNotifications(), NullLogger<ApplicantPortalService>.Instance);
+        return (db, service, profile, tenantId);
+    }
+
+    [Fact]
+    public async Task Submission_Without_Consent_Is_Refused_And_Nothing_Is_Recorded()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        var (db, service, profile, _) = await SubmittableAsync(connection, new DateOnly(2000, 1, 1));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SubmitAsync(profile.Id));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SubmitAsync(profile.Id, new ApplicantSubmission(AcceptProcessing: false)));
+        Assert.Equal(ApplicantStatus.Draft, (await db.ApplicantProfiles.IgnoreQueryFilters().SingleAsync()).Status);
+        Assert.Empty(await db.ConsentLedgers.IgnoreQueryFilters().ToListAsync());
+    }
+
+    [Fact]
+    public async Task An_Adult_Consents_In_Their_Own_Name_And_The_Exact_Text_Is_Kept()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        var (db, service, profile, tenant) = await SubmittableAsync(connection, new DateOnly(2000, 1, 1));
+        var texts = await service.GetConsentTextsAsync(profile.Id);
+        Assert.False(texts.GuardianRequired);
+
+        var view = await service.SubmitAsync(profile.Id, new ApplicantSubmission(AcceptProcessing: true));
+
+        Assert.Equal(ApplicantStatus.Submitted, view.Status);
+        var consent = await db.ConsentLedgers.IgnoreQueryFilters().SingleAsync();
+        Assert.Equal(profile.Id, consent.UserId);
+        Assert.Equal(tenant, consent.TenantId);
+        Assert.Equal(ApplicantPortalService.ProcessingConsentCategory, consent.DataCategory);
+        Assert.Equal(texts.ProcessingText, consent.ConsentText);
+    }
+
+    [Fact]
+    public async Task A_Minor_Needs_A_Guardian_Who_Consents_And_Both_Consents_Are_Recorded()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        var seventeen = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-17);
+        var (db, service, profile, _) = await SubmittableAsync(connection, seventeen);
+        Assert.True((await service.GetConsentTextsAsync(profile.Id)).GuardianRequired);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SubmitAsync(profile.Id, new ApplicantSubmission(AcceptProcessing: true)));
+        var refusing = new ApplicantGuardianConsent("Parent Name", "Mother", "0300-1111111", "parent@example.com", Consents: false);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SubmitAsync(profile.Id, new ApplicantSubmission(true, refusing)));
+        Assert.Empty(await db.ConsentLedgers.IgnoreQueryFilters().ToListAsync());
+
+        var consenting = refusing with { Consents = true };
+        var view = await service.SubmitAsync(profile.Id, new ApplicantSubmission(true, consenting));
+
+        Assert.Equal(ApplicantStatus.Submitted, view.Status);
+        var stored = await db.ApplicantProfiles.IgnoreQueryFilters().SingleAsync();
+        Assert.Equal("Parent Name", stored.GuardianName);
+        Assert.Equal("parent@example.com", stored.GuardianEmail);
+        Assert.NotNull(stored.GuardianConsentAt);
+        var categories = await db.ConsentLedgers.IgnoreQueryFilters().Select(c => c.DataCategory).OrderBy(c => c).ToListAsync();
+        Assert.Equal(new[] { ApplicantPortalService.GuardianConsentCategory, ApplicantPortalService.ProcessingConsentCategory }, categories);
+    }
+
+    [Fact]
+    public async Task Editing_The_Consent_Text_Does_Not_Change_What_Was_Agreed()
+    {
+        await using var connection = new SqliteConnection("DataSource=:memory:");
+        await connection.OpenAsync();
+        var (db, service, profile, tenant) = await SubmittableAsync(connection, new DateOnly(2000, 1, 1));
+        db.ConfigurationEntries.Add(new ConfigurationEntry { Id = Guid.NewGuid(), TenantId = tenant, Key = "consent.admissions.processing.text", ValueJson = "\"Version one of the text.\"" });
+        await db.SaveChangesAsync();
+
+        await service.SubmitAsync(profile.Id, new ApplicantSubmission(AcceptProcessing: true));
+        var entry = await db.ConfigurationEntries.IgnoreQueryFilters().SingleAsync(e => e.Key == "consent.admissions.processing.text");
+        entry.ValueJson = "\"Version two, edited later.\"";
+        await db.SaveChangesAsync();
+
+        Assert.Equal("Version one of the text.", (await db.ConsentLedgers.IgnoreQueryFilters().SingleAsync()).ConsentText);
+    }
+
+    [Theory]
+    [InlineData("2008-09-21", "2026-09-20", 17)]
+    [InlineData("2008-09-20", "2026-09-20", 18)]
+    [InlineData("2008-02-29", "2026-02-28", 17)]
+    public void Age_Is_Computed_From_The_Birthday_Not_The_Year(string dob, string on, int expected)
+        => Assert.Equal(expected, ApplicantPortalService.AgeOn(DateOnly.Parse(dob), DateOnly.Parse(on)));
 
     [Fact]
     public async Task Document_Upload_Enforces_Admin_Configured_Size_And_Format()

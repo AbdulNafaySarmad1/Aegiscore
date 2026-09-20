@@ -17,9 +17,23 @@ public sealed class ApplicantPortalService(
     IPhotoValidationService photoValidation,
     IStorageProvider storage,
     INotificationService notifications,
-    ILogger<ApplicantPortalService> logger) : IApplicantPortalService
+    ILogger<ApplicantPortalService> logger,
+    AegisCore.Infrastructure.Security.Pqc.IPqcCryptographyService? encryption = null) : IApplicantPortalService
 {
     private Guid TenantId => tenantResolver.ResolveTenantId();
+
+    /// <summary>Majority Act 1875: eighteen. Below it the guardian consents (docs/compliance/10).</summary>
+    public const int AgeOfMajority = 18;
+    public const string ProcessingConsentCategory = "admissions.processing";
+    public const string GuardianConsentCategory = "admissions.guardian";
+    private const string DefaultProcessingText =
+        "I confirm that the information and documents in this application are true, and I consent to the university " +
+        "processing them — including my CNIC, date of birth, contact details and academic results — to assess my " +
+        "application, run admission tests and interviews, and, if I am admitted, to create my student record. " +
+        "I can withdraw this application at any time; the university's privacy notice explains how long records are kept.";
+    private const string DefaultGuardianText =
+        "I am the parent or legal guardian of this applicant, who is under 18. I consent on their behalf to the " +
+        "processing described above, and I understand I may withdraw this consent by contacting the admissions office.";
 
     public async Task<ApplicantSignupResult> SignupAsync(string email, Guid intakeId, Guid programId, CancellationToken ct = default)
     {
@@ -186,7 +200,16 @@ public sealed class ApplicantPortalService(
         return new ApplicantDocumentUploadResult(AdmissionDocumentKind.Photo, doc.ValidationStatus, doc.RejectionReason, doc.ValidationConfidence);
     }
 
-    public async Task<ApplicantProfileView> SubmitAsync(Guid applicantProfileId, CancellationToken ct = default)
+    public async Task<ApplicantConsentTexts> GetConsentTextsAsync(Guid applicantProfileId, CancellationToken ct = default)
+    {
+        var profile = await RequireProfileAsync(applicantProfileId, ct);
+        var (processing, processingVersion) = await ConsentTextAsync(profile.TenantId, ProcessingConsentCategory, DefaultProcessingText, ct);
+        var (guardian, guardianVersion) = await ConsentTextAsync(profile.TenantId, GuardianConsentCategory, DefaultGuardianText, ct);
+        var minor = profile.DateOfBirth is { } dob && AgeOn(dob, DateOnly.FromDateTime(DateTime.UtcNow)) < AgeOfMajority;
+        return new ApplicantConsentTexts(processing, processingVersion, guardian, guardianVersion, minor, AgeOfMajority);
+    }
+
+    public async Task<ApplicantProfileView> SubmitAsync(Guid applicantProfileId, ApplicantSubmission? submission = null, CancellationToken ct = default)
     {
         var profile = await RequireProfileAsync(applicantProfileId, ct);
         RequireEditable(profile);
@@ -194,6 +217,33 @@ public sealed class ApplicantPortalService(
         if (string.IsNullOrWhiteSpace(profile.FullName) || profile.DateOfBirth is null)
         {
             throw new InvalidOperationException("Complete your personal details before submitting.");
+        }
+
+        // Consent is explicit and never inferred: no checkbox, no submission (docs/compliance/10 §3).
+        if (submission is null || !submission.AcceptProcessing)
+        {
+            throw new InvalidOperationException("You must confirm the application and consent to the processing of your details before submitting.");
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var minor = AgeOn(profile.DateOfBirth.Value, today) < AgeOfMajority;
+        if (minor)
+        {
+            var guardian = submission.Guardian;
+            if (guardian is null || string.IsNullOrWhiteSpace(guardian.Name) || string.IsNullOrWhiteSpace(guardian.Relationship)
+                || string.IsNullOrWhiteSpace(guardian.Phone) || string.IsNullOrWhiteSpace(guardian.Email))
+            {
+                throw new InvalidOperationException($"Applicants under {AgeOfMajority} must provide a parent or guardian's name, relationship, phone and email.");
+            }
+            if (!guardian.Consents)
+            {
+                throw new InvalidOperationException("The parent or guardian must consent on behalf of an applicant under 18.");
+            }
+            profile.GuardianName = guardian.Name.Trim();
+            profile.GuardianRelationship = guardian.Relationship.Trim();
+            profile.GuardianPhone = guardian.Phone.Trim();
+            profile.GuardianEmail = guardian.Email.Trim();
+            profile.GuardianConsentAt = DateTimeOffset.UtcNow;
         }
 
         var requirements = await db.AdmissionDocumentRequirements.IgnoreQueryFilters()
@@ -215,6 +265,16 @@ public sealed class ApplicantPortalService(
         profile.Status = ApplicantStatus.Submitted;
         profile.SubmittedAt = DateTimeOffset.UtcNow;
         profile.UpdatedAt = DateTimeOffset.UtcNow;
+
+        // The exact text shown is copied into the ledger, so a later edit of the setting cannot change
+        // what this person agreed to. A minor's processing consent is given by the guardian.
+        var (processingText, _) = await ConsentTextAsync(profile.TenantId, ProcessingConsentCategory, DefaultProcessingText, ct);
+        db.ConsentLedgers.Add(Consent(profile, ProcessingConsentCategory, processingText, submission.IpAddress));
+        if (minor)
+        {
+            var (guardianText, _) = await ConsentTextAsync(profile.TenantId, GuardianConsentCategory, DefaultGuardianText, ct);
+            db.ConsentLedgers.Add(Consent(profile, GuardianConsentCategory, guardianText, submission.IpAddress));
+        }
         await db.SaveChangesAsync(ct);
 
         await notifications.SendEmailAsync(
@@ -222,11 +282,64 @@ public sealed class ApplicantPortalService(
             "Your AegisCore application has been submitted",
             $"<p>Your application is submitted. Your Applicant ID is <strong>{profile.ApplicantId}</strong> — keep it safe; you will need it for tests and status checks.</p>",
             ct);
+        if (minor && !string.IsNullOrWhiteSpace(profile.GuardianEmail))
+        {
+            // The guardian receives what they agreed to. Confirmation by a one-time link is a follow-up
+            // (docs/compliance/10 §3.3); today the consent is captured in the applicant's session.
+            await notifications.SendEmailAsync(
+                profile.GuardianEmail,
+                $"Consent recorded for {profile.FullName}'s university application",
+                $"<p>You were recorded as the parent or guardian of <strong>{profile.FullName}</strong> (applicant {profile.ApplicantId}) and as consenting to the following:</p><blockquote>{System.Net.WebUtility.HtmlEncode(processingText)}</blockquote><p>If this is not correct, contact the admissions office.</p>",
+                ct);
+        }
 
         return ToView(profile, await LoadRequirementViewsAsync(applicantProfileId, ct));
     }
 
     // ---- helpers ----
+
+    public static int AgeOn(DateOnly dateOfBirth, DateOnly date)
+    {
+        var age = date.Year - dateOfBirth.Year;
+        // A 29 February birthday falls on 1 March in a common year (the conservative reading:
+        // nobody is treated as an adult a day early).
+        var birthdayThisYear = dateOfBirth.Month == 2 && dateOfBirth.Day == 29 && !DateTime.IsLeapYear(date.Year)
+            ? new DateOnly(date.Year, 3, 1)
+            : new DateOnly(date.Year, dateOfBirth.Month, dateOfBirth.Day);
+        if (date < birthdayThisYear) age--;
+        return age;
+    }
+
+    private async Task<(string Text, string Version)> ConsentTextAsync(Guid tenantId, string category, string fallback, CancellationToken ct)
+    {
+        var entry = await db.ConfigurationEntries.IgnoreQueryFilters().AsNoTracking()
+            .Where(item => item.TenantId == tenantId && item.Key == $"consent.{category}.text")
+            .Select(item => new { item.ValueJson, item.UpdatedAt })
+            .FirstOrDefaultAsync(ct);
+        if (entry is null || string.IsNullOrWhiteSpace(entry.ValueJson)) return (fallback, "default");
+        try
+        {
+            using var document = System.Text.Json.JsonDocument.Parse(entry.ValueJson);
+            var text = document.RootElement.ValueKind == System.Text.Json.JsonValueKind.String ? document.RootElement.GetString() : document.RootElement.ToString();
+            return string.IsNullOrWhiteSpace(text) ? (fallback, "default") : (text!, entry.UpdatedAt.ToString("O"));
+        }
+        catch (System.Text.Json.JsonException) { return (entry.ValueJson, entry.UpdatedAt.ToString("O")); }
+    }
+
+    private ConsentLedger Consent(ApplicantProfile profile, string category, string text, string? ipAddress)
+    {
+        var ledger = new ConsentLedger
+        {
+            Id = Guid.NewGuid(), TenantId = profile.TenantId, UserId = profile.Id, DataCategory = category,
+            ConsentedAt = DateTime.UtcNow, ConsentText = text,
+        };
+        if (encryption is not null && !string.IsNullOrWhiteSpace(ipAddress))
+        {
+            var aad = System.Text.Encoding.UTF8.GetBytes($"{profile.TenantId:N}:{ledger.Id:N}:consent-ip");
+            ledger.SetEncryptedIpAddress(ipAddress, encryption.Encrypt(System.Text.Encoding.UTF8.GetBytes(ipAddress), aad));
+        }
+        return ledger;
+    }
 
     private async Task<(AdmissionIntake Intake, DegreeProgram Program)> ResolveIntakeProgramAsync(Guid intakeId, Guid programId, CancellationToken ct)
     {
