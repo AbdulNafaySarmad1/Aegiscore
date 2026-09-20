@@ -18,6 +18,7 @@ public static class ComplianceServiceExtensions
 
         services.TryAddScoped<IComplianceService, ComplianceService>();
         services.TryAddScoped<IFerpaAuditService, FerpaAuditService>();
+        services.TryAddScoped<IAccessAuditService, AccessAuditService>();
         services.TryAddScoped<IPrivacyComplianceService, PrivacyComplianceService>();
         services.AddHostedService<ComplianceRetentionWorker>();
 

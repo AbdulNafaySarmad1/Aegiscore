@@ -164,10 +164,12 @@ public abstract class DbDialectAdapterBase : IDbDialectAdapter
     {
         services.AddScoped<TenantSessionInterceptor>();
         services.AddScoped<AegisCore.Infrastructure.Licensing.LicenseWriteInterceptor>();
+        services.AddScoped<Security.SensitiveChangeAuditInterceptor>();
         services.AddDbContext<AegisDbContext>((provider, options) =>
         {
             ConfigureOptions(options, connectionString);
             options.AddInterceptors(provider.GetRequiredService<AegisCore.Infrastructure.Licensing.LicenseWriteInterceptor>());
+            options.AddInterceptors(provider.GetRequiredService<Security.SensitiveChangeAuditInterceptor>());
             if (Dialect == DbDialects.Postgres)
                 options.AddInterceptors(provider.GetRequiredService<TenantSessionInterceptor>());
         });

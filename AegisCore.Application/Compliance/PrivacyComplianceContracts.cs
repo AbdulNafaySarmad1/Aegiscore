@@ -20,6 +20,24 @@ public interface IFerpaAuditService
     Task<FerpaAccessDecision> AuthorizeAndAuditAsync(FerpaAccessRequest request, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// A read of a sensitive non-student record (staff, payroll, welfare, health, foreign-student
+/// status). Authorisation has already been decided by the permission layer; this only records
+/// who looked, at what, from where. Compliance control AC-50.
+/// </summary>
+public sealed record AccessAuditRecord(
+    Guid UserId,
+    IReadOnlyList<string> UserRoles,
+    string? IpAddress,
+    string ResourceType,
+    Guid ResourceId,
+    string Action);
+
+public interface IAccessAuditService
+{
+    Task RecordAsync(AccessAuditRecord record, CancellationToken cancellationToken = default);
+}
+
 public interface IPrivacyComplianceService
 {
     Task<ConsentLedger> RecordConsentAsync(

@@ -17,6 +17,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
 {
     [HttpGet("employees")]
     [AegisCore.API.Authorization.RequirePermission("System", "Write")]
+    [AegisCore.API.Authorization.RequireAccessAudit("Employee")]
     public async Task<IActionResult> Employees(CancellationToken ct)
         => Ok(await db.Employees.AsNoTracking().OrderBy(e => e.EmployeeCode).ToListAsync(ct));
 
@@ -35,6 +36,7 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
     }
 
     [HttpGet("employees/{id:guid}")]
+    [AegisCore.API.Authorization.RequireAccessAudit("Employee", "id")]
     public async Task<IActionResult> GetEmployee(Guid id, CancellationToken ct)
     {
         var employee = await db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id, ct);
@@ -114,11 +116,13 @@ public sealed class HrController(AegisDbContext db, IPayrollService payroll, IAc
 
     [HttpGet("payroll/{id:guid}/bank-export")]
     [AegisCore.API.Authorization.RequirePermission("System", "Export")]
+    [AegisCore.API.Authorization.RequireAccessAudit("Payroll", "id")]
     public async Task<IActionResult> BankExport(Guid id, CancellationToken ct)
         => File(System.Text.Encoding.UTF8.GetBytes(await payroll.ExportBankTransferCsvAsync(id, ct)), "text/csv", $"payroll-{id:N}.csv");
 
     [HttpGet("employees/{id:guid}/gratuity")]
     [AegisCore.API.Authorization.RequirePermission("System", "Read")]
+    [AegisCore.API.Authorization.RequireAccessAudit("Employee", "id")]
     public async Task<IActionResult> Gratuity(Guid id, [FromQuery] DateOnly resignationDate, CancellationToken ct)
     {
         var employee = await db.Employees.FindAsync([id], ct);

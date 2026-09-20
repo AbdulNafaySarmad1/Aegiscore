@@ -94,7 +94,10 @@ public sealed class TestDatabase : IAsyncDisposable
         Configure(options);
         // A plain property, not HttpContextAccessor: that one keeps the context in an AsyncLocal, which does
         // not flow out of an async helper, so a context created inside one silently lost its tenant.
-        return new AegisDbContext(options.Options, new FixedHttpContextAccessor(http), Adapter);
+        var accessor = new FixedHttpContextAccessor(http);
+        // The production context carries this interceptor, so tests see the same audit rows a deployment writes.
+        options.AddInterceptors(new AegisCore.Infrastructure.Security.SensitiveChangeAuditInterceptor(accessor));
+        return new AegisDbContext(options.Options, accessor, Adapter);
     }
 
     // Building the 600-table schema takes thousands of locks; a dozen in parallel exhausts the

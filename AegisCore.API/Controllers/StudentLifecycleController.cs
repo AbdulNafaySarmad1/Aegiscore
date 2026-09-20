@@ -107,6 +107,7 @@ public class StudentLifecycleController : ControllerBase
     }
 
     [HttpGet("health-records/{studentId:guid}")]
+    [AegisCore.API.Authorization.RequireAccessAudit("Health", "studentId")]
     public async Task<IActionResult> HealthRecord(Guid studentId, CancellationToken ct)
     {
         if (!IsPrivileged() && !Owns(studentId)) return Forbid();
