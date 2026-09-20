@@ -12,6 +12,12 @@ public static class DbContextServiceExtensions
         var adapter = DbDialectAdapterResolver.FromConfiguration(configuration);
         var connectionString = DbConnectionStringFactory.Build(configuration, adapter);
 
+        // The column cipher shares the installation master key with the secret vault and the audit
+        // IP encryption. Without a key (development, tests) columns are stored in clear; production
+        // cannot start without it because PqcCryptographyService requires the same variable.
+        Security.FieldEncryption.FieldCipher.Configure(
+            configuration["AEGISCORE_PQC_KEY_BASE64"] ?? configuration["Pqc:MasterKeyBase64"]);
+
         services.AddHttpContextAccessor();
         services.AddSingleton<IDbDialectAdapter>(adapter);
         adapter.AddDbProvider(services, connectionString);

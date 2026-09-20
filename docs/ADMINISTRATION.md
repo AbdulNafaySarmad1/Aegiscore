@@ -163,6 +163,27 @@ start with its password stored beside it. If you supply your own, set `DataProte
 and `DATA_PROTECTION_CERTIFICATE_PASSWORD`. Production refuses to start without one, because
 without it every protected value would be readable by anyone holding the volume.
 
+### The master key, and the columns it encrypts
+
+`AEGISCORE_PQC_KEY_BASE64` — generated into the `config` volume on first start — encrypts the local
+secret vault, the IP addresses in the access audit, and, since this release, the columns listed in
+`AegisCore.Infrastructure/Security/FieldEncryption/FieldEncryptionModel.cs`: CNICs, passport and
+visa numbers, applicant and guardian contact details, counselling and disciplinary text,
+mental-health tickets, and where people signed in from (IP, city, coordinates). A backup of the
+database without that key is unreadable for those columns — the same rule as the Data Protection
+certificate above.
+
+An installation upgraded from an earlier release keeps reading its existing rows; run the
+rewrite once so that no plaintext remains:
+
+```bash
+docker compose exec app dotnet AegisCore.API.dll encrypt-fields
+```
+
+It is safe to run again. Rotating this key is not yet supported (it would mean re-encrypting the
+vault, the audit log and every column above in one pass); it is recorded as an open item in
+`docs/compliance/04-nist-csf-gap-assessment.md`, control AC-23.
+
 ### Signing keys for the ledger and the vault
 
 Post-quantum signing keys are per tenant and per purpose, registered in the database with their key
@@ -236,3 +257,10 @@ curl -s -b jar.txt http://localhost:8080/health/modules | jq '.status'   # jar.t
 
 A restore that brings back the database without the `config` volume leaves every encrypted value
 unreadable. That is worth finding out in a drill rather than in an incident.
+
+For the database alone, `deploy/scripts/backup.sh` writes an encrypted `pg_dump`
+(`BACKUP_ENCRYPTION_KEY` is required; the script refuses to write a plaintext dump) and
+`deploy/scripts/restore.sh` brings it back into an empty database. `deploy/scripts/backup-restore-drill.sh`
+runs both against your live server into a throwaway database and checks the result — run it
+quarterly and file the output under `docs/compliance/exercises/`; the same drill runs on every CI
+build.

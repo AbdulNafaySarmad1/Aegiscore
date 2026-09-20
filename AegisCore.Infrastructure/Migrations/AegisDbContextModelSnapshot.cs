@@ -1069,8 +1069,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("Cnic")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1104,8 +1104,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<Guid>("ProgramId")
                         .HasColumnType("uuid");
@@ -1987,8 +1987,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<Guid>("ProgramId")
                         .HasColumnType("uuid");
@@ -14844,8 +14844,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PassportNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("Program")
                         .IsRequired()
@@ -14862,8 +14862,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("VisaNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<int>("VisaType")
                         .HasColumnType("integer");
@@ -18036,20 +18036,22 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<double?>("GpsLatitude")
-                        .HasColumnType("double precision");
+                    b.Property<string>("GpsLatitude")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
-                    b.Property<double?>("GpsLongitude")
-                        .HasColumnType("double precision");
+                    b.Property<string>("GpsLongitude")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("IpAddress")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("IpCity")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("IpCountry")
                         .HasMaxLength(100)
@@ -18080,8 +18082,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<string>("UserEmail")
                         .IsRequired()
@@ -18304,8 +18306,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<string>("ReportContent")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<DateTime>("ReportedAt")
                         .HasColumnType("timestamp with time zone");
@@ -18532,8 +18534,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("ConcernDescription")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<string>("ConcernType")
                         .IsRequired()
@@ -23914,8 +23916,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<DateTime>("SessionDate")
                         .HasColumnType("timestamp with time zone");
@@ -23938,8 +23940,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<DateTime>("IncidentDate")
                         .HasColumnType("timestamp with time zone");
@@ -24023,8 +24025,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -24032,8 +24034,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("Relationship")
                         .HasMaxLength(50)
@@ -25999,8 +26001,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("VendorCnic")
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("VendorName")
                         .IsRequired()
@@ -26332,8 +26334,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Cnic")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -26436,8 +26438,8 @@ namespace AegisCore.Infrastructure.Migrations
 
                     b.Property<string>("CNIC")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<DateTime?>("CheckInTime")
                         .HasColumnType("timestamp with time zone");
@@ -26519,8 +26521,8 @@ namespace AegisCore.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("VisitorCNIC")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
 
                     b.Property<string>("VisitorName")
                         .IsRequired()

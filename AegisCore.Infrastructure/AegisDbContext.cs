@@ -3620,6 +3620,9 @@ public class AegisDbContext : DbContext
         dialectAdapter.NormalizeProviderModel(modelBuilder);
 
         ApplyUtcDateTimeConvention(modelBuilder);
+        // Application-level column encryption (compliance AC-20). Last, so it overrides the
+        // annotations' column lengths for the columns it protects.
+        Security.FieldEncryption.FieldEncryptionModel.Apply(modelBuilder);
     }
 
     /// <summary>

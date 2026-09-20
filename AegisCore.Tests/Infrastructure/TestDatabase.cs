@@ -16,6 +16,9 @@ namespace AegisCore.Tests.Infrastructure;
 public sealed class TestDatabase : IAsyncDisposable
 {
     public const string PostgresVariable = "PILOT_POSTGRES_CONNECTION";
+
+    // Column encryption is on for the whole test run, under a fixed key, so a query that a converter
+    // breaks fails here rather than in a deployment (see TestKeys).
     public static bool PostgresConfigured => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(PostgresVariable));
 
     // xUnit runs test classes in parallel; concurrent CREATE DATABASE calls collide on template1

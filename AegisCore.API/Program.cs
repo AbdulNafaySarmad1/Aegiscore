@@ -83,6 +83,22 @@ if (args.Contains("migrate", StringComparer.OrdinalIgnoreCase))
     return 0;
 }
 
+// Operator command: `dotnet AegisCore.API.dll encrypt-fields` rewrites rows written before column
+// encryption existed (docs/compliance/04, AC-20). Safe to re-run; prints the row count.
+if (args.Contains("encrypt-fields", StringComparer.OrdinalIgnoreCase))
+{
+    var encryptServices = new ServiceCollection();
+    encryptServices.AddLogging(l => l.AddConsole());
+    encryptServices.AddAegisDbContext(builder.Configuration);
+    await using var encryptProvider = encryptServices.BuildServiceProvider();
+    using var encryptScope = encryptProvider.CreateScope();
+    var encryptLogger = encryptScope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("encrypt-fields");
+    var rows = await AegisCore.Infrastructure.Security.FieldEncryption.FieldEncryptionMigrator.RewriteAsync(
+        encryptScope.ServiceProvider.GetRequiredService<AegisDbContext>(), encryptLogger);
+    Console.WriteLine($"encrypt-fields: {rows} rows rewritten.");
+    return 0;
+}
+
 if (args.Contains("rotate-jwt-keys", StringComparer.OrdinalIgnoreCase))
 {
     Console.WriteLine(AegisCore.Infrastructure.Security.JwtKeyMaterial.Rotate(builder.Configuration));
