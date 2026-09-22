@@ -77,6 +77,20 @@ A report received through the disclosure channel is triaged within 2 business da
 
 Within 30 days: blameless write-up; actions with owners and dates; risk register and SoA updated; this procedure amended if it failed. Reviewed at the next management review.
 
-## 9. Testing
+## 9. Regulator and authority contacts
 
-A tabletop exercise is run at least annually and after any material change to the architecture. First exercise: Phase 3 item 12 (scenario: leaked `generated-secrets.env` from a university backup bucket). The record of each exercise, with what went wrong, is kept in `docs/compliance/exercises/`.
+| Body | When | Contact |
+|---|---|---|
+| National Cyber Crime Investigation Agency (NCCIA) | Suspected offence under PECA ss. 3–5, 21 | **[to be confirmed from the official NCCIA site — exercise finding F-3, due 2026-10-22]** |
+| Pakistan Digital Authority | Once the National Data Governance Policy is notified and a reporting duty exists | **[to be confirmed]** |
+| Higher Education Commission | Public university, student records involved | Through the university's own HEC focal person |
+| The University | Always, within 48 h (DPA §8) | DPA Schedule 6 |
+
+## 10. Testing
+
+A tabletop exercise is run at least every six months and after any material change to the architecture. Records, including what failed, are in `docs/compliance/exercises/`.
+
+| Date | Scenario | Findings |
+|---|---|---|
+| 2026-09-22 | Leaked `generated-secrets.env` from a university backup bucket | 4 findings; F-1 (no master-key rotation path) is High — see `exercises/2026-09-22-tabletop-leaked-secrets.md` |
+| 2027-03 (planned) | Compromised administrator account with a valid session | — |
