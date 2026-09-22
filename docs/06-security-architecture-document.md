@@ -1,6 +1,25 @@
 # Document 6 — Security Architecture Document
 **Standards:** ISO/IEC 27001 + NIST CSF + OWASP ASVS Level 2
 
+> **Superseded in part — read this first (added 2026-09-22).**
+> This document was written in January 2025 as a design intent. Several statements in it describe
+> controls that were never implemented as written, and an internal audit found them still being
+> read as fact. The authoritative, evidence-backed position is `docs/compliance/04-nist-csf-gap-assessment.md`
+> and `docs/compliance/15-statement-of-applicability.md`.
+>
+> Specifically, at the time of writing this note:
+> - "AES-256-GCM column-level encryption for PII" — true only for the columns listed in
+>   `AegisCore.Infrastructure/Security/FieldEncryption/FieldEncryptionModel.cs`; date of birth and salary remain plaintext.
+> - "SBOM generated per build" — no SBOM is generated. Dependencies are tracked by lockfiles and Dependabot.
+> - "Weekly dependency vulnerability scan" — dependency auditing was disabled repository-wide until 2026-09-20; it now runs on every push.
+> - "MFA for administrative accounts" — true since 2026-09-20, not in 2025.
+> - "RTO < 1 hour, RPO < 5 minutes" — not measured and not agreed with any client. A restore of the
+>   1.3 MB pilot database took 13 s; that is not an RTO commitment.
+> - "Audit logs ... append-only policy; tamper detection via checksums" — true of the finance ledger only.
+>
+> Nothing in this document should be quoted to a client or an auditor without checking it against the
+> compliance folder.
+
 | Field | Value |
 |-------|-------|
 | Document ID | AEGIS-SEC-001 |

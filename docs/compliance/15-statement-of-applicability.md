@@ -1,6 +1,6 @@
 # 15 — Statement of Applicability
 
-**Version 1.0 · 2026-09-22 · approved by the DPC.** ISO/IEC 27001:2022 clause 6.1.3 d), all 93 Annex A controls. Scope: `13-isms-scope.md`. Risks: `14`. Unified control set: `04-nist-csf-gap-assessment.md` (the `AC-nn` column). ISO/IEC 27002:2022 is the implementation reference.
+**Version 1.1 · 2026-09-22 · approved by the DPC.** (1.1: A.5.1 and A.5.10 closed by `19-information-security-policy.md` following internal audit finding A-07.) ISO/IEC 27001:2022 clause 6.1.3 d), all 93 Annex A controls. Scope: `13-isms-scope.md`. Risks: `14`. Unified control set: `04-nist-csf-gap-assessment.md` (the `AC-nn` column). ISO/IEC 27002:2022 is the implementation reference.
 
 **Status vocabulary** (same as `04`, so the two documents cannot drift): **Implemented** (evidence exists), **Partial** (named remainder), **Planned** (dated), **N/A** (the activity does not exist in this organisation — never "too small to bother").
 
@@ -12,7 +12,7 @@
 
 | # | Control | Applies | Status | How it is implemented / why excluded | AC |
 |---|---|---|---|---|---|
-| 5.1 | Policies for information security | Yes | **Planned** — 2026-10-22 | The policy set is this `docs/compliance/` folder; a single approved, versioned top-level policy referencing the rest is the missing piece. `docs/06` is superseded where it overstates | AC-02 |
+| 5.1 | Policies for information security | Yes | Implemented (2026-09-22) | `19-information-security-policy.md`, approved and versioned, governing the rest of the folder. `docs/06` now carries a superseded banner naming each statement of it that was never true | AC-02 |
 | 5.2 | Information security roles and responsibilities | Yes | Implemented | `05-governance.md` §§1–2; one person, named, with each responsibility listed against the role | AC-01, AC-03 |
 | 5.3 | Segregation of duties | Yes | **Partial** | Impossible with one person. Compensating: CI gates that the author cannot bypass, PR checklist and 24-hour soak on sensitive paths, append-only finance ledger with hash chain, audit trail the author cannot edit silently. Risk R-014 retained | AC-03 |
 | 5.4 | Management responsibilities | Yes | Implemented | `17-management-review.md`; the DPC is also the management, and the review record shows the decisions | — |
@@ -21,7 +21,7 @@
 | 5.7 | Threat intelligence | Yes | **Partial** | STRIDE model in `docs/06` §3 and the advisory feeds above; not yet linked to the risk register on a cadence | AC-14 |
 | 5.8 | Information security in project management | Yes | Implemented | Every change enters through the compliance programme's control set; new personal data must be added to `01` and `08` before release | AC-10 |
 | 5.9 | Inventory of information and other associated assets | Yes | Implemented | `01-data-inventory.md` (information), `13` §2 (company assets), `DEPENDENCY_AUDIT.md` + lockfiles (software) | AC-10, AC-12 |
-| 5.10 | Acceptable use of information and other associated assets | Yes | **Planned** — 2026-10-22 | To be part of the 5.1 policy set; currently implicit | AC-02 |
+| 5.10 | Acceptable use of information and other associated assets | Yes | Implemented (2026-09-22) | `19` §3–4 and the workstation rules in `18` §3 | AC-02 |
 | 5.11 | Return of assets | Yes | **N/A in practice, retained** | No employees or contractors hold assets. The clause activates on the first hire; the onboarding checklist in `18` carries the offboarding half | — |
 | 5.12 | Classification of information | Yes | Implemented | `01-data-inventory.md` classifies by category and sensitivity; `docs/06` §2 gives the Restricted/Critical/Internal scheme | AC-10 |
 | 5.13 | Labelling of information | Yes | **Partial** | Data categories are labelled in the inventory and in code (`FieldEncryptionModel`, the audit interceptor's entity map). Documents are not labelled | AC-10 |
@@ -129,12 +129,12 @@ The company has no offices, server rooms or data centres. Client infrastructure 
 
 | Theme | Controls | Applicable | Implemented | Partial | Planned | N/A |
 |---|---|---|---|---|---|---|
-| A.5 Organizational | 37 | 37 | 24 | 11 | 2 | 0 (1 retained-inactive) |
+| A.5 Organizational | 37 | 37 | 26 | 11 | 0 | 0 (1 retained-inactive) |
 | A.6 People | 8 | 8 | 4 | 0 | 0 | 4 (until first hire) |
 | A.7 Physical | 14 | 14 | 5 | 0 | 1 | 8 |
 | A.8 Technological | 34 | 32 | 24 | 8 | 0 | 2 |
-| **Total** | **93** | **91** | **57** | **19** | **3** | **14** |
+| **Total** | **93** | **91** | **59** | **19** | **1** | **14** |
 
-Two controls are excluded as not applicable to the organisation's activities (8.23 web filtering, 8.30 outsourced development); the physical exclusions follow from having no premises, and each is justified individually above rather than as a block. Twelve controls are marked N/A *until an event* (first hire, first disposal) and their procedures are written in advance so the ISMS does not have a hole on the day the event happens.
+One control remains Planned (7.14, secure disposal — no device has been disposed of yet). Two controls are excluded as not applicable to the organisation's activities (8.23 web filtering, 8.30 outsourced development); the physical exclusions follow from having no premises, and each is justified individually above rather than as a block. Twelve controls are marked N/A *until an event* (first hire, first disposal) and their procedures are written in advance so the ISMS does not have a hole on the day the event happens.
 
-**Honest position for a certification body:** 57 of 91 applicable controls carry evidence today. The 19 partials each name what is missing. Nothing here is claimed as implemented on the strength of a document alone — every "Implemented" points at code, a test, a CI job, or a dated exercise record.
+**Honest position for a certification body:** 59 of 91 applicable controls carry evidence today. The 19 partials each name what is missing. Nothing here is claimed as implemented on the strength of a document alone — every "Implemented" points at code, a test, a CI job, or a dated exercise record.

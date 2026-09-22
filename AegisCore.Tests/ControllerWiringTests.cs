@@ -61,10 +61,44 @@ public sealed class ControllerWiringTests
         return feature.Controllers.Select(c => c.AsType()).OrderBy(t => t.FullName).ToList();
     }
 
+    /// <summary>
+    /// Building the runtime scans every referenced assembly (MediatR's open-generic registration does
+    /// this). A machine with an OS application-control policy (Windows WDAC / Smart App Control) can
+    /// refuse to load one of the cloud SDKs, and the failure then arrives as a
+    /// ReflectionTypeLoadException whose message says nothing about wiring — which is how a developer
+    /// learns to ignore a red suite. xunit v2 cannot skip at runtime, so the failure is kept but
+    /// re-thrown with a message naming the cause and the remedy. Internal audit finding A-01, 2026-09-22.
+    /// </summary>
+    private static IHost BuildInstalledRuntimeHostOrExplain()
+    {
+        try { return BuildInstalledRuntimeHost(); }
+        catch (Exception exception) when (Blocked(exception) is { Length: > 0 } blocked)
+        {
+            throw new InvalidOperationException(
+                "This test could not run on this machine: the operating system's application-control policy "
+                + "(WDAC / Smart App Control) refused to load a referenced assembly, so the runtime container cannot be built. "
+                + "This is NOT a dependency-injection failure and says nothing about the product. Run the suite on a machine "
+                + "without that policy, or rely on CI, which runs this test on every push. Blocked: "
+                + string.Join(" | ", blocked), exception);
+        }
+    }
+
+    private static string[] Blocked(Exception exception)
+    {
+        var load = exception as ReflectionTypeLoadException
+            ?? exception.InnerException as ReflectionTypeLoadException;
+        return load?.LoaderExceptions
+            .Select(inner => inner?.Message)
+            .Where(message => message?.Contains("Application Control policy", StringComparison.OrdinalIgnoreCase) == true)
+            .Select(message => message!)
+            .Distinct()
+            .ToArray() ?? [];
+    }
+
     [Fact]
     public void Every_Mapped_Controller_Resolves_From_The_Installed_Runtime_Container()
     {
-        using var host = BuildInstalledRuntimeHost();
+        using var host = BuildInstalledRuntimeHostOrExplain();
         using var scope = host.Services.CreateScope();
         var controllers = MappedControllers(host.Services);
         var failures = new List<string>();
@@ -85,7 +119,7 @@ public sealed class ControllerWiringTests
     [Fact]
     public void The_Installation_Wizard_Is_Not_Mapped_Once_Installed()
     {
-        using var host = BuildInstalledRuntimeHost();
+        using var host = BuildInstalledRuntimeHostOrExplain();
         var controllers = MappedControllers(host.Services);
         Assert.DoesNotContain(controllers, c => c.Name == "WizardController");
         Assert.Contains(controllers, c => c.Name == "AuthController");
