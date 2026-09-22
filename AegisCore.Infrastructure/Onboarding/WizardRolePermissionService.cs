@@ -6,15 +6,9 @@ namespace AegisCore.Infrastructure.Onboarding;
 
 public sealed class WizardRolePermissionService(AegisDbContext db, WizardStateService wizardState)
 {
-    private static readonly HashSet<string> AllowedResources = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Students", "Grades", "Attendance", "CampusPolygon", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System"
-    };
+    private static readonly HashSet<string> AllowedResources = new(Identity.PermissionCatalog.Resources, StringComparer.OrdinalIgnoreCase);
 
-    private static readonly HashSet<string> AllowedActions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Read", "Write", "Delete", "Approve", "Export", "Admin"
-    };
+    private static readonly HashSet<string> AllowedActions = new(Identity.PermissionCatalog.Actions, StringComparer.OrdinalIgnoreCase);
 
     public async Task<IReadOnlyList<Role>> SaveRolesAsync(string token, SaveWizardRolesRequest request, CancellationToken ct = default)
     {

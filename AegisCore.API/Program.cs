@@ -423,6 +423,10 @@ else
             var outcome = await AegisCore.Infrastructure.Deployment.StartupBootstrap.SchemaPolicyAsync(
                 schemaScope.ServiceProvider.GetRequiredService<AegisDbContext>(), app.Configuration, app.Logger);
             Log.Information("[AEGISCORE] Database schema {Action}: {Detail}", outcome.Action, outcome.Detail);
+            // Staff, Payroll and Welfare permissions were split out of System (compliance AC-29); an
+            // upgraded installation's administrators receive them here rather than losing HR screens.
+            await AegisCore.Infrastructure.Identity.PermissionCatalog.GrantAddedResourcesToAdministratorsAsync(
+                schemaScope.ServiceProvider.GetRequiredService<AegisDbContext>(), app.Logger);
         }
         catch (AegisCore.Infrastructure.Deployment.StartupBootstrap.BootstrapException ex)
         {

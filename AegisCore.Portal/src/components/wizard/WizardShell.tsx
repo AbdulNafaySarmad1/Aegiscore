@@ -44,12 +44,16 @@ const STEPS = [
   "Review and go-live",
 ] as const;
 
-const MODULES = ["Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System"];
+// Staff, Payroll and Welfare are their own resources so that HR, pay and counselling records are
+// not opened by the generic System permission (docs/compliance/04, AC-29).
+const MODULES = ["Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System", "Staff", "Payroll", "Welfare", "Graduation"];
 const ACTIONS = ["Read", "Write", "Delete", "Approve", "Export"];
 const DEFAULT_ROLES: RoleConfig[] = [
   { name: "Admin", permissions: MODULES.flatMap(module => ACTIONS.map(action => `${module}.${action}`)) },
   { name: "Faculty", permissions: ["Students.Read", "Grades.Read", "Grades.Write", "Attendance.Read", "Attendance.Write"] },
   { name: "Student", permissions: ["Grades.Read", "Attendance.Read", "Timetable.Read"] },
+  { name: "HR", permissions: ["Staff.Read", "Staff.Write", "Staff.Approve", "Payroll.Read", "Payroll.Write", "Payroll.Export"] },
+  { name: "Counsellor", permissions: ["Students.Read", "Welfare.Read", "Welfare.Write"] },
 ];
 
 function text(value: WizardData, key: string, fallback = "") {

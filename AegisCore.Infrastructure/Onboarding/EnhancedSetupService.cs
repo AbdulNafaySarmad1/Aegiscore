@@ -391,7 +391,13 @@ public sealed class EnhancedSetupService
             ["CampusPolygon.Read"] = ["Admin"],
             ["CampusPolygon.Write"] = ["Admin"],
             ["System.Write"] = ["Admin"],
-            ["System.Admin"] = ["Admin"]
+            ["System.Admin"] = ["Admin"],
+            ["Staff.Read"] = ["Admin"],
+            ["Staff.Write"] = ["Admin"],
+            ["Payroll.Read"] = ["Admin"],
+            ["Payroll.Export"] = ["Admin"],
+            ["Welfare.Read"] = ["Admin"],
+            ["Welfare.Write"] = ["Admin"]
         };
         return features.SelectMany(feature => roles.Select(role =>
             new SetupPermission(role, feature.Key, feature.Value.Contains(role)))).ToList();
