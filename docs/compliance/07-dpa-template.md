@@ -100,6 +100,7 @@ Lawfulness and transparency; purpose limitation; data minimisation; accuracy; st
 | Microsoft 365 / Moodle | Microsoft / University Moodle | rosters, grades | M365 tenant region | ☐ |
 | Payments | SBP Raast / [gateway] | payer reference, amount | Pakistan / [ ] | ☐ |
 | Bot protection | Cloudflare Turnstile | IP address | Cloudflare edge | ☐ |
+| Sign-in location lookup | ipapi.co | IP address of each person signing in | USA | ☑ on by default — see `docs/compliance/02-data-flow-map.md` X-15 |
 | Encrypted backups | [S3-compatible provider] | full database | [region] | ☐ |
 | Secrets / storage | Infisical / AWS / Azure / GCP / R2 | secrets; files | [region] | ☐ |
 | Search | Elasticsearch (University host) | directory index | University | ☐ |

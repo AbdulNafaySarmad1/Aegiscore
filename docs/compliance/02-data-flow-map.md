@@ -69,6 +69,7 @@
 | X-12 | Cloud secret / storage providers | secrets; uploaded files | No — only when `AEGISCORE_SECRET_PROVIDER`/`AEGISCORE_STORAGE_PROVIDER` point at AWS/Azure/GCP/Infisical/R2 | `Cloud/` | Chosen cloud |
 | X-13 | Container registry / Watchtower | none (pulls images) | Watchtower off by default (`profiles: [legacy-updater]`) | `docker-compose.client.yml:164` | ghcr.io |
 | X-14 | Hugging Face model pull (CLIP sidecar) | none (downloads a model) | Yes, at first start unless pre-seeded | `services/aegiscore-clip/app/main.py:39` | Hugging Face |
+| X-15 | **GeoIP lookup of the signing-in user's IP address** | the IP address of every person who signs in from a public address | **Yes** — `GeoIpService` is registered by default and called on every sign-in | `AegisCore.Infrastructure/Security/LoginAuditService.cs` (`https://ipapi.co/{ip}/json/`) | ipapi.co (USA) |
 
 ## 4. Sub-processor list (input to the Phase 2 DPA)
 
@@ -86,4 +87,5 @@ Cloud model (`docker-compose.cloud.yml`): Nocturne Systems becomes the hosting p
 | D-02 | X-09: S3 backups are the only flow that exports **everything**; `backup.sh` encrypts with `openssl enc -aes-256-cbc -pbkdf2` **only if `BACKUP_ENCRYPTION_KEY` is set**, and the in-app `BackupService` does not encrypt at all (`BackupEncryptionService` is unregistered dead code with no decrypt path). |
 | D-03 | X-10: payslip and employee-record exports are not access-logged. |
 | D-04 | I-06: log content vs. PII masking not yet tested. |
-| D-05 | E-06: applicant portal takes CNIC + DOB from anonymous users with no age gate and no consent text capture (the consent ledger exists but the admissions form does not call it — `grep RecordConsentAsync` → only `PrivacyComplianceController`). |
+| D-05 | E-06: applicant portal takes CNIC + DOB from anonymous users with no age gate and no consent text capture (the consent ledger exists but the admissions form does not call it — `grep RecordConsentAsync` → only `PrivacyComplianceController`). **Closed 2026-09-20**: consent is captured verbatim and a minor's guardian must consent (`ApplicantPortalService`). |
+| D-06 | X-15: every sign-in from a public IP address sends that address to ipapi.co, a US service, with no configuration switch, no disclosure in the privacy notice and no entry in the sub-processor schedule. It is on by default. **Open — Phase 5 remediation item R-01.** Options: drop the enrichment, ship an offline database (MaxMind GeoLite2), or make it opt-in and disclose it. Until then the privacy notice and DPA Schedule 4 must list it. |

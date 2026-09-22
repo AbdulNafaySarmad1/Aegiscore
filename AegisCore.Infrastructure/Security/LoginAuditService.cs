@@ -67,10 +67,11 @@ public class LoginAuditService : ILoginAuditService
     private readonly IGeoIpService _geoIp;
     private readonly Channel<LoginAuditRecord> _archiveChannel;
     private readonly ILogger<LoginAuditService> _logger;
+    private readonly ISecurityAlertService? _alerts;
 
-    public LoginAuditService(ILoginAuditRecordRepository repo, IGeoIpService geoIp, ILogger<LoginAuditService> logger)
+    public LoginAuditService(ILoginAuditRecordRepository repo, IGeoIpService geoIp, ILogger<LoginAuditService> logger, ISecurityAlertService? alerts = null)
     {
-        _repo = repo; _geoIp = geoIp; _logger = logger;
+        _repo = repo; _geoIp = geoIp; _logger = logger; _alerts = alerts;
         _archiveChannel = Channel.CreateUnbounded<LoginAuditRecord>();
     }
 
@@ -89,7 +90,17 @@ public class LoginAuditService : ILoginAuditService
 
         await _repo.AddAsync(record, ct);
         await _archiveChannel.Writer.WriteAsync(record, ct);
-        _ = Task.Run(() => DetectAnomaliesAsync(record, ct), ct);
+        // Detection used to run and discard its findings, so nobody was ever told. The alerts are
+        // now raised on the same path (compliance AC-54); a failure here must not fail a sign-in.
+        try
+        {
+            foreach (var anomaly in await DetectAnomaliesAsync(record, ct))
+            {
+                if (_alerts is null) { _logger.LogWarning("Security alert [{Severity}] {Type}: {Description}", anomaly.Severity, anomaly.Type, anomaly.Description); continue; }
+                await _alerts.RaiseAsync(record.TenantId, anomaly.Type, anomaly.Severity, anomaly.Description, anomaly.UserId, 1, ct);
+            }
+        }
+        catch (Exception ex) { _logger.LogError(ex, "Login anomaly detection failed for {Email}", record.UserEmail); }
 
         _logger.LogInformation("Login audit: {Event} for {Email} from {Ip} ({Country})",
             record.EventType, record.UserEmail, record.IpAddress, record.IpCountry);

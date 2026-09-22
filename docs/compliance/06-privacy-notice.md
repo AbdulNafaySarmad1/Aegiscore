@@ -35,6 +35,7 @@ This notice is written for what AegisCore actually does (see `01-data-inventory.
 - [Only if enabled] Document reading through Microsoft Azure Document Intelligence in [region].
 - [Only if enabled] Microsoft 365 / Moodle roster synchronisation.
 - [Only if enabled] Encrypted backups to [storage location].
+- Your IP address is sent to ipapi.co (United States) when you sign in from outside the campus network, so that we can show you where your account was used and spot a sign-in that is not you.
 - Licence check to Nocturne: the university's name, id, licensed-user count and time. **No personal data.**
 
 **Disclosures required by law.** Mental-health mandatory reports to [authority]; foreign-student reporting to [MORA / relevant authority]; payroll reporting to FBR/EOBI; responses to lawful requests under PECA 2016 (as amended 2025).

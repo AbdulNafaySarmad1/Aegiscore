@@ -724,6 +724,7 @@ public class AegisDbContext : DbContext
     /// Security incidents.
     /// </summary>
     public DbSet<SecurityIncident> SecurityIncidents => Set<SecurityIncident>();
+    public DbSet<SecurityAlert> SecurityAlerts => Set<SecurityAlert>();
 
     /// <summary>
     /// Incident witnesses.
@@ -2036,6 +2037,7 @@ public class AegisDbContext : DbContext
             entity.Property(item => item.LatitudeEncrypted).HasColumnName("Latitude").HasColumnType("bytea");
             entity.Property(item => item.LongitudeEncrypted).HasColumnName("Longitude").HasColumnType("bytea");
             entity.Property(item => item.LocationStatus).HasConversion<string>().HasMaxLength(24).HasDefaultValue(LocationStatus.Unverifiable);
+            entity.Property(item => item.Source).HasConversion<string>().HasMaxLength(24).HasDefaultValue(AttendanceSource.FacultyRoll);
             entity.HasOne(item => item.Geofence).WithMany().HasForeignKey(item => item.GeofenceId)
                 .OnDelete(DeleteBehavior.SetNull);
             // A student is present once on a day in a course. Two roll calls submitted at the same

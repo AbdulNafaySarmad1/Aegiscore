@@ -15,6 +15,8 @@ public static class LoginAuditServiceExtensions
         services.TryAddScoped<IGeoIpService, GeoIpService>();
         services.TryAddScoped<ILoginAuditService, LoginAuditService>();
         services.TryAddSingleton<IBruteForceProtectionService, BruteForceProtectionService>();
+        services.TryAddScoped<ISecurityAlertService, SecurityAlertService>();
+        services.AddHostedService<BulkAccessAlertWorker>();
         return services;
     }
 }

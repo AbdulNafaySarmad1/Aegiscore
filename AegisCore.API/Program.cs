@@ -368,8 +368,12 @@ else
 
     app.UseHttpMetrics(options =>
     {
-        options.AddCustomLabel("tenant", context => context.User.FindFirst("tenant_id")?.Value ?? "anonymous");
+        // The tenant label is off by default: on a per-university installation it adds nothing but
+        // a tenant id in a feed that monitoring systems copy around (compliance AC-33).
+        if (app.Configuration.GetValue("Metrics:IncludeTenantLabel", false))
+            options.AddCustomLabel("tenant", context => context.User.FindFirst("tenant_id")?.Value ?? "anonymous");
     });
+    app.UseMiddleware<MetricsAccessMiddleware>();
     app.MapMetrics().AllowAnonymous();
     app.MapGet("/api/session", (HttpContext context) => Results.Ok(new
     {
