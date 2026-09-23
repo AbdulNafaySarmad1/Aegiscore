@@ -230,7 +230,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           # Must match services/aegiscore-clip/Dockerfile (python:3.11-slim): the pinned torch build
           # only resolves for the interpreter the image actually runs.
