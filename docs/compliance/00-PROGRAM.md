@@ -1,6 +1,6 @@
 # AegisCore compliance programme
 
-**Status:** Phases 1–4 complete — 2026-09-22. Phase 5 (internal audit and remediation) next.
+**Status:** Phases 1–5 complete; Phase 6 prepared and blocked on one item — 2026-09-23. See `20-certification-engagement.md` §1 for the honest standing.
 **Owner:** Data Protection Contact, named in `05-governance.md` §1.
 **Scope:** the root-level AegisCore product (`AegisCore.API`, `AegisCore.Infrastructure`, `AegisCore.Portal`, `AegisCore.Mobile`, the `aegiscore-clip` sidecar) as shipped by `docker-compose.client.yml` (per-university container) and `docker-compose.cloud.yml` (vendor-hosted). Legacy `aegiscore-*` directories are out of scope: they are not built or deployed.
 
@@ -13,7 +13,8 @@
 | "PDA-aware; preparing for the National Data Governance Policy 2026" | Yes | See legal check below |
 | "GDPR-aligned architecture" / "FERPA-aligned access logging" | Yes, with the caveats in `01-data-inventory.md` §4 and `04` PR.AA / DE.CM | Partial coverage — see gap assessment |
 | "GDPR compliant", "FERPA compliant", "PDPA compliant", "ISO 27001 certified" | **No** | No EU/US data subjects identified; PDPA not enacted; no certificate |
-| "ISO 27001-aligned" / "audit-ready" | Not yet — after Phase 4 | ISMS documents do not exist yet |
+| "ISO/IEC 27001-aligned; ISMS implemented and internally audited" | **Yes** (from 2026-09-22) | `13`–`19`; internal audit `audits/2026-09-22-full-scope.md`; SoA `15` |
+| "ISO 27001 certification in progress" | **Not yet** — only once a body is engaged and Stage 1 is scheduled | `20-certification-engagement.md` §8 governs the wording at each stage |
 
 ## Legal landscape check — re-checked 2026-09-22 at the start of Phase 4 (repeat every phase)
 
@@ -94,3 +95,22 @@
 | `16-internal-audit-programme.md` | Quarterly cycle, 17 re-runnable evidence checks, how the independence limitation is handled |
 | `17-management-review.md` + `reviews/2026-q3.md` | Agenda, measured metrics, objectives; first review held and minuted |
 | `18-security-awareness-training.md` | Content, workstation rules, joiner/leaver procedure written before the first hire |
+
+## Phase 5 deliverables (internal audit and remediation)
+
+| File | Content |
+|---|---|
+| `audits/2026-09-22-full-scope.md` | The audit as it actually ran: 17 evidence checks, 12 control suites green, 3 checks not run and recorded as such, 7 findings including one Major |
+| `19-information-security-policy.md` | The approved top-level policy A.5.1 wanted; closed finding A-07 |
+| `docs/06-security-architecture-document.md` | Superseded banner naming six statements that were never true; closed finding A-06 pending second-party re-check |
+| CI `sidecar-audit` job | `pip-audit` on the Python sidecar, on the image's own Python version |
+| `GET /api/admin/data-subject-counts` | The "whose data, how many" report the tabletop found missing at hour 24 |
+| `04` re-score | CSF functions recomputed from the control table: Govern 61 %, Identify 80 %, Protect 81 %, Detect 92 %, Respond 100 %, Recover 33 % |
+
+## Phase 6 deliverable (certification engagement)
+
+| File | Content |
+|---|---|
+| `20-certification-engagement.md` | Standing, how to choose an accredited body and verify it, the enquiry pack, realistic Stage 1/Stage 2 timing, what Stage 2 will probe and the answer to each, and the wording permitted at every stage |
+
+**Phase 6 is prepared, not executed.** Engaging a certification body is a commercial decision with a cost, and one internal-audit finding (A-06) must be closed by a second party first. Everything the company can do without an external party is done.
