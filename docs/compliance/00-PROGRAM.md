@@ -114,3 +114,11 @@
 | `20-certification-engagement.md` | Standing, how to choose an accredited body and verify it, the enquiry pack, realistic Stage 1/Stage 2 timing, what Stage 2 will probe and the answer to each, and the wording permitted at every stage |
 
 **Phase 6 is prepared, not executed.** Engaging a certification body is a commercial decision with a cost, and one internal-audit finding (A-06) must be closed by a second party first. Everything the company can do without an external party is done.
+
+## Decisions each installation owns
+
+`21-configurable-decisions.md` — the data protection contact, the physical location of the data, and
+every retention period are **settings**, editable at any time at **Administration → Compliance** or
+over `GET`/`PUT /api/admin/compliance-settings`. The product ships the first two empty and reports
+them as unmet obligations; retention ships with working starting values the institution then revises.
+No document in this folder asserts a value for them.

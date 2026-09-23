@@ -1,5 +1,11 @@
 # 03 — Data residency by deployment model
 
+> **Each installation records its own answer.** Deployment model, database, file-storage, backup and
+> replica locations are settings at **Administration → Compliance** (`21-configurable-decisions.md`),
+> reported as unmet until filled in. What follows describes what each deployment model *can* do and
+> where the boundaries of responsibility fall; it does not assert where any particular university's
+> data actually is.
+
 **As of:** 2026-09-20. Residency matters for the draft PDPA's cross-border transfer clauses, the NDGP 2026's data-sovereignty rules for public-sector data, and whatever HEC eventually asks. The answer differs per compose file, so each is stated separately.
 
 ## Model A — Per-university container (`docker-compose.client.yml`) — the primary offer

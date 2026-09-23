@@ -11,8 +11,41 @@ namespace AegisCore.API.Controllers;
 [ApiController]
 [Route("api")]
 [Authorize]
-public sealed class PrivacyComplianceController(AegisDbContext db, IPrivacyComplianceService privacy) : ControllerBase
+public sealed class PrivacyComplianceController(
+    AegisDbContext db,
+    IPrivacyComplianceService privacy,
+    IComplianceSettingsService? settings = null) : ControllerBase
 {
+    /// <summary>
+    /// The compliance decisions this installation owns: who its data protection contact is, where
+    /// its data lives, and how long each category is kept. Readable by anyone who can open the
+    /// compliance screen; changing them needs Settings.Write. The product ships starting values,
+    /// never answers — a supplier cannot name a university's data protection officer or decide how
+    /// long it keeps disciplinary records.
+    /// </summary>
+    [HttpGet("admin/compliance-settings")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Read")]
+    public async Task<IActionResult> GetComplianceSettings(CancellationToken cancellationToken = default)
+    {
+        if (settings is null) return NotFound();
+        var tenantId = db.CurrentTenantId;
+        if (tenantId == Guid.Empty) return BadRequest(new { error = "Tenant context is required." });
+        var current = await settings.GetAsync(tenantId, cancellationToken);
+        return Ok(new { settings = current, gaps = settings.Gaps(current) });
+    }
+
+    [HttpPut("admin/compliance-settings")]
+    [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
+    public async Task<IActionResult> SaveComplianceSettings([FromBody] ComplianceSettingsUpdate update, CancellationToken cancellationToken = default)
+    {
+        if (settings is null) return NotFound();
+        var tenantId = db.CurrentTenantId;
+        if (tenantId == Guid.Empty) return BadRequest(new { error = "Tenant context is required." });
+        var actorId = Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsed) ? parsed : Guid.Empty;
+        var saved = await settings.SaveAsync(tenantId, update ?? new ComplianceSettingsUpdate(), actorId, cancellationToken);
+        return Ok(new { settings = saved, gaps = settings.Gaps(saved) });
+    }
+
     /// <summary>
     /// How many people's records this installation holds, by category — no names, no identifiers.
     /// A breach assessment has 24 hours to answer "whose data, how many" (docs/compliance/11 §4) and

@@ -85,7 +85,7 @@ const profiles: Record<string, RoleProfile> = {
     dashboardModules: [
       { id: "timetable", label: "My Timetable", icon: "CalendarDays", route: "/student/timetable", color: "blue", description: "Today's classes and full semester schedule.", priority: 1, domain: "academic", badge: "TODAY" },
       { id: "grades", label: "My Grades", icon: "GraduationCap", route: "/student/grades", color: "blue", description: "Semester-wise grades, SGPA, and CGPA.", priority: 2, domain: "academic" },
-      { id: "attendance", label: "Attendance", icon: "ClipboardCheck", route: "/student/attendance", color: "blue", description: "Per-course attendance records and percentage.", priority: 3, domain: "academic" },
+      { id: "attendance", label: "Attendance", icon: "ClipboardCheck", route: "/student/attendance/records", color: "blue", description: "Sessions recorded by your instructors and your attendance percentage.", priority: 3, domain: "academic" },
       { id: "fees", label: "Fee Status", icon: "CreditCard", route: "/student/finance", color: "green", description: "Current dues, payment history, and challans.", priority: 4, domain: "finance" },
       { id: "transcript", label: "Transcript", icon: "FileText", route: "/student/transcript", color: "blue", description: "Official transcript view and request.", priority: 5, domain: "academic" },
       { id: "mentalhealth", label: "Mental Health", icon: "ShieldCheck", route: "/mental-health", color: "violet", description: "Anonymous support tickets and counselor access.", priority: 6, domain: "welfare" },
@@ -262,7 +262,7 @@ const profiles: Record<string, RoleProfile> = {
     displayName: "IT Head",
     allowedRoutes: [
       "/admin/health", "/sync-lag", "/replication",
-      "/audit", "/data-import", "/imports", "/setup", "/admin/license",
+      "/audit", "/data-import", "/imports", "/setup", "/admin/license", "/admin/compliance",
     ],
     dashboardModules: [
       { id: "portal-health", label: "System health", icon: "ShieldCheck", route: "/admin/health", color: "green", description: "Whether the database, cache, storage and every module are answering.", priority: 1, domain: "operations", badge: "MONITOR" },
@@ -272,6 +272,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "import-jobs", label: "Import Jobs", icon: "FileSearch", route: "/imports", color: "amber", description: "Data import job status and history.", priority: 5, domain: "operations" },
       { id: "setup", label: "Setup", icon: "Settings", route: "/setup", color: "blue", description: "System configuration and installation.", priority: 6, domain: "operations" },
       { id: "license", label: "Licence", icon: "ShieldCheck", route: "/admin/license", color: "amber", description: "Licence standing and offline licence keys.", priority: 7, domain: "operations" },
+      { id: "compliance-settings", label: "Compliance", icon: "Scale", route: "/admin/compliance", color: "slate", description: "Data protection contact, where data lives, how long records are kept.", priority: 8, domain: "compliance" },
     ],
     kpis: [
       { id: "register-health", label: "Register health", value: "--", format: "text", icon: "ShieldCheck", iconColor: "green", source: "/health/modules" },

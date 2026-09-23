@@ -1,6 +1,6 @@
 # 09 — Data retention and deletion policy
 
-**Version 1.0 · 2026-09-20.** Control AC-38 (ISO A.5.33, A.8.10; PDPA-draft storage limitation; GDPR 5(1)(e)/17 pattern). Periods marked **[DEFAULT — confirm]** were chosen by engineering from common Pakistani record-keeping practice (Companies Act 10-year financial records, HEC academic register permanence, 7-year employment records) and must be confirmed by each University's registrar/legal team, who can override them per tenant.
+**Version 1.0 · 2026-09-20.** Control AC-38 (ISO A.5.33, A.8.10; PDPA-draft storage limitation; GDPR 5(1)(e)/17 pattern). **Every period below is a setting, not a fixed value** — see `21-configurable-decisions.md`. The figures shown are the values the product ships with, chosen by engineering from common Pakistani record-keeping practice (Companies Act 10-year financial records, HEC academic register permanence, 7-year employment records). They are a starting point, not advice. Each University's registrar and legal adviser set the real ones at **Administration → Compliance**, and may revise them at any time; the nightly worker reads whatever is current.
 
 ## 1. Principles
 
@@ -13,31 +13,31 @@
 
 Mechanism key: **worker** = `ComplianceRetentionWorker` (02:00 tenant-local); **erasure** = `PrivacyComplianceService.ProcessErasureAsync`; **manual** = administrator action with audit entry; **P3** = Phase 3 code item.
 
-| Category (→ `01`) | Retention | Trigger | Mechanism today | Target mechanism |
+| Category (→ `01`) | Shipped starting value | Trigger | Mechanism today | Target mechanism |
 |---|---|---|---|---|
 | Academic register (grades, transcripts, degrees, enrolments) | permanent | — | none (correct) | anonymise identity on erasure (exists) |
-| Student identity (`Students`, `StudentProfiles`, `StudentGuardians`) | life of relationship + 7 y after graduation/withdrawal [DEFAULT — confirm] | graduation / withdrawal date | erasure on request only | worker: anonymise after period (P3-6) |
-| Attendance incl. coordinates | 7 y after graduation [DEFAULT] | as above | none | worker (P3-6) |
-| Counselling notes, mental-health tickets, wellness | 7 y after last session [DEFAULT] | last session | none | worker + erasure (P3-6) |
-| Discipline / misconduct | 7 y after case closure [DEFAULT] | closure | none | worker + erasure (P3-6) |
+| Student identity (`Students`, `StudentProfiles`, `StudentGuardians`) | life of relationship + 7 y after graduation/withdrawal | graduation / withdrawal date | erasure on request only | worker: anonymise after period (P3-6) |
+| Attendance incl. coordinates | 7 y after graduation | as above | none | worker (P3-6) |
+| Counselling notes, mental-health tickets, wellness | 7 y after last session | last session | none | worker + erasure (P3-6) |
+| Discipline / misconduct | 7 y after case closure | closure | none | worker + erasure (P3-6) |
 | Student documents and files | with the student identity; deleted on erasure | erasure / period end | **none — files and rows remain** | erasure + worker delete file via `IStorageService` (P3-6) |
-| Applicants — unsuccessful/withdrawn (`AdmissionApplications`, `ApplicantProfiles`, `ApplicantDocuments`, leads) | 2 y after the admission cycle closes [DEFAULT] | cycle close | erasure covers `AdmissionApplications` only | worker + erasure for all four (P3-6) |
-| Foreign-student registry, visa documents | 7 y after leaving [DEFAULT] | leaving | none | worker + erasure (P3-6) |
-| Fees, payments, ledgers, payslips | 10 y [DEFAULT — Companies Act / tax] | transaction date | none (append-only ledger) | worker archive/purge after 10 y — **ledger hash chain must be sealed before purge**; design in Phase 4 risk register |
-| Staff records (employment, contracts, leave, performance, training, CVs) | 7 y after leaving [DEFAULT] | leaving date | none | worker (P3-6) |
-| Recruitment (unsuccessful candidates) | 1 y after decision [DEFAULT] | decision | none | worker (P3-6) |
+| Applicants — unsuccessful/withdrawn (`AdmissionApplications`, `ApplicantProfiles`, `ApplicantDocuments`, leads) | 2 y after the admission cycle closes | cycle close | erasure covers `AdmissionApplications` only | worker + erasure for all four (P3-6) |
+| Foreign-student registry, visa documents | 7 y after leaving | leaving | none | worker + erasure (P3-6) |
+| Fees, payments, ledgers, payslips | 10 y (Companies Act / tax) | transaction date | none (append-only ledger) | worker archive/purge after 10 y — **ledger hash chain must be sealed before purge**; design in Phase 4 risk register |
+| Staff records (employment, contracts, leave, performance, training, CVs) | 7 y after leaving | leaving date | none | worker (P3-6) |
+| Recruitment (unsuccessful candidates) | 1 y after decision | decision | none | worker (P3-6) |
 | Payroll bank references | with staff record | — | encrypted | as staff record |
-| Visitors, gate entries (CNIC) | 90 d [DEFAULT] | entry date | none | worker (P3-6) |
-| Login audit (`LoginAuditRecords`: IP, GeoIP, GPS, device) | 1 y [DEFAULT] | event date | **none** | worker (P3-6); IP/GPS encrypted (P3-5) |
+| Visitors, gate entries (CNIC) | 90 d | entry date | none | worker (P3-6) |
+| Login audit (`LoginAuditRecords`: IP, GeoIP, GPS, device) | 1 y | event date | **none** | worker (P3-6); IP/GPS encrypted (P3-5) |
 | Access audit (`FerpaAuditLogs`) | `compliance.audit_retention_years`, default 6 | event date | worker ✔ | — |
 | Write audit (`AuditLogs`) | 6 y (same setting) | event date | none | worker (P3-6) |
 | Consent ledger | 6 y after expiry/revocation | — | worker ✔ | — |
 | Erasure request metadata | 7 y after completion (fixed) | completion | worker ✔ | — |
 | DSAR export archive | 24 h | creation | expiry stamp ✔ (verify the file is actually removed — P3) | storage lifecycle |
-| Application logs (Serilog console / PostgreSQL sink) | 1 y [DEFAULT] | — | host log rotation (University) | document in `INSTALL.md`; PostgreSQL sink table purge (P3-6) |
+| Application logs (Serilog console / PostgreSQL sink) | 1 y | — | host log rotation (University) | document in `INSTALL.md`; PostgreSQL sink table purge (P3-6) |
 | Refresh tokens, sessions, rate-limit keys (Redis) | token lifetime / 24 h | expiry | Redis TTL ✔ | — |
 | Notification logs | 1 y | — | none | worker (P3-6) |
-| Backups | 30 d rolling [DEFAULT] | backup date | `backup.sh` prune ✔ (local + S3) | keep; encrypt always (P3-1) |
+| Backups | 30 d rolling | backup date | `backup.sh` prune ✔ (local + S3) | keep; encrypt always (P3-1) |
 | Read replicas / WAL archive | mirrors primary; WAL 30 d | — | University config | document |
 | Search index | rebuilt from live data | — | `DirectoryOptOut` ✔ | — |
 
@@ -57,8 +57,8 @@ Mechanism key: **worker** = `ComplianceRetentionWorker` (02:00 tenant-local); **
 
 ## 5. Legal holds
 
-An administrator marks a hold by adding the record id to the tenant setting `compliance.legal_holds` (Phase 3 implements the setting and the worker honours it). Holds are reviewed at each management review.
+An administrator marks a hold by adding the record id to the tenant setting `compliance.legal_holds`; the worker honours it (`ErasureScopeTests`). Holds are reviewed at each management review.
 
 ## 6. Ownership
 
-The University's registrar owns the periods; the DPC owns the mechanism. Changes to a period are made in tenant settings (`compliance.*` keys) and noted in the ROPA.
+The University's registrar owns the periods; the supplier owns the mechanism. Periods are changed at **Administration → Compliance** and take effect on the next nightly run — no restart, no redeploy, no support request. Which periods the worker enforces and which are published commitments is set out in `21-configurable-decisions.md`.

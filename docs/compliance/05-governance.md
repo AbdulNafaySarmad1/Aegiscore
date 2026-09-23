@@ -1,16 +1,23 @@
 # 05 — Governance: accountable people and decisions
 
-**Phase 2 · 2026-09-20.** Controls AC-01, AC-03. Items marked **[DEFAULT — confirm]** were set by the compliance build-out because no decision existed; they stand until someone changes them here.
+**Phase 2 · 2026-09-20, revised 2026-09-23.** Controls AC-01, AC-03. The three decisions a supplier cannot make for an institution — its data protection contact, where its data lives, and how long it keeps records — are **settings each installation owns and may change at any time**, not values in this document; see `21-configurable-decisions.md`.
 
 ## 1. Data protection point of contact (AC-01)
 
-| Role | Holder | Contact | Basis |
-|---|---|---|---|
-| Data Protection Contact (DPC) — accountable for this programme, DSARs, breach decisions | **Abdul Nafay Sarmad, Founder, Nocturne Systems (Pvt.) Ltd.** [DEFAULT — confirm] | security@ — **mailbox to be created**; until then the founder's address | The brief says "likely you, initially"; the founder is the only named officer in the repository (`docs/06`, `README.md`) |
-| Deputy | none — single-person company | | Record when a second person joins |
-| Security incident lead | same person | | See `11-breach-notification.md` |
+**This is a setting, not a value in this document.** Each installation names its own contact at
+**Administration → Compliance** (`compliance.dpc_*`); see `21-configurable-decisions.md`. The product
+ships it empty and reports it as an unmet obligation until the institution fills it in, because
+naming an accountable person for someone else's institution is not something a supplier can do.
 
-This is not a statutory DPO appointment (no Pakistani law requires one yet). It is a named, accountable person so that a university, HEC, the PDA or the NCCIA has someone to write to.
+| Field | Where it lives |
+|---|---|
+| Name, role, email, phone, postal address, deputy | Compliance settings, editable at any time by anyone holding `Settings.Write` |
+| Published to data subjects | `06-privacy-notice.md`, filled from the setting |
+| Used in breach correspondence | `11-breach-notification.md` |
+
+**For Nocturne itself** (the supplier's own ISMS, `13-isms-scope.md`), the contact is the founder,
+who holds every role in a one-person company. That is a fact about Nocturne, not a default imposed
+on any client.
 
 ## 2. Roles and responsibilities (AC-03)
 
@@ -28,8 +35,8 @@ This is not a statutory DPO appointment (no Pakistani law requires one yet). It 
 
 | # | Decision | Value | Status |
 |---|---|---|---|
-| D-A | Hosting region for the vendor-hosted model (Model B) | **Model B is restricted to demonstrations and non-production pilots with synthetic data until a Pakistani hosting region is chosen and recorded in `03-data-residency.md`.** The Hetzner EU references in `docs/06` are not an approved production location. | [DEFAULT — confirm] |
-| D-B | Retention periods | As set in `09-retention-policy.md` | [DEFAULT — confirm each period] |
+| D-A | Hosting region for the vendor-hosted model (Model B) | **A setting per installation** (`compliance.deployment_model`, `compliance.database_location`, …). Nocturne's own position: Model B is restricted to demonstrations and non-production pilots with synthetic data until a region is chosen and recorded. The Hetzner EU references in `docs/06` are not an approved production location. | Vendor position decided; per-installation value is the institution's |
+| D-B | Retention periods | **Settings per installation**, with shipped starting values (`21-configurable-decisions.md`). `09-retention-policy.md` documents the mechanism enforcing each | Mechanism decided; periods are the institution's |
 | D-C | GDPR / FERPA posture | "aligned architecture" only; no compliance claim; reassess when an EU or US data subject enters the pipeline | Decided (Phase 1) |
 | D-D | AI provider default | `ollama` (on-premise) is the only default; `openai` requires the university to accept the sub-processor disclosure in the wizard (Phase 3 wording) | Decided |
 | D-E | Licence heartbeat | Stays on by default; payload fixed at five non-personal fields; offline mode documented | Decided (existing) |
