@@ -168,10 +168,10 @@
     "semantic_hash": "ebfe6a5667a51909bf1f3a15ecd6a6be"
   },
   "AegisCore.API/Controllers/FormsController.cs": {
-    "mtime": 1789576588.3153386,
-    "seen": 1789834587.6206036,
-    "ast_hash": "381cdf5a3a17b65fe8a262dd270220bd",
-    "semantic_hash": "381cdf5a3a17b65fe8a262dd270220bd"
+    "mtime": 1790155388.7272255,
+    "seen": 1790163988.0937536,
+    "ast_hash": "37532de67cf993a06ba93bb50756fd92",
+    "semantic_hash": "37532de67cf993a06ba93bb50756fd92"
   },
   "AegisCore.API/Controllers/GovernanceController.cs": {
     "mtime": 1789246638.493052,
@@ -258,10 +258,10 @@
     "semantic_hash": "7dd6c40884b790981655aa415a4222f5"
   },
   "AegisCore.API/Controllers/S5ObeController.cs": {
-    "mtime": 1789246638.5001028,
-    "seen": 1789834587.6206036,
-    "ast_hash": "4adff8b7c20648b103309bac616e6af4",
-    "semantic_hash": "4adff8b7c20648b103309bac616e6af4"
+    "mtime": 1790161055.0910387,
+    "seen": 1790163988.0937536,
+    "ast_hash": "4d2330ed4215fec7660530254efab57f",
+    "semantic_hash": "4d2330ed4215fec7660530254efab57f"
   },
   "AegisCore.API/Controllers/SamlController.cs": {
     "mtime": 1789574354.8649447,
@@ -2604,10 +2604,10 @@
     "semantic_hash": "cd2871bf8d756127b353c6c86cdbd918"
   },
   "AegisCore.Infrastructure/AegisDbContext.cs": {
-    "mtime": 1790101948.9594843,
-    "seen": 1790148735.199701,
-    "ast_hash": "3231d56499fdc4d41a7d7a6e04944346",
-    "semantic_hash": "3231d56499fdc4d41a7d7a6e04944346"
+    "mtime": 1790160322.6756325,
+    "seen": 1790163988.0937536,
+    "ast_hash": "4cc454b51e5d9c4030babcbb83837304",
+    "semantic_hash": "4cc454b51e5d9c4030babcbb83837304"
   },
   "AegisCore.Infrastructure/AegisDbContextFactory.cs": {
     "mtime": 1789246638.7208872,
@@ -3198,10 +3198,10 @@
     "semantic_hash": "6bb0007c180a25d8d8325ff1dd9ac30d"
   },
   "AegisCore.Infrastructure/InfrastructureServiceExtensions.cs": {
-    "mtime": 1789246638.7779415,
-    "seen": 1789834587.6206036,
-    "ast_hash": "2ce42c3d6eda42140c3c03434ac6d6d0",
-    "semantic_hash": "2ce42c3d6eda42140c3c03434ac6d6d0"
+    "mtime": 1790159566.0696821,
+    "seen": 1790163988.0937536,
+    "ast_hash": "acda4900145b1a3a3bb97c5fadc08543",
+    "semantic_hash": "acda4900145b1a3a3bb97c5fadc08543"
   },
   "AegisCore.Infrastructure/Installation/InstallationStateService.cs": {
     "mtime": 1789246638.7779415,
@@ -3774,10 +3774,10 @@
     "semantic_hash": "7d0233fe2d6e3be902bda5e6706f4853"
   },
   "AegisCore.Infrastructure/Migrations/AegisDbContextModelSnapshot.cs": {
-    "mtime": 1790102106.3024437,
-    "seen": 1790148735.199701,
-    "ast_hash": "86dc829dbd19c82b7d483f5ab01618eb",
-    "semantic_hash": "86dc829dbd19c82b7d483f5ab01618eb"
+    "mtime": 1790160883.50769,
+    "seen": 1790163988.0953004,
+    "ast_hash": "63188b74777572dec2bca134ca1a82ae",
+    "semantic_hash": "63188b74777572dec2bca134ca1a82ae"
   },
   "AegisCore.Infrastructure/Obe/ObeServices.cs": {
     "mtime": 1789575769.2671874,
@@ -5268,10 +5268,10 @@
     "semantic_hash": "82ffa2edbe2d6096f26ee5359b975f41"
   },
   "AegisCore.Portal/src/components/wizard/WizardShell.tsx": {
-    "mtime": 1790101507.5756304,
-    "seen": 1790148735.199701,
-    "ast_hash": "7986b7e87f8456c01004966eed52f5b7",
-    "semantic_hash": "7986b7e87f8456c01004966eed52f5b7"
+    "mtime": 1790155291.421008,
+    "seen": 1790163988.0953004,
+    "ast_hash": "72694cdda917df6208edbd53ec409ecc",
+    "semantic_hash": "72694cdda917df6208edbd53ec409ecc"
   },
   "AegisCore.Portal/src/hooks/use-pagination.ts": {
     "mtime": 1789246639.2786605,
@@ -5304,10 +5304,10 @@
     "semantic_hash": "40173af201a8b8091d8f72312a7695af"
   },
   "AegisCore.Portal/src/lib/api-client.ts": {
-    "mtime": 1789921900.6900997,
-    "seen": 1790148735.199701,
-    "ast_hash": "997eae817e157f465de6ac769c174c86",
-    "semantic_hash": "997eae817e157f465de6ac769c174c86"
+    "mtime": 1790161923.2179425,
+    "seen": 1790163988.0953004,
+    "ast_hash": "9c30934fc2927bf4b65c0f94667db16c",
+    "semantic_hash": "9c30934fc2927bf4b65c0f94667db16c"
   },
   "AegisCore.Portal/src/lib/personality-context.tsx": {
     "mtime": 1789747898.7702043,
@@ -5322,10 +5322,10 @@
     "semantic_hash": "ee47d7289b1f29165026a5e3173d7010"
   },
   "AegisCore.Portal/src/lib/roles.ts": {
-    "mtime": 1790146762.8139997,
-    "seen": 1790148735.199701,
-    "ast_hash": "7b561df245ede25f0fd656d5a00e18f8",
-    "semantic_hash": "7b561df245ede25f0fd656d5a00e18f8"
+    "mtime": 1790160174.8495376,
+    "seen": 1790163988.0953004,
+    "ast_hash": "348b8f82effd51dcc58c959d18e96702",
+    "semantic_hash": "348b8f82effd51dcc58c959d18e96702"
   },
   "AegisCore.Portal/src/lib/server-api.ts": {
     "mtime": 1789246639.2830935,
@@ -8340,10 +8340,10 @@
     "semantic_hash": "a842c399f57bd3fb5caed8285adbe94a"
   },
   "AegisCore.Portal/src/app/api/[...path]/route.ts": {
-    "mtime": 1789886685.6126418,
-    "seen": 1790148735.199701,
-    "ast_hash": "273db8c8fcf097e46cc44ec93cbc2c90",
-    "semantic_hash": "273db8c8fcf097e46cc44ec93cbc2c90"
+    "mtime": 1790156996.567578,
+    "seen": 1790163988.0953004,
+    "ast_hash": "6f369714277645999f85fd57c12e0d17",
+    "semantic_hash": "6f369714277645999f85fd57c12e0d17"
   },
   "AegisCore.Portal/src/app/api/runtime/ready/route.ts": {
     "mtime": 1789246639.2115257,
@@ -9258,10 +9258,10 @@
     "semantic_hash": "52cfefd1095931d4dd40b4a8c94fe822"
   },
   "AegisCore.Portal/tests/capture/run-capture.mjs": {
-    "mtime": 1789332754.1833067,
-    "seen": 1789834587.6206036,
-    "ast_hash": "37d50f28cff3635a9d0ff4bfd38c2d43",
-    "semantic_hash": "37d50f28cff3635a9d0ff4bfd38c2d43"
+    "mtime": 1790161213.030717,
+    "seen": 1790163988.0953004,
+    "ast_hash": "d0718ec4efd59e473dea5016d218af61",
+    "semantic_hash": "d0718ec4efd59e473dea5016d218af61"
   },
   "AegisCore.Tests/AcademicRecordMathTests.cs": {
     "mtime": 1789302503.4022796,
@@ -9618,10 +9618,10 @@
     "semantic_hash": "a8c27d9743869dd30980b2c8ce28ee93"
   },
   "AegisCore.Infrastructure/Identity/PermissionCatalog.cs": {
-    "mtime": 1790101507.5756304,
-    "seen": 1790148735.199701,
-    "ast_hash": "fc03f15fe661078e95e75bc48f5a6371",
-    "semantic_hash": "fc03f15fe661078e95e75bc48f5a6371"
+    "mtime": 1790155274.0638788,
+    "seen": 1790163988.0937536,
+    "ast_hash": "3c25ca004e96afa7fdff80516a9a29ca",
+    "semantic_hash": "3c25ca004e96afa7fdff80516a9a29ca"
   },
   "AegisCore.Infrastructure/Migrations/20260920060744_FieldEncryption.Designer.cs": {
     "mtime": 1789884465.2261615,
@@ -10000,5 +10000,185 @@
     "seen": 1790148735.199701,
     "ast_hash": "05a2276a21fb469e675d072445659221",
     "semantic_hash": "05a2276a21fb469e675d072445659221"
+  },
+  "AegisCore.API/Controllers/FormIntegrationsController.cs": {
+    "mtime": 1790159566.0696821,
+    "seen": 1790163988.0937536,
+    "ast_hash": "2bfb20d62a893b13f3338d102b1fac92",
+    "semantic_hash": "2bfb20d62a893b13f3338d102b1fac92"
+  },
+  "AegisCore.API/Controllers/OutcomeSurveysController.cs": {
+    "mtime": 1790161903.5750027,
+    "seen": 1790163988.0937536,
+    "ast_hash": "1e253ca51dc885afbdaa81710625f286",
+    "semantic_hash": "1e253ca51dc885afbdaa81710625f286"
+  },
+  "AegisCore.Application/Integrations/FormIntegrationContracts.cs": {
+    "mtime": 1790160948.327277,
+    "seen": 1790163988.0937536,
+    "ast_hash": "09a2f0ce8c0efe9b3d7635010d4239d0",
+    "semantic_hash": "09a2f0ce8c0efe9b3d7635010d4239d0"
+  },
+  "AegisCore.Application/Obe/OutcomeSurveyContracts.cs": {
+    "mtime": 1790161903.5750027,
+    "seen": 1790163988.0937536,
+    "ast_hash": "694a85ac34780ea9187358c6fd0a993b",
+    "semantic_hash": "694a85ac34780ea9187358c6fd0a993b"
+  },
+  "AegisCore.Domain/Entities/FormIntegrationEntities.cs": {
+    "mtime": 1790159458.2813213,
+    "seen": 1790163988.0937536,
+    "ast_hash": "4593d5b7880eb953a6c0687fcad35701",
+    "semantic_hash": "4593d5b7880eb953a6c0687fcad35701"
+  },
+  "AegisCore.Domain/Entities/OutcomeSurveyEntities.cs": {
+    "mtime": 1790160242.0921657,
+    "seen": 1790163988.0937536,
+    "ast_hash": "f10848b70db2814286bddc4f6fae0c4e",
+    "semantic_hash": "f10848b70db2814286bddc4f6fae0c4e"
+  },
+  "AegisCore.Infrastructure/Integrations/Forms/FormIngestionService.cs": {
+    "mtime": 1790155235.4295335,
+    "seen": 1790163988.0937536,
+    "ast_hash": "afb8e48526fbaedaf1e48d38abfbc604",
+    "semantic_hash": "afb8e48526fbaedaf1e48d38abfbc604"
+  },
+  "AegisCore.Infrastructure/Integrations/Forms/FormPayloadAdapters.cs": {
+    "mtime": 1790155175.3506966,
+    "seen": 1790163988.0937536,
+    "ast_hash": "9da66798ac85023dc66e990b62033542",
+    "semantic_hash": "9da66798ac85023dc66e990b62033542"
+  },
+  "AegisCore.Infrastructure/Integrations/Forms/IndirectAssessmentReportService.cs": {
+    "mtime": 1790160948.327277,
+    "seen": 1790163988.0937536,
+    "ast_hash": "31ffaca340b57e11a981487418375de1",
+    "semantic_hash": "31ffaca340b57e11a981487418375de1"
+  },
+  "AegisCore.Infrastructure/Migrations/20260923093241_FormIntegrations.Designer.cs": {
+    "mtime": 1790155961.5100014,
+    "seen": 1790163988.0953004,
+    "ast_hash": "cb4066055d52e4f37cce09154debf907",
+    "semantic_hash": "cb4066055d52e4f37cce09154debf907"
+  },
+  "AegisCore.Infrastructure/Migrations/20260923093241_FormIntegrations.cs": {
+    "mtime": 1790155961.507269,
+    "seen": 1790163988.0953004,
+    "ast_hash": "56f8ddc0ccd439690250ac09a3370f45",
+    "semantic_hash": "56f8ddc0ccd439690250ac09a3370f45"
+  },
+  "AegisCore.Infrastructure/Migrations/20260923105432_OutcomeSurveys.Designer.cs": {
+    "mtime": 1790160883.5066645,
+    "seen": 1790163988.0953004,
+    "ast_hash": "b5aeaad70a4af9bd423263daef869f71",
+    "semantic_hash": "b5aeaad70a4af9bd423263daef869f71"
+  },
+  "AegisCore.Infrastructure/Migrations/20260923105432_OutcomeSurveys.cs": {
+    "mtime": 1790160883.4978192,
+    "seen": 1790163988.0953004,
+    "ast_hash": "939957dca29975a1e3490efa57730eb5",
+    "semantic_hash": "939957dca29975a1e3490efa57730eb5"
+  },
+  "AegisCore.Infrastructure/Obe/OutcomeSurveyService.cs": {
+    "mtime": 1790161903.5750027,
+    "seen": 1790163988.0953004,
+    "ast_hash": "1a252dac4a5380b895939b46cbf7bde3",
+    "semantic_hash": "1a252dac4a5380b895939b46cbf7bde3"
+  },
+  "AegisCore.Portal/src/app/admin/integrations/forms/page.tsx": {
+    "mtime": 1790156573.8592217,
+    "seen": 1790163988.0953004,
+    "ast_hash": "dbcdfa4c5eb534299c29aa7d60bcebcc",
+    "semantic_hash": "dbcdfa4c5eb534299c29aa7d60bcebcc"
+  },
+  "AegisCore.Portal/src/app/obe/survey-results/page.tsx": {
+    "mtime": 1790161055.1407437,
+    "seen": 1790163988.0953004,
+    "ast_hash": "3003053029ed46910cf8dc57835439be",
+    "semantic_hash": "3003053029ed46910cf8dc57835439be"
+  },
+  "AegisCore.Portal/src/app/obe/surveys/page.tsx": {
+    "mtime": 1790161903.5750027,
+    "seen": 1790163988.0953004,
+    "ast_hash": "1bf7502416ce376dce5fd1759a4e4dd9",
+    "semantic_hash": "1bf7502416ce376dce5fd1759a4e4dd9"
+  },
+  "AegisCore.Portal/src/app/student/evaluations/[surveyId]/[courseId]/page.tsx": {
+    "mtime": 1790160157.210147,
+    "seen": 1790163988.0953004,
+    "ast_hash": "5ff8a1d5398dd3d3b11f734ed019bf9a",
+    "semantic_hash": "5ff8a1d5398dd3d3b11f734ed019bf9a"
+  },
+  "AegisCore.Portal/src/app/student/evaluations/page.tsx": {
+    "mtime": 1790160157.148156,
+    "seen": 1790163988.0953004,
+    "ast_hash": "6d0926858c41d50b4cdd044e21bced1b",
+    "semantic_hash": "6d0926858c41d50b4cdd044e21bced1b"
+  },
+  "AegisCore.Portal/tests/capture/course-evaluation-prepare.spec.ts": {
+    "mtime": 1790161903.5750027,
+    "seen": 1790163988.0953004,
+    "ast_hash": "392f8ba439aadbeb7aa40e6fed06e9ee",
+    "semantic_hash": "392f8ba439aadbeb7aa40e6fed06e9ee"
+  },
+  "AegisCore.Portal/tests/capture/course-evaluation.spec.ts": {
+    "mtime": 1790161213.027363,
+    "seen": 1790163988.0953004,
+    "ast_hash": "39ab594ba1c0d63dc445ce5291b7f838",
+    "semantic_hash": "39ab594ba1c0d63dc445ce5291b7f838"
+  },
+  "AegisCore.Portal/tests/capture/course-evaluation/questions.mjs": {
+    "mtime": 1790161118.5040586,
+    "seen": 1790163988.0953004,
+    "ast_hash": "5b9f30f7283245aad2247b9db4d2a88a",
+    "semantic_hash": "5b9f30f7283245aad2247b9db4d2a88a"
+  },
+  "AegisCore.Portal/tests/capture/external-form/questions.mjs": {
+    "mtime": 1790156663.856011,
+    "seen": 1790163988.0953004,
+    "ast_hash": "e658a0ca83f9919ab39b9f76ec6b72fa",
+    "semantic_hash": "e658a0ca83f9919ab39b9f76ec6b72fa"
+  },
+  "AegisCore.Portal/tests/capture/external-form/server.mjs": {
+    "mtime": 1790156641.929512,
+    "seen": 1790163988.0953004,
+    "ast_hash": "4fc97d203a439731d02580c88bbe995a",
+    "semantic_hash": "4fc97d203a439731d02580c88bbe995a"
+  },
+  "AegisCore.Portal/tests/capture/external-form/submit-sample-responses.mjs": {
+    "mtime": 1790157024.8511424,
+    "seen": 1790163988.0953004,
+    "ast_hash": "1746a5a145248418d63d946d3e9d8e51",
+    "semantic_hash": "1746a5a145248418d63d946d3e9d8e51"
+  },
+  "AegisCore.Portal/tests/capture/form-integration-prepare.spec.ts": {
+    "mtime": 1790156724.5086975,
+    "seen": 1790163988.0953004,
+    "ast_hash": "411436aed90aee91cec1f27c9100fc11",
+    "semantic_hash": "411436aed90aee91cec1f27c9100fc11"
+  },
+  "AegisCore.Portal/tests/capture/form-integration.spec.ts": {
+    "mtime": 1790158070.3457184,
+    "seen": 1790163988.0953004,
+    "ast_hash": "67830b2ca81e2870f3025f36f8df9a9c",
+    "semantic_hash": "67830b2ca81e2870f3025f36f8df9a9c"
+  },
+  "AegisCore.Tests/FormIntegrationTests.cs": {
+    "mtime": 1790157237.3714528,
+    "seen": 1790163988.0953004,
+    "ast_hash": "2e3f31c1d7178b40d4171a48a75fe11d",
+    "semantic_hash": "2e3f31c1d7178b40d4171a48a75fe11d"
+  },
+  "AegisCore.Tests/OutcomeSurveyTests.cs": {
+    "mtime": 1790161937.978781,
+    "seen": 1790163988.0953004,
+    "ast_hash": "a090dd814d7825ea808ae0f8bb9ef71c",
+    "semantic_hash": "a090dd814d7825ea808ae0f8bb9ef71c"
+  },
+  "docs/integrations/external-forms.md": {
+    "mtime": 1790157065.8886545,
+    "seen": 1790163988.0953004,
+    "ast_hash": "71b2f5ed3781d47f7cc8ee8510acb317",
+    "semantic_hash": "71b2f5ed3781d47f7cc8ee8510acb317"
   }
 }
