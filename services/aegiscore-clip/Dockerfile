@@ -1,6 +1,6 @@
 # AegisCore CLIP + OCR sidecar (aegiscore-clip).
 # Internal service only — never exposed publicly. Listens on :8100.
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
