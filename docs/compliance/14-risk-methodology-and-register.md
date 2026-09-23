@@ -59,7 +59,8 @@ Status as at 2026-09-22. "Initial" is the score before the Phase 3 work; "residu
 | R-016 | A client's own installation is breached through the university's infrastructure and AegisCore is blamed | O-1 | DPC | 4×3 = **12 High** | Share: DPA §3 assigns the controls; installation guide states them; breach procedure covers the direction | 3×3 = **9 Medium** | Yes |
 | R-017 | The National Data Governance Policy is notified and the product cannot meet a data-sovereignty or disposal requirement in the 12-month window | S-1 | DPC | 3×3 = **9 Medium** | Modify: monthly tracking (`00-PROGRAM.md`), residency decision already taken (D-A), disposal implemented (AC-38) | 2×3 = **6 Medium** | Yes |
 | R-018 | Internal traffic between the ingress, application and sidecar is plaintext on the Docker network | O-1 data | DPC | 2×3 = **6 Medium** | Retain: the network is host-local; an attacker at that level has the database anyway. Revisit for multi-host deployments (R-09 in `04`) | 2×3 = **6 Medium** | Yes |
-| R-019 | The Python sidecar's dependencies have never been audited | S-1 | DPC | 3×3 = **9 Medium** | Modify: Dependabot pip enabled; add `pip-audit` to CI (V-007), due 2026-10-22 | 2×3 = **6 Medium** | Retained to 2026-10-22 |
+| R-019 | The Python sidecar's dependencies have never been audited | S-1 | DPC | 3×3 = **9 Medium** | Modified 2026-09-23: `pip-audit` runs in CI on every push against the pinned set, on the image's own Python version | 2×3 = **6 Medium** until the first CI result | Retained pending first run |
+| R-021 | The sidecar's `torch` pin is old enough that it installs only on Python ≤ 3.12; when an advisory lands there may be no patched 2.3.x build to move to | S-1 | DPC | 3×3 = **9 Medium** | Modify: upgrade torch/transformers and revalidate the CLIP model (V-009), due 2026-12-23 | 3×3 = **9 Medium** until upgraded | Retained to 2026-12-23 |
 | R-020 | A client is sold on a compliance claim the company cannot evidence | S-4 | DPC | 3×4 = **12 High** | Modify: the claims table in `00-PROGRAM.md` is the only approved wording; the 2025 architecture document is marked superseded where it overstates | 1×4 = **4 Low** | Yes |
 
 ## 3. Summary
@@ -80,5 +81,6 @@ One High remains: **R-013, the single maintainer**, retained with the owner's ex
 | R-002 | `rotate-master-key` command | DPC | 2026-12-22 |
 | R-010 | GeoIP opt-in or offline database | DPC | 2026-11-22 |
 | R-012 | Confirm NCCIA and PDA contacts | DPC | 2026-10-22 |
-| R-019 | `pip-audit` in CI | DPC | 2026-10-22 |
+| R-019 | `pip-audit` in CI | DPC | **Done 2026-09-23** |
+| R-021 | Upgrade the sidecar's torch/transformers pins | DPC | 2026-12-23 |
 | R-014 / R-013 | Second reviewer when headcount allows | DPC | Reviewed each management review |

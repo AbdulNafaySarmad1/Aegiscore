@@ -224,6 +224,25 @@ jobs:
           sh -c "apk add -q openssl bash && bash /scripts/backup-restore-drill.sh"
 
 
+  sidecar-audit:
+    name: Python sidecar vulnerability audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # Must match services/aegiscore-clip/Dockerfile (python:3.11-slim): the pinned torch build
+          # only resolves for the interpreter the image actually runs.
+          python-version: '3.11'
+      # Compliance AC-13 / register item V-007: the sidecar's dependencies ship in a client image
+      # and had never been audited. pip-audit resolves the pinned set and fails on a known advisory.
+      - name: Audit pinned requirements
+        run: |
+          python -m pip install --quiet pip-audit
+          pip-audit --requirement services/aegiscore-clip/requirements.txt --index-url https://pypi.org/simple --extra-index-url https://download.pytorch.org/whl/cpu --strict --progress-spinner off
+
+
   accessibility-check:
     name: WCAG 2.1 AA (Portal)
     runs-on: ubuntu-latest

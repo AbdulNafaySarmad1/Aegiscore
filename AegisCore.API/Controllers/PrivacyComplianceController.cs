@@ -13,6 +13,44 @@ namespace AegisCore.API.Controllers;
 [Authorize]
 public sealed class PrivacyComplianceController(AegisDbContext db, IPrivacyComplianceService privacy) : ControllerBase
 {
+    /// <summary>
+    /// How many people's records this installation holds, by category — no names, no identifiers.
+    /// A breach assessment has 24 hours to answer "whose data, how many" (docs/compliance/11 §4) and
+    /// the first tabletop exercise found that question needed a hand-written query at the worst
+    /// possible moment (finding F-2). Counts are live, not cached.
+    /// </summary>
+    [HttpGet("admin/data-subject-counts")]
+    [AegisCore.API.Authorization.RequirePermission("System", "Admin")]
+    public async Task<IActionResult> DataSubjectCounts(CancellationToken cancellationToken = default)
+    {
+        var erasedPrefix = "ERASED_USER_";
+        var categories = new[]
+        {
+            new { category = "Students on the register", count = await db.Students.CountAsync(cancellationToken) },
+            new { category = "Students already anonymised by erasure", count = await db.Students.CountAsync(s => s.FirstName.StartsWith(erasedPrefix), cancellationToken) },
+            new { category = "Guardians", count = await db.StudentGuardians.CountAsync(cancellationToken) },
+            new { category = "Applicants (admission applications)", count = await db.AdmissionApplications.CountAsync(cancellationToken) },
+            new { category = "Applicants (portal profiles)", count = await db.ApplicantProfiles.CountAsync(cancellationToken) },
+            new { category = "Employees", count = await db.Employees.CountAsync(cancellationToken) },
+            new { category = "User accounts", count = await db.Users.CountAsync(cancellationToken) },
+            new { category = "Foreign students (passport and visa held)", count = await db.ForeignStudentRegistries.CountAsync(cancellationToken) },
+            new { category = "Students with counselling records", count = await db.StudentCounselings.Select(c => c.StudentId).Distinct().CountAsync(cancellationToken) },
+            new { category = "Students with disciplinary records", count = await db.StudentDisciplines.Select(c => c.StudentId).Distinct().CountAsync(cancellationToken) },
+            new { category = "Mental-health tickets", count = await db.MentalHealthTickets.CountAsync(cancellationToken) },
+            new { category = "Visitors recorded", count = await db.VisitorLogs.CountAsync(cancellationToken) },
+            new { category = "Consent records", count = await db.ConsentLedgers.CountAsync(cancellationToken) },
+            new { category = "Erasure requests (all states)", count = await db.ErasureRequests.CountAsync(cancellationToken) },
+        };
+
+        return Ok(new
+        {
+            generatedAt = DateTime.UtcNow,
+            purpose = "Breach assessment (docs/compliance/11-breach-notification.md §4). Counts only; no personal data.",
+            categories,
+            note = "Counts are scoped to the signed-in tenant. Categories overlap: a person may appear as a user, a student and an applicant.",
+        });
+    }
+
     [HttpGet("admin/ferpa-audit")]
     [AegisCore.API.Authorization.RequirePermission("System", "Admin")]
     public async Task<IActionResult> FerpaAudit(
