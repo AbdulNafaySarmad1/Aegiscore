@@ -1838,6 +1838,7 @@ public class AegisDbContext : DbContext
     public DbSet<FinancePayment> FinancePayments => Set<FinancePayment>();
     public DbSet<PaymentGatewayConfiguration> PaymentGatewayConfigurations => Set<PaymentGatewayConfiguration>();
     public DbSet<PaymentGatewayEvent> PaymentGatewayEvents => Set<PaymentGatewayEvent>();
+    public DbSet<FeeCheckoutSession> FeeCheckoutSessions => Set<FeeCheckoutSession>();
     public DbSet<ExchangeRateSnapshot> ExchangeRateSnapshots => Set<ExchangeRateSnapshot>();
     public DbSet<FinanceForeignCurrencyTransaction> FinanceForeignCurrencyTransactions => Set<FinanceForeignCurrencyTransaction>();
     public DbSet<FinanceReportArtifact> FinanceReportArtifacts => Set<FinanceReportArtifact>();
@@ -2691,6 +2692,13 @@ public class AegisDbContext : DbContext
 
         modelBuilder.Entity<PaymentGatewayConfiguration>(entity =>
             entity.HasIndex(e => new { e.TenantId, e.GatewaySlug }).IsUnique());
+
+        modelBuilder.Entity<FeeCheckoutSession>(entity =>
+        {
+            entity.HasIndex(e => new { e.TenantId, e.GatewaySlug, e.BasketId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.FeeDemandId, e.Status });
+            entity.HasIndex(e => new { e.Status, e.ExpiresAt });
+        });
 
         modelBuilder.Entity<PaymentGatewayEvent>(entity =>
         {

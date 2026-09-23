@@ -368,7 +368,9 @@ public sealed class FinanceModuleService(AegisDbContext db, IPqcSignatureService
             var payment = new FinancePayment
             {
                 Id = Guid.NewGuid(), TenantId = tenantId, FeeDemandId = demand.Id, FeeInstallmentId = installment?.Id,
-                IdempotencyKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{gateway}:{command.WebhookId}"))).ToLowerInvariant(),
+                // 40 hex characters (160 bits) because the column is varchar(40); the full 64-character digest
+                // overflowed it on PostgreSQL, so no gateway payment could ever be recorded there.
+                IdempotencyKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{gateway}:{command.WebhookId}")))[..40].ToLowerInvariant(),
                 Method = "WEBHOOK", GatewaySlug = gateway, ExternalReference = command.ExternalReference,
                 Amount = command.Amount, Status = "SETTLED", WebhookId = command.WebhookId, SettledAt = DateTime.UtcNow
             };

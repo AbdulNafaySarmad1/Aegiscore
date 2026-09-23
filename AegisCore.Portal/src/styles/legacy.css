@@ -335,3 +335,10 @@ progress { accent-color: var(--laurel); height: 6px; }
 .apply-actions { display: flex; justify-content: space-between; margin-top: var(--s-4); gap: var(--s-3); }
 .apply-doc { display: flex; align-items: center; gap: var(--s-3); justify-content: space-between; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; padding: var(--s-3) 0; margin: 0; }
 .apply-appid { font-family: var(--font-mono); font-size: var(--t-21); font-weight: 500; letter-spacing: 0; padding: var(--s-3) var(--s-4); background: var(--brass-tint); border-left: 3px solid var(--brass); border-radius: 0; text-align: left; margin: var(--s-4) 0; }
+.finance-note { margin: 0; font-size: var(--t-12); color: var(--ink-2); }
+.checkout-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--s-3); margin: var(--s-3) 0; }
+.checkout-facts dt { font-size: var(--t-12); color: var(--ink-2); }
+.checkout-facts dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+.status-pill.paid { color: var(--laurel); }
+.status-pill.pending { color: var(--brass); }
+.status-pill.failed { color: var(--oxblood); }

@@ -409,3 +409,36 @@ public sealed class FinanceSecurityDepositDeduction : ITenantScoped
     public Guid TenantId { get; set; }
     [ForeignKey(nameof(SecurityDepositId))] public FinanceSecurityDeposit Deposit { get; set; } = null!;
 }
+
+/// <summary>
+/// One attempt to pay a fee demand through a hosted checkout (PayFast). The student is sent to the
+/// gateway's own page; nothing card-related is ever held here. The row carries the demand's status
+/// from before the attempt so a failed, cancelled or expired attempt can put it back exactly.
+///
+/// Statuses: PENDING → PAID | FAILED | CANCELLED | EXPIRED | SUPERSEDED, and NEEDS_REVIEW when the
+/// gateway verifiably took money that cannot be applied (the demand was already settled another way).
+/// A verified success is honoured from any non-PAID state: the money was taken either way.
+/// </summary>
+[Table("FeeCheckoutSessions")]
+public sealed class FeeCheckoutSession : ITenantScoped
+{
+    [Key] public Guid Id { get; set; }
+    public Guid FeeDemandId { get; set; }
+    public Guid StudentId { get; set; }
+    [Required, MaxLength(40)] public string GatewaySlug { get; set; } = "payfast";
+    /// <summary>The order reference sent to the gateway as BASKET_ID; unique per attempt.</summary>
+    [Required, MaxLength(60)] public string BasketId { get; set; } = "";
+    [Column(TypeName = "numeric(19,4)")] public decimal Amount { get; set; }
+    [Required, MaxLength(3)] public string Currency { get; set; } = "PKR";
+    [Required, MaxLength(20)] public string Status { get; set; } = "PENDING";
+    [Required, MaxLength(20)] public string PreviousDemandStatus { get; set; } = "OPEN";
+    public bool IsSandbox { get; set; }
+    [MaxLength(100)] public string? GatewayTransactionId { get; set; }
+    [MaxLength(10)] public string? GatewayErrorCode { get; set; }
+    [MaxLength(200)] public string? GatewayMessage { get; set; }
+    public Guid? FinancePaymentId { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime ExpiresAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public Guid TenantId { get; set; }
+}

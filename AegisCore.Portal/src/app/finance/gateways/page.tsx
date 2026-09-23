@@ -16,7 +16,13 @@ type Gateway = {
   configuredAt: string | null;
 };
 
+const hashAuthenticated = new Set(["payfast"]);
+const requiredFields = (slug: string, env: string | undefined) => env === "production" && !hashAuthenticated.has(slug) ? [...(fields[slug] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[slug] ?? ["ENV"]);
+const secretField = (field: string) => ["SECRET", "PASSWORD", "TOKEN", "SALT"].some(part => field.includes(part)) || field.endsWith("_KEY");
+
 const fields: Record<string, string[]> = {
+  // PayFast (Pakistan) hosted checkout. Its IPN is authenticated by a hash keyed on SECURED_KEY, so no WEBHOOK_SECRET or ML-DSA key.
+  payfast: ["MERCHANT_ID", "SECURED_KEY", "MERCHANT_NAME", "ENV"],
   raast: ["MERCHANT_ID", "CLIENT_ID", "CLIENT_SECRET", "IBAN", "WEBHOOK_SECRET", "ENV"],
   stripe: ["PUBLISHABLE_KEY", "SECRET_KEY", "WEBHOOK_SECRET", "ACCOUNT_ID"],
   jazzcash: ["MERCHANT_ID", "PASSWORD", "INTEGRITY_SALT", "WEBHOOK_SECRET"],
@@ -78,9 +84,13 @@ export default function GatewayManagementPage() {
         <div className="finance-control-list"><Control label={gateway.isActive ? "Active" : "Inactive"} detail={gateway.healthError ?? (gateway.lastHealthCheckAt ? `Checked ${new Date(gateway.lastHealthCheckAt).toLocaleString()}` : "Not checked")} /></div>
         <div className="wizard-footer"><button className="wizard-secondary" onClick={() => { setSelected(gateway.gatewaySlug); setValues({ ENV: gateway.environment }); }}><KeyRound size={16} /> Configure</button><button className="wizard-primary" disabled={busy || !gateway.isActive} onClick={() => void check(gateway.gatewaySlug)}>Test connection</button></div>
       </article>)}
+      {!gateways.some(gateway => gateway.gatewaySlug === "payfast") && <article className="surface finance-panel">
+        <div className="surface-heading"><div><h2>PAYFAST</h2><p>Card payments on PayFast's hosted page · not configured</p></div><ShieldCheck /></div>
+        <div className="wizard-footer"><button className="wizard-secondary" onClick={() => { setSelected("payfast"); setValues({ ENV: "sandbox" }); }}><KeyRound size={16} /> Configure</button></div>
+      </article>}
       {gateways.length === 0 && <div className="finance-empty"><KeyRound /><strong>No gateways configured</strong><span>Configure a gateway during setup or after activating a licensed tenant.</span></div>}
     </section>
-    {selected && <FocusTrapDialog label={`Configure ${selected}`} onClose={() => setSelected(null)}><div className="wizard-card"><h2>Configure {selected.toUpperCase()}</h2><p className="wizard-muted">Values are write-only and stored in the tenant vault. Production webhooks also require ML-DSA verification.</p>{(values.ENV === "production" ? [...(fields[selected] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[selected] ?? ["ENV"])).map(field => <label className="wizard-field" key={field}><span>{field.replaceAll("_", " ")} *</span><input type={field.includes("SECRET") || field.includes("PASSWORD") || field.includes("TOKEN") || field.includes("SALT") || field === "PQC_PUBLIC_KEY" ? "password" : "text"} value={values[field] ?? ""} onChange={event => setValues(current => ({ ...current, [field]: event.target.value }))} /></label>)}<div className="wizard-footer"><button className="wizard-secondary" onClick={() => setSelected(null)}>Cancel</button><button className="wizard-primary" disabled={busy || (values.ENV === "production" ? [...(fields[selected] ?? ["ENV"]), "PQC_ALGORITHM", "PQC_PUBLIC_KEY"] : (fields[selected] ?? ["ENV"])).some(field => !values[field]?.trim())} onClick={() => void configure()}>{busy ? "Saving..." : "Save and verify"}</button></div></div></FocusTrapDialog>}
+    {selected && <FocusTrapDialog label={`Configure ${selected}`} onClose={() => setSelected(null)}><div className="wizard-card"><h2>Configure {selected.toUpperCase()}</h2><p className="wizard-muted">Values are write-only and stored in the tenant vault. {hashAuthenticated.has(selected) ? "Use the sandbox (UAT) credentials PayFast issued until live credentials are approved. ENV is sandbox or production." : "Production webhooks also require ML-DSA verification."}</p>{requiredFields(selected, values.ENV).map(field => <label className="wizard-field" key={field}><span>{field.replaceAll("_", " ")} *</span><input type={secretField(field) ? "password" : "text"} value={values[field] ?? ""} onChange={event => setValues(current => ({ ...current, [field]: event.target.value }))} /></label>)}<div className="wizard-footer"><button className="wizard-secondary" onClick={() => setSelected(null)}>Cancel</button><button className="wizard-primary" disabled={busy || requiredFields(selected, values.ENV).some(field => !values[field]?.trim())} onClick={() => void configure()}>{busy ? "Saving..." : "Save and verify"}</button></div></div></FocusTrapDialog>}
   </main>;
 }
 

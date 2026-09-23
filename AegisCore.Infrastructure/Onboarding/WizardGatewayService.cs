@@ -12,6 +12,8 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
     private static readonly IReadOnlyDictionary<string, string[]> RequiredFields = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
     {
         ["raast"] = ["MERCHANT_ID", "CLIENT_ID", "CLIENT_SECRET", "IBAN", "WEBHOOK_SECRET", "ENV"],
+        // PayFast (Pakistan) hosted checkout. No WEBHOOK_SECRET: its IPN is authenticated by a hash keyed on SECURED_KEY.
+        ["payfast"] = ["MERCHANT_ID", "SECURED_KEY", "MERCHANT_NAME", "ENV"],
         ["stripe"] = ["PUBLISHABLE_KEY", "SECRET_KEY", "WEBHOOK_SECRET", "ACCOUNT_ID"],
         ["jazzcash"] = ["MERCHANT_ID", "PASSWORD", "INTEGRITY_SALT", "WEBHOOK_SECRET"],
         ["easypaisa"] = ["STORE_ID", "PASSWORD", "WEBHOOK_SECRET"],
@@ -28,6 +30,12 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
         ["duitnow-qr"] = ["MERCHANT_ID", "CLIENT_ID", "CLIENT_SECRET", "WEBHOOK_SECRET"],
         ["swift-mt103"] = ["BIC", "SIGNING_KEY_ID"]
     };
+
+    // Gateways whose callbacks cannot carry an ML-DSA signature because the provider defines its own
+    // authentication. PayFast signs its IPN with a SHA-256 hash keyed on the merchant's secured key and
+    // AegisCore re-reads every success from PayFast's status API (see PayFastCheckoutService), so it does
+    // not go through the generic /api/webhooks receiver the ML-DSA rule protects.
+    private static readonly HashSet<string> HashAuthenticatedGateways = new(StringComparer.OrdinalIgnoreCase) { "payfast" };
 
     public async Task<GatewayConfigurationResult> ConfigureAsync(Guid tenantId, string slug, JsonElement payload, CancellationToken ct, Guid configuredByUserId = default, bool demoMode = false)
     {
@@ -65,7 +73,7 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
 
         var missing = required.Where(name => !fields.ContainsKey(name)).ToList();
         if (missing.Count > 0) throw new InvalidOperationException($"Required gateway fields are missing: {string.Join(", ", missing)}.");
-        if (environment == "production")
+        if (environment == "production" && !HashAuthenticatedGateways.Contains(normalized))
         {
             if (!fields.TryGetValue("PQC_ALGORITHM", out var algorithm) || !string.Equals(algorithm.Trim(), "ML-DSA-65", StringComparison.Ordinal))
                 throw new ArgumentException("Production gateways require an ML-DSA-65 webhook verification key.");
@@ -112,7 +120,7 @@ public sealed class WizardGatewayService(AegisDbContext db, ISecretService secre
         if (!string.Equals(configuration.SecretNamespace, expectedNamespace, StringComparison.Ordinal))
             throw new InvalidOperationException("Gateway secret namespace is invalid.");
         var stopwatch = Stopwatch.StartNew();
-        var healthFields = configuration.Environment.Equals("production", StringComparison.OrdinalIgnoreCase)
+        var healthFields = configuration.Environment.Equals("production", StringComparison.OrdinalIgnoreCase) && !HashAuthenticatedGateways.Contains(normalized)
             ? required.Concat(["PQC_ALGORITHM", "PQC_PUBLIC_KEY"]).Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
             : required;
         var availability = await Task.WhenAll(healthFields.Select(async field =>

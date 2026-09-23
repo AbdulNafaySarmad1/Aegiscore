@@ -29,6 +29,8 @@ public sealed class FinanceWebhookController(
         if (tenantId == Guid.Empty || string.IsNullOrWhiteSpace(gatewaySlug)) return Ok(new { accepted = true });
         var gateway = gatewaySlug.Trim().ToLowerInvariant();
         if (gateway.Length > 40 || gateway.Any(c => !(char.IsAsciiLetterOrDigit(c) || c == '-'))) return Ok(new { accepted = true });
+        // PayFast has its own receiver (PayFastController) and its own authentication; never accept it here.
+        if (gateway == "payfast") return Ok(new { accepted = true });
 
         var sharedSecret = configuration["Webhooks:SharedSecret"];
         if (!string.IsNullOrWhiteSpace(sharedSecret))

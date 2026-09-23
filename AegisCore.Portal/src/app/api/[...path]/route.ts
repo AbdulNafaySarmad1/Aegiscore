@@ -8,11 +8,16 @@ const refreshCookie = "aegiscore_refresh";
 // form token it presents. Only this exact path shape is exempt from the browser origin check, and
 // it is never given the caller's session cookies.
 const FORM_WEBHOOK = /^\/api\/integrations\/forms\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/webhook$/i;
+// PayFast's server-to-server payment notification (IPN). Same rules: no Origin, no session, exact
+// path only; the API authenticates it by PayFast's validation hash and re-reads the result from
+// PayFast. PayFast puts the detail in the query string, by GET or POST.
+const PAYFAST_IPN = /^\/api\/payments\/payfast\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/ipn$/i;
 
 async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const mutating = !["GET", "HEAD", "OPTIONS"].includes(request.method);
-  const webhook = request.method === "POST" && FORM_WEBHOOK.test(path);
+  const payfastIpn = (request.method === "GET" || request.method === "POST") && PAYFAST_IPN.test(path);
+  const webhook = (request.method === "POST" && FORM_WEBHOOK.test(path)) || payfastIpn;
   const origin = request.headers.get("origin");
   const expectedOrigin = new URL(process.env.APP_URL ?? request.url).origin;
   if (mutating && !webhook && origin !== expectedOrigin) {
@@ -31,11 +36,11 @@ async function proxy(request: NextRequest) {
     if (!headers.has("x-forwarded-for")) headers.set("x-forwarded-for", request.headers.get("x-real-ip") ?? "form-webhook");
     try {
       const upstream = await fetch(`${process.env.AEGISCORE_API_INTERNAL_URL ?? "http://api:8080"}${path}${request.nextUrl.search}`, {
-        method: "POST", headers, body: await request.arrayBuffer(), cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(60_000),
+        method: request.method, headers, body: request.method === "POST" ? await request.arrayBuffer() : undefined, cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(60_000),
       });
       return new NextResponse(upstream.body, { status: upstream.status, headers: { "content-type": upstream.headers.get("content-type") ?? "application/json", "cache-control": "no-store" } });
     } catch {
-      return NextResponse.json({ error: "The university API did not answer; the form tool should retry." }, { status: 502 });
+      return NextResponse.json({ error: `The university API did not answer; ${payfastIpn ? "PayFast" : "the form tool"} should retry.` }, { status: 502 });
     }
   }
   // The API rate-limits per client address; behind this proxy it would otherwise see one address

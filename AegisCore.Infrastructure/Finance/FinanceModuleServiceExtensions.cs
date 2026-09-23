@@ -39,6 +39,9 @@ public static class FinanceModuleServiceExtensions
         services.AddScoped<IPaymentGatewayAdapter, BillplzFpxPaymentGatewayAdapter>();
         services.AddScoped<IPaymentGatewayAdapter, DuitNowPaymentGatewayAdapter>();
         services.AddScoped<PaymentGatewayRouter>();
+        services.AddScoped<AegisCore.Infrastructure.Finance.Gateways.PayFast.IPayFastApi, AegisCore.Infrastructure.Finance.Gateways.PayFast.PayFastApi>();
+        services.AddScoped<AegisCore.Infrastructure.Finance.Gateways.PayFast.PayFastCheckoutService>();
+        services.AddHostedService<AegisCore.Infrastructure.Finance.Gateways.PayFast.FeeCheckoutExpiryWorker>();
         services.AddScoped<VoucherImportService>();
         services.AddScoped<FinanceProcurementService>();
         services.AddScoped<VendorSanctionsService>();
