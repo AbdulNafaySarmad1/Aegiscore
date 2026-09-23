@@ -70,7 +70,7 @@ jobs:
           visibility=$(gh api /orgs/nocturne-systems/packages/container/aegiscore --jq .visibility)
           test "$visibility" = private
 
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
@@ -117,7 +117,7 @@ jobs:
           visibility=$(gh api /orgs/nocturne-systems/packages/container/aegiscore-clip --jq .visibility)
           test "$visibility" = private
 
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: ./services/aegiscore-clip
           file: ./services/aegiscore-clip/Dockerfile
