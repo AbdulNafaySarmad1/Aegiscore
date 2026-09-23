@@ -22,7 +22,7 @@
     "@tanstack/react-query": "^5.77.2",
     "axios": "^1.9.0",
     "expo": "^57.0.8",
-    "expo-application": "^6.1.5",
+    "expo-application": "^57.0.3",
     "expo-local-authentication": "^16.0.4",
     "expo-notifications": "^57.0.7",
     "expo-secure-store": "^14.2.3",
