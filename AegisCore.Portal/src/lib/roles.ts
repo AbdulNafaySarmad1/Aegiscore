@@ -86,6 +86,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "timetable", label: "My Timetable", icon: "CalendarDays", route: "/student/timetable", color: "blue", description: "Today's classes and full semester schedule.", priority: 1, domain: "academic", badge: "TODAY" },
       { id: "grades", label: "My Grades", icon: "GraduationCap", route: "/student/grades", color: "blue", description: "Semester-wise grades, SGPA, and CGPA.", priority: 2, domain: "academic" },
       { id: "attendance", label: "Attendance", icon: "ClipboardCheck", route: "/student/attendance/records", color: "blue", description: "Sessions recorded by your instructors and your attendance percentage.", priority: 3, domain: "academic" },
+      { id: "evaluations", label: "Course evaluations", icon: "ClipboardCheck", route: "/student/evaluations", color: "violet", description: "Rate each of your courses, its learning outcomes and its teaching. Anonymous.", priority: 3, domain: "academic" },
       { id: "fees", label: "Fee Status", icon: "CreditCard", route: "/student/finance", color: "green", description: "Current dues, payment history, and challans.", priority: 4, domain: "finance" },
       { id: "transcript", label: "Transcript", icon: "FileText", route: "/student/transcript", color: "blue", description: "Official transcript view and request.", priority: 5, domain: "academic" },
       { id: "mentalhealth", label: "Mental Health", icon: "ShieldCheck", route: "/mental-health", color: "violet", description: "Anonymous support tickets and counselor access.", priority: 6, domain: "welfare" },
@@ -175,7 +176,7 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/examinations", "/foreign-students", "/convocations",
       "/catalog", "/classes", "/prerequisite-conflicts", "/data-import",
-      "/readiness", "/achievements", "/timetable",
+      "/readiness", "/achievements", "/timetable", "/obe/survey-results", "/obe/surveys",
     ],
     dashboardModules: [
       { id: "enrollment", label: "Enrollment Overview", icon: "BookOpenCheck", route: "/classes", color: "blue", description: "Current enrollment stats, sections, and capacity.", priority: 1, domain: "academic", badge: "LIVE" },
@@ -185,6 +186,8 @@ const profiles: Record<string, RoleProfile> = {
       { id: "classes-gen", label: "Class Generation", icon: "Building2", route: "/classes", color: "blue", description: "Auto-generate sections for new semesters.", priority: 5, domain: "academic" },
       { id: "readiness", label: "Accreditation Readiness", icon: "ShieldCheck", route: "/readiness", color: "green", description: "Self-assessment score and criteria tracking.", priority: 6, domain: "compliance" },
       { id: "data-import", label: "Data Import", icon: "FileSearch", route: "/data-import", color: "amber", description: "Bulk student/faculty data import.", priority: 7, domain: "operations" },
+      { id: "course-evaluations", label: "Course evaluations", icon: "ClipboardCheck", route: "/obe/surveys", color: "violet", description: "Build and open the end-of-semester course and teacher evaluation; watch the response rate.", priority: 8, domain: "academic" },
+      { id: "survey-results", label: "Outcome survey results", icon: "ShieldCheck", route: "/obe/survey-results", color: "green", description: "Survey answers on CLOs, PLOs and teaching, from AegisCore and outside form tools.", priority: 8, domain: "academic" },
     ],
     kpis: [
       { id: "enrolled", label: "Total Enrolled", value: "--", format: "number", icon: "BookOpenCheck", iconColor: "blue", source: "/api/classes?summary" },
@@ -263,6 +266,7 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/admin/health", "/sync-lag", "/replication",
       "/audit", "/data-import", "/imports", "/setup", "/admin/license", "/admin/compliance",
+      "/admin/integrations/forms",
     ],
     dashboardModules: [
       { id: "portal-health", label: "System health", icon: "ShieldCheck", route: "/admin/health", color: "green", description: "Whether the database, cache, storage and every module are answering.", priority: 1, domain: "operations", badge: "MONITOR" },
@@ -273,6 +277,7 @@ const profiles: Record<string, RoleProfile> = {
       { id: "setup", label: "Setup", icon: "Settings", route: "/setup", color: "blue", description: "System configuration and installation.", priority: 6, domain: "operations" },
       { id: "license", label: "Licence", icon: "ShieldCheck", route: "/admin/license", color: "amber", description: "Licence standing and offline licence keys.", priority: 7, domain: "operations" },
       { id: "compliance-settings", label: "Compliance", icon: "Scale", route: "/admin/compliance", color: "slate", description: "Data protection contact, where data lives, how long records are kept.", priority: 8, domain: "compliance" },
+      { id: "form-connections", label: "Form connections", icon: "FileSearch", route: "/admin/integrations/forms", color: "blue", description: "Outside survey tools (JotForm) feeding CLO/PLO results, and what each question means.", priority: 9, domain: "operations" },
     ],
     kpis: [
       { id: "register-health", label: "Register health", value: "--", format: "text", icon: "ShieldCheck", iconColor: "green", source: "/health/modules" },
@@ -294,7 +299,7 @@ const profiles: Record<string, RoleProfile> = {
     allowedRoutes: [
       "/classes", "/examinations", "/grade-distributions",
       "/grade-appeals", "/prerequisite-conflicts",
-      "/readiness", "/visiting-faculty",
+      "/readiness", "/visiting-faculty", "/obe/survey-results", "/obe/surveys",
     ],
     dashboardModules: [
       { id: "dept-overview", label: "Department Overview", icon: "Building2", route: "/classes", color: "blue", description: "All departments, programmes, and faculty under your faculty.", priority: 1, domain: "academic" },

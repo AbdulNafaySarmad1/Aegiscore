@@ -4,7 +4,11 @@ using AegisCore.Contracts.Common.Interfaces;
 using AegisCore.Application.Forms;
 using AegisCore.Domain;
 using AegisCore.Domain.Entities;
+using AegisCore.Application.Integrations;
+using AegisCore.Infrastructure;
+using AegisCore.Infrastructure.Integrations.Forms;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AegisCore.API.Controllers;
@@ -18,17 +22,23 @@ public class FormsController : ControllerBase
     private readonly IFormDefinitionRepository _formRepo;
     private readonly IFormSubmissionRepository _submissionRepo;
     private readonly ILogger<FormsController> _logger;
+    private readonly AegisDbContext _db;
+    private readonly IFormIngestionService _ingestion;
 
     public FormsController(
         IFormService formService,
         IFormDefinitionRepository formRepo,
         IFormSubmissionRepository submissionRepo,
-        ILogger<FormsController> logger)
+        ILogger<FormsController> logger,
+        AegisDbContext db,
+        IFormIngestionService ingestion)
     {
         _formService = formService;
         _formRepo = formRepo;
         _submissionRepo = submissionRepo;
         _logger = logger;
+        _db = db;
+        _ingestion = ingestion;
     }
 
     [AegisCore.API.Authorization.RequirePermission("Settings", "Write")]
@@ -103,7 +113,28 @@ public class FormsController : ControllerBase
     public async Task<IActionResult> SubmitForm(Guid formId, [FromBody] SubmitFormRequest request, CancellationToken cancellationToken)
     {
         var submission = await _formService.SubmitFormAsync(formId, request.Values, null, null, null, cancellationToken);
+        await RecordOutcomeAnswersAsync(formId, submission.Id, request.Values, cancellationToken);
         return Ok(new SubmissionDto { Id = submission.Id, Status = submission.Status.ToString(), SubmittedAt = submission.SubmittedAt });
+    }
+
+    /// <summary>
+    /// A native form wired to the outcome survey mapping (a form-integration source with the
+    /// <c>aegiscore-forms</c> provider) feeds the same store as an external tool's webhook, so the
+    /// indirect-assessment report counts both alike.
+    /// </summary>
+    private async Task RecordOutcomeAnswersAsync(Guid formId, Guid submissionId, Dictionary<string, object?> values, CancellationToken ct)
+    {
+        var formKey = formId.ToString();
+        var source = await _db.FormIntegrationSources.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Provider == FormIngestionService.NativeProvider && s.ExternalFormId == formKey && s.IsActive, ct);
+        if (source is null) return;
+        var answers = new List<FormAnswer>();
+        foreach (var (field, value) in values)
+        {
+            var element = JsonSerializer.SerializeToElement(value);
+            FormPayloadText.Flatten(field, null, element, answers);
+        }
+        await _ingestion.IngestAsync(source.Id, new FormSubmissionEnvelope(formKey, submissionId.ToString(), answers), ct);
     }
 
     [HttpPost("{formId:guid}/draft")]

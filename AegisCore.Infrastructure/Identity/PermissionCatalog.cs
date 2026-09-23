@@ -19,12 +19,15 @@ public static class PermissionCatalog
         // Gated on by the convocation endpoints since before this catalogue existed, but absent from
         // the wizard's list, so no role could ever be granted it.
         "Graduation",
+        // Connections to outside systems (incoming form webhooks and their field mappings): who may
+        // mint a credential another system uses to write into this installation.
+        "Integrations",
     ];
 
     public static readonly string[] Actions = ["Read", "Write", "Delete", "Approve", "Export", "Admin"];
 
     /// <summary>Resources added after the first release; granted at startup to every role that already holds the administrator marker.</summary>
-    public static readonly string[] AddedResources = ["Staff", "Payroll", "Welfare", "Graduation"];
+    public static readonly string[] AddedResources = ["Staff", "Payroll", "Welfare", "Graduation", "Integrations"];
 
     /// <summary>The grant that marks a role as an administrator in the wizard and the seeders.</summary>
     public const string AdministratorMarkerResource = "System";

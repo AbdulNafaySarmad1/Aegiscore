@@ -122,6 +122,11 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<AegisCore.Application.Obe.ICisExtractionService, CisExtractionService>();
         services.AddScoped<AegisCore.Application.Obe.IHemisExportService, HemisExportService>();
         services.AddScoped<AegisCore.Application.Obe.IOBEAttainmentService, OBEAttainmentService>();
+        services.AddScoped<AegisCore.Application.Obe.IOutcomeSurveyService, AegisCore.Infrastructure.Obe.OutcomeSurveyService>();
+        services.AddScoped<AegisCore.Application.Integrations.IFormIngestionService, AegisCore.Infrastructure.Integrations.Forms.FormIngestionService>();
+        services.AddScoped<AegisCore.Application.Integrations.IIndirectAssessmentReportService, AegisCore.Infrastructure.Integrations.Forms.IndirectAssessmentReportService>();
+        services.AddSingleton<AegisCore.Application.Integrations.IFormPayloadAdapter, AegisCore.Infrastructure.Integrations.Forms.GenericFormPayloadAdapter>();
+        services.AddSingleton<AegisCore.Application.Integrations.IFormPayloadAdapter, AegisCore.Infrastructure.Integrations.Forms.JotFormPayloadAdapter>();
         services.AddScoped<AegisCore.Application.Hr.IPayrollService, PayrollService>();
         services.AddScoped<AegisCore.Application.Finance.IFeeService, FeeService>();
         services.AddScoped<AegisCore.Application.Finance.IAccountingService, AccountingService>();

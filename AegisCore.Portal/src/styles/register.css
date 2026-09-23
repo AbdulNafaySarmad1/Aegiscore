@@ -104,6 +104,10 @@
 .ledger tr[data-status="ink"] { --status-color: var(--ink-3); }
 .ledger a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
 .ledger a:hover { text-decoration-color: var(--brass); }
+/* A button-styled link inside a ledger keeps its button colours; the plain-link rule above used to win and left dark text on a dark button. */
+.ledger a.btn { text-decoration: none; }
+.ledger a.btn-primary { color: var(--btn-primary-fg); }
+.ledger a.btn-primary:hover { color: #fff; }
 .ledger .cell-sub { display: block; font-size: var(--t-13); color: var(--ink-2); margin-top: 2px; }
 .ledger .cell-actions { display: flex; gap: var(--s-2); justify-content: flex-end; flex-wrap: wrap; }
 .ledger-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); padding: var(--s-3) var(--s-6); font-size: var(--t-13); color: var(--ink-2); border-top: 1px solid var(--rule); background: var(--paper); }
@@ -370,3 +374,34 @@
 
 /* A report this screen has no reading for yet is shown as it came, rather than not at all. */
 .report-raw { font-family: var(--font-mono); font-size: var(--t-12); white-space: pre-wrap; overflow-x: auto; margin: 0; color: var(--ink-2); }
+
+/* Form connections (admin/integrations/forms) and the outcome survey report (obe/survey-results). */
+.form-integrations-secret { word-break: break-all; padding: var(--s-2) var(--s-3); background: var(--paper, transparent); border: 1px solid var(--rule, currentColor); user-select: all; }
+.form-integrations-mapping { max-height: 70vh; overflow: auto; }
+.form-integrations-mapping thead th { position: sticky; top: 0; z-index: 1; background: var(--paper-2); }
+.form-integrations-mapping select, .form-integrations-mapping input:not([type="checkbox"]) { min-height: 32px; font-size: var(--t-13); max-width: 280px; }
+.form-integrations-mapping td > select[aria-label^="Meaning"] { min-width: 230px; }
+.form-integrations-import { margin-top: var(--s-4); }
+.form-integrations-import summary { cursor: pointer; font-weight: 600; }
+.form-integrations-import textarea { width: 100%; font-family: var(--font-mono, monospace); font-size: var(--t-13); }
+.form-integrations-problems { margin: 0; padding-left: 1.1em; font-size: var(--t-13); }
+.survey-bar { display: inline-block; vertical-align: middle; width: 120px; height: 8px; background: var(--rule, #ddd); margin-right: var(--s-2); }
+.survey-bar > span { display: block; height: 100%; background: var(--laurel, #3a6b35); }
+.survey-live { font-size: var(--t-13); }
+
+/* Course evaluations: the registrar's builder (obe/surveys) and the student's form (student/evaluations). */
+.course-evaluations-sub { font-size: var(--t-15, 15px); margin: var(--s-5) 0 var(--s-2); }
+.course-evaluations-list { margin: var(--s-2) 0 0; padding-left: 1.4em; font-size: var(--t-13); columns: 2; column-gap: var(--s-6, 32px); }
+.evaluation-progress { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: var(--s-2) 0; }
+.evaluation-prompt { font-style: italic; margin: 0 0 var(--s-2); }
+.evaluation-question { border: 0; border-bottom: 1px solid var(--rule); margin: 0; padding: var(--s-3) 0; }
+.evaluation-question legend { font-weight: 600; padding: 0; margin-bottom: var(--s-2); }
+.evaluation-question.is-missing { background: var(--brass-tint); border-left: 3px solid var(--brass); padding-left: var(--s-3); }
+.evaluation-number { font-variant-numeric: tabular-nums; margin-right: 4px; }
+.evaluation-code { margin-left: var(--s-2); font-size: var(--t-12, 12px); font-weight: 400; opacity: .7; }
+.evaluation-scale { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--s-2); }
+.evaluation-scale label { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--rule); cursor: pointer; font-size: var(--t-13); }
+.evaluation-scale label.is-chosen { border-color: var(--laurel); background: var(--laurel-tint); }
+.evaluation-question textarea { width: 100%; }
+.course-evaluations-courses { border: 1px solid var(--rule); padding: var(--s-2) var(--s-3); margin: var(--s-3) 0; }
+.course-evaluations-course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2px var(--s-4); max-height: 240px; overflow: auto; }

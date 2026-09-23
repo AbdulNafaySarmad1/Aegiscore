@@ -46,7 +46,7 @@ const STEPS = [
 
 // Staff, Payroll and Welfare are their own resources so that HR, pay and counselling records are
 // not opened by the generic System permission (docs/compliance/04, AC-29).
-const MODULES = ["Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System", "Staff", "Payroll", "Welfare", "Graduation"];
+const MODULES = ["Students", "Grades", "Attendance", "Finance", "Timetable", "Admissions", "Reports", "Settings", "System", "Staff", "Payroll", "Welfare", "Graduation", "Integrations"];
 const ACTIONS = ["Read", "Write", "Delete", "Approve", "Export"];
 const DEFAULT_ROLES: RoleConfig[] = [
   { name: "Admin", permissions: MODULES.flatMap(module => ACTIONS.map(action => `${module}.${action}`)) },

@@ -3,19 +3,40 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 const accessCookie = "aegiscore_access";
 const refreshCookie = "aegiscore_refresh";
+// Machine-to-machine deliveries from an outside form tool (JotForm and the like). They come from
+// another server, so they carry no Origin and no session; the API authenticates each one by the
+// form token it presents. Only this exact path shape is exempt from the browser origin check, and
+// it is never given the caller's session cookies.
+const FORM_WEBHOOK = /^\/api\/integrations\/forms\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/webhook$/i;
 
 async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const mutating = !["GET", "HEAD", "OPTIONS"].includes(request.method);
+  const webhook = request.method === "POST" && FORM_WEBHOOK.test(path);
   const origin = request.headers.get("origin");
   const expectedOrigin = new URL(process.env.APP_URL ?? request.url).origin;
-  if (mutating && origin !== expectedOrigin) {
+  if (mutating && !webhook && origin !== expectedOrigin) {
     return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   }
   const headers = new Headers();
   for (const name of ["content-type", "accept", "x-setup-token", "x-csrf-token", "cf-turnstile-response", "x-session-binding"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
+  }
+  if (webhook) {
+    for (const name of ["authorization", "x-aegiscore-form-token", "x-forwarded-for"]) {
+      const value = request.headers.get(name);
+      if (value) headers.set(name, value);
+    }
+    if (!headers.has("x-forwarded-for")) headers.set("x-forwarded-for", request.headers.get("x-real-ip") ?? "form-webhook");
+    try {
+      const upstream = await fetch(`${process.env.AEGISCORE_API_INTERNAL_URL ?? "http://api:8080"}${path}${request.nextUrl.search}`, {
+        method: "POST", headers, body: await request.arrayBuffer(), cache: "no-store", redirect: "manual", signal: AbortSignal.timeout(60_000),
+      });
+      return new NextResponse(upstream.body, { status: upstream.status, headers: { "content-type": upstream.headers.get("content-type") ?? "application/json", "cache-control": "no-store" } });
+    } catch {
+      return NextResponse.json({ error: "The university API did not answer; the form tool should retry." }, { status: 502 });
+    }
   }
   // The API rate-limits per client address; behind this proxy it would otherwise see one address
   // for everyone. An ingress in front of us sets x-forwarded-for; when nothing does — the portal

@@ -287,6 +287,15 @@ public class AegisDbContext : DbContext
     /// CLO attainments.
     /// </summary>
     public DbSet<CLOAttainment> CLOAttainments => Set<CLOAttainment>();
+    public DbSet<FormIntegrationSource> FormIntegrationSources => Set<FormIntegrationSource>();
+    public DbSet<FormFieldMapping> FormFieldMappings => Set<FormFieldMapping>();
+    public DbSet<FormIntegrationSubmission> FormIntegrationSubmissions => Set<FormIntegrationSubmission>();
+    public DbSet<OutcomeSurveyResponse> OutcomeSurveyResponses => Set<OutcomeSurveyResponse>();
+    public DbSet<OutcomeSurvey> OutcomeSurveys => Set<OutcomeSurvey>();
+    public DbSet<OutcomeSurveyQuestion> OutcomeSurveyQuestions => Set<OutcomeSurveyQuestion>();
+    public DbSet<OutcomeSurveyCompletion> OutcomeSurveyCompletions => Set<OutcomeSurveyCompletion>();
+    public DbSet<OutcomeSurveyComment> OutcomeSurveyComments => Set<OutcomeSurveyComment>();
+    public DbSet<OutcomeSurveyCourse> OutcomeSurveyCourses => Set<OutcomeSurveyCourse>();
 
     /// <summary>
     /// PO attainments.
@@ -2023,6 +2032,20 @@ public class AegisDbContext : DbContext
             }
         }
 
+        // External form integration: a token identifies exactly one source, a field is mapped once
+        // per source, and a redelivered submission is recognised rather than counted twice.
+        modelBuilder.Entity<FormIntegrationSource>().HasIndex(item => item.TokenHash).IsUnique();
+        modelBuilder.Entity<FormFieldMapping>().HasIndex(item => new { item.TenantId, item.SourceId, item.ExternalFieldId }).IsUnique();
+        modelBuilder.Entity<FormIntegrationSubmission>().HasIndex(item => new { item.TenantId, item.SourceId, item.ExternalSubmissionId }).IsUnique();
+        modelBuilder.Entity<OutcomeSurveyResponse>().HasIndex(item => new { item.TenantId, item.CourseId });
+        modelBuilder.Entity<OutcomeSurveyResponse>().HasIndex(item => item.SubmissionId);
+        modelBuilder.Entity<OutcomeSurveyResponse>().HasIndex(item => item.SurveyId);
+        // A student answers a survey once per course; the index settles a double submit.
+        modelBuilder.Entity<OutcomeSurveyCompletion>().HasIndex(item => new { item.TenantId, item.SurveyId, item.CourseId, item.StudentId }).IsUnique();
+        modelBuilder.Entity<OutcomeSurveyQuestion>().HasIndex(item => new { item.TenantId, item.SurveyId, item.SortOrder });
+        modelBuilder.Entity<OutcomeSurveyComment>().HasIndex(item => new { item.TenantId, item.SurveyId, item.CourseId });
+        modelBuilder.Entity<OutcomeSurveyCourse>().HasIndex(item => new { item.TenantId, item.SurveyId, item.CourseId }).IsUnique();
+
         modelBuilder.Entity<RegistrationEnrollment>(entity =>
         {
             // One registration per student per course per window. Without this, two clicks at the
@@ -3356,13 +3379,16 @@ public class AegisDbContext : DbContext
         // ProgramOutcome
         modelBuilder.Entity<ProgramOutcome>(entity =>
         {
-            entity.HasIndex(e => e.Code).IsUnique();
+            // PLO1 is PLO1 of one programme; every programme (and every institution) has its own.
+            entity.HasIndex(e => new { e.TenantId, e.ProgramId, e.Code }).IsUnique();
         });
 
         // CourseLearningOutcome
         modelBuilder.Entity<CourseLearningOutcome>(entity =>
         {
-            entity.HasIndex(e => e.Code).IsUnique();
+            // CLO1 is CLO1 of one course; a unique code across the whole database stopped a second
+            // course (or a second institution) from having a CLO1 at all.
+            entity.HasIndex(e => new { e.TenantId, e.CourseId, e.Code }).IsUnique();
         });
 
         // CLOPOMapping
