@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:22-alpine AS portal-build
+FROM node:26-alpine AS portal-build
 WORKDIR /portal
 COPY AegisCore.Portal/package.json AegisCore.Portal/package-lock.json ./
 RUN --mount=type=cache,id=npm,target=/root/.npm npm ci --no-audit --no-fund
