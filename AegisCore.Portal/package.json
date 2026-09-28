@@ -22,28 +22,28 @@
     "test:accessibility:ci": "npm run test:a11y:ci && npm run test:keyboard"
   },
   "dependencies": {
-    "@microsoft/signalr": "^10.0.0",
-    "@noble/post-quantum": "^0.6.1",
+    "@microsoft/signalr": "^10.0.11",
+    "@noble/post-quantum": "^0.7.1",
     "@react-pdf/renderer": "^4.9.0",
     "@swc/helpers": "0.5.23",
     "d3-geo": "^3.1.1",
     "framer-motion": "^12.43.0",
     "lucide-react": "^0.577.0",
-    "next": "16.3.5",
-    "next-intl": "^4.13.4",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "next": "16.3.6",
+    "next-intl": "^4.14.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@types/d3-geo": "^3.1.1",
     "@types/node": "20.19.43",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "9.39.5",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.3.6",
     "typescript": "5.9.3"
   },
   "overrides": {
