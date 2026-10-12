@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.9" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26300" />
-    <PackageReference Include="Quartz" Version="3.13.0" />
+    <PackageReference Include="Quartz" Version="4.4.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
