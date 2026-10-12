@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.400.0" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.104.2" />
     <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.504.43" />
     <PackageReference Include="Azure.AI.DocumentIntelligence" Version="1.0.0" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
