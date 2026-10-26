@@ -10,33 +10,33 @@
 
   <ItemGroup>
     <!-- Authentication & Cryptography -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.18.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
     
     <!-- Data Access -->
-    <PackageReference Include="Npgsql" Version="10.0.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" />
     
     <!-- Serialisation -->
     <!-- HTTP & Networking -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
     
     <!-- Logging -->
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
     
     <!-- Casbin ABAC -->
-    <PackageReference Include="Casbin.NET" Version="2.21.2" />
+    <PackageReference Include="Casbin.NET" Version="2.21.3" />
     
     <!-- Redis -->
-    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="StackExchange.Redis" Version="2.13.17" />
     
     <!-- Validation -->
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     
     <!-- Health Checks -->
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
@@ -50,7 +50,7 @@
     
     <!-- CVE-2024-43485: Force safe version of System.Text.Encodings.Web -->
     <!-- CVE-2024-21319: Force safe version of Microsoft.IdentityModel.Tokens -->
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.18.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.23.0" />
   </ItemGroup>
 
   <ItemGroup>
